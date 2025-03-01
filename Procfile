@@ -1,0 +1,1 @@
+web: gunicorn ebenezeri.wsgi --log-file -
