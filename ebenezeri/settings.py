@@ -16,6 +16,7 @@ ALLOWED_HOSTS = ["*"]
 
 # Application definition
 INSTALLED_APPS = [
+    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -130,3 +131,28 @@ MEDIA_URL = f"https://res.cloudinary.com/{os.getenv('CLOUDINARY_CLOUD_NAME')}/"
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+
+# Jazzmin Settings
+JAZZMIN_SETTINGS = {
+    "site_title": "My Admin Panel",
+    "site_header": "My Dashboard",
+    "site_brand": "Fraternal Company",
+    "welcome_sign": "Welcome to Fraternal Dashboard",
+    "copyright": "Fraternal Company © 2025",
+    "search_model": "auth.User",
+    "topmenu_links": [
+        {"name": "Home", "url": "admin:index", "permissions": ["auth.view_user"]},
+        {"model": "auth.User"},
+        {"app": "Fraternal System"},
+    ],
+}
+
+JAZZMIN_UI_TWEAKS = {
+    "theme": "darkly",
+    "navbar_fixed": True,
+    "sidebar_fixed": True,
+    "footer_fixed": False,
+    "show_ui_builder": True,
+}
