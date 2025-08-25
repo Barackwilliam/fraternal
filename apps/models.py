@@ -42,3 +42,36 @@ class Contact(models.Model):
 
     def __str__(self):
         return self.full_name
+
+
+
+from django.contrib.auth.models import User
+
+class WebsiteType(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.TextField(blank=True)
+    icon = models.CharField(max_length=50, blank=True)
+    
+    def __str__(self):
+        return self.name
+
+class Client(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
+    name = models.CharField(max_length=100)
+    email = models.EmailField()
+    phone = models.CharField(max_length=20, blank=True)
+    company = models.CharField(max_length=100, blank=True)
+    
+    def __str__(self):
+        return self.name
+
+class ProjectProposal(models.Model):
+    client = models.ForeignKey(Client, on_delete=models.CASCADE)
+    website_type = models.ForeignKey(WebsiteType, on_delete=models.CASCADE)
+    requirements = models.JSONField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    pdf_file = models.FileField(upload_to="proposals/", blank=True)
+    
+    def __str__(self):
+        return f"{self.client.name} - {self.website_type.name}"

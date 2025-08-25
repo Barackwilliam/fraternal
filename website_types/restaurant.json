@@ -1,0 +1,75 @@
+{
+  "client_name": {
+    "question": "Full Name",
+    "type": "text",
+    "required": true
+  },
+  "client_email": {
+    "question": "Email Address",
+    "type": "text",
+    "required": true
+  },
+  "client_phone": {
+    "question": "Phone Number",
+    "type": "text",
+    "required": false
+  },
+  "restaurant_name": {
+    "question": "Restaurant Name",
+    "type": "text",
+    "required": true
+  },
+  "features": {
+    "question": "Select features you want on your restaurant website:",
+    "type": "checkbox",
+    "options": [
+      "Responsive Homepage | 15000",
+      "Online Menu Display | 20000",
+      "Table Reservation System | 30000",
+      "Online Food Ordering | 40000",
+      "Google Maps Integration | 10000",
+      "Photo Gallery (Food & Interior) | 15000",
+      "Customer Reviews Section | 15000",
+      "WhatsApp/Phone Call Button | 8000",
+      "Multilingual Support | 20000",
+      "Event or Promotion Management | 20000",
+      "Newsletter Signup | 10000",
+      "Instagram Feed Integration | 12000"
+    ]
+  },
+  "payment_options": {
+    "question": "Do you want to accept payments online?",
+    "type": "checkbox",
+    "options": [
+      "Yes (Mobile Money, Cards, etc.) | 30000",
+      "No | 0"
+    ]
+  },
+  "design_preference": {
+    "question": "Preferred website design style:",
+    "type": "checkbox",
+    "options": [
+      "Classic & Elegant | 0",
+      "Modern & Bold | 15000",
+      "Cultural & Traditional Theme | 20000"
+    ]
+  },
+  "domain_hosting": {
+    "question": "Do you need domain and hosting setup?",
+    "type": "checkbox",
+    "options": [
+      "Yes | 70000",
+      "No | 0"
+    ]
+  },
+  "project_timeline": {
+    "question": "Target project completion time (days/weeks):",
+    "type": "text",
+    "required": false
+  },
+  "additional_notes": {
+    "question": "Any additional notes or requirements?",
+    "type": "text",
+    "required": false
+  }
+}

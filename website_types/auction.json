@@ -1,0 +1,95 @@
+{
+  "client_name": {
+    "question": "Full Name",
+    "type": "text",
+    "required": true
+  },
+  "client_email": {
+    "question": "Email Address",
+    "type": "text",
+    "required": true
+  },
+  "client_phone": {
+    "question": "Phone Number",
+    "type": "text",
+    "required": false
+  },
+  "auction_type": {
+    "question": "What type of auction platform do you need?",
+    "type": "checkbox",
+    "options": [
+      "General Auctions (Multiple categories) | 0",
+      "Real Estate Auctions | 0",
+      "Vehicle Auctions | 0",
+      "Art & Collectibles | 0",
+      "Custom Bidding Marketplace | 0"
+    ]
+  },
+  "features": {
+    "question": "Select the core features required:",
+    "type": "checkbox",
+    "options": [
+      "User Registration and Login | 10000",
+      "Seller Profiles & Verification | 12000",
+      "Live Bidding System | 25000",
+      "Reserve Price Setting | 8000",
+      "Buy Now Option | 6000",
+      "Countdown Timer for Bidding | 7000",
+      "Admin Approval for Listings | 5000",
+      "SMS/Email Notifications | 10000",
+      "Auction History and Logs | 8000",
+      "Search & Filtering by Category/Price | 7000",
+      "Responsive & Mobile Friendly UI | 8000",
+      "Multi-language Support | 12000",
+      "Bidder Auto-Increment Logic | 10000"
+    ]
+  },
+  "payment_integration": {
+    "question": "Preferred payment methods:",
+    "type": "checkbox",
+    "options": [
+      "Mobile Money (e.g. M-Pesa, Airtel Money) | 8000",
+      "Card Payments (Visa/MasterCard) | 10000",
+      "Bank Transfer Option | 7000",
+      "Escrow System Integration | 12000"
+    ]
+  },
+  "admin_features": {
+    "question": "Admin panel features needed:",
+    "type": "checkbox",
+    "options": [
+      "User & Seller Management | 7000",
+      "Auction Listing Control | 8000",
+      "Reports & Analytics | 10000",
+      "Dispute Resolution Center | 6000",
+      "Manual Auction Closure | 5000"
+    ]
+  },
+  "design_preferences": {
+    "question": "Choose design style:",
+    "type": "checkbox",
+    "options": [
+      "Modern UI | 7000",
+      "Clean & Minimalist | 6000",
+      "Dark Theme Option | 6000"
+    ]
+  },
+  "domain_hosting": {
+    "question": "Do you need domain and hosting setup?",
+    "type": "checkbox",
+    "options": [
+      "Yes, include it | 70000",
+      "No, I already have | 0"
+    ]
+  },
+  "project_timeline": {
+    "question": "Expected delivery timeline:",
+    "type": "text",
+    "required": false
+  },
+  "additional_notes": {
+    "question": "Any specific expectations or functionality?",
+    "type": "text",
+    "required": false
+  }
+}

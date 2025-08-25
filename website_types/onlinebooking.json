@@ -1,0 +1,105 @@
+{
+  "client_name": {
+    "question": "Full Name of the Client",
+    "type": "text",
+    "required": true
+  },
+  "client_email": {
+    "question": "Email Address",
+    "type": "text",
+    "required": true
+  },
+  "client_phone": {
+    "question": "Phone Number",
+    "type": "text",
+    "required": false
+  },
+  "client_company": {
+    "question": "Business or Company Name",
+    "type": "text",
+    "required": true
+  },
+  "business_type": {
+    "question": "What kind of business is this?",
+    "type": "checkbox",
+    "options": [
+      "Salon or Spa | 0",
+      "Medical or Dental Clinic | 0",
+      "Hotel, Lodge or Guesthouse | 0",
+      "Car Rental or Mechanic | 0",
+      "Event Space | 0",
+      "Coworking or Training Center | 0",
+      "Tours or Experiences | 0",
+      "Others | 0"
+    ]
+  },
+  "features": {
+    "question": "Select the booking features you want:",
+    "type": "checkbox",
+    "options": [
+      "Booking Form with Calendar & Time Slots | 50000",
+      "SMS or Email Booking Confirmations | 30000",
+      "Payment Integration (M-Pesa, TigoPesa, Stripe, PayPal) | 50000",
+      "Admin Panel to Manage Bookings | 60000",
+      "User Dashboard to View Appointments | 40000",
+      "Booking Approval Workflow | 30000",
+      "Multi-Service / Staff Selection | 35000",
+      "Service Categories & Descriptions | 25000",
+      "Dynamic Pricing per Service | 30000",
+      "Rescheduling & Cancellation System | 30000",
+      "Mobile Friendly Design | 40000",
+      "WhatsApp Booking Integration | 15000",
+      "Google Calendar Integration | 30000",
+      "PDF Receipt Generator | 20000",
+      "Multilingual Support | 25000",
+      "Staff Login with Limited Access | 30000",
+      "Customer Feedback/Rating System | 20000",
+      "Search & Filter Bookings | 15000",
+      "Real-Time Availability Checker | 35000"
+    ]
+  },
+  "design_preference": {
+    "question": "Do you have any preferred design or sample website?",
+    "type": "text",
+    "required": false
+  },
+  "locations_supported": {
+    "question": "Will you support multiple locations?",
+    "type": "checkbox",
+    "options": [
+      "Yes | 30000",
+      "No | 0"
+    ]
+  },
+  "staff_profiles": {
+    "question": "Do you need individual staff profiles with schedules?",
+    "type": "checkbox",
+    "options": [
+      "Yes | 25000",
+      "No | 0"
+    ]
+  },
+  "domain_hosting": {
+    "question": "Do you need help with domain and hosting?",
+    "type": "checkbox",
+    "options": [
+      "Yes | 70000",
+      "No | 0"
+    ]
+  },
+  "estimated_bookings": {
+    "question": "How many bookings do you expect per month?",
+    "type": "text",
+    "required": false
+  },
+  "timeline": {
+    "question": "What is your preferred timeline for project completion?",
+    "type": "text",
+    "required": false
+  },
+  "extra_notes": {
+    "question": "Any other specific requirements or ideas?",
+    "type": "text",
+    "required": false
+  }
+}

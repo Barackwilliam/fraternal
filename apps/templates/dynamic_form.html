@@ -1,0 +1,257 @@
+{% extends "base.html" %}
+{% load static %}
+{% load custom_filters %}
+
+{% block title %}{{ website_type.name }} Requirements - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <!-- Hero Section -->
+    <div class="hero-section bg-gradient-primary text-white py-5">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h1 class="display-4 mb-3 fw-bold">{{ website_type.name }} Development</h1>
+                    <p class="lead opacity-75">Complete this form to get your customized proposal</p>
+                </div>
+                <div class="col-lg-6">
+                    <img src="{% static 'images/web-dev-illustration.svg' %}" alt="Website Development" class="img-fluid">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Form Section -->
+    <div class="container my-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-9">
+                <div class="card shadow-lg border-0 overflow-hidden">
+                    <div class="card-header bg-primary text-white py-3">
+                        <h3 class="mb-0"><i class="fas fa-user-edit me-2"></i> Client & Project Details</h3>
+                    </div>
+                    
+                    <div class="card-body p-4">
+                        <form method="post" novalidate id="proposalForm">
+                            {% csrf_token %}
+                            
+                            <!-- Client Information -->
+                            <section class="mb-5">
+                                <div class="row g-3">
+                                    {% for field in client_fields %}
+                                    <div class="col-md-6">
+                                        {% if field.field.widget.input_type == 'select' %}
+                                        <div class="form-floating">
+                                            <div class="select-wrapper">
+                                                {{ field }}
+                                                <span class="select-arrow"><i class="fas fa-chevron-down"></i></span>
+                                            </div>
+                                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                        </div>
+                                        {% else %}
+                                        <div class="form-floating">
+                                            {{ field }}
+                                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                        </div>
+                                        {% endif %}
+                                        {% if field.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ field.errors|join:", " }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </section>
+                            
+                            <!-- Project Features -->
+                            <section class="mb-5">
+                                <h4 class="fw-semibold mb-4 border-bottom pb-2">
+                                    <i class="fas fa-cubes me-2"></i>Select Your Features
+                                </h4>
+                                
+                                {% for field in project_fields %}
+                                <div class="feature-card mb-4">
+                                    <div class="feature-header p-3">
+                                        <h5 class="mb-0 d-flex align-items-center">
+                                            <i class="fas fa-circle-check me-2"></i>{{ field.label }}
+                                        </h5>
+                                    </div>
+                                    <div class="feature-body p-3">
+                                        {% if field.help_text %}
+                                            <p class="feature-help text-muted mb-3">{{ field.help_text }}</p>
+                                        {% endif %}
+                                        
+                                        {% if field.field.widget.input_type == 'checkbox' %}
+                                            <!-- Multiple choices -->
+                                            <div class="feature-options">
+                                                {% for choice in field %}
+                                                <div class="feature-option">
+                                                    <input type="checkbox" 
+                                                           id="{{ choice.id_for_label }}" 
+                                                           name="{{ field.name }}" 
+                                                           value="{{ choice.data.value }}" 
+                                                           class="feature-checkbox">
+                                                    <label for="{{ choice.id_for_label }}" class="feature-label">
+                                                        <span class="feature-name">{{ choice.choice_label|split_first }}</span>
+                                                        {% if choice.choice_label|has_delimiter %}
+                                                        <span class="feature-price">
+                                                            {{ choice.choice_label|split_last }} <small>TZS</small>
+                                                        </span>
+                                                        {% endif %}
+                                                    </label>
+                                                </div>
+                                                {% endfor %}
+                                            </div>
+                                        
+                                        {% elif field.field.widget.input_type == 'select' %}
+                                            <!-- Dropdown -->
+                                            <div class="form-floating">
+                                                <div class="select-wrapper">
+                                                    {{ field }}
+                                                    <span class="select-arrow"><i class="fas fa-chevron-down"></i></span>
+                                                </div>
+                                                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                            </div>
+                                        
+                                        {% else %}
+                                            <!-- Normal input -->
+                                            <div class="form-floating">
+                                                {{ field }}
+                                                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                            </div>
+                                        {% endif %}
+                                        
+                                        {% if field.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ field.errors|join:", " }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </section>
+                            
+                            <!-- Budget Summary -->
+                            <div class="budget-summary p-4 mb-4">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h4 class="mb-1 fw-semibold">Estimated Budget</h4>
+                                        <p class="text-muted mb-0">Based on selected features</p>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="budget-amount text-primary" id="totalBudget">0</div>
+                                        <small class="text-muted">Tanzanian Shillings</small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Submit -->
+                            <div class="text-center pt-2">
+                                <button type="submit" class="btn btn-primary btn-lg px-5 py-3 fw-bold">
+                                    <i class="fas fa-file-contract me-2"></i> Generate My Proposal
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    function calculateTotal() {
+        let total = 0;
+        document.querySelectorAll('.feature-checkbox:checked').forEach(checkbox => {
+            const priceElement = checkbox.closest('.feature-option').querySelector('.feature-price');
+            if (priceElement) {
+                const priceText = priceElement.textContent.replace(' TZS', '').trim();
+                total += parseInt(priceText.replace(/,/g, '')) || 0;
+            }
+        });
+        document.getElementById('totalBudget').textContent = total.toLocaleString('en-US');
+    }
+
+    calculateTotal();
+    
+    document.querySelectorAll('.feature-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', calculateTotal);
+    });
+
+    document.querySelectorAll('select').forEach(select => {
+        select.classList.add('form-select');
+    });
+});
+</script>
+
+<style>
+:root {
+    --primary-color: #2563eb;
+    --primary-light: #3b82f6;
+    --secondary-color: #f8fafc;
+    --text-color: #1e293b;
+    --border-color: #e2e8f0;
+}
+
+.hero-section {
+    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+}
+
+.form-control, .form-select {
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    background-color: var(--secondary-color);
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary-light);
+    box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.25);
+}
+
+.select-wrapper {
+    position: relative;
+}
+.select-wrapper select { appearance: none; padding-right: 2.5rem; }
+.select-arrow {
+    position: absolute; top: 50%; right: 1rem; transform: translateY(-50%);
+    pointer-events: none; color: #64748b;
+}
+
+/* Feature Cards */
+.feature-card { border: 1px solid var(--border-color); border-radius: 0.75rem; overflow: hidden; transition: all 0.3s ease; }
+.feature-card:hover { border-color: var(--primary-light); box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); }
+.feature-header { background-color: #f1f5f9; border-bottom: 1px solid var(--border-color); }
+.feature-header h5 { color: var(--primary-color); font-weight: 600; }
+.feature-body { background-color: white; }
+
+/* Options */
+.feature-option { display: flex; align-items: center; padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 0.5rem; transition: all 0.2s; }
+.feature-option:hover { background-color: #f8fafc; }
+.feature-checkbox { width: 1.25rem; height: 1.25rem; margin-right: 1rem; accent-color: var(--primary-color); }
+.feature-label { display: flex; justify-content: space-between; align-items: center; width: 100%; cursor: pointer; }
+.feature-name { font-weight: 500; color: var(--text-color); }
+.feature-price { background: linear-gradient(135deg, var(--primary-light), var(--primary-color)); color: white; padding: 0.35rem 1rem; border-radius: 1rem; font-weight: 600; font-size: 0.9rem; min-width: 100px; text-align: center; }
+.feature-price small { font-size: 0.75rem; opacity: 0.9; }
+
+/* Budget Summary */
+.budget-summary { background-color: #f8fafc; border-left: 4px solid var(--primary-color); border-radius: 0.75rem; }
+.budget-amount { font-size: 2.5rem; font-weight: 700; line-height: 1; }
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --primary-color: #3b82f6;
+        --secondary-color: #1e293b;
+        --text-color: #f8fafc;
+        --border-color: #334155;
+    }
+    .feature-body { background-color: #1e293b; }
+    .feature-header { background-color: #334155; border-color: #475569; }
+    .form-control, .form-select { background-color: #334155; color: #f8fafc; border-color: #475569; }
+    .feature-name { color: #f8fafc; }
+    .budget-summary { background-color: #1e293b; }
+}
+</style>
+{% endblock %}

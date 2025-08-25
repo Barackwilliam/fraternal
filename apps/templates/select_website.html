@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Choose a Website Type - {{ block.super }}{% endblock %}
+
+{% block content %}
+<style>
+    .glass-card {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 1rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .glass-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 123, 255, 0.2);
+    }
+
+    .modern-icon {
+        color: #007bff;
+        font-size: 3rem;
+    }
+
+    .btn-modern {
+        border-radius: 30px;
+        font-weight: 600;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .btn-modern:hover {
+        background-color: #007bff;
+        color: white;
+        box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
+    }
+
+    .section-header {
+        font-weight: 700;
+        font-size: 2rem;
+        color: #007bff;
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+
+    body {
+        background: linear-gradient(to right, #e0eafc, #cfdef3);
+    }
+</style>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="section-header">Choose the Type of Website You Want</div>
+            <div class="row">
+                {% for website in website_types %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card glass-card h-100 shadow-sm text-center p-4">
+                        <div class="mb-3">
+                            <i class="{{ website.icon|default:'fas fa-globe' }} modern-icon"></i>
+                        </div>
+                        <h5 class="fw-bold">{{ website.name }}</h5>
+                        <p class="text-muted small">{{ website.description|default:"" }}</p>
+                        <a href="{% url 'dynamic_form' website.id %}" class="btn btn-outline-primary btn-modern mt-2">
+                            Select <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

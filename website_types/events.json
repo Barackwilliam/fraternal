@@ -1,0 +1,76 @@
+{
+  "client_name": {
+    "question": "Full Name",
+    "type": "text",
+    "required": true
+  },
+  "client_email": {
+    "question": "Email Address",
+    "type": "text",
+    "required": true
+  },
+  "client_phone": {
+    "question": "Phone Number",
+    "type": "text",
+    "required": false
+  },
+  "event_type": {
+    "question": "Type of events you organize:",
+    "type": "checkbox",
+    "options": [
+      "Weddings | 0",
+      "Corporate Events | 0",
+      "Concerts & Shows | 0",
+      "Conferences & Seminars | 0",
+      "Birthdays & Private Parties | 0"
+    ]
+  },
+  "features": {
+    "question": "Select the features you want on your event website:",
+    "type": "checkbox",
+    "options": [
+      "Event Listing with Categories | 20000",
+      "Event Details Page with Gallery | 15000",
+      "Online Booking or RSVP Form | 20000",
+      "Countdown Timer for Events | 10000",
+      "Calendar Integration | 15000",
+      "Ticketing System (Free or Paid) | 25000",
+      "Online Payment Integration | 20000",
+      "Testimonials/Reviews Section | 10000",
+      "Team/Organizers Profiles | 8000",
+      "Blog or News Section | 12000",
+      "Sponsors/Partners Carousel | 10000",
+      "Social Media Integration | 8000",
+      "WhatsApp Button Integration | 5000",
+      "Live Chat Integration | 10000",
+      "Photo/Video Gallery | 15000"
+    ]
+  },
+  "design_style": {
+    "question": "Preferred design style:",
+    "type": "checkbox",
+    "options": [
+      "Modern & Colorful | 10000",
+      "Minimal & Elegant | 10000",
+      "Festival/Creative | 15000"
+    ]
+  },
+  "domain_hosting": {
+    "question": "Do you need domain and hosting setup?",
+    "type": "checkbox",
+    "options": [
+      "Yes | 70000",
+      "No | 0"
+    ]
+  },
+  "project_timeline": {
+    "question": "Preferred project delivery timeline:",
+    "type": "text",
+    "required": false
+  },
+  "additional_notes": {
+    "question": "Other features or specific requests?",
+    "type": "text",
+    "required": false
+  }
+}

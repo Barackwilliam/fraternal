@@ -1,0 +1,95 @@
+{
+  "client_name": {
+    "question": "Full Name",
+    "type": "text",
+    "required": true
+  },
+  "client_email": {
+    "question": "Email Address",
+    "type": "text",
+    "required": true
+  },
+  "client_phone": {
+    "question": "Phone Number",
+    "type": "text",
+    "required": false
+  },
+  "crypto_website_type": {
+    "question": "Select your preferred cryptocurrency platform type:",
+    "type": "checkbox",
+    "options": [
+      "Crypto News & Blog | 0",
+      "Token/ICO Promotion Website | 0",
+      "Cryptocurrency Exchange | 0",
+      "Crypto Wallet Interface | 0",
+      "Crypto Dashboard/Portfolio Tracker | 0"
+    ]
+  },
+  "features": {
+    "question": "Select the features you want included:",
+    "type": "checkbox",
+    "options": [
+      "Live Price Charts (CoinMarketCap API, etc.) | 20000",
+      "Wallet Connection (Metamask, TrustWallet, etc.) | 30000",
+      "User Registration & Login | 15000",
+      "Two-Factor Authentication (2FA) | 10000",
+      "Admin Panel for Managing Listings/Users | 25000",
+      "Trading Interface (Buy/Sell UI) | 30000",
+      "Crypto News Feed & Blog | 10000",
+      "Token Sale Countdown Timer | 8000",
+      "Whitepaper & Tokenomics Section | 5000",
+      "Newsletter Subscription (Email Capture) | 5000",
+      "Contact/Support Form | 4000",
+      "Animated Stats & Token Performance Graphs | 12000",
+      "Roadmap Section with Milestones | 7000",
+      "Team & Advisors Section | 6000",
+      "KYC/AML Verification System Integration | 20000"
+    ]
+  },
+  "payment_methods": {
+    "question": "Which payment options should be supported?",
+    "type": "checkbox",
+    "options": [
+      "Crypto Payments (BTC, ETH, USDT, etc.) | 10000",
+      "Fiat via PayPal or Card (Stripe) | 8000",
+      "Mobile Money (M-Pesa, TigoPesa) | 8000"
+    ]
+  },
+  "blockchain_features": {
+    "question": "Do you want to integrate with any blockchain features?",
+    "type": "checkbox",
+    "options": [
+      "Smart Contract Viewer | 12000",
+      "NFT Showcase/Market | 25000",
+      "Airdrop Claim Page | 10000",
+      "Staking/Farming Interface | 20000"
+    ]
+  },
+  "design_style": {
+    "question": "Choose a preferred design style:",
+    "type": "checkbox",
+    "options": [
+      "Modern, Futuristic | 10000",
+      "Dark Theme | 8000",
+      "Minimalist | 7000"
+    ]
+  },
+  "domain_hosting": {
+    "question": "Do you need domain and hosting support?",
+    "type": "checkbox",
+    "options": [
+      "Yes, please include | 70000",
+      "No, I already have | 0"
+    ]
+  },
+  "project_timeline": {
+    "question": "Expected project timeline or deadline:",
+    "type": "text",
+    "required": false
+  },
+  "additional_notes": {
+    "question": "Any extra requirements or ideas?",
+    "type": "text",
+    "required": false
+  }
+}

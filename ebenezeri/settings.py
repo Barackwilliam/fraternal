@@ -7,11 +7,15 @@ import cloudinary
 load_dotenv()
 
 # Build paths inside the project
+
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+WEBSITE_TYPES_DIR = BASE_DIR / 'apps' / 'website_types'
 
 # Security settings
 SECRET_KEY = os.getenv('SECRET_KEY', 'fallback-secret-key')
-DEBUG = os.getenv('DEBUG', 'False') == 'True'
+DEBUG = True
+# DEBUG = os.getenv('DEBUG', 'False') == 'True'
 ALLOWED_HOSTS = ["*"]
 
 # Application definition
@@ -62,31 +66,24 @@ WSGI_APPLICATION = 'ebenezeri.wsgi.application'
                     
 
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',  # Jina la database
-        'USER': 'postgres.vfkogkdlslhdrfclnmhk',  # Jina la mtumiaji
-        'PASSWORD': 'NyumbaChap',  # Badilisha kwa password yako halisi
-        'HOST': 'aws-0-eu-central-1.pooler.supabase.com',  # URL ya server ya database
-        'PORT': '5432',  # Port ya PostgreSQL (default ni 5432)
-    }
-}
-
-
-# user=postgres.vfkogkdlslhdrfclnmhk 
-# password=[YOUR-PASSWORD] 
-# host=aws-0-eu-central-1.pooler.supabase.com
-# port=5432
-# dbname=postgres
-
-
 # DATABASES = {
 #     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'postgres', 
+#         'USER': 'postgres.vfkogkdlslhdrfclnmhk',  
+#         'HOST': 'aws-0-eu-central-1.pooler.supabase.com',  
+#         'PORT': '5432',  
 #     }
 # }
+
+
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
 
 
 # Password validation
@@ -156,3 +153,6 @@ JAZZMIN_UI_TWEAKS = {
     "footer_fixed": False,
     "show_ui_builder": True,
 }
+
+
+WEASYPRINT_BASEURL = BASE_DIR

@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Proposal Preview - {{ block.super }}{% endblock %}
+
+{% block content %}
+<style>
+    body {
+        background: linear-gradient(to right, #f0f2f5, #ffffff);
+        font-family: 'Inter', sans-serif;
+    }
+
+    .glass-panel {
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 16px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+        padding: 30px;
+    }
+
+    .proposal-header {
+        border-bottom: 2px solid #007bff;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+    }
+
+    .proposal-table th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+    }
+
+    .btn-primary, .btn-success {
+        border-radius: 30px;
+        padding: 8px 20px;
+        font-weight: 600;
+    }
+
+    .btn-light {
+        border-radius: 30px;
+    }
+
+    .print-controls button,
+    .print-controls a {
+        margin-right: 10px;
+    }
+
+    @media print {
+        .no-print {
+            display: none !important;
+        }
+        body {
+            background: white;
+        }
+    }
+</style>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="glass-panel">
+                <div class="d-flex justify-content-between align-items-center mb-4 proposal-header">
+                    <h3 class="text-primary mb-0">📝 Proposal Preview</h3>
+                    <a href="{% url 'generate_pdf' proposal.id %}" class="btn btn-light btn-sm shadow-sm">
+                        <i class="fas fa-download me-2"></i> Download PDF
+                    </a>
+                </div>
+
+                <div id="printable-area">
+                    <div class="text-center mb-4">
+                        <h1 class="text-dark">{{ proposal.website_type.name }} Proposal</h1>
+                        <p class="lead">Prepared for <strong>{{ proposal.client.name }}</strong></p>
+                        <p class="text-muted">Generated on {{ proposal.created_at|date:"F j, Y" }}</p>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6 mb-3">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body">
+                                    <h5 class="text-primary fw-bold mb-3">👤 Client Information</h5>
+                                    <ul class="list-unstyled mb-0">
+                                        <li><strong>Name:</strong> {{ proposal.client.name }}</li>
+                                        <li><strong>Email:</strong> {{ proposal.client.email }}</li>
+                                        {% if proposal.client.phone %}
+                                        <li><strong>Phone:</strong> {{ proposal.client.phone }}</li>
+                                        {% endif %}
+                                        {% if proposal.client.company %}
+                                        <li><strong>Company:</strong> {{ proposal.client.company }}</li>
+                                        {% endif %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body">
+                                    <h5 class="text-primary fw-bold mb-3">📁 Project Details</h5>
+                                    <ul class="list-unstyled mb-0">
+                                        <li><strong>Website Type:</strong> {{ proposal.website_type.name }}</li>
+                                        <li><strong>Created:</strong> {{ proposal.created_at|date:"F j, Y" }}</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-body">
+                            <h5 class="text-primary fw-bold mb-3">📋 Project Requirements</h5>
+                            <div class="table-responsive">
+                                <table class="table table-bordered proposal-table">
+                                    <thead>
+                                        <tr>
+                                            <th width="30%">Requirement</th>
+                                            <th>Details</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for key, value in proposal.requirements.items %}
+                                            {% if key|slice:":7" != "client_" %}
+                                            <tr>
+                                                <td><strong>{{ key|title }}</strong></td>
+                                                <td>
+                                                    {% if value is iterable and value is not string %}
+                                                    <ul class="mb-0 ps-3">
+                                                        {% for item in value %}
+                                                        <li>{{ item }}</li>
+                                                        {% endfor %}
+                                                    </ul>
+                                                    {% else %}
+                                                    {{ value|default:"Not specified" }}
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center no-print print-controls">
+                        <button onclick="window.print()" class="btn btn-primary shadow-sm">
+                            <i class="fas fa-print me-2"></i> Print
+                        </button>
+                        <a href="{% url 'generate_pdf' proposal.id %}" class="btn btn-success shadow-sm">
+                            <i class="fas fa-download me-2"></i> Download PDF
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

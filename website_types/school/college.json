@@ -1,0 +1,103 @@
+{
+  "client_name": {
+    "question": "Full Name of the Client",
+    "type": "text",
+    "required": true
+  },
+  "client_email": {
+    "question": "Email Address",
+    "type": "text",
+    "required": true
+  },
+  "client_phone": {
+    "question": "Phone Number",
+    "type": "text",
+    "required": false
+  },
+  "client_company": {
+    "question": "School or College Name",
+    "type": "text",
+    "required": true
+  },
+  "website_purpose": {
+    "question": "What is the main purpose of the website?",
+    "type": "checkbox",
+    "options": [
+      "Informational Only | 0",
+      "Student Portal | 30000",
+      "Online Admissions | 40000",
+      "E-Learning Platform | 70000"
+    ]
+  },
+  "features": {
+    "question": "Select features you want to include:",
+    "type": "checkbox",
+    "options": [
+      "School/College Overview Page | 20000",
+      "Academic Departments & Staff Directory | 25000",
+      "Course Listings with Descriptions | 30000",
+      "Online Admission Form | 40000",
+      "Student Login Portal | 30000",
+      "Admin Panel to Manage Content | 60000",
+      "Student Grades & Results Portal | 35000",
+      "Parent/Guardian Login | 30000",
+      "News & Announcements Section | 15000",
+      "Events Calendar | 20000",
+      "Timetable Upload/Download | 15000",
+      "Gallery (Photos & Videos) | 20000",
+      "Blog or Academic Articles | 15000",
+      "Contact Form with Map | 10000",
+      "Live Chat or WhatsApp Integration | 15000",
+      "Multi-language Support | 30000",
+      "Mobile Friendly (Responsive Design) | 40000",
+      "Google Classroom Integration | 25000",
+      "Zoom/Video Class Integration | 30000",
+      "Downloadable Syllabus & Brochures | 10000",
+      "E-learning Materials Upload (PDF, Docs) | 20000",
+      "Alumni Registration & Portal | 25000",
+      "Online Fee Payment Integration | 50000",
+      "Newsletter Subscription | 10000",
+      "Search Functionality | 10000",
+      "Social Media Links | 5000"
+    ]
+  },
+  "target_users": {
+    "question": "Who will be the primary users of this website?",
+    "type": "checkbox",
+    "options": [
+      "Students | 0",
+      "Teachers | 0",
+      "Parents | 0",
+      "Administrators | 0",
+      "Public/Visitors | 0"
+    ]
+  },
+  "domain_hosting": {
+    "question": "Do you need domain and hosting support?",
+    "type": "checkbox",
+    "options": [
+      "Yes | 70000",
+      "No | 0"
+    ]
+  },
+  "design_preference": {
+    "question": "Do you have a preferred website design or sample to follow?",
+    "type": "text",
+    "required": false
+  },
+  "estimated_students": {
+    "question": "How many students do you estimate will use the site?",
+    "type": "text",
+    "required": false
+  },
+  "timeline": {
+    "question": "What is your preferred timeline for project completion?",
+    "type": "text",
+    "required": false
+  },
+  "extra_notes": {
+    "question": "Any other special requests or features?",
+    "type": "text",
+    "required": false
+  }
+}

@@ -1,0 +1,84 @@
+{
+  "client_name": {
+    "question": "Full Name",
+    "type": "text",
+    "required": true
+  },
+  "client_email": {
+    "question": "Email Address",
+    "type": "text",
+    "required": true
+  },
+  "client_phone": {
+    "question": "Phone Number",
+    "type": "text",
+    "required": false
+  },
+  "music_platform_type": {
+    "question": "What type of music platform do you want?",
+    "type": "checkbox",
+    "options": [
+      "Music Streaming Service | 0",
+      "Online Music Store | 0",
+      "Artist Portfolio | 0",
+      "Podcast Platform | 0",
+      "Radio Station | 0"
+    ]
+  },
+  "core_features": {
+    "question": "Select the core features you want in the platform:",
+    "type": "checkbox",
+    "options": [
+      "User Registration & Profiles | 8000",
+      "Music Upload & Management | 10000",
+      "Playlists Creation & Sharing | 7000",
+      "Search & Filtering by Genre/Artist | 6000",
+      "Audio Streaming with Player | 9000",
+      "Download Option (if permitted) | 7000",
+      "Subscription Plans & Payments | 11000",
+      "Social Sharing & Comments | 6000",
+      "Live Streaming | 12000",
+      "Artist Analytics & Dashboard | 9000",
+      "Multi-Device Support (Mobile, Desktop) | 8000",
+      "Push Notifications | 6000",
+      "Offline Listening | 10000"
+    ]
+  },
+  "monetization_features": {
+    "question": "Do you want monetization features?",
+    "type": "checkbox",
+    "options": [
+      "Ad Integration | 6000",
+      "Subscription-Based Access | 11000",
+      "Pay-per-download | 7000",
+      "Merchandise Store | 8000"
+    ]
+  },
+  "design_preferences": {
+    "question": "Choose your preferred design style:",
+    "type": "checkbox",
+    "options": [
+      "Modern & Vibrant | 7000",
+      "Minimal & Clean | 6000",
+      "Dark Mode Support | 6000"
+    ]
+  },
+  "domain_hosting": {
+    "question": "Do you need domain and hosting setup?",
+    "type": "checkbox",
+    "options": [
+      "Yes, please include | 60000",
+      "No, I already have | 0"
+    ]
+  },
+  "project_timeline": {
+    "question": "Expected timeline for project delivery:",
+    "type": "text",
+    "required": false
+  },
+  "additional_notes": {
+    "question": "Any additional requests or comments?",
+    "type": "text",
+    "required": false
+  }
+}

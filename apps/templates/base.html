@@ -1,0 +1,216 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>JamiiTek company - {% block title %}Web Consultant{% endblock %}</title>
+        <meta content="width=device-width, initial-scale=1.0" name="viewport">
+        <meta content="Construction Company Website Template" name="keywords">
+        <meta content="Construction Company Website Template" name="description">
+
+        <!-- Favicon -->
+        <link href="{% static 'img/favicon.ico' %}" rel="icon">
+
+        <!-- Google Font -->
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+        <!-- CSS Libraries -->
+        <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet">
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+        <link href="{% static 'lib/flaticon/font/flaticon.css' %}" rel="stylesheet"> 
+        <link href="{% static 'lib/animate/animate.min.css' %}" rel="stylesheet">
+        <link href="{% static 'lib/owlcarousel/assets/owl.carousel.min.css' %}" rel="stylesheet">
+        <link href="{% static 'lib/lightbox/css/lightbox.min.css' %}" rel="stylesheet">
+        <link href="{% static 'lib/slick/slick.css' %}" rel="stylesheet">
+        <link href="{% static 'lib/slick/slick-theme.css' %}" rel="stylesheet">
+
+        <!-- Template Stylesheet -->
+        <link href="{% static 'css/style.css' %}" rel="stylesheet">
+
+        {% block extra_css %}
+        <style>
+            /* Print styles for proposal preview */
+            @media print {
+                body * {
+                    visibility: hidden;
+                }
+                #printable-area, #printable-area * {
+                    visibility: visible;
+                }
+                #printable-area {
+                    position: absolute;
+                    left: 0;
+                    top: 0;
+                    width: 100%;
+                    padding: 20px;
+                    background: white;
+                }
+                /* Hide buttons and navbars on print */
+                .no-print {
+                    display: none !important;
+                }
+            }
+        </style>
+        {% endblock %}
+    </head>
+
+    <body style="background-color: blue;">
+        <div class="wrapper">
+            <!-- Top Bar Start -->
+            <div class="top-bar bg-dark border-bottom">
+                <div class="container-fluid">
+                    <div class="row align-items-center py-2">
+                        <div class="col-lg-4 col-md-12">
+                            <div class="logo">
+                                <a href="#" class="text-dark text-decoration-none font-weight-bold" style="font-size: 1.8rem;">
+                                    JamiiTek company
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-lg-8 col-md-7 d-none d-lg-flex justify-content-end">
+                            <div class="row w-100">
+                                <div class="col-4 d-flex align-items-center">
+                                    <i class="flaticon-calendar text-primary mr-2" style="font-size: 1.5rem;"></i>
+                                    <div>
+                                        <h6 class="mb-0 font-weight-bold">Opening Hour</h6>
+                                        <small>Mon - Fri, 8:00 - 9:00</small>
+                                    </div>
+                                </div>
+                                <div class="col-4 d-flex align-items-center">
+                                    <i class="flaticon-call text-primary mr-2" style="font-size: 1.5rem;"></i>
+                                    <div>
+                                        <h6 class="mb-0 font-weight-bold">Call Us</h6>
+                                        <small>0629712678</small>
+                                    </div>
+                                </div>
+                                <div class="col-4 d-flex align-items-center">
+                                    <i class="flaticon-send-mail text-primary mr-2" style="font-size: 1.5rem;"></i>
+                                    <div>
+                                        <h6 class="mb-0 font-weight-bold">Email Us</h6>
+                                        <small>barackwilliam12@gmail.com</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Top Bar End -->
+
+            <!-- Nav Bar Start -->
+            <div class="nav-bar">
+                <div class="container-fluid">
+                    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+                        <a href="#" class="navbar-brand font-weight-bold">MENU</a>
+                        <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+
+                        <div class="collapse navbar-collapse justify-content-between" id="navbarCollapse">
+                            <div class="navbar-nav mr-auto">
+                                <a href="{% url 'home' %}" class="nav-item nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">Home</a>
+                                <a href="{% url 'About' %}" class="nav-item nav-link {% if request.resolver_match.url_name == 'About' %}active{% endif %}">About</a>
+                                <a href="{% url 'service' %}" class="nav-item nav-link {% if request.resolver_match.url_name == 'service' %}active{% endif %}">Service</a>
+                                <a href="{% url 'contact' %}" class="nav-item nav-link {% if request.resolver_match.url_name == 'contact' %}active{% endif %}">Contact</a>
+                            </div>
+                            <div class="ml-auto">
+                                <a class="btn btn-outline-primary" href="https://nyumbachap.com" target="_blank" rel="noopener">Ads</a>
+                            </div>
+                        </div>
+                    </nav>
+                </div>
+            </div>
+            <!-- Nav Bar End -->
+
+            <!-- Main Content Start -->
+            <main class="py-5">
+                <div class="container">
+                    {% block content %}
+                    <!-- Page-specific content goes here -->
+                    {% endblock %}
+                </div>
+            </main>
+            <!-- Main Content End -->
+
+            <!-- Footer Start -->
+            <footer class="footer bg-dark text-light pt-5">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-6 col-lg-3 mb-4">
+                            <h5 class="text-primary mb-3">Office Contact</h5>
+                            <p><i class="fa fa-map-marker-alt mr-2"></i>Boko Street, Dar Es Salaam, Tanzania</p>
+                            <p><i class="fa fa-phone-alt mr-2"></i>0629712678</p>
+                            <p><i class="fa fa-envelope mr-2"></i>barackwilliam12@gmail.com</p>
+                            <div class="footer-social mt-3">
+                                <a href="#" class="text-light mr-3"><i class="fab fa-twitter"></i></a>
+                                <a href="#" class="text-light mr-3"><i class="fab fa-facebook-f"></i></a>
+                                <a href="#" class="text-light mr-3"><i class="fab fa-youtube"></i></a>
+                                <a href="#" class="text-light mr-3"><i class="fab fa-instagram"></i></a>
+                                <a href="#" class="text-light"><i class="fab fa-linkedin-in"></i></a>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-3 mb-4">
+                            <h5 class="text-primary mb-3">Services Areas</h5>
+                            <ul class="list-unstyled">
+                                <li><a href="#" class="text-light">Website Development</a></li>
+                                <li><a href="#" class="text-light">Mobile App Development</a></li>
+                                <li><a href="#" class="text-light">Network Installations</a></li>
+                                <li><a href="#" class="text-light">Hosting <em>Support</em></a></li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6 col-lg-3 mb-4">
+                            <h5 class="text-primary mb-3">Useful Pages</h5>
+                            <ul class="list-unstyled">
+                                <li><a href="{% url 'About' %}" class="text-light">About Us</a></li>
+                                <li><a href="{% url 'contact' %}" class="text-light">Contact Us</a></li>
+                                <li><a href="{% url 'service' %}" class="text-light">Services</a></li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6 col-lg-3 mb-4">
+                            <h5 class="text-primary mb-3">Newsletter</h5>
+                            <p>Send us a message</p>
+                            <form class="form-inline">
+                                <div class="input-group">
+                                    <input type="email" class="form-control" placeholder="Email here" aria-label="Email">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-primary" type="submit">Submit</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="container border-top border-secondary pt-3 mt-3">
+                    <div class="row">
+                        <div class="col-md-6 text-left text-light">
+                            <small>&copy; <a href="https://nyumbachap.com" class="text-light">JamiiTek Company</a>, All Rights Reserved.</small>
+                        </div>
+                        <div class="col-md-6 text-right">
+                            <small><a href="https://htmlcodex.com" class="text-light"></a></small>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+            <!-- Footer End -->
+
+            <a href="#" class="back-to-top"><i class="fa fa-chevron-up"></i></a>
+        </div>
+
+        <!-- JavaScript Libraries -->
+        <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+        <script src="{% static 'lib/easing/easing.min.js' %}"></script>
+        <script src="{% static 'lib/wow/wow.min.js' %}"></script>
+        <script src="{% static 'lib/owlcarousel/owl.carousel.min.js' %}"></script>
+        <script src="{% static 'lib/isotope/isotope.pkgd.min.js' %}"></script>
+        <script src="{% static 'lib/lightbox/js/lightbox.min.js' %}"></script>
+        <script src="{% static 'lib/waypoints/waypoints.min.js' %}"></script>
+        <script src="{% static 'lib/counterup/counterup.min.js' %}"></script>
+        <script src="{% static 'lib/slick/slick.min.js' %}"></script>
+
+        <!-- Template Javascript -->
+        <script src="{% static 'js/main.js' %}"></script>
+
+        {% block extra_js %}{% endblock %}
+    </body>
+</html>

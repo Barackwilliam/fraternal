@@ -1,0 +1,105 @@
+{
+  "client_name": {
+    "question": "Full Name",
+    "type": "text",
+    "required": true
+  },
+  "client_email": {
+    "question": "Email Address",
+    "type": "text",
+    "required": true
+  },
+  "client_phone": {
+    "question": "Phone Number",
+    "type": "text",
+    "required": false
+  },
+  "forum_purpose": {
+    "question": "What is the main purpose of the forum?",
+    "type": "checkbox",
+    "options": [
+      "Community Support | 0",
+      "Product Discussions | 0",
+      "Educational Discussions | 0",
+      "Technical Help | 0",
+      "Interest-Based Groups (e.g. hobbies) | 0"
+    ]
+  },
+  "core_features": {
+    "question": "Select the core features you want in the forum:",
+    "type": "checkbox",
+    "options": [
+      "User Registration/Login | 8000",
+      "User Profiles with Avatars | 6000",
+      "Post Creation (Text, Images, Code) | 9000",
+      "Reply and Comment System | 7000",
+      "Upvote/Like Feature | 5000",
+      "Threaded Discussions | 6000",
+      "Post Tagging and Categorization | 5000",
+      "Rich Text Editor | 7000",
+      "Responsive & Mobile Friendly Design | 8000",
+      "Notification System (Email or in-app) | 7000",
+      "Search by Topic or Tags | 6000",
+      "Multilingual Support | 10000"
+    ]
+  },
+  "moderation_features": {
+    "question": "Moderation and admin features needed:",
+    "type": "checkbox",
+    "options": [
+      "Admin Panel | 7000",
+      "Moderator Roles | 6000",
+      "Spam Filter / CAPTCHA | 5000",
+      "User Banning / Warnings | 5000",
+      "Content Reporting by Users | 6000",
+      "Post Approval Workflow | 7000"
+    ]
+  },
+  "user_engagement": {
+    "question": "Do you want user engagement tools?",
+    "type": "checkbox",
+    "options": [
+      "Badges & Achievements | 7000",
+      "User Rankings & Leaderboard | 7000",
+      "Polls and Surveys | 6000",
+      "Direct Messaging (Private) | 8000"
+    ]
+  },
+  "monetization": {
+    "question": "Monetization options (if needed):",
+    "type": "checkbox",
+    "options": [
+      "Google Ads Integration | 5000",
+      "Paid Membership Tiers | 10000",
+      "Sponsored Posts | 7000",
+      "Affiliate Banners | 5000"
+    ]
+  },
+  "design_preferences": {
+    "question": "Choose your preferred design style:",
+    "type": "checkbox",
+    "options": [
+      "Modern & Vibrant | 6000",
+      "Professional & Minimal | 5000",
+      "Dark Theme Support | 5000"
+    ]
+  },
+  "domain_hosting": {
+    "question": "Do you need domain and hosting services?",
+    "type": "checkbox",
+    "options": [
+      "Yes, set it up for me | 60000",
+      "No, I already have | 0"
+    ]
+  },
+  "project_timeline": {
+    "question": "Expected timeline for project delivery:",
+    "type": "text",
+    "required": false
+  },
+  "additional_notes": {
+    "question": "Any additional requests or features?",
+    "type": "text",
+    "required": false
+  }
+}

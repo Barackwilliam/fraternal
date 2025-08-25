@@ -1,0 +1,79 @@
+{
+  "client_name": {
+    "question": "Full Name",
+    "type": "text",
+    "required": true
+  },
+  "client_email": {
+    "question": "Email Address",
+    "type": "text",
+    "required": true
+  },
+  "client_phone": {
+    "question": "Phone Number",
+    "type": "text",
+    "required": false
+  },
+  "studio_name": {
+    "question": "Studio or Brand Name",
+    "type": "text",
+    "required": true
+  },
+  "features": {
+    "question": "Select features you want on your Photography website:",
+    "type": "checkbox",
+    "options": [
+      "Portfolio Gallery | 20000",
+      "Client Login for Proofing & Downloads | 25000",
+      "Image Lightbox & Zoom | 10000",
+      "Booking Form with Calendar | 20000",
+      "Service Packages Display | 10000",
+      "Online Payment Integration | 20000",
+      "Blog Section | 15000",
+      "Social Media Integration | 10000",
+      "Instagram Feed Embedding | 15000",
+      "Testimonial Slider | 8000",
+      "Contact Form | 5000",
+      "Newsletter Signup | 7000"
+    ]
+  },
+  "photography_type": {
+    "question": "What type of photography do you offer?",
+    "type": "checkbox",
+    "options": [
+      "Weddings | 0",
+      "Events | 0",
+      "Studio Portraits | 0",
+      "Nature/Landscape | 0",
+      "Product Photography | 0",
+      "Fashion | 0"
+    ]
+  },
+  "design_style": {
+    "question": "Preferred design style:",
+    "type": "checkbox",
+    "options": [
+      "Dark & Elegant | 10000",
+      "Minimal & Light | 10000",
+      "Creative & Bold | 15000"
+    ]
+  },
+  "domain_hosting": {
+    "question": "Do you need domain and hosting setup?",
+    "type": "checkbox",
+    "options": [
+      "Yes | 70000",
+      "No | 0"
+    ]
+  },
+  "project_timeline": {
+    "question": "Preferred project delivery timeline:",
+    "type": "text",
+    "required": false
+  },
+  "additional_notes": {
+    "question": "Other features or comments?",
+    "type": "text",
+    "required": false
+  }
+}

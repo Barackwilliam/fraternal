@@ -1,0 +1,87 @@
+{
+  "client_name": {
+    "question": "Full Name of the Client",
+    "type": "text",
+    "required": true
+  },
+  "client_email": {
+    "question": "Email Address",
+    "type": "text",
+    "required": true
+  },
+  "client_phone": {
+    "question": "Phone Number",
+    "type": "text",
+    "required": false
+  },
+  "website_name": {
+    "question": "Name of the News/Blog Website",
+    "type": "text",
+    "required": true
+  },
+  "content_categories": {
+    "question": "Select content categories:",
+    "type": "checkbox",
+    "options": [
+      "Politics | 0",
+      "Technology | 0",
+      "Entertainment | 0",
+      "Sports | 0",
+      "Health | 0",
+      "Lifestyle | 0",
+      "Business | 0",
+      "Education | 0"
+    ]
+  },
+  "features": {
+    "question": "Select required website features:",
+    "type": "checkbox",
+    "options": [
+      "Article Publishing System | 40000",
+      "Multi-author Support | 30000",
+      "Comments Section with Moderation | 25000",
+      "Social Media Sharing Integration | 15000",
+      "Newsletter Subscription | 15000",
+      "SEO Optimization | 25000",
+      "Mobile Responsive Design | 40000",
+      "Content Scheduling and Drafts | 20000",
+      "Tagging and Categories Management | 15000",
+      "Search Functionality | 15000",
+      "Image and Video Embedding | 20000",
+      "Admin Dashboard for Content Management | 45000",
+      "Push Notifications | 25000",
+      "Advertising Slots Management | 20000",
+      "User Registration and Profiles | 30000",
+      "Analytics and Reporting | 35000",
+      "Custom Landing Pages | 30000"
+    ]
+  },
+  "monetization_options": {
+    "question": "Select monetization options:",
+    "type": "checkbox",
+    "options": [
+      "Subscription-based Access | 30000",
+      "AdSense/Advertising Integration | 20000",
+      "Sponsored Content Management | 25000",
+      "Affiliate Marketing Integration | 20000"
+    ]
+  },
+  "domain_hosting": {
+    "question": "Do you need domain and hosting support?",
+    "type": "checkbox",
+    "options": [
+      "Yes | 70000",
+      "No | 0"
+    ]
+  },
+  "project_timeline": {
+    "question": "Preferred timeline for project completion:",
+    "type": "text",
+    "required": false
+  },
+  "additional_requirements": {
+    "question": "Any other specific requirements or ideas?",
+    "type": "text",
+    "required": false
+  }
+}

@@ -1,0 +1,104 @@
+{
+  "client_name": {
+    "question": "Full Name of Client",
+    "type": "text",
+    "required": true
+  },
+  "client_email": {
+    "question": "Client Email Address",
+    "type": "text",
+    "required": true
+  },
+  "client_phone": {
+    "question": "Phone Number",
+    "type": "text",
+    "required": false
+  },
+  "client_company": {
+    "question": "Company or Agency Name",
+    "type": "text",
+    "required": true
+  },
+  "property_type_focus": {
+    "question": "Which property types will your website support?",
+    "type": "checkbox",
+    "options": [
+      "Residential | 0",
+      "Commercial | 0",
+      "Land | 0",
+      "Vacation Rentals | 0",
+      "Short-term Rentals | 0",
+      "Off-plan Properties | 0"
+    ]
+  },
+  "features": {
+    "question": "Select features you want to include:",
+    "type": "checkbox",
+    "options": [
+      "Property Listings with Image Galleries | 50000",
+      "Advanced Search & Filtering (price, type, location, etc.) | 40000",
+      "Interactive Property Map (Google Maps Integration) | 30000",
+      "Agent Profile Pages with Contact Info | 30000",
+      "User Registration/Login | 40000",
+      "Favorites & Saved Listings | 25000",
+      "WhatsApp Chat Integration | 15000",
+      "Contact Forms & Quick Inquiry | 20000",
+      "Multilingual Support | 60000",
+      "Blog/News Articles | 30000",
+      "Admin Dashboard to Manage Listings | 60000",
+      "Email Notifications to Agents or Users | 25000",
+      "Booking Request System | 30000",
+      "Virtual Tour (YouTube or 360°) Embeds | 25000",
+      "Featured Properties Section | 20000",
+      "Search by Region/District | 15000",
+      "Map & List View Toggle | 20000",
+      "Social Media Sharing Buttons | 10000",
+      "Compare Properties Feature | 30000",
+      "Property Tags (e.g., For Sale, New Listing, Hot Deal) | 10000",
+      "Mobile-Responsive Design | 40000",
+      "Progressive Web App (PWA) for Mobile Experience | 60000",
+      "Search Engine Optimization (SEO) | 40000",
+      "Google Analytics Integration | 10000",
+      "Automatic Sitemap & Indexing | 15000",
+      "Featured Ads & Premium Listings Payment System | 50000",
+      "SMS Notifications (via API) | 40000"
+    ]
+  },
+  "design_preference": {
+    "question": "Do you have a sample website or preferred design style?",
+    "type": "text",
+    "required": false
+  },
+  "domain_hosting": {
+    "question": "Do you need help with domain and hosting?",
+    "type": "checkbox",
+    "options": [
+      "Yes | 70000",
+      "No | 0"
+    ]
+  },
+  "number_of_properties": {
+    "question": "How many properties do you plan to upload initially?",
+    "type": "text",
+    "required": false
+  },
+  "currency_supported": {
+    "question": "Which currencies should the site support?",
+    "type": "checkbox",
+    "options": [
+      "TZS (Tanzanian Shilling) | 0",
+      "USD (US Dollar) | 0",
+      "KES (Kenyan Shilling) | 0"
+    ]
+  },
+  "timeline": {
+    "question": "Preferred project delivery timeline?",
+    "type": "text",
+    "required": false
+  },
+  "extra_notes": {
+    "question": "Any other notes or features you would like to add?",
+    "type": "text",
+    "required": false
+  }
+}

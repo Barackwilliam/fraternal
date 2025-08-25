@@ -1,0 +1,80 @@
+{
+  "client_name": {
+    "question": "Full Name",
+    "type": "text",
+    "required": true
+  },
+  "client_email": {
+    "question": "Email Address",
+    "type": "text",
+    "required": true
+  },
+  "client_phone": {
+    "question": "Phone Number",
+    "type": "text",
+    "required": false
+  },
+  "platform_name": {
+    "question": "Job Board Platform Name",
+    "type": "text",
+    "required": true
+  },
+  "features": {
+    "question": "Select features you want on your Job Board website:",
+    "type": "checkbox",
+    "options": [
+      "Job Posting by Employers | 30000",
+      "Job Search & Filtering | 25000",
+      "Candidate Registration & Profiles | 30000",
+      "Resume Uploading & Management | 20000",
+      "Employer Dashboards | 25000",
+      "Candidate Dashboards | 25000",
+      "Admin Panel to Manage Listings | 20000",
+      "Premium Job Listings (Paid) | 20000",
+      "Job Alerts via Email | 15000",
+      "Application Tracking System | 30000",
+      "Payment Gateway for Employers | 25000",
+      "Blog/Resource Section | 15000",
+      "Company Profiles & Reviews | 20000",
+      "Newsletter Integration | 10000",
+      "Social Media Login (Google/Facebook) | 15000"
+    ]
+  },
+  "user_roles": {
+    "question": "Select user roles you want supported:",
+    "type": "checkbox",
+    "options": [
+      "Admin | 0",
+      "Employer | 0",
+      "Job Seeker | 0",
+      "Recruiter/Agency | 10000"
+    ]
+  },
+  "design_style": {
+    "question": "Preferred design style:",
+    "type": "checkbox",
+    "options": [
+      "Corporate/Professional | 0",
+      "Tech Startup Style | 15000",
+      "Minimalist & Clean | 10000"
+    ]
+  },
+  "domain_hosting": {
+    "question": "Do you need domain and hosting setup?",
+    "type": "checkbox",
+    "options": [
+      "Yes | 70000",
+      "No | 0"
+    ]
+  },
+  "project_timeline": {
+    "question": "Preferred project delivery timeline:",
+    "type": "text",
+    "required": false
+  },
+  "additional_notes": {
+    "question": "Other features or comments?",
+    "type": "text",
+    "required": false
+  }
+}

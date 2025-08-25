@@ -1,0 +1,66 @@
+{
+  "client_name": {
+    "question": "Full Name",
+    "type": "text",
+    "required": true
+  },
+  "client_email": {
+    "question": "Email Address",
+    "type": "text",
+    "required": true
+  },
+  "client_phone": {
+    "question": "Phone Number",
+    "type": "text",
+    "required": false
+  },
+  "portfolio_title": {
+    "question": "Portfolio Title or Tagline",
+    "type": "text",
+    "required": false
+  },
+  "sections": {
+    "question": "Select sections to include:",
+    "type": "checkbox",
+    "options": [
+      "About Me | 0",
+      "Resume / CV | 20000",
+      "Portfolio Gallery | 30000",
+      "Skills & Endorsements | 15000",
+      "Testimonials | 15000",
+      "Blog / Articles | 25000",
+      "Contact Form | 15000",
+      "Social Media Links | 10000",
+      "Video Introduction | 25000",
+      "Downloadable Resume | 15000"
+    ]
+  },
+  "design_preferences": {
+    "question": "Preferred Design Style:",
+    "type": "checkbox",
+    "options": [
+      "Minimalist | 0",
+      "Modern & Sleek | 15000",
+      "Creative & Artistic | 20000",
+      "Professional & Corporate | 15000"
+    ]
+  },
+  "domain_hosting": {
+    "question": "Need domain and hosting setup?",
+    "type": "checkbox",
+    "options": [
+      "Yes | 70000",
+      "No | 0"
+    ]
+  },
+  "project_timeline": {
+    "question": "Desired project completion timeline:",
+    "type": "text",
+    "required": false
+  },
+  "additional_requirements": {
+    "question": "Other specific requests or features?",
+    "type": "text",
+    "required": false
+  }
+}

@@ -1,0 +1,86 @@
+{
+  "client_name": {
+    "question": "Full Name",
+    "type": "text",
+    "required": true
+  },
+  "client_email": {
+    "question": "Email Address",
+    "type": "text",
+    "required": true
+  },
+  "client_phone": {
+    "question": "Phone Number",
+    "type": "text",
+    "required": false
+  },
+  "betting_type": {
+    "question": "What type of betting platform do you want?",
+    "type": "checkbox",
+    "options": [
+      "Sports Betting (Football, Basketball, etc.) | 0",
+      "Virtual Games Betting | 0",
+      "Casino Games (Slots, Poker, etc.) | 0",
+      "Live Betting | 0",
+      "Lottery or Jackpot | 0"
+    ]
+  },
+  "features": {
+    "question": "Select the features you need:",
+    "type": "checkbox",
+    "options": [
+      "User Registration & Login | 15000",
+      "Wallet System for Deposits/Withdrawals | 25000",
+      "Live Odds Integration | 30000",
+      "Match Schedules & Results Feed | 20000",
+      "Admin Panel for Managing Bets | 25000",
+      "Bet Slip Generator | 15000",
+      "Affiliate/Referral System | 15000",
+      "Mobile-Friendly Responsive Design | 10000",
+      "Multi-Language Support | 12000",
+      "Promotions & Bonus Offers | 10000",
+      "Push Notifications (Web or Mobile) | 12000",
+      "Live Chat Support | 10000",
+      "SMS & Email Notifications | 8000",
+      "Terms, Privacy & Responsible Gaming Pages | 7000"
+    ]
+  },
+  "payment_methods": {
+    "question": "Which payment methods do you want integrated?",
+    "type": "checkbox",
+    "options": [
+      "Tigo Pesa | 8000",
+      "M-Pesa | 8000",
+      "Airtel Money | 8000",
+      "Bank Transfer | 10000",
+      "Card Payments (Visa, Mastercard) | 10000",
+      "Cryptocurrency (BTC, ETH) | 12000"
+    ]
+  },
+  "regulatory_compliance": {
+    "question": "Do you want assistance with regulatory/licensing compliance?",
+    "type": "checkbox",
+    "options": [
+      "Yes | 15000",
+      "No | 0"
+    ]
+  },
+  "domain_hosting": {
+    "question": "Do you need domain and hosting setup?",
+    "type": "checkbox",
+    "options": [
+      "Yes, include it | 70000",
+      "No, I already have | 0"
+    ]
+  },
+  "project_timeline": {
+    "question": "Expected delivery timeline:",
+    "type": "text",
+    "required": false
+  },
+  "additional_notes": {
+    "question": "Additional features, requests or ideas?",
+    "type": "text",
+    "required": false
+  }
+}
