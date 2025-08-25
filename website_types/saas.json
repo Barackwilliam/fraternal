@@ -1,0 +1,108 @@
+{
+  "client_name": {
+    "question": "Full Name",
+    "type": "text",
+    "required": true
+  },
+  "client_email": {
+    "question": "Email Address",
+    "type": "text",
+    "required": true
+  },
+  "client_phone": {
+    "question": "Phone Number",
+    "type": "text",
+    "required": false
+  },
+  "saas_type": {
+    "question": "What type of SaaS product are you planning?",
+    "type": "checkbox",
+    "options": [
+      "Project Management | 0",
+      "CRM (Customer Relationship Management) | 0",
+      "Accounting & Finance | 0",
+      "Marketing Automation | 0",
+      "Collaboration Tools | 0",
+      "Analytics & Reporting | 0",
+      "Other (Specify in notes) | 0"
+    ]
+  },
+  "core_features": {
+    "question": "Select the main features required:",
+    "type": "checkbox",
+    "options": [
+      "User Registration and Authentication | 12000",
+      "Role-based Access Control | 10000",
+      "Subscription Billing & Payment Integration | 15000",
+      "Dashboard with Analytics | 14000",
+      "API Access for Integrations | 15000",
+      "Multi-Tenant Architecture | 18000",
+      "Email Notifications & Alerts | 8000",
+      "Real-time Collaboration | 16000",
+      "Mobile Responsive Design | 9000",
+      "Customizable User Settings | 7000",
+      "Data Export & Import | 6000",
+      "User Activity Logs | 7000"
+    ]
+  },
+  "third_party_integrations": {
+    "question": "Which third-party services should be integrated?",
+    "type": "checkbox",
+    "options": [
+      "Payment Gateways (Stripe, PayPal) | 10000",
+      "CRM Tools (Salesforce, HubSpot) | 12000",
+      "Cloud Storage (AWS S3, Google Drive) | 9000",
+      "Email Marketing (Mailchimp, SendGrid) | 8000",
+      "Analytics Platforms (Google Analytics) | 7000"
+    ]
+  },
+  "security_features": {
+    "question": "Select required security features:",
+    "type": "checkbox",
+    "options": [
+      "Data Encryption | 12000",
+      "Two-Factor Authentication (2FA) | 10000",
+      "Regular Backups | 8000",
+      "Activity Monitoring | 7000",
+      "GDPR Compliance | 15000"
+    ]
+  },
+  "admin_features": {
+    "question": "Administrative tools needed:",
+    "type": "checkbox",
+    "options": [
+      "User Management Dashboard | 9000",
+      "Subscription Management | 12000",
+      "Usage Analytics & Reporting | 11000",
+      "Customer Support Integration | 8000",
+      "Audit Logs | 7000"
+    ]
+  },
+  "design_preferences": {
+    "question": "Choose design style:",
+    "type": "checkbox",
+    "options": [
+      "Modern & Clean | 8000",
+      "Professional & Minimal | 7000",
+      "Dark Mode Support | 7000"
+    ]
+  },
+  "domain_hosting": {
+    "question": "Do you want domain and hosting services included?",
+    "type": "checkbox",
+    "options": [
+      "Yes, please set up | 70000",
+      "No, I already have | 0"
+    ]
+  },
+  "project_timeline": {
+    "question": "Expected project completion timeline:",
+    "type": "text",
+    "required": false
+  },
+  "additional_notes": {
+    "question": "Any other specific requirements or comments?",
+    "type": "text",
+    "required": false
+  }
+}

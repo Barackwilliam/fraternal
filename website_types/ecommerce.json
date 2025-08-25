@@ -1,0 +1,100 @@
+{
+  "client_name": {
+    "question": "Full Name of Client",
+    "type": "text",
+    "required": true
+  },
+  "client_email": {
+    "question": "Client Email Address",
+    "type": "text",
+    "required": true
+  },
+  "client_phone": {
+    "question": "Phone Number",
+    "type": "text",
+    "required": false
+  },
+  "client_company": {
+    "question": "Company or Brand Name (if any)",
+    "type": "text",
+    "required": false
+  },
+  "business_type": {
+    "question": "What type of products will you sell?",
+    "type": "text",
+    "required": true
+  },
+  "expected_products": {
+    "question": "How many products do you expect to start with?",
+    "type": "text",
+    "required": false
+  },
+  "features": {
+    "question": "Which features would you like to include?",
+    "type": "checkbox",
+    "options": [
+      "Shopping Cart | 150000",
+      "Online Payments | 200000",
+      "Cash on Delivery | 100000",
+      "Customer Reviews | 70000",
+      "Product Categories | 50000",
+      "Search Functionality | 80000",
+      "Live Chat Support | 100000",
+      "Customer Accounts / Login | 130000",
+      "Discount Codes / Coupons | 90000",
+      "Product Filters (Price, Brand, etc.) | 70000",
+      "Wishlist Function | 60000",
+      "Admin Dashboard | 200000",
+      "Multi-language Support | 150000",
+      "Multi-currency Support | 130000",
+      "Product Import (CSV/Excel) | 100000"
+    ]
+  },
+  "payment_methods": {
+    "question": "Which payment methods do you want to support?",
+    "type": "checkbox",
+    "options": [
+      "M-Pesa | 50000",
+      "TigoPesa | 50000",
+      "Airtel Money | 50000",
+      "Bank Transfer | 40000",
+      "Visa / MasterCard | 100000",
+      "PayPal | 80000",
+      "Stripe | 80000"
+    ]
+  },
+  "shipping_options": {
+    "question": "What kind of shipping options will you offer?",
+    "type": "checkbox",
+    "options": [
+      "Free Shipping | 30000",
+      "Flat Rate Shipping | 40000",
+      "Local Delivery | 50000",
+      "Pickup from Store | 20000",
+      "International Shipping | 70000"
+    ]
+  },
+  "design_preference": {
+    "question": "Do you have any design inspiration or competitor websites?",
+    "type": "text",
+    "required": false
+  },
+  "domain_hosting": {
+    "question": "Do you need help with domain name and hosting?",
+    "type": "checkbox",
+    "options": [
+      "Yes | 70000",
+      "No, I already have them | 0"
+    ]
+  },
+  "timeline": {
+    "question": "What is your desired timeline for the project?",
+    "type": "text",
+    "required": false
+  },
+  "extra_notes": {
+    "question": "Any additional notes or custom features?",
+    "type": "text",
+    "required": false
+  }
+}

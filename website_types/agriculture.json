@@ -1,0 +1,91 @@
+{
+  "client_name": {
+    "question": "Full Name",
+    "type": "text",
+    "required": true
+  },
+  "client_email": {
+    "question": "Email Address",
+    "type": "text",
+    "required": true
+  },
+  "client_phone": {
+    "question": "Phone Number",
+    "type": "text",
+    "required": false
+  },
+  "platform_type": {
+    "question": "What type of agriculture platform do you want?",
+    "type": "checkbox",
+    "options": [
+      "Farm Management System | 0",
+      "Marketplace for Produce | 0",
+      "Agricultural News & Updates | 0",
+      "Weather & Crop Advisory | 0",
+      "Agro-inputs E-commerce | 0"
+    ]
+  },
+  "core_features": {
+    "question": "Select core features needed:",
+    "type": "checkbox",
+    "options": [
+      "User Registration & Profiles | 8000",
+      "Farm Data Tracking & Analytics | 12000",
+      "Inventory & Supply Chain Management | 11000",
+      "Order Management & Payments | 10000",
+      "Weather Forecast Integration | 9000",
+      "Crop Disease Detection Tools | 14000",
+      "Multi-language Support | 7000",
+      "Mobile Responsive Design | 8000",
+      "Notification System (SMS/Email) | 7000",
+      "Marketplace for Buying & Selling | 13000"
+    ]
+  },
+  "third_party_integrations": {
+    "question": "Select third-party integrations required:",
+    "type": "checkbox",
+    "options": [
+      "Payment Gateways (Stripe, PayPal) | 10000",
+      "Weather APIs (OpenWeatherMap, AccuWeather) | 7000",
+      "SMS Gateways | 7000",
+      "Google Maps / GIS Integration | 12000"
+    ]
+  },
+  "security_features": {
+    "question": "Select required security features:",
+    "type": "checkbox",
+    "options": [
+      "Data Encryption | 10000",
+      "Two-Factor Authentication (2FA) | 9000",
+      "Regular Backups | 8000",
+      "User Activity Logs | 7000"
+    ]
+  },
+  "design_preferences": {
+    "question": "Choose design style:",
+    "type": "checkbox",
+    "options": [
+      "Clean & Professional | 7000",
+      "Earthy & Natural Colors | 7000",
+      "Modern & Minimal | 6000"
+    ]
+  },
+  "domain_hosting": {
+    "question": "Do you want domain and hosting services included?",
+    "type": "checkbox",
+    "options": [
+      "Yes, please include | 60000",
+      "No, I already have | 0"
+    ]
+  },
+  "project_timeline": {
+    "question": "Expected timeline for project delivery:",
+    "type": "text",
+    "required": false
+  },
+  "additional_notes": {
+    "question": "Any other specific requirements or comments?",
+    "type": "text",
+    "required": false
+  }
+}

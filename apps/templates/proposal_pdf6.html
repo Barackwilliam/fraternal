@@ -1,0 +1,129 @@
+{% load custom_filters %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>International Service Agreement Proposal - {{ proposal.client.name }}</title>
+    <style>
+        /* Your existing styles remain the same */
+        @page { size: A4; margin: 2cm; }
+        body {
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            font-size: 12px;
+            line-height: 1.6;
+            color: #2e2e2e;
+        }
+        /* ... (keep all your existing styles) ... */
+    </style>
+</head>
+<body>
+    <!-- Header section remains unchanged -->
+    <div class="header">
+        <img src="{{ STATIC_URL }}logo.png" class="logo" alt="Company Logo">
+        <h1>International Service Agreement Proposal</h1>
+        <p>Prepared for {{ proposal.client.name }}</p>
+        <p>Date: {{ proposal.created_at|date:"F j, Y" }}</p>
+    </div>
+
+    <!-- Client Information remains unchanged -->
+    <div class="section">
+        <h2>Client Information</h2>
+        <table>
+            <tr><td><strong>Name</strong></td><td>{{ proposal.client.name }}</td></tr>
+            <tr><td><strong>Email</strong></td><td>{{ proposal.client.email }}</td></tr>
+            {% if proposal.client.phone %}<tr><td><strong>Phone</strong></td><td>{{ proposal.client.phone }}</td></tr>{% endif %}
+            {% if proposal.client.company %}<tr><td><strong>Company</strong></td><td>{{ proposal.client.company }}</td></tr>{% endif %}
+        </table>
+    </div>
+
+    <!-- Modified Project Requirements Section -->
+    <div class="section">
+        <h2>Project Requirements</h2>
+        <table>
+            <thead><tr><th>Requirement</th><th>Details</th></tr></thead>
+            <tbody>
+            {% for key, value in requirements.items %}
+                {% if key|slice:":7" != "client_" %}
+                <tr>
+                    <td>{{ key|title|cut:"_" }}</td>
+                    <td>
+                        {% if value is iterable and value is not string %}
+                            <ul>
+                            {% for item in value %}
+                                <li>{{ item|clean_display }}</li>
+                            {% endfor %}
+                            </ul>
+                        {% else %}
+                            {{ value|clean_display }}
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endif %}
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modified Project Budget Section -->
+    <div class="section">
+        <h2>Project Budget</h2>
+        <table>
+            <thead><tr><th>Description</th><th>Estimated Cost (TZS)</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td><strong>Total Project Cost</strong></td>
+                    <td><strong>{{ requirements|calculate_total|floatformat:0 }} TZS</strong></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>Project Budget</h2>
+        <table>
+            <thead><tr><th>Description</th><th>Estimated Cost (TZS)</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td><strong>Total Project Cost</strong></td>
+                    <td><strong>{{ requirements|calculate_total|floatformat:0 }} TZS</strong></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Rest of your template content -->
+
+    <div class="section">
+        <h2>Agreement Terms</h2>
+        <div class="terms">
+            <p>This proposal outlines the scope of work agreed upon by <strong>JamiiTek Company</strong> and the client. Final design, delivery dates, payment terms, and hosting details will be formalized upon signature of this agreement.</p>
+            <p><strong>Confidentiality:</strong> Both parties agree to keep all information confidential.</p>
+            <p><strong>Liability:</strong> JamiiTek Company shall not be liable for indirect damages.</p>
+            <p><strong>Dispute Resolution:</strong> Any disputes shall be resolved through arbitration in [Specify Location].</p>
+            <p><strong>Termination:</strong> Either party may terminate this agreement with 30 days written notice.</p>
+            <p><strong>Force Majeure:</strong> Neither party shall be liable for delays due to causes beyond their control.</p>
+        </div>
+    </div>
+     <div class="signature">
+        <p><strong>Client Signature:</strong></p>
+        <div class="line"></div>
+        <p>Name: ________________________</p>
+        <p>Title: ________________________</p>
+        <p>Date: ________________________</p>
+    </div>
+
+    <div class="signature" style="margin-top: 60px;">
+        <p><strong>JamiiTek Company Representative:</strong></p>
+        <div class="line"></div>
+        <p>Name: ________________________</p>
+        <p>Title: ________________________</p>
+        <p>Date: ________________________</p>
+    </div>
+
+    <pdf:pageFooter>
+        <div class="footer">
+            Page <pdf:pagenumber/> of <pdf:pagecount/> | JamiiTek Company | info@jamiitek.co.tz | +255 620 000 000
+        </div>
+    </pdf:pageFooter>
+</body>
+</html>

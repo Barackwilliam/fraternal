@@ -1,0 +1,81 @@
+{
+  "client_name": {
+    "question": "Full Name of Client",
+    "type": "text",
+    "required": true
+  },
+  "client_email": {
+    "question": "Client Email Address",
+    "type": "text",
+    "required": true
+  },
+  "client_phone": {
+    "question": "Phone Number",
+    "type": "text",
+    "required": false
+  },
+  "client_company": {
+    "question": "Company Name",
+    "type": "text",
+    "required": true
+  },
+  "company_description": {
+    "question": "Brief description about your company",
+    "type": "text",
+    "required": true
+  },
+  "industry_type": {
+    "question": "What industry does your company belong to?",
+    "type": "text",
+    "required": true
+  },
+  "target_audience": {
+    "question": "Who is your primary audience?",
+    "type": "text",
+    "required": false
+  },
+  "features": {
+    "question": "Which features do you want for your company profile website?",
+    "type": "checkbox",
+    "options": [
+      "About Us Page | 30000",
+      "Our Team Section | 30000",
+      "Mission & Vision Section | 25000",
+      "Contact Page | 20000",
+      "Contact Form | 30000",
+      "Map Integration (Google Maps) | 30000",
+      "Gallery / Portfolio | 40000",
+      "Social Media Integration | 20000",
+      "Testimonials Section | 25000",
+      "Blog or News Section | 50000",
+      "Downloadable Brochure (PDF) | 25000",
+      "Careers Page | 30000",
+      "SEO Setup | 40000",
+      "Whatsapp Chat Button | 15000",
+      "Multilingual Support | 60000"
+    ]
+  },
+  "design_preference": {
+    "question": "Do you have any website examples or design preferences?",
+    "type": "text",
+    "required": false
+  },
+  "domain_hosting": {
+    "question": "Do you need help with domain and hosting?",
+    "type": "checkbox",
+    "options": [
+      "Yes | 70000",
+      "No, I already have them | 0"
+    ]
+  },
+  "timeline": {
+    "question": "When would you like the project to be completed?",
+    "type": "text",
+    "required": false
+  },
+  "extra_notes": {
+    "question": "Additional notes or custom requests",
+    "type": "text",
+    "required": false
+  }
+}

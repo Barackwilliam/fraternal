@@ -1,0 +1,75 @@
+{
+  "client_name": {
+    "question": "Full Name of the Client",
+    "type": "text",
+    "required": true
+  },
+  "client_email": {
+    "question": "Email Address",
+    "type": "text",
+    "required": true
+  },
+  "client_phone": {
+    "question": "Phone Number",
+    "type": "text",
+    "required": false
+  },
+  "clinic_name": {
+    "question": "Name of Hospital/Clinic",
+    "type": "text",
+    "required": true
+  },
+  "services_offered": {
+    "question": "Select services offered:",
+    "type": "checkbox",
+    "options": [
+      "General Consultation | 0",
+      "Pediatrics | 0",
+      "Dental Care | 0",
+      "Laboratory Services | 0",
+      "Pharmacy | 0",
+      "Emergency Services | 0",
+      "Radiology and Imaging | 0",
+      "Physiotherapy | 0",
+      "Surgery | 0"
+    ]
+  },
+  "features": {
+    "question": "Select required website features:",
+    "type": "checkbox",
+    "options": [
+      "Online Appointment Booking | 50000",
+      "Doctor/Staff Profiles | 30000",
+      "Patient Portal with Login | 60000",
+      "Medical Records Management | 70000",
+      "Contact Form with Map | 15000",
+      "Blog/Health Tips Section | 20000",
+      "Multi-language Support | 30000",
+      "Mobile Responsive Design | 40000",
+      "SEO Optimization | 25000",
+      "Online Payments for Services | 50000",
+      "Email/SMS Notifications | 20000",
+      "Prescription Upload and Download | 40000",
+      "Admin Dashboard for Management | 60000",
+      "Emergency Contact Information Display | 10000"
+    ]
+  },
+  "domain_hosting": {
+    "question": "Do you need domain and hosting support?",
+    "type": "checkbox",
+    "options": [
+      "Yes | 70000",
+      "No | 0"
+    ]
+  },
+  "project_timeline": {
+    "question": "Preferred timeline for project completion:",
+    "type": "text",
+    "required": false
+  },
+  "additional_requirements": {
+    "question": "Any other specific requirements or ideas?",
+    "type": "text",
+    "required": false
+  }
+}

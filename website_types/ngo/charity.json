@@ -1,0 +1,95 @@
+{
+  "client_name": {
+    "question": "Full Name of the Client",
+    "type": "text",
+    "required": true
+  },
+  "client_email": {
+    "question": "Email Address",
+    "type": "text",
+    "required": true
+  },
+  "client_phone": {
+    "question": "Phone Number",
+    "type": "text",
+    "required": false
+  },
+  "organization_name": {
+    "question": "Name of the NGO/Charity",
+    "type": "text",
+    "required": true
+  },
+  "organization_type": {
+    "question": "Type of Organization",
+    "type": "checkbox",
+    "options": [
+      "Non-Governmental Organization (NGO) | 0",
+      "Charity/Foundation | 0",
+      "Community-Based Organization (CBO) | 0",
+      "Faith-Based Organization | 0",
+      "Advocacy Group | 0"
+    ]
+  },
+  "features": {
+    "question": "Select required website features:",
+    "type": "checkbox",
+    "options": [
+      "Donation Management System (Online Donations) | 50000",
+      "Event Calendar and Registration | 30000",
+      "Volunteer Registration and Management | 35000",
+      "Blog and News Section | 25000",
+      "Newsletter Subscription | 15000",
+      "Contact Form with Captcha | 10000",
+      "Photo and Video Gallery | 20000",
+      "Multi-language Support | 30000",
+      "Social Media Integration | 15000",
+      "User Dashboard for Donors/Volunteers | 40000",
+      "Reports and Analytics (Donations & Activities) | 35000",
+      "Admin Panel to Manage Content | 50000",
+      "Email Notifications and Alerts | 20000",
+      "Mobile Responsive Design | 40000",
+      "SEO Optimization | 25000",
+      "Custom Landing Pages | 30000",
+      "Integration with Payment Gateways (e.g., PayPal, Stripe, M-Pesa) | 50000",
+      "Blog Comments and Moderation | 15000"
+    ]
+  },
+  "fundraising_methods": {
+    "question": "Preferred fundraising methods:",
+    "type": "checkbox",
+    "options": [
+      "One-time Donations | 0",
+      "Recurring Donations (Monthly/Yearly) | 10000",
+      "Crowdfunding Campaigns | 20000",
+      "Merchandise Sales | 15000"
+    ]
+  },
+  "volunteer_features": {
+    "question": "Volunteer features needed:",
+    "type": "checkbox",
+    "options": [
+      "Sign-up Forms | 0",
+      "Scheduling and Shift Management | 25000",
+      "Volunteer Profiles | 20000",
+      "Communication Tools (Email/SMS) | 15000"
+    ]
+  },
+  "domain_hosting": {
+    "question": "Do you need domain and hosting support?",
+    "type": "checkbox",
+    "options": [
+      "Yes | 70000",
+      "No | 0"
+    ]
+  },
+  "project_timeline": {
+    "question": "Preferred timeline for project completion:",
+    "type": "text",
+    "required": false
+  },
+  "additional_requirements": {
+    "question": "Any other specific requirements or ideas?",
+    "type": "text",
+    "required": false
+  }
+}

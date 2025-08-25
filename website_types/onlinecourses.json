@@ -1,0 +1,77 @@
+{
+  "client_name": {
+    "question": "Full Name",
+    "type": "text",
+    "required": true
+  },
+  "client_email": {
+    "question": "Email Address",
+    "type": "text",
+    "required": true
+  },
+  "client_phone": {
+    "question": "Phone Number",
+    "type": "text",
+    "required": false
+  },
+  "course_categories": {
+    "question": "What type of courses will your platform offer?",
+    "type": "checkbox",
+    "options": [
+      "Business & Marketing | 0",
+      "Tech & Programming | 0",
+      "Languages | 0",
+      "Design & Creativity | 0",
+      "Health & Fitness | 0",
+      "School Subjects (Math, Science, etc.) | 0"
+    ]
+  },
+  "features": {
+    "question": "Select features you want on the course platform:",
+    "type": "checkbox",
+    "options": [
+      "Course Catalog & Search | 25000",
+      "Individual Course Pages | 15000",
+      "Video/Audio Course Upload | 25000",
+      "PDF and Material Uploads | 10000",
+      "Quiz/Exams Module | 20000",
+      "Course Progress Tracking | 20000",
+      "Student Registration/Login | 12000",
+      "Instructor Dashboard | 25000",
+      "Student Dashboard | 20000",
+      "Payment Gateway Integration | 20000",
+      "Subscription or One-time Purchase Support | 20000",
+      "Certificates after Completion | 15000",
+      "Discussion Forum or Q&A | 12000",
+      "Blog or Articles Section | 10000",
+      "Mobile-Responsive Design | 10000"
+    ]
+  },
+  "design_preference": {
+    "question": "Choose preferred design style:",
+    "type": "checkbox",
+    "options": [
+      "Modern Professional | 10000",
+      "Clean & Minimal | 8000",
+      "Dark Theme | 7000"
+    ]
+  },
+  "domain_hosting": {
+    "question": "Do you want us to set up domain and hosting?",
+    "type": "checkbox",
+    "options": [
+      "Yes, please include it | 70000",
+      "No, I already have | 0"
+    ]
+  },
+  "project_timeline": {
+    "question": "What is your preferred project timeline?",
+    "type": "text",
+    "required": false
+  },
+  "additional_notes": {
+    "question": "Additional features or requests?",
+    "type": "text",
+    "required": false
+  }
+}

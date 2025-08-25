@@ -1,0 +1,86 @@
+{
+  "client_name": {
+    "question": "Full Name",
+    "type": "text",
+    "required": true
+  },
+  "client_email": {
+    "question": "Email Address",
+    "type": "text",
+    "required": true
+  },
+  "client_phone": {
+    "question": "Phone Number",
+    "type": "text",
+    "required": false
+  },
+  "dashboard_type": {
+    "question": "What type of dashboard do you need?",
+    "type": "checkbox",
+    "options": [
+      "Business Analytics Dashboard | 0",
+      "E-commerce Admin Dashboard | 0",
+      "School Management Dashboard | 0",
+      "Project Management Dashboard | 0",
+      "HR/Employee Dashboard | 0",
+      "Custom Role-Based Dashboard | 0"
+    ]
+  },
+  "features": {
+    "question": "Select the features you want in the dashboard:",
+    "type": "checkbox",
+    "options": [
+      "User Authentication (Login, Register) | 15000",
+      "Role-Based Permissions (Admin, User, etc.) | 15000",
+      "Dynamic Charts (Bar, Pie, Line, etc.) | 20000",
+      "Real-time Data Updates | 18000",
+      "Data Filtering and Export (CSV, Excel, PDF) | 12000",
+      "Notifications (In-app, Email, SMS) | 10000",
+      "Data Tables with Pagination & Search | 10000",
+      "Responsive Design (Mobile + Desktop) | 8000",
+      "Dark/Light Theme Toggle | 7000",
+      "Multi-language Support | 12000",
+      "Activity Logs & Audit Trails | 9000",
+      "Calendar & Scheduling | 8000",
+      "File Upload & Management | 9000"
+    ]
+  },
+  "integrations": {
+    "question": "Select external integrations (if any):",
+    "type": "checkbox",
+    "options": [
+      "Google Sheets or Excel Sync | 10000",
+      "Payment Systems (e.g. Stripe, PayPal) | 12000",
+      "SMS Gateway (e.g. Twilio, Africa's Talking) | 10000",
+      "Email Service (e.g. SendGrid, Mailchimp) | 8000",
+      "API Integration with 3rd Party System | 15000"
+    ]
+  },
+  "design_preferences": {
+    "question": "Choose a design preference:",
+    "type": "checkbox",
+    "options": [
+      "Modern Material UI | 7000",
+      "Minimalist Layout | 6000",
+      "Dark Themed | 7000"
+    ]
+  },
+  "domain_hosting": {
+    "question": "Do you need domain and hosting setup?",
+    "type": "checkbox",
+    "options": [
+      "Yes, include it | 70000",
+      "No, I already have | 0"
+    ]
+  },
+  "project_timeline": {
+    "question": "Expected delivery timeline:",
+    "type": "text",
+    "required": false
+  },
+  "additional_notes": {
+    "question": "Any other ideas, features, or expectations?",
+    "type": "text",
+    "required": false
+  }
+}

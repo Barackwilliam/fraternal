@@ -1,0 +1,6 @@
+{
+    "sample_question": {
+        "question": "Sample question for membership",
+        "type": "text"
+    }
+}

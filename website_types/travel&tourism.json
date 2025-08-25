@@ -1,0 +1,119 @@
+{
+  "client_name": {
+    "question": "Client's Full Name",
+    "type": "text",
+    "required": true
+  },
+  "client_email": {
+    "question": "Email Address",
+    "type": "text",
+    "required": true
+  },
+  "client_phone": {
+    "question": "Phone Number",
+    "type": "text",
+    "required": false
+  },
+  "client_company": {
+    "question": "Company or Brand Name",
+    "type": "text",
+    "required": true
+  },
+  "business_focus": {
+    "question": "What type of travel services do you offer?",
+    "type": "checkbox",
+    "options": [
+      "Safaris and Game Drives | 0",
+      "Mountain Climbing (e.g., Kilimanjaro) | 0",
+      "Beach Holidays | 0",
+      "Cultural Tours | 0",
+      "Hotel/Resort Booking | 0",
+      "Visa Assistance | 0",
+      "Car Hire Services | 0",
+      "Flight Booking | 0",
+      "Package Deals | 0"
+    ]
+  },
+  "features": {
+    "question": "Select the features you need on your website:",
+    "type": "checkbox",
+    "options": [
+      "Tour Package Listing with Details | 60000",
+      "Advanced Tour Search & Filters | 35000",
+      "Multi-language Support | 30000",
+      "Online Booking & Reservation | 60000",
+      "Real-time Availability & Pricing | 40000",
+      "WhatsApp Integration | 15000",
+      "Live Chat Support | 30000",
+      "Online Payment Integration | 50000",
+      "Client Reviews & Ratings | 25000",
+      "Google Maps for Destinations | 20000",
+      "Blog & Travel Tips Section | 25000",
+      "Admin Panel to Manage Tours | 55000",
+      "PDF Itinerary Download | 20000",
+      "Gallery or Media Slider | 15000",
+      "Contact Form with Captcha | 10000",
+      "Responsive Mobile Design | 40000",
+      "Custom Landing Pages for Packages | 30000",
+      "Social Media Integration | 10000",
+      "Travel Insurance Integration | 20000"
+    ]
+  },
+  "preferred_design_style": {
+    "question": "Do you have any sample websites or design preferences?",
+    "type": "text",
+    "required": false
+  },
+  "target_markets": {
+    "question": "Where are your main customers located?",
+    "type": "checkbox",
+    "options": [
+      "Local (Tanzania) | 0",
+      "East Africa Region | 0",
+      "International Tourists | 0",
+      "Corporate Clients | 0"
+    ]
+  },
+  "vendor_accounts": {
+    "question": "Do you need tour guides, agents, or hotels to have their own logins?",
+    "type": "checkbox",
+    "options": [
+      "Yes, include vendor/agent accounts | 40000",
+      "No, only admin will manage everything | 0"
+    ]
+  },
+  "email_sms_notifications": {
+    "question": "Would you like automated email or SMS alerts?",
+    "type": "checkbox",
+    "options": [
+      "Email Notifications | 20000",
+      "SMS Notifications | 20000"
+    ]
+  },
+  "reporting_features": {
+    "question": "Do you need reporting features?",
+    "type": "checkbox",
+    "options": [
+      "Yes, booking reports and analytics | 30000",
+      "No | 0"
+    ]
+  },
+  "domain_hosting": {
+    "question": "Do you need domain and hosting setup?",
+    "type": "checkbox",
+    "options": [
+      "Yes | 70000",
+      "No | 0"
+    ]
+  },
+  "project_timeline": {
+    "question": "Preferred project completion timeline?",
+    "type": "text",
+    "required": false
+  },
+  "extra_notes": {
+    "question": "Any additional requirements or expectations?",
+    "type": "text",
+    "required": false
+  }
+}
