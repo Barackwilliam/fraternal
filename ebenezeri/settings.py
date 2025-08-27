@@ -28,7 +28,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'apps',
-    'cloudinary_storage',
+    'uploadcare',
     'cloudinary',
 ]
 
@@ -66,24 +66,23 @@ WSGI_APPLICATION = 'ebenezeri.wsgi.application'
                     
 
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'postgres', 
-#         'USER': 'postgres.vfkogkdlslhdrfclnmhk',  
-#         'HOST': 'aws-0-eu-central-1.pooler.supabase.com',  
-#         'PORT': '5432',  
-#     }
-# }
-
-
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'postgres', 
+        'USER': 'postgres.frapnewfadymevdkznrq',
+        'PASSWORD':'NyumbaChap',
+        'HOST': 'aws-1-eu-north-1.pooler.supabase.com',  
+        'PORT': '5432',  
     }
 }
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 
 
 # Password validation
@@ -135,14 +134,14 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 JAZZMIN_SETTINGS = {
     "site_title": "My Admin Panel",
     "site_header": "My Dashboard",
-    "site_brand": "Fraternal Company",
-    "welcome_sign": "Welcome to Fraternal Dashboard",
-    "copyright": "Fraternal Company © 2025",
+    "site_brand": "JamiiTek Company",
+    "welcome_sign": "Welcome to JamiiTek Dashboard",
+    "copyright": "JamiiTek Company © 2025",
     "search_model": "auth.User",
     "topmenu_links": [
         {"name": "Home", "url": "admin:index", "permissions": ["auth.view_user"]},
         {"model": "auth.User"},
-        {"app": "Fraternal System"},
+        {"app": "JamiiTek System"},
     ],
 }
 
@@ -154,5 +153,12 @@ JAZZMIN_UI_TWEAKS = {
     "show_ui_builder": True,
 }
 
+
+
+UPLOADCARE = {
+    'pub_key': '76122001cca4add87f02',
+    'secret': 'f00801b9b65172d50de5',
+    'use_secure': True, 
+}
 
 WEASYPRINT_BASEURL = BASE_DIR

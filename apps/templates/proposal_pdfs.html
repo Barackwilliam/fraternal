@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Tanzania Service Agreement Proposal - {{ proposal.client.name }}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm;
+        }
+
+        body {
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            font-size: 12px;
+            line-height: 1.6;
+            color: #2e2e2e;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #007bff;
+        }
+
+        .header h1 {
+            color: #007bff;
+            font-size: 24px;
+            margin: 0;
+            white-space: nowrap;
+        }
+
+        .header p {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .logo {
+            max-width: 100px;
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            color: #007bff;
+            font-size: 16px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 4px;
+        }
+
+        .section {
+            margin-bottom: 25px;
+            page-break-inside: avoid;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background-color: #f1f1f1;
+            padding: 8px;
+            text-align: left;
+            border: 1px solid #ccc;
+        }
+
+        td {
+            padding: 8px;
+            border: 1px solid #ccc;
+        }
+
+        ul {
+            padding-left: 20px;
+            margin: 0;
+        }
+
+        .footer {
+            font-size: 10px;
+            color: #888;
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 10px;
+            border-top: 1px solid #ccc;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+
+        .signature {
+            margin-top: 40px;
+            text-align: left;
+        }
+
+        .signature .line {
+            border-top: 1px solid #000;
+            width: 200px;
+            margin-top: 40px;
+        }
+
+        .terms {
+            font-size: 11px;
+            color: #555;
+            background-color: #f9f9f9;
+            padding: 10px;
+            border-left: 4px solid #007bff;
+        }
+
+        .preamble {
+            font-style: italic;
+            margin-bottom: 20px;
+        }
+
+        .total-cost {
+            margin-top: 15px;
+            font-size: 14px;
+            font-weight: bold;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="{{ STATIC_URL }}logo.png" class="logo" alt="JamiiTek Logo">
+        <h1>{{ proposal.website_type.name }} - Tanzania Service Agreement Proposal</h1>
+        <p>Prepared for {{ proposal.client.name }}</p>
+        <p>Date: {{ proposal.created_at|date:"F j, Y" }}</p>
+    </div>
+
+    <div class="section preamble">
+        <p>This Agreement ("Agreement") is made between <strong>JamiiTek Company</strong> ("Service Provider") and <strong>{{ proposal.client.name }}</strong> ("Client"). This Agreement shall be governed by and construed in accordance with the laws of [Specify Jurisdiction].</p>
+    </div>
+
+    <div class="section">
+        <h2>Client Information</h2>
+        <table>
+            <tr>
+                <td><strong>Name</strong></td>
+                <td>{{ proposal.client.name }}</td>
+            </tr>
+            <tr>
+                <td><strong>Email</strong></td>
+                <td>{{ proposal.client.email }}</td>
+            </tr>
+            {% if proposal.client.phone %}
+            <tr>
+                <td><strong>Phone</strong></td>
+                <td>{{ proposal.client.phone }}</td>
+            </tr>
+            {% endif %}
+            {% if proposal.client.company %}
+            <tr>
+                <td><strong>Company</strong></td>
+                <td>{{ proposal.client.company }}</td>
+            </tr>
+            {% endif %}
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>Project Requirements</h2>
+        <table id="requirements-table">
+            <thead>
+                <tr>
+                    <th>Requirement</th>
+                    <th>Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for key, value in proposal.requirements.items %}
+                    {% if key|slice:":7" != "client_" %}
+                    <tr>
+                        <td>{{ key|title|cut:" " }}</td>
+                        <td class="requirement-value">
+                            {% if value|slice:":1" == "[" %}
+                                <ul>
+                                    {% for item in value %}
+                                        <li>{{ item }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                {{ value|default:"Not specified" }}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endif %}
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <p class="total-cost">Total Estimated Amount: <span id="totalAmount">0</span> TZS</p>
+    </div>
+
+    <div class="section">
+        <h2>Agreement Terms</h2>
+        <div class="terms">
+            <p>This proposal outlines the scope of work agreed upon by <strong>JamiiTek Company</strong> and the client. Final design, delivery dates, payment terms, and hosting details will be formalized upon signature of this agreement.</p>
+            <p><strong>Confidentiality:</strong> Both parties agree to keep all information confidential.</p>
+            <p><strong>Liability:</strong> JamiiTek Company shall not be liable for indirect damages.</p>
+            <p><strong>Dispute Resolution:</strong> Any disputes shall be resolved through arbitration in [Specify Location].</p>
+            <p><strong>Termination:</strong> Either party may terminate this agreement with 7 days written notice.</p>
+            <p><strong>Force Majeure:</strong> Neither party shall be liable for delays due to causes beyond their control.</p>
+        </div>
+    </div>
+
+    <div class="signature">
+        <p><strong>Client Signature:</strong></p>
+        <div class="line"></div>
+        <p>Name: ________________________</p>
+        <p>Title: ________________________</p>
+        <p>Date: ________________________</p>
+    </div>
+
+    <div class="signature" style="margin-top: 60px;">
+        <p><strong>JamiiTek Company Representative:</strong></p>
+        <div class="line"></div>
+        <p>Name: ________________________</p>
+        <p>Title: ________________________</p>
+        <p>Date: ________________________</p>
+    </div>
+
+    <pdf:pageFooter>
+        <div class="footer">
+            Page <pdf:pagenumber/> of <pdf:pagecount/> | JamiiTek Company | info@jamiitek.co.tz | +255 629712678
+        </div>
+    </pdf:pageFooter>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            let total = 0;
+            document.querySelectorAll(".requirement-value").forEach(td => {
+                let text = td.innerText.replace(/[^0-9.]/g, ""); // toa maneno, bakia namba pekee
+                if (text) {
+                    total += parseFloat(text);
+                }
+            });
+            document.getElementById("totalAmount").innerText = total.toLocaleString();
+        });
+    </script>
+</body>
+</html>

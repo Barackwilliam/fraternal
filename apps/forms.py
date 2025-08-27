@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
 from django import forms
+from .models import Service,Team
 from django.core.exceptions import ValidationError
 
 class DynamicProposalForm(forms.Form):
@@ -63,3 +64,27 @@ class DynamicProposalForm(forms.Form):
                     )
         except json.JSONDecodeError:
             raise forms.ValidationError(f"Faili ya {website_type}.json haijaandikwa vizuri. Angalia syntax ya JSON")
+
+
+
+
+class ServiceAdminForm(forms.ModelForm):
+    class Meta:
+        model = Service
+        fields = '__all__'
+
+    class Media:
+        js = [
+            'https://ucarecdn.com/libs/widget/3.x/uploadcare.full.min.js',
+        ]
+
+
+class TeamAdminForm(forms.ModelForm):
+    class Meta:
+        model = Team
+        fields = '__all__'
+
+    class Media:
+        js = [
+            'https://ucarecdn.com/libs/widget/3.x/uploadcare.full.min.js',
+        ]
