@@ -141,20 +141,6 @@ def proposal_preview(request, proposal_id):
         'title': 'Proposal Preview'
     })
 
-# def proposal_preview(request, proposal_id):
-#     proposal = ProjectProposal.objects.get(id=proposal_id)
-
-#     # Filter out keys that start with 'client_'
-#     filtered_requirements = {
-#         key: value for key, value in proposal.requirements.items() if not key.startswith('client_')
-#     }
-
-#     return render(request, 'proposal_preview.html', {
-#         'proposal': proposal,
-#         'filtered_requirements': filtered_requirements,
-#         'title': 'Proposal Preview',
-#     })
-
 
 
 import json
@@ -207,3 +193,69 @@ def generate_pdf(request, proposal_id):
     response = HttpResponse(pdf_file, content_type='application/pdf')
     response['Content-Disposition'] = f'attachment; filename="proposal_{proposal.id}.pdf"'
     return response
+
+# import json
+# from django.http import HttpResponse
+# from django.template.loader import render_to_string
+# from xhtml2pdf import pisa
+# from io import BytesIO
+# from pyuploadcare import Uploadcare
+# from .models import ProjectProposal
+
+# # Initialize Uploadcare client
+# uc = Uploadcare(public_key='76122001cca4add87f02', secret_key='f00801b9b65172d50de5')
+
+# def generate_proposal_pdf(proposal):
+#     template_path = 'proposal_pdf.html'
+
+#     requirements = proposal.requirements.copy()
+#     total_cost = 0
+
+#     # Hesabu total cost
+#     for key, value in requirements.items():
+#         if 'cost' in key.lower() or 'price' in key.lower():
+#             try:
+#                 cost = float(value)
+#                 requirements[key] = cost
+#                 total_cost += cost
+#             except (ValueError, TypeError):
+#                 continue
+
+#     context = {
+#         'proposal': proposal,
+#         'requirements': requirements,
+#         'total_cost': total_cost
+#     }
+
+#     html = render_to_string(template_path, context)
+#     result = BytesIO()
+#     pisa_status = pisa.CreatePDF(html, dest=result)
+
+#     if pisa_status.err:
+#         return HttpResponse('We had some errors with PDF rendering <br>' + html)
+#     result.seek(0)  # Read from beginning
+#     return result
+
+# def generate_pdf(request, proposal_id):
+#     proposal = ProjectProposal.objects.get(id=proposal_id)
+
+#     # Ensure requirements is a dict
+#     if isinstance(proposal.requirements, str):
+#         try:
+#             proposal.requirements = json.loads(proposal.requirements)
+#         except Exception:
+#             proposal.requirements = {}
+
+#     pdf_buffer = generate_proposal_pdf(proposal)
+
+#     # Uploadcare: tumia from_bytes (pyuploadcare 6.x inatumia this method)
+#     if pdf_buffer:
+#         pdf_buffer.seek(0)
+#         upload = uc.upload_from_bytes(pdf_buffer.read(), filename=f"proposal_{proposal.id}.pdf")
+#         proposal.pdf_file = upload.cdn_url  # Hii inahifadhi URL kwenye database
+#         proposal.save()
+#         pdf_buffer.seek(0)  # Kurudi mwanzo ili kurudisha HTTP response
+
+#     response = HttpResponse(pdf_buffer.getvalue(), content_type='application/pdf')
+#     response['Content-Disposition'] = f'attachment; filename="proposal_{proposal.id}.pdf"'
+#     return response

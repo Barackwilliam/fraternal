@@ -139,6 +139,48 @@
                         </div>
                     </div>
 
+
+                                        <!-- Total Estimated Amount Section -->
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-body text-center">
+                            <h5 class="text-success fw-bold mb-2">💰 Total Estimated Amount</h5>
+                            <div class="fs-2 fw-bold text-primary" id="totalAmountDisplay">
+                                0 TZS
+                            </div>
+                            <small class="text-muted">Based on selected features</small>
+                        </div>
+                    </div>
+
+                    <script>
+                    // Function to calculate total from table
+                    document.addEventListener('DOMContentLoaded', function() {
+                        let total = 0;
+
+                        document.querySelectorAll('.proposal-table tbody tr').forEach(row => {
+                            // Angalia kama kuna number kwenye Details
+                            let detailsCell = row.querySelector('td:nth-child(2)');
+                            if (detailsCell) {
+                                // Tafuta numbers ndani ya li au text
+                                detailsCell.querySelectorAll('li').forEach(li => {
+                                    let text = li.textContent.replace(/,/g, '').match(/\d+/g);
+                                    if (text) {
+                                        text.forEach(num => total += parseInt(num));
+                                    }
+                                });
+                                // Ikiwa ni text moja tu
+                                if (!detailsCell.querySelector('li')) {
+                                    let text = detailsCell.textContent.replace(/,/g, '').match(/\d+/g);
+                                    if (text) text.forEach(num => total += parseInt(num));
+                                }
+                            }
+                        });
+
+                        document.getElementById('totalAmountDisplay').textContent = total.toLocaleString('en-US') + " TZS";
+                    });
+                    </script>
+
+
+
                     <div class="text-center no-print print-controls">
                         <button onclick="window.print()" class="btn btn-primary shadow-sm">
                             <i class="fas fa-print me-2"></i> Print

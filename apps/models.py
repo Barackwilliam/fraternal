@@ -1,16 +1,29 @@
 from django.db import models
-from cloudinary.models import CloudinaryField
+
 
 # Create your models here.
 
 class Service(models.Model):
     Service_type = models.CharField(max_length=255)
-    image = CloudinaryField('image')
+    image = models.CharField(max_length=255, blank=True, null=True)  
     description = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.Service_type
+
+    # Kwa Open Graph preview (Facebook, WhatsApp etc.)
+    def get_og_image_url(self):
+        if self.image:
+            return f"https://ucarecdn.com/{self.image}/-/resize/1200x630/-/format/auto/"
+        return ''
+
+    # Kwa matumizi ya kawaida kwenye site (speed optimized)
+    def get_image_url(self):
+        if self.image:
+            return f"https://ucarecdn.com/{self.image}/-/format/jpg/-/quality/smart/"
+        return ''
+
 
 
 class Question(models.Model):
@@ -23,7 +36,7 @@ class Question(models.Model):
 
 class Team(models.Model):
     full_name = models.CharField(max_length=255)
-    image = image = CloudinaryField('image')
+    image = models.CharField(max_length=255, blank=True, null=True)  # Hifadhi Uploadcare UUID au URL
     position = models.CharField(max_length=255)
     facebook_link = models.URLField(max_length=300, blank=True, null=True)
     twitter_link = models.URLField(max_length=300, blank=True, null=True)
@@ -32,6 +45,19 @@ class Team(models.Model):
     
     def __str__(self):
         return self.full_name
+
+    # Kwa Open Graph preview (Facebook, WhatsApp etc.)
+    def get_og_image_url(self):
+        if self.image:
+            return f"https://ucarecdn.com/{self.image}/-/resize/1200x630/-/format/auto/"
+        return ''
+
+    # Kwa matumizi ya kawaida kwenye site (speed optimized)
+    def get_image_url(self):
+        if self.image:
+            return f"https://ucarecdn.com/{self.image}/-/format/jpg/-/quality/smart/"
+        return ''
+
 
     
 class Contact(models.Model):
@@ -71,7 +97,7 @@ class ProjectProposal(models.Model):
     requirements = models.JSONField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    pdf_file = models.FileField(upload_to="proposals/", blank=True)
+    pdf_file = models.URLField(blank=True)  
     
     def __str__(self):
         return f"{self.client.name} - {self.website_type.name}"
