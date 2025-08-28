@@ -5,241 +5,119 @@
 {% block title %}{{ website_type.name }} Requirements - {{ block.super }}{% endblock %}
 
 {% block content %}
-<!-- <div class="container-fluid px-0"> -->
-    <!-- Hero Section -->
-    <div class="hero-section d-flex align-items-center text-white">
-        <div class="container py-5">
-            <div class="row align-items-center">
-                <div class="col-lg-6 text-center text-lg-start mb-4 mb-lg-0">
-                    <h1 class="display-3 fw-bold">{{ website_type.name }} Development</h1>
-                    <p class="lead opacity-85 fs-5">Complete this form to get your customized proposal</p>
+
+<!-- Modern Hero Section -->
+ <div class="modern-hero"> 
+    <div class="hero-content"> 
+        <div class="hero-text"> 
+            <h1>{{ website_type.name }} Development</h1> 
+            <p>Complete this form to get your customized proposal</p> 
+           </div> <div class="hero-image"> <img src="{% static 'img/bg3.jpg' %}" alt="Website Development"> </div> </div> </div> <!-- Sleek Form Section --> <div class="form-container"> <div class="form-card"> 
+            <div class="form-header"> <h2><i class="fas fa-user-edit"></i> Client & Project Details</h2> </div>
+
+    <div class="form-body">
+        <form method="post" novalidate id="proposalForm">
+            {% csrf_token %}
+
+            <!-- Client Information -->
+            <section class="client-info">
+                <h3>Client Information</h3>
+                <div class="form-grid">
+                    {% for field in client_fields %}
+                    <div class="form-group">
+                        {% if field.field.widget.input_type == 'select' %}
+                        <div class="select-wrapper">
+                            {{ field }}
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        {% else %}
+                        {{ field }}
+                        {% endif %}
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {% if field.errors %}
+                            <div class="error-message">{{ field.errors|join:", " }}</div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
                 </div>
-                <div class="col-lg-6 text-center">
-                    <img src="{% static 'img/bg3.jpg' %}" alt="Website Development" class="img-fluid hero-img">
+            </section>
+
+            <!-- Project Features -->
+            <section class="project-features">
+                <h3><i class="fas fa-cubes"></i> Select Your Features</h3>
+                
+                {% for field in project_fields %}
+                <div class="feature-item">
+                    <div class="feature-title">
+                        <h4>{{ field.label }}</h4>
+                    </div>
+                    <div class="feature-content">
+                        {% if field.help_text %}
+                            <p class="help-text">{{ field.help_text }}</p>
+                        {% endif %}
+
+                        {% if field.field.widget.input_type == 'checkbox' %}
+                        <div class="checkbox-group">
+                            {% for choice in field %}
+                            <div class="checkbox-item">
+                                <input type="checkbox" 
+                                       id="{{ choice.id_for_label }}" 
+                                       name="{{ field.name }}" 
+                                       value="{{ choice.data.value }}" 
+                                       class="feature-checkbox">
+                                <label for="{{ choice.id_for_label }}">
+                                    <span class="feature-name">{{ choice.choice_label|split_first }}</span>
+                                    {% if choice.choice_label|has_delimiter %}
+                                    <span class="feature-price">
+                                        {{ choice.choice_label|split_last }} <small>TZS</small>
+                                    </span>
+                                    {% endif %}
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        {% elif field.field.widget.input_type == 'select' %}
+                        <div class="select-wrapper">
+                            {{ field }}
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+
+                        {% else %}
+                        <div class="form-group">
+                            {{ field }}
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        </div>
+                        {% endif %}
+                        
+                        {% if field.errors %}
+                            <div class="error-message">{{ field.errors|join:", " }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </section>
+
+            <!-- Budget Summary -->
+            <div class="budget-summary">
+                <div class="budget-content">
+                    <h4>Estimated Budget</h4>
+                    <p>Based on selected features</p>
+                </div>
+                <div class="budget-amount">
+                    <span id="totalBudget">0</span>
+                    <small>Tanzanian Shillings</small>
                 </div>
             </div>
-        </div>
+
+            <!-- Submit Button -->
+            <div class="submit-section">
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-file-contract"></i> Generate My Proposal
+                </button>
+            </div>
+        </form>
     </div>
-
-    <!-- Main Form Section -->
-    <!-- <div class="container my-5"> -->
-        <!-- <div class="row justify-content-center"> -->
-            <div class="col-lg-10">
-                <div class="card shadow-lg border-0 overflow-hidden rounded-4">
-                    <div class="card-header bg-gradient-primary text-white py-4">
-                        <h3 class="mb-0"><i class="fas fa-user-edit me-2"></i> Client & Project Details</h3>
-                    </div>
-                    
-                    <div class="card-body p-5">
-                        <form method="post" novalidate id="proposalForm">
-                            {% csrf_token %}
-
-                            <!-- Client Information -->
-                            <section class="mb-5">
-                                <div class="row g-4">
-                                    {% for field in client_fields %}
-                                    <div class="col-md-6">
-                                        <div class="form-floating">
-                                            {% if field.field.widget.input_type == 'select' %}
-                                            <div class="select-wrapper">
-                                                {{ field }}
-                                                <span class="select-arrow"><i class="fas fa-chevron-down"></i></span>
-                                            </div>
-                                            {% else %}
-                                            {{ field }}
-                                            {% endif %}
-                                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                                        </div>
-                                        {% if field.errors %}
-                                            <div class="invalid-feedback d-block">
-                                                {{ field.errors|join:", " }}
-                                            </div>
-                                        {% endif %}
-                                    </div>
-                                    {% endfor %}
-                                </div>
-                            </section>
-
-                            <!-- Project Features -->
-                            <section class="mb-5">
-                                <h4 class="fw-semibold mb-4 border-bottom pb-2"><i class="fas fa-cubes me-2"></i>Select Your Features</h4>
-                                
-                                {% for field in project_fields %}
-                                <div class="feature-card mb-4 shadow-sm rounded-3">
-                                    <div class="feature-header p-3 bg-gradient-light border-bottom">
-                                        <h5 class="mb-0 d-flex align-items-center">
-                                            <i class="fas fa-circle-check me-2"></i>{{ field.label }}
-                                        </h5>
-                                    </div>
-                                    <div class="feature-body p-3 bg-white">
-                                        {% if field.help_text %}
-                                            <p class="feature-help text-muted mb-3">{{ field.help_text }}</p>
-                                        {% endif %}
-
-                                        {% if field.field.widget.input_type == 'checkbox' %}
-                                        <div class="feature-options">
-                                            {% for choice in field %}
-                                            <div class="feature-option">
-                                                <input type="checkbox" 
-                                                       id="{{ choice.id_for_label }}" 
-                                                       name="{{ field.name }}" 
-                                                       value="{{ choice.data.value }}" 
-                                                       class="feature-checkbox">
-                                                <label for="{{ choice.id_for_label }}" class="feature-label">
-                                                    <span class="feature-name">{{ choice.choice_label|split_first }}</span>
-                                                    {% if choice.choice_label|has_delimiter %}
-                                                    <span class="feature-price">
-                                                        {{ choice.choice_label|split_last }} <small>TZS</small>
-                                                    </span>
-                                                    {% endif %}
-                                                </label>
-                                            </div>
-                                            {% endfor %}
-                                        </div>
-
-                                        {% elif field.field.widget.input_type == 'select' %}
-                                        <div class="form-floating">
-                                            <div class="select-wrapper">
-                                                {{ field }}
-                                                <span class="select-arrow"><i class="fas fa-chevron-down"></i></span>
-                                            </div>
-                                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                                        </div>
-
-                                        {% else %}
-                                        <div class="form-floating">
-                                            {{ field }}
-                                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                                        </div>
-                                        {% endif %}
-                                        
-                                        {% if field.errors %}
-                                            <div class="invalid-feedback d-block">
-                                                {{ field.errors|join:", " }}
-                                            </div>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                                {% endfor %}
-                            </section>
-
-                            <!-- Budget Summary -->
-                            <div class="budget-summary p-4 mb-4 rounded-3 shadow-sm">
-                                <div class="d-flex justify-content-between align-items-center flex-wrap">
-                                    <div>
-                                        <h4 class="mb-1 fw-semibold">Estimated Budget</h4>
-                                        <p class="text-muted mb-0">Based on selected features</p>
-                                    </div>
-                                    <div class="text-end mt-3 mt-md-0">
-                                        <div class="budget-amount text-gradient-primary fs-1 fw-bold" id="totalBudget">0</div>
-                                        <small class="text-muted">Tanzanian Shillings</small>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Submit -->
-                            <div class="text-center pt-3">
-                                <button type="submit" class="btn btn-gradient-primary btn-lg px-5 py-3 fw-bold shadow">
-                                    <i class="fas fa-file-contract me-2"></i> Generate My Proposal
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        <!-- </div> -->
-    <!-- </div> -->
-<!-- </div> -->
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    function calculateTotal() {
-        let total = 0;
-        document.querySelectorAll('.feature-checkbox:checked').forEach(checkbox => {
-            const priceElement = checkbox.closest('.feature-option').querySelector('.feature-price');
-            if (priceElement) {
-                const priceText = priceElement.textContent.replace(' TZS', '').trim();
-                total += parseInt(priceText.replace(/,/g, '')) || 0;
-            }
-        });
-        document.getElementById('totalBudget').textContent = total.toLocaleString('en-US');
-    }
-
-    calculateTotal();
-    
-    document.querySelectorAll('.feature-checkbox').forEach(checkbox => {
-        checkbox.addEventListener('change', calculateTotal);
-    });
-
-    document.querySelectorAll('select').forEach(select => {
-        select.classList.add('form-select');
-    });
-});
-</script>
-
-<style>
-:root {
-    --primary-color: #2563eb;
-    --primary-light: #3b82f6;
-    --primary-gradient: linear-gradient(135deg, #3b82f6, #1e40af);
-    --secondary-color: #f8fafc;
-    --text-color: #1e293b;
-    --border-color: #e2e8f0;
-}
-
-.hero-section {
-    min-height: 60vh;
-    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
-    position: relative;
-}
-.hero-img { max-width: 100%; height: auto; }
-
-.form-control, .form-select {
-    border: 1px solid var(--border-color);
-    border-radius: 0.75rem;
-    padding: 1rem;
-    background-color: var(--secondary-color);
-    transition: all 0.3s;
-}
-
-.form-control:focus, .form-select:focus {
-    border-color: var(--primary-light);
-    box-shadow: 0 0 15px rgba(59, 130, 246, 0.25);
-}
-
-.select-wrapper { position: relative; }
-.select-wrapper select { appearance: none; padding-right: 2.5rem; }
-.select-arrow { position: absolute; top: 50%; right: 1rem; transform: translateY(-50%); pointer-events: none; color: #64748b; }
-
-/* Feature Cards */
-.feature-card { border-radius: 1rem; overflow: hidden; transition: all 0.3s ease; }
-.feature-card:hover { transform: translateY(-3px); box-shadow: 0 12px 24px rgba(0,0,0,0.08); }
-.feature-header { background-color: #f1f5f9; border-bottom: 1px solid var(--border-color); }
-.feature-header h5 { color: var(--primary-color); font-weight: 700; }
-.feature-body { background-color: white; }
-
-/* Options */
-.feature-option { display: flex; align-items: center; padding: 1rem; border-radius: 0.75rem; margin-bottom: 0.5rem; transition: all 0.2s; }
-.feature-option:hover { background-color: #f0f4ff; }
-.feature-checkbox { width: 1.3rem; height: 1.3rem; margin-right: 1rem; accent-color: var(--primary-color); }
-.feature-label { display: flex; justify-content: space-between; align-items: center; width: 100%; cursor: pointer; }
-.feature-name { font-weight: 600; color: var(--text-color); }
-.feature-price { background: var(--primary-gradient); color: white; padding: 0.4rem 1rem; border-radius: 1rem; font-weight: 600; font-size: 0.95rem; min-width: 100px; text-align: center; }
-.feature-price small { font-size: 0.75rem; opacity: 0.9; }
-
-/* Budget Summary */
-.budget-summary { background-color: #f8fafc; border-left: 6px solid var(--primary-color); border-radius: 1rem; }
-.budget-amount { font-size: 2.75rem; font-weight: 700; line-height: 1; background: var(--primary-gradient); -webkit-background-clip: text; color: transparent; }
-
-/* Buttons */
-.btn-gradient-primary { background: var(--primary-gradient); border: none; color: #fff; transition: all 0.3s; }
-.btn-gradient-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.12); }
-
-/* Responsive */
-@media (max-width: 992px) {
-    .hero-section { min-height: 50vh; text-align: center; }
-    .hero-section h1 { font-size: 2.2rem; }
-    .hero-section p { font-size: 1.1rem; }
-}
-</style>
+</div>
+</div> <script> document.addEventListener('DOMContentLoaded', function() { function calculateTotal() { let total = 0; document.querySelectorAll('.feature-checkbox:checked').forEach(checkbox => { const priceElement = checkbox.closest('.checkbox-item').querySelector('.feature-price'); if (priceElement) { const priceText = priceElement.textContent.replace(' TZS', '').trim(); total += parseInt(priceText.replace(/,/g, '')) || 0; } }); document.getElementById('totalBudget').textContent = total.toLocaleString('en-US'); } calculateTotal(); document.querySelectorAll('.feature-checkbox').forEach(checkbox => { checkbox.addEventListener('change', calculateTotal); }); }); </script> <style> :root { --primary-color: #4a6bff; --primary-light: #6b8cff; --primary-dark: #3a56cc; --secondary-color: #f8f9fa; --text-color: #2d3748; --border-color: #e2e8f0; --shadow: 0 10px 30px rgba(0, 0, 0, 0.1); --transition: all 0.3s ease; } /* Modern Hero Section */ .modern-hero { background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)); color: white; padding: 4rem 2rem; border-radius: 0 0 20px 20px; margin-bottom: 2rem; } .hero-content { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; } .hero-text h1 { font-size: 2.5rem; margin-bottom: 1rem; } .hero-text p { font-size: 1.2rem; opacity: 0.9; } .hero-image img { max-width: 100%; border-radius: 10px; box-shadow: var(--shadow); } /* Form Container */ .form-container { max-width: 1000px; margin: 0 auto; padding: 0 1rem; } .form-card { background: white; border-radius: 20px; box-shadow: var(--shadow); overflow: hidden; } .form-header { background: var(--primary-color); color: white; padding: 1.5rem; text-align: center; } .form-header h2 { margin: 0; font-size: 1.5rem; } .form-body { padding: 2rem; } /* Form Elements */ .form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; } .form-group { position: relative; margin-bottom: 1.5rem; } .form-group input, .form-group select { width: 100%; padding: 1rem; border: 1px solid var(--border-color); border-radius: 10px; font-size: 1rem; transition: var(--transition); } .form-group input:focus, .form-group select:focus { border-color: var(--primary-light); box-shadow: 0 0 0 3px rgba(74, 107, 255, 0.2); } .form-group label { position: absolute; top: -10px; left: 10px; background: white; padding: 0 5px; font-size: 0.9rem; color: var(--primary-color); } .select-wrapper { position: relative; } .select-wrapper select { appearance: none; padding-right: 2.5rem; } .select-wrapper i { position: absolute; top: 50%; right: 1rem; transform: translateY(-50%); pointer-events: none; color: var(--text-color); } /* Feature Items */ .feature-item { background: var(--secondary-color); border-radius: 15px; margin-bottom: 1.5rem; overflow: hidden; transition: var(--transition); } .feature-item:hover { transform: translateY(-5px); box-shadow: var(--shadow); } .feature-title { background: var(--primary-light); color: white; padding: 1rem; } .feature-title h4 { margin: 0; font-size: 1.2rem; } .feature-content { padding: 1.5rem; } .help-text { color: #6b7280; margin-bottom: 1rem; } .checkbox-group { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem; } .checkbox-item { display: flex; align-items: center; padding: 0.8rem; background: white; border-radius: 10px; transition: var(--transition); } .checkbox-item:hover { background: #f0f4ff; } .checkbox-item input { margin-right: 1rem; accent-color: var(--primary-color); } .checkbox-item label { display: flex; justify-content: space-between; align-items: center; width: 100%; cursor: pointer; } .feature-name { font-weight: 600; color: var(--text-color); } .feature-price { background: var(--primary-color); color: white; padding: 0.4rem 1rem; border-radius: 20px; font-weight: 600; font-size: 0.9rem; } /* Budget Summary */ .budget-summary { display: flex; justify-content: space-between; align-items: center; background: var(--secondary-color); padding: 1.5rem; border-radius: 15px; margin: 2rem 0; } .budget-content h4 { margin: 0; font-size: 1.2rem; color: var(--primary-color); } .budget-content p { margin: 0.5rem 0 0; color: #6b7280; } .budget-amount { text-align: right; } .budget-amount span { font-size: 2.5rem; font-weight: 700; color: var(--primary-color); } /* Submit Button */ .submit-section { text-align: center; margin-top: 2rem; } .submit-btn { background: var(--primary-color); color: white; border: none; padding: 1rem 2rem; font-size: 1.1rem; border-radius: 10px; cursor: pointer; transition: var(--transition); } .submit-btn:hover { background: var(--primary-dark); transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); } /* Responsive Design */ @media (max-width: 768px) { .hero-content { flex-direction: column; text-align: center; } .hero-text { margin-bottom: 2rem; } .form-grid { grid-template-columns: 1fr; } .checkbox-group { grid-template-columns: 1fr; } .budget-summary { flex-direction: column; text-align: center; } .budget-amount { margin-top: 1rem; text-align: center; } } </style>
 {% endblock %}
