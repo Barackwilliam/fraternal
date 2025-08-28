@@ -29,17 +29,17 @@
     "question": "Select the features you want included:",
     "type": "checkbox",
     "options": [
-      "Live Price Charts (CoinMarketCap API, etc.) | 20000",
-      "Wallet Connection (Metamask, TrustWallet, etc.) | 30000",
+      "Live Price Charts (CoinMarketCap API, etc.) | 50000",
+      "Wallet Connection (Metamask, TrustWallet, etc.) | 100000",
       "User Registration & Login | 15000",
       "Two-Factor Authentication (2FA) | 10000",
       "Admin Panel for Managing Listings/Users | 25000",
       "Trading Interface (Buy/Sell UI) | 30000",
       "Crypto News Feed & Blog | 10000",
-      "Token Sale Countdown Timer | 8000",
+      "Token Sale Countdown Timer | 30000",
       "Whitepaper & Tokenomics Section | 5000",
-      "Newsletter Subscription (Email Capture) | 5000",
-      "Contact/Support Form | 4000",
+      "Newsletter Subscription (Email Capture) | 15000",
+      "Contact/Support Form | 10000",
       "Animated Stats & Token Performance Graphs | 12000",
       "Roadmap Section with Milestones | 7000",
       "Team & Advisors Section | 6000",
@@ -50,9 +50,9 @@
     "question": "Which payment options should be supported?",
     "type": "checkbox",
     "options": [
-      "Crypto Payments (BTC, ETH, USDT, etc.) | 10000",
-      "Fiat via PayPal or Card (Stripe) | 8000",
-      "Mobile Money (M-Pesa, TigoPesa) | 8000"
+      "Crypto Payments (BTC, ETH, USDT, etc.) | 100000",
+      "Fiat via PayPal or Card (Stripe) | 80000",
+      "Mobile Money (M-Pesa, TigoPesa) | 80000"
     ]
   },
   "blockchain_features": {

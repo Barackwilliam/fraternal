@@ -30,18 +30,18 @@
     "type": "checkbox",
     "options": [
       "User Registration & Login | 15000",
-      "Wallet System for Deposits/Withdrawals | 25000",
-      "Live Odds Integration | 30000",
+      "Wallet System for Deposits/Withdrawals | 100000",
+      "Live Odds Integration | 150000",
       "Match Schedules & Results Feed | 20000",
       "Admin Panel for Managing Bets | 25000",
-      "Bet Slip Generator | 15000",
-      "Affiliate/Referral System | 15000",
+      "Bet Slip Generator | 150000",
+      "Affiliate/Referral System | 45000",
       "Mobile-Friendly Responsive Design | 10000",
       "Multi-Language Support | 12000",
-      "Promotions & Bonus Offers | 10000",
+      "Promotions & Bonus Offers | 50000",
       "Push Notifications (Web or Mobile) | 12000",
-      "Live Chat Support | 10000",
-      "SMS & Email Notifications | 8000",
+      "Live Chat Support | 100000",
+      "SMS & Email Notifications | 58000",
       "Terms, Privacy & Responsible Gaming Pages | 7000"
     ]
   },
@@ -49,12 +49,12 @@
     "question": "Which payment methods do you want integrated?",
     "type": "checkbox",
     "options": [
-      "Tigo Pesa | 8000",
-      "M-Pesa | 8000",
-      "Airtel Money | 8000",
-      "Bank Transfer | 10000",
-      "Card Payments (Visa, Mastercard) | 10000",
-      "Cryptocurrency (BTC, ETH) | 12000"
+      "Tigo Pesa | 80000",
+      "M-Pesa | 80000",
+      "Airtel Money | 80000",
+      "Bank Transfer | 100000",
+      "Card Payments (Visa, Mastercard) | 100000",
+      "Cryptocurrency (BTC, ETH) | 72000"
     ]
   },
   "regulatory_compliance": {

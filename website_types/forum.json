@@ -29,17 +29,17 @@
     "question": "Select the core features you want in the forum:",
     "type": "checkbox",
     "options": [
-      "User Registration/Login | 8000",
-      "User Profiles with Avatars | 6000",
+      "User Registration/Login | 15000",
+      "User Profiles with Avatars | 10000",
       "Post Creation (Text, Images, Code) | 9000",
-      "Reply and Comment System | 7000",
-      "Upvote/Like Feature | 5000",
-      "Threaded Discussions | 6000",
+      "Reply and Comment System | 25000",
+      "Upvote/Like Feature | 10000",
+      "Threaded Discussions | 15000",
       "Post Tagging and Categorization | 5000",
-      "Rich Text Editor | 7000",
+      "Rich Text Editor | 20000",
       "Responsive & Mobile Friendly Design | 8000",
-      "Notification System (Email or in-app) | 7000",
-      "Search by Topic or Tags | 6000",
+      "Notification System (Email or in-app) | 10000",
+      "Search by Topic or Tags | 30000",
       "Multilingual Support | 10000"
     ]
   },
@@ -47,12 +47,12 @@
     "question": "Moderation and admin features needed:",
     "type": "checkbox",
     "options": [
-      "Admin Panel | 7000",
+      "Admin Panel | 30000",
       "Moderator Roles | 6000",
       "Spam Filter / CAPTCHA | 5000",
       "User Banning / Warnings | 5000",
       "Content Reporting by Users | 6000",
-      "Post Approval Workflow | 7000"
+      "Post Approval Workflow | 25000"
     ]
   },
   "user_engagement": {
@@ -69,9 +69,9 @@
     "question": "Monetization options (if needed):",
     "type": "checkbox",
     "options": [
-      "Google Ads Integration | 5000",
-      "Paid Membership Tiers | 10000",
-      "Sponsored Posts | 7000",
+      "Google Ads Integration | 50000",
+      "Paid Membership Tiers | 30000",
+      "Sponsored Posts | 15000",
       "Affiliate Banners | 5000"
     ]
   },

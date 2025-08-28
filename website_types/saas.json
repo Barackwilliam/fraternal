@@ -31,16 +31,16 @@
     "question": "Select the main features required:",
     "type": "checkbox",
     "options": [
-      "User Registration and Authentication | 12000",
+      "User Registration and Authentication | 15000",
       "Role-based Access Control | 10000",
       "Subscription Billing & Payment Integration | 15000",
       "Dashboard with Analytics | 14000",
       "API Access for Integrations | 15000",
-      "Multi-Tenant Architecture | 18000",
-      "Email Notifications & Alerts | 8000",
-      "Real-time Collaboration | 16000",
+      "Multi-Tenant Architecture | 25000",
+      "Email Notifications & Alerts | 30000",
+      "Real-time Collaboration | 20000",
       "Mobile Responsive Design | 9000",
-      "Customizable User Settings | 7000",
+      "Customizable User Settings | 35000",
       "Data Export & Import | 6000",
       "User Activity Logs | 7000"
     ]
@@ -49,8 +49,8 @@
     "question": "Which third-party services should be integrated?",
     "type": "checkbox",
     "options": [
-      "Payment Gateways (Stripe, PayPal) | 10000",
-      "CRM Tools (Salesforce, HubSpot) | 12000",
+      "Payment Gateways (Stripe, PayPal) | 100000",
+      "CRM Tools (Salesforce, HubSpot) | 80000",
       "Cloud Storage (AWS S3, Google Drive) | 9000",
       "Email Marketing (Mailchimp, SendGrid) | 8000",
       "Analytics Platforms (Google Analytics) | 7000"
@@ -60,8 +60,8 @@
     "question": "Select required security features:",
     "type": "checkbox",
     "options": [
-      "Data Encryption | 12000",
-      "Two-Factor Authentication (2FA) | 10000",
+      "Data Encryption | 20000",
+      "Two-Factor Authentication (2FA) | 250000",
       "Regular Backups | 8000",
       "Activity Monitoring | 7000",
       "GDPR Compliance | 15000"
@@ -71,10 +71,10 @@
     "question": "Administrative tools needed:",
     "type": "checkbox",
     "options": [
-      "User Management Dashboard | 9000",
+      "User Management Dashboard | 25000",
       "Subscription Management | 12000",
-      "Usage Analytics & Reporting | 11000",
-      "Customer Support Integration | 8000",
+      "Usage Analytics & Reporting | 25000",
+      "Customer Support Integration | 10000",
       "Audit Logs | 7000"
     ]
   },
