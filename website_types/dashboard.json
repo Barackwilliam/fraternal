@@ -32,8 +32,8 @@
     "options": [
       "User Authentication (Login, Register) | 15000",
       "Role-Based Permissions (Admin, User, etc.) | 15000",
-      "Dynamic Charts (Bar, Pie, Line, etc.) | 20000",
-      "Real-time Data Updates | 18000",
+      "Dynamic Charts (Bar, Pie, Line, etc.) | 50000",
+      "Real-time Data Updates | 38000",
       "Data Filtering and Export (CSV, Excel, PDF) | 12000",
       "Notifications (In-app, Email, SMS) | 10000",
       "Data Tables with Pagination & Search | 10000",
@@ -42,7 +42,7 @@
       "Multi-language Support | 12000",
       "Activity Logs & Audit Trails | 9000",
       "Calendar & Scheduling | 8000",
-      "File Upload & Management | 9000"
+      "File Upload & Management | 15000"
     ]
   },
   "integrations": {
@@ -50,7 +50,7 @@
     "type": "checkbox",
     "options": [
       "Google Sheets or Excel Sync | 10000",
-      "Payment Systems (e.g. Stripe, PayPal) | 12000",
+      "Payment Systems (e.g. Stripe, PayPal) | 15000",
       "SMS Gateway (e.g. Twilio, Africa's Talking) | 10000",
       "Email Service (e.g. SendGrid, Mailchimp) | 8000",
       "API Integration with 3rd Party System | 15000"

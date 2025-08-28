@@ -18,9 +18,9 @@
     "question": "What type of agriculture platform do you want?",
     "type": "checkbox",
     "options": [
-      "Farm Management System | 0",
+      "Farm Management System | 25000",
       "Marketplace for Produce | 0",
-      "Agricultural News & Updates | 0",
+      "Agricultural News & Updates | 10000",
       "Weather & Crop Advisory | 0",
       "Agro-inputs E-commerce | 0"
     ]
@@ -29,16 +29,16 @@
     "question": "Select core features needed:",
     "type": "checkbox",
     "options": [
-      "User Registration & Profiles | 8000",
-      "Farm Data Tracking & Analytics | 12000",
-      "Inventory & Supply Chain Management | 11000",
-      "Order Management & Payments | 10000",
-      "Weather Forecast Integration | 9000",
-      "Crop Disease Detection Tools | 14000",
-      "Multi-language Support | 7000",
+      "User Registration & Profiles | 15000",
+      "Farm Data Tracking & Analytics | 25000",
+      "Inventory & Supply Chain Management | 31000",
+      "Order Management & Payments | 30000",
+      "Weather Forecast Integration | 25000",
+      "Crop Disease Detection Tools | 45000",
+      "Multi-language Support | 30000",
       "Mobile Responsive Design | 8000",
       "Notification System (SMS/Email) | 7000",
-      "Marketplace for Buying & Selling | 13000"
+      "Marketplace for Buying & Selling | 50000"
     ]
   },
   "third_party_integrations": {
@@ -46,8 +46,8 @@
     "type": "checkbox",
     "options": [
       "Payment Gateways (Stripe, PayPal) | 10000",
-      "Weather APIs (OpenWeatherMap, AccuWeather) | 7000",
-      "SMS Gateways | 7000",
+      "Weather APIs (OpenWeatherMap, AccuWeather) | 25000",
+      "SMS Gateways | 15000",
       "Google Maps / GIS Integration | 12000"
     ]
   },

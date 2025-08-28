@@ -29,28 +29,28 @@
     "question": "Select the core features required:",
     "type": "checkbox",
     "options": [
-      "User Registration and Login | 10000",
-      "Seller Profiles & Verification | 12000",
+      "User Registration and Login | 15000",
+      "Seller Profiles & Verification | 25000",
       "Live Bidding System | 25000",
-      "Reserve Price Setting | 8000",
+      "Reserve Price Setting | 18000",
       "Buy Now Option | 6000",
       "Countdown Timer for Bidding | 7000",
       "Admin Approval for Listings | 5000",
-      "SMS/Email Notifications | 10000",
+      "SMS/Email Notifications | 35000",
       "Auction History and Logs | 8000",
-      "Search & Filtering by Category/Price | 7000",
+      "Search & Filtering by Category/Price | 25000",
       "Responsive & Mobile Friendly UI | 8000",
-      "Multi-language Support | 12000",
-      "Bidder Auto-Increment Logic | 10000"
+      "Multi-language Support | 35000",
+      "Bidder Auto-Increment Logic | 30000"
     ]
   },
   "payment_integration": {
     "question": "Preferred payment methods:",
     "type": "checkbox",
     "options": [
-      "Mobile Money (e.g. M-Pesa, Airtel Money) | 8000",
-      "Card Payments (Visa/MasterCard) | 10000",
-      "Bank Transfer Option | 7000",
+      "Mobile Money (e.g. M-Pesa, Airtel Money) | 90000",
+      "Card Payments (Visa/MasterCard) | 60000",
+      "Bank Transfer Option | 40000",
       "Escrow System Integration | 12000"
     ]
   },
@@ -58,11 +58,11 @@
     "question": "Admin panel features needed:",
     "type": "checkbox",
     "options": [
-      "User & Seller Management | 7000",
-      "Auction Listing Control | 8000",
-      "Reports & Analytics | 10000",
+      "User & Seller Management | 25000",
+      "Auction Listing Control | 18000",
+      "Reports & Analytics | 30000",
       "Dispute Resolution Center | 6000",
-      "Manual Auction Closure | 5000"
+      "Manual Auction Closure | 15000"
     ]
   },
   "design_preferences": {
