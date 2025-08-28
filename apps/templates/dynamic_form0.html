@@ -5,8 +5,16 @@
 {% block title %}{{ website_type.name }} Requirements - {{ block.super }}{% endblock %}
 
 {% block content %}
-
-<!-- Minimalist Hero Section --> <div class="minimal-hero"> <div class="hero-overlay"> <div class="hero-content"> <h1 style="color: #f5f5f5;">{{ website_type.name }} Development</h1> <p>Get a tailored proposal in minutes</p> </div> </div> </div> <!-- Sleek Form Container --> <div class="sleek-form-container"> <div class="form-wrapper"> <!-- Form Header --> <div class="form-header"> <h2><i class="fas fa-pencil-alt"></i> Tell Us About Your Project</h2> <p>Fill in the details below to receive a customized quote</p> </div>
+ <div class="minimal-hero"> 
+    <div class="hero-overlay"> 
+        <div class="hero-content"> 
+            <h1 style="color: #f5f5f5;">{{ website_type.name }} Development</h1> 
+            <p>Get a tailored proposal in minutes</p> </div> </div> </div>  
+            <div class="sleek-form-container"> 
+                <div class="form-wrapper">  
+                    <div class="form-header"> 
+                        <h2><i class="fas fa-pencil-alt"></i> Tell Us About Your Project</h2> 
+                        <p>Fill in the details below to receive a customized quote</p> </div>
 
     <!-- Form Body -->
     <form method="post" novalidate id="proposalForm">
