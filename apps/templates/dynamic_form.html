@@ -43,7 +43,7 @@
                 <div class="feature-header">
                     <!-- <h4>{{ field.label }}</h4> -->
                     {% if field.help_text %}
-                    <p class="feature-help">{{ field.help_text }}</p>
+                    <p style="color: black;">{{ field.help_text }}</p>
                     {% endif %}
                 </div>
 
@@ -68,13 +68,16 @@
                         {% endfor %}
                     {% elif field.field.widget.input_type == 'select' %}
                         <div class="styled-select">
-                            {{ field }}
+                             {{ field }}
+
                             <i class="fas fa-chevron-down"></i>
                         </div>
                     {% else %}
                         <div class="input-group">
-                            {{ field }}
-                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            <p style="color: black;">{{ field.label }}</p>
+                    <label for="{{ field.id_for_label }}"></label>
+                                {{ field }}
+
                         </div>
                     {% endif %}
                 </div>
