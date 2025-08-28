@@ -6,8 +6,7 @@
 
 {% block content %}
 
-<!-- Minimalist Hero Section --> <div class="minimal-hero"> <div class="hero-overlay"> <div class="hero-content"> <h1>{{ website_type.name }} Development</h1> <p>Get a tailored proposal in minutes</p> </div> </div> </div> <!-- Sleek Form Container --> <div class="sleek-form-container"> <div class="form-wrapper"> <!-- Form Header --> <div class="form-header"> <h2><i class="fas fa-pencil-alt"></i> Tell Us About Your Project</h2> <p>Fill in the details below to receive a customized quote</p> </div>
-
+<!-- Minimalist Hero Section --> <div class="minimal-hero"> <div class="hero-overlay"> <div class="hero-content"> <h1 style="color: #f5f5f5;">{{ website_type.name }} Development</h1> <p>Get a tailored proposal in minutes</p> </div> </div> </div> <!-- Sleek Form Container --> <div class="sleek-form-container"> <div class="form-wrapper"> <!-- Form Header --> <div class="form-header"> <h2><i class="fas fa-pencil-alt"></i> Tell Us About Your Project</h2> <p>Fill in the details below to receive a customized quote</p> </div>
 
     <!-- Form Body -->
     <form method="post" novalidate id="proposalForm">
@@ -42,9 +41,9 @@
             {% for field in project_fields %}
             <div class="feature-block">
                 <div class="feature-header">
-                    <h4>{{ field.label }}</h4>
+                    <!-- <h4>{{ field.label }}</h4> -->
                     {% if field.help_text %}
-                    <p class="feature-help">{{ field.help_text }}</p>
+                    <p style="color: black;">{{ field.help_text }}</p>
                     {% endif %}
                 </div>
 
@@ -64,22 +63,25 @@
                                     {{ choice.choice_label|split_last }} <small>TZS</small>
                                 </span>
                                 {% endif %}
-                              
                             </label>
                         </div>
                         {% endfor %}
                     {% elif field.field.widget.input_type == 'select' %}
+
                         <div class="styled-select">
-                            {{ field }}
+                             {{ field }}
+
                             <i class="fas fa-chevron-down"></i>
                         </div>
                     {% else %}
                         <div class="input-group">
-                            {{ field }}
-                            <label for="{{ field.id_for_label }}">  </label>
+                            <p style="color: black;">{{ field.label }}</p>
+                    <label for="{{ field.id_for_label }}"></label>
+                                {{ field }}
+
                         </div>
                     {% endif %}
-                   
+                    
                 </div>
             </div>
             {% endfor %}
