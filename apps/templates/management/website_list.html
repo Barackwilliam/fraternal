@@ -1,0 +1,74 @@
+{% extends 'management/base.html' %}
+{% block title %}All Websites{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+  <div style="display:flex;gap:6px;flex-wrap:wrap">
+    <a href="{% url 'website_list' %}" class="act-btn {% if not status_filter %}act-btn-blue{% else %}act-btn-ghost{% endif %}">All</a>
+    <a href="?status=active" class="act-btn {% if status_filter == 'active' %}act-btn-green{% else %}act-btn-ghost{% endif %}">Active</a>
+    <a href="?status=suspended" class="act-btn {% if status_filter == 'suspended' %}act-btn-red{% else %}act-btn-ghost{% endif %}">Suspended</a>
+    <a href="?status=maintenance" class="act-btn {% if status_filter == 'maintenance' %}act-btn-yellow{% else %}act-btn-ghost{% endif %}">Maintenance</a>
+  </div>
+  <a href="{% url 'website_add' %}" class="act-btn act-btn-blue"><i class="fas fa-plus"></i> Add Website</a>
+</div>
+
+<div class="panel-card">
+  <div class="panel-card-body-0">
+    <div style="overflow-x:auto">
+      <table class="panel-table">
+        <thead>
+          <tr>
+            <th>Website</th>
+            <th>Client</th>
+            <th>Type</th>
+            <th>Status</th>
+            <th>Expires</th>
+            <th>Monthly</th>
+            <th style="text-align:right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for w in websites %}
+          <tr>
+            <td>
+              <div style="font-weight:600;color:#e6edf3">{{ w.name }}</div>
+              <a href="{{ w.url }}" target="_blank" style="font-family:var(--mono);font-size:11px;color:#484f58;transition:color 0.2s" onmouseover="this.style.color='#58a6ff'" onmouseout="this.style.color='#484f58'">{{ w.url|truncatechars:36 }} <i class="fas fa-arrow-up-right-from-square" style="font-size:9px"></i></a>
+            </td>
+            <td>
+              <div style="font-size:14px;color:#e6edf3">{{ w.client.name }}</div>
+              <div style="font-size:12px;color:#484f58">{{ w.client.email }}</div>
+            </td>
+            <td><span style="font-family:var(--mono);font-size:11px;background:#21262d;color:#8b949e;padding:3px 8px;border-radius:6px">{{ w.get_site_type_display }}</span></td>
+            <td>
+              <span class="badge-panel badge-{{ w.status }}">
+                {% if w.status == 'active' %}<i class="fas fa-circle fa-xs"></i> Active
+                {% elif w.status == 'suspended' %}<i class="fas fa-ban fa-xs"></i> Suspended
+                {% elif w.status == 'maintenance' %}<i class="fas fa-wrench fa-xs"></i> Maintenance
+                {% else %}<i class="fas fa-circle-xmark fa-xs"></i> Terminated{% endif %}
+              </span>
+            </td>
+            <td>
+              <div style="font-family:var(--mono);font-size:12px;{% if w.is_overdue %}color:#f85149{% elif w.days_until_expiry <= 7 %}color:#d29922{% else %}color:#484f58{% endif %}">
+                {{ w.hosting_end_date|date:"d M Y" }}
+              </div>
+              {% if w.is_overdue %}
+                <div style="font-size:11px;color:#f85149">Expired!</div>
+              {% elif w.days_until_expiry <= 14 %}
+                <div style="font-size:11px;color:#d29922">{{ w.days_until_expiry }}d remaining</div>
+              {% endif %}
+            </td>
+            <td style="font-family:var(--mono);font-size:13px;color:#8b949e">TZS {{ w.monthly_cost|floatformat:0 }}</td>
+            <td style="text-align:right">
+              <a href="{% url 'website_detail' w.pk %}" class="act-btn act-btn-blue" style="font-size:12px;padding:7px 14px">
+                <i class="fas fa-sliders"></i> Manage
+              </a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="7"><div class="empty-state"><div class="es-icon">🌐</div><p>No websites found. <a href="{% url 'website_add' %}" style="color:#58a6ff">Add your first one.</a></p></div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

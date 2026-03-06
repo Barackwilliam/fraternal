@@ -1,423 +1,410 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <title>JamiiTek web development company</title>
-        <meta content="width=device-width, initial-scale=1.0" name="viewport">
-        <meta content="Construction Company Website Template" name="keywords">
-        <meta content="Construction Company Website Template" name="description">
+{% block title %}JamiiTek — Modern Web Development in Tanzania{% endblock %}
+{% block extra_css %}
+<style>
+/* HERO */
+.hero {
+  min-height: 100vh; display: flex; align-items: center;
+  background: var(--ink); position: relative; overflow: hidden;
+  padding: 100px 0 60px;
+}
+.hero-bg-mesh {
+  position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 80% 60% at 70% 30%, rgba(91,110,245,0.2) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 20% 80%, rgba(123,92,240,0.15) 0%, transparent 55%);
+}
+.hero-grid {
+  position: absolute; inset: 0; pointer-events: none;
+  background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
+}
+.hero-pill {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.65); padding: 7px 14px; border-radius: 100px;
+  font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.5px;
+  margin-bottom: 28px;
+}
+.hero-pill .live { width: 7px; height: 7px; background: var(--green); border-radius: 50%; animation: blink 2s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.hero h1 {
+  font-family: var(--font-display); font-size: clamp(40px, 6vw, 76px);
+  font-weight: 800; color: #fff; letter-spacing: -2px; line-height: 1.05;
+  margin-bottom: 24px;
+}
+.hero h1 span {
+  background: linear-gradient(120deg, var(--accent), #a855f7, var(--gold));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.hero-sub { font-size: 18px; color: rgba(255,255,255,0.55); line-height: 1.75; max-width: 500px; margin-bottom: 40px; }
+.hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 56px; }
+.hero-trust { display: flex; align-items: center; gap: 16px; padding-top: 28px; border-top: 1px solid rgba(255,255,255,0.07); }
+.avatars { display: flex; }
+.avatars .av {
+  width: 34px; height: 34px; border-radius: 50%; margin-right: -9px;
+  border: 2px solid var(--ink); font-family: var(--font-display);
+  font-size: 11px; font-weight: 800; color: #fff; display: flex;
+  align-items: center; justify-content: center;
+}
+.av-1 { background: linear-gradient(135deg,#6366f1,#8b5cf6); }
+.av-2 { background: linear-gradient(135deg,#f59e0b,#ef4444); }
+.av-3 { background: linear-gradient(135deg,#10b981,#3b82f6); }
+.av-4 { background: var(--ink-3); border-color: rgba(255,255,255,0.1); }
+.trust-label { font-size: 13px; }
+.trust-label strong { display: block; color: rgba(255,255,255,0.8); font-weight: 600; }
+.trust-label span { color: rgba(255,255,255,0.35); }
+/* Hero visual */
+.hero-cards { position: relative; padding: 20px; }
+.hc {
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 18px; padding: 22px 26px; backdrop-filter: blur(10px);
+  transition: border-color 0.3s;
+}
+.hc:hover { border-color: rgba(91,110,245,0.4); }
+.hc-icon { font-size: 26px; margin-bottom: 10px; }
+.hc-title { font-family: var(--font-display); font-weight: 700; font-size: 15px; color: #fff; margin-bottom: 3px; }
+.hc-sub { font-size: 13px; color: rgba(255,255,255,0.4); }
+.hc-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.hc-row .hc:first-child { margin-top: 0; }
+.hc-row .hc:last-child { margin-top: 24px; }
+.hc-badge {
+  position: absolute; background: white; border-radius: 14px;
+  padding: 11px 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.35);
+  display: flex; align-items: center; gap: 9px;
+  animation: levitate 4s ease-in-out infinite;
+}
+.hc-badge:nth-child(2) { animation-delay: 2s; }
+@keyframes levitate { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+.hb-top { top: -10px; right: 10px; }
+.hb-bot { bottom: 10px; left: -10px; }
+.hc-badge .hb-icon { font-size: 22px; }
+.hc-badge .hb-text strong { display: block; font-family: var(--font-display); font-size: 13px; font-weight: 700; color: var(--ink); }
+.hc-badge .hb-text span { font-size: 11px; color: var(--muted); }
+@media(max-width:1000px){.hero-cards{display:none}}
+@media(max-width:768px){.hero{padding:90px 0 52px}.hero h1{letter-spacing:-1px}.hero-sub{font-size:16px}}
 
-        <!-- Favicon -->
-        <link href="{% static 'img/favicon.ico' %}" rel="icon">
+/* STRIP */
+.strip { background: var(--bg-light); border-top: 1px solid var(--border-light); border-bottom: 1px solid var(--border-light); padding: 0; }
+.strip-items { display: flex; overflow-x: auto; scrollbar-width: none; }
+.strip-items::-webkit-scrollbar { display: none; }
+.strip-item {
+  display: flex; align-items: center; gap: 11px; flex-shrink: 0;
+  padding: 20px 32px; border-right: 1px solid var(--border-light);
+}
+.strip-item:last-child { border-right: none; }
+.strip-ico { width: 38px; height: 38px; border-radius: 10px; background: rgba(91,110,245,0.1); color: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0; }
+.strip-text strong { display: block; font-family: var(--font-display); font-weight: 700; font-size: 14px; color: var(--ink); }
+.strip-text span { font-size: 12px; color: var(--muted); }
+@media(max-width:576px){.strip-item{padding:16px 20px}}
 
-        <!-- Google Font -->
-        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+/* SERVICES */
+.svc-card {
+  background: #fff; border: 1px solid var(--border-light);
+  border-radius: var(--r-lg); padding: 32px; height: 100%;
+  position: relative; overflow: hidden; transition: all 0.35s;
+}
+.svc-card::before {
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0;
+  height: 3px; background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  transform: scaleX(0); transform-origin: left; transition: transform 0.3s;
+}
+.svc-card:hover { border-color: rgba(91,110,245,0.25); transform: translateY(-6px); box-shadow: 0 28px 56px rgba(91,110,245,0.12); }
+.svc-card:hover::before { transform: scaleX(1); }
+.svc-num { font-family: var(--font-mono); font-size: 11px; color: rgba(91,110,245,0.5); letter-spacing: 2px; margin-bottom: 18px; }
+.svc-icon { width: 52px; height: 52px; border-radius: 14px; background: rgba(91,110,245,0.08); display: flex; align-items: center; justify-content: center; font-size: 22px; color: var(--accent); margin-bottom: 20px; transition: all 0.3s; }
+.svc-card:hover .svc-icon { background: var(--accent); color: #fff; }
+.svc-title { font-family: var(--font-display); font-weight: 700; font-size: 18px; color: var(--ink); margin-bottom: 10px; }
+.svc-desc { font-size: 14px; color: var(--muted); line-height: 1.7; }
 
-        <!-- CSS Libraries -->
-        <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet">
-        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
-        <link href="{% static 'lib/flaticon/font/flaticon.css' %}" rel="stylesheet"> 
-        <link href="{% static 'lib/animate/animate.min.css' %}" rel="stylesheet">
-        <link href="{% static 'lib/owlcarousel/assets/owl.carousel.min.css' %}" rel="stylesheet">
-        <link href="{% static 'lib/lightbox/css/lightbox.min.css' %}" rel="stylesheet">
-        <link href="{% static 'lib/slick/slick.css' %}" rel="stylesheet">
-        <link href="{% static 'lib/slick/slick-theme.css' %}" rel="stylesheet">
+/* STATS */
+.stats-band { background: var(--ink); padding: 0; }
+.stats-inner { display: grid; grid-template-columns: repeat(4, 1fr); }
+.stat-cell {
+  padding: 52px 32px; text-align: center;
+  border-right: 1px solid rgba(255,255,255,0.07);
+  position: relative;
+}
+.stat-cell:last-child { border-right: none; }
+.stat-big {
+  font-family: var(--font-display); font-size: clamp(40px,5vw,62px);
+  font-weight: 800; color: #fff; line-height: 1; margin-bottom: 8px;
+}
+.stat-big em { color: var(--accent); font-style: normal; }
+.stat-label { font-size: 14px; color: rgba(255,255,255,0.4); font-weight: 500; }
+@media(max-width:768px){ .stats-inner { grid-template-columns: 1fr 1fr; } .stat-cell:nth-child(2){border-right:none} .stat-cell:nth-child(3){border-right:1px solid rgba(255,255,255,0.07)} .stat-cell:nth-child(3),.stat-cell:nth-child(4){border-top:1px solid rgba(255,255,255,0.07)} }
+@media(max-width:400px){ .stats-inner { grid-template-columns: 1fr; } .stat-cell { border-right: none !important; border-top: 1px solid rgba(255,255,255,0.07); } .stat-cell:first-child{border-top:none} }
 
-        <!-- Template Stylesheet -->
-        <link href="{% static 'css/style.css' %}" rel="stylesheet">
-    </head>
+/* PROCESS */
+.proc-step { text-align: center; position: relative; }
+.proc-step + .proc-step::before {
+  content: ''; position: absolute; top: 28px; right: calc(50% + 40px);
+  left: calc(-50% + 40px); height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(91,110,245,0.4), transparent);
+}
+.proc-num {
+  width: 56px; height: 56px; border-radius: 16px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  font-family: var(--font-display); font-size: 22px; font-weight: 800;
+  color: #fff; display: inline-flex; align-items: center; justify-content: center;
+  margin-bottom: 20px; box-shadow: 0 8px 24px rgba(91,110,245,0.35);
+}
+.proc-title { font-family: var(--font-display); font-weight: 700; font-size: 17px; color: var(--ink); margin-bottom: 8px; }
+.proc-desc { font-size: 14px; color: var(--muted); line-height: 1.65; }
+@media(max-width:768px){.proc-step + .proc-step::before{display:none}}
 
-    <body>
-        <div class="wrapper">
-            <!-- Top Bar Start -->
-            <div class="top-bar">
-                <div class="container-fluid">
-                    <div class="row align-items-center">
-                        <div class="col-lg-4 col-md-12">
-                            <div class="logo">
-                                <a href="#">
-                                    <h1>JamiiTek company</h1>
-                                    <!-- <img src="img/logo.jpg" alt="Logo"> -->
-                                </a>
-                            </div>
-                        </div>
-                        <div class="col-lg-8 col-md-7 d-none d-lg-block">
-                            <div class="row">
-                                <div class="col-4">
-                                    <div class="top-bar-item">
-                                        <div class="top-bar-icon">
-                                            <i class="flaticon-calendar"></i>
-                                        </div>
-                                        <div class="top-bar-text">
-                                            <h3>Opening Hour</h3>
-                                            <p>Mon - Fri, 8:00 - 9:00</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-4">
-                                    <div class="top-bar-item">
-                                        <div class="top-bar-icon">
-                                            <i class="flaticon-call"></i>
-                                        </div>
-                                        <div class="top-bar-text">
-                                            <h3>Call Us</h3>
-                                            <p>0629712678</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-4">
-                                    <div class="top-bar-item">
-                                        <div class="top-bar-icon">
-                                            <i class="flaticon-send-mail"></i>
-                                        </div>
-                                        <div class="top-bar-text">
-                                            <h3>Email Us</h3>
-                                            <p>info@jamiitek.com</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Top Bar End -->
-            <!-- Nav Bar Start -->
-            <div class="nav-bar">
-                <div class="container-fluid">
-                    <nav class="navbar navbar-expand-lg bg-dark navbar-dark">
-                        <a href="#" class="navbar-brand">MENU</a>
-                        <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
-                            <span class="navbar-toggler-icon"></span>
-                        </button>
+/* TEAM */
+.team-card {
+  background: #fff; border: 1px solid var(--border-light);
+  border-radius: var(--r-lg); padding: 28px; text-align: center;
+  transition: all 0.3s;
+}
+.team-card:hover { transform: translateY(-5px); box-shadow: 0 20px 44px rgba(0,0,0,0.08); }
+.team-photo {
+  width: 84px; height: 84px; border-radius: 50%; object-fit: cover;
+  margin: 0 auto 16px; display: block;
+  outline: 3px solid transparent; outline-offset: 3px;
+  transition: outline-color 0.3s;
+}
+.team-card:hover .team-photo { outline-color: var(--accent); }
+.team-initials {
+  width: 84px; height: 84px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  display: inline-flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-size: 28px; font-weight: 800;
+  color: #fff; margin: 0 auto 16px;
+}
+.team-name { font-family: var(--font-display); font-weight: 700; font-size: 16px; color: var(--ink); margin-bottom: 4px; }
+.team-role { font-size: 13px; color: var(--muted); margin-bottom: 14px; }
+.team-socials { display: flex; justify-content: center; gap: 7px; }
+.team-socials a {
+  width: 30px; height: 30px; border-radius: 8px; background: var(--bg-light);
+  color: var(--muted); display: inline-flex; align-items: center; justify-content: center;
+  font-size: 12px; text-decoration: none; transition: all 0.2s;
+}
+.team-socials a:hover { background: var(--accent); color: #fff; }
 
-                        <div class="collapse navbar-collapse justify-content-between" id="navbarCollapse">
-                            <div class="navbar-nav mr-auto">
+/* CTA BAND */
+.cta-band {
+  background: linear-gradient(140deg, #3730a3 0%, var(--accent) 45%, var(--accent-2) 100%);
+  border-radius: 28px; padding: 72px 48px; position: relative; overflow: hidden;
+  text-align: center;
+}
+.cta-band::before {
+  content: ''; position: absolute;
+  width: 500px; height: 500px; border-radius: 50%;
+  background: rgba(255,255,255,0.05);
+  top: -200px; right: -150px; pointer-events: none;
+}
+.cta-band h2 { font-family: var(--font-display); font-size: clamp(28px,4vw,46px); font-weight: 800; color: #fff; letter-spacing: -1px; margin-bottom: 14px; }
+.cta-band p { color: rgba(255,255,255,0.65); font-size: 17px; max-width: 460px; margin: 0 auto 36px; line-height: 1.65; }
+@media(max-width:640px){.cta-band{padding:44px 24px;border-radius:20px}}
+</style>
+{% endblock %}
 
-                                <a href="{% url 'home' %}" class="nav-item nav-link active">Home</a>
-                                <a href="{% url 'About' %}" class="nav-item nav-link">About</a>
-                                <a href="{% url 'service' %}" class="nav-item nav-link">Service</a>
-            
-                                
-                                <a href="{% url 'contact' %}" class="nav-item nav-link">Contact</a>
-                            </div>
-                            <div class="ml-auto">
-                                <a class="btn" href="https://nyumbachap.com">Ads</a>
-                            </div>
-                        </div>
-                    </nav>
-                </div>
-            </div>
-            <!-- Nav Bar End -->
+{% block content %}
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg-mesh"></div>
+  <div class="hero-grid"></div>
+  <div class="container position-relative">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-6">
+        <div class="hero-pill"><span class="live"></span> Currently accepting new projects</div>
+        <h1>We Build<br>Digital Products<br><span>That Perform</span></h1>
+        <p class="hero-sub">From sleek websites to powerful web applications — JamiiTek delivers fast, secure, and scalable digital solutions for businesses across Tanzania.</p>
+        <div class="hero-actions">
+          <a href="{% url 'select_website' %}" class="btn-accent">Start Your Project <i class="fas fa-arrow-right"></i></a>
+          <a href="{% url 'service' %}" class="btn-ghost-white">Explore Services</a>
+        </div>
+        <div class="hero-trust">
+          <div class="avatars">
+            <div class="av av-1">AK</div>
+            <div class="av av-2">JM</div>
+            <div class="av av-3">EM</div>
+            <div class="av av-4" style="font-size:16px">+</div>
+          </div>
+          <div class="trust-label">
+            <strong>485+ happy clients</strong>
+            <span>across Tanzania &amp; East Africa</span>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6 d-none d-lg-block">
+        <div class="hero-cards" style="position:relative">
+          <div class="hc-badge hb-top">
+            <div class="hb-icon">🚀</div>
+            <div class="hb-text"><strong>Project Launched</strong><span>Delivered in 3 weeks</span></div>
+          </div>
+          <div class="hc-row">
+            <div class="hc"><div class="hc-icon">🌐</div><div class="hc-title">Web Apps</div><div class="hc-sub">Full-stack Django</div></div>
+            <div class="hc" style="margin-top:24px"><div class="hc-icon">📱</div><div class="hc-title">Mobile-First</div><div class="hc-sub">Every screen size</div></div>
+            <div class="hc"><div class="hc-icon">⚡</div><div class="hc-title">Fast Delivery</div><div class="hc-sub">2–6 weeks</div></div>
+            <div class="hc" style="margin-top:24px"><div class="hc-icon">🔒</div><div class="hc-title">Secure & Hosted</div><div class="hc-sub">99.9% uptime</div></div>
+          </div>
+          <div class="hc-badge hb-bot">
+            <div class="hb-icon">⭐</div>
+            <div class="hb-text"><strong>5.0 Rating</strong><span>From 789 projects</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
+<!-- STRIP -->
+<div class="strip">
+  <div class="strip-items">
+    <div class="strip-item"><div class="strip-ico"><i class="fas fa-rocket"></i></div><div class="strip-text"><strong>Fast Delivery</strong><span>2–6 week turnaround</span></div></div>
+    <div class="strip-item"><div class="strip-ico"><i class="fas fa-shield-halved"></i></div><div class="strip-text"><strong>Secure by Default</strong><span>Best-practice code</span></div></div>
+    <div class="strip-item"><div class="strip-ico"><i class="fas fa-mobile-screen"></i></div><div class="strip-text"><strong>Mobile-First</strong><span>Every device supported</span></div></div>
+    <div class="strip-item"><div class="strip-ico"><i class="fas fa-headset"></i></div><div class="strip-text"><strong>24/7 Support</strong><span>Post-launch care</span></div></div>
+    <div class="strip-item"><div class="strip-ico"><i class="fas fa-code"></i></div><div class="strip-text"><strong>Clean Code</strong><span>Maintainable & scalable</span></div></div>
+  </div>
+</div>
 
-            <!-- Carousel Start -->
-            <div id="carousel" class="carousel slide" data-ride="carousel">
-                <ol class="carousel-indicators">
-                    <li data-target="#carousel" data-slide-to="0" class="active"></li>
-                    <li data-target="#carousel" data-slide-to="1"></li>
-                    <li data-target="#carousel" data-slide-to="2"></li>
-                </ol>
-                <div class="carousel-inner">
-                    <div class="carousel-item active">
-                        <img src="{% static 'img/bg3.jpg' %}" alt="Carousel Image">
-                        <div class="carousel-caption">
-                            <p class="animated fadeInRight">We Are Professional</p>
-                            <h1 class="animated fadeInLeft">For Your Dream Website</h1>
-                            <a class="btn animated fadeInUp" href="{% url 'select_website' %}">Get Started</a>
-                        </div>
-                    </div>
-
-                    <div class="carousel-item">
-                        <img src="{% static 'img/bg1.jpg' %}" alt="Carousel Image">
-                        <div class="carousel-caption">
-                            <p class="animated fadeInRight">Professional Builder</p>
-                            <h1 class="animated fadeInLeft">We Build Your Network</h1>
-                            <a class="btn animated fadeInUp" href="{% url 'select_website' %}">Get A Started</a>
-                        </div>
-                    </div>
-
-                    <div class="carousel-item">
-                        <img src="{% static 'img/bg2.jpg' %}" alt="Carousel Image">
-                        <div class="carousel-caption">
-                            <p class="animated fadeInRight">We Are Trusted</p>
-                            <h1 class="animated fadeInLeft">For Your Dream Software</h1>
-                            <a class="btn animated fadeInUp" href="{% url 'select_website' %}">Get A Started</a>
-                        </div>
-                    </div>
-                </div>
-
-                <a class="carousel-control-prev" href="#carousel" role="button" data-slide="prev">
-                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                    <span class="sr-only">Previous</span>
-                </a>
-                <a class="carousel-control-next" href="#carousel" role="button" data-slide="next">
-                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                    <span class="sr-only">Next</span>
-                </a>
-            </div>
-            <!-- Carousel End -->
-
-
-            <!-- Feature Start-->
-            <div class="feature wow fadeInUp" data-wow-delay="0.1s">
-                <div class="container-fluid">
-                    <div class="row align-items-center">
-                        <div class="col-lg-4 col-md-12">
-                            <div class="feature-item">
-                                <div class="feature-icon">
-                                    <i class="flaticon-worker"></i>
-                                </div>
-                                <div class="feature-text">
-                                    <h3>Expert Craftsmanship</h3>
-                                    <p>✔ Skilled developers with years of experience in web and software development.</p>
-                                    <p>✔ Precision in every project to ensure performance, reliability, and modern design.</p>
-
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-4 col-md-12">
-                            <div class="feature-item">
-                                <div class="feature-icon">
-                                    <i class="flaticon-building"></i>
-                                </div>
-                                <div class="feature-text">
-                                    <h3>Premium Quality Work</h3>
-                                    <p>✔ Modern technologies and best practices used to build secure, scalable digital solutions.</p>
-                                    <p>✔ Attention to detail in every line of code, interface, and user experience.</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-4 col-md-12">
-                            <div class="feature-item">
-                                <div class="feature-icon">
-                                    <i class="flaticon-call"></i>
-                                </div>
-                                <div class="feature-text">
-                                    <h3>24/7 Support</h3>
-                                    <p>✔ Quick responses to inquiries and orders.</p>
-                                    <p>✔ Dedicated post-launch support for bug fixes, updates, and feature adjustments.</p>
-
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Feature End-->
-
-
-
-            <!-- Fact Start -->
-            <div class="fact">
-                <div class="container-fluid">
-                    <div class="row counters">
-                        <div class="col-md-6 fact-left wow slideInLeft">
-                            <div class="row">
-                                <div class="col-6">
-                                    <div class="fact-icon">
-                                        <i class="flaticon-worker"></i>
-                                    </div>
-                                    <div class="fact-text">
-                                        <h2 data-toggle="counter-up">10</h2>
-                                        <p>Expert Workers</p>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="fact-icon">
-                                        <i class="flaticon-building"></i>
-                                    </div>
-                                    <div class="fact-text">
-                                        <h2 data-toggle="counter-up">485</h2>
-                                        <p>Happy Clients</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6 fact-right wow slideInRight">
-                            <div class="row">
-                                <div class="col-6">
-                                    <div class="fact-icon">
-                                        <i class="flaticon-address"></i>
-                                    </div>
-                                    <div class="fact-text">
-                                        <h2 data-toggle="counter-up">789</h2>
-                                        <p>Projects</p>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="fact-icon">
-                                        <i class="flaticon-crane"></i>
-                                    </div>
-                                    <div class="fact-text">
-                                        <h2 data-toggle="counter-up">92</h2>
-                                        <p>Running</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Fact End -->
-
-
-            
-
-
-           <!-- Team Start -->
-<div class="team py-5">
+<!-- SERVICES -->
+<section style="padding:96px 0;background:#fff">
   <div class="container">
-    <div class="section-header text-center mb-5">
-      <p class="text-primary fw-bold">Our Team</p>
-      <h2 class="fw-bold">Meet the Mind Behind the Code</h2>
+    <div class="row justify-content-center text-center mb-5">
+      <div class="col-lg-6">
+        <div class="section-eyebrow"><span class="dot"></span> What We Do</div>
+        <h2 class="section-heading mb-3">Services Built for<br>Modern Businesses</h2>
+        <p class="section-sub mx-auto">End-to-end digital services — from UI design to deployment and ongoing hosting support.</p>
+      </div>
     </div>
     <div class="row g-4">
-
-      {% for i in team %}
-      <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
-        <div class="team-item text-center shadow-lg rounded-4 p-4 bg-white position-relative overflow-hidden">
-          
-          <!-- Profile Image -->
-          <div class="team-img mx-auto mb-3 position-relative">
-            <img src="{{i.image}}" alt="{{i.full_name}}" 
-                 class="rounded-circle img-fluid border border-4 border-primary shadow" 
-                 style="width:180px; height:180px; object-fit:cover;">
+      {% for svc in services %}
+      <div class="col-md-6 col-lg-4">
+        <div class="svc-card">
+          <div class="svc-num">{{ forloop.counter|stringformat:"02d" }} / {{ services|length|stringformat:"02d" }}</div>
+          <div class="svc-icon"><i class="fas fa-globe"></i></div>
+          <div class="svc-title">{{ svc.Service_type }}</div>
+          <p class="svc-desc">{{ svc.description|truncatewords:22 }}</p>
+        </div>
+      </div>
+      {% empty %}
+      {% for item in "123456" %}
+      <div class="col-md-6 col-lg-4">
+        <div class="svc-card">
+          <div class="svc-num">0{{ forloop.counter }} / 06</div>
+          <div class="svc-icon">
+            {% if forloop.counter == 1 %}<i class="fas fa-globe"></i>
+            {% elif forloop.counter == 2 %}<i class="fas fa-mobile-screen"></i>
+            {% elif forloop.counter == 3 %}<i class="fas fa-server"></i>
+            {% elif forloop.counter == 4 %}<i class="fas fa-network-wired"></i>
+            {% elif forloop.counter == 5 %}<i class="fas fa-palette"></i>
+            {% else %}<i class="fas fa-gears"></i>{% endif %}
           </div>
-          
-          <!-- Text -->
-          <div class="team-text">
-            <h4 style="color: aliceblue;" class="fw-bold mb-1">{{i.full_name}}</h4>
-            <p class="text-muted small mb-3">{{i.position}}</p>
+          <div class="svc-title">
+            {% if forloop.counter == 1 %}Website Development
+            {% elif forloop.counter == 2 %}Mobile App Development
+            {% elif forloop.counter == 3 %}Web Hosting & Servers
+            {% elif forloop.counter == 4 %}Network Installation
+            {% elif forloop.counter == 5 %}UI/UX Design
+            {% else %}System Integration{% endif %}
           </div>
-          
-          <!-- Social Icons -->
-          <div class="team-social d-flex justify-content-center gap-3">
-            {% if i.twitter_link %}
-            <a href="{{i.twitter_link}}" class="btn btn-outline-primary btn-sm rounded-circle">
-              <i class="fab fa-twitter"></i>
-            </a>
-            {% endif %}
-            {% if i.facebook_link %}
-            <a href="{{i.facebook_link}}" class="btn btn-outline-primary btn-sm rounded-circle">
-              <i class="fab fa-facebook-f"></i>
-            </a>
-            {% endif %}
-            {% if i.linkedIn %}
-            <a href="{{i.linkedIn}}" class="btn btn-outline-primary btn-sm rounded-circle">
-              <i class="fab fa-linkedin-in"></i>
-            </a>
-            {% endif %}
-            {% if i.instagram_link %}
-            <a href="{{i.instagram_link}}" class="btn btn-outline-primary btn-sm rounded-circle">
-              <i class="fab fa-instagram"></i>
-            </a>
-            {% endif %}
-          </div>
-
+          <p class="svc-desc">
+            {% if forloop.counter == 1 %}Modern, responsive websites built with the latest frameworks for speed, security, and user experience.
+            {% elif forloop.counter == 2 %}Android & iOS applications designed for scale, performance, and a seamless user experience.
+            {% elif forloop.counter == 3 %}Reliable hosting with 99.9% uptime, daily backups, and proactive monitoring.
+            {% elif forloop.counter == 4 %}Professional network setup and IT infrastructure for offices and businesses of any size.
+            {% elif forloop.counter == 5 %}Intuitive interfaces and thoughtful designs that users love and convert well.
+            {% else %}Smart integrations connecting your tools, APIs, and platforms into one seamless workflow.{% endif %}
+          </p>
         </div>
       </div>
       {% endfor %}
+      {% endfor %}
+    </div>
+    <div class="text-center mt-5">
+      <a href="{% url 'service' %}" class="btn-ghost">View All Services <i class="fas fa-arrow-right"></i></a>
+    </div>
+  </div>
+</section>
 
+<!-- STATS -->
+<div class="stats-band">
+  <div class="container-fluid px-0">
+    <div class="stats-inner">
+      <div class="stat-cell"><div class="stat-big">10<em>+</em></div><div class="stat-label">Expert Developers</div></div>
+      <div class="stat-cell"><div class="stat-big">485<em>+</em></div><div class="stat-label">Happy Clients</div></div>
+      <div class="stat-cell"><div class="stat-big">789<em>+</em></div><div class="stat-label">Projects Delivered</div></div>
+      <div class="stat-cell"><div class="stat-big">5<em>★</em></div><div class="stat-label">Average Rating</div></div>
     </div>
   </div>
 </div>
-<!-- Team End -->
 
-            
+<!-- HOW WE WORK -->
+<section style="padding:96px 0;background:var(--bg-light)">
+  <div class="container">
+    <div class="row justify-content-center text-center mb-5">
+      <div class="col-lg-6">
+        <div class="section-eyebrow"><span class="dot"></span> Our Process</div>
+        <h2 class="section-heading">From Idea to Launch<br>in 4 Steps</h2>
+      </div>
+    </div>
+    <div class="row g-4">
+      <div class="col-6 col-md-3"><div class="proc-step"><div class="proc-num">1</div><div class="proc-title">Discovery</div><p class="proc-desc">We understand your goals, audience, and technical requirements in depth.</p></div></div>
+      <div class="col-6 col-md-3"><div class="proc-step"><div class="proc-num">2</div><div class="proc-title">Design</div><p class="proc-desc">We craft beautiful, intuitive wireframes and UI designs tailored to your brand.</p></div></div>
+      <div class="col-6 col-md-3"><div class="proc-step"><div class="proc-num">3</div><div class="proc-title">Development</div><p class="proc-desc">We build with clean, modern, scalable code — tested thoroughly before launch.</p></div></div>
+      <div class="col-6 col-md-3"><div class="proc-step"><div class="proc-num">4</div><div class="proc-title">Launch &amp; Support</div><p class="proc-desc">We deploy, monitor, and provide ongoing support so you're always running smoothly.</p></div></div>
+    </div>
+  </div>
+</section>
 
-            <!-- Footer Start -->
-            <div class="footer wow fadeIn" data-wow-delay="0.3s">
-                <div class="container">
-                    <div class="row">
-                        <div class="col-md-6 col-lg-3">
-                            <div class="footer-contact">
-                                <h2>Office Contact</h2>
-                                <p><i class="fa fa-map-marker-alt"></i>Boko Street, Dar Es Salaam, Tanzania</p>
-                                <p><i class="fa fa-phone-alt"></i>0629712678</p>
-                                <p><i class="fa fa-envelope"></i>info@JamiiTek.com</p>
-                                <div class="footer-social">
-                                    <a href=""><i class="fab fa-twitter"></i></a>
-                                    <a href=""><i class="fab fa-facebook-f"></i></a>
-                                    <a href=""><i class="fab fa-youtube"></i></a>
-                                    <a href=""><i class="fab fa-instagram"></i></a>
-                                    <a href=""><i class="fab fa-linkedin-in"></i></a>
-                                </div>
-                            </div>
-                        </div>
-                         <div class="col-md-6 col-lg-3 mb-4">
-                            <h5 class="text-primary mb-3">Services Areas</h5>
-                            <ul class="list-unstyled">
-                                <li><a href="#" class="text-light">Website Development</a></li>
-                                <li><a href="#" class="text-light">Mobile App Development</a></li>
-                                <li><a href="#" class="text-light">Network Installations</a></li>
-                                <li><a href="#" class="text-light">Hosting <em>Support</em></a></li>
-                            </ul>
-                        </div>
-                        <div class="col-md-6 col-lg-3">
-                            <div class="footer-link">
-                                <h2>Useful Pages</h2>
-                                <a href="{% url 'About' %}">About Us</a>
-                                <a href="{% url 'contact' %}">Contact Us</a>
-                                <a href="{% url 'service' %}">Services</a>
-                               
-                            </div>
-                        </div>
-                        <div class="col-md-6 col-lg-3">
-                            <div class="newsletter">
-                                <h2>Newsletter</h2>
-                                <p>
-                                   Send us a massage
-                                </p>
-                                <div class="form">
-                                    <input class="form-control" placeholder="Email here">
-                                    <button class="btn">Submit</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="container footer-menu">
-                    <div class="f-menu">
-                        <a href="">Terms of use</a>
-                        <a href="">Privacy policy</a>
-                        <a href="">Cookies</a>
-                        <a href="{% url 'admin:index' %}">Help</a>
-                        <a href="">FQAs</a>
-                    </div>
-                </div>
-                <div class="container copyright">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <p>&copy; <a href="https://nyumbachap.com">JamiiTek Company</a>, All Right Reserved.</p>
-                        </div>
-						
-						<!--/*** This template is free as long as you keep the footer author’s credit link/attribution link/backlink. If you'd like to use the template without the footer author’s credit link/attribution link/backlink, you can purchase the Credit Removal License from "https://htmlcodex.com/credit-removal". Thank you for your support. ***/-->
-                        <div class="col-md-6">
-                            <p><a href="https://htmlcodex.com"></a></p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Footer End -->
-
-            <a href="#" class="back-to-top"><i class="fa fa-chevron-up"></i></a>
+<!-- TEAM -->
+{% if team %}
+<section style="padding:96px 0;background:#fff">
+  <div class="container">
+    <div class="row justify-content-center text-center mb-5">
+      <div class="col-lg-6">
+        <div class="section-eyebrow"><span class="dot"></span> Our Team</div>
+        <h2 class="section-heading">The People Behind<br>the Code</h2>
+      </div>
+    </div>
+    <div class="row g-4 justify-content-center">
+      {% for member in team %}
+      <div class="col-6 col-md-4 col-lg-3">
+        <div class="team-card">
+          {% if member.image %}
+          <img src="{{ member.get_image_url }}" alt="{{ member.full_name }}" class="team-photo">
+          {% else %}
+          <div class="team-initials">{{ member.full_name|first }}</div>
+          {% endif %}
+          <div class="team-name">{{ member.full_name }}</div>
+          <div class="team-role">{{ member.position }}</div>
+          <div class="team-socials">
+            {% if member.twitter_link %}<a href="{{ member.twitter_link }}" target="_blank"><i class="fab fa-twitter"></i></a>{% endif %}
+            {% if member.facebook_link %}<a href="{{ member.facebook_link }}" target="_blank"><i class="fab fa-facebook-f"></i></a>{% endif %}
+            {% if member.linkedIn %}<a href="{{ member.linkedIn }}" target="_blank"><i class="fab fa-linkedin-in"></i></a>{% endif %}
+            {% if member.instagram_link %}<a href="{{ member.instagram_link }}" target="_blank"><i class="fab fa-instagram"></i></a>{% endif %}
+          </div>
         </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
 
-        <!-- JavaScript Libraries -->
-        <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
-        <script src="{% static 'lib/easing/easing.min.js' %}"></script>
-        <script src="{% static 'lib/wow/wow.min.js' %}"></script>
-        <script src="{% static 'lib/owlcarousel/owl.carousel.min.js' %}"></script>
-        <script src="{% static 'lib/isotope/isotope.pkgd.min.js' %}"></script>
-        <script src="{% static 'lib/lightbox/js/lightbox.min.js' %}"></script>
-        <script src="{% static 'lib/waypoints/waypoints.min.js' %}"></script>
-        <script src="{% static 'lib/counterup/counterup.min.js' %}"></script>
-        <script src="{% static 'lib/slick/slick.min.js' %}"></script>
-
-        <!-- Template Javascript -->
-        <script src="{% static 'js/main.js' %}"></script>
-    </body>
-</html>
+<!-- CTA -->
+<section style="padding:96px 0;background:var(--bg-light)">
+  <div class="container">
+    <div class="cta-band">
+      <div style="position:relative;z-index:2">
+        <div class="section-eyebrow" style="background:rgba(255,255,255,0.12);color:#fff;border-color:rgba(255,255,255,0.2)"><span class="dot" style="background:#fff"></span> Ready to Build?</div>
+        <h2>Let's Create Something<br>Remarkable Together</h2>
+        <p>Tell us about your project — we'll send back a detailed proposal within 24 hours, no commitment required.</p>
+        <div class="d-flex flex-wrap gap-3 justify-content-center">
+          <a href="{% url 'select_website' %}" class="btn-white-solid">Start Your Project <i class="fas fa-arrow-right"></i></a>
+          <a href="{% url 'contact' %}" class="btn-ghost-white">Talk to Us First</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

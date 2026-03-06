@@ -1,214 +1,375 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <title>JamiiTek web development company</title>
-        <meta content="width=device-width, initial-scale=1.0" name="viewport">
-        <meta content="Construction Company Website Template" name="keywords">
-        <meta content="Construction Company Website Template" name="description">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}JamiiTek — Professional Web Development{% endblock %}</title>
+  <meta name="description" content="{% block meta_desc %}JamiiTek builds modern websites, web apps, and digital solutions for businesses across Tanzania.{% endblock %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #0b0f1a;
+      --ink-2: #141928;
+      --ink-3: #1e2539;
+      --ink-4: #2a3350;
+      --muted: #6b7a9e;
+      --muted-2: #9aa3c0;
+      --border: rgba(255,255,255,0.07);
+      --border-light: #e8ecf4;
+      --accent: #5b6ef5;
+      --accent-2: #7b5cf0;
+      --accent-glow: rgba(91,110,245,0.25);
+      --gold: #f0b429;
+      --green: #00d68f;
+      --red: #ff4d6d;
+      --bg-light: #f7f8fc;
+      --font-display: 'Syne', sans-serif;
+      --font-body: 'DM Sans', sans-serif;
+      --font-mono: 'DM Mono', monospace;
+      --r: 14px;
+      --r-lg: 22px;
+    }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--font-body); background: #fff; color: #2d3561; line-height: 1.65; -webkit-font-smoothing: antialiased; }
 
-        <!-- Favicon -->
-        <link href="{% static 'img/favicon.ico' %}" rel="icon">
+    /* ─── NAV ─────────────────────────────────── */
+    #site-nav {
+      position: fixed; top: 0; inset-inline: 0; z-index: 900;
+      transition: background 0.4s, box-shadow 0.4s, padding 0.3s;
+    }
+    #site-nav .nav-inner {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 22px 40px;
+      transition: padding 0.3s;
+    }
+    #site-nav.pinned .nav-inner {
+      padding: 14px 40px;
+      background: rgba(11,15,26,0.92);
+      backdrop-filter: blur(24px) saturate(180%);
+      box-shadow: 0 1px 0 rgba(255,255,255,0.06), 0 8px 32px rgba(0,0,0,0.4);
+    }
+    .nav-logo {
+      font-family: var(--font-display);
+      font-weight: 800; font-size: 21px; letter-spacing: -0.5px;
+      color: #fff; text-decoration: none;
+    }
+    .nav-logo em { color: var(--gold); font-style: normal; }
+    .nav-menu { display: flex; align-items: center; gap: 2px; list-style: none; }
+    .nav-menu a {
+      font-family: var(--font-body); font-weight: 500; font-size: 14px;
+      color: rgba(255,255,255,0.65); padding: 8px 14px; border-radius: 10px;
+      text-decoration: none; transition: color 0.2s, background 0.2s;
+    }
+    .nav-menu a:hover, .nav-menu a.active { color: #fff; background: rgba(255,255,255,0.08); }
+    .nav-cta {
+      font-family: var(--font-display); font-weight: 700; font-size: 13px;
+      letter-spacing: 0.2px;
+      background: var(--accent); color: #fff !important;
+      padding: 10px 22px !important; border-radius: 10px !important;
+      box-shadow: 0 0 0 1px rgba(91,110,245,0.5), 0 4px 16px rgba(91,110,245,0.35);
+      transition: transform 0.2s, box-shadow 0.2s !important;
+    }
+    .nav-cta:hover { transform: translateY(-1px); box-shadow: 0 0 0 1px rgba(91,110,245,0.7), 0 8px 24px rgba(91,110,245,0.45) !important; }
+    .nav-burger { display: none; background: none; border: none; cursor: pointer; padding: 4px; flex-direction: column; gap: 5px; }
+    .nav-burger span { display: block; width: 22px; height: 2px; background: rgba(255,255,255,0.8); border-radius: 2px; transition: all 0.3s; }
+    .nav-burger.open span:nth-child(1) { transform: rotate(45deg) translate(5px,5px); }
+    .nav-burger.open span:nth-child(2) { opacity: 0; transform: translateX(-6px); }
+    .nav-burger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px,-5px); }
+    /* Mobile drawer */
+    #mob-nav {
+      position: fixed; inset: 0; background: var(--ink); z-index: 850;
+      display: flex; flex-direction: column; padding: 90px 32px 40px;
+      transform: translateX(100%); transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+    }
+    #mob-nav.open { transform: translateX(0); }
+    #mob-nav a {
+      font-family: var(--font-display); font-size: 28px; font-weight: 700;
+      color: rgba(255,255,255,0.75); text-decoration: none;
+      padding: 16px 0; border-bottom: 1px solid var(--border);
+      transition: color 0.2s;
+    }
+    #mob-nav a:hover { color: #fff; }
+    #mob-nav .mob-cta {
+      margin-top: 28px; text-align: center; border-radius: var(--r) !important;
+      background: var(--accent) !important; color: #fff !important;
+      padding: 18px !important; border: none !important; font-size: 20px !important;
+    }
+    @media (max-width: 900px) {
+      .nav-menu { display: none; }
+      .nav-burger { display: flex; }
+      #site-nav .nav-inner { padding: 18px 20px; }
+      #site-nav.pinned .nav-inner { padding: 14px 20px; }
+    }
 
-        <!-- Google Font -->
-        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    /* ─── PAGE HERO (inner pages) ─────────────── */
+    .inner-hero {
+      background: linear-gradient(160deg, var(--ink) 0%, var(--ink-3) 100%);
+      padding: 130px 0 72px; position: relative; overflow: hidden;
+    }
+    .inner-hero::before {
+      content: ''; position: absolute;
+      width: 600px; height: 600px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(91,110,245,0.18) 0%, transparent 70%);
+      top: -200px; right: -100px; pointer-events: none;
+    }
+    .inner-hero h1 {
+      font-family: var(--font-display); font-size: clamp(32px,5vw,56px);
+      font-weight: 800; color: #fff; letter-spacing: -1px; margin-bottom: 12px;
+    }
+    .inner-hero p { color: rgba(255,255,255,0.5); font-size: 16px; }
+    .breadcrumb-wrap { display: flex; align-items: center; gap: 8px; margin-bottom: 24px; }
+    .breadcrumb-wrap a { color: rgba(255,255,255,0.35); font-size: 13px; text-decoration: none; transition: color 0.2s; }
+    .breadcrumb-wrap a:hover { color: rgba(255,255,255,0.65); }
+    .breadcrumb-wrap span { color: var(--gold); font-size: 13px; }
+    .breadcrumb-wrap i { color: rgba(255,255,255,0.2); font-size: 10px; }
 
-        <!-- CSS Libraries -->
-        <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet">
-        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
-        <link href="{% static 'lib/flaticon/font/flaticon.css' %}" rel="stylesheet"> 
-        <link href="{% static 'lib/animate/animate.min.css' %}" rel="stylesheet">
-        <link href="{% static 'lib/owlcarousel/assets/owl.carousel.min.css' %}" rel="stylesheet">
-        <link href="{% static 'lib/lightbox/css/lightbox.min.css' %}" rel="stylesheet">
-        <link href="{% static 'lib/slick/slick.css' %}" rel="stylesheet">
-        <link href="{% static 'lib/slick/slick-theme.css' %}" rel="stylesheet">
+    /* ─── SHARED SECTION CHROME ───────────────── */
+    .section-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+      letter-spacing: 2px; text-transform: uppercase;
+      color: var(--accent); background: rgba(91,110,245,0.1);
+      border: 1px solid rgba(91,110,245,0.2);
+      padding: 5px 12px; border-radius: 100px; margin-bottom: 18px;
+    }
+    .section-eyebrow .dot { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; }
+    .section-heading {
+      font-family: var(--font-display);
+      font-size: clamp(28px, 4vw, 46px);
+      font-weight: 800; letter-spacing: -1px;
+      color: var(--ink); line-height: 1.15;
+    }
+    .section-heading.light { color: #fff; }
+    .section-sub { font-size: 17px; color: var(--muted); line-height: 1.75; max-width: 520px; }
 
-        <!-- Template Stylesheet -->
-        <link href="{% static 'css/style.css' %}" rel="stylesheet">
+    /* ─── BUTTONS ─────────────────────────────── */
+    .btn-accent {
+      display: inline-flex; align-items: center; gap: 9px;
+      font-family: var(--font-display); font-weight: 700; font-size: 15px;
+      background: var(--accent); color: #fff;
+      padding: 14px 28px; border-radius: var(--r); border: none; cursor: pointer;
+      text-decoration: none; transition: all 0.25s;
+      box-shadow: 0 4px 20px rgba(91,110,245,0.4);
+    }
+    .btn-accent:hover { color: #fff; transform: translateY(-2px); box-shadow: 0 8px 32px rgba(91,110,245,0.55); }
+    .btn-ghost {
+      display: inline-flex; align-items: center; gap: 9px;
+      font-family: var(--font-display); font-weight: 600; font-size: 15px;
+      background: transparent; color: var(--ink);
+      padding: 13px 28px; border-radius: var(--r);
+      border: 1.5px solid var(--border-light); cursor: pointer;
+      text-decoration: none; transition: all 0.2s;
+    }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-ghost-white {
+      display: inline-flex; align-items: center; gap: 9px;
+      font-family: var(--font-display); font-weight: 600; font-size: 15px;
+      background: transparent; color: rgba(255,255,255,0.75);
+      padding: 13px 28px; border-radius: var(--r);
+      border: 1.5px solid rgba(255,255,255,0.15); cursor: pointer;
+      text-decoration: none; transition: all 0.2s;
+    }
+    .btn-ghost-white:hover { border-color: rgba(255,255,255,0.4); color: #fff; }
+    .btn-white-solid {
+      display: inline-flex; align-items: center; gap: 9px;
+      font-family: var(--font-display); font-weight: 700; font-size: 15px;
+      background: #fff; color: var(--accent);
+      padding: 14px 28px; border-radius: var(--r); border: none; cursor: pointer;
+      text-decoration: none; transition: all 0.25s;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    }
+    .btn-white-solid:hover { color: var(--accent-2); transform: translateY(-2px); box-shadow: 0 16px 40px rgba(0,0,0,0.3); }
 
-        {% block extra_css %}
-        <style>
-            /* Print styles for proposal preview */
-            @media print {
-                body * {
-                    visibility: hidden;
-                }
-                #printable-area, #printable-area * {
-                    visibility: visible;
-                }
-                #printable-area {
-                    position: absolute;
-                    left: 0;
-                    top: 0;
-                    width: 100%;
-                    padding: 20px;
-                    background: white;
-                }
-                /* Hide buttons and navbars on print */
-                .no-print {
-                    display: none !important;
-                }
-            }
-        </style>
-        {% endblock %}
-    </head>
+    /* ─── CARDS ───────────────────────────────── */
+    .card-base {
+      background: #fff; border: 1px solid var(--border-light);
+      border-radius: var(--r-lg); padding: 32px; height: 100%;
+      transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+    }
+    .card-base:hover { border-color: rgba(91,110,245,0.3); transform: translateY(-5px); box-shadow: 0 24px 48px rgba(91,110,245,0.1); }
 
-    <body style="background-color: blue;">
-        <div class="wrapper">
-            <!-- Top Bar Start -->
-            <div class="top-bar bg-dark border-bottom">
-                <div class="container-fluid">
-                    <div class="row align-items-center py-2">
-                        <div class="col-lg-4 col-md-12">
-                            <div class="logo">
-                                <a href="#" class="text-dark text-decoration-none font-weight-bold" style="font-size: 1.8rem;">
-                                    JamiiTek company
-                                </a>
-                            </div>
-                        </div>
-                        <div class="col-lg-8 col-md-7 d-none d-lg-flex justify-content-end">
-                            <div class="row w-100">
-                                <div class="col-4 d-flex align-items-center">
-                                    <i class="flaticon-calendar text-primary mr-2" style="font-size: 1.5rem;"></i>
-                                    <div>
-                                        <h6 class="mb-0 font-weight-bold">Opening Hour</h6>
-                                        <small>Mon - Fri, 8:00 - 9:00</small>
-                                    </div>
-                                </div>
-                                <div class="col-4 d-flex align-items-center">
-                                    <i class="flaticon-call text-primary mr-2" style="font-size: 1.5rem;"></i>
-                                    <div>
-                                        <h6 class="mb-0 font-weight-bold">Call Us</h6>
-                                        <small>0629712678</small>
-                                    </div>
-                                </div>
-                                <div class="col-4 d-flex align-items-center">
-                                    <i class="flaticon-send-mail text-primary mr-2" style="font-size: 1.5rem;"></i>
-                                    <div>
-                                        <h6 class="mb-0 font-weight-bold">Email Us</h6>
-                                        <small>info@JamiiTek.com</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Top Bar End -->
+    /* ─── FOOTER ──────────────────────────────── */
+    footer { background: var(--ink); color: #fff; }
+    .footer-body { padding: 72px 0 52px; }
+    .footer-divide { height: 1px; background: var(--border); margin: 0; }
+    .footer-base { padding: 22px 0; }
+    .f-brand { font-family: var(--font-display); font-size: 22px; font-weight: 800; color: #fff; }
+    .f-brand em { color: var(--gold); font-style: normal; }
+    .f-tagline { color: rgba(255,255,255,0.38); font-size: 14px; line-height: 1.7; margin: 14px 0 24px; max-width: 280px; }
+    .f-socials a {
+      width: 36px; height: 36px; border-radius: 9px;
+      border: 1px solid rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.45); display: inline-flex;
+      align-items: center; justify-content: center;
+      font-size: 14px; margin-right: 7px; text-decoration: none;
+      transition: all 0.2s;
+    }
+    .f-socials a:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .f-col-title { font-family: var(--font-mono); font-size: 10px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.3); margin-bottom: 20px; }
+    .f-links { list-style: none; padding: 0; }
+    .f-links li { margin-bottom: 11px; }
+    .f-links a { color: rgba(255,255,255,0.5); font-size: 14px; text-decoration: none; transition: color 0.2s; }
+    .f-links a:hover { color: rgba(255,255,255,0.85); }
+    .f-nl-input {
+      width: 100%; background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1); color: #fff;
+      padding: 12px 16px; border-radius: 10px; font-size: 14px;
+      font-family: var(--font-body); outline: none; margin-bottom: 9px;
+      transition: border-color 0.2s;
+    }
+    .f-nl-input::placeholder { color: rgba(255,255,255,0.2); }
+    .f-nl-input:focus { border-color: var(--accent); }
+    .f-nl-btn {
+      width: 100%; background: var(--accent); color: #fff; border: none;
+      padding: 12px; border-radius: 10px; font-family: var(--font-display);
+      font-weight: 700; font-size: 14px; cursor: pointer; transition: background 0.2s;
+    }
+    .f-nl-btn:hover { background: var(--accent-2); }
+    .f-copy { color: rgba(255,255,255,0.25); font-size: 13px; }
+    .f-legal a { color: rgba(255,255,255,0.25); font-size: 13px; text-decoration: none; margin-left: 24px; transition: color 0.2s; }
+    .f-legal a:hover { color: rgba(255,255,255,0.55); }
 
-            <!-- Nav Bar Start -->
-            <div class="nav-bar">
-                <div class="container-fluid">
-                    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-                        <a href="#" class="navbar-brand font-weight-bold">MENU</a>
-                        <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
-                            <span class="navbar-toggler-icon"></span>
-                        </button>
+    /* ─── BACK TO TOP ─────────────────────────── */
+    #back-top {
+      position: fixed; bottom: 24px; right: 24px; z-index: 800;
+      width: 44px; height: 44px; border-radius: 12px;
+      background: var(--accent); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; text-decoration: none;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.3s, transform 0.3s;
+      box-shadow: 0 4px 20px rgba(91,110,245,0.45);
+    }
+    #back-top.show { opacity: 1; pointer-events: all; }
+    #back-top:hover { color: #fff; transform: translateY(-3px); }
 
-                        <div class="collapse navbar-collapse justify-content-between" id="navbarCollapse">
-                            <div class="navbar-nav mr-auto">
-                                <a href="{% url 'home' %}" class="nav-item nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">Home</a>
-                                <a href="{% url 'About' %}" class="nav-item nav-link {% if request.resolver_match.url_name == 'About' %}active{% endif %}">About</a>
-                                <a href="{% url 'service' %}" class="nav-item nav-link {% if request.resolver_match.url_name == 'service' %}active{% endif %}">Service</a>
-                                <a href="{% url 'contact' %}" class="nav-item nav-link {% if request.resolver_match.url_name == 'contact' %}active{% endif %}">Contact</a>
-                            </div>
-                            <div class="ml-auto">
-                                <a class="btn btn-outline-primary" href="https://nyumbachap.com" target="_blank" rel="noopener">Ads</a>
-                            </div>
-                        </div>
-                    </nav>
-                </div>
-            </div>
-            <!-- Nav Bar End -->
+    /* ─── UTILITIES ───────────────────────────── */
+    .text-accent { color: var(--accent); }
+    .text-gold { color: var(--gold); }
+    .bg-ink { background: var(--ink); }
+    .bg-ink-2 { background: var(--ink-2); }
+    .bg-light-gray { background: var(--bg-light); }
+    .divider-accent { width: 44px; height: 3px; background: linear-gradient(90deg, var(--accent), var(--accent-2)); border-radius: 3px; margin-bottom: 24px; }
 
-            <!-- <main class="py-5"> -->
-                <!-- <div class="container"> -->
-                    {% block content %}
-                    <!-- Page-specific content goes here -->
-                    {% endblock %}
-                <!-- </div> -->
-            <!-- </main> -->
+    @media (max-width: 768px) {
+      .footer-body { padding: 48px 0 36px; }
+    }
+  </style>
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
 
-            <!-- Footer Start -->
-            <footer class="footer bg-dark text-light pt-5">
-                <div class="container">
-                    <div class="row">
-                        <div class="col-md-6 col-lg-3 mb-4">
-                            <h5 class="text-primary mb-3">Office Contact</h5>
-                            <p><i class="fa fa-map-marker-alt mr-2"></i>Boko Street, Dar Es Salaam, Tanzania</p>
-                            <p><i class="fa fa-phone-alt mr-2"></i>0629712678</p>
-                            <p><i class="fa fa-envelope mr-2"></i>info@JamiiTek.com</p>
-                            <div class="footer-social mt-3">
-                                <a href="#" class="text-light mr-3"><i class="fab fa-twitter"></i></a>
-                                <a href="#" class="text-light mr-3"><i class="fab fa-facebook-f"></i></a>
-                                <a href="#" class="text-light mr-3"><i class="fab fa-youtube"></i></a>
-                                <a href="#" class="text-light mr-3"><i class="fab fa-instagram"></i></a>
-                                <a href="#" class="text-light"><i class="fab fa-linkedin-in"></i></a>
-                            </div>
-                        </div>
-                        <div class="col-md-6 col-lg-3 mb-4">
-                            <h5 class="text-primary mb-3">Services Areas</h5>
-                            <ul class="list-unstyled">
-                                <li><a href="#" class="text-light">Website Development</a></li>
-                                <li><a href="#" class="text-light">Mobile App Development</a></li>
-                                <li><a href="#" class="text-light">Network Installations</a></li>
-                                <li><a href="#" class="text-light">Hosting <em>Support</em></a></li>
-                            </ul>
-                        </div>
-                        <div class="col-md-6 col-lg-3 mb-4">
-                            <h5 class="text-primary mb-3">Useful Pages</h5>
-                            <ul class="list-unstyled">
-                                <li><a href="{% url 'About' %}" class="text-light">About Us</a></li>
-                                <li><a href="{% url 'contact' %}" class="text-light">Contact Us</a></li>
-                                <li><a href="{% url 'service' %}" class="text-light">Services</a></li>
-                            </ul>
-                        </div>
-                        <div class="col-md-6 col-lg-3 mb-4">
-                            <h5 class="text-primary mb-3">Newsletter</h5>
-                            <p>Send us a message</p>
-                            <form class="form-inline">
-                                <div class="input-group">
-                                    <input type="email" class="form-control" placeholder="Email here" aria-label="Email">
-                                    <div class="input-group-append">
-                                        <button class="btn btn-primary" type="submit">Submit</button>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-                <div class="container border-top border-secondary pt-3 mt-3">
-                    <div class="row">
-                        <div class="col-md-6 text-left text-light">
-                            <small>&copy; <a href="{% url 'admin:index' %}" class="text-light">JamiiTek Company</a>, All Rights Reserved.</small>
-                        </div>
-                        <div class="col-md-6 text-right">
-                            <small><a href="https://htmlcodex.com" class="text-light"></a></small>
-                        </div>
-                    </div>
-                </div>
-            </footer>
-            <!-- Footer End -->
+<!-- NAV -->
+<nav id="site-nav">
+  <div class="nav-inner">
+    <a href="{% url 'home' %}" class="nav-logo">Jamii<em>Tek</em></a>
+    <ul class="nav-menu">
+      <li><a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}">Home</a></li>
+      <li><a href="{% url 'About' %}" class="{% if request.resolver_match.url_name == 'About' %}active{% endif %}">About</a></li>
+      <li><a href="{% url 'service' %}" class="{% if request.resolver_match.url_name == 'service' %}active{% endif %}">Services</a></li>
+      <li><a href="{% url 'contact' %}" class="{% if request.resolver_match.url_name == 'contact' %}active{% endif %}">Contact</a></li>
+      <li><a href="{% url 'select_website' %}" class="nav-cta">Get a Quote</a></li>
+    </ul>
+    <button class="nav-burger" id="burger" aria-label="Menu"><span></span><span></span><span></span></button>
+  </div>
+</nav>
 
-            <a href="#" class="back-to-top"><i class="fa fa-chevron-up"></i></a>
+<!-- MOBILE NAV -->
+<div id="mob-nav">
+  <a href="{% url 'home' %}">Home</a>
+  <a href="{% url 'About' %}">About</a>
+  <a href="{% url 'service' %}">Services</a>
+  <a href="{% url 'contact' %}">Contact</a>
+  <a href="{% url 'select_website' %}" class="mob-cta">Get a Quote →</a>
+</div>
+
+{% block content %}{% endblock %}
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-body">
+    <div class="container">
+      <div class="row g-5">
+        <div class="col-lg-4">
+          <div class="f-brand">Jamii<em>Tek</em></div>
+          <p class="f-tagline">We design and build modern digital products — websites, web applications, and custom software — for businesses across Tanzania and East Africa.</p>
+          <div class="f-socials">
+            <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+            <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+          </div>
         </div>
+        <div class="col-6 col-lg-2">
+          <div class="f-col-title">Company</div>
+          <ul class="f-links">
+            <li><a href="{% url 'About' %}">About Us</a></li>
+            <li><a href="{% url 'service' %}">Services</a></li>
+            <li><a href="{% url 'contact' %}">Contact</a></li>
+            <li><a href="{% url 'select_website' %}">Get a Quote</a></li>
+          </ul>
+        </div>
+        <div class="col-6 col-lg-2">
+          <div class="f-col-title">Services</div>
+          <ul class="f-links">
+            <li><a href="#">Web Development</a></li>
+            <li><a href="#">Mobile Apps</a></li>
+            <li><a href="#">Web Hosting</a></li>
+            <li><a href="#">System Integration</a></li>
+          </ul>
+        </div>
+        <div class="col-lg-4">
+          <div class="f-col-title">Stay Updated</div>
+          <p style="color:rgba(255,255,255,0.35);font-size:14px;margin-bottom:16px">Get notified about new services and tech insights from our team.</p>
+          <input type="email" class="f-nl-input" placeholder="Your email address">
+          <button class="f-nl-btn">Subscribe Now</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer-divide"></div>
+  <div class="footer-base">
+    <div class="container d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
+      <p class="f-copy mb-0">&copy; {% now "Y" %} JamiiTek Technologies. All rights reserved.</p>
+      <div class="f-legal">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Use</a>
+      </div>
+    </div>
+  </div>
+</footer>
 
-        <!-- JavaScript Libraries -->
-        <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
-        <script src="{% static 'lib/easing/easing.min.js' %}"></script>
-        <script src="{% static 'lib/wow/wow.min.js' %}"></script>
-        <script src="{% static 'lib/owlcarousel/owl.carousel.min.js' %}"></script>
-        <script src="{% static 'lib/isotope/isotope.pkgd.min.js' %}"></script>
-        <script src="{% static 'lib/lightbox/js/lightbox.min.js' %}"></script>
-        <script src="{% static 'lib/waypoints/waypoints.min.js' %}"></script>
-        <script src="{% static 'lib/counterup/counterup.min.js' %}"></script>
-        <script src="{% static 'lib/slick/slick.min.js' %}"></script>
+<a href="#" id="back-top" aria-label="Back to top"><i class="fas fa-chevron-up"></i></a>
 
-        <!-- Template Javascript -->
-        <script src="{% static 'js/main.js' %}"></script>
-
-        {% block extra_js %}{% endblock %}
-    </body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+<script>
+  // Nav pin on scroll
+  const nav = document.getElementById('site-nav');
+  const bt = document.getElementById('back-top');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('pinned', scrollY > 50);
+    bt.classList.toggle('show', scrollY > 500);
+  }, { passive: true });
+  // Mobile burger
+  const burger = document.getElementById('burger');
+  const mob = document.getElementById('mob-nav');
+  burger.addEventListener('click', () => {
+    const open = mob.classList.toggle('open');
+    burger.classList.toggle('open', open);
+    document.body.style.overflow = open ? 'hidden' : '';
+  });
+  mob.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+    mob.classList.remove('open'); burger.classList.remove('open');
+    document.body.style.overflow = '';
+  }));
+  // Back to top smooth
+  bt.addEventListener('click', e => { e.preventDefault(); scrollTo({ top: 0, behavior: 'smooth' }); });
+</script>
+{% block extra_js %}{% endblock %}
+</body>
 </html>

@@ -1,0 +1,89 @@
+{% extends 'management/base.html' %}
+{% block title %}Send Message — {{ website.name }}{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-7">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px">
+      <a href="{% url 'website_detail' website.pk %}" style="width:36px;height:36px;border-radius:9px;background:#21262d;color:#8b949e;display:flex;align-items:center;justify-content:center;text-decoration:none;transition:all 0.15s" onmouseover="this.style.background='#30363d'" onmouseout="this.style.background='#21262d'"><i class="fas fa-arrow-left"></i></a>
+      <div>
+        <div style="font-size:18px;font-weight:700;color:#e6edf3">Send Message</div>
+        <div style="font-size:13px;color:#8b949e">To: {{ website.client.name }} · {{ website.client.email }}</div>
+      </div>
+    </div>
+
+    <div class="panel-card">
+      <div class="panel-card-body">
+        <div style="margin-bottom:20px">
+          <label class="f-label">Quick Template</label>
+          <div style="display:flex;flex-wrap:wrap;gap:8px">
+            <button type="button" onclick="setTemplate('payment')" class="act-btn act-btn-ghost" style="font-size:12px;padding:7px 12px">💰 Payment Reminder</button>
+            <button type="button" onclick="setTemplate('invoice')" class="act-btn act-btn-ghost" style="font-size:12px;padding:7px 12px">🧾 Invoice</button>
+            <button type="button" onclick="setTemplate('update')" class="act-btn act-btn-ghost" style="font-size:12px;padding:7px 12px">📢 General Update</button>
+            <button type="button" onclick="setTemplate('maintenance')" class="act-btn act-btn-ghost" style="font-size:12px;padding:7px 12px">🔧 Maintenance Notice</button>
+          </div>
+        </div>
+
+        <form method="post">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label class="f-label">Notification Type</label>
+            <select name="notification_type" class="f-input">
+              {% for val, label in notification_types %}<option value="{{ val }}">{{ label }}</option>{% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="f-label">Subject *</label>
+            <input type="text" name="subject" class="f-input" id="msgSubject" required>
+          </div>
+          <div class="mb-4">
+            <label class="f-label">Message *</label>
+            <textarea name="message" class="f-input" id="msgBody" style="min-height:240px" required></textarea>
+          </div>
+          <div style="background:rgba(88,166,255,0.08);border:1px solid rgba(88,166,255,0.15);border-radius:10px;padding:12px 16px;font-size:13px;color:#8b949e;margin-bottom:20px">
+            <i class="fas fa-circle-info" style="color:#58a6ff;margin-right:7px"></i>
+            Email will be sent to <strong style="color:#58a6ff">{{ website.client.email }}</strong> and saved to notification history.
+          </div>
+          <div style="display:flex;gap:10px">
+            <button type="submit" class="act-btn act-btn-blue"><i class="fas fa-paper-plane"></i> Send Message</button>
+            <a href="{% url 'website_detail' website.pk %}" class="act-btn act-btn-ghost">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+const name = "{{ website.client.name }}";
+const site = "{{ website.name }}";
+const url = "{{ website.url }}";
+const monthly = "{{ website.monthly_cost }}";
+const expires = "{{ website.hosting_end_date }}";
+
+const templates = {
+  payment: {
+    subject: `Payment Reminder — Hosting for ${site}`,
+    body: `Dear ${name},\n\nThis is a friendly reminder that the hosting payment for your website (${site}) is due.\n\nHosting end date: ${expires}\nMonthly cost: TZS ${monthly}\n\nPlease make your payment at your earliest convenience to avoid service interruption.\n\nThank you for your continued business.\n\nBest regards,\nJamiiTek Team`
+  },
+  invoice: {
+    subject: `Invoice — Hosting for ${site}`,
+    body: `Dear ${name},\n\nPlease find your hosting invoice below:\n\nWebsite: ${site}\nURL: ${url}\nPeriod: [ADD PERIOD]\nAmount: TZS [ADD AMOUNT]\n\nPayment Methods:\n• M-Pesa: [number]\n• Tigo Pesa: [number]\n• Airtel Money: [number]\n\nReference: [invoice number]\n\nThank you,\nJamiiTek Team`
+  },
+  update: {
+    subject: `Update Notice — ${site}`,
+    body: `Dear ${name},\n\nWe have an important update regarding your website (${site}):\n\n[ADD YOUR MESSAGE HERE]\n\nIf you have any questions, please don't hesitate to reach out.\n\nBest regards,\nJamiiTek Team`
+  },
+  maintenance: {
+    subject: `Scheduled Maintenance — ${site}`,
+    body: `Dear ${name},\n\nWe will be performing scheduled maintenance on your website (${site}) on:\n\nDate: [ADD DATE]\nTime: [ADD TIME]\nExpected duration: [ADD DURATION]\n\nDuring this period, your website may be temporarily unavailable. We apologize for any inconvenience.\n\nBest regards,\nJamiiTek Team`
+  }
+};
+
+function setTemplate(key) {
+  const t = templates[key];
+  document.getElementById('msgSubject').value = t.subject;
+  document.getElementById('msgBody').value = t.body;
+}
+</script>
+{% endblock %}

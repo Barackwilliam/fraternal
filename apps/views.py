@@ -1,10 +1,10 @@
+# app/view.py
 from django.shortcuts import render
 from .models import Question,Service,Team
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.models import User, auth
 from django.contrib.auth.decorators import login_required
-# from .forms import MyContact
 
 
 # Home Page

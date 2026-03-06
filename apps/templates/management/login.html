@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In — JamiiTek Panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Outfit',sans-serif;background:#0d1117;min-height:100vh;display:flex;-webkit-font-smoothing:antialiased}
+    /* Left panel */
+    .left-panel{
+      width:420px;flex-shrink:0;background:#0d1117;border-right:1px solid rgba(255,255,255,0.06);
+      display:flex;flex-direction:column;padding:40px;
+    }
+    .lp-logo{display:flex;align-items:center;gap:10px;margin-bottom:60px}
+    .lp-logo-mark{width:36px;height:36px;border-radius:9px;background:linear-gradient(135deg,#58a6ff,#bc8cff);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;color:#fff}
+    .lp-logo-text{font-size:16px;font-weight:700;color:#e6edf3}
+    .lp-logo-text span{display:block;font-size:11px;font-weight:400;color:#484f58;font-family:'JetBrains Mono',monospace}
+    .lp-heading{font-size:30px;font-weight:800;color:#e6edf3;line-height:1.2;margin-bottom:10px}
+    .lp-sub{font-size:15px;color:#8b949e;margin-bottom:40px;line-height:1.6}
+    /* Form */
+    .f-group{margin-bottom:18px}
+    .f-label{display:block;font-size:13px;font-weight:600;color:#8b949e;margin-bottom:7px}
+    .f-input{
+      width:100%;padding:12px 16px;background:#161b22;
+      border:1px solid #30363d;border-radius:10px;
+      color:#e6edf3;font-family:'Outfit',sans-serif;font-size:15px;
+      outline:none;transition:border-color 0.2s;
+    }
+    .f-input:focus{border-color:#58a6ff;box-shadow:0 0 0 3px rgba(88,166,255,0.1)}
+    .f-input::placeholder{color:#484f58}
+    .f-input-wrap{position:relative}
+    .f-eye{position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;color:#484f58;cursor:pointer;font-size:16px;padding:4px;transition:color 0.2s}
+    .f-eye:hover{color:#8b949e}
+    .error-box{background:rgba(248,81,73,0.1);border:1px solid rgba(248,81,73,0.2);border-radius:10px;padding:12px 16px;color:#f85149;font-size:14px;margin-bottom:20px;display:flex;align-items:center;gap:9px}
+    .submit-btn{
+      width:100%;padding:13px;background:#58a6ff;color:#0d1117;border:none;
+      border-radius:10px;font-family:'Outfit',sans-serif;font-weight:700;font-size:15px;
+      cursor:pointer;transition:all 0.2s;margin-top:4px;
+    }
+    .submit-btn:hover{background:#79c0ff;transform:translateY(-1px)}
+    .lp-footer{margin-top:auto;padding-top:32px}
+    .lp-footer a{color:#484f58;font-size:13px;text-decoration:none;display:block;margin-bottom:7px;transition:color 0.2s}
+    .lp-footer a:hover{color:#8b949e}
+    /* Right visual */
+    .right-panel{
+      flex:1;display:flex;align-items:center;justify-content:center;
+      background:linear-gradient(160deg,#0d1117 0%,#161b22 50%,#0d1117 100%);
+      position:relative;overflow:hidden;padding:40px;
+    }
+    .right-panel::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 60% 40%,rgba(88,166,255,0.12) 0%,transparent 70%)}
+    .right-panel::after{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.03) 1px,transparent 1px);background-size:44px 44px}
+    .right-content{position:relative;z-index:1;text-align:center;max-width:400px}
+    .right-content h2{font-size:32px;font-weight:800;color:#e6edf3;letter-spacing:-0.5px;margin-bottom:14px;line-height:1.25}
+    .right-content p{font-size:15px;color:#8b949e;line-height:1.7;margin-bottom:36px}
+    .right-pills{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+    .right-pill{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:100px;padding:8px 16px;font-size:13px;color:#8b949e;display:flex;align-items:center;gap:7px}
+    .right-pill .dot{width:7px;height:7px;border-radius:50%}
+    @media(max-width:768px){.right-panel{display:none}.left-panel{width:100%;border:none}}
+  </style>
+</head>
+<body>
+  <div class="left-panel">
+    <div class="lp-logo">
+      <div class="lp-logo-mark">J</div>
+      <div class="lp-logo-text">JamiiTek <span>Management Panel</span></div>
+    </div>
+
+    <div>
+      <h1 class="lp-heading">Welcome back,<br>Admin.</h1>
+      <p class="lp-sub">Sign in to manage your client websites, control hosting, and send notifications.</p>
+
+      {% if error %}
+      <div class="error-box"><i class="fas fa-circle-exclamation"></i> {{ error }}</div>
+      {% endif %}
+
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ next }}">
+        <div class="f-group">
+          <label class="f-label" for="username">Username</label>
+          <input type="text" class="f-input" id="username" name="username" placeholder="Enter your username" autofocus required>
+        </div>
+        <div class="f-group">
+          <label class="f-label" for="password">Password</label>
+          <div class="f-input-wrap">
+            <input type="password" class="f-input" id="password" name="password" placeholder="••••••••••" required style="padding-right:46px">
+            <button type="button" class="f-eye" onclick="togglePwd()"><i class="fas fa-eye" id="eyeIcon"></i></button>
+          </div>
+        </div>
+        <button type="submit" class="submit-btn">Sign In <i class="fas fa-arrow-right"></i></button>
+      </form>
+    </div>
+
+    <div class="lp-footer">
+      <a href="{% url 'home' %}"><i class="fas fa-arrow-left fa-xs" style="margin-right:6px"></i> Back to JamiiTek Website</a>
+      <a href="/admin/">Django Admin Panel</a>
+    </div>
+  </div>
+
+  <div class="right-panel">
+    <div class="right-content">
+      <h2>Full Control Over<br>Every Website</h2>
+      <p>Suspend, restore, schedule actions, manage payments, and send notifications — all from one powerful dashboard.</p>
+      <div class="right-pills">
+        <div class="right-pill"><span class="dot" style="background:#3fb950"></span> Website Monitoring</div>
+        <div class="right-pill"><span class="dot" style="background:#58a6ff"></span> Payment Tracking</div>
+        <div class="right-pill"><span class="dot" style="background:#bc8cff"></span> Auto-Scheduler</div>
+        <div class="right-pill"><span class="dot" style="background:#d29922"></span> Email Notifications</div>
+        <div class="right-pill"><span class="dot" style="background:#f85149"></span> One-Click Suspend</div>
+        <div class="right-pill"><span class="dot" style="background:#3fb950"></span> Feature Controls</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function togglePwd() {
+      const inp = document.getElementById('password');
+      const ico = document.getElementById('eyeIcon');
+      if (inp.type === 'password') { inp.type = 'text'; ico.className = 'fas fa-eye-slash'; }
+      else { inp.type = 'password'; ico.className = 'fas fa-eye'; }
+    }
+  </script>
+</body>
+</html>
