@@ -432,69 +432,76 @@ def site_status_api(request, api_key):
             'features': features,
             'site_name': website.name,
         }
-        return JsonResponse(data)
+        resp = JsonResponse(data)
+        resp['Access-Control-Allow-Origin'] = '*'
+        resp['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+        return resp
 
     except ManagedWebsite.DoesNotExist:
-        return JsonResponse({'status': 'active', 'is_active': True, 'features': {}}, status=200)
+        r = JsonResponse({'status': 'active', 'is_active': True, 'features': {}}, status=200)
+        r['Access-Control-Allow-Origin'] = '*'
+        return r
 
 
 @require_GET
+@require_GET
 def get_js_snippet(request, api_key):
-    """Returns JS snippet for static websites"""
+    """Returns JS snippet for static websites to enforce suspension/maintenance."""
     try:
         website = ManagedWebsite.objects.get(api_key=api_key)
     except ManagedWebsite.DoesNotExist:
-        return HttpResponse("// Invalid API key", content_type='application/javascript')
+        return HttpResponse("// JamiiTek: Invalid API key", content_type='application/javascript')
 
     api_url = request.build_absolute_uri(f'/api/site-status/{api_key}/')
-    
-    js_code = f"""
-/* JamiiTek Website Status Checker - {website.name} */
-(function() {{
-    var JAMIITEK_API = '{api_url}';
-    
-    function checkStatus() {{
-        fetch(JAMIITEK_API)
-            .then(function(r) {{ return r.json(); }})
-            .then(function(data) {{
-                if (!data.is_active) {{
-                    showSuspensionPage(data.suspension_message || 'Huduma imesimamishwa kwa muda.');
-                }}
-                // Store features globally for app use
-                window.JAMIITEK_FEATURES = data.features || {{}};
-                
-                // Trigger custom event
-                document.dispatchEvent(new CustomEvent('jamiitek:status', {{ detail: data }}));
-            }})
-            .catch(function(err) {{
-                console.warn('JamiiTek: Status check failed', err);
-            }});
-    }}
-    
-    function showSuspensionPage(msg) {{
-        document.body.innerHTML = `
-        <div style="
-            display:flex; flex-direction:column; align-items:center; justify-content:center;
-            min-height:100vh; background:#f8f9fa; font-family:Arial,sans-serif; text-align:center; padding:20px;">
-            <div style="background:white; padding:50px; border-radius:12px; box-shadow:0 4px 20px rgba(0,0,0,0.1); max-width:500px;">
-                <div style="font-size:64px; margin-bottom:20px;">🔒</div>
-                <h1 style="color:#dc3545; margin-bottom:15px;">Huduma Imesimamishwa</h1>
-                <p style="color:#6c757d; font-size:16px; line-height:1.6;">${{msg}}</p>
-                <p style="color:#adb5bd; font-size:13px; margin-top:30px;">Powered by JamiiTek</p>
-            </div>
-        </div>`;
-    }}
-    
-    // Check on page load
-    if (document.readyState === 'loading') {{
-        document.addEventListener('DOMContentLoaded', checkStatus);
-    }} else {{
-        checkStatus();
-    }}
-}})();
-""".strip()
 
-    return HttpResponse(js_code, content_type='application/javascript')
+    js_code = f"""/* JamiiTek Status Guard - {website.name} */
+(function() {{
+  var API = '{api_url}';
+
+  // Hide page content immediately to prevent flash before check
+  var style = document.createElement('style');
+  style.id = 'jt-hide';
+  style.textContent = 'body{{visibility:hidden!important}}';
+  document.head.appendChild(style);
+
+  function revealPage() {{
+    var s = document.getElementById('jt-hide');
+    if (s) s.remove();
+  }}
+
+  function blockPage(msg, status) {{
+    var bg = status === 'maintenance' ? '#0f172a' : '#0f172a';
+    var icon = status === 'maintenance' ? '🔧' : '🔒';
+    var title = status === 'maintenance' ? 'Under Maintenance' : 'Service Suspended';
+    var color = status === 'maintenance' ? '#f59e0b' : '#ef4444';
+    document.documentElement.style.cssText = 'height:100%';
+    document.body.style.cssText = 'margin:0;padding:0;height:100%;visibility:visible';
+    document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#0f172a;font-family:system-ui,sans-serif;padding:20px"><div style="text-align:center;max-width:480px"><div style="font-size:72px;margin-bottom:24px">' + icon + '</div><h1 style="font-size:28px;font-weight:800;color:#fff;margin-bottom:16px;letter-spacing:-0.5px">' + title + '</h1><p style="font-size:16px;color:rgba(255,255,255,0.55);line-height:1.7;margin-bottom:32px">' + (msg || 'This website is temporarily unavailable. Please contact the administrator.') + '</p><div style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);padding:8px 16px;border-radius:100px;font-size:12px;color:rgba(255,255,255,0.35)">Managed by JamiiTek</div></div></div>';
+  }}
+
+  fetch(API, {{cache: 'no-store'}})
+    .then(function(r) {{ return r.json(); }})
+    .then(function(data) {{
+      window.JAMIITEK = data;
+      document.dispatchEvent(new CustomEvent('jamiitek:ready', {{detail: data}}));
+      if (!data.is_active) {{
+        blockPage(data.suspension_message, data.status);
+      }} else {{
+        revealPage();
+      }}
+    }})
+    .catch(function() {{
+      // On network error, allow page to show (fail open)
+      revealPage();
+    }});
+}})();""".strip()
+
+    resp = HttpResponse(js_code, content_type='application/javascript')
+    resp['Access-Control-Allow-Origin'] = '*'
+    resp['Cache-Control'] = 'no-store, no-cache, must-revalidate'
+    return resp
+
+
 
 
 # ─── HELPER ─────────────────────────────────────────────────
