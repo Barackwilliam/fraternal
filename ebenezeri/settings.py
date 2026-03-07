@@ -16,7 +16,7 @@ WEBSITE_TYPES_DIR = BASE_DIR / 'apps' / 'website_types'
 SECRET_KEY = os.getenv('SECRET_KEY', 'fallback-secret-key')
 DEBUG = False
 # DEBUG = os.getenv('DEBUG', 'False') == 'True'
-ALLOWED_HOSTS = ["https://www.jamiitek.com"]
+ALLOWED_HOSTS = ["*"]
 
 # Application definition
 INSTALLED_APPS = [
