@@ -1,182 +1,157 @@
 {% extends 'management/base.html' %}
 {% block title %}Dashboard{% endblock %}
+{% block extra_css %}
+<style>
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:24px}
+.pulse{animation:pulse-glow 2s ease-in-out infinite}
+@keyframes pulse-glow{0%,100%{box-shadow:0 0 0 rgba(0,212,255,0)}50%{box-shadow:0 0 20px rgba(0,212,255,0.15)}}
+</style>
+{% endblock %}
 {% block content %}
 
-<!-- STAT CARDS -->
-<div class="row g-3 mb-4">
-  <div class="col-6 col-xl-3">
-    <div class="stat-card">
-      <div class="sc-top">
-        <div>
-          <div class="sc-val">{{ stats.total }}</div>
-          <div class="sc-label">Total Websites</div>
-        </div>
-        <div class="sc-icon" style="background:rgba(88,166,255,0.1);color:#58a6ff"><i class="fas fa-globe"></i></div>
-      </div>
-    </div>
+<!-- WELCOME -->
+<div style="display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:24px;flex-wrap:wrap">
+  <div>
+    <h1 style="font-family:var(--head);font-size:24px;font-weight:800;color:var(--text);margin-bottom:3px">Command Center</h1>
+    <div style="font-family:var(--mono);font-size:12px;color:var(--text-3)">System operational — {% now "d M Y, H:i" %}</div>
   </div>
-  <div class="col-6 col-xl-3">
-    <div class="stat-card">
-      <div class="sc-top">
-        <div>
-          <div class="sc-val" style="color:#3fb950">{{ stats.active }}</div>
-          <div class="sc-label">Active</div>
-        </div>
-        <div class="sc-icon" style="background:rgba(63,185,80,0.1);color:#3fb950"><i class="fas fa-circle-check"></i></div>
-      </div>
-      <div class="sc-trend up"><i class="fas fa-arrow-up fa-xs"></i> Running</div>
-    </div>
-  </div>
-  <div class="col-6 col-xl-3">
-    <div class="stat-card">
-      <div class="sc-top">
-        <div>
-          <div class="sc-val" style="color:#f85149">{{ stats.suspended }}</div>
-          <div class="sc-label">Suspended</div>
-        </div>
-        <div class="sc-icon" style="background:rgba(248,81,73,0.1);color:#f85149"><i class="fas fa-ban"></i></div>
-      </div>
-      {% if stats.suspended > 0 %}<div class="sc-trend down"><i class="fas fa-circle-exclamation fa-xs"></i> Needs attention</div>{% endif %}
-    </div>
-  </div>
-  <div class="col-6 col-xl-3">
-    <div class="stat-card">
-      <div class="sc-top">
-        <div>
-          <div class="sc-val" style="color:#d29922">{{ stats.maintenance }}</div>
-          <div class="sc-label">Maintenance</div>
-        </div>
-        <div class="sc-icon" style="background:rgba(210,153,34,0.1);color:#d29922"><i class="fas fa-wrench"></i></div>
-      </div>
-    </div>
-  </div>
+  <a href="{% url 'website_add' %}" class="jt-btn btn-cyan"><i class="fas fa-plus"></i> Add Website</a>
 </div>
 
 <!-- ALERTS -->
-{% if overdue %}
-<div style="background:rgba(248,81,73,0.08);border:1px solid rgba(248,81,73,0.2);border-radius:12px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-  <div style="width:32px;height:32px;border-radius:8px;background:rgba(248,81,73,0.15);display:flex;align-items:center;justify-content:center;color:#f85149;flex-shrink:0"><i class="fas fa-triangle-exclamation"></i></div>
-  <div style="flex:1;min-width:200px">
-    <strong style="color:#f85149;font-size:14px">{{ overdue|length }} website{{ overdue|length|pluralize }} past hosting expiry</strong>
-    <div style="font-size:13px;color:#8b949e;margin-top:3px">
-      {% for w in overdue %}<a href="{% url 'website_detail' w.pk %}" style="color:#f85149;text-decoration:underline;text-underline-offset:2px;margin-right:12px">{{ w.name }}</a>{% endfor %}
-    </div>
+{% for w in overdue %}
+<div class="jt-alert jt-alert-danger" style="margin-bottom:8px">
+  <i class="fas fa-triangle-exclamation fa-sm" style="flex-shrink:0;margin-top:3px"></i>
+  <span><strong>{{ w.name }}</strong> — hosting expired on {{ w.hosting_end_date|date:"d M Y" }}.
+  <a href="{% url 'website_detail' w.pk %}" style="color:var(--red);font-weight:700;text-decoration:underline;margin-left:8px">Act Now →</a></span>
+</div>
+{% endfor %}
+{% for w in expiring_soon %}
+<div class="jt-alert jt-alert-warning" style="margin-bottom:8px">
+  <i class="fas fa-clock fa-sm" style="flex-shrink:0;margin-top:3px"></i>
+  <span><strong>{{ w.name }}</strong> expires in {{ w.days_until_expiry }} day(s) — {{ w.hosting_end_date|date:"d M Y" }}.
+  <a href="{% url 'website_detail' w.pk %}" style="color:var(--yellow);font-weight:700;text-decoration:underline;margin-left:8px">Review →</a></span>
+</div>
+{% endfor %}
+
+<!-- STATS -->
+<div class="stat-grid">
+  <div class="stat-card" style="--accent:var(--cyan)">
+    <div class="sc-icon" style="background:var(--cyan-d);color:var(--cyan)"><i class="fas fa-globe"></i></div>
+    <div class="sc-val" style="color:var(--cyan)">{{ stats.total }}</div>
+    <div class="sc-label">Total Sites</div>
+  </div>
+  <div class="stat-card" style="--accent:var(--green)">
+    <div class="sc-icon" style="background:var(--green-d);color:var(--green)"><i class="fas fa-circle-check"></i></div>
+    <div class="sc-val" style="color:var(--green)">{{ stats.active }}</div>
+    <div class="sc-label">Active</div>
+  </div>
+  <div class="stat-card" style="--accent:var(--red)">
+    <div class="sc-icon" style="background:var(--red-d);color:var(--red)"><i class="fas fa-ban"></i></div>
+    <div class="sc-val" style="color:var(--red)">{{ stats.suspended }}</div>
+    <div class="sc-label">Suspended</div>
+  </div>
+  <div class="stat-card" style="--accent:var(--yellow)">
+    <div class="sc-icon" style="background:var(--yellow-d);color:var(--yellow)"><i class="fas fa-wrench"></i></div>
+    <div class="sc-val" style="color:var(--yellow)">{{ stats.maintenance }}</div>
+    <div class="sc-label">Maintenance</div>
+  </div>
+  <div class="stat-card" style="--accent:var(--green)">
+    <div class="sc-icon" style="background:var(--green-d);color:var(--green)"><i class="fas fa-coins"></i></div>
+    <div class="sc-val" style="font-size:18px;color:var(--green)">{{ stats.revenue_month|floatformat:0 }}</div>
+    <div class="sc-label">Revenue This Month</div>
+  </div>
+  <div class="stat-card" style="--accent:var(--purple)">
+    <div class="sc-icon" style="background:var(--purple-d);color:var(--purple)"><i class="fas fa-wallet"></i></div>
+    <div class="sc-val" style="font-size:18px;color:var(--purple)">{{ stats.revenue_total|floatformat:0 }}</div>
+    <div class="sc-label">Total Revenue</div>
   </div>
 </div>
-{% endif %}
 
-{% if expiring_soon %}
-<div style="background:rgba(210,153,34,0.08);border:1px solid rgba(210,153,34,0.2);border-radius:12px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-  <div style="width:32px;height:32px;border-radius:8px;background:rgba(210,153,34,0.15);display:flex;align-items:center;justify-content:center;color:#d29922;flex-shrink:0"><i class="fas fa-clock"></i></div>
-  <div style="flex:1;min-width:200px">
-    <strong style="color:#d29922;font-size:14px">{{ expiring_soon|length }} website{{ expiring_soon|length|pluralize }} expiring within 14 days</strong>
-    <div style="font-size:13px;color:#8b949e;margin-top:3px">
-      {% for w in expiring_soon %}<a href="{% url 'website_detail' w.pk %}" style="color:#d29922;text-decoration:underline;text-underline-offset:2px;margin-right:12px">{{ w.name }} ({{ w.days_until_expiry }}d)</a>{% endfor %}
-    </div>
-  </div>
-</div>
-{% endif %}
-
-<!-- MAIN GRID -->
 <div class="row g-3">
-  <!-- WEBSITES TABLE -->
+  <!-- Websites table -->
   <div class="col-lg-8">
-    <div class="panel-card">
-      <div class="panel-card-head">
-        <span class="panel-card-title"><i class="fas fa-globe" style="color:#58a6ff"></i> All Websites</span>
-        <a href="{% url 'website_list' %}" class="act-btn act-btn-ghost" style="font-size:12px;padding:6px 12px">View All</a>
+    <div class="jt-card" style="padding:0">
+      <div class="jt-card-head">
+        <span class="jt-card-title"><i class="fas fa-globe" style="color:var(--cyan)"></i> Recent Websites</span>
+        <a href="{% url 'website_list' %}" style="font-family:var(--mono);font-size:11px;color:var(--cyan);text-decoration:none">View All →</a>
       </div>
-      <div class="panel-card-body-0">
-        <div style="overflow-x:auto">
-          <table class="panel-table">
-            <thead>
-              <tr>
-                <th>Website</th>
-                <th>Client</th>
-                <th>Status</th>
-                <th>Expires</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for w in websites %}
-              <tr>
-                <td>
-                  <div style="font-weight:600;color:#e6edf3;font-size:14px">{{ w.name }}</div>
-                  <div style="font-size:12px;color:#484f58;font-family:var(--mono)">{{ w.get_site_type_display }}</div>
-                </td>
-                <td style="color:#8b949e;font-size:13px">{{ w.client.name }}</td>
-                <td>
-                  <span class="badge-panel badge-{{ w.status }}">
-                    {% if w.status == 'active' %}<i class="fas fa-circle fa-xs"></i> Active
-                    {% elif w.status == 'suspended' %}<i class="fas fa-ban fa-xs"></i> Suspended
-                    {% elif w.status == 'maintenance' %}<i class="fas fa-wrench fa-xs"></i> Maintenance
-                    {% else %}<i class="fas fa-circle-xmark fa-xs"></i> Terminated{% endif %}
-                  </span>
-                </td>
-                <td>
-                  <span style="font-family:var(--mono);font-size:12px;{% if w.is_overdue %}color:#f85149{% elif w.days_until_expiry <= 7 %}color:#d29922{% else %}color:#484f58{% endif %}">
-                    {{ w.hosting_end_date|date:"d M Y" }}{% if w.is_overdue %} ⚠{% endif %}
-                  </span>
-                </td>
-                <td style="text-align:right">
-                  <a href="{% url 'website_detail' w.pk %}" class="act-icon act-icon-blue" title="Manage"><i class="fas fa-sliders"></i></a>
-                </td>
-              </tr>
-              {% empty %}
-              <tr><td colspan="5"><div class="empty-state"><div class="es-icon">🌐</div><p>No websites yet. <a href="{% url 'website_add' %}" style="color:#58a6ff">Add your first one.</a></p></div></td></tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
+      <div style="overflow-x:auto">
+        <table class="jt-table">
+          <thead><tr><th>Website</th><th>Client</th><th>Status</th><th>Expires</th><th>Monthly</th><th></th></tr></thead>
+          <tbody>
+            {% for w in websites %}
+            <tr>
+              <td>
+                <div style="font-weight:600;color:var(--text)">{{ w.name }}</div>
+                <a href="{{ w.url }}" target="_blank" style="font-family:var(--mono);font-size:11px;color:var(--text-3);text-decoration:none">{{ w.url|truncatechars:32 }}</a>
+              </td>
+              <td style="font-size:13px;color:var(--text-2)">{{ w.client.name }}</td>
+              <td><span class="jt-badge b-{{ w.status }}">{{ w.status|capfirst }}</span></td>
+              <td style="font-family:var(--mono);font-size:12px;{% if w.is_overdue %}color:var(--red){% elif w.days_until_expiry <= 7 %}color:var(--yellow){% else %}color:var(--text-3){% endif %}">
+                {{ w.hosting_end_date|date:"d M Y" }}
+              </td>
+              <td style="font-family:var(--mono);font-size:12px;color:var(--text-2)">{{ w.monthly_cost|floatformat:0 }}</td>
+              <td><a href="{% url 'website_detail' w.pk %}" class="jt-btn btn-ghost" style="font-size:11px;padding:6px 12px">Manage</a></td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6"><div class="jt-empty"><div class="ei">🌐</div><p>No websites yet</p></div></td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
 
-  <!-- RIGHT COLUMN -->
+  <!-- Right column -->
   <div class="col-lg-4">
     <!-- Pending Actions -->
-    <div class="panel-card mb-3">
-      <div class="panel-card-head">
-        <span class="panel-card-title"><i class="fas fa-clock" style="color:#d29922"></i> Scheduled Actions</span>
-        <span style="font-family:var(--mono);font-size:12px;color:#484f58">{{ pending_actions|length }} pending</span>
+    <div class="jt-card mb-3" style="padding:0">
+      <div class="jt-card-head">
+        <span class="jt-card-title"><i class="fas fa-clock" style="color:var(--yellow)"></i> Pending Actions</span>
+        <span style="font-family:var(--mono);font-size:11px;color:var(--text-3)">{{ pending_actions|length }}</span>
       </div>
-      <div class="panel-card-body-0">
-        {% for action in pending_actions %}
-        <div style="padding:14px 16px;border-bottom:1px solid #21262d;display:flex;align-items:flex-start;gap:11px">
-          <div style="width:8px;height:8px;border-radius:50%;background:#d29922;margin-top:5px;flex-shrink:0"></div>
-          <div style="flex:1;min-width:0">
-            <div style="font-size:13px;font-weight:600;color:#e6edf3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ action.website.name }}</div>
-            <div style="font-size:12px;color:#8b949e">{{ action.get_action_type_display }}</div>
-            <div style="font-family:var(--mono);font-size:11px;color:#484f58;margin-top:2px">{{ action.scheduled_at|date:"d M, H:i" }}</div>
-          </div>
-          <a href="{% url 'cancel_scheduled_action' action.pk %}" onclick="return confirm('Cancel this action?')" style="color:#484f58;font-size:13px;padding:2px 6px;border-radius:6px;transition:color 0.2s" onmouseover="this.style.color='#f85149'" onmouseout="this.style.color='#484f58'"><i class="fas fa-times"></i></a>
+      {% for a in pending_actions %}
+      <div style="padding:12px 16px;border-bottom:1px solid var(--border)">
+        <div style="font-size:13px;font-weight:600;color:var(--text)">{{ a.get_action_type_display }}</div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--cyan)">{{ a.website.name }} · {{ a.scheduled_at|date:"d M H:i" }}</div>
+      </div>
+      {% empty %}
+      <div class="jt-empty" style="padding:20px"><div class="ei" style="font-size:24px">⏱</div><p>No pending actions</p></div>
+      {% endfor %}
+    </div>
+
+    <!-- Recent Payments -->
+    <div class="jt-card mb-3" style="padding:0">
+      <div class="jt-card-head">
+        <span class="jt-card-title"><i class="fas fa-receipt" style="color:var(--green)"></i> Recent Payments</span>
+      </div>
+      {% for p in recent_payments %}
+      <div style="padding:11px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div style="font-family:var(--mono);font-size:13px;font-weight:600;color:var(--green)">TZS {{ p.amount|floatformat:0 }}</div>
+          <div style="font-size:11px;color:var(--text-3)">{{ p.website.name }}</div>
         </div>
-        {% empty %}
-        <div class="empty-state" style="padding:28px 16px"><div class="es-icon" style="font-size:24px">⏱</div><p>No scheduled actions</p></div>
-        {% endfor %}
+        <div style="font-family:var(--mono);font-size:11px;color:var(--text-3)">{{ p.payment_date|date:"d M" }}</div>
       </div>
+      {% empty %}
+      <div class="jt-empty" style="padding:20px"><div class="ei" style="font-size:24px">💳</div><p>No payments yet</p></div>
+      {% endfor %}
     </div>
 
     <!-- Recent Notifications -->
-    <div class="panel-card">
-      <div class="panel-card-head">
-        <span class="panel-card-title"><i class="fas fa-bell" style="color:#58a6ff"></i> Recent Notifications</span>
+    <div class="jt-card" style="padding:0">
+      <div class="jt-card-head">
+        <span class="jt-card-title"><i class="fas fa-envelope" style="color:var(--cyan)"></i> Messages</span>
       </div>
-      <div class="panel-card-body-0">
-        {% for n in recent_notifications %}
-        <div style="padding:12px 16px;border-bottom:1px solid #21262d">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
-            <div style="font-size:13px;font-weight:600;color:#e6edf3;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ n.client.name }}</div>
-            <div style="font-family:var(--mono);font-size:11px;color:#484f58;flex-shrink:0">{{ n.sent_at|date:"d M" }}</div>
-          </div>
-          <div style="font-size:12px;color:#8b949e;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ n.subject }}</div>
-          {% if n.email_sent %}<span style="font-family:var(--mono);font-size:10px;background:rgba(63,185,80,0.1);color:#3fb950;padding:2px 7px;border-radius:5px;margin-top:4px;display:inline-block">✓ email sent</span>{% endif %}
-        </div>
-        {% empty %}
-        <div class="empty-state" style="padding:28px 16px"><div class="es-icon" style="font-size:24px">🔔</div><p>No notifications sent yet</p></div>
-        {% endfor %}
+      {% for n in recent_notifications %}
+      <div style="padding:11px 16px;border-bottom:1px solid var(--border)">
+        <div style="font-size:12px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ n.subject|truncatechars:34 }}</div>
+        <div style="font-size:11px;color:var(--text-3);margin-top:2px">{{ n.client.name }} · {{ n.sent_at|date:"d M" }}</div>
       </div>
+      {% empty %}
+      <div class="jt-empty" style="padding:20px"><div class="ei" style="font-size:24px">📭</div><p>No messages</p></div>
+      {% endfor %}
     </div>
   </div>
 </div>

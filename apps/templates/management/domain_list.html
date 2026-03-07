@@ -1,0 +1,68 @@
+{% extends 'management/base.html' %}
+{% block title %}Domain Management{% endblock %}
+{% block content %}
+<div style="display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px;flex-wrap:wrap">
+  <div>
+    <h1 style="font-family:var(--head);font-size:22px;font-weight:800;color:var(--text)">Domain Management</h1>
+    <div style="font-family:var(--mono);font-size:12px;color:var(--text-3)">{{ domains|length }} domain{{ domains|length|pluralize }} tracked</div>
+  </div>
+  <a href="{% url 'domain_add' %}" class="jt-btn btn-cyan"><i class="fas fa-plus"></i> Add Domain</a>
+</div>
+
+{% if expired %}
+<div class="jt-alert jt-alert-danger mb-3">
+  <i class="fas fa-triangle-exclamation" style="flex-shrink:0;margin-top:2px"></i>
+  <div><strong>{{ expired|length }} domain(s) EXPIRED!</strong>&nbsp;
+    {% for d in expired %}<a href="{% url 'domain_detail' d.pk %}" style="color:var(--red);font-weight:700;text-decoration:underline">{{ d.domain_name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}
+  </div>
+</div>
+{% endif %}
+{% if expiring %}
+<div class="jt-alert jt-alert-warning mb-3">
+  <i class="fas fa-clock" style="flex-shrink:0;margin-top:2px"></i>
+  <div><strong>{{ expiring|length }} domain(s) expiring within 30 days.</strong>&nbsp;
+    {% for d in expiring %}<a href="{% url 'domain_detail' d.pk %}" style="color:var(--yellow);font-weight:700">{{ d.domain_name }}</a> ({{ d.days_until_expiry }}d){% if not forloop.last %}, {% endif %}{% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<div class="jt-card" style="padding:0">
+  <div style="overflow-x:auto">
+    <table class="jt-table">
+      <thead>
+        <tr><th>Domain</th><th>Website / Client</th><th>Registrar</th><th>Expires</th><th>Renewal Cost</th><th>Status</th><th></th></tr>
+      </thead>
+      <tbody>
+        {% for d in domains %}
+        <tr>
+          <td>
+            <div style="font-family:var(--mono);font-weight:700;color:var(--cyan)">{{ d.domain_name }}</div>
+            <div style="font-size:11px;color:var(--text-3);margin-top:2px">{% if d.auto_renew %}<span style="color:var(--green)">↻ auto-renew on</span>{% else %}manual renewal{% endif %}</div>
+          </td>
+          <td>
+            <div style="font-size:13px;font-weight:600;color:var(--text)">{{ d.website.name }}</div>
+            <div style="font-size:11px;color:var(--text-3)">{{ d.website.client.name }}</div>
+          </td>
+          <td style="font-size:13px;color:var(--text-2)">{{ d.get_registrar_display }}</td>
+          <td>
+            <div style="font-family:var(--mono);font-size:13px;{% if d.is_expired %}color:var(--red){% elif d.days_until_expiry <= 30 %}color:var(--yellow){% else %}color:var(--text-2){% endif %}">{{ d.expiry_date|date:"d M Y" }}</div>
+            <div style="font-size:11px;{% if d.is_expired %}color:var(--red){% elif d.days_until_expiry <= 30 %}color:var(--yellow){% else %}color:var(--text-3){% endif %}">
+              {% if d.is_expired %}EXPIRED{% else %}{{ d.days_until_expiry }}d remaining{% endif %}
+            </div>
+          </td>
+          <td style="font-family:var(--mono);font-size:13px;color:var(--green)">TZS {{ d.renewal_cost|floatformat:0 }}</td>
+          <td>
+            <span class="jt-badge {% if d.is_expired %}b-suspended{% elif d.days_until_expiry <= 30 %}b-maintenance{% else %}b-active{% endif %}">
+              {% if d.is_expired %}Expired{% elif d.days_until_expiry <= 30 %}Expiring{% else %}Active{% endif %}
+            </span>
+          </td>
+          <td><a href="{% url 'domain_detail' d.pk %}" class="jt-btn btn-ghost" style="font-size:11px;padding:5px 12px">Manage</a></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7"><div class="jt-empty" style="padding:40px"><div class="ei">🌐</div><p>No domains tracked yet. Add your first domain.</p></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

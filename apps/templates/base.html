@@ -75,6 +75,15 @@
       transition: transform 0.2s, box-shadow 0.2s !important;
     }
     .nav-cta:hover { transform: translateY(-1px); box-shadow: 0 0 0 1px rgba(91,110,245,0.7), 0 8px 24px rgba(91,110,245,0.45) !important; }
+    .nav-portal {
+      display:inline-flex; align-items:center; gap:6px;
+      font-size:13px !important; font-weight:600 !important;
+      padding:7px 13px !important; border-radius:8px !important;
+      color:rgba(255,255,255,0.65) !important;
+      border:1px solid rgba(255,255,255,0.14) !important;
+      transition:all 0.2s !important; background:transparent !important;
+    }
+    .nav-portal:hover { color:#fff !important; border-color:rgba(91,110,245,0.45) !important; background:rgba(91,110,245,0.1) !important; }
     .nav-burger { display: none; background: none; border: none; cursor: pointer; padding: 4px; flex-direction: column; gap: 5px; }
     .nav-burger span { display: block; width: 22px; height: 2px; background: rgba(255,255,255,0.8); border-radius: 2px; transition: all 0.3s; }
     .nav-burger.open span:nth-child(1) { transform: rotate(45deg) translate(5px,5px); }
@@ -273,6 +282,12 @@
       <li><a href="{% url 'About' %}" class="{% if request.resolver_match.url_name == 'About' %}active{% endif %}">About</a></li>
       <li><a href="{% url 'service' %}" class="{% if request.resolver_match.url_name == 'service' %}active{% endif %}">Services</a></li>
       <li><a href="{% url 'contact' %}" class="{% if request.resolver_match.url_name == 'contact' %}active{% endif %}">Contact</a></li>
+      <li>
+        <a href="{% if request.user.is_authenticated and not request.user.is_staff %}{% url 'portal_dashboard' %}{% else %}{% url 'portal_login' %}{% endif %}" class="nav-portal">
+          <i class="fas fa-user-circle"></i>
+          {% if request.user.is_authenticated and not request.user.is_staff %}My Portal{% else %}Client Login{% endif %}
+        </a>
+      </li>
       <li><a href="{% url 'select_website' %}" class="nav-cta">Get a Quote</a></li>
     </ul>
     <button class="nav-burger" id="burger" aria-label="Menu"><span></span><span></span><span></span></button>
@@ -285,6 +300,7 @@
   <a href="{% url 'About' %}">About</a>
   <a href="{% url 'service' %}">Services</a>
   <a href="{% url 'contact' %}">Contact</a>
+  <a href="{% if request.user.is_authenticated and not request.user.is_staff %}{% url 'portal_dashboard' %}{% else %}{% url 'portal_login' %}{% endif %}" style="color:var(--accent);font-weight:600"><i class="fas fa-user-circle"></i> {% if request.user.is_authenticated and not request.user.is_staff %}My Portal{% else %}Client Portal{% endif %}</a>
   <a href="{% url 'select_website' %}" class="mob-cta">Get a Quote →</a>
 </div>
 
@@ -343,6 +359,24 @@
     </div>
   </div>
 </footer>
+
+<!-- ADMIN ACCESS — bottom of page -->
+<div style="background:#010208;border-top:1px solid rgba(0,212,255,0.06);padding:14px 0;text-align:center">
+  <a href="{% url 'management_login' %}"
+     style="display:inline-flex;align-items:center;gap:8px;
+            padding:8px 20px;border-radius:10px;
+            background:rgba(0,212,255,0.04);
+            border:1px solid rgba(0,212,255,0.1);
+            color:rgba(0,212,255,0.35);
+            font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1.5px;
+            text-decoration:none;text-transform:uppercase;
+            transition:all 0.25s"
+     onmouseover="this.style.background='rgba(0,212,255,0.1)';this.style.borderColor='rgba(0,212,255,0.3)';this.style.color='rgba(0,212,255,0.8)'"
+     onmouseout="this.style.background='rgba(0,212,255,0.04)';this.style.borderColor='rgba(0,212,255,0.1)';this.style.color='rgba(0,212,255,0.35)'">
+    <i class="fas fa-terminal" style="font-size:12px"></i>
+    sys::admin_access
+  </a>
+</div>
 
 <a href="#" id="back-top" aria-label="Back to top"><i class="fas fa-chevron-up"></i></a>
 

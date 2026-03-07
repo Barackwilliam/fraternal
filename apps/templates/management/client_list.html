@@ -1,0 +1,52 @@
+{% extends 'management/base.html' %}
+{% block title %}Clients{% endblock %}
+{% block content %}
+<div style="display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px;flex-wrap:wrap">
+  <div>
+    <h1 style="font-family:var(--head);font-size:22px;font-weight:800;color:var(--text)">All Clients</h1>
+    <div style="font-family:var(--mono);font-size:12px;color:var(--text-3)">{{ clients.count }} registered client{{ clients.count|pluralize }}</div>
+  </div>
+</div>
+<div class="jt-card" style="padding:0">
+  <div style="overflow-x:auto">
+    <table class="jt-table">
+      <thead><tr><th>Client</th><th>Contact</th><th>Websites</th><th>Portal Account</th><th>Linked To</th><th></th></tr></thead>
+      <tbody>
+        {% for c in clients %}
+        <tr>
+          <td>
+            <div style="font-weight:600;color:var(--text)">{{ c.name }}</div>
+            {% if c.company %}<div style="font-size:12px;color:var(--text-3)">{{ c.company }}</div>{% endif %}
+          </td>
+          <td>
+            <div style="font-size:13px;color:var(--text-2)">{{ c.email }}</div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--text-3)">{{ c.phone|default:"—" }}</div>
+          </td>
+          <td>
+            <span style="font-family:var(--mono);font-size:12px;background:var(--card-s);border:1px solid var(--border);padding:3px 10px;border-radius:7px">{{ c.website_count }}</span>
+          </td>
+          <td>
+            {% if c.user %}
+            <span class="jt-badge b-active" style="font-size:10px">@{{ c.user.username }}</span>
+            {% else %}
+            <span style="font-family:var(--mono);font-size:11px;color:var(--text-3)">No account</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if c.user %}
+            <div style="font-family:var(--mono);font-size:11px;color:var(--cyan)">{{ c.user.email }}</div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--text-3)">Since {{ c.user.date_joined|date:"d M Y" }}</div>
+            {% else %}
+            <span style="font-size:12px;color:var(--text-3)">—</span>
+            {% endif %}
+          </td>
+          <td><a href="{% url 'client_detail_admin' c.pk %}" class="jt-btn btn-ghost" style="font-size:11px;padding:6px 12px"><i class="fas fa-arrow-right"></i></a></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6"><div class="jt-empty"><div class="ei">👥</div><p>No clients yet</p></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

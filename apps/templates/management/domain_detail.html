@@ -1,0 +1,172 @@
+{% extends 'management/base.html' %}
+{% block title %}{{ domain.domain_name }}{% endblock %}
+{% block content %}
+
+<div style="display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px;flex-wrap:wrap">
+  <div style="display:flex;align-items:center;gap:12px">
+    <a href="{% url 'domain_list' %}" class="jt-btn btn-ghost btn-icon"><i class="fas fa-arrow-left"></i></a>
+    <div>
+      <h1 style="font-family:var(--mono);font-size:22px;font-weight:800;color:var(--cyan)">{{ domain.domain_name }}</h1>
+      <div style="font-size:13px;color:var(--text-3)">{{ domain.website.name }} — {{ domain.website.client.name }}</div>
+    </div>
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <button onclick="openModal('renewModal')" class="jt-btn btn-green"><i class="fas fa-rotate"></i> Record Renewal</button>
+    <button onclick="openModal('statusModal')" class="jt-btn btn-ghost"><i class="fas fa-pen"></i> Update Status</button>
+  </div>
+</div>
+
+{% if domain.is_expired %}
+<div class="jt-alert jt-alert-danger mb-3"><i class="fas fa-triangle-exclamation" style="flex-shrink:0"></i><strong>Domain EXPIRED!</strong>&nbsp;{{ domain.expiry_date|date:"d M Y" }} — renew immediately.</div>
+{% elif domain.days_until_expiry <= 30 %}
+<div class="jt-alert jt-alert-warning mb-3"><i class="fas fa-clock" style="flex-shrink:0"></i>Expires in <strong>{{ domain.days_until_expiry }} day(s)</strong> on {{ domain.expiry_date|date:"d M Y" }}.</div>
+{% endif %}
+
+<div class="row g-3">
+  <!-- Info panel -->
+  <div class="col-lg-4">
+    <div class="jt-card mb-3">
+      <div class="jt-card-head"><span class="jt-card-title"><i class="fas fa-at" style="color:var(--cyan)"></i> Domain Info</span></div>
+      <div class="jt-card-body">
+        <div class="info-row"><span class="info-key">Domain</span><span class="info-val" style="font-family:var(--mono);color:var(--cyan)">{{ domain.domain_name }}</span></div>
+        <div class="info-row"><span class="info-key">Registrar</span><span class="info-val">{{ domain.get_registrar_display }}{% if domain.registrar_other %} ({{ domain.registrar_other }}){% endif %}</span></div>
+        <div class="info-row"><span class="info-key">Registered</span><span class="info-val">{{ domain.registration_date|date:"d M Y" }}</span></div>
+        <div class="info-row"><span class="info-key">Expires</span>
+          <span class="info-val" style="{% if domain.is_expired %}color:var(--red);font-weight:700{% elif domain.days_until_expiry <= 30 %}color:var(--yellow){% endif %}">
+            {{ domain.expiry_date|date:"d M Y" }}{% if domain.is_expired %} ⚠{% endif %}
+          </span>
+        </div>
+        <div class="info-row"><span class="info-key">Renewal Cost</span><span class="info-val" style="color:var(--green)">TZS {{ domain.renewal_cost|floatformat:0 }}</span></div>
+        <div class="info-row"><span class="info-key">Auto Renew</span>
+          <span class="info-val">{% if domain.auto_renew %}<span style="color:var(--green)">✓ Yes</span>{% else %}<span style="color:var(--text-3)">No</span>{% endif %}</span>
+        </div>
+        <div class="info-row"><span class="info-key">Status</span>
+          <span class="info-val">
+            <span class="jt-badge {% if domain.is_expired %}b-suspended{% elif domain.days_until_expiry <= 30 %}b-maintenance{% else %}b-active{% endif %}">{{ domain.status }}</span>
+          </span>
+        </div>
+        <div class="info-row" style="border:none"><span class="info-key">Client</span>
+          <span class="info-val"><a href="{% url 'client_detail_admin' domain.website.client.pk %}" style="color:var(--cyan)">{{ domain.website.client.name }}</a></span>
+        </div>
+      </div>
+    </div>
+
+    {% if domain.dns_nameservers %}
+    <div class="jt-card">
+      <div class="jt-card-head"><span class="jt-card-title"><i class="fas fa-server" style="color:var(--purple)"></i> DNS Nameservers</span></div>
+      <div class="jt-card-body">
+        {% for ns in domain.dns_nameservers.splitlines %}
+        {% if ns %}<div style="font-family:var(--mono);font-size:12px;color:var(--cyan);padding:6px 0;border-bottom:1px solid var(--border)">{{ ns }}</div>{% endif %}
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Renewal history -->
+  <div class="col-lg-8">
+    <div class="jt-card" style="padding:0">
+      <div class="jt-card-head">
+        <span class="jt-card-title"><i class="fas fa-rotate" style="color:var(--green)"></i> Renewal History</span>
+        <button onclick="openModal('renewModal')" class="jt-btn btn-icon btn-green" style="width:32px;height:32px;font-size:14px"><i class="fas fa-plus"></i></button>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="jt-table">
+          <thead><tr><th>Paid Date</th><th>Amount</th><th>Renewed Until</th><th>Method</th><th>Reference</th></tr></thead>
+          <tbody>
+            {% for p in payments %}
+            <tr>
+              <td style="font-family:var(--mono);font-size:12px;color:var(--text-3)">{{ p.paid_date|date:"d M Y" }}</td>
+              <td style="font-family:var(--mono);font-weight:600;color:var(--green)">TZS {{ p.amount|floatformat:0 }}</td>
+              <td style="font-family:var(--mono);font-size:12px;color:var(--cyan)">{{ p.renewed_until|date:"d M Y" }}</td>
+              <td style="font-size:12px;color:var(--text-2)">{{ p.payment_method|default:"—" }}</td>
+              <td style="font-family:var(--mono);font-size:11px;color:var(--text-3)">{{ p.transaction_ref|default:"—" }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5"><div class="jt-empty" style="padding:30px"><div class="ei">🔄</div><p>No renewals recorded</p></div></td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RENEW MODAL -->
+<div class="jt-modal-overlay" id="renewModal">
+  <div class="jt-modal-bg"></div>
+  <div class="jt-modal-box">
+    <div class="jt-modal-head">
+      <h3><i class="fas fa-rotate" style="color:var(--green)"></i> Record Domain Renewal</h3>
+      <button class="jt-modal-close" onclick="closeModal('renewModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <form method="post" action="{% url 'domain_renew' domain.pk %}">
+      {% csrf_token %}
+      <div class="jt-modal-body">
+        <div class="row g-3">
+          <div class="col-6">
+            <label class="f-label">Amount Paid (TZS) *</label>
+            <input type="number" name="amount" class="f-input" value="{{ domain.renewal_cost }}" required>
+          </div>
+          <div class="col-6">
+            <label class="f-label">Payment Date *</label>
+            <input type="date" name="paid_date" class="f-input" value="{% now 'Y-m-d' %}" required>
+          </div>
+          <div class="col-12">
+            <label class="f-label">New Expiry Date (Renewed Until) *</label>
+            <input type="date" name="renewed_until" class="f-input" required>
+            <div class="f-help">Current expiry: <strong>{{ domain.expiry_date|date:"d M Y" }}</strong></div>
+          </div>
+          <div class="col-6">
+            <label class="f-label">Payment Method</label>
+            <select name="payment_method" class="f-input">
+              <option>NMB Bank Transfer</option><option>M-Pesa</option><option>Card Online</option><option>Cash</option><option>Other</option>
+            </select>
+          </div>
+          <div class="col-6">
+            <label class="f-label">Transaction Reference</label>
+            <input type="text" name="transaction_ref" class="f-input" placeholder="NMB20240912345">
+          </div>
+          <div class="col-12">
+            <label class="f-check"><input type="checkbox" name="notify_client" checked style="width:15px;height:15px"><span>Email renewal confirmation to {{ domain.website.client.name }}</span></label>
+          </div>
+        </div>
+      </div>
+      <div class="jt-modal-foot">
+        <button type="button" onclick="closeModal('renewModal')" class="jt-btn btn-ghost">Cancel</button>
+        <button type="submit" class="jt-btn btn-green"><i class="fas fa-rotate"></i> Save Renewal</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- STATUS MODAL -->
+<div class="jt-modal-overlay" id="statusModal">
+  <div class="jt-modal-bg"></div>
+  <div class="jt-modal-box">
+    <div class="jt-modal-head">
+      <h3><i class="fas fa-pen" style="color:var(--purple)"></i> Update Domain Status</h3>
+      <button class="jt-modal-close" onclick="closeModal('statusModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <form method="post" action="{% url 'domain_update_status' domain.pk %}">
+      {% csrf_token %}
+      <div class="jt-modal-body">
+        <div class="mb-3">
+          <label class="f-label">Status</label>
+          <select name="status" class="f-input">
+            {% for val, label in status_choices %}<option value="{{ val }}" {% if domain.status == val %}selected{% endif %}>{{ label }}</option>{% endfor %}
+          </select>
+        </div>
+        <div>
+          <label class="f-label">Notes</label>
+          <textarea name="notes" class="f-input" style="min-height:80px">{{ domain.notes }}</textarea>
+        </div>
+      </div>
+      <div class="jt-modal-foot">
+        <button type="button" onclick="closeModal('statusModal')" class="jt-btn btn-ghost">Cancel</button>
+        <button type="submit" class="jt-btn btn-cyan"><i class="fas fa-save"></i> Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

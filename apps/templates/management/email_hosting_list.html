@@ -1,0 +1,61 @@
+{% extends 'management/base.html' %}
+{% block title %}Email Hosting{% endblock %}
+{% block content %}
+<div style="display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px;flex-wrap:wrap">
+  <div>
+    <h1 style="font-family:var(--head);font-size:22px;font-weight:800;color:var(--text)">Email Hosting Plans</h1>
+    <div style="font-family:var(--mono);font-size:12px;color:var(--text-3)">{{ stats.total }} plan{{ stats.total|pluralize }} total</div>
+  </div>
+  <a href="{% url 'email_hosting_add' %}" class="jt-btn btn-cyan"><i class="fas fa-plus"></i> Add Plan</a>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-3"><div class="stat-card" style="--accent:var(--green)"><div class="sc-icon" style="background:var(--green-d);color:var(--green)"><i class="fas fa-circle-check"></i></div><div class="sc-val" style="color:var(--green)">{{ stats.active }}</div><div class="sc-label">Active</div></div></div>
+  <div class="col-6 col-md-3"><div class="stat-card" style="--accent:var(--red)"><div class="sc-icon" style="background:var(--red-d);color:var(--red)"><i class="fas fa-ban"></i></div><div class="sc-val" style="color:var(--red)">{{ stats.suspended }}</div><div class="sc-label">Suspended</div></div></div>
+  <div class="col-6 col-md-3"><div class="stat-card" style="--accent:var(--yellow)"><div class="sc-icon" style="background:var(--yellow-d);color:var(--yellow)"><i class="fas fa-clock"></i></div><div class="sc-val" style="color:var(--yellow)">{{ expiring|length }}</div><div class="sc-label">Expiring Soon</div></div></div>
+  <div class="col-6 col-md-3"><div class="stat-card" style="--accent:var(--text-3)"><div class="sc-icon" style="background:rgba(255,255,255,0.05);color:var(--text-3)"><i class="fas fa-circle-xmark"></i></div><div class="sc-val" style="color:var(--text-3)">{{ stats.exp_count }}</div><div class="sc-label">Expired</div></div></div>
+</div>
+
+{% if expired %}
+<div class="jt-alert jt-alert-danger mb-3"><i class="fas fa-triangle-exclamation" style="flex-shrink:0;margin-top:2px"></i>
+  <div><strong>{{ expired|length }} plan(s) expired!</strong>&nbsp;{% for p in expired %}<a href="{% url 'email_hosting_detail' p.pk %}" style="color:var(--red);font-weight:700">{{ p.email_domain }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</div>
+</div>
+{% endif %}
+{% if expiring %}
+<div class="jt-alert jt-alert-warning mb-3"><i class="fas fa-clock" style="flex-shrink:0;margin-top:2px"></i>
+  <div><strong>{{ expiring|length }} plan(s) expiring within 14 days.</strong>&nbsp;{% for p in expiring %}<a href="{% url 'email_hosting_detail' p.pk %}" style="color:var(--yellow);font-weight:700">{{ p.email_domain }}</a> ({{ p.days_until_expiry }}d){% if not forloop.last %}, {% endif %}{% endfor %}</div>
+</div>
+{% endif %}
+
+<div class="jt-card" style="padding:0">
+  <div style="overflow-x:auto">
+    <table class="jt-table">
+      <thead><tr><th>Plan / Domain</th><th>Client</th><th>Accounts</th><th>Storage</th><th>Monthly</th><th>Expires</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+        {% for p in plans %}
+        <tr>
+          <td>
+            <div style="font-weight:600;color:var(--text);margin-bottom:2px">{{ p.plan_name }}</div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--cyan)">@{{ p.email_domain }}</div>
+          </td>
+          <td>
+            <div style="font-size:13px;color:var(--text-2)">{{ p.client.name }}</div>
+            {% if p.website %}<div style="font-size:11px;color:var(--text-3)">{{ p.website.name }}</div>{% endif %}
+          </td>
+          <td style="font-family:var(--mono);font-size:13px;color:var(--text-2);text-align:center">{{ p.accounts_count }}</td>
+          <td style="font-family:var(--mono);font-size:12px;color:var(--text-3)">{{ p.storage_gb }} GB</td>
+          <td style="font-family:var(--mono);font-size:13px;color:var(--text-2)">TZS {{ p.monthly_cost|floatformat:0 }}</td>
+          <td style="font-family:var(--mono);font-size:12px;{% if p.is_overdue %}color:var(--red){% elif p.days_until_expiry <= 14 %}color:var(--yellow){% else %}color:var(--text-3){% endif %}">
+            {{ p.end_date|date:"d M Y" }}{% if p.is_overdue %} ⚠{% endif %}
+          </td>
+          <td><span class="jt-badge b-{{ p.status }}">{{ p.status|capfirst }}</span></td>
+          <td><a href="{% url 'email_hosting_detail' p.pk %}" class="jt-btn btn-ghost" style="font-size:11px;padding:5px 12px">Manage</a></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="8"><div class="jt-empty" style="padding:40px"><div class="ei">📧</div><p>No email hosting plans yet.</p></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

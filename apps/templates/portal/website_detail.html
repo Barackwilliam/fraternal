@@ -1,0 +1,111 @@
+{% extends 'portal/base.html' %}
+{% block title %}{{ website.name }}{% endblock %}
+{% block content %}
+
+<!-- HEADER -->
+<div style="display:flex;align-items:center;gap:12px;margin-bottom:22px;flex-wrap:wrap">
+  <a href="{% url 'portal_website_list' %}" class="jt-btn btn-ghost btn-icon"><i class="fas fa-arrow-left"></i></a>
+  <div style="flex:1">
+    <div style="font-family:var(--head);font-size:20px;font-weight:800;color:var(--text)">{{ website.name }}</div>
+    <a href="{{ website.url }}" target="_blank" style="font-family:var(--mono);font-size:12px;color:var(--text-3)">{{ website.url }} <i class="fas fa-arrow-up-right-from-square fa-xs"></i></a>
+  </div>
+  <span class="jt-badge b-{{ website.status }}" style="padding:6px 14px;font-size:12px">{{ website.status|capfirst }}</span>
+</div>
+
+<!-- ALERTS -->
+{% if website.status == 'suspended' %}
+<div class="jt-alert jt-alert-danger mb-3"><i class="fas fa-ban" style="flex-shrink:0"></i><div><strong>Website Suspended</strong><br>{{ website.suspension_message }}</div></div>
+{% elif website.status == 'maintenance' %}
+<div class="jt-alert jt-alert-warning mb-3"><i class="fas fa-wrench" style="flex-shrink:0"></i><div><strong>Maintenance Mode</strong><br>{{ website.suspension_message }}</div></div>
+{% endif %}
+{% if website.is_overdue %}
+<div class="jt-alert jt-alert-danger mb-3"><i class="fas fa-triangle-exclamation" style="flex-shrink:0"></i>
+  <div><strong>Hosting Expired!</strong> Expired on {{ website.hosting_end_date|date:"d M Y" }}.<br>
+  <a href="{% url 'portal_billing' %}" style="color:var(--red);font-weight:700;text-decoration:underline">Pay Now →</a></div>
+</div>
+{% elif website.days_until_expiry is not None and website.days_until_expiry <= 14 %}
+<div class="jt-alert jt-alert-warning mb-3"><i class="fas fa-clock" style="flex-shrink:0"></i>
+  <div>Expires in <strong>{{ website.days_until_expiry }} day(s)</strong> — {{ website.hosting_end_date|date:"d M Y" }}.
+  <a href="{% url 'portal_billing' %}" style="color:var(--yellow);font-weight:700;margin-left:8px">Renew →</a></div>
+</div>
+{% endif %}
+
+<div class="row g-3">
+  <!-- Info column -->
+  <div class="col-lg-4">
+    <div class="jt-card mb-3" style="padding:0">
+      <div class="jt-card-head"><span class="jt-card-title"><i class="fas fa-circle-info" style="color:var(--cyan)"></i> Details</span></div>
+      <div class="jt-card-body">
+        <div class="info-row"><span class="info-key">Type</span><span class="info-val">{{ website.get_site_type_display }}</span></div>
+        <div class="info-row"><span class="info-key">Status</span><span class="info-val"><span class="jt-badge b-{{ website.status }}">{{ website.status|capfirst }}</span></span></div>
+        <div class="info-row"><span class="info-key">Started</span><span class="info-val">{{ website.hosting_start_date|date:"d M Y" }}</span></div>
+        <div class="info-row"><span class="info-key">Expires</span><span class="info-val" style="{% if website.is_overdue %}color:var(--red){% elif website.days_until_expiry <= 14 %}color:var(--yellow){% endif %}">{{ website.hosting_end_date|date:"d M Y" }}</span></div>
+        <div class="info-row"><span class="info-key">Monthly</span><span class="info-val">TZS {{ website.monthly_cost|floatformat:0 }}</span></div>
+        <div class="info-row"><span class="info-key">Total Paid</span><span class="info-val" style="color:var(--green)">TZS {{ total_paid|floatformat:0 }}</span></div>
+        <div class="info-row" style="border:none"><span class="info-key">Months Paid</span><span class="info-val">{{ months_paid }}</span></div>
+      </div>
+    </div>
+
+    <div class="jt-card" style="padding:0">
+      <div class="jt-card-head"><span class="jt-card-title"><i class="fas fa-toggle-on" style="color:var(--green)"></i> Features</span></div>
+      {% for f in features %}
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:11px 16px;border-bottom:1px solid var(--border)">
+        <div>
+          <div style="font-size:13px;font-weight:600;color:var(--text)">{{ f.feature_name }}</div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--text-3)">{{ f.feature_key }}</div>
+        </div>
+        <span class="jt-badge {% if f.is_enabled %}b-active{% else %}b-suspended{% endif %}" style="font-size:10px">{% if f.is_enabled %}ON{% else %}OFF{% endif %}</span>
+      </div>
+      {% empty %}
+      <div class="jt-empty" style="padding:20px"><div class="ei" style="font-size:22px">⚙️</div><p>No features</p></div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Payments -->
+  <div class="col-lg-5">
+    <div class="jt-card" style="padding:0">
+      <div class="jt-card-head">
+        <span class="jt-card-title"><i class="fas fa-receipt" style="color:var(--green)"></i> Payment History</span>
+        <a href="{% url 'portal_billing' %}" class="jt-btn btn-ghost" style="font-size:11px;padding:5px 12px">+ Pay</a>
+      </div>
+      {% if payments %}
+      <div style="overflow-x:auto">
+        <table class="jt-table">
+          <thead><tr><th>Date</th><th>Amount</th><th>Method</th><th>Months</th><th>Ref</th></tr></thead>
+          <tbody>
+            {% for p in payments %}
+            <tr>
+              <td style="font-family:var(--mono);font-size:12px;color:var(--text-3)">{{ p.payment_date|date:"d M Y" }}</td>
+              <td style="font-family:var(--mono);font-weight:600;color:var(--green)">TZS {{ p.amount|floatformat:0 }}</td>
+              <td style="font-size:12px;color:var(--text-2)">{{ p.payment_method|default:"—" }}</td>
+              <td style="font-family:var(--mono);font-size:12px;text-align:center">{{ p.months_covered }}</td>
+              <td style="font-family:var(--mono);font-size:11px;color:var(--cyan)">{{ p.transaction_ref|default:"—"|truncatechars:16 }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="jt-empty"><div class="ei">💳</div><p>No payments yet</p></div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Messages -->
+  <div class="col-lg-3">
+    <div class="jt-card" style="padding:0">
+      <div class="jt-card-head"><span class="jt-card-title"><i class="fas fa-envelope" style="color:var(--purple)"></i> Messages</span></div>
+      {% for n in notifications %}
+      <div style="padding:12px 16px;border-bottom:1px solid var(--border)">
+        <div style="font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px">{{ n.subject|truncatechars:32 }}</div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--text-3)">{{ n.sent_at|date:"d M Y" }}</div>
+        <div style="font-size:12px;color:var(--text-2);margin-top:3px">{{ n.message|truncatechars:60 }}</div>
+      </div>
+      {% empty %}
+      <div class="jt-empty" style="padding:24px"><div class="ei" style="font-size:24px">📭</div><p>No messages</p></div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

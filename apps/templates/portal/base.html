@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Portal{% endblock %} — JamiiTek Client Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#050810; --bg2:#080d18; --card:rgba(255,255,255,0.03); --card-s:rgba(255,255,255,0.05);
+      --border:rgba(255,255,255,0.07); --border-s:rgba(0,212,255,0.2);
+      --cyan:#00d4ff; --cyan-d:rgba(0,212,255,0.1); --purple:#8b5cf6; --purple-d:rgba(139,92,246,0.1);
+      --green:#00ff88; --green-d:rgba(0,255,136,0.08); --red:#ff3b5c; --red-d:rgba(255,59,92,0.1);
+      --yellow:#ffb800; --yellow-d:rgba(255,184,0,0.1);
+      --text:rgba(255,255,255,0.85); --text-2:rgba(255,255,255,0.45); --text-3:rgba(255,255,255,0.2);
+      --mono:'JetBrains Mono',monospace; --head:'Syne',sans-serif; --body:'Space Grotesk',sans-serif;
+      --sb:245px; --top:56px; --r:10px; --r-lg:16px;
+    }
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{font-family:var(--body);background:var(--bg);color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+    body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background-image:linear-gradient(rgba(0,212,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,0.025) 1px,transparent 1px);background-size:50px 50px}
+    a{text-decoration:none}
+
+    /* SIDEBAR */
+    .jt-sb{position:fixed;top:0;left:0;bottom:0;width:var(--sb);z-index:300;background:rgba(5,8,16,0.98);border-right:1px solid var(--border);display:flex;flex-direction:column;backdrop-filter:blur(20px);transition:transform 0.3s cubic-bezier(0.4,0,0.2,1)}
+    .jt-sb::after{content:'';position:absolute;top:0;right:0;bottom:0;width:1px;background:linear-gradient(180deg,transparent,rgba(139,92,246,0.5),transparent);opacity:0.4}
+    .sb-top{padding:20px 18px 16px;border-bottom:1px solid var(--border);position:relative}
+    .sb-logo{font-family:var(--head);font-size:19px;font-weight:800;background:linear-gradient(135deg,var(--purple),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .sb-tag{font-family:var(--mono);font-size:10px;color:var(--text-3);letter-spacing:2px;text-transform:uppercase;margin-top:2px}
+    .sb-status{position:absolute;top:20px;right:18px;width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pdot 2s ease-in-out infinite}
+    @keyframes pdot{0%,100%{opacity:1}50%{opacity:0.4}}
+    .sb-nav{flex:1;overflow-y:auto;padding:10px 0;scrollbar-width:none}
+    .sb-nav::-webkit-scrollbar{display:none}
+    .sb-section{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--text-3);letter-spacing:2px;text-transform:uppercase;padding:14px 16px 5px}
+    .sb-link{display:flex;align-items:center;gap:10px;padding:9px 11px;margin:1px 8px;border-radius:9px;color:var(--text-2);font-size:13.5px;font-weight:500;transition:all 0.15s;cursor:pointer;position:relative}
+    .sb-link::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:0;background:var(--purple);border-radius:0 2px 2px 0;transition:height 0.2s}
+    .sb-link:hover{color:var(--text);background:var(--card-s)}
+    .sb-link.active{color:var(--purple);background:var(--purple-d);border:1px solid rgba(139,92,246,0.15)}
+    .sb-link.active::before{height:60%}
+    .sb-link i{width:17px;text-align:center;font-size:14px;flex-shrink:0}
+    .sb-foot{padding:12px 8px;border-top:1px solid var(--border)}
+    .sb-user{display:flex;align-items:center;gap:10px;padding:10px;border-radius:10px;background:var(--card);border:1px solid var(--border)}
+    .sb-av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--cyan));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;color:var(--bg);flex-shrink:0}
+    .sb-uname{font-size:13px;font-weight:600;color:var(--text);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .sb-urole{font-family:var(--mono);font-size:10px;color:var(--text-3)}
+
+    /* TOPBAR */
+    .jt-topbar{position:fixed;top:0;left:var(--sb);right:0;z-index:200;height:var(--top);background:rgba(5,8,16,0.92);border-bottom:1px solid var(--border);backdrop-filter:blur(20px);display:flex;align-items:center;justify-content:space-between;padding:0 20px;transition:left 0.3s}
+    .tb-left{display:flex;align-items:center;gap:12px}
+    .tb-title{font-family:var(--head);font-size:16px;font-weight:700;color:var(--text)}
+    .tb-right{display:flex;align-items:center;gap:8px}
+    .tb-btn{width:34px;height:34px;border-radius:8px;background:var(--card);border:1px solid var(--border);color:var(--text-2);display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;transition:all 0.15s;text-decoration:none}
+    .tb-btn:hover{border-color:var(--border-s);color:var(--purple)}
+    .mob-tog{display:none;background:none;border:none;color:var(--text-2);font-size:20px;cursor:pointer;padding:4px}
+
+    /* MAIN */
+    .jt-main{margin-left:var(--sb);margin-top:var(--top);padding:24px;min-height:calc(100vh - var(--top));position:relative;z-index:1}
+
+    /* MESSAGES */
+    .jt-msgs{margin-bottom:16px}
+    .jt-msg{display:flex;align-items:center;gap:10px;padding:11px 16px;border-radius:10px;font-size:13.5px;margin-bottom:8px;animation:slideD 0.3s ease}
+    @keyframes slideD{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+    .jt-msg-success{background:var(--green-d);border:1px solid rgba(0,255,136,0.2);color:var(--green)}
+    .jt-msg-error{background:var(--red-d);border:1px solid rgba(255,59,92,0.2);color:var(--red)}
+    .jt-msg-warning{background:var(--yellow-d);border:1px solid rgba(255,184,0,0.2);color:var(--yellow)}
+    .jt-msg-info{background:var(--cyan-d);border:1px solid rgba(0,212,255,0.2);color:var(--cyan)}
+
+    /* CARDS */
+    .jt-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);transition:border-color 0.2s}
+    .jt-card:hover{border-color:rgba(139,92,246,0.1)}
+    .jt-card-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .jt-card-title{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--text-2);text-transform:uppercase;letter-spacing:1px;display:flex;align-items:center;gap:8px}
+    .jt-card-body{padding:18px}
+
+    /* STATS */
+    .stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:20px;position:relative;overflow:hidden;transition:all 0.2s}
+    .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--accent,var(--purple)),transparent)}
+    .stat-card:hover{border-color:var(--accent,rgba(139,92,246,0.3))}
+    .sc-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:14px}
+    .sc-val{font-family:var(--mono);font-size:26px;font-weight:600;color:var(--text);line-height:1}
+    .sc-label{font-size:12px;color:var(--text-2);margin-top:4px;font-family:var(--mono);text-transform:uppercase;letter-spacing:0.5px}
+
+    /* BADGES */
+    .jt-badge{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:11px;font-weight:500;padding:3px 10px;border-radius:6px}
+    .jt-badge::before{content:'';width:6px;height:6px;border-radius:50%;flex-shrink:0}
+    .b-active{background:rgba(0,255,136,0.1);color:var(--green);border:1px solid rgba(0,255,136,0.2)}
+    .b-active::before{background:var(--green);box-shadow:0 0 6px var(--green);animation:pdot 2s infinite}
+    .b-suspended{background:var(--red-d);color:var(--red);border:1px solid rgba(255,59,92,0.2)}
+    .b-suspended::before{background:var(--red)}
+    .b-maintenance{background:var(--yellow-d);color:var(--yellow);border:1px solid rgba(255,184,0,0.2)}
+    .b-maintenance::before{background:var(--yellow)}
+    .b-terminated{background:rgba(255,255,255,0.04);color:var(--text-3);border:1px solid var(--border)}
+    .b-terminated::before{background:var(--text-3)}
+
+    /* TABLE */
+    .jt-table{width:100%;border-collapse:collapse}
+    .jt-table th{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:1.5px;padding:12px 16px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap}
+    .jt-table td{padding:13px 16px;border-bottom:1px solid var(--border);vertical-align:middle;font-size:13.5px}
+    .jt-table tr:last-child td{border-bottom:none}
+    .jt-table tbody tr{transition:background 0.12s}
+    .jt-table tbody tr:hover td{background:var(--card-s)}
+
+    /* BUTTONS */
+    .jt-btn{display:inline-flex;align-items:center;gap:7px;font-family:var(--body);font-size:13px;font-weight:600;padding:8px 16px;border-radius:8px;border:none;cursor:pointer;transition:all 0.15s;text-decoration:none;white-space:nowrap}
+    .jt-btn:hover{transform:translateY(-1px)}
+    .btn-primary{background:linear-gradient(135deg,var(--purple),var(--cyan));color:var(--bg)}
+    .btn-primary:hover{box-shadow:0 6px 24px rgba(139,92,246,0.35);color:var(--bg)}
+    .btn-green{background:var(--green);color:var(--bg)}
+    .btn-green:hover{box-shadow:0 6px 24px rgba(0,255,136,0.3);color:var(--bg)}
+    .btn-red{background:var(--red-d);color:var(--red);border:1px solid rgba(255,59,92,0.2)}
+    .btn-red:hover{background:var(--red);color:#fff}
+    .btn-ghost{background:transparent;color:var(--text-2);border:1px solid var(--border)}
+    .btn-ghost:hover{border-color:var(--border-s);color:var(--text)}
+    .btn-icon{width:30px;height:30px;border-radius:7px;padding:0;justify-content:center}
+
+    /* FORMS */
+    .f-label{display:block;font-family:var(--mono);font-size:10px;font-weight:600;color:var(--text-3);letter-spacing:1px;text-transform:uppercase;margin-bottom:7px}
+    .f-input{width:100%;padding:10px 13px;background:rgba(255,255,255,0.04);border:1.5px solid var(--border);border-radius:var(--r);color:var(--text);font-family:var(--body);font-size:13.5px;outline:none;transition:all 0.2s}
+    .f-input:focus{border-color:var(--purple);box-shadow:0 0 0 3px rgba(139,92,246,0.1);background:rgba(255,255,255,0.06)}
+    .f-input::placeholder{color:var(--text-3)}
+    select.f-input{cursor:pointer}
+    select.f-input option{background:var(--bg2);color:var(--text)}
+    textarea.f-input{resize:vertical;min-height:90px}
+
+    /* ALERTS */
+    .jt-alert{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-radius:10px;font-size:14px}
+    .jt-alert-danger{background:var(--red-d);border:1px solid rgba(255,59,92,0.2);color:var(--red)}
+    .jt-alert-warning{background:var(--yellow-d);border:1px solid rgba(255,184,0,0.2);color:var(--yellow)}
+    .jt-alert-info{background:var(--cyan-d);border:1px solid rgba(0,212,255,0.2);color:var(--cyan)}
+    .jt-alert-success{background:var(--green-d);border:1px solid rgba(0,255,136,0.2);color:var(--green)}
+
+    /* EMPTY */
+    .jt-empty{text-align:center;padding:40px 20px}
+    .jt-empty .ei{font-size:36px;opacity:0.3;margin-bottom:12px}
+    .jt-empty p{color:var(--text-3);font-family:var(--mono);font-size:12px}
+
+    /* MODAL */
+    .jt-modal-overlay{display:none;position:fixed;inset:0;z-index:9000;align-items:center;justify-content:center;padding:16px}
+    .jt-modal-overlay.jt-open{display:flex}
+    .jt-modal-bg{position:absolute;inset:0;background:rgba(3,5,10,0.85);backdrop-filter:blur(8px)}
+    .jt-modal-box{position:relative;z-index:1;background:linear-gradient(145deg,#0a0f1e,#080d18);border:1px solid rgba(139,92,246,0.2);border-radius:var(--r-lg);width:100%;max-width:500px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,0.6);animation:mIn 0.25s cubic-bezier(0.34,1.56,0.64,1)}
+    @keyframes mIn{from{opacity:0;transform:scale(0.92) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}
+    .jt-modal-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+    .jt-modal-head h3{font-family:var(--head);font-size:16px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px}
+    .jt-modal-close{width:28px;height:28px;border-radius:7px;background:var(--card);border:1px solid var(--border);color:var(--text-3);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;transition:all 0.15s}
+    .jt-modal-close:hover{border-color:var(--red);color:var(--red)}
+    .jt-modal-body{padding:20px}
+    .jt-modal-foot{padding:14px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px}
+
+    /* INFO ROWS */
+    .info-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);font-size:13.5px}
+    .info-row:last-child{border-bottom:none}
+    .info-key{color:var(--text-2);font-family:var(--mono);font-size:12px}
+    .info-val{color:var(--text);font-weight:500;text-align:right}
+
+    /* RESPONSIVE */
+    @media(max-width:991px){.jt-sb{transform:translateX(-100%)}.jt-sb.open{transform:translateX(0);box-shadow:0 0 60px rgba(0,0,0,0.6)}.jt-topbar{left:0}.jt-main{margin-left:0;padding:14px}.mob-tog{display:block}}
+    @media(max-width:576px){.jt-main{padding:10px}}
+    .modal-backdrop{display:none!important}
+  </style>
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+<!-- SIDEBAR -->
+<aside class="jt-sb" id="jtSb">
+  <div class="sb-top">
+    <div class="sb-logo">JamiiTek</div>
+    <div class="sb-tag">Client Portal</div>
+    <div class="sb-status"></div>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-section">Dashboard</div>
+    <a href="{% url 'portal_dashboard' %}" class="sb-link {% if request.resolver_match.url_name == 'portal_dashboard' %}active{% endif %}"><i class="fas fa-gauge"></i> Overview</a>
+    <a href="{% url 'portal_website_list' %}" class="sb-link {% if 'portal_website' in request.resolver_match.url_name %}active{% endif %}"><i class="fas fa-globe"></i> My Websites</a>
+    <a href="{% url 'portal_domains' %}" class="sb-link {% if request.resolver_match.url_name == 'portal_domains' %}active{% endif %}"><i class="fas fa-at"></i> My Domains</a>
+    <a href="{% url 'portal_email_hosting' %}" class="sb-link {% if request.resolver_match.url_name == 'portal_email_hosting' %}active{% endif %}"><i class="fas fa-envelope-open-text"></i> Email Hosting</a>
+    <div class="sb-section">Account</div>
+    <a href="{% url 'portal_billing' %}" class="sb-link {% if 'billing' in request.resolver_match.url_name %}active{% endif %}"><i class="fas fa-receipt"></i> Billing & Payments</a>
+    <a href="{% url 'portal_notifications' %}" class="sb-link {% if 'notifications' in request.resolver_match.url_name %}active{% endif %}"><i class="fas fa-bell"></i> Messages</a>
+    <a href="{% url 'portal_support' %}" class="sb-link {% if 'support' in request.resolver_match.url_name %}active{% endif %}"><i class="fas fa-headset"></i> Support</a>
+    <a href="{% url 'portal_profile' %}" class="sb-link {% if 'profile' in request.resolver_match.url_name %}active{% endif %}"><i class="fas fa-user-circle"></i> Profile</a>
+    <div class="sb-section">Links</div>
+    <a href="{% url 'home' %}" target="_blank" class="sb-link"><i class="fas fa-arrow-up-right-from-square"></i> JamiiTek Website</a>
+    <a href="{% url 'portal_logout' %}" class="sb-link" style="color:rgba(255,59,92,0.5)" onclick="return confirm('Sign out?')"><i class="fas fa-power-off"></i> Sign Out</a>
+  </nav>
+  <div class="sb-foot">
+    <div class="sb-user">
+      <div class="sb-av">{{ client.name|first|upper }}</div>
+      <div style="min-width:0">
+        <div class="sb-uname">{{ client.name }}</div>
+        <div class="sb-urole">client account</div>
+      </div>
+    </div>
+  </div>
+</aside>
+<div id="mobOv" onclick="closeSb()" style="display:none;position:fixed;inset:0;z-index:290;background:rgba(0,0,0,0.5)"></div>
+
+<!-- TOPBAR -->
+<header class="jt-topbar">
+  <div class="tb-left">
+    <button class="mob-tog" onclick="toggleSb()"><i class="fas fa-bars"></i></button>
+    <span class="tb-title">{% block page_title %}{{ title }}{% endblock %}</span>
+  </div>
+  <div class="tb-right">
+    <a href="{% url 'portal_notifications' %}" class="tb-btn"><i class="fas fa-bell"></i></a>
+    <a href="{% url 'portal_support' %}" class="tb-btn"><i class="fas fa-headset"></i></a>
+    <a href="{% url 'portal_profile' %}" class="tb-btn"><i class="fas fa-user-circle"></i></a>
+  </div>
+</header>
+
+<!-- MAIN -->
+<main class="jt-main">
+  {% if messages %}
+  <div class="jt-msgs">
+    {% for m in messages %}
+    <div class="jt-msg jt-msg-{% if m.tags == 'success' %}success{% elif m.tags == 'error' %}error{% elif m.tags == 'warning' %}warning{% else %}info{% endif %}">
+      <i class="fas {% if m.tags == 'success' %}fa-check-circle{% elif m.tags == 'error' %}fa-circle-exclamation{% elif m.tags == 'warning' %}fa-triangle-exclamation{% else %}fa-circle-info{% endif %}" style="flex-shrink:0"></i>
+      {{ m }}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+  {% block content %}{% endblock %}
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+<script>
+function toggleSb(){const s=document.getElementById('jtSb');const o=document.getElementById('mobOv');const open=s.classList.contains('open');if(open){s.classList.remove('open');o.style.display='none';document.body.style.overflow=''}else{s.classList.add('open');o.style.display='block';document.body.style.overflow='hidden'}}
+function closeSb(){document.getElementById('jtSb').classList.remove('open');document.getElementById('mobOv').style.display='none';document.body.style.overflow=''}
+function openModal(id){const el=document.getElementById(id);if(!el)return;el.style.display='flex';el.classList.add('jt-open');document.body.style.overflow='hidden'}
+function closeModal(id){const el=document.getElementById(id);if(!el)return;el.style.display='none';el.classList.remove('jt-open');document.body.style.overflow=''}
+document.addEventListener('click',function(e){if(e.target.classList.contains('jt-modal-bg')){const ov=e.target.closest('.jt-modal-overlay');if(ov)closeModal(ov.id)}});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')document.querySelectorAll('.jt-modal-overlay.jt-open').forEach(m=>closeModal(m.id))});
+setTimeout(()=>{document.querySelectorAll('.jt-msg').forEach(m=>{m.style.transition='opacity 0.5s';m.style.opacity='0';setTimeout(()=>m.remove(),500)})},5000);
+</script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,221 @@
+{% extends 'portal/base.html' %}
+{% block title %}Billing & Payments{% endblock %}
+{% block content %}
+<div style="margin-bottom:24px">
+  <h1 style="font-family:var(--head);font-size:22px;font-weight:800;color:var(--text);margin-bottom:4px">Billing & Payments</h1>
+  <div style="font-family:var(--mono);font-size:12px;color:var(--text-3)">Manage hosting payments for your websites</div>
+</div>
+
+<!-- STATS -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-3">
+    <div class="stat-card" style="--accent:var(--green)">
+      <div class="sc-icon" style="background:var(--green-d);color:var(--green)"><i class="fas fa-check-circle"></i></div>
+      <div class="sc-val" style="font-size:18px;color:var(--green)">{{ total_paid|floatformat:0 }}</div>
+      <div class="sc-label">Total Paid (TZS)</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="stat-card" style="--accent:var(--red)">
+      <div class="sc-icon" style="background:var(--red-d);color:var(--red)"><i class="fas fa-circle-exclamation"></i></div>
+      <div class="sc-val" style="font-size:18px;{% if total_due > 0 %}color:var(--red){% else %}color:var(--green){% endif %}">{{ total_due|floatformat:0 }}</div>
+      <div class="sc-label">Amount Due (TZS)</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="stat-card" style="--accent:var(--purple)">
+      <div class="sc-icon" style="background:var(--purple-d);color:var(--purple)"><i class="fas fa-globe"></i></div>
+      <div class="sc-val" style="color:var(--purple)">{{ websites.count }}</div>
+      <div class="sc-label">Websites</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="stat-card" style="--accent:var(--cyan)">
+      <div class="sc-icon" style="background:var(--cyan-d);color:var(--cyan)"><i class="fas fa-receipt"></i></div>
+      <div class="sc-val" style="color:var(--cyan)">{{ payments.count }}</div>
+      <div class="sc-label">Payments Made</div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <!-- LEFT: Status + Submit form -->
+  <div class="col-lg-7">
+    <!-- Hosting status per website -->
+    <div class="jt-card mb-3" style="padding:0">
+      <div class="jt-card-head"><span class="jt-card-title"><i class="fas fa-server" style="color:var(--cyan)"></i> Hosting Status</span></div>
+      <div style="padding:14px">
+        {% for w in websites %}
+        <div style="border:1px solid {% if w.is_overdue %}rgba(255,59,92,0.25){% else %}rgba(0,255,136,0.15){% endif %};border-radius:12px;padding:16px 18px;margin-bottom:10px;background:{% if w.is_overdue %}var(--red-d){% else %}var(--green-d){% endif %}">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap">
+            <div>
+              <div style="font-weight:700;font-size:15px;color:var(--text);margin-bottom:3px">{{ w.name }}</div>
+              <div style="font-family:var(--mono);font-size:11px;color:var(--text-3);margin-bottom:8px">{{ w.url|truncatechars:40 }}</div>
+              <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+                <span class="jt-badge b-{{ w.status }}">{{ w.status|capfirst }}</span>
+                <span style="font-family:var(--mono);font-size:11px;{% if w.is_overdue %}color:var(--red){% else %}color:var(--text-2){% endif %}">
+                  {% if w.is_overdue %}⚠ EXPIRED {{ w.hosting_end_date|date:"d M Y" }}{% else %}Expires {{ w.hosting_end_date|date:"d M Y" }}{% if w.days_until_expiry is not None and w.days_until_expiry <= 14 %} ({{ w.days_until_expiry }}d){% endif %}{% endif %}
+                </span>
+              </div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-family:var(--mono);font-size:20px;font-weight:600;color:var(--text)">{{ w.monthly_cost|floatformat:0 }}</div>
+              <div style="font-family:var(--mono);font-size:10px;color:var(--text-3)">TZS/month</div>
+            </div>
+          </div>
+        </div>
+        {% empty %}
+        <div class="jt-empty"><div class="ei">🌐</div><p>No websites linked yet.</p></div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Submit payment proof -->
+    <div class="jt-card" style="padding:0">
+      <div class="jt-card-head"><span class="jt-card-title"><i class="fas fa-upload" style="color:var(--green)"></i> Submit Payment Proof</span></div>
+      <div class="jt-card-body">
+        <div class="jt-alert jt-alert-info" style="margin-bottom:20px;font-size:13px">
+          <i class="fas fa-circle-info fa-sm" style="flex-shrink:0;margin-top:2px"></i>
+          After transferring to NMB, fill this form. JamiiTek verifies within <strong>24 hours</strong>.
+        </div>
+        <form method="post" action="{% url 'portal_submit_payment' %}">
+          {% csrf_token %}
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="f-label">Website *</label>
+              <select name="website" class="f-input" required>
+                <option value="">— Select website —</option>
+                {% for w in websites %}<option value="{{ w.pk }}">{{ w.name }}</option>{% endfor %}
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="f-label">Amount Paid (TZS) *</label>
+              <input type="number" name="amount" class="f-input" placeholder="e.g. 50000" required>
+            </div>
+            <div class="col-md-6">
+              <label class="f-label">Months to Cover</label>
+              <select name="months_covered" class="f-input">
+                <option value="1">1 Month</option>
+                <option value="3">3 Months</option>
+                <option value="6">6 Months</option>
+                <option value="12">12 Months</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="f-label">Payment Method</label>
+              <select name="payment_method" class="f-input">
+                <option>NMB Bank Transfer</option>
+                <option>M-Pesa</option><option>Tigo Pesa</option><option>Airtel Money</option><option>Cash</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="f-label">Transaction Reference *</label>
+              <input type="text" name="transaction_ref" class="f-input" placeholder="e.g. NMB20240912345" required>
+            </div>
+            <div class="col-12">
+              <label class="f-label">Notes</label>
+              <textarea name="notes" class="f-input" style="min-height:70px" placeholder="Any additional info..."></textarea>
+            </div>
+            <div class="col-12">
+              <button type="submit" class="jt-btn btn-green" style="width:100%;justify-content:center;padding:12px"><i class="fas fa-paper-plane"></i> Submit Payment Proof</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Bank details + History -->
+  <div class="col-lg-5">
+    <!-- Bank details card -->
+    <div class="jt-card mb-3" style="background:linear-gradient(145deg,rgba(5,8,16,0.98),rgba(10,15,30,0.98));border-color:rgba(0,212,255,0.15)">
+      <div style="padding:18px">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+          <div style="width:44px;height:44px;border-radius:11px;background:var(--cyan-d);border:1px solid rgba(0,212,255,0.2);display:flex;align-items:center;justify-content:center;font-size:22px">🏦</div>
+          <div>
+            <div style="font-family:var(--head);font-size:15px;font-weight:700;color:var(--text)">Payment Details</div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--text-3);letter-spacing:1px">NMB BANK TRANSFER</div>
+          </div>
+        </div>
+        <div style="background:rgba(0,212,255,0.06);border:1px solid rgba(0,212,255,0.12);border-radius:12px;padding:18px;margin-bottom:16px">
+          {% for label, value, copyable in bank_rows %}{% endfor %}
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
+            <span style="font-family:var(--mono);font-size:11px;color:var(--text-3)">BANK</span>
+            <span style="font-weight:600;color:var(--text)">NMB Bank</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
+            <span style="font-family:var(--mono);font-size:11px;color:var(--text-3)">ACCOUNT NAME</span>
+            <span style="font-weight:600;color:var(--text)">JamiiTek Technologies</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
+            <span style="font-family:var(--mono);font-size:11px;color:var(--text-3)">ACCOUNT NO.</span>
+            <span style="display:flex;align-items:center;gap:8px">
+              <span id="accNo" style="font-family:var(--mono);font-weight:700;font-size:15px;color:var(--cyan)">{{ payment_info.account_number }}</span>
+              <button onclick="copyAcc(this)" style="background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.2);border-radius:6px;padding:3px 8px;font-family:var(--mono);font-size:10px;color:var(--cyan);cursor:pointer"><i class="fas fa-copy"></i></button>
+            </span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0">
+            <span style="font-family:var(--mono);font-size:11px;color:var(--text-3)">REFERENCE</span>
+            <span style="font-family:var(--mono);font-weight:700;color:var(--yellow)">{{ client.name|upper }}</span>
+          </div>
+        </div>
+        <div class="jt-alert jt-alert-warning" style="font-size:12px;padding:11px 13px">
+          <i class="fas fa-triangle-exclamation fa-xs" style="flex-shrink:0"></i>
+          Include your <strong>name</strong> as the payment reference so we can identify your payment quickly.
+        </div>
+      </div>
+    </div>
+
+    <!-- How to pay steps -->
+    <div class="jt-card mb-3">
+      <div style="font-family:var(--mono);font-size:11px;color:var(--text-3);letter-spacing:1px;text-transform:uppercase;margin-bottom:16px">How to Pay</div>
+      {% for num, title, desc in steps %}{% endfor %}
+      {% for item in "1234" %}
+      <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:16px">
+        <div style="width:28px;height:28px;border-radius:50%;background:{% if forloop.counter == 4 %}var(--green-d){% else %}var(--purple-d){% endif %};border:1px solid {% if forloop.counter == 4 %}rgba(0,255,136,0.2){% else %}rgba(139,92,246,0.2){% endif %};display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:12px;font-weight:700;color:{% if forloop.counter == 4 %}var(--green){% else %}var(--purple){% endif %};flex-shrink:0">{{ forloop.counter }}</div>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:3px">
+            {% if forloop.counter == 1 %}Transfer to NMB{% elif forloop.counter == 2 %}Save your receipt{% elif forloop.counter == 3 %}Submit proof here{% else %}Confirmed in 24hrs{% endif %}
+          </div>
+          <div style="font-size:13px;color:var(--text-2);line-height:1.6">
+            {% if forloop.counter == 1 %}Send payment to account <strong style="color:var(--cyan)">{{ payment_info.account_number }}</strong>. Use your name as reference.
+            {% elif forloop.counter == 2 %}Note the transaction reference number from your NMB confirmation SMS.
+            {% elif forloop.counter == 3 %}Fill in the form on the left with your amount and transaction reference.
+            {% else %}JamiiTek verifies and activates your hosting. You'll get a confirmation message.{% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Recent payments -->
+    <div class="jt-card" style="padding:0">
+      <div class="jt-card-head"><span class="jt-card-title"><i class="fas fa-clock-rotate-left" style="color:var(--green)"></i> Recent Payments</span></div>
+      {% for p in payments|slice:":5" %}
+      <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+        <div>
+          <div style="font-family:var(--mono);font-size:13px;font-weight:600;color:var(--green)">TZS {{ p.amount|floatformat:0 }}</div>
+          <div style="font-size:12px;color:var(--text-3);margin-top:2px">{{ p.website.name }} · {{ p.payment_method|default:"—" }}</div>
+          {% if p.transaction_ref %}<div style="font-family:var(--mono);font-size:10px;color:var(--cyan)">{{ p.transaction_ref }}</div>{% endif %}
+        </div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--text-3);flex-shrink:0">{{ p.payment_date|date:"d M Y" }}</div>
+      </div>
+      {% empty %}
+      <div class="jt-empty" style="padding:24px"><div class="ei">💳</div><p>No payments yet</p></div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+function copyAcc(btn) {
+  const text = document.getElementById('accNo').textContent.trim();
+  navigator.clipboard.writeText(text).then(() => {
+    btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+    btn.style.color = 'var(--green)';
+    setTimeout(() => { btn.innerHTML = '<i class="fas fa-copy"></i>'; btn.style.color = ''; }, 2000);
+  });
+}
+</script>
+{% endblock %}

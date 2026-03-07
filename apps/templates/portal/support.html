@@ -1,0 +1,129 @@
+{% extends 'portal/base.html' %}
+{% block title %}Support{% endblock %}
+{% block content %}
+
+<div style="margin-bottom:24px">
+  <h1 style="font-family:var(--head);font-size:22px;font-weight:800;color:var(--text);margin-bottom:4px">Support Center</h1>
+  <div style="font-family:var(--mono);font-size:12px;color:var(--text-3)">Get help from the JamiiTek team — we respond within 24 hours</div>
+</div>
+
+<div class="row g-3">
+  <!-- Support form -->
+  <div class="col-lg-7">
+    <div class="jt-card">
+      <div class="jt-card-head"><span class="jt-card-title"><i class="fas fa-headset" style="color:var(--cyan)"></i> Submit Support Request</span></div>
+      <div class="jt-card-body">
+        <form method="post">
+          {% csrf_token %}
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="f-label">Related Website</label>
+              <select name="website" class="f-input">
+                <option value="">— General / Other —</option>
+                {% for w in websites %}<option value="{{ w.pk }}">{{ w.name }}</option>{% endfor %}
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="f-label">Priority</label>
+              <select name="priority" class="f-input">
+                <option value="low">🟢 Low — General question</option>
+                <option value="normal" selected>🟡 Normal — Needs attention</option>
+                <option value="high">🔴 High — Urgent issue</option>
+              </select>
+            </div>
+            <div class="col-12">
+              <label class="f-label">Subject *</label>
+              <input type="text" name="subject" class="f-input" placeholder="Brief description of your issue..." required>
+            </div>
+            <div class="col-12">
+              <label class="f-label">Message *</label>
+              <textarea name="message" class="f-input" style="min-height:150px" placeholder="Please describe your issue in detail. Include any error messages or steps to reproduce..." required></textarea>
+            </div>
+            <div class="col-12" style="background:rgba(0,212,255,0.05);border:1px solid rgba(0,212,255,0.1);border-radius:10px;padding:14px">
+              <div style="font-family:var(--mono);font-size:11px;color:var(--text-3);letter-spacing:1px;margin-bottom:8px">YOUR CONTACT INFO</div>
+              <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--text-2)">
+                <span><i class="fas fa-user fa-xs" style="color:var(--cyan);margin-right:6px"></i>{{ client.name }}</span>
+                <span><i class="fas fa-envelope fa-xs" style="color:var(--cyan);margin-right:6px"></i>{{ client.email }}</span>
+                {% if client.phone %}<span><i class="fas fa-phone fa-xs" style="color:var(--cyan);margin-right:6px"></i>{{ client.phone }}</span>{% endif %}
+              </div>
+            </div>
+            <div class="col-12">
+              <button type="submit" class="jt-btn btn-cyan" style="width:100%;justify-content:center;padding:12px">
+                <i class="fas fa-paper-plane"></i> Submit Support Request
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contact info + FAQ -->
+  <div class="col-lg-5">
+    <!-- Direct contact -->
+    <div class="jt-card mb-3" style="padding:0">
+      <div class="jt-card-head"><span class="jt-card-title"><i class="fas fa-address-card" style="color:var(--purple)"></i> Direct Contact</span></div>
+      <div style="padding:18px;display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="width:36px;height:36px;border-radius:9px;background:var(--green-d);display:flex;align-items:center;justify-content:center;color:var(--green);flex-shrink:0"><i class="fas fa-phone"></i></div>
+          <div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--text-3);letter-spacing:1px">PHONE / WHATSAPP</div>
+            <div style="font-weight:600;color:var(--text)">+255 629 712 678</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="width:36px;height:36px;border-radius:9px;background:var(--cyan-d);display:flex;align-items:center;justify-content:center;color:var(--cyan);flex-shrink:0"><i class="fas fa-envelope"></i></div>
+          <div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--text-3);letter-spacing:1px">EMAIL</div>
+            <div style="font-weight:600;color:var(--text)">info@jamiitek.com</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="width:36px;height:36px;border-radius:9px;background:var(--yellow-d);display:flex;align-items:center;justify-content:center;color:var(--yellow);flex-shrink:0"><i class="fas fa-clock"></i></div>
+          <div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--text-3);letter-spacing:1px">WORKING HOURS</div>
+            <div style="font-weight:600;color:var(--text)">Mon–Sat, 8:00am – 6:00pm</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="width:36px;height:36px;border-radius:9px;background:var(--purple-d);display:flex;align-items:center;justify-content:center;color:var(--purple);flex-shrink:0"><i class="fas fa-location-dot"></i></div>
+          <div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--text-3);letter-spacing:1px">LOCATION</div>
+            <div style="font-weight:600;color:var(--text)">Dar es Salaam, Tanzania</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FAQ -->
+    <div class="jt-card" style="padding:0">
+      <div class="jt-card-head"><span class="jt-card-title"><i class="fas fa-circle-question" style="color:var(--yellow)"></i> Quick FAQ</span></div>
+      <div style="padding:6px 0">
+        {% for q, a in faq_items %}{% endfor %}
+        {% for faq in faqs %}
+        <div onclick="toggleFaq('faq{{ forloop.counter }}')" style="cursor:pointer;border-bottom:1px solid var(--border)">
+          <div style="padding:13px 18px;display:flex;justify-content:space-between;align-items:center;gap:8px;transition:background 0.12s" onmouseover="this.style.background='var(--card-s)'" onmouseout="this.style.background=''">
+            <span style="font-size:13.5px;font-weight:600;color:var(--text)">{{ faq.q }}</span>
+            <i id="faqarr{{ forloop.counter }}" class="fas fa-chevron-down" style="font-size:11px;color:var(--text-3);flex-shrink:0;transition:transform 0.2s"></i>
+          </div>
+          <div id="faq{{ forloop.counter }}" style="display:none;padding:0 18px 14px;font-size:13px;color:var(--text-2);line-height:1.7">{{ faq.a }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleFaq(id) {
+  const el = document.getElementById(id);
+  const num = id.replace('faq','');
+  const arr = document.getElementById('faqarr'+num);
+  const open = el.style.display === 'block';
+  el.style.display = open ? 'none' : 'block';
+  arr.style.transform = open ? '' : 'rotate(180deg)';
+}
+</script>
+{% endblock %}

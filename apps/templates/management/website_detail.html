@@ -1,206 +1,248 @@
 {% extends 'management/base.html' %}
+{% load custom_filters %}
 {% block title %}{{ website.name }}{% endblock %}
 {% block extra_css %}
 <style>
-.info-row{display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px solid #21262d;font-size:14px}
-.info-row:last-child{border-bottom:none}
-.info-key{color:#8b949e}
-.info-val{color:#e6edf3;font-weight:500;text-align:right}
-.feature-row{display:flex;align-items:center;padding:12px 0;border-bottom:1px solid #21262d}
-.feature-row:last-child{border-bottom:none}
-.action-row{padding:11px 0;border-bottom:1px solid #21262d}
-.action-row:last-child{border-bottom:none}
-.code-snippet{background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:12px 14px;font-family:var(--mono);font-size:12px;color:#8b949e;word-break:break-all;position:relative}
-.copy-btn{position:absolute;top:8px;right:8px;background:#21262d;border:none;color:#8b949e;font-size:12px;padding:4px 9px;border-radius:6px;cursor:pointer;transition:all 0.15s}
-.copy-btn:hover{background:#30363d;color:#e6edf3}
+.pulse-ring{display:inline-block;width:10px;height:10px;border-radius:50%;position:relative}
+.pulse-ring::after{content:'';position:absolute;inset:-3px;border-radius:50%;border:2px solid currentColor;animation:ring 1.5s ease-out infinite;opacity:0}
+@keyframes ring{0%{transform:scale(1);opacity:0.6}100%{transform:scale(1.8);opacity:0}}
 </style>
 {% endblock %}
 
 {% block content %}
-<!-- HEADER -->
-<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:24px;flex-wrap:wrap">
+<!-- PAGE HEADER -->
+<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:22px;flex-wrap:wrap">
   <div style="display:flex;align-items:center;gap:14px">
-    <a href="{% url 'website_list' %}" style="width:36px;height:36px;border-radius:9px;background:#21262d;color:#8b949e;display:flex;align-items:center;justify-content:center;text-decoration:none;flex-shrink:0;transition:all 0.15s" onmouseover="this.style.background='#30363d';this.style.color='#e6edf3'" onmouseout="this.style.background='#21262d';this.style.color='#8b949e'"><i class="fas fa-arrow-left"></i></a>
+    <a href="{% url 'website_list' %}" class="jt-btn btn-ghost btn-icon"><i class="fas fa-arrow-left"></i></a>
     <div>
-      <div style="font-size:20px;font-weight:800;color:#e6edf3">{{ website.name }}</div>
-      <a href="{{ website.url }}" target="_blank" style="font-family:var(--mono);font-size:12px;color:#484f58;text-decoration:none;transition:color 0.2s" onmouseover="this.style.color='#58a6ff'" onmouseout="this.style.color='#484f58'">{{ website.url }} <i class="fas fa-arrow-up-right-from-square fa-xs"></i></a>
+      <h1 style="font-family:var(--head);font-size:22px;font-weight:800;color:var(--text);line-height:1.1">{{ website.name }}</h1>
+      <a href="{{ website.url }}" target="_blank" style="font-family:var(--mono);font-size:12px;color:var(--text-3);text-decoration:none;transition:color 0.2s" onmouseover="this.style.color='var(--cyan)'" onmouseout="this.style.color='var(--text-3)'">
+        {{ website.url }} <i class="fas fa-arrow-up-right-from-square fa-xs"></i>
+      </a>
     </div>
   </div>
-  <span class="badge-panel badge-{{ website.status }}" style="padding:6px 14px;font-size:12px">
-    {% if website.status == 'active' %}<i class="fas fa-circle fa-xs"></i> Active
-    {% elif website.status == 'suspended' %}<i class="fas fa-ban fa-xs"></i> Suspended
-    {% elif website.status == 'maintenance' %}<i class="fas fa-wrench fa-xs"></i> Maintenance
-    {% else %}Terminated{% endif %}
-  </span>
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+    <span class="jt-badge b-{{ website.status }}" style="padding:6px 14px;font-size:12px">
+      {% if website.status == 'active' %}Active{% elif website.status == 'suspended' %}Suspended{% elif website.status == 'maintenance' %}Maintenance{% else %}Terminated{% endif %}
+    </span>
+    <a href="{% url 'website_edit' website.pk %}" class="jt-btn btn-ghost" style="font-size:12px"><i class="fas fa-pen"></i> Edit</a>
+  </div>
 </div>
 
-<!-- QUICK ACTIONS BAR -->
-<div class="panel-card mb-4">
-  <div class="panel-card-body">
-    <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
-      <span style="font-family:var(--mono);font-size:11px;color:#484f58;letter-spacing:1px;margin-right:6px">ACTIONS:</span>
-      {% if website.status != 'suspended' %}
-      <button onclick="openModal('suspendModal')" class="act-btn act-btn-red"><i class="fas fa-ban"></i> Suspend</button>
+{% if website.status == 'suspended' %}
+<div class="jt-alert jt-alert-danger mb-3"><i class="fas fa-ban" style="flex-shrink:0;margin-top:2px"></i><div><strong>Website Suspended</strong> — {{ website.suspension_message }}<br><small style="opacity:0.7;margin-top:4px;display:block">Internal reason: {{ website.suspension_reason }}</small></div></div>
+{% elif website.status == 'maintenance' %}
+<div class="jt-alert jt-alert-warning mb-3"><i class="fas fa-wrench" style="flex-shrink:0;margin-top:2px"></i><div><strong>Maintenance Mode Active</strong> — {{ website.suspension_message }}</div></div>
+{% endif %}
+
+{% if website.is_overdue %}
+<div class="jt-alert jt-alert-danger mb-3"><i class="fas fa-triangle-exclamation" style="flex-shrink:0;margin-top:2px"></i><strong>Hosting Expired!</strong>&nbsp; Expired {{ website.days_overdue }} day(s) ago.</div>
+{% elif website.days_until_expiry <= 7 %}
+<div class="jt-alert jt-alert-warning mb-3"><i class="fas fa-clock" style="flex-shrink:0;margin-top:2px"></i>Hosting expires in <strong>{{ website.days_until_expiry }} day(s)</strong> — {{ website.hosting_end_date|date:"d M Y" }}</div>
+{% endif %}
+
+<!-- ACTION BAR -->
+<div class="jt-card mb-4">
+  <div class="jt-card-body" style="padding:14px 18px">
+    <div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px">
+      <span style="font-family:var(--mono);font-size:10px;color:var(--text-3);letter-spacing:2px;margin-right:4px">ACTIONS</span>
+
+      {% if website.status != 'suspended' and website.status != 'terminated' %}
+      <button type="button" onclick="openModal('suspendModal')" class="jt-btn btn-red">
+        <i class="fas fa-ban"></i> Suspend
+      </button>
       {% endif %}
-      {% if website.status == 'suspended' %}
-      <button onclick="openModal('restoreModal')" class="act-btn act-btn-green"><i class="fas fa-play"></i> Restore</button>
+
+      {% if website.status == 'suspended' or website.status == 'maintenance' %}
+      <button type="button" onclick="openModal('restoreModal')" class="jt-btn btn-green">
+        <i class="fas fa-play"></i> Restore
+      </button>
       {% endif %}
-      {% if website.status == 'maintenance' %}
-      <button onclick="openModal('restoreModal')" class="act-btn act-btn-green"><i class="fas fa-play"></i> Restore from Maintenance</button>
-      {% endif %}
+
       {% if website.status == 'active' %}
-      <button onclick="openModal('maintenanceModal')" class="act-btn act-btn-yellow"><i class="fas fa-wrench"></i> Maintenance Mode</button>
+      <button type="button" onclick="openModal('maintenanceModal')" class="jt-btn btn-yellow">
+        <i class="fas fa-wrench"></i> Maintenance
+      </button>
       {% endif %}
-      <a href="{% url 'send_notification' website.pk %}" class="act-btn act-btn-blue"><i class="fas fa-envelope"></i> Send Message</a>
-      <button onclick="openModal('scheduleModal')" class="act-btn act-btn-purple"><i class="fas fa-clock"></i> Schedule Action</button>
-      <button onclick="openModal('paymentModal')" class="act-btn act-btn-ghost"><i class="fas fa-coins"></i> Record Payment</button>
+
+      <button type="button" onclick="openModal('messageModal')" class="jt-btn" style="background:var(--cyan-d);color:var(--cyan);border:1px solid rgba(0,212,255,0.2)">
+        <i class="fas fa-envelope"></i> Send Message
+      </button>
+
+      <button type="button" onclick="openModal('scheduleModal')" class="jt-btn btn-purple">
+        <i class="fas fa-clock"></i> Schedule Action
+      </button>
+
+      <button type="button" onclick="openModal('paymentModal')" class="jt-btn btn-ghost">
+        <i class="fas fa-coins"></i> Record Payment
+      </button>
     </div>
   </div>
 </div>
 
-<!-- CONTENT GRID -->
+<!-- MAIN GRID -->
 <div class="row g-3">
-  <!-- LEFT: Info + API -->
-  <div class="col-lg-4">
-    <!-- Website Info -->
-    <div class="panel-card mb-3">
-      <div class="panel-card-head"><span class="panel-card-title"><i class="fas fa-circle-info" style="color:#58a6ff"></i> Website Info</span></div>
-      <div class="panel-card-body">
-        <div class="info-row"><span class="info-key">Client</span><span class="info-val">{{ website.client.name }}</span></div>
-        <div class="info-row"><span class="info-key">Email</span><span class="info-val" style="font-size:13px">{{ website.client.email }}</span></div>
+
+  <!-- COL 1: Info + Integration -->
+  <div class="col-xl-3 col-lg-4">
+    <div class="jt-card mb-3">
+      <div class="jt-card-head">
+        <span class="jt-card-title"><i class="fas fa-circle-info" style="color:var(--cyan)"></i> Website Info</span>
+      </div>
+      <div class="jt-card-body">
+        <div class="info-row"><span class="info-key">Client</span><span class="info-val">
+          <a href="{% url 'client_detail_admin' website.client.pk %}" style="color:var(--cyan);text-decoration:none">{{ website.client.name }}</a>
+        </span></div>
+        <div class="info-row"><span class="info-key">Email</span><span class="info-val" style="font-size:12px">{{ website.client.email }}</span></div>
         <div class="info-row"><span class="info-key">Phone</span><span class="info-val">{{ website.client.phone|default:"—" }}</span></div>
         <div class="info-row"><span class="info-key">Type</span><span class="info-val">{{ website.get_site_type_display }}</span></div>
-        <div class="info-row"><span class="info-key">Start</span><span class="info-val">{{ website.hosting_start_date|date:"d M Y" }}</span></div>
+        <div class="info-row"><span class="info-key">Started</span><span class="info-val">{{ website.hosting_start_date|date:"d M Y" }}</span></div>
         <div class="info-row">
           <span class="info-key">Expires</span>
-          <span class="info-val {% if website.is_overdue %}text-danger{% endif %}" style="{% if website.is_overdue %}color:#f85149{% elif website.days_until_expiry <= 7 %}color:#d29922{% endif %}">
+          <span class="info-val" style="{% if website.is_overdue %}color:var(--red){% elif website.days_until_expiry <= 14 %}color:var(--yellow){% endif %}">
             {{ website.hosting_end_date|date:"d M Y" }}
-            {% if website.is_overdue %}<br><small>⚠ Expired!</small>
-            {% elif website.days_until_expiry <= 14 %}<br><small style="color:#d29922">{{ website.days_until_expiry }}d left</small>{% endif %}
           </span>
         </div>
         <div class="info-row"><span class="info-key">Monthly</span><span class="info-val">TZS {{ website.monthly_cost|floatformat:0 }}</span></div>
-        <div class="info-row"><span class="info-key">Total Paid</span><span class="info-val" style="color:#3fb950">TZS {{ website.total_paid|floatformat:0 }}</span></div>
+        <div class="info-row"><span class="info-key">Total Paid</span><span class="info-val" style="color:var(--green)">TZS {{ website.total_paid|floatformat:0 }}</span></div>
+        <div class="info-row" style="border-bottom:none"><span class="info-key">Portal Account</span><span class="info-val">
+          {% if website.client.user %}
+          <span class="jt-badge b-active" style="font-size:10px">@{{ website.client.user.username }}</span>
+          {% else %}
+          <span style="color:var(--text-3);font-size:12px">None</span>
+          {% endif %}
+        </span></div>
       </div>
     </div>
 
-    <!-- Integration -->
-    <div class="panel-card">
-      <div class="panel-card-head"><span class="panel-card-title"><i class="fas fa-plug" style="color:#d29922"></i> Integration</span></div>
-      <div class="panel-card-body">
-        <div style="font-size:12px;color:#8b949e;margin-bottom:10px">API Key for client website:</div>
-        <div class="code-snippet" id="apiKeyBox">{{ website.api_key }}<button class="copy-btn" onclick="copyApi()"><i class="fas fa-copy"></i></button></div>
+    <!-- Integration / API -->
+    <div class="jt-card">
+      <div class="jt-card-head">
+        <span class="jt-card-title"><i class="fas fa-plug" style="color:var(--yellow)"></i> Integration</span>
+        <form method="post" action="{% url 'regenerate_api_key' website.pk %}" onsubmit="return confirm('Regenerate API key? Must update client website!')">
+          {% csrf_token %}
+          <button type="submit" class="jt-btn btn-ghost" style="font-size:11px;padding:5px 10px" title="Regenerate"><i class="fas fa-rotate"></i></button>
+        </form>
+      </div>
+      <div class="jt-card-body">
+        <div style="font-family:var(--mono);font-size:10px;color:var(--text-3);letter-spacing:1px;margin-bottom:8px">API KEY</div>
+        <div class="code-block" id="apiBox">{{ website.api_key }}<button class="code-copy" onclick="copyText('apiBox',this)"><i class="fas fa-copy"></i></button></div>
 
         {% if website.site_type == 'static' %}
-        <div style="font-size:12px;color:#8b949e;margin:14px 0 8px">Add inside <code style="color:#58a6ff">&lt;head&gt;</code> of HTML:</div>
-        <div class="code-snippet">&lt;script src="{{ request.scheme }}://{{ request.get_host }}/api/js/{{ website.api_key }}/"&gt;&lt;/script&gt;</div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--text-3);letter-spacing:1px;margin:14px 0 7px">ADD TO &lt;HEAD&gt;</div>
+        <div class="code-block" id="scriptBox">&lt;script src="{{ request.scheme }}://{{ request.get_host }}/api/js/{{ website.api_key }}/"&gt;&lt;/script&gt;<button class="code-copy" onclick="copyText('scriptBox',this)"><i class="fas fa-copy"></i></button></div>
         {% else %}
-        <div style="font-size:12px;color:#8b949e;margin:14px 0 8px">Add to Django <code style="color:#58a6ff">settings.py</code>:</div>
-        <div class="code-snippet">JAMIITEK_API_KEY = "{{ website.api_key }}"</div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--text-3);letter-spacing:1px;margin:14px 0 7px">SETTINGS.PY</div>
+        <div class="code-block" id="settingsBox">JAMIITEK_API_KEY = "{{ website.api_key }}"<button class="code-copy" onclick="copyText('settingsBox',this)"><i class="fas fa-copy"></i></button></div>
         {% endif %}
 
-        <a href="/api/site-status/{{ website.api_key }}/" target="_blank" class="act-btn act-btn-ghost" style="width:100%;justify-content:center;margin-top:12px"><i class="fas fa-vial"></i> Test API</a>
+        <a href="/api/site-status/{{ website.api_key }}/" target="_blank" class="jt-btn btn-ghost" style="width:100%;justify-content:center;margin-top:12px;font-size:12px"><i class="fas fa-vial"></i> Test API Endpoint</a>
       </div>
     </div>
   </div>
 
-  <!-- CENTER: Features + Scheduled -->
-  <div class="col-lg-5">
+  <!-- COL 2: Features + Scheduled Actions -->
+  <div class="col-xl-5 col-lg-5">
     <!-- Features -->
-    <div class="panel-card mb-3">
-      <div class="panel-card-head">
-        <span class="panel-card-title"><i class="fas fa-toggle-on" style="color:#3fb950"></i> Feature Controls</span>
-        <button onclick="openModal('addFeatureModal')" class="act-btn act-btn-ghost" style="font-size:12px;padding:6px 11px"><i class="fas fa-plus"></i> Add</button>
+    <div class="jt-card mb-3">
+      <div class="jt-card-head">
+        <span class="jt-card-title"><i class="fas fa-toggle-on" style="color:var(--green)"></i> Feature Controls</span>
+        <button type="button" onclick="openModal('addFeatureModal')" class="jt-btn btn-ghost" style="font-size:11px;padding:5px 12px"><i class="fas fa-plus"></i> Add</button>
       </div>
-      <div class="panel-card-body">
+      <div style="padding:4px 0">
         {% for feature in features %}
-        <div class="feature-row">
-          <div style="flex:1;min-width:0;margin-right:14px">
-            <div style="font-size:14px;font-weight:600;color:#e6edf3">{{ feature.feature_name }}</div>
-            <div style="font-family:var(--mono);font-size:11px;color:#484f58">{{ feature.feature_key }}</div>
-            {% if not feature.is_enabled and feature.disabled_reason %}
-            <div style="font-size:12px;color:#f85149;margin-top:3px">{{ feature.disabled_reason }}</div>
-            {% endif %}
+        <div style="display:flex;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid var(--border);transition:background 0.12s" onmouseover="this.style.background='var(--card-s)'" onmouseout="this.style.background=''">
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13.5px;font-weight:600;color:var(--text)">{{ feature.feature_name }}</div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--text-3)">{{ feature.feature_key }}</div>
           </div>
-          <form method="post" action="{% url 'toggle_feature' website.pk feature.pk %}">
+          <form method="post" action="{% url 'toggle_feature' website.pk feature.pk %}" style="flex-shrink:0">
             {% csrf_token %}
-            <label class="toggle-sw" title="{% if feature.is_enabled %}Disable{% else %}Enable{% endif %}">
+            <label class="jt-toggle" title="Toggle {{ feature.feature_name }}">
               <input type="checkbox" {% if feature.is_enabled %}checked{% endif %} onchange="this.closest('form').submit()">
-              <span class="toggle-track"></span>
+              <div class="jt-toggle-track"></div>
             </label>
           </form>
         </div>
         {% empty %}
-        <div class="empty-state" style="padding:28px 0"><div class="es-icon" style="font-size:24px">⚙️</div><p>No features configured yet.</p></div>
+        <div class="jt-empty"><div class="ei">⚙️</div><p>No features yet — add your first</p></div>
         {% endfor %}
       </div>
     </div>
 
-    <!-- Scheduled -->
-    <div class="panel-card">
-      <div class="panel-card-head">
-        <span class="panel-card-title"><i class="fas fa-clock" style="color:#d29922"></i> Scheduled Actions</span>
-        <button onclick="openModal('scheduleModal')" class="act-btn act-btn-ghost" style="font-size:12px;padding:6px 11px"><i class="fas fa-plus"></i></button>
+    <!-- Scheduled Actions -->
+    <div class="jt-card mb-3">
+      <div class="jt-card-head">
+        <span class="jt-card-title"><i class="fas fa-clock" style="color:var(--yellow)"></i> Scheduled Actions</span>
+        <button type="button" onclick="openModal('scheduleModal')" class="jt-btn btn-icon btn-cyan"><i class="fas fa-plus"></i></button>
       </div>
-      <div class="panel-card-body-0">
+      <div>
         {% for action in scheduled %}
-        <div class="action-row" style="padding:12px 16px">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
-            <div>
-              <div style="font-size:13px;font-weight:600;color:#e6edf3">{{ action.get_action_type_display }}</div>
-              <div style="font-family:var(--mono);font-size:11px;color:#58a6ff;margin-top:2px"><i class="fas fa-calendar-alt fa-xs"></i> {{ action.scheduled_at|date:"d M Y, H:i" }}</div>
-              {% if action.action_data.reason %}<div style="font-size:12px;color:#8b949e;margin-top:3px">{{ action.action_data.reason }}</div>{% endif %}
-            </div>
-            <a href="{% url 'cancel_scheduled_action' action.pk %}" onclick="return confirm('Cancel this action?')" class="act-icon act-icon-red" style="flex-shrink:0"><i class="fas fa-times"></i></a>
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:12px 18px;border-bottom:1px solid var(--border);gap:10px">
+          <div>
+            <div style="font-size:13px;font-weight:600;color:var(--text)">{{ action.get_action_type_display }}</div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--cyan);margin-top:2px"><i class="fas fa-calendar-alt fa-xs"></i> {{ action.scheduled_at|date:"d M Y, H:i" }}</div>
+            {% if action.action_data.reason %}<div style="font-size:12px;color:var(--text-2);margin-top:3px">{{ action.action_data.reason }}</div>{% endif %}
           </div>
+          <a href="{% url 'cancel_scheduled_action' action.pk %}" onclick="return confirm('Cancel this scheduled action?')" class="jt-btn btn-icon btn-red"><i class="fas fa-times"></i></a>
         </div>
         {% empty %}
-        <div class="empty-state" style="padding:28px 16px"><div class="es-icon" style="font-size:24px">⏱</div><p>No actions scheduled</p></div>
+        <div class="jt-empty"><div class="ei">⏱</div><p>No scheduled actions</p></div>
         {% endfor %}
+      </div>
+    </div>
+
+    <!-- Payment History -->
+    <div class="jt-card">
+      <div class="jt-card-head">
+        <span class="jt-card-title"><i class="fas fa-receipt" style="color:var(--green)"></i> Payment History</span>
+        <button type="button" onclick="openModal('paymentModal')" class="jt-btn btn-icon btn-cyan"><i class="fas fa-plus"></i></button>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="jt-table">
+          <thead><tr><th>Date</th><th>Amount</th><th>Method</th><th>Months</th><th>Ref</th></tr></thead>
+          <tbody>
+            {% for p in payments %}
+            <tr>
+              <td style="font-family:var(--mono);font-size:12px;color:var(--text-2)">{{ p.payment_date|date:"d M Y" }}</td>
+              <td style="font-family:var(--mono);font-weight:600;color:var(--green)">TZS {{ p.amount|floatformat:0 }}</td>
+              <td style="font-size:12px;color:var(--text-2)">{{ p.payment_method|default:"—" }}</td>
+              <td style="font-family:var(--mono);font-size:12px;text-align:center">{{ p.months_covered }}</td>
+              <td style="font-family:var(--mono);font-size:11px;color:var(--cyan)">{{ p.transaction_ref|default:"—" }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5"><div class="jt-empty" style="padding:24px"><div class="ei">💳</div><p>No payments yet</p></div></td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
 
-  <!-- RIGHT: Payments + Notifications -->
-  <div class="col-lg-3">
-    <!-- Payments -->
-    <div class="panel-card mb-3">
-      <div class="panel-card-head">
-        <span class="panel-card-title"><i class="fas fa-receipt" style="color:#3fb950"></i> Payments</span>
-        <button onclick="openModal('paymentModal')" class="act-icon act-icon-blue" style="width:28px;height:28px"><i class="fas fa-plus"></i></button>
+  <!-- COL 3: Messages -->
+  <div class="col-xl-4 col-lg-3">
+    <div class="jt-card">
+      <div class="jt-card-head">
+        <span class="jt-card-title"><i class="fas fa-envelope" style="color:var(--cyan)"></i> Messages ({{ notifications|length }})</span>
+        <button type="button" onclick="openModal('messageModal')" class="jt-btn btn-icon btn-cyan"><i class="fas fa-plus"></i></button>
       </div>
-      <div class="panel-card-body-0">
-        {% for p in payments %}
-        <div style="padding:11px 14px;border-bottom:1px solid #21262d">
-          <div style="display:flex;justify-content:space-between">
-            <span style="font-family:var(--mono);font-size:13px;font-weight:600;color:#3fb950">TZS {{ p.amount|floatformat:0 }}</span>
-            <span style="font-family:var(--mono);font-size:11px;color:#484f58">{{ p.payment_date|date:"d M Y" }}</span>
-          </div>
-          <div style="font-size:12px;color:#484f58;margin-top:3px">{{ p.months_covered }}mo · {{ p.payment_method|default:"—" }}</div>
-          {% if p.transaction_ref %}<div style="font-family:var(--mono);font-size:11px;color:#58a6ff;margin-top:2px">{{ p.transaction_ref }}</div>{% endif %}
-        </div>
-        {% empty %}
-        <div class="empty-state" style="padding:24px 14px"><div class="es-icon" style="font-size:22px">💳</div><p>No payments recorded</p></div>
-        {% endfor %}
-      </div>
-    </div>
-
-    <!-- Notifications -->
-    <div class="panel-card">
-      <div class="panel-card-head">
-        <span class="panel-card-title"><i class="fas fa-envelope" style="color:#58a6ff"></i> Messages</span>
-      </div>
-      <div class="panel-card-body-0">
+      <div>
         {% for n in notifications %}
-        <div style="padding:11px 14px;border-bottom:1px solid #21262d">
-          <div style="display:flex;justify-content:space-between;gap:6px">
-            <span style="font-size:12px;font-weight:600;color:#e6edf3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1">{{ n.subject|truncatechars:32 }}</span>
-            <span style="font-family:var(--mono);font-size:10px;color:#484f58;flex-shrink:0">{{ n.sent_at|date:"d M" }}</span>
+        <div style="padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.12s" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display?'':'block'" onmouseover="this.style.background='var(--card-s)'" onmouseout="this.style.background=''">
+          <div style="display:flex;justify-content:space-between;gap:8px;margin-bottom:3px">
+            <span style="font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1">{{ n.subject|truncatechars:38 }}</span>
+            <span style="font-family:var(--mono);font-size:10px;color:var(--text-3);flex-shrink:0">{{ n.sent_at|date:"d M" }}</span>
           </div>
-          {% if n.email_sent %}<span style="font-family:var(--mono);font-size:10px;background:rgba(63,185,80,0.1);color:#3fb950;padding:2px 6px;border-radius:5px;margin-top:4px;display:inline-block">✓ sent</span>{% endif %}
+          <div style="display:flex;gap:6px;align-items:center">
+            <span style="font-size:11px;color:var(--text-3)">{{ n.notification_type }}</span>
+            {% if n.email_sent %}<span style="font-family:var(--mono);font-size:10px;background:rgba(0,255,136,0.1);color:var(--green);padding:1px 6px;border-radius:4px">✓ emailed</span>{% endif %}
+          </div>
+        </div>
+        <div style="display:none;padding:12px 16px;background:rgba(0,0,0,0.2);border-bottom:1px solid var(--border)">
+          <pre style="font-family:var(--body);font-size:12px;color:var(--text-2);white-space:pre-wrap;margin:0;line-height:1.6">{{ n.message }}</pre>
         </div>
         {% empty %}
-        <div class="empty-state" style="padding:24px 14px"><div class="es-icon" style="font-size:22px">📭</div><p>No messages sent</p></div>
+        <div class="jt-empty"><div class="ei">📭</div><p>No messages sent yet</p></div>
         {% endfor %}
       </div>
     </div>
@@ -210,195 +252,298 @@
 
 <!-- ═══ MODALS ═══ -->
 
-<!-- SUSPEND -->
-<div class="panel-modal" id="suspendModal">
-  <div class="modal-backdrop"></div>
-  <div class="modal-box">
-    <div class="modal-head">
-      <h3 style="color:#f85149"><i class="fas fa-ban fa-sm me-2"></i>Suspend Website</h3>
-      <button class="modal-close" onclick="closeModal('suspendModal')"><i class="fas fa-times"></i></button>
+<!-- SUSPEND MODAL -->
+<div class="jt-modal-overlay" id="suspendModal">
+  <div class="jt-modal-bg"></div>
+  <div class="jt-modal-box">
+    <div class="jt-modal-head">
+      <h3><i class="fas fa-ban" style="color:var(--red)"></i> Suspend Website</h3>
+      <button class="jt-modal-close" onclick="closeModal('suspendModal')"><i class="fas fa-times"></i></button>
     </div>
     <form method="post" action="{% url 'suspend_website' website.pk %}">
       {% csrf_token %}
-      <div class="modal-body">
-        <div class="mb-3"><label class="f-label">Reason (internal) *</label><input type="text" name="reason" class="f-input" placeholder="e.g. Hosting payment overdue" required></div>
-        <div class="mb-3"><label class="f-label">Message shown to website visitors</label><textarea name="suspension_message" class="f-input">{{ website.suspension_message }}</textarea></div>
-        <label class="f-check"><input type="checkbox" name="notify_client" checked><span>Email client a suspension notice</span></label>
+      <div class="jt-modal-body">
+        <div class="jt-alert jt-alert-danger mb-3" style="margin-bottom:16px">
+          <i class="fas fa-triangle-exclamation fa-sm"></i>
+          Suspending will show a block page to all visitors of <strong>{{ website.name }}</strong>.
+        </div>
+        <div class="mb-3">
+          <label class="f-label">Suspension Reason (internal) *</label>
+          <input type="text" name="reason" class="f-input" placeholder="e.g. Hosting payment overdue" required>
+        </div>
+        <div class="mb-3">
+          <label class="f-label">Visitor Message</label>
+          <textarea name="suspension_message" class="f-input" style="min-height:80px">{{ website.suspension_message }}</textarea>
+          <div class="f-help">Shown to website visitors when they try to access the site</div>
+        </div>
+        <label class="f-check"><input type="checkbox" name="notify_client" checked><span>Send suspension email to {{ website.client.name }}</span></label>
       </div>
-      <div class="modal-footer">
-        <button type="button" onclick="closeModal('suspendModal')" class="act-btn act-btn-ghost">Cancel</button>
-        <button type="submit" class="act-btn act-btn-red"><i class="fas fa-ban"></i> Suspend Now</button>
+      <div class="jt-modal-foot">
+        <button type="button" onclick="closeModal('suspendModal')" class="jt-btn btn-ghost">Cancel</button>
+        <button type="submit" class="jt-btn btn-red"><i class="fas fa-ban"></i> Suspend Now</button>
       </div>
     </form>
   </div>
 </div>
 
-<!-- RESTORE -->
-<div class="panel-modal" id="restoreModal">
-  <div class="modal-backdrop"></div>
-  <div class="modal-box">
-    <div class="modal-head">
-      <h3 style="color:#3fb950"><i class="fas fa-play fa-sm me-2"></i>Restore Website</h3>
-      <button class="modal-close" onclick="closeModal('restoreModal')"><i class="fas fa-times"></i></button>
+<!-- RESTORE MODAL -->
+<div class="jt-modal-overlay" id="restoreModal">
+  <div class="jt-modal-bg"></div>
+  <div class="jt-modal-box">
+    <div class="jt-modal-head">
+      <h3><i class="fas fa-play" style="color:var(--green)"></i> Restore Website</h3>
+      <button class="jt-modal-close" onclick="closeModal('restoreModal')"><i class="fas fa-times"></i></button>
     </div>
     <form method="post" action="{% url 'restore_website' website.pk %}">
       {% csrf_token %}
-      <div class="modal-body">
-        <p style="color:#8b949e;font-size:15px;margin-bottom:18px">Restore <strong style="color:#e6edf3">{{ website.name }}</strong> back to active status.</p>
-        <label class="f-check"><input type="checkbox" name="notify_client" checked><span>Email client a restoration notice</span></label>
+      <div class="jt-modal-body">
+        <div class="jt-alert jt-alert-success mb-3" style="margin-bottom:16px">
+          <i class="fas fa-circle-check fa-sm"></i>
+          <strong>{{ website.name }}</strong> will be set back to <strong>Active</strong> status immediately.
+        </div>
+        <label class="f-check"><input type="checkbox" name="notify_client" checked><span>Send restoration email to {{ website.client.name }}</span></label>
       </div>
-      <div class="modal-footer">
-        <button type="button" onclick="closeModal('restoreModal')" class="act-btn act-btn-ghost">Cancel</button>
-        <button type="submit" class="act-btn act-btn-green"><i class="fas fa-play"></i> Restore Now</button>
+      <div class="jt-modal-foot">
+        <button type="button" onclick="closeModal('restoreModal')" class="jt-btn btn-ghost">Cancel</button>
+        <button type="submit" class="jt-btn btn-green"><i class="fas fa-play"></i> Restore Now</button>
       </div>
     </form>
   </div>
 </div>
 
-<!-- MAINTENANCE -->
-<div class="panel-modal" id="maintenanceModal">
-  <div class="modal-backdrop"></div>
-  <div class="modal-box">
-    <div class="modal-head">
-      <h3 style="color:#d29922"><i class="fas fa-wrench fa-sm me-2"></i>Set Maintenance Mode</h3>
-      <button class="modal-close" onclick="closeModal('maintenanceModal')"><i class="fas fa-times"></i></button>
+<!-- MAINTENANCE MODAL -->
+<div class="jt-modal-overlay" id="maintenanceModal">
+  <div class="jt-modal-bg"></div>
+  <div class="jt-modal-box">
+    <div class="jt-modal-head">
+      <h3><i class="fas fa-wrench" style="color:var(--yellow)"></i> Maintenance Mode</h3>
+      <button class="jt-modal-close" onclick="closeModal('maintenanceModal')"><i class="fas fa-times"></i></button>
     </div>
     <form method="post" action="{% url 'set_maintenance' website.pk %}">
       {% csrf_token %}
-      <div class="modal-body">
-        <label class="f-label">Message shown to visitors</label>
-        <textarea name="maintenance_message" class="f-input">We're performing scheduled maintenance. We'll be back shortly — thank you for your patience.</textarea>
+      <div class="jt-modal-body">
+        <div class="mb-3">
+          <label class="f-label">Maintenance Message for Visitors</label>
+          <textarea name="maintenance_message" class="f-input" style="min-height:90px">We are performing scheduled maintenance. We will be back shortly. Thank you for your patience.</textarea>
+        </div>
+        <label class="f-check"><input type="checkbox" name="notify_client" checked><span>Notify {{ website.client.name }} via email</span></label>
       </div>
-      <div class="modal-footer">
-        <button type="button" onclick="closeModal('maintenanceModal')" class="act-btn act-btn-ghost">Cancel</button>
-        <button type="submit" class="act-btn act-btn-yellow"><i class="fas fa-wrench"></i> Enable Maintenance</button>
+      <div class="jt-modal-foot">
+        <button type="button" onclick="closeModal('maintenanceModal')" class="jt-btn btn-ghost">Cancel</button>
+        <button type="submit" class="jt-btn btn-yellow"><i class="fas fa-wrench"></i> Enable Maintenance</button>
       </div>
     </form>
   </div>
 </div>
 
-<!-- PAYMENT -->
-<div class="panel-modal" id="paymentModal">
-  <div class="modal-backdrop"></div>
-  <div class="modal-box">
-    <div class="modal-head">
-      <h3><i class="fas fa-coins fa-sm me-2" style="color:#3fb950"></i>Record Payment</h3>
-      <button class="modal-close" onclick="closeModal('paymentModal')"><i class="fas fa-times"></i></button>
+<!-- SEND MESSAGE MODAL -->
+<div class="jt-modal-overlay" id="messageModal">
+  <div class="jt-modal-bg"></div>
+  <div class="jt-modal-box">
+    <div class="jt-modal-head">
+      <h3><i class="fas fa-envelope" style="color:var(--cyan)"></i> Send Message</h3>
+      <button class="jt-modal-close" onclick="closeModal('messageModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <form method="post" action="{% url 'send_notification' website.pk %}">
+      {% csrf_token %}
+      <div class="jt-modal-body">
+        <!-- Quick templates -->
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px">
+          <button type="button" onclick="fillMsg('Payment Reminder','Dear {{ website.client.name }},\n\nThis is a reminder that your hosting payment for {{ website.name }} is due.\n\nPlease make your payment of TZS {{ website.monthly_cost|floatformat:0 }} to NMB Account 21410034200.\n\nThank you!\nJamiiTek Team')" class="jt-btn btn-ghost" style="font-size:11px;padding:5px 10px">💰 Payment Due</button>
+          <button type="button" onclick="fillMsg('Invoice — {{ website.name }}','Dear {{ website.client.name }},\n\nPlease find your hosting invoice attached.\n\nWebsite: {{ website.name }}\nAmount: TZS {{ website.monthly_cost|floatformat:0 }}/month\nDue: {{ hosting_end_date_str }}\n\nThank you!\nJamiiTek Team')" class="jt-btn btn-ghost" style="font-size:11px;padding:5px 10px">🧾 Invoice</button>
+          <button type="button" onclick="fillMsg('Update Notice — {{ website.name }}','Dear {{ website.client.name }},\n\nWe are pleased to notify you of an update to your website {{ website.name }}.\n\n[Add details here]\n\nBest regards,\nJamiiTek Team')" class="jt-btn btn-ghost" style="font-size:11px;padding:5px 10px">📢 Update</button>
+        </div>
+        <div class="mb-3">
+          <label class="f-label">Message Type</label>
+          <select name="notification_type" class="f-input">
+            {% for val, label in notification_types %}<option value="{{ val }}">{{ label }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="f-label">Subject *</label>
+          <input type="text" name="subject" id="msgSubject" class="f-input" placeholder="Message subject..." required>
+        </div>
+        <div class="mb-2">
+          <label class="f-label">Message *</label>
+          <textarea name="message" id="msgBody" class="f-input" style="min-height:130px" placeholder="Write your message..." required></textarea>
+        </div>
+      </div>
+      <div class="jt-modal-foot">
+        <button type="button" onclick="closeModal('messageModal')" class="jt-btn btn-ghost">Cancel</button>
+        <button type="submit" class="jt-btn btn-cyan"><i class="fas fa-paper-plane"></i> Send Message</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- RECORD PAYMENT MODAL -->
+<div class="jt-modal-overlay" id="paymentModal">
+  <div class="jt-modal-bg"></div>
+  <div class="jt-modal-box">
+    <div class="jt-modal-head">
+      <h3><i class="fas fa-coins" style="color:var(--green)"></i> Record Payment</h3>
+      <button class="jt-modal-close" onclick="closeModal('paymentModal')"><i class="fas fa-times"></i></button>
     </div>
     <form method="post" action="{% url 'add_payment' website.pk %}">
       {% csrf_token %}
-      <div class="modal-body">
+      <div class="jt-modal-body">
         <div class="row g-3">
-          <div class="col-6"><label class="f-label">Amount (TZS) *</label><input type="number" name="amount" class="f-input" placeholder="{{ website.monthly_cost }}" required></div>
-          <div class="col-6"><label class="f-label">Payment Date *</label><input type="date" name="payment_date" class="f-input" value="{% now 'Y-m-d' %}" required></div>
-          <div class="col-6"><label class="f-label">Months Covered</label><input type="number" name="months_covered" class="f-input" value="1" min="1"></div>
-          <div class="col-6"><label class="f-label">Payment Method</label>
+          <div class="col-6">
+            <label class="f-label">Amount (TZS) *</label>
+            <input type="number" name="amount" class="f-input" placeholder="{{ website.monthly_cost }}" required>
+          </div>
+          <div class="col-6">
+            <label class="f-label">Payment Date *</label>
+            <input type="date" name="payment_date" class="f-input" value="{% now 'Y-m-d' %}" required>
+          </div>
+          <div class="col-6">
+            <label class="f-label">Months Covered</label>
+            <input type="number" name="months_covered" class="f-input" value="1" min="1" max="24">
+          </div>
+          <div class="col-6">
+            <label class="f-label">Payment Method</label>
             <select name="payment_method" class="f-input">
+              <option>NMB Bank Transfer</option>
               <option>M-Pesa</option><option>Tigo Pesa</option><option>Airtel Money</option>
-              <option>Bank Transfer</option><option>Cash</option><option>Other</option>
+              <option>Cash</option><option>Other</option>
             </select>
           </div>
-          <div class="col-12"><label class="f-label">Transaction Reference</label><input type="text" name="transaction_ref" class="f-input" placeholder="TXN123456789"></div>
           <div class="col-12">
-            <label class="f-check mb-2"><input type="checkbox" name="extend_hosting" checked><span>Auto-extend hosting end date</span></label>
-            <label class="f-check"><input type="checkbox" name="auto_restore" {% if website.status == 'suspended' %}checked{% endif %}><span>Restore website if suspended</span></label>
+            <label class="f-label">Transaction Reference</label>
+            <input type="text" name="transaction_ref" class="f-input" placeholder="e.g. NMB20240912345">
+          </div>
+          <div class="col-12">
+            <label class="f-label">Notes</label>
+            <input type="text" name="notes" class="f-input" placeholder="Optional notes...">
+          </div>
+          <div class="col-12" style="display:flex;flex-direction:column;gap:10px">
+            <label class="f-check"><input type="checkbox" name="extend_hosting" checked><span>Extend hosting end date by months covered</span></label>
+            <label class="f-check"><input type="checkbox" name="auto_restore" {% if website.status == 'suspended' %}checked{% endif %}><span>Auto-restore website if currently suspended</span></label>
+            <label class="f-check"><input type="checkbox" name="notify_client" checked><span>Email payment confirmation to {{ website.client.name }}</span></label>
           </div>
         </div>
       </div>
-      <div class="modal-footer">
-        <button type="button" onclick="closeModal('paymentModal')" class="act-btn act-btn-ghost">Cancel</button>
-        <button type="submit" class="act-btn act-btn-green"><i class="fas fa-save"></i> Save Payment</button>
+      <div class="jt-modal-foot">
+        <button type="button" onclick="closeModal('paymentModal')" class="jt-btn btn-ghost">Cancel</button>
+        <button type="submit" class="jt-btn btn-green"><i class="fas fa-save"></i> Save Payment</button>
       </div>
     </form>
   </div>
 </div>
 
-<!-- SCHEDULE -->
-<div class="panel-modal" id="scheduleModal">
-  <div class="modal-backdrop"></div>
-  <div class="modal-box modal-box-lg">
-    <div class="modal-head">
-      <h3><i class="fas fa-clock fa-sm me-2" style="color:#bc8cff"></i>Schedule an Action</h3>
-      <button class="modal-close" onclick="closeModal('scheduleModal')"><i class="fas fa-times"></i></button>
+<!-- SCHEDULE ACTION MODAL -->
+<div class="jt-modal-overlay" id="scheduleModal">
+  <div class="jt-modal-bg"></div>
+  <div class="jt-modal-box jt-modal-box-lg">
+    <div class="jt-modal-head">
+      <h3><i class="fas fa-clock" style="color:var(--purple)"></i> Schedule Action</h3>
+      <button class="jt-modal-close" onclick="closeModal('scheduleModal')"><i class="fas fa-times"></i></button>
     </div>
     <form method="post" action="{% url 'schedule_action' website.pk %}">
       {% csrf_token %}
-      <div class="modal-body">
+      <div class="jt-modal-body">
         <div class="row g-3">
-          <div class="col-md-6"><label class="f-label">Action Type *</label>
-            <select name="action_type" class="f-input" id="actionType" onchange="handleActionType()">
+          <div class="col-md-6">
+            <label class="f-label">Action Type *</label>
+            <select name="action_type" id="actionTypeSel" class="f-input" onchange="updateActionFields()">
               {% for val, label in action_types %}<option value="{{ val }}">{{ label }}</option>{% endfor %}
             </select>
           </div>
-          <div class="col-md-6"><label class="f-label">Execute At *</label><input type="datetime-local" name="scheduled_at" class="f-input" required></div>
-          <div class="col-12"><label class="f-label">Reason / Description</label><input type="text" name="reason" class="f-input" placeholder="Why this action?"></div>
-          <div class="col-12" id="visitorMsgField">
-            <label class="f-label">Message for Website Visitors</label>
-            <textarea name="message" class="f-input" style="min-height:80px" placeholder="Shown on the website when suspended/in maintenance"></textarea>
+          <div class="col-md-6">
+            <label class="f-label">Execute At *</label>
+            <input type="datetime-local" name="scheduled_at" class="f-input" required>
           </div>
-          <div class="col-12" id="emailFields" style="display:none">
+          <div class="col-12">
+            <label class="f-label">Reason / Description</label>
+            <input type="text" name="reason" class="f-input" placeholder="Why this action is scheduled...">
+          </div>
+          <div class="col-12" id="sched-visitor-field">
+            <label class="f-label">Visitor Message (shown on site)</label>
+            <textarea name="message" class="f-input" style="min-height:80px" placeholder="Message shown to website visitors..."></textarea>
+          </div>
+          <div class="col-12" id="sched-email-fields" style="display:none">
             <label class="f-label">Email Subject</label>
-            <input type="text" name="email_subject" class="f-input mb-2" placeholder="Subject line">
+            <input type="text" name="email_subject" class="f-input mb-3" placeholder="Email subject...">
             <label class="f-label">Email Body</label>
-            <textarea name="email_body" class="f-input" placeholder="Email content..."></textarea>
+            <textarea name="email_body" class="f-input" placeholder="Email body..."></textarea>
           </div>
-          <div class="col-12" id="featureField" style="display:none">
-            <label class="f-label">Select Feature</label>
+          <div class="col-12" id="sched-feature-field" style="display:none">
+            <label class="f-label">Feature to Toggle</label>
             <select name="feature_key" class="f-input">
-              {% for f in features %}<option value="{{ f.feature_key }}">{{ f.feature_name }}</option>{% endfor %}
+              {% for f in features %}
+                <option value="{{ f.feature_key }}">{{ f.feature_name }}</option>
+              {% empty %}
+                <option value="">No features added</option>
+              {% endfor %}
             </select>
           </div>
-          <div class="col-12"><label class="f-check"><input type="checkbox" name="notify_client" id="notifyClient" checked><span>Email client after execution</span></label></div>
+          <div class="col-12">
+            <label class="f-check"><input type="checkbox" name="notify_client" id="schedNotify" checked><span>Email {{ website.client.name }} after execution</span></label>
+          </div>
         </div>
       </div>
-      <div class="modal-footer">
-        <button type="button" onclick="closeModal('scheduleModal')" class="act-btn act-btn-ghost">Cancel</button>
-        <button type="submit" class="act-btn act-btn-purple"><i class="fas fa-clock"></i> Schedule Action</button>
+      <div class="jt-modal-foot">
+        <button type="button" onclick="closeModal('scheduleModal')" class="jt-btn btn-ghost">Cancel</button>
+        <button type="submit" class="jt-btn btn-purple"><i class="fas fa-clock"></i> Schedule Action</button>
       </div>
     </form>
   </div>
 </div>
 
-<!-- ADD FEATURE -->
-<div class="panel-modal" id="addFeatureModal">
-  <div class="modal-backdrop"></div>
-  <div class="modal-box">
-    <div class="modal-head">
-      <h3><i class="fas fa-plus-circle fa-sm me-2" style="color:#3fb950"></i>Add Feature</h3>
-      <button class="modal-close" onclick="closeModal('addFeatureModal')"><i class="fas fa-times"></i></button>
+<!-- ADD FEATURE MODAL -->
+<div class="jt-modal-overlay" id="addFeatureModal">
+  <div class="jt-modal-bg"></div>
+  <div class="jt-modal-box">
+    <div class="jt-modal-head">
+      <h3><i class="fas fa-plus-circle" style="color:var(--green)"></i> Add Feature</h3>
+      <button class="jt-modal-close" onclick="closeModal('addFeatureModal')"><i class="fas fa-times"></i></button>
     </div>
     <form method="post" action="{% url 'add_feature' website.pk %}">
       {% csrf_token %}
-      <div class="modal-body">
-        <div class="mb-3"><label class="f-label">Feature Key (unique, lowercase) *</label><input type="text" name="feature_key" class="f-input" placeholder="e.g. ecommerce, payments, blog" required></div>
-        <div class="mb-0"><label class="f-label">Feature Display Name *</label><input type="text" name="feature_name" class="f-input" placeholder="e.g. E-Commerce System" required></div>
+      <div class="jt-modal-body">
+        <div class="mb-3">
+          <label class="f-label">Feature Key (unique, lowercase) *</label>
+          <input type="text" name="feature_key" class="f-input" placeholder="e.g. ecommerce, blog, payments" required>
+          <div class="f-help">Used in the JS API: window.JAMIITEK.features['your_key']</div>
+        </div>
+        <div>
+          <label class="f-label">Display Name *</label>
+          <input type="text" name="feature_name" class="f-input" placeholder="e.g. E-Commerce System" required>
+        </div>
       </div>
-      <div class="modal-footer">
-        <button type="button" onclick="closeModal('addFeatureModal')" class="act-btn act-btn-ghost">Cancel</button>
-        <button type="submit" class="act-btn act-btn-green"><i class="fas fa-plus"></i> Add Feature</button>
+      <div class="jt-modal-foot">
+        <button type="button" onclick="closeModal('addFeatureModal')" class="jt-btn btn-ghost">Cancel</button>
+        <button type="submit" class="jt-btn btn-green"><i class="fas fa-plus"></i> Add Feature</button>
       </div>
     </form>
   </div>
 </div>
+
 {% endblock %}
 
 {% block extra_js %}
 <script>
-function copyApi() {
-  const text = document.getElementById('apiKeyBox').textContent.trim().split('\n')[0].trim();
+function copyText(boxId, btn) {
+  const el = document.getElementById(boxId);
+  const text = el.innerText.replace(/copy$/, '').trim();
   navigator.clipboard.writeText(text).then(() => {
-    const btn = document.querySelector('#apiKeyBox .copy-btn');
-    btn.innerHTML = '<i class="fas fa-check"></i>';
-    setTimeout(() => btn.innerHTML = '<i class="fas fa-copy"></i>', 2000);
+    btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+    btn.style.color = 'var(--green)';
+    setTimeout(() => { btn.innerHTML = '<i class="fas fa-copy"></i>'; btn.style.color = ''; }, 2000);
   });
 }
-function handleActionType() {
-  const val = document.getElementById('actionType').value;
-  document.getElementById('emailFields').style.display = val === 'send_email' ? 'block' : 'none';
-  document.getElementById('featureField').style.display = (val.includes('feature')) ? 'block' : 'none';
-  document.getElementById('visitorMsgField').style.display = (val === 'suspend' || val === 'maintenance') ? 'block' : 'none';
-  document.getElementById('notifyClient').closest('label').style.display = val === 'send_email' ? 'none' : 'flex';
+
+function fillMsg(subject, body) {
+  document.getElementById('msgSubject').value = subject;
+  document.getElementById('msgBody').value = body;
 }
-handleActionType();
+
+function updateActionFields() {
+  const val = document.getElementById('actionTypeSel').value;
+  document.getElementById('sched-visitor-field').style.display = (val === 'suspend' || val === 'maintenance') ? 'block' : 'none';
+  document.getElementById('sched-email-fields').style.display  = (val === 'send_email') ? 'block' : 'none';
+  document.getElementById('sched-feature-field').style.display = (val === 'disable_feature' || val === 'enable_feature') ? 'block' : 'none';
+}
+updateActionFields();
 </script>
 {% endblock %}

@@ -1,0 +1,62 @@
+{% extends 'portal/base.html' %}
+{% block title %}My Websites{% endblock %}
+{% block content %}
+<div style="margin-bottom:24px">
+  <h1 style="font-family:var(--head);font-size:22px;font-weight:800;color:var(--text);margin-bottom:4px">My Websites</h1>
+  <div style="font-family:var(--mono);font-size:12px;color:var(--text-3)">{{ websites|length }} website{{ websites|length|pluralize }} linked to your account</div>
+</div>
+
+{% if websites %}
+<div class="row g-3">
+  {% for w in websites %}
+  <div class="col-md-6 col-xl-4">
+    <div class="jt-card" style="position:relative;transition:all 0.2s" onmouseover="this.style.transform='translateY(-3px)';this.style.borderColor='rgba(139,92,246,0.3)'" onmouseout="this.style.transform='';this.style.borderColor=''">
+      <!-- Status badge -->
+      <div style="position:absolute;top:16px;right:16px">
+        <span class="jt-badge b-{{ w.status }}">{{ w.status|capfirst }}</span>
+      </div>
+      <div style="padding:18px">
+        <!-- Icon -->
+        <div style="width:44px;height:44px;border-radius:11px;background:var(--purple-d);display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--purple);margin-bottom:14px"><i class="fas fa-globe"></i></div>
+        <div style="font-family:var(--head);font-size:16px;font-weight:700;color:var(--text);margin-bottom:4px;padding-right:90px">{{ w.name }}</div>
+        <a href="{{ w.url }}" target="_blank" style="font-family:var(--mono);font-size:11px;color:var(--text-3);display:block;margin-bottom:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ w.url }}</a>
+
+        <!-- Key info grid -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
+          <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:9px;padding:10px 12px">
+            <div style="font-family:var(--mono);font-size:10px;color:var(--text-3);letter-spacing:1px;margin-bottom:3px">EXPIRES</div>
+            <div style="font-size:13px;font-weight:600;{% if w.is_overdue %}color:var(--red){% elif w.days_until_expiry <= 7 %}color:var(--yellow){% else %}color:var(--text){% endif %}">
+              {{ w.hosting_end_date|date:"d M Y" }}{% if w.is_overdue %} ⚠{% endif %}
+            </div>
+          </div>
+          <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:9px;padding:10px 12px">
+            <div style="font-family:var(--mono);font-size:10px;color:var(--text-3);letter-spacing:1px;margin-bottom:3px">MONTHLY</div>
+            <div style="font-size:13px;font-weight:600;color:var(--text)">TZS {{ w.monthly_cost|floatformat:0 }}</div>
+          </div>
+        </div>
+
+        {% if w.is_overdue %}
+        <div class="jt-alert jt-alert-danger" style="margin-bottom:14px;padding:10px 12px;font-size:13px"><i class="fas fa-triangle-exclamation fa-xs"></i> Hosting expired — please renew</div>
+        {% elif w.days_until_expiry is not None and w.days_until_expiry <= 7 %}
+        <div class="jt-alert jt-alert-warning" style="margin-bottom:14px;padding:10px 12px;font-size:13px"><i class="fas fa-clock fa-xs"></i> {{ w.days_until_expiry }} day(s) until expiry</div>
+        {% endif %}
+
+        <div style="display:flex;gap:8px">
+          <a href="{% url 'portal_website_detail' w.pk %}" class="jt-btn btn-primary" style="flex:1;justify-content:center;font-size:13px;padding:8px 12px"><i class="fas fa-eye"></i> Details</a>
+          <a href="{% url 'portal_billing' %}" class="jt-btn btn-ghost" style="font-size:13px;padding:8px 12px"><i class="fas fa-receipt"></i> Pay</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="jt-card">
+  <div class="jt-empty">
+    <div class="ei">🌐</div>
+    <p>No websites linked to your account yet.<br>Contact JamiiTek to get your website added.</p>
+    <a href="{% url 'portal_support' %}" class="jt-btn btn-primary" style="margin-top:16px;display:inline-flex"><i class="fas fa-headset"></i> Contact Support</a>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

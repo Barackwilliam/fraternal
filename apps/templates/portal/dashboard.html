@@ -1,0 +1,118 @@
+{% extends 'portal/base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+
+{% for alert in alerts %}
+<div class="jt-alert jt-alert-{{ alert.type }} mb-2">
+  <i class="fas {% if alert.type == 'danger' %}fa-circle-exclamation{% else %}fa-triangle-exclamation{% endif %}" style="flex-shrink:0;margin-top:2px"></i>
+  <span>{{ alert.msg }}</span>
+</div>
+{% endfor %}
+
+<!-- HEADER -->
+<div style="display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:24px;flex-wrap:wrap">
+  <div>
+    <h1 style="font-family:var(--head);font-size:22px;font-weight:800;color:var(--text);margin-bottom:3px">Hello, {{ client.name|truncatewords:2 }} 👋</h1>
+    <div style="font-family:var(--mono);font-size:12px;color:var(--text-3)">Your hosting overview — {% now "d M Y" %}</div>
+  </div>
+  <a href="{% url 'portal_support' %}" class="jt-btn btn-primary"><i class="fas fa-headset"></i> Get Support</a>
+</div>
+
+<!-- STATS -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3">
+    <div class="stat-card" style="--accent:var(--purple)">
+      <div class="sc-icon" style="background:var(--purple-d);color:var(--purple)"><i class="fas fa-globe"></i></div>
+      <div class="sc-val" style="color:var(--purple)">{{ websites.count }}</div>
+      <div class="sc-label">Websites</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="stat-card" style="--accent:var(--cyan)">
+      <div class="sc-icon" style="background:var(--cyan-d);color:var(--cyan)"><i class="fas fa-at"></i></div>
+      <div class="sc-val" style="color:var(--cyan)">{{ domains.count }}</div>
+      <div class="sc-label">Domains</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="stat-card" style="--accent:var(--purple)">
+      <div class="sc-icon" style="background:var(--purple-d);color:var(--purple)"><i class="fas fa-envelope-open-text"></i></div>
+      <div class="sc-val" style="color:var(--purple)">{{ email_plans.count }}</div>
+      <div class="sc-label">Email Plans</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="stat-card" style="--accent:var(--green)">
+      <div class="sc-icon" style="background:var(--green-d);color:var(--green)"><i class="fas fa-coins"></i></div>
+      <div class="sc-val" style="font-size:18px;color:var(--green)">{{ total_paid|floatformat:0 }}</div>
+      <div class="sc-label">Total Paid (TZS)</div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <!-- Websites table -->
+  <div class="col-lg-8">
+    <div class="jt-card" style="padding:0">
+      <div class="jt-card-head">
+        <span class="jt-card-title"><i class="fas fa-globe" style="color:var(--purple)"></i> My Websites</span>
+        <a href="{% url 'portal_website_list' %}" class="jt-btn btn-ghost" style="font-size:11px;padding:6px 12px">View All</a>
+      </div>
+      {% if websites %}
+      <div style="overflow-x:auto">
+        <table class="jt-table">
+          <thead><tr><th>Website</th><th>Status</th><th>Expires</th><th>Monthly</th><th></th></tr></thead>
+          <tbody>
+            {% for w in websites %}
+            <tr>
+              <td>
+                <div style="font-weight:600;color:var(--text)">{{ w.name }}</div>
+                <a href="{{ w.url }}" target="_blank" style="font-family:var(--mono);font-size:11px;color:var(--text-3)">{{ w.url|truncatechars:36 }}</a>
+              </td>
+              <td><span class="jt-badge b-{{ w.status }}">{{ w.status|capfirst }}</span></td>
+              <td style="font-family:var(--mono);font-size:12px;{% if w.is_overdue %}color:var(--red){% elif w.days_until_expiry <= 7 %}color:var(--yellow){% else %}color:var(--text-3){% endif %}">
+                {{ w.hosting_end_date|date:"d M Y" }}{% if w.is_overdue %} ⚠{% endif %}
+              </td>
+              <td style="font-family:var(--mono);font-size:12px;color:var(--text-2)">TZS {{ w.monthly_cost|floatformat:0 }}</td>
+              <td><a href="{% url 'portal_website_detail' w.pk %}" class="jt-btn btn-ghost" style="font-size:11px;padding:6px 12px">Details</a></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="jt-empty"><div class="ei">🌐</div><p>No websites linked yet. Contact JamiiTek.</p></div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Right -->
+  <div class="col-lg-4">
+    <!-- Recent messages -->
+    <div class="jt-card mb-3" style="padding:0">
+      <div class="jt-card-head">
+        <span class="jt-card-title"><i class="fas fa-envelope" style="color:var(--purple)"></i> Messages</span>
+        <a href="{% url 'portal_notifications' %}" style="font-family:var(--mono);font-size:11px;color:var(--purple)">All →</a>
+      </div>
+      {% for n in notifications %}
+      <div style="padding:12px 16px;border-bottom:1px solid var(--border)">
+        <div style="font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px">{{ n.subject|truncatechars:38 }}</div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--text-3)">{{ n.sent_at|date:"d M Y" }}</div>
+      </div>
+      {% empty %}
+      <div class="jt-empty" style="padding:24px"><div class="ei" style="font-size:24px">📭</div><p>No messages</p></div>
+      {% endfor %}
+    </div>
+
+    <!-- Quick actions -->
+    <div class="jt-card">
+      <div style="font-family:var(--mono);font-size:11px;color:var(--text-3);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px">Quick Actions</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <a href="{% url 'portal_billing' %}" class="jt-btn btn-ghost" style="justify-content:flex-start"><i class="fas fa-coins" style="color:var(--green)"></i> Make a Payment</a>
+        <a href="{% url 'portal_support' %}" class="jt-btn btn-ghost" style="justify-content:flex-start"><i class="fas fa-headset" style="color:var(--cyan)"></i> Contact Support</a>
+        <a href="{% url 'portal_profile' %}" class="jt-btn btn-ghost" style="justify-content:flex-start"><i class="fas fa-user-circle" style="color:var(--purple)"></i> Update Profile</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

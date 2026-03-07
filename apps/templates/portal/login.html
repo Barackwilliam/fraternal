@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Client Portal — JamiiTek</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    :root{--bg:#050810;--cyan:#00d4ff;--purple:#8b5cf6;--green:#00ff88;--red:#ff3b5c;--border:rgba(255,255,255,0.07);--text:rgba(255,255,255,0.85);--text-2:rgba(255,255,255,0.4);--mono:'JetBrains Mono',monospace;--head:'Syne',sans-serif;--body:'Space Grotesk',sans-serif}
+    body{font-family:var(--body);background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:stretch;overflow:hidden}
+    body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,212,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,0.03) 1px,transparent 1px);background-size:50px 50px;pointer-events:none}
+    .orb{position:fixed;border-radius:50%;filter:blur(100px);pointer-events:none}
+    .orb-1{width:500px;height:500px;background:rgba(139,92,246,0.07);top:-100px;right:-100px;animation:drift 10s ease-in-out infinite}
+    .orb-2{width:300px;height:300px;background:rgba(0,212,255,0.05);bottom:-50px;left:-50px;animation:drift 12s ease-in-out infinite reverse}
+    @keyframes drift{0%,100%{transform:translate(0,0)}50%{transform:translate(30px,20px)}}
+    .scan{position:fixed;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(139,92,246,0.5),transparent);animation:scan 6s linear infinite;pointer-events:none;opacity:0.4}
+    @keyframes scan{from{top:0}to{top:100%}}
+
+    /* Split layout */
+    .left-panel{flex:1;position:relative;z-index:10;display:flex;align-items:center;justify-content:center;padding:40px}
+    .right-panel{width:420px;flex-shrink:0;background:rgba(255,255,255,0.025);border-left:1px solid rgba(139,92,246,0.15);display:flex;align-items:center;justify-content:center;padding:40px;position:relative;z-index:10}
+    @media(max-width:768px){.left-panel{display:none}.right-panel{width:100%;border-left:none;background:transparent;padding:24px}}
+
+    /* Left: features */
+    .feature-list{max-width:440px}
+    .f-logo{font-family:var(--head);font-size:32px;font-weight:800;background:linear-gradient(135deg,var(--purple),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px}
+    .f-tagline{font-family:var(--mono);font-size:12px;color:var(--text-2);letter-spacing:2px;text-transform:uppercase;margin-bottom:36px}
+    .f-item{display:flex;align-items:flex-start;gap:14px;margin-bottom:24px}
+    .f-ico{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+    .f-item-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:3px}
+    .f-item-desc{font-size:13px;color:var(--text-2);line-height:1.6}
+
+    /* Right: form */
+    .form-wrap{width:100%;max-width:360px}
+    .form-logo{font-family:var(--head);font-size:24px;font-weight:800;background:linear-gradient(135deg,var(--purple),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px}
+    .form-tag{font-family:var(--mono);font-size:10px;color:var(--text-2);letter-spacing:2px;text-transform:uppercase;margin-bottom:28px;display:flex;align-items:center;gap:8px}
+    .form-tag::before,.form-tag::after{content:'';flex:1;height:1px;background:var(--border)}
+    h1{font-family:var(--head);font-size:20px;font-weight:800;color:var(--text);margin-bottom:5px}
+    p.sub{font-size:13px;color:var(--text-2);margin-bottom:24px}
+    .f-group{margin-bottom:16px}
+    .f-label{display:block;font-family:var(--mono);font-size:10px;font-weight:600;color:rgba(139,92,246,0.7);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:7px}
+    .f-input{width:100%;padding:11px 14px;background:rgba(255,255,255,0.04);border:1.5px solid rgba(255,255,255,0.1);border-radius:10px;font-family:var(--body);font-size:14px;color:var(--text);outline:none;transition:all 0.2s}
+    .f-input:focus{border-color:var(--purple);box-shadow:0 0 0 3px rgba(139,92,246,0.12);background:rgba(255,255,255,0.06)}
+    .f-input::placeholder{color:rgba(255,255,255,0.2)}
+    .pw-wrap{position:relative}
+    .pw-eye{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:rgba(255,255,255,0.25);cursor:pointer;font-size:15px;padding:4px;transition:color 0.2s}
+    .pw-eye:hover{color:var(--purple)}
+    .err-box{background:rgba(255,59,92,0.08);border:1px solid rgba(255,59,92,0.2);border-radius:10px;padding:11px 14px;color:var(--red);font-size:13px;margin-bottom:18px;display:flex;align-items:center;gap:8px}
+    .submit-btn{width:100%;padding:12px;background:linear-gradient(135deg,var(--purple),var(--cyan));color:#fff;border:none;border-radius:10px;font-family:var(--head);font-weight:700;font-size:15px;cursor:pointer;transition:all 0.2s;margin-top:4px;letter-spacing:0.5px}
+    .submit-btn:hover{transform:translateY(-1px);box-shadow:0 8px 30px rgba(139,92,246,0.35)}
+    .alt{text-align:center;font-size:13px;color:var(--text-2);margin-top:16px}
+    .alt a{color:var(--purple);font-weight:600}
+    .staff-link{text-align:center;margin-top:10px}
+    .staff-link a{font-family:var(--mono);font-size:10px;color:var(--text-2);letter-spacing:1px}
+    .staff-link a:hover{color:var(--cyan)}
+  </style>
+</head>
+<body>
+<div class="orb orb-1"></div><div class="orb orb-2"></div><div class="scan"></div>
+
+<!-- Left feature panel -->
+<div class="left-panel">
+  <div class="feature-list">
+    <div class="f-logo">JamiiTek</div>
+    <div class="f-tagline">Client Portal</div>
+    <div class="f-item">
+      <div class="f-ico" style="background:rgba(0,212,255,0.1);color:#00d4ff"><i class="fas fa-gauge"></i></div>
+      <div><div class="f-item-title">Live Status Monitoring</div><div class="f-item-desc">Track your website status, uptime, and hosting expiry in real time.</div></div>
+    </div>
+    <div class="f-item">
+      <div class="f-ico" style="background:rgba(0,255,136,0.1);color:#00ff88"><i class="fas fa-receipt"></i></div>
+      <div><div class="f-item-title">Smart Billing</div><div class="f-item-desc">Submit payment proof, track payment history, and renew hosting instantly.</div></div>
+    </div>
+    <div class="f-item">
+      <div class="f-ico" style="background:rgba(139,92,246,0.1);color:#8b5cf6"><i class="fas fa-bell"></i></div>
+      <div><div class="f-item-title">Instant Notifications</div><div class="f-item-desc">Get alerts for maintenance, suspension, and important account updates.</div></div>
+    </div>
+    <div class="f-item">
+      <div class="f-ico" style="background:rgba(255,184,0,0.1);color:#ffb800"><i class="fas fa-headset"></i></div>
+      <div><div class="f-item-title">Priority Support</div><div class="f-item-desc">Submit support tickets and get direct assistance from the JamiiTek team.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Right form panel -->
+<div class="right-panel">
+  <div class="form-wrap">
+    <div class="form-logo">JamiiTek</div>
+    <div class="form-tag">Client Portal</div>
+    <h1>Welcome Back</h1>
+    <p class="sub">Sign in to manage your websites.</p>
+
+    {% if error %}<div class="err-box"><i class="fas fa-circle-exclamation fa-sm"></i> {{ error }}</div>{% endif %}
+
+    <form method="post">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ next }}">
+      <div class="f-group">
+        <label class="f-label">Username</label>
+        <input type="text" name="username" class="f-input" placeholder="your_username" autofocus autocomplete="username" required>
+      </div>
+      <div class="f-group">
+        <label class="f-label">Password</label>
+        <div class="pw-wrap">
+          <input type="password" name="password" id="pw" class="f-input" placeholder="••••••••" style="padding-right:42px" required>
+          <button type="button" class="pw-eye" onclick="togglePw()"><i class="fas fa-eye" id="eyeI"></i></button>
+        </div>
+      </div>
+      <button type="submit" class="submit-btn">Sign In <i class="fas fa-arrow-right"></i></button>
+    </form>
+    <div class="alt">Don't have an account? <a href="{% url 'portal_register' %}">Create one</a></div>
+    <div class="staff-link"><a href="{% url 'management_login' %}">↗ STAFF / MANAGEMENT PANEL</a></div>
+  </div>
+</div>
+<script>
+function togglePw(){const i=document.getElementById('pw');const e=document.getElementById('eyeI');i.type=i.type==='password'?'text':'password';e.className=i.type==='text'?'fas fa-eye-slash':'fas fa-eye'}
+</script>
+</body>
+</html>

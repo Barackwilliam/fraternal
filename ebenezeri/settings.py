@@ -14,9 +14,9 @@ WEBSITE_TYPES_DIR = BASE_DIR / 'apps' / 'website_types'
 
 # Security settings
 SECRET_KEY = os.getenv('SECRET_KEY', 'fallback-secret-key')
-DEBUG = True
+DEBUG = False
 # DEBUG = os.getenv('DEBUG', 'False') == 'True'
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ["https://www.jamiitek.com"]
 
 # Application definition
 INSTALLED_APPS = [
@@ -109,20 +109,8 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# Cloudinary settings
-cloudinary.config(
-    cloud_name=os.getenv('CLOUDINARY_CLOUD_NAME'),
-    api_key=os.getenv('CLOUDINARY_API_KEY'),
-    api_secret=os.getenv('CLOUDINARY_API_SECRET')
-)
 
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': os.getenv('CLOUDINARY_CLOUD_NAME'),
-    'API_KEY': os.getenv('CLOUDINARY_API_KEY'),
-    'API_SECRET': os.getenv('CLOUDINARY_API_SECRET')
-}
 
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 MEDIA_URL = f"https://res.cloudinary.com/{os.getenv('CLOUDINARY_CLOUD_NAME')}/"
 
 # Default primary key field type
@@ -156,8 +144,8 @@ JAZZMIN_UI_TWEAKS = {
 
 
 UPLOADCARE = {
-    'pub_key': '76122001cca4add87f02',
-    'secret': 'f00801b9b65172d50de5',
+    'pub_key': '96c9f49ee7fe6afeb1fc',
+    'secret': 'daeb85d5381946a91757',
     'use_secure': True, 
 }
 
