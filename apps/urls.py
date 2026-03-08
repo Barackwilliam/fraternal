@@ -73,4 +73,7 @@ urlpatterns = [
     # ── PUBLIC API ─────────────────────────────────────────
     path('api/site-status/<str:api_key>/', management_views.site_status_api, name='site_status_api'),
     path('api/js/<str:api_key>/', management_views.get_js_snippet, name='get_js_snippet'),
+
+    # ── CRON ENDPOINT ──────────────────────────────────────
+    path('cron/emails/<str:secret>/', views.run_email_cron, name='run_email_cron'),
 ]

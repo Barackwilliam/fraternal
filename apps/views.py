@@ -259,3 +259,21 @@ def generate_pdf(request, proposal_id):
 #     response = HttpResponse(pdf_buffer.getvalue(), content_type='application/pdf')
 #     response['Content-Disposition'] = f'attachment; filename="proposal_{proposal.id}.pdf"'
 #     return response
+
+
+# ══════════════════════════════════════════════════════════════════
+# CRON ENDPOINT — Called by cron-job.org daily to send emails
+# URL: /cron/emails/jamiitek-cron-2025/
+# ══════════════════════════════════════════════════════════════════
+
+from django.views.decorators.csrf import csrf_exempt
+
+@csrf_exempt
+def run_email_cron(request, secret):
+    if secret != 'jamiitek-cron-2025':
+        from django.http import JsonResponse
+        return JsonResponse({'error': 'Unauthorized'}, status=403)
+    from apps.utils.email_notifications import send_bulk_expiry_warnings
+    from django.http import JsonResponse
+    result = send_bulk_expiry_warnings()
+    return JsonResponse(result)
