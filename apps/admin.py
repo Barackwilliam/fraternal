@@ -50,7 +50,7 @@ class ServiceAdmin(admin.ModelAdmin):
 
     image_preview.short_description = "Preview"
 
-    list_display = ("service_type", "image_preview")
+    list_display = ("Service_type", "image_preview")
 
 
 admin.site.register(Service, ServiceAdmin)
