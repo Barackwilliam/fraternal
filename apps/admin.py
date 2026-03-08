@@ -17,6 +17,10 @@ from .models import (
     WebsiteFeature,
     ScheduledAction,
     ClientNotification,
+    DomainRecord,
+    DomainRenewalPayment,
+    EmailHostingPlan,
+    EmailHostingPayment,
 )
 
 # ============================================================
@@ -32,7 +36,7 @@ class ServiceAdmin(admin.ModelAdmin):
         if db_field.name == "image":
             formfield.widget.attrs.update({
                 "role": "uploadcare-uploader",
-                "data-public-key": "96c9f49ee7fe6afeb1fc",
+                "data-public-key": "76122001cca4add87f02",
             })
 
         return formfield
@@ -46,7 +50,7 @@ class ServiceAdmin(admin.ModelAdmin):
 
     image_preview.short_description = "Preview"
 
-    list_display = ("Service_type", "image_preview")
+    list_display = ("service_type", "image_preview")
 
 
 admin.site.register(Service, ServiceAdmin)
@@ -116,7 +120,7 @@ class TeamAdmin(admin.ModelAdmin):
         if db_field.name == "image":
             formfield.widget.attrs.update({
                 "role": "uploadcare-uploader",
-                "data-public-key": "96c9f49ee7fe6afeb1fc",
+                "data-public-key": "76122001cca4add87f02",
             })
 
         return formfield
@@ -219,3 +223,77 @@ class ClientNotificationAdmin(admin.ModelAdmin):
     list_filter = ("notification_type", "email_sent")
 
     readonly_fields = ("sent_at",)
+
+# ============================================================
+# WEBSITE FEATURES
+# ============================================================
+
+@admin.register(WebsiteFeature)
+class WebsiteFeatureAdmin(admin.ModelAdmin):
+    list_display  = ("website", "feature_name", "feature_key", "is_enabled")
+    list_filter   = ("is_enabled",)
+    search_fields = ("website__name", "feature_key", "feature_name")
+    list_editable = ("is_enabled",)
+
+
+# ============================================================
+# DOMAIN RECORDS
+# ============================================================
+
+class DomainRenewalPaymentInline(admin.TabularInline):
+    model  = DomainRenewalPayment
+    extra  = 0
+    readonly_fields = ("created_at",)
+    fields = ("paid_date", "renewed_until", "amount", "payment_method", "transaction_ref", "recorded_by", "notes")
+
+
+@admin.register(DomainRecord)
+class DomainRecordAdmin(admin.ModelAdmin):
+    list_display  = ("domain_name", "website", "registrar", "expiry_date", "days_until_expiry_display", "status")
+    list_filter   = ("status", "registrar", "auto_renew")
+    search_fields = ("domain_name", "website__name", "website__client__name")
+    readonly_fields = ("created_at", "updated_at")
+    inlines       = [DomainRenewalPaymentInline]
+
+    def days_until_expiry_display(self, obj):
+        d = obj.days_until_expiry
+        if d < 0:
+            return f"Expired {abs(d)}d ago"
+        return f"{d} days"
+    days_until_expiry_display.short_description = "Days Until Expiry"
+
+
+@admin.register(DomainRenewalPayment)
+class DomainRenewalPaymentAdmin(admin.ModelAdmin):
+    list_display  = ("domain", "paid_date", "renewed_until", "amount", "payment_method")
+    list_filter   = ("payment_method", "paid_date")
+    search_fields = ("domain__domain_name",)
+    readonly_fields = ("created_at",)
+
+
+# ============================================================
+# EMAIL HOSTING
+# ============================================================
+
+class EmailHostingPaymentInline(admin.TabularInline):
+    model  = EmailHostingPayment
+    extra  = 0
+    readonly_fields = ("created_at",)
+    fields = ("payment_date", "months_covered", "amount", "payment_method", "transaction_ref", "recorded_by", "notes")
+
+
+@admin.register(EmailHostingPlan)
+class EmailHostingPlanAdmin(admin.ModelAdmin):
+    list_display  = ("plan_name", "client", "email_domain", "accounts_count", "monthly_cost", "end_date", "status")
+    list_filter   = ("status",)
+    search_fields = ("plan_name", "email_domain", "client__name")
+    readonly_fields = ("created_at", "updated_at")
+    inlines       = [EmailHostingPaymentInline]
+
+
+@admin.register(EmailHostingPayment)
+class EmailHostingPaymentAdmin(admin.ModelAdmin):
+    list_display  = ("plan", "payment_date", "months_covered", "amount", "payment_method")
+    list_filter   = ("payment_method", "payment_date")
+    search_fields = ("plan__plan_name", "plan__email_domain")
+    readonly_fields = ("created_at",)
