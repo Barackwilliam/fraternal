@@ -5,7 +5,7 @@
 {% for alert in alerts %}
 <div class="jt-alert jt-alert-{{ alert.type }} mb-2">
   <i class="fas {% if alert.type == 'danger' %}fa-circle-exclamation{% else %}fa-triangle-exclamation{% endif %}" style="flex-shrink:0;margin-top:2px"></i>
-  <span>{{ alert.msg }}</span>
+  <span>{{ alert.msg|safe }}</span>
 </div>
 {% endfor %}
 
