@@ -2,8 +2,8 @@ name: Daily Email Notifications
 
 on:
   schedule:
-    - cron: '0 5 * * *'   # 05:00 UTC = 08:00 EAT kila siku
-  workflow_dispatch:        # Kitufe cha manual run kwenye GitHub
+    - cron: '0 5 * * *'
+  workflow_dispatch:
 
 jobs:
   send-emails:
@@ -22,8 +22,6 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Run email notifications
-        run: python manage.py send_expiry_emails
-       - name: Run email notifications
         run: python manage.py send_expiry_emails
         env:
           DATABASE_URL: "postgresql://postgres.frapnewfadymevdkznrq:NyumbaChap@aws-1-eu-north-1.pooler.supabase.com:5432/postgres"
