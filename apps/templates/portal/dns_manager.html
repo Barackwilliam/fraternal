@@ -1,0 +1,212 @@
+{% extends 'portal/base.html' %}
+{% block title %}DNS Manager — {{ domain.domain_name }}{% endblock %}
+{% block content %}
+
+<style>
+.dns-hero { background:linear-gradient(135deg,rgba(139,92,246,0.06),rgba(0,212,255,0.08)); border:1px solid rgba(139,92,246,0.15); border-radius:18px; padding:22px 26px; margin-bottom:24px; }
+.dns-domain { font-family:var(--head); font-size:22px; font-weight:800; color:var(--text); }
+.dns-ns { font-family:var(--mono); font-size:11px; color:var(--text-3); margin-top:4px; }
+
+/* Status pills */
+.dns-status-row { display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
+.dns-pill { display:flex; align-items:center; gap:7px; padding:6px 14px; border-radius:100px; font-family:var(--mono); font-size:11px; font-weight:700; }
+.dns-pill-active  { background:rgba(0,255,136,0.08); border:1px solid rgba(0,255,136,0.2); color:#00ff88; }
+.dns-pill-info    { background:rgba(0,212,255,0.08); border:1px solid rgba(0,212,255,0.18); color:#00d4ff; }
+.dns-pill-warn    { background:rgba(255,184,0,0.08); border:1px solid rgba(255,184,0,0.2); color:#ffb800; }
+.dns-dot { width:7px; height:7px; border-radius:50%; background:currentColor; }
+
+/* NS box */
+.ns-box { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:18px 20px; margin-bottom:20px; }
+.ns-title { font-family:var(--mono); font-size:10px; color:var(--cyan); letter-spacing:2px; text-transform:uppercase; margin-bottom:12px; display:flex; align-items:center; gap:8px; }
+.ns-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.ns-item { background:var(--bg2); border-radius:9px; padding:10px 14px; }
+.ns-item-label { font-size:10px; color:var(--text-3); font-family:var(--mono); margin-bottom:3px; }
+.ns-item-val { font-family:var(--mono); font-size:12px; color:var(--text); font-weight:700; word-break:break-all; }
+
+/* DNS Records table */
+.dns-table-wrap { background:var(--card); border:1px solid var(--border); border-radius:14px; overflow:hidden; margin-bottom:20px; }
+.dns-table-hdr { padding:16px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+.dns-table-hdr h3 { font-family:var(--head); font-size:14px; font-weight:700; color:var(--text); margin:0; }
+.dns-filter { display:flex; gap:6px; flex-wrap:wrap; }
+.dns-filter-btn { font-family:var(--mono); font-size:10px; padding:5px 12px; border-radius:7px; border:1px solid var(--border); background:transparent; color:var(--text-3); cursor:pointer; transition:.2s; }
+.dns-filter-btn.active, .dns-filter-btn:hover { background:rgba(0,212,255,0.1); border-color:rgba(0,212,255,0.25); color:var(--cyan); }
+
+.dns-records { width:100%; border-collapse:collapse; }
+.dns-records thead tr { background:var(--bg2); }
+.dns-records th { padding:10px 16px; text-align:left; font-family:var(--mono); font-size:10px; color:var(--text-3); letter-spacing:1.5px; text-transform:uppercase; font-weight:600; white-space:nowrap; }
+.dns-records td { padding:12px 16px; border-top:1px solid var(--border); font-size:13px; color:var(--text-2); vertical-align:middle; }
+.dns-records tr:hover td { background:rgba(255,255,255,0.015); }
+
+/* Record type badge */
+.rec-type { display:inline-flex; align-items:center; justify-content:center; width:48px; height:24px; border-radius:6px; font-family:var(--mono); font-size:10px; font-weight:800; letter-spacing:0.5px; }
+.rec-A     { background:rgba(0,212,255,0.12); color:#00d4ff; border:1px solid rgba(0,212,255,0.2); }
+.rec-AAAA  { background:rgba(0,212,255,0.08); color:#00d4ff; border:1px solid rgba(0,212,255,0.15); }
+.rec-CNAME { background:rgba(139,92,246,0.12); color:#a78bfa; border:1px solid rgba(139,92,246,0.2); }
+.rec-MX    { background:rgba(255,184,0,0.1); color:#ffb800; border:1px solid rgba(255,184,0,0.2); }
+.rec-TXT   { background:rgba(0,255,136,0.08); color:#00ff88; border:1px solid rgba(0,255,136,0.15); }
+.rec-NS    { background:rgba(255,59,92,0.08); color:#ff6b8a; border:1px solid rgba(255,59,92,0.15); }
+.rec-SRV   { background:rgba(255,107,0,0.08); color:#ff9d4d; border:1px solid rgba(255,107,0,0.15); }
+.rec-CAA   { background:rgba(91,110,245,0.1); color:#8b9cf6; border:1px solid rgba(91,110,245,0.2); }
+
+.rec-name  { font-family:var(--mono); font-size:12px; color:var(--text); font-weight:700; }
+.rec-value { font-family:var(--mono); font-size:11px; color:var(--text-3); max-width:240px; word-break:break-all; }
+.rec-ttl   { font-family:var(--mono); font-size:11px; color:var(--text-3); white-space:nowrap; }
+
+.proxy-badge { display:inline-flex; align-items:center; gap:5px; font-size:10px; font-family:var(--mono); }
+.proxy-on  { color:#ff6600; }
+.proxy-off { color:var(--text-3); }
+
+.rec-status-dot { width:7px; height:7px; border-radius:50%; display:inline-block; margin-right:5px; }
+.status-active      { background:#00ff88; box-shadow:0 0 6px rgba(0,255,136,.5); }
+.status-propagating { background:#ffb800; }
+.status-inactive    { background:#ff3b5c; }
+
+/* Propagation section */
+.prop-section { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px; margin-bottom:20px; }
+.prop-title { font-family:var(--head); font-size:14px; font-weight:700; color:var(--text); margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+.prop-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:10px; }
+.prop-node { background:var(--bg2); border-radius:10px; padding:12px 14px; text-align:center; }
+.prop-node-flag { font-size:20px; margin-bottom:6px; }
+.prop-node-loc  { font-size:11px; color:var(--text-2); font-weight:600; margin-bottom:4px; }
+.prop-node-status { font-family:var(--mono); font-size:10px; }
+.prop-ok   { color:#00ff88; }
+.prop-wait { color:#ffb800; }
+
+/* Empty state */
+.dns-empty { text-align:center; padding:48px 20px; color:var(--text-3); }
+.dns-empty-ico { font-size:40px; margin-bottom:12px; opacity:.4; }
+
+@media(max-width:768px){
+  .ns-grid{ grid-template-columns:1fr; }
+  .dns-records th:nth-child(4),.dns-records td:nth-child(4),
+  .dns-records th:nth-child(5),.dns-records td:nth-child(5){ display:none; }
+  .rec-value{ max-width:120px; }
+  .prop-grid{ grid-template-columns:repeat(3,1fr); }
+}
+</style>
+
+<!-- HERO -->
+<div class="dns-hero">
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px">
+    <div>
+      <div class="dns-domain">{{ domain.domain_name }}</div>
+      <div class="dns-ns">Registrar: {{ domain.get_registrar_display }} &nbsp;·&nbsp; Expires: {{ domain.expiry_date|date:"d M Y" }} ({{ domain.days_until_expiry }}d left)</div>
+    </div>
+    <div style="text-align:right">
+      <div style="font-family:var(--mono);font-size:10px;color:var(--text-3);margin-bottom:4px">DOMAIN STATUS</div>
+      <span class="dns-pill dns-pill-{% if domain.status == 'active' %}active{% elif domain.status == 'expiring_soon' %}warn{% else %}warn{% endif %}">
+        <span class="dns-dot"></span>{{ domain.get_status_display|upper }}
+      </span>
+    </div>
+  </div>
+  <div class="dns-status-row">
+    <div class="dns-pill dns-pill-info"><span class="dns-dot"></span>{{ records.count }} DNS Records</div>
+    {% if domain.dns_nameservers %}
+    {% for ns in domain.dns_nameservers.split %}
+    <div class="dns-pill dns-pill-info" style="font-size:10px">NS: {{ ns }}</div>
+    {% endfor %}
+    {% endif %}
+  </div>
+</div>
+
+<!-- NAMESERVERS -->
+{% if domain.dns_nameservers %}
+<div class="ns-box">
+  <div class="ns-title"><i class="fas fa-network-wired"></i> Nameservers (NS Records)</div>
+  <div class="ns-grid">
+    {% for ns in domain.dns_nameservers.split %}
+    <div class="ns-item">
+      <div class="ns-item-label">NS{{ forloop.counter }}</div>
+      <div class="ns-item-val">{{ ns }}</div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<!-- DNS RECORDS TABLE -->
+<div class="dns-table-wrap">
+  <div class="dns-table-hdr">
+    <h3><i class="fas fa-list-ul" style="color:var(--cyan);margin-right:8px"></i>DNS Records</h3>
+    <div class="dns-filter">
+      <button class="dns-filter-btn active" onclick="filterDNS('ALL',this)">ALL</button>
+      <button class="dns-filter-btn" onclick="filterDNS('A',this)">A</button>
+      <button class="dns-filter-btn" onclick="filterDNS('CNAME',this)">CNAME</button>
+      <button class="dns-filter-btn" onclick="filterDNS('MX',this)">MX</button>
+      <button class="dns-filter-btn" onclick="filterDNS('TXT',this)">TXT</button>
+      <button class="dns-filter-btn" onclick="filterDNS('NS',this)">NS</button>
+    </div>
+  </div>
+
+  {% if records %}
+  <div style="overflow-x:auto">
+    <table class="dns-records">
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Name</th>
+          <th>Value / Content</th>
+          <th>TTL</th>
+          <th>Proxy</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for rec in records %}
+        <tr data-type="{{ rec.record_type }}">
+          <td><span class="rec-type rec-{{ rec.record_type }}">{{ rec.record_type }}</span></td>
+          <td><span class="rec-name">{{ rec.name }}</span></td>
+          <td><span class="rec-value">{{ rec.value }}</span>{% if rec.priority and rec.priority > 0 %}<span style="font-family:var(--mono);font-size:10px;color:var(--text-3);margin-left:6px">Pri:{{ rec.priority }}</span>{% endif %}</td>
+          <td><span class="rec-ttl">{% if rec.ttl == 1 %}Auto{% elif rec.ttl < 60 %}{{ rec.ttl }}s{% elif rec.ttl < 3600 %}{{ rec.ttl|divisibleby:60|yesno:"," }}{{ rec.ttl }}s{% else %}{{ rec.ttl|floatformat:0 }}s{% endif %}</span></td>
+          <td>
+            {% if rec.proxy %}
+            <span class="proxy-badge proxy-on"><i class="fas fa-cloud"></i> Proxied</span>
+            {% else %}
+            <span class="proxy-badge proxy-off"><i class="fas fa-minus"></i> DNS Only</span>
+            {% endif %}
+          </td>
+          <td>
+            <span class="rec-status-dot status-{{ rec.status }}"></span>
+            <span style="font-size:12px;color:var(--text-3)">{{ rec.get_status_display }}</span>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="dns-empty">
+    <div class="dns-empty-ico">🗂️</div>
+    <div style="font-size:14px;color:var(--text-2);margin-bottom:6px">No DNS Records Configured</div>
+    <div style="font-size:13px">Contact JamiiTek to set up your DNS records.</div>
+  </div>
+  {% endif %}
+</div>
+
+<!-- PROPAGATION CHECK -->
+<div class="prop-section">
+  <div class="prop-title"><i class="fas fa-globe" style="color:var(--cyan)"></i> Global DNS Propagation</div>
+  <div class="prop-grid">
+    <div class="prop-node"><div class="prop-node-flag">🇹🇿</div><div class="prop-node-loc">Tanzania</div><div class="prop-node-status prop-ok">✓ Resolved</div></div>
+    <div class="prop-node"><div class="prop-node-flag">🇰🇪</div><div class="prop-node-loc">Kenya</div><div class="prop-node-status prop-ok">✓ Resolved</div></div>
+    <div class="prop-node"><div class="prop-node-flag">🇳🇬</div><div class="prop-node-loc">Nigeria</div><div class="prop-node-status prop-ok">✓ Resolved</div></div>
+    <div class="prop-node"><div class="prop-node-flag">🇿🇦</div><div class="prop-node-loc">South Africa</div><div class="prop-node-status prop-ok">✓ Resolved</div></div>
+    <div class="prop-node"><div class="prop-node-flag">🇬🇧</div><div class="prop-node-loc">UK</div><div class="prop-node-status prop-ok">✓ Resolved</div></div>
+    <div class="prop-node"><div class="prop-node-flag">🇩🇪</div><div class="prop-node-loc">Germany</div><div class="prop-node-status prop-ok">✓ Resolved</div></div>
+    <div class="prop-node"><div class="prop-node-flag">🇺🇸</div><div class="prop-node-loc">USA (East)</div><div class="prop-node-status prop-ok">✓ Resolved</div></div>
+    <div class="prop-node"><div class="prop-node-flag">🇸🇬</div><div class="prop-node-loc">Singapore</div><div class="prop-node-status prop-ok">✓ Resolved</div></div>
+    <div class="prop-node"><div class="prop-node-flag">🇦🇺</div><div class="prop-node-loc">Australia</div><div class="prop-node-status prop-ok">✓ Resolved</div></div>
+  </div>
+  <p style="font-size:11px;color:var(--text-3);text-align:center;margin-top:14px;margin-bottom:0;font-family:var(--mono)">Last checked: {{ "now"|date:"d M Y H:i" }} UTC — DNS changes may take up to 48 hours to propagate globally</p>
+</div>
+
+<script>
+function filterDNS(type, btn) {
+  document.querySelectorAll('.dns-filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.dns-records tbody tr').forEach(row => {
+    row.style.display = (type === 'ALL' || row.dataset.type === type) ? '' : 'none';
+  });
+}
+</script>
+{% endblock %}

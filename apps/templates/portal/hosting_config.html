@@ -1,0 +1,319 @@
+{% extends 'portal/base.html' %}
+{% block title %}Hosting Control Panel — {{ website.name }}{% endblock %}
+{% block content %}
+
+<style>
+.hcp-hero {
+  background: linear-gradient(135deg, rgba(0,212,255,0.06), rgba(139,92,246,0.08));
+  border: 1px solid rgba(0,212,255,0.12); border-radius: 18px;
+  padding: 24px 28px; margin-bottom: 28px; position: relative; overflow: hidden;
+}
+.hcp-hero::before {
+  content:''; position:absolute; inset:0;
+  background-image: linear-gradient(rgba(0,212,255,0.02) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,212,255,0.02) 1px,transparent 1px);
+  background-size: 40px 40px; pointer-events:none;
+}
+.hcp-hero-inner { position:relative; z-index:2; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px; }
+.hcp-site-name { font-family:var(--head); font-size:22px; font-weight:800; color:var(--text); margin-bottom:4px; }
+.hcp-site-url { font-size:13px; color:var(--cyan); font-family:var(--mono); }
+.hcp-status-badge { display:flex; align-items:center; gap:8px; background:rgba(0,255,136,0.08); border:1px solid rgba(0,255,136,0.2); border-radius:100px; padding:7px 16px; }
+.hcp-status-dot { width:8px; height:8px; border-radius:50%; background:#00ff88; box-shadow:0 0 8px #00ff88; animation: blink 2s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+/* Section card */
+.hcp-section { background:var(--card); border:1px solid var(--border); border-radius:16px; margin-bottom:20px; overflow:hidden; }
+.hcp-section-hdr { padding:16px 22px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px; }
+.hcp-section-hdr .ico { width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0; }
+.hcp-section-hdr h3 { font-family:var(--head); font-size:14px; font-weight:700; color:var(--text); margin:0; }
+.hcp-section-hdr span { font-family:var(--mono); font-size:10px; color:var(--text-3); letter-spacing:1px; text-transform:uppercase; }
+.hcp-body { padding:20px 22px; }
+
+/* Resource bars */
+.res-bar-wrap { margin-bottom:18px; }
+.res-bar-wrap:last-child { margin-bottom:0; }
+.res-bar-top { display:flex; justify-content:space-between; margin-bottom:7px; }
+.res-bar-label { font-size:13px; color:var(--text-2); font-weight:600; }
+.res-bar-val { font-family:var(--mono); font-size:12px; color:var(--text-3); }
+.res-bar-bg { height:8px; background:var(--bg2); border-radius:100px; overflow:hidden; }
+.res-bar-fill { height:100%; border-radius:100px; transition:width 1s ease; }
+.fill-cyan   { background: linear-gradient(90deg, #00d4ff, #5b6ef5); }
+.fill-purple { background: linear-gradient(90deg, #8b5cf6, #ff2d8a); }
+.fill-green  { background: linear-gradient(90deg, #00ff88, #00d4ff); }
+.fill-warn   { background: linear-gradient(90deg, #ffb800, #ff6b00); }
+
+/* Info grid */
+.info-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.info-item { background:var(--bg2); border-radius:10px; padding:12px 14px; }
+.info-item-label { font-family:var(--mono); font-size:10px; color:var(--text-3); letter-spacing:1px; text-transform:uppercase; margin-bottom:5px; }
+.info-item-val { font-size:13px; font-weight:700; color:var(--text); word-break:break-all; }
+.info-item-val.mono { font-family:var(--mono); font-size:12px; }
+.info-item-val .badge-on  { color:#00ff88; font-size:11px; }
+.info-item-val .badge-off { color:#ff3b5c; font-size:11px; }
+
+/* SSL card */
+.ssl-card { background:var(--bg2); border-radius:12px; padding:16px 18px; display:flex; align-items:center; gap:14px; margin-bottom:14px; }
+.ssl-icon { width:42px; height:42px; border-radius:11px; background:rgba(0,255,136,0.1); border:1px solid rgba(0,255,136,0.2); display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+.ssl-icon.warn { background:rgba(255,184,0,0.1); border-color:rgba(255,184,0,0.2); }
+.ssl-details { flex:1; }
+.ssl-title { font-size:13px; font-weight:700; color:var(--text); margin-bottom:3px; }
+.ssl-sub { font-family:var(--mono); font-size:10px; color:var(--text-3); }
+
+/* Feature toggles */
+.feat-list { display:flex; flex-direction:column; gap:10px; }
+.feat-row { display:flex; align-items:center; justify-content:space-between; padding:10px 14px; background:var(--bg2); border-radius:10px; }
+.feat-name { font-size:13px; color:var(--text-2); display:flex; align-items:center; gap:8px; }
+.feat-icon { font-size:15px; }
+.feat-badge { font-family:var(--mono); font-size:10px; font-weight:700; padding:3px 9px; border-radius:100px; }
+.feat-on  { background:rgba(0,255,136,0.12); color:#00ff88; border:1px solid rgba(0,255,136,0.2); }
+.feat-off { background:rgba(255,59,92,0.1); color:#ff3b5c; border:1px solid rgba(255,59,92,0.15); }
+
+/* FTP/DB credential box */
+.cred-box { background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:13px 16px; margin-bottom:10px; }
+.cred-box:last-child { margin-bottom:0; }
+.cred-label { font-family:var(--mono); font-size:10px; color:var(--cyan); letter-spacing:1px; text-transform:uppercase; margin-bottom:8px; }
+.cred-row { display:flex; justify-content:space-between; align-items:center; font-size:12px; margin-bottom:4px; }
+.cred-row:last-child { margin-bottom:0; }
+.cred-key { color:var(--text-3); }
+.cred-val { font-family:var(--mono); color:var(--text); font-size:11px; }
+.cred-val.blur { filter:blur(4px); transition:.2s; cursor:pointer; }
+.cred-val.blur:hover { filter:none; }
+
+/* Uptime display */
+.uptime-big { text-align:center; padding:20px 0 10px; }
+.uptime-num { font-family:var(--head); font-size:48px; font-weight:800; color:#00ff88; line-height:1; filter:drop-shadow(0 0 12px rgba(0,255,136,.4)); }
+.uptime-label { font-family:var(--mono); font-size:10px; color:var(--text-3); letter-spacing:2px; text-transform:uppercase; margin-top:6px; }
+.uptime-bar { display:flex; gap:3px; margin-top:16px; }
+.uptime-day { flex:1; height:28px; border-radius:4px; background:rgba(0,255,136,0.7); }
+.uptime-day.down { background:rgba(255,59,92,0.6); }
+.uptime-day.partial { background:rgba(255,184,0,0.6); }
+
+@media(max-width:768px){
+  .info-grid{ grid-template-columns:1fr; }
+  .hcp-hero-inner{ flex-direction:column; align-items:flex-start; }
+  .uptime-num{ font-size:36px; }
+}
+</style>
+
+<!-- HERO -->
+<div class="hcp-hero">
+  <div class="hcp-hero-inner">
+    <div>
+      <div class="hcp-site-name">{{ website.name }}</div>
+      <a href="{{ website.url }}" target="_blank" class="hcp-site-url">{{ website.url }} <i class="fas fa-external-link-alt" style="font-size:10px"></i></a>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+      {% if website.status == 'active' %}
+      <div class="hcp-status-badge"><div class="hcp-status-dot"></div><span style="font-family:var(--mono);font-size:11px;font-weight:700;color:#00ff88">ONLINE</span></div>
+      {% else %}
+      <div class="hcp-status-badge" style="background:rgba(255,59,92,0.08);border-color:rgba(255,59,92,0.2)"><div class="hcp-status-dot" style="background:#ff3b5c;box-shadow:0 0 8px #ff3b5c"></div><span style="font-family:var(--mono);font-size:11px;font-weight:700;color:#ff3b5c">{{ website.get_status_display|upper }}</span></div>
+      {% endif %}
+      <div style="font-family:var(--mono);font-size:10px;color:var(--text-3);background:var(--bg2);padding:6px 12px;border-radius:8px;border:1px solid var(--border)">
+        IP: {{ cfg.ip_address }}
+      </div>
+    </div>
+  </div>
+</div>
+
+{% if not cfg %}
+<div class="jt-alert jt-alert-warning">
+  <i class="fas fa-triangle-exclamation"></i>
+  <span>Hosting configuration has not been set up yet. Contact JamiiTek to configure your hosting panel.</span>
+</div>
+{% else %}
+
+<div class="row g-4">
+
+  <!-- LEFT COLUMN -->
+  <div class="col-lg-8">
+
+    <!-- RESOURCE USAGE -->
+    <div class="hcp-section">
+      <div class="hcp-section-hdr">
+        <div class="ico" style="background:rgba(0,212,255,0.1);color:#00d4ff"><i class="fas fa-gauge-high"></i></div>
+        <div><h3>Resource Usage</h3><span>Live allocation — {{ cfg.server_type|title }} Plan</span></div>
+      </div>
+      <div class="hcp-body">
+        <!-- Disk -->
+        <div class="res-bar-wrap">
+          <div class="res-bar-top">
+            <span class="res-bar-label"><i class="fas fa-hard-drive" style="color:var(--cyan);margin-right:6px"></i>Disk Storage</span>
+            <span class="res-bar-val">{{ cfg.disk_used_gb }} GB / {{ cfg.disk_total_gb }} GB</span>
+          </div>
+          <div class="res-bar-bg"><div class="res-bar-fill {% if cfg.disk_percent > 80 %}fill-warn{% else %}fill-cyan{% endif %}" style="width:{{ cfg.disk_percent }}%"></div></div>
+        </div>
+        <!-- Bandwidth -->
+        <div class="res-bar-wrap">
+          <div class="res-bar-top">
+            <span class="res-bar-label"><i class="fas fa-arrow-right-arrow-left" style="color:#8b5cf6;margin-right:6px"></i>Bandwidth This Month</span>
+            <span class="res-bar-val">{{ cfg.bandwidth_used }} GB / {{ cfg.bandwidth_gb }} GB</span>
+          </div>
+          <div class="res-bar-bg"><div class="res-bar-fill {% if cfg.bandwidth_percent > 80 %}fill-warn{% else %}fill-purple{% endif %}" style="width:{{ cfg.bandwidth_percent }}%"></div></div>
+        </div>
+        <!-- RAM -->
+        <div class="res-bar-wrap">
+          <div class="res-bar-top">
+            <span class="res-bar-label"><i class="fas fa-memory" style="color:#00ff88;margin-right:6px"></i>RAM Allocation</span>
+            <span class="res-bar-val">{{ cfg.ram_mb }} MB</span>
+          </div>
+          <div class="res-bar-bg"><div class="res-bar-fill fill-green" style="width:60%"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SERVER INFO -->
+    <div class="hcp-section">
+      <div class="hcp-section-hdr">
+        <div class="ico" style="background:rgba(139,92,246,0.1);color:#8b5cf6"><i class="fas fa-server"></i></div>
+        <div><h3>Server Information</h3><span>{{ cfg.get_server_type_display }} — {{ cfg.server_location }}</span></div>
+      </div>
+      <div class="hcp-body">
+        <div class="info-grid">
+          <div class="info-item"><div class="info-item-label">Hostname</div><div class="info-item-val mono">{{ cfg.server_hostname }}</div></div>
+          <div class="info-item"><div class="info-item-label">IP Address</div><div class="info-item-val mono">{{ cfg.ip_address }}</div></div>
+          <div class="info-item"><div class="info-item-label">Operating System</div><div class="info-item-val">{{ cfg.get_server_os_display }}</div></div>
+          <div class="info-item"><div class="info-item-label">Web Server</div><div class="info-item-val">{{ cfg.web_server }}</div></div>
+          <div class="info-item"><div class="info-item-label">Stack</div><div class="info-item-val">{{ cfg.get_stack_display }}</div></div>
+          <div class="info-item"><div class="info-item-label">CPU Cores</div><div class="info-item-val">{{ cfg.cpu_cores }} vCPU</div></div>
+          <div class="info-item"><div class="info-item-label">Database Engine</div><div class="info-item-val">{{ cfg.db_engine }}</div></div>
+          <div class="info-item"><div class="info-item-label">Location</div><div class="info-item-val">{{ cfg.server_location }}</div></div>
+          {% if cfg.python_version %}<div class="info-item"><div class="info-item-label">Python Version</div><div class="info-item-val mono">v{{ cfg.python_version }}</div></div>{% endif %}
+          {% if cfg.django_version %}<div class="info-item"><div class="info-item-label">Django Version</div><div class="info-item-val mono">v{{ cfg.django_version }}</div></div>{% endif %}
+          {% if cfg.php_version %}<div class="info-item"><div class="info-item-label">PHP Version</div><div class="info-item-val mono">v{{ cfg.php_version }}</div></div>{% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- FTP / SFTP -->
+    <div class="hcp-section">
+      <div class="hcp-section-hdr">
+        <div class="ico" style="background:rgba(0,212,255,0.1);color:#00d4ff"><i class="fas fa-folder-open"></i></div>
+        <div><h3>SFTP / FTP Access</h3><span>File transfer credentials</span></div>
+      </div>
+      <div class="hcp-body">
+        <div class="cred-box">
+          <div class="cred-label">SFTP Connection Details</div>
+          <div class="cred-row"><span class="cred-key">Host</span><span class="cred-val">{{ cfg.ftp_host }}</span></div>
+          <div class="cred-row"><span class="cred-key">Port</span><span class="cred-val">{{ cfg.ftp_port }}</span></div>
+          {% if cfg.ftp_username %}<div class="cred-row"><span class="cred-key">Username</span><span class="cred-val">{{ cfg.ftp_username }}</span></div>{% endif %}
+          <div class="cred-row"><span class="cred-key">Protocol</span><span class="cred-val">SFTP (SSH File Transfer)</span></div>
+        </div>
+        <p style="font-size:12px;color:var(--text-3);margin-top:10px;margin-bottom:0"><i class="fas fa-info-circle" style="color:var(--cyan)"></i> Use FileZilla, WinSCP, or Cyberduck to connect. Contact JamiiTek for password.</p>
+      </div>
+    </div>
+
+    <!-- DATABASE -->
+    <div class="hcp-section">
+      <div class="hcp-section-hdr">
+        <div class="ico" style="background:rgba(139,92,246,0.1);color:#8b5cf6"><i class="fas fa-database"></i></div>
+        <div><h3>Database Access</h3><span>{{ cfg.db_engine }}</span></div>
+      </div>
+      <div class="hcp-body">
+        <div class="cred-box">
+          <div class="cred-label">Connection Details</div>
+          <div class="cred-row"><span class="cred-key">Host</span><span class="cred-val">{{ cfg.db_host }}</span></div>
+          <div class="cred-row"><span class="cred-key">Port</span><span class="cred-val">{{ cfg.db_port }}</span></div>
+          {% if cfg.db_name %}<div class="cred-row"><span class="cred-key">Database Name</span><span class="cred-val">{{ cfg.db_name }}</span></div>{% endif %}
+          {% if cfg.db_username %}<div class="cred-row"><span class="cred-key">Username</span><span class="cred-val">{{ cfg.db_username }}</span></div>{% endif %}
+          <div class="cred-row"><span class="cred-key">Password</span><span class="cred-val blur" title="Hover to reveal">••••••••••••</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT COLUMN -->
+  <div class="col-lg-4">
+
+    <!-- UPTIME -->
+    <div class="hcp-section">
+      <div class="hcp-section-hdr">
+        <div class="ico" style="background:rgba(0,255,136,0.1);color:#00ff88"><i class="fas fa-signal"></i></div>
+        <div><h3>Uptime Monitor</h3><span>Last 30 days</span></div>
+      </div>
+      <div class="hcp-body">
+        <div class="uptime-big">
+          <div class="uptime-num">{{ cfg.uptime_percent }}%</div>
+          <div class="uptime-label">Uptime — 30 Days</div>
+        </div>
+        <div class="uptime-bar">
+          {% for i in "1234567890123456789012345678901" %}
+          <div class="uptime-day {% if forloop.counter == 14 %}partial{% endif %}"></div>
+          {% endfor %}
+        </div>
+        <p style="font-size:11px;color:var(--text-3);text-align:center;margin-top:10px;margin-bottom:0;font-family:var(--mono)">
+          {% if cfg.last_downtime %}Last incident: {{ cfg.last_downtime|date:"d M Y" }}{% else %}No incidents recorded{% endif %}
+        </p>
+      </div>
+    </div>
+
+    <!-- SSL CERTIFICATE -->
+    <div class="hcp-section">
+      <div class="hcp-section-hdr">
+        <div class="ico" style="background:rgba(0,255,136,0.1);color:#00ff88"><i class="fas fa-lock"></i></div>
+        <div><h3>SSL Certificate</h3><span>{{ cfg.get_ssl_type_display }}</span></div>
+      </div>
+      <div class="hcp-body">
+        <div class="ssl-card">
+          <div class="ssl-icon {% if cfg.ssl_days_left and cfg.ssl_days_left < 14 %}warn{% endif %}">🔒</div>
+          <div class="ssl-details">
+            <div class="ssl-title">{{ cfg.get_ssl_type_display }}</div>
+            <div class="ssl-sub">Issuer: {{ cfg.ssl_issuer }}</div>
+            {% if cfg.ssl_expiry_date %}
+            <div class="ssl-sub" style="margin-top:3px">
+              Expires: {{ cfg.ssl_expiry_date|date:"d M Y" }}
+              {% if cfg.ssl_days_left %}<span style="color:{% if cfg.ssl_days_left < 14 %}#ffb800{% else %}#00ff88{% endif %}"> ({{ cfg.ssl_days_left }}d left)</span>{% endif %}
+            </div>
+            {% endif %}
+          </div>
+        </div>
+        <div class="info-grid" style="grid-template-columns:1fr 1fr;gap:8px">
+          <div class="info-item"><div class="info-item-label">HTTPS Redirect</div><div class="info-item-val"><span class="{% if cfg.https_redirect %}badge-on{% else %}badge-off{% endif %}">{% if cfg.https_redirect %}● Enabled{% else %}● Disabled{% endif %}</span></div></div>
+          {% if cfg.ssl_issued_date %}<div class="info-item"><div class="info-item-label">Issued</div><div class="info-item-val" style="font-size:12px">{{ cfg.ssl_issued_date|date:"d M Y" }}</div></div>{% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- SECURITY & FEATURES -->
+    <div class="hcp-section">
+      <div class="hcp-section-hdr">
+        <div class="ico" style="background:rgba(255,59,92,0.1);color:#ff3b5c"><i class="fas fa-shield-halved"></i></div>
+        <div><h3>Security & Features</h3><span>Active protections</span></div>
+      </div>
+      <div class="hcp-body">
+        <div class="feat-list">
+          <div class="feat-row"><span class="feat-name"><span class="feat-icon">🔥</span>Firewall</span><span class="feat-badge {% if cfg.firewall_enabled %}feat-on{% else %}feat-off{% endif %}">{% if cfg.firewall_enabled %}ON{% else %}OFF{% endif %}</span></div>
+          <div class="feat-row"><span class="feat-name"><span class="feat-icon">🛡️</span>DDoS Protection</span><span class="feat-badge {% if cfg.ddos_protection %}feat-on{% else %}feat-off{% endif %}">{% if cfg.ddos_protection %}ON{% else %}OFF{% endif %}</span></div>
+          <div class="feat-row"><span class="feat-name"><span class="feat-icon">💾</span>Auto Backup</span><span class="feat-badge {% if cfg.auto_backup %}feat-on{% else %}feat-off{% endif %}">{% if cfg.auto_backup %}ON{% else %}OFF{% endif %}</span></div>
+          <div class="feat-row"><span class="feat-name"><span class="feat-icon">⚡</span>CDN</span><span class="feat-badge {% if cfg.cdn_enabled %}feat-on{% else %}feat-off{% endif %}">{% if cfg.cdn_enabled %}ON{% else %}OFF{% endif %}</span></div>
+        </div>
+        {% if cfg.auto_backup %}
+        <div style="margin-top:12px;padding:10px 12px;background:var(--bg2);border-radius:9px;font-size:12px">
+          <div style="color:var(--text-3);font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Backup Info</div>
+          <div style="color:var(--text-2)">Frequency: <strong style="color:var(--text)">{{ cfg.backup_frequency }}</strong></div>
+          {% if cfg.last_backup %}<div style="color:var(--text-2);margin-top:3px">Last backup: <strong style="color:#00ff88">{{ cfg.last_backup|date:"d M Y" }}</strong></div>{% endif %}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- MONTHLY STATS -->
+    {% if cfg.monthly_visits %}
+    <div class="hcp-section">
+      <div class="hcp-section-hdr">
+        <div class="ico" style="background:rgba(0,212,255,0.1);color:#00d4ff"><i class="fas fa-chart-line"></i></div>
+        <div><h3>Traffic Stats</h3><span>This month</span></div>
+      </div>
+      <div class="hcp-body">
+        <div style="text-align:center;padding:10px 0">
+          <div style="font-family:var(--head);font-size:36px;font-weight:800;color:var(--cyan);line-height:1">{{ cfg.monthly_visits|floatformat:0 }}</div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:1.5px;margin-top:5px">Visits This Month</div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+{% endif %}
+{% endblock %}

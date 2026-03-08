@@ -69,6 +69,8 @@ urlpatterns = [
     path('portal/support/', portal.portal_support, name='portal_support'),
     path('portal/domains/', portal.portal_domains, name='portal_domains'),
     path('portal/email/', portal.portal_email_hosting, name='portal_email_hosting'),
+    path('portal/hosting/<int:pk>/', portal.portal_hosting_config, name='portal_hosting_config'),
+    path('portal/dns/<int:pk>/', portal.portal_dns_manager, name='portal_dns_manager'),
 
     # ── PUBLIC API ─────────────────────────────────────────
     path('api/site-status/<str:api_key>/', management_views.site_status_api, name='site_status_api'),

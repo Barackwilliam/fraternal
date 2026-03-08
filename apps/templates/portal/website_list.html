@@ -45,6 +45,12 @@
           <a href="{% url 'portal_website_detail' w.pk %}" class="jt-btn btn-primary" style="flex:1;justify-content:center;font-size:13px;padding:8px 12px"><i class="fas fa-eye"></i> Details</a>
           <a href="{% url 'portal_billing' %}" class="jt-btn btn-ghost" style="font-size:13px;padding:8px 12px"><i class="fas fa-receipt"></i> Pay</a>
         </div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <a href="{% url 'portal_hosting_config' w.pk %}" class="jt-btn btn-ghost" style="flex:1;justify-content:center;font-size:12px;padding:7px 10px;border-color:rgba(0,212,255,0.2);color:var(--cyan)"><i class="fas fa-server"></i> Hosting Panel</a>
+          {% with domain=w.domains.first %}{% if domain %}
+          <a href="{% url 'portal_dns_manager' domain.pk %}" class="jt-btn btn-ghost" style="flex:1;justify-content:center;font-size:12px;padding:7px 10px;border-color:rgba(139,92,246,0.2);color:#a78bfa"><i class="fas fa-network-wired"></i> DNS Manager</a>
+          {% endif %}{% endwith %}
+        </div>
       </div>
     </div>
   </div>

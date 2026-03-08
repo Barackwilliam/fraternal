@@ -11,8 +11,7 @@ import secrets
 # ============================================================
 
 class Service(models.Model):
-    # service_type = models.CharField(max_length=255)
-    Service_type = models.CharField(max_length=100, db_column='Service_type')
+    service_type = models.CharField(max_length=255)
     image = models.CharField(max_length=255, blank=True, null=True)
     description = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
@@ -597,3 +596,171 @@ class EmailHostingPayment(models.Model):
 
     class Meta:
         ordering = ['-payment_date']
+
+
+# ============================================================
+# HOSTING CONFIGURATION (Advanced Panel)
+# ============================================================
+
+class HostingConfiguration(models.Model):
+
+    SERVER_CHOICES = [
+        ('shared',    'Shared Hosting'),
+        ('vps',       'VPS Server'),
+        ('dedicated', 'Dedicated Server'),
+        ('cloud',     'Cloud Hosting'),
+    ]
+
+    OS_CHOICES = [
+        ('ubuntu_22', 'Ubuntu 22.04 LTS'),
+        ('ubuntu_20', 'Ubuntu 20.04 LTS'),
+        ('debian_12', 'Debian 12'),
+        ('centos_8',  'CentOS Stream 8'),
+    ]
+
+    STACK_CHOICES = [
+        ('django',    'Python / Django'),
+        ('php_apache','PHP / Apache'),
+        ('php_nginx', 'PHP / Nginx'),
+        ('node',      'Node.js'),
+        ('static',    'Static / Nginx'),
+    ]
+
+    SSL_CHOICES = [
+        ('lets_encrypt', "Let's Encrypt (Free)"),
+        ('comodo',       'Comodo SSL'),
+        ('wildcard',     'Wildcard SSL'),
+        ('none',         'No SSL'),
+    ]
+
+    website = models.OneToOneField(
+        ManagedWebsite, on_delete=models.CASCADE, related_name='hosting_config')
+
+    # Server Info
+    server_type     = models.CharField(max_length=20, choices=SERVER_CHOICES, default='shared')
+    server_os       = models.CharField(max_length=20, choices=OS_CHOICES, default='ubuntu_22')
+    stack           = models.CharField(max_length=20, choices=STACK_CHOICES, default='django')
+    server_location = models.CharField(max_length=100, default='Dar es Salaam, Tanzania')
+    ip_address      = models.GenericIPAddressField(default='197.250.10.1')
+    server_hostname = models.CharField(max_length=200, default='srv1.jamiitek.co.tz')
+
+    # Resources
+    disk_total_gb   = models.DecimalField(max_digits=6, decimal_places=1, default=10.0)
+    disk_used_gb    = models.DecimalField(max_digits=6, decimal_places=1, default=1.2)
+    bandwidth_gb    = models.DecimalField(max_digits=8, decimal_places=1, default=100.0)
+    bandwidth_used  = models.DecimalField(max_digits=8, decimal_places=1, default=4.5)
+    ram_mb          = models.IntegerField(default=512)
+    cpu_cores       = models.IntegerField(default=1)
+    monthly_visits  = models.IntegerField(default=0)
+
+    # Stack versions
+    python_version  = models.CharField(max_length=20, blank=True, default='3.11.6')
+    php_version     = models.CharField(max_length=20, blank=True)
+    django_version  = models.CharField(max_length=20, blank=True, default='5.1')
+    db_engine       = models.CharField(max_length=50, default='PostgreSQL 15')
+    web_server      = models.CharField(max_length=50, default='Nginx 1.24')
+
+    # FTP / SFTP
+    ftp_host        = models.CharField(max_length=200, default='ftp.jamiitek.co.tz')
+    ftp_username    = models.CharField(max_length=100, blank=True)
+    ftp_port        = models.IntegerField(default=22)
+
+    # Database
+    db_host         = models.CharField(max_length=200, default='db.jamiitek.co.tz')
+    db_name         = models.CharField(max_length=100, blank=True)
+    db_username     = models.CharField(max_length=100, blank=True)
+    db_port         = models.IntegerField(default=5432)
+
+    # SSL
+    ssl_type        = models.CharField(max_length=20, choices=SSL_CHOICES, default='lets_encrypt')
+    ssl_issued_date = models.DateField(null=True, blank=True)
+    ssl_expiry_date = models.DateField(null=True, blank=True)
+    ssl_issuer      = models.CharField(max_length=100, default="Let's Encrypt Authority X3")
+    https_redirect  = models.BooleanField(default=True)
+
+    # Features
+    auto_backup     = models.BooleanField(default=True)
+    backup_frequency= models.CharField(max_length=20, default='Daily')
+    last_backup     = models.DateField(null=True, blank=True)
+    cdn_enabled     = models.BooleanField(default=False)
+    firewall_enabled= models.BooleanField(default=True)
+    ddos_protection = models.BooleanField(default=True)
+
+    # Uptime
+    uptime_percent  = models.DecimalField(max_digits=5, decimal_places=2, default=99.97)
+    last_downtime   = models.DateTimeField(null=True, blank=True)
+
+    notes           = models.TextField(blank=True)
+    updated_at      = models.DateTimeField(auto_now=True)
+
+    @property
+    def disk_percent(self):
+        if self.disk_total_gb:
+            return round((float(self.disk_used_gb) / float(self.disk_total_gb)) * 100, 1)
+        return 0
+
+    @property
+    def bandwidth_percent(self):
+        if self.bandwidth_gb:
+            return round((float(self.bandwidth_used) / float(self.bandwidth_gb)) * 100, 1)
+        return 0
+
+    @property
+    def ssl_days_left(self):
+        if self.ssl_expiry_date:
+            from django.utils import timezone
+            return (self.ssl_expiry_date - timezone.now().date()).days
+        return None
+
+    def __str__(self):
+        return f'Hosting Config — {self.website.name}'
+
+    class Meta:
+        verbose_name = 'Hosting Configuration'
+        verbose_name_plural = 'Hosting Configurations'
+
+
+# ============================================================
+# DOMAIN DNS CONFIGURATION
+# ============================================================
+
+class DomainDNSRecord(models.Model):
+
+    RECORD_TYPES = [
+        ('A',     'A — IPv4 Address'),
+        ('AAAA',  'AAAA — IPv6 Address'),
+        ('CNAME', 'CNAME — Canonical Name'),
+        ('MX',    'MX — Mail Exchange'),
+        ('TXT',   'TXT — Text Record'),
+        ('NS',    'NS — Name Server'),
+        ('SRV',   'SRV — Service Record'),
+        ('CAA',   'CAA — Certification Authority'),
+    ]
+
+    STATUS_CHOICES = [
+        ('active',      'Active'),
+        ('propagating', 'Propagating'),
+        ('inactive',    'Inactive'),
+    ]
+
+    domain  = models.ForeignKey(
+        DomainRecord, on_delete=models.CASCADE, related_name='dns_records')
+
+    record_type = models.CharField(max_length=10, choices=RECORD_TYPES)
+    name        = models.CharField(max_length=253, help_text='e.g. @ or www or mail')
+    value       = models.TextField(help_text='e.g. 197.250.10.1 or target domain')
+    ttl         = models.IntegerField(default=3600, help_text='Time to live in seconds')
+    priority    = models.IntegerField(default=0, help_text='Used for MX and SRV records')
+    status      = models.CharField(max_length=15, choices=STATUS_CHOICES, default='active')
+    proxy       = models.BooleanField(default=False, help_text='CDN/Proxy enabled (like Cloudflare)')
+
+    created_at  = models.DateTimeField(auto_now_add=True)
+    updated_at  = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f'{self.record_type} {self.name} → {self.value[:40]}'
+
+    class Meta:
+        verbose_name = 'DNS Record'
+        verbose_name_plural = 'DNS Records'
+        ordering = ['record_type', 'name']

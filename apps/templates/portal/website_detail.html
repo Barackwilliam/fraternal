@@ -9,7 +9,13 @@
     <div style="font-family:var(--head);font-size:20px;font-weight:800;color:var(--text)">{{ website.name }}</div>
     <a href="{{ website.url }}" target="_blank" style="font-family:var(--mono);font-size:12px;color:var(--text-3)">{{ website.url }} <i class="fas fa-arrow-up-right-from-square fa-xs"></i></a>
   </div>
-  <span class="jt-badge b-{{ website.status }}" style="padding:6px 14px;font-size:12px">{{ website.status|capfirst }}</span>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <a href="{% url 'portal_hosting_config' website.pk %}" class="jt-btn btn-ghost" style="font-size:12px;padding:7px 14px;border-color:rgba(0,212,255,0.25);color:var(--cyan)"><i class="fas fa-server"></i> Hosting Panel</a>
+    {% with domain=website.domains.first %}{% if domain %}
+    <a href="{% url 'portal_dns_manager' domain.pk %}" class="jt-btn btn-ghost" style="font-size:12px;padding:7px 14px;border-color:rgba(139,92,246,0.25);color:#a78bfa"><i class="fas fa-network-wired"></i> DNS Manager</a>
+    {% endif %}{% endwith %}
+    <span class="jt-badge b-{{ website.status }}" style="padding:6px 14px;font-size:12px">{{ website.status|capfirst }}</span>
+  </div>
 </div>
 
 <!-- ALERTS -->

@@ -13,11 +13,14 @@ from django.db.models import Sum
 from django.views.decorators.http import require_POST
 from django.utils import timezone
 from django.conf import settings
+
+from apps.utils.email_notifications import send_welcome_email
 from django.core.mail import send_mail
 
 from .models import (
     Client, ManagedWebsite, HostingPayment, ClientNotification, WebsiteFeature,
     DomainRecord, EmailHostingPlan, EmailHostingPayment,
+    HostingConfiguration, DomainDNSRecord,
 )
 
 
@@ -82,6 +85,8 @@ def portal_register(request):
                 email=email, phone=phone,
                 company=website_name,
             )
+            # Send branded welcome email
+            send_welcome_email(client)
             # Store website URL as a pending managed website note
             if website_url:
                 from .models import ClientNotification
@@ -466,4 +471,41 @@ def portal_email_hosting(request):
         'payments': payments,
         'total_paid': total_paid,
         'payment_info': payment_info,
+    })
+
+
+# ══════════════════════════════════════════════════════════════
+# HOSTING CONTROL PANEL
+# ══════════════════════════════════════════════════════════════
+
+@client_required
+def portal_hosting_config(request, pk):
+    client  = request.client_profile
+    website = get_object_or_404(ManagedWebsite, pk=pk, client=client)
+    try:
+        cfg = website.hosting_config
+    except HostingConfiguration.DoesNotExist:
+        cfg = None
+    return render(request, 'portal/hosting_config.html', {
+        'title':   f'Hosting Panel — {website.name}',
+        'client':  client,
+        'website': website,
+        'cfg':     cfg,
+    })
+
+
+# ══════════════════════════════════════════════════════════════
+# DNS MANAGER
+# ══════════════════════════════════════════════════════════════
+
+@client_required
+def portal_dns_manager(request, pk):
+    client = request.client_profile
+    domain = get_object_or_404(DomainRecord, pk=pk, website__client=client)
+    records = domain.dns_records.all().order_by('record_type', 'name')
+    return render(request, 'portal/dns_manager.html', {
+        'title':   f'DNS Manager — {domain.domain_name}',
+        'client':  client,
+        'domain':  domain,
+        'records': records,
     })
