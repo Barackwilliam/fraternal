@@ -1,0 +1,38 @@
+{% extends 'emails/base_email.html' %}
+{% block content %}
+<p class="greeting">Hello, {{ client_name }} 🎉</p>
+
+<div class="alert alert-success">
+  <strong>✅ Website Restored Successfully</strong>
+  Great news! Your website <strong>{{ website_name }}</strong> is back online and fully operational.
+</div>
+
+<div class="info-box">
+  <div class="info-row">
+    <span class="info-label">Website</span>
+    <span class="info-value">{{ website_name }}</span>
+  </div>
+  <div class="info-row">
+    <span class="info-label">URL</span>
+    <span class="info-value"><a href="{{ website_url }}" style="color:#5b6ef5">{{ website_url }}</a></span>
+  </div>
+  <div class="info-row">
+    <span class="info-label">Status</span>
+    <span class="info-value" style="color:#22c55e">● Active</span>
+  </div>
+  <div class="info-row">
+    <span class="info-label">Restored On</span>
+    <span class="info-value">{{ restored_date }}</span>
+  </div>
+  <div class="info-row">
+    <span class="info-label">New Expiry Date</span>
+    <span class="info-value">{{ new_expiry_date }}</span>
+  </div>
+</div>
+
+<p>Your website is now live. Please verify everything is working correctly. If you notice any issues, contact us immediately.</p>
+
+<div class="btn-wrap">
+  <a href="{{ website_url }}" class="btn btn-cyan">Visit My Website</a>
+</div>
+{% endblock %}

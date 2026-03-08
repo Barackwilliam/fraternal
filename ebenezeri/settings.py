@@ -150,3 +150,17 @@ UPLOADCARE = {
 }
 
 WEASYPRINT_BASEURL = BASE_DIR
+
+
+# ══════════════════════════════════════
+# EMAIL CONFIGURATION
+# ══════════════════════════════════════
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'info@jamiitek.com'       # ← email yako
+EMAIL_HOST_PASSWORD = 'tbgh swtl zple dhiv'   # ← App Password (ona Step 3)
+DEFAULT_FROM_EMAIL = 'JamiiTek <info@jamiitek.com>'
+PORTAL_BASE_URL = 'https://jamiitek.com/portal/'
