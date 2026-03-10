@@ -1,135 +1,424 @@
 {% extends 'base.html' %}
 {% block title %}Contact Us — JamiiTek{% endblock %}
+
 {% block extra_css %}
 <style>
+/* ══════════════════════════════════════════
+   CONTACT PAGE — JAMIITEK DESIGN SYSTEM
+══════════════════════════════════════════ */
+
+/* ── HERO ─────────────────────────────── */
+.contact-hero {
+  min-height: 40vh;
+  display: flex; align-items: center;
+  background: var(--void);
+  position: relative; overflow: hidden;
+  padding: 130px 0 72px;
+}
+.contact-hero-stars {
+  position: absolute; inset: 0; pointer-events: none;
+  background-image:
+    radial-gradient(1px 1px at 7%  14%, rgba(255,255,255,0.7)  0%, transparent 100%),
+    radial-gradient(1px 1px at 20% 40%, rgba(255,255,255,0.5)  0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 60% 7%, rgba(255,255,255,0.8) 0%, transparent 100%),
+    radial-gradient(1px 1px at 82% 26%, rgba(255,255,255,0.45) 0%, transparent 100%),
+    radial-gradient(1px 1px at 44% 68%, rgba(255,255,255,0.6)  0%, transparent 100%),
+    radial-gradient(1px 1px at 90% 58%, rgba(255,255,255,0.5)  0%, transparent 100%),
+    radial-gradient(1px 1px at 15% 85%, rgba(255,255,255,0.4)  0%, transparent 100%),
+    radial-gradient(1px 1px at 70% 80%, rgba(255,255,255,0.55) 0%, transparent 100%),
+    radial-gradient(1px 1px at 35% 25%, rgba(255,255,255,0.5)  0%, transparent 100%),
+    radial-gradient(1px 1px at 55% 92%, rgba(255,255,255,0.4)  0%, transparent 100%);
+}
+.contact-hero-nebula {
+  position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 58% 68% at 82% 42%, rgba(0,200,255,0.1)  0%, transparent 65%),
+    radial-gradient(ellipse 48% 58% at 12% 68%, rgba(180,77,255,0.1) 0%, transparent 60%),
+    radial-gradient(ellipse 38% 46% at 52% 18%, rgba(0,255,179,0.05) 0%, transparent 55%);
+  animation: nebula-ct 15s ease-in-out infinite alternate;
+}
+@keyframes nebula-ct {
+  from { opacity:.7; transform:scale(1); }
+  to   { opacity:1;  transform:scale(1.04); }
+}
+.contact-hero-grid {
+  position: absolute; inset: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(0,200,255,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,200,255,0.04) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse 90% 80% at 50% 50%, black 20%, transparent 100%);
+}
+.contact-hero-inner { position: relative; z-index: 2; }
+
+.contact-breadcrumb {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--ff-mono); font-size: 10px;
+  letter-spacing: 2px; color: rgba(0,200,255,0.45);
+  text-transform: uppercase; margin-bottom: 20px;
+}
+.contact-breadcrumb a { color: rgba(0,200,255,0.45); text-decoration: none; transition: color .2s; }
+.contact-breadcrumb a:hover { color: var(--cyan); }
+.contact-breadcrumb i { font-size: 8px; opacity: .5; }
+
+/* ── MAIN CONTACT SECTION ────────────── */
+.section-contact {
+  padding: 96px 0;
+  background: var(--deep);
+  position: relative; overflow: hidden;
+}
+.section-contact::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(0,200,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,200,255,0.025) 1px, transparent 1px);
+  background-size: 56px 56px;
+}
+.section-contact::after {
+  content: ''; position: absolute; pointer-events: none;
+  width: 500px; height: 500px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(180,77,255,0.07) 0%, transparent 70%);
+  bottom: -150px; right: -150px;
+}
+
+/* ── INFO CARD ───────────────────────── */
 .contact-info-card {
-  background: var(--ink); border-radius: var(--r-lg); padding: 40px;
-  height: 100%; position: relative; overflow: hidden;
+  background: rgba(6,15,46,0.6);
+  border: 1px solid rgba(0,200,255,0.15);
+  border-radius: 24px; padding: 42px 36px;
+  height: 100%;
+  backdrop-filter: blur(20px);
+  position: relative; overflow: hidden;
 }
 .contact-info-card::before {
-  content: ''; position: absolute; top: -80px; right: -80px;
-  width: 280px; height: 280px; border-radius: 50%;
-  background: radial-gradient(circle, rgba(91,110,245,0.2) 0%, transparent 70%);
-  pointer-events: none;
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--cyan), var(--plasma), transparent);
 }
-.ci-item { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 32px; }
+.contact-info-card::after {
+  content: '';
+  position: absolute; width: 300px; height: 300px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(0,200,255,0.06) 0%, transparent 70%);
+  top: -100px; right: -80px; pointer-events: none;
+}
+.contact-info-title {
+  font-family: var(--ff-display); font-size: 22px; font-weight: 800;
+  color: #fff; margin-bottom: 8px;
+}
+.contact-info-sub {
+  font-size: 14px; color: rgba(232,244,255,0.38);
+  line-height: 1.75; margin-bottom: 36px;
+}
+
+/* Info items */
+.ci-item {
+  display: flex; align-items: flex-start; gap: 16px;
+  margin-bottom: 28px; position: relative; z-index: 1;
+}
+.ci-item:last-of-type { margin-bottom: 0; }
 .ci-icon {
-  width: 48px; height: 48px; border-radius: 13px; flex-shrink: 0;
-  background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1);
+  width: 46px; height: 46px; border-radius: 13px; flex-shrink: 0;
+  background: rgba(0,200,255,0.08);
+  border: 1px solid rgba(0,200,255,0.18);
   display: flex; align-items: center; justify-content: center;
-  font-size: 20px; color: rgba(255,255,255,0.7);
+  font-size: 18px; color: var(--cyan);
+  transition: all .3s;
 }
-.ci-label { font-family: var(--font-mono); font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.3); margin-bottom: 5px; }
-.ci-val { font-family: var(--font-display); font-weight: 600; font-size: 16px; color: #fff; }
+.ci-item:hover .ci-icon {
+  background: rgba(0,200,255,0.18);
+  box-shadow: 0 0 20px rgba(0,200,255,0.2);
+}
+.ci-label {
+  font-family: var(--ff-mono); font-size: 9px;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: rgba(0,200,255,0.45); margin-bottom: 5px;
+}
+.ci-val {
+  font-family: var(--ff-display); font-weight: 600; font-size: 15px;
+  color: rgba(232,244,255,0.85);
+}
+
+/* Social links */
+.contact-social-heading {
+  font-family: var(--ff-mono); font-size: 9px; letter-spacing: 2.5px;
+  text-transform: uppercase; color: rgba(0,200,255,0.3);
+  margin-bottom: 14px;
+}
+.contact-socials { display: flex; gap: 9px; }
+.contact-socials a {
+  width: 38px; height: 38px; border-radius: 10px;
+  background: rgba(0,200,255,0.04);
+  border: 1px solid rgba(0,200,255,0.14);
+  color: rgba(232,244,255,0.38);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; text-decoration: none;
+  transition: all .25s;
+}
+.contact-socials a:hover {
+  background: rgba(0,200,255,0.14);
+  border-color: rgba(0,200,255,0.4);
+  color: var(--cyan);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0,200,255,0.15);
+}
+
+/* ── FORM CARD ───────────────────────── */
 .contact-form-card {
-  background: #fff; border: 1px solid var(--border-light);
-  border-radius: var(--r-lg); padding: 40px;
+  background: rgba(6,15,46,0.5);
+  border: 1px solid rgba(0,200,255,0.12);
+  border-radius: 24px; padding: 42px 40px;
+  backdrop-filter: blur(20px);
+  position: relative; overflow: hidden;
 }
-.form-label-custom { font-family: var(--font-display); font-weight: 600; font-size: 13px; color: var(--ink); margin-bottom: 8px; display: block; }
-.form-ctrl {
+.contact-form-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--plasma), var(--cyan), transparent);
+}
+.contact-form-title {
+  font-family: var(--ff-display); font-size: 22px; font-weight: 800;
+  color: #fff; margin-bottom: 6px;
+}
+.contact-form-sub {
+  font-size: 14px; color: rgba(232,244,255,0.38);
+  margin-bottom: 30px; line-height: 1.7;
+}
+
+/* Form labels */
+.form-label-q {
+  font-family: var(--ff-mono); font-size: 9px;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: rgba(0,200,255,0.5); margin-bottom: 8px;
+  display: block;
+}
+.form-label-q em {
+  color: var(--plasma); font-style: normal;
+  margin-left: 3px;
+}
+
+/* Form inputs */
+.form-ctrl-q {
   width: 100%; padding: 13px 16px;
-  border: 1.5px solid var(--border-light); border-radius: 10px;
-  font-family: var(--font-body); font-size: 15px; color: var(--ink);
-  outline: none; transition: border-color 0.2s, box-shadow 0.2s;
-  background: #fff;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(0,200,255,0.14);
+  border-radius: 12px;
+  font-family: var(--ff-body); font-size: 14px;
+  color: rgba(232,244,255,0.85);
+  outline: none;
+  transition: border-color .25s, box-shadow .25s, background .25s;
 }
-.form-ctrl:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(91,110,245,0.1); }
-.form-ctrl::placeholder { color: #b8c0d4; }
-textarea.form-ctrl { resize: vertical; min-height: 140px; }
-.msg-success { background: rgba(0,214,143,0.1); border: 1px solid rgba(0,214,143,0.3); border-radius: 10px; padding: 14px 18px; color: #00a870; font-weight: 500; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+.form-ctrl-q::placeholder { color: rgba(232,244,255,0.2); }
+.form-ctrl-q:focus {
+  border-color: rgba(0,200,255,0.4);
+  box-shadow: 0 0 0 3px rgba(0,200,255,0.08);
+  background: rgba(0,200,255,0.04);
+}
+textarea.form-ctrl-q { resize: vertical; min-height: 150px; }
+
+/* Success message */
+.msg-success-q {
+  display: flex; align-items: center; gap: 12px;
+  background: rgba(0,255,179,0.07);
+  border: 1px solid rgba(0,255,179,0.25);
+  border-radius: 12px; padding: 14px 18px;
+  font-family: var(--ff-display); font-size: 14px; font-weight: 600;
+  color: var(--emerald); margin-bottom: 24px;
+}
+.msg-success-q i { font-size: 18px; }
+
+/* Submit button */
+.btn-submit-q {
+  width: 100%;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  padding: 15px 30px; border-radius: 12px;
+  background: linear-gradient(135deg, var(--cyan), var(--plasma));
+  color: #000; font-family: var(--ff-display);
+  font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+  border: none; cursor: pointer;
+  transition: all .3s;
+  box-shadow: 0 0 30px rgba(0,200,255,0.2);
+  position: relative; overflow: hidden;
+}
+.btn-submit-q::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, var(--plasma), var(--cyan));
+  opacity: 0; transition: opacity .3s;
+}
+.btn-submit-q:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 50px rgba(0,200,255,0.45);
+}
+.btn-submit-q:hover::before { opacity: 1; }
+.btn-submit-q > * { position: relative; z-index: 1; }
+
+/* ── RESPONSIVE ──────────────────────── */
+@media (max-width: 768px) {
+  .contact-hero { padding: 100px 0 56px; }
+  .section-contact { padding: 64px 0; }
+  .contact-info-card { padding: 30px 24px; margin-bottom: 24px; }
+  .contact-form-card { padding: 30px 24px; }
+}
+@media (max-width: 480px) {
+  .contact-info-card, .contact-form-card { border-radius: 18px; }
+}
 </style>
 {% endblock %}
-{% block content %}
-<div class="inner-hero">
-  <div class="container position-relative">
-    <div class="breadcrumb-wrap">
-      <a href="{% url 'home' %}">Home</a>
-      <i class="fas fa-chevron-right"></i>
-      <span>Contact</span>
-    </div>
-    <h1>Let's Start a<br>Conversation</h1>
-    <p>We respond to every message within 24 hours — guaranteed.</p>
-  </div>
-</div>
 
-<section style="padding:96px 0;background:var(--bg-light)">
-  <div class="container">
+
+{% block content %}
+
+<!-- ══════════════ HERO ══════════════ -->
+<section class="contact-hero">
+  <div class="contact-hero-stars"></div>
+  <div class="contact-hero-nebula"></div>
+  <div class="contact-hero-grid"></div>
+
+  <div class="container contact-hero-inner">
+    <div class="row">
+      <div class="col-lg-7">
+        <div class="contact-breadcrumb">
+          <a href="{% url 'home' %}">Home</a>
+          <i class="fas fa-chevron-right"></i>
+          <span style="color:rgba(232,244,255,0.55)">Contact</span>
+        </div>
+        <div class="section-label">Get in Touch</div>
+        <h1 style="font-family:var(--ff-display);font-size:clamp(32px,5.5vw,64px);font-weight:800;color:#fff;letter-spacing:-0.5px;line-height:1.08;margin-bottom:18px">
+          We'd Love to Hear<br>
+          <span style="background:linear-gradient(135deg,var(--cyan),var(--plasma));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 20px rgba(0,200,255,0.2))">About Your Project</span>
+        </h1>
+        <p style="font-size:16px;color:rgba(232,244,255,0.38);line-height:1.8;max-width:500px">
+          Reach out through any of our channels — we'll respond within 24 hours with ideas and next steps.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════ CONTACT SECTION ══════════════ -->
+<section class="section-contact">
+  <div class="container position-relative" style="z-index:2">
     <div class="row g-4 align-items-start">
-      <!-- INFO -->
-      <div class="col-lg-4">
+
+      <!-- INFO CARD -->
+      <div class="col-lg-4 reveal-l">
         <div class="contact-info-card">
-          <div style="font-family:var(--font-display);font-size:22px;font-weight:800;color:#fff;margin-bottom:8px">Get in Touch</div>
-          <p style="color:rgba(255,255,255,0.4);font-size:14px;margin-bottom:36px;line-height:1.7">We'd love to hear about your project. Reach out through any of these channels.</p>
+          <div class="contact-info-title">Contact Info</div>
+          <p class="contact-info-sub">We'd love to hear about your project. Reach out through any of these channels.</p>
 
           <div class="ci-item">
             <div class="ci-icon"><i class="fas fa-location-dot"></i></div>
-            <div><div class="ci-label">Location</div><div class="ci-val">Boko Street, Dar es Salaam, Tanzania</div></div>
-          </div>
-          <div class="ci-item">
-            <div class="ci-icon"><i class="fas fa-phone"></i></div>
-            <div><div class="ci-label">Phone / WhatsApp</div><div class="ci-val">+255 629 712 678</div></div>
-          </div>
-          <div class="ci-item">
-            <div class="ci-icon"><i class="fas fa-envelope"></i></div>
-            <div><div class="ci-label">Email</div><div class="ci-val">info@jamiitek.com</div></div>
-          </div>
-          <div class="ci-item" style="margin-bottom:0">
-            <div class="ci-icon"><i class="fas fa-clock"></i></div>
-            <div><div class="ci-label">Working Hours</div><div class="ci-val">Mon – Fri, 8:00 AM – 6:00 PM</div></div>
-          </div>
-
-          <!-- Social -->
-          <div style="margin-top:36px;padding-top:28px;border-top:1px solid rgba(255,255,255,0.08)">
-            <div style="font-family:var(--font-mono);font-size:11px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.25);margin-bottom:16px">Follow us</div>
-            <div style="display:flex;gap:9px">
-              <a href="#" style="width:38px;height:38px;border-radius:10px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.5);display:flex;align-items:center;justify-content:center;text-decoration:none;transition:all 0.2s" onmouseover="this.style.background='var(--accent)';this.style.borderColor='var(--accent)';this.style.color='#fff'" onmouseout="this.style.background='rgba(255,255,255,0.05)';this.style.borderColor='rgba(255,255,255,0.1)';this.style.color='rgba(255,255,255,0.5)'"><i class="fab fa-twitter"></i></a>
-              <a href="#" style="width:38px;height:38px;border-radius:10px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.5);display:flex;align-items:center;justify-content:center;text-decoration:none;transition:all 0.2s" onmouseover="this.style.background='var(--accent)';this.style.borderColor='var(--accent)';this.style.color='#fff'" onmouseout="this.style.background='rgba(255,255,255,0.05)';this.style.borderColor='rgba(255,255,255,0.1)';this.style.color='rgba(255,255,255,0.5)'"><i class="fab fa-facebook-f"></i></a>
-              <a href="#" style="width:38px;height:38px;border-radius:10px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.5);display:flex;align-items:center;justify-content:center;text-decoration:none;transition:all 0.2s" onmouseover="this.style.background='var(--accent)';this.style.borderColor='var(--accent)';this.style.color='#fff'" onmouseout="this.style.background='rgba(255,255,255,0.05)';this.style.borderColor='rgba(255,255,255,0.1)';this.style.color='rgba(255,255,255,0.5)'"><i class="fab fa-instagram"></i></a>
-              <a href="#" style="width:38px;height:38px;border-radius:10px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.5);display:flex;align-items:center;justify-content:center;text-decoration:none;transition:all 0.2s" onmouseover="this.style.background='var(--accent)';this.style.borderColor='var(--accent)';this.style.color='#fff'" onmouseout="this.style.background='rgba(255,255,255,0.05)';this.style.borderColor='rgba(255,255,255,0.1)';this.style.color='rgba(255,255,255,0.5)'"><i class="fab fa-linkedin-in"></i></a>
+            <div>
+              <div class="ci-label">Location</div>
+              <div class="ci-val">Boko Street, Dar es Salaam, Tanzania</div>
             </div>
           </div>
+
+          <div class="ci-item">
+            <div class="ci-icon"><i class="fas fa-phone"></i></div>
+            <div>
+              <div class="ci-label">Phone / WhatsApp</div>
+              <div class="ci-val">+255 629 712 678</div>
+            </div>
+          </div>
+
+          <div class="ci-item">
+            <div class="ci-icon"><i class="fas fa-envelope"></i></div>
+            <div>
+              <div class="ci-label">Email</div>
+              <div class="ci-val">info@jamiitek.com</div>
+            </div>
+          </div>
+
+          <div class="ci-item">
+            <div class="ci-icon"><i class="fas fa-clock"></i></div>
+            <div>
+              <div class="ci-label">Working Hours</div>
+              <div class="ci-val">Mon – Fri, 8:00 AM – 6:00 PM</div>
+            </div>
+          </div>
+
+          <!-- Divider -->
+          <div style="margin-top:32px;padding-top:28px;border-top:1px solid rgba(0,200,255,0.08);position:relative;z-index:1">
+            <div class="contact-social-heading">Follow us</div>
+            <div class="contact-socials">
+              <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+              <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+              <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+              <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+            </div>
+          </div>
+
         </div>
       </div>
 
-      <!-- FORM -->
-      <div class="col-lg-8">
+      <!-- FORM CARD -->
+      <div class="col-lg-8 reveal-r">
         <div class="contact-form-card">
-          <div style="font-family:var(--font-display);font-size:22px;font-weight:800;color:var(--ink);margin-bottom:6px">Send Us a Message</div>
-          <p style="color:var(--muted);font-size:14px;margin-bottom:28px">Fill in the form below and we'll get back to you within 24 hours.</p>
+          <div class="contact-form-title">Send Us a Message</div>
+          <p class="contact-form-sub">Fill in the form below and we'll get back to you within 24 hours.</p>
 
           {% if ujumbe %}
-          <div class="msg-success"><i class="fas fa-check-circle"></i> {{ ujumbe }}</div>
+          <div class="msg-success-q">
+            <i class="fas fa-check-circle"></i>
+            {{ ujumbe }}
+          </div>
           {% endif %}
 
           <form method="post" novalidate>
             {% csrf_token %}
             <div class="row g-3">
+
               <div class="col-md-6">
-                <label class="form-label-custom">Full Name <span style="color:var(--red)">*</span></label>
-                <input type="text" name="full_name" class="form-ctrl" placeholder="John Mwangi" required>
+                <label class="form-label-q">Full Name <em>*</em></label>
+                <input type="text" name="full_name" class="form-ctrl-q" placeholder="John Mwangi" required>
               </div>
+
               <div class="col-md-6">
-                <label class="form-label-custom">Email Address <span style="color:var(--red)">*</span></label>
-                <input type="email" name="email" class="form-ctrl" placeholder="john@example.com" required>
+                <label class="form-label-q">Email Address <em>*</em></label>
+                <input type="email" name="email" class="form-ctrl-q" placeholder="john@example.com" required>
               </div>
+
               <div class="col-12">
-                <label class="form-label-custom">Subject <span style="color:var(--red)">*</span></label>
-                <input type="text" name="subject" class="form-ctrl" placeholder="What's your project about?" required>
+                <label class="form-label-q">Subject <em>*</em></label>
+                <input type="text" name="subject" class="form-ctrl-q" placeholder="What's your project about?" required>
               </div>
+
               <div class="col-12">
-                <label class="form-label-custom">Message <span style="color:var(--red)">*</span></label>
-                <textarea name="message" class="form-ctrl" placeholder="Tell us about your project, goals, budget, and timeline..." required></textarea>
+                <label class="form-label-q">Message <em>*</em></label>
+                <textarea name="message" class="form-ctrl-q" placeholder="Tell us about your project, goals, budget, and timeline..." required></textarea>
               </div>
+
               <div class="col-12">
-                <button type="submit" class="btn-accent w-100" style="justify-content:center">
-                  Send Message <i class="fas fa-paper-plane"></i>
+                <button type="submit" class="btn-submit-q">
+                  <i class="fas fa-paper-plane"></i>
+                  <span>Send Message</span>
                 </button>
               </div>
+
             </div>
           </form>
         </div>
       </div>
+
     </div>
   </div>
 </section>
+
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+/* Scroll reveal */
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      setTimeout(() => e.target.classList.add('in'), +(e.target.dataset.delay || 0));
+      obs.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal, .reveal-l, .reveal-r').forEach(el => obs.observe(el));
+</script>
 {% endblock %}

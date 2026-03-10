@@ -11,7 +11,7 @@ import secrets
 # ============================================================
 
 class Service(models.Model):
-    service_type = models.CharField(max_length=255)
+    service_type = models.CharField(max_length=255, db_column='Service_type')
     image = models.CharField(max_length=255, blank=True, null=True)
     description = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)

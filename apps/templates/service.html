@@ -1,124 +1,481 @@
 {% extends 'base.html' %}
 {% block title %}Our Services — JamiiTek{% endblock %}
+
 {% block extra_css %}
 <style>
-.svc-img-card {
-  background: #fff; border: 1px solid var(--border-light);
-  border-radius: var(--r-lg); overflow: hidden; height: 100%;
-  transition: all 0.35s;
+/* ══════════════════════════════════════════
+   SERVICE PAGE — JAMIITEK DESIGN SYSTEM
+══════════════════════════════════════════ */
+
+/* ── INNER HERO ─────────────────────────── */
+.svc-hero {
+  min-height: 46vh;
+  display: flex; align-items: center;
+  background: var(--void);
+  position: relative; overflow: hidden;
+  padding: 130px 0 72px;
 }
-.svc-img-card:hover { transform: translateY(-6px); box-shadow: 0 28px 56px rgba(91,110,245,0.12); border-color: rgba(91,110,245,0.2); }
-.svc-img-wrap { position: relative; height: 200px; overflow: hidden; background: var(--ink-3); }
-.svc-img-wrap img { width:100%;height:100%;object-fit:cover;transition:transform 0.5s; }
-.svc-img-card:hover .svc-img-wrap img { transform: scale(1.06); }
+.svc-hero-stars {
+  position: absolute; inset: 0; pointer-events: none;
+  background-image:
+    radial-gradient(1px 1px at 5%  10%, rgba(255,255,255,0.7)  0%, transparent 100%),
+    radial-gradient(1px 1px at 18% 35%, rgba(255,255,255,0.5)  0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 55% 6%, rgba(255,255,255,0.8) 0%, transparent 100%),
+    radial-gradient(1px 1px at 80% 24%, rgba(255,255,255,0.45) 0%, transparent 100%),
+    radial-gradient(1px 1px at 40% 62%, rgba(255,255,255,0.6)  0%, transparent 100%),
+    radial-gradient(1px 1px at 92% 52%, rgba(255,255,255,0.5)  0%, transparent 100%),
+    radial-gradient(1px 1px at 12% 80%, rgba(255,255,255,0.4)  0%, transparent 100%),
+    radial-gradient(1px 1px at 65% 75%, rgba(255,255,255,0.55) 0%, transparent 100%),
+    radial-gradient(1px 1px at 30% 20%, rgba(255,255,255,0.5)  0%, transparent 100%),
+    radial-gradient(1px 1px at 50% 90%, rgba(255,255,255,0.4)  0%, transparent 100%);
+}
+.svc-hero-nebula {
+  position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 60% 70% at 85% 50%, rgba(0,200,255,0.1)  0%, transparent 65%),
+    radial-gradient(ellipse 50% 60% at 10% 60%, rgba(180,77,255,0.1) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 50% at 50% 20%, rgba(0,255,179,0.05) 0%, transparent 55%);
+  animation: nebula-svc 14s ease-in-out infinite alternate;
+}
+@keyframes nebula-svc {
+  from { opacity: .7; transform: scale(1); }
+  to   { opacity: 1;  transform: scale(1.04); }
+}
+.svc-hero-grid {
+  position: absolute; inset: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(0,200,255,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,200,255,0.04) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse 90% 80% at 50% 50%, black 20%, transparent 100%);
+}
+.svc-hero-inner { position: relative; z-index: 2; }
+
+.svc-breadcrumb {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--ff-mono); font-size: 10px;
+  letter-spacing: 2px; color: rgba(0,200,255,0.45);
+  text-transform: uppercase; margin-bottom: 20px;
+}
+.svc-breadcrumb a { color: rgba(0,200,255,0.45); text-decoration: none; transition: color .2s; }
+.svc-breadcrumb a:hover { color: var(--cyan); }
+.svc-breadcrumb i { font-size: 8px; opacity: .5; }
+
+.svc-hero-label {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-family: var(--ff-mono); font-size: 10px; letter-spacing: 3px;
+  text-transform: uppercase; color: var(--cyan); margin-bottom: 16px;
+}
+.svc-hero-label::before, .svc-hero-label::after {
+  content: ''; display: block; width: 18px; height: 1px;
+  background: var(--cyan); opacity: .5;
+}
+.svc-h1 {
+  font-family: var(--ff-display);
+  font-size: clamp(32px, 5.5vw, 68px);
+  font-weight: 800; color: #fff;
+  letter-spacing: -0.5px; line-height: 1.08;
+  margin-bottom: 18px;
+}
+.svc-h1 .accent {
+  background: linear-gradient(135deg, var(--cyan), var(--plasma));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 20px rgba(0,200,255,0.2));
+}
+.svc-h1-sub {
+  font-size: 16px; color: rgba(232,244,255,0.38);
+  line-height: 1.8; max-width: 480px;
+}
+
+.svc-hero-badge {
+  display: inline-flex; align-items: center; gap: 12px;
+  background: rgba(0,1,10,0.9); border: 1px solid rgba(0,200,255,0.18);
+  border-radius: 14px; padding: 14px 20px;
+  box-shadow: 0 16px 40px rgba(0,0,0,0.5), 0 0 20px rgba(0,200,255,0.07);
+  backdrop-filter: blur(12px);
+  animation: lev-svc 4s ease-in-out infinite;
+}
+.svc-hero-badge.d2 { animation-delay: 2s; }
+@keyframes lev-svc {
+  0%,100% { transform: translateY(0); }
+  50%      { transform: translateY(-10px); }
+}
+.svc-hero-badge .badge-ico { font-size: 24px; }
+.svc-hero-badge strong {
+  display: block; font-family: var(--ff-display);
+  font-size: 13px; font-weight: 700; color: #fff;
+}
+.svc-hero-badge span {
+  font-family: var(--ff-mono); font-size: 9px;
+  color: rgba(255,255,255,0.35); letter-spacing: 1.5px;
+}
+
+/* ── SECTION: SERVICES GRID ─────────────── */
+.section-svc-grid {
+  padding: 96px 0;
+  background: var(--deep);
+  position: relative; overflow: hidden;
+}
+.section-svc-grid::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(0,200,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,200,255,0.03) 1px, transparent 1px);
+  background-size: 56px 56px;
+}
+.section-svc-grid::after {
+  content: ''; position: absolute; pointer-events: none;
+  width: 600px; height: 600px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(180,77,255,0.07) 0%, transparent 70%);
+  bottom: -200px; right: -200px;
+}
+
+.svc-img-card {
+  background: rgba(6,15,46,0.5);
+  border: 1px solid var(--border);
+  border-radius: 20px; overflow: hidden; height: 100%;
+  backdrop-filter: blur(20px);
+  transition: all .4s cubic-bezier(.4,0,.2,1);
+  position: relative;
+}
+.svc-img-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--cyan), var(--plasma), transparent);
+  opacity: 0; transition: opacity .35s;
+}
+.svc-img-card:hover {
+  border-color: rgba(0,200,255,0.22);
+  transform: translateY(-8px);
+  box-shadow: 0 28px 60px rgba(0,0,0,.6), 0 0 36px rgba(0,200,255,0.07);
+}
+.svc-img-card:hover::before { opacity: 1; }
+
+.svc-img-wrap {
+  position: relative; height: 210px; overflow: hidden;
+  background: var(--surface);
+}
+.svc-img-wrap img {
+  width: 100%; height: 100%; object-fit: cover;
+  transition: transform .6s cubic-bezier(.23,1,.32,1);
+}
+.svc-img-card:hover .svc-img-wrap img { transform: scale(1.08); }
+
+.svc-placeholder {
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center; font-size: 54px;
+  background: linear-gradient(135deg, #060f2e, #0d1240, #0a0d30);
+}
 .svc-img-overlay {
   position: absolute; inset: 0;
-  background: linear-gradient(180deg, transparent 40%, rgba(11,15,26,0.85) 100%);
-  display: flex; align-items: flex-end; padding: 16px;
+  background: linear-gradient(180deg, transparent 30%, rgba(0,1,10,0.85) 100%);
+  display: flex; align-items: flex-end; padding: 18px;
 }
 .svc-img-tag {
-  background: rgba(91,110,245,0.85); backdrop-filter: blur(8px);
-  color: #fff; font-family: var(--font-mono); font-size: 11px;
-  font-weight: 500; letter-spacing: 1px; text-transform: uppercase;
-  padding: 5px 11px; border-radius: 7px;
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(0,1,10,0.85); border: 1px solid rgba(0,200,255,0.25);
+  backdrop-filter: blur(12px);
+  color: var(--cyan);
+  font-family: var(--ff-mono); font-size: 9px;
+  font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+  padding: 5px 13px; border-radius: 100px;
 }
-.svc-img-body { padding: 24px; }
-.svc-img-title { font-family: var(--font-display); font-weight: 700; font-size: 17px; color: var(--ink); margin-bottom: 8px; }
-.svc-img-desc { font-size: 14px; color: var(--muted); line-height: 1.7; }
+.svc-img-tag::before {
+  content: '';
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--cyan); box-shadow: 0 0 6px var(--cyan);
+  flex-shrink: 0;
+}
+.svc-img-body { padding: 24px 26px 28px; }
+.svc-img-title {
+  font-family: var(--ff-display); font-weight: 700; font-size: 15px;
+  color: rgba(232,244,255,0.9); margin-bottom: 10px; line-height: 1.4;
+}
+.svc-img-desc {
+  font-size: 13.5px; color: rgba(232,244,255,0.38); line-height: 1.8; margin: 0;
+}
 
-/* FAQ */
-.faq-item {
-  border: 1px solid var(--border-light); border-radius: var(--r);
-  overflow: hidden; margin-bottom: 12px; transition: border-color 0.2s;
+/* ── SECTION: FAQ ───────────────────────── */
+.section-faq {
+  padding: 96px 0;
+  background: var(--void);
+  position: relative; overflow: hidden;
 }
-.faq-item.open { border-color: rgba(91,110,245,0.3); }
+.section-faq::before {
+  content: ''; position: absolute; pointer-events: none;
+  width: 500px; height: 500px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(0,200,255,0.05) 0%, transparent 70%);
+  top: -150px; left: -150px;
+}
+.section-faq::after {
+  content: ''; position: absolute; pointer-events: none;
+  width: 400px; height: 400px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(180,77,255,0.06) 0%, transparent 70%);
+  bottom: -100px; right: -100px;
+}
+
+.faq-item {
+  border: 1px solid var(--border);
+  border-radius: 16px; overflow: hidden; margin-bottom: 12px;
+  background: rgba(6,15,46,0.4); backdrop-filter: blur(16px);
+  transition: border-color .3s, box-shadow .3s;
+  position: relative;
+}
+.faq-item::before {
+  content: '';
+  position: absolute; left: 0; top: 0; bottom: 0; width: 2px;
+  background: linear-gradient(180deg, var(--cyan), var(--plasma));
+  opacity: 0; transition: opacity .3s;
+}
+.faq-item.open { border-color: rgba(0,200,255,0.22); box-shadow: 0 0 36px rgba(0,200,255,0.07); }
+.faq-item.open::before { opacity: 1; }
+
 .faq-trigger {
   width: 100%; display: flex; align-items: center; justify-content: space-between;
-  padding: 20px 24px; background: #fff; border: none; cursor: pointer;
-  text-align: left; transition: background 0.2s;
-  font-family: var(--font-display); font-weight: 600; font-size: 15px; color: var(--ink);
+  padding: 20px 26px;
+  background: transparent; border: none; cursor: pointer;
+  text-align: left; transition: background .2s;
+  font-family: var(--ff-display); font-weight: 600; font-size: 14px;
+  color: rgba(232,244,255,0.75); letter-spacing: .3px;
 }
-.faq-trigger:hover { background: var(--bg-light); }
+.faq-trigger:hover { background: rgba(0,200,255,0.03); color: rgba(232,244,255,0.9); }
+.faq-item.open .faq-trigger { color: #fff; }
 .faq-trigger .fq-icon {
-  width: 28px; height: 28px; border-radius: 8px; flex-shrink: 0;
-  background: var(--bg-light); color: var(--accent);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 14px; transition: all 0.3s; margin-left: 16px;
+  width: 30px; height: 30px; border-radius: 10px; flex-shrink: 0;
+  background: rgba(0,200,255,0.07); border: 1px solid rgba(0,200,255,0.18);
+  color: var(--cyan); display: flex; align-items: center; justify-content: center;
+  font-size: 12px; transition: all .35s cubic-bezier(.23,1,.32,1); margin-left: 16px;
 }
-.faq-item.open .fq-icon { background: var(--accent); color: #fff; transform: rotate(45deg); }
+.faq-item.open .fq-icon {
+  background: linear-gradient(135deg, var(--cyan), var(--plasma));
+  color: #000; border-color: transparent;
+  transform: rotate(45deg);
+  box-shadow: 0 4px 18px rgba(0,200,255,0.35);
+}
 .faq-body {
   max-height: 0; overflow: hidden;
-  transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1), padding 0.35s;
+  transition: max-height .4s cubic-bezier(.4,0,.2,1), padding .4s;
 }
-.faq-body.open { max-height: 400px; padding: 0 24px 20px; }
-.faq-body p { font-size: 15px; color: var(--muted); line-height: 1.75; margin: 0; }
+.faq-body.open { max-height: 400px; padding: 0 26px 22px; }
+.faq-body p {
+  font-size: 14px; color: rgba(232,244,255,0.38); line-height: 1.85; margin: 0;
+  padding-top: 16px; border-top: 1px solid rgba(0,200,255,0.08);
+}
+
+/* ── CTA BAND ───────────────────────────── */
+.section-cta { padding: 88px 0; background: var(--deep); }
+.svc-cta-band {
+  position: relative; overflow: hidden;
+  background: linear-gradient(135deg,
+    rgba(0,200,255,0.05), rgba(6,15,46,0.9), rgba(180,77,255,0.06));
+  border: 1px solid rgba(0,200,255,0.12);
+  border-radius: 28px; padding: 72px 48px; text-align: center;
+}
+.svc-cta-band::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(0,200,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,200,255,0.025) 1px, transparent 1px);
+  background-size: 50px 50px;
+}
+.svc-cta-band::after {
+  content: ''; position: absolute; pointer-events: none;
+  width: 500px; height: 500px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(0,200,255,0.07) 0%, transparent 70%);
+  top: -200px; right: -100px;
+}
+.svc-cta-title {
+  font-family: var(--ff-display);
+  font-size: clamp(24px, 4vw, 48px);
+  font-weight: 800; color: #fff; letter-spacing: -1px;
+  line-height: 1.1; margin-bottom: 14px;
+  position: relative; z-index: 2;
+}
+.svc-cta-title .accent {
+  background: linear-gradient(135deg, var(--cyan), var(--plasma));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.svc-cta-sub {
+  font-size: 15px; color: rgba(232,244,255,0.38);
+  max-width: 440px; margin: 0 auto 36px; line-height: 1.8;
+  position: relative; z-index: 2;
+}
+
+/* ── RESPONSIVE ─────────────────────────── */
+@media (max-width: 768px) {
+  .svc-hero { padding: 100px 0 56px; }
+  .svc-h1 { font-size: clamp(28px, 8vw, 48px); }
+  .svc-h1-sub { font-size: 14px; }
+  .svc-hero-right { display: none !important; }
+  .section-svc-grid, .section-faq, .section-cta { padding: 60px 0; }
+  .svc-cta-band { padding: 44px 20px; border-radius: 20px; }
+  .section-cta .d-flex { flex-direction: column; align-items: stretch; }
+  .section-cta .btn-q,
+  .section-cta .btn-outline { width: 100%; }
+}
+@media (max-width: 480px) {
+  .svc-img-wrap { height: 180px; }
+  .svc-img-body { padding: 18px 20px 22px; }
+}
 </style>
 {% endblock %}
-{% block content %}
-<div class="inner-hero">
-  <div class="container position-relative">
-    <div class="breadcrumb-wrap">
-      <a href="{% url 'home' %}">Home</a>
-      <i class="fas fa-chevron-right"></i>
-      <span>Services</span>
-    </div>
-    <h1>What We Build<br>for You</h1>
-    <p>Every project is custom-crafted with the latest tools and best practices.</p>
-  </div>
-</div>
 
-<!-- SERVICES GRID -->
-<section style="padding:96px 0;background:#fff">
-  <div class="container">
+
+{% block content %}
+
+<!-- ══════════════ HERO ══════════════ -->
+<section class="svc-hero">
+  <div class="svc-hero-stars"></div>
+  <div class="svc-hero-nebula"></div>
+  <div class="svc-hero-grid"></div>
+
+  <div class="container svc-hero-inner">
+    <div class="row align-items-center g-4">
+
+      <div class="col-lg-7">
+        <div class="svc-breadcrumb">
+          <a href="{% url 'home' %}">Home</a>
+          <i class="fas fa-chevron-right"></i>
+          <span style="color:rgba(232,244,255,0.55)">Services</span>
+        </div>
+        <div class="svc-hero-label">What We Build</div>
+        <h1 class="svc-h1">
+          Full-Spectrum<br>
+          <span class="accent">Digital Solutions</span>
+        </h1>
+        <p class="svc-h1-sub">
+          Every project is custom-crafted with the latest tools and best practices —
+          from first concept to launch and long-term support.
+        </p>
+      </div>
+
+      <div class="col-lg-5 d-none d-lg-flex flex-column align-items-end gap-4 svc-hero-right">
+        <div class="svc-hero-badge">
+          <div class="badge-ico">⚡</div>
+          <div>
+            <strong>Fast Delivery</strong>
+            <span>2–6 WEEKS TURNAROUND</span>
+          </div>
+        </div>
+        <div class="svc-hero-badge d2">
+          <div class="badge-ico">🔒</div>
+          <div>
+            <strong>99.9% Uptime</strong>
+            <span>MANAGED HOSTING</span>
+          </div>
+        </div>
+        <div class="svc-hero-badge" style="animation-delay:1s">
+          <div class="badge-ico">🌍</div>
+          <div>
+            <strong>485+ Clients</strong>
+            <span>TANZANIA & EAST AFRICA</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════ SERVICES GRID ══════════════ -->
+<section class="section-svc-grid">
+  <div class="container position-relative" style="z-index:2">
+
     <div class="row justify-content-center text-center mb-5">
       <div class="col-lg-6">
-        <div class="section-eyebrow"><span class="dot"></span> Our Services</div>
-        <h2 class="section-heading">Full-Spectrum Digital<br>Solutions</h2>
+        <div class="section-label">Our Services</div>
+        <h2 class="section-title">
+          What We <span class="accent">Offer</span>
+        </h2>
+        <p class="section-sub mx-auto mt-3">
+          End-to-end digital services tailored to your business — from UI design to deployment and ongoing support.
+        </p>
       </div>
     </div>
+
     <div class="row g-4">
       {% for svc in services %}
-      <div class="col-md-6 col-lg-4">
+      <div class="col-md-6 col-lg-4 reveal" data-delay="{{ forloop.counter0 }}00">
         <div class="svc-img-card">
           <div class="svc-img-wrap">
             {% if svc.image %}
-            <img src="{{ svc.get_image_url }}" alt="{{ svc.Service_type }}">
+            <img src="{{ svc.get_image_url }}" alt="{{ svc.service_type }}">
             {% else %}
-            <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--ink-2),var(--ink-3));font-size:52px">🌐</div>
+            <div class="svc-placeholder">🌐</div>
             {% endif %}
             <div class="svc-img-overlay">
-              <span class="svc-img-tag">{{ svc.Service_type|truncatewords:2 }}</span>
+              <span class="svc-img-tag">{{ svc.service_type|truncatewords:2 }}</span>
             </div>
           </div>
           <div class="svc-img-body">
-            <div class="svc-img-title">{{ svc.Service_type }}</div>
+            <div class="svc-img-title">{{ svc.service_type }}</div>
             <p class="svc-img-desc">{{ svc.description|truncatewords:25 }}</p>
           </div>
         </div>
       </div>
       {% empty %}
-      <div class="col-12 text-center py-5">
-        <div style="font-size:48px;margin-bottom:16px">🔧</div>
-        <p style="color:var(--muted)">Services coming soon. Check back shortly.</p>
+      {% for n in "123456" %}
+      <div class="col-md-6 col-lg-4 reveal" data-delay="{{ forloop.counter0 }}00">
+        <div class="svc-img-card">
+          <div class="svc-img-wrap">
+            <div class="svc-placeholder">
+              {% if forloop.counter == 1 %}🌐{% elif forloop.counter == 2 %}📱{% elif forloop.counter == 3 %}🖥️{% elif forloop.counter == 4 %}🌐{% elif forloop.counter == 5 %}🎨{% else %}⚙️{% endif %}
+            </div>
+            <div class="svc-img-overlay">
+              <span class="svc-img-tag">
+                {% if forloop.counter == 1 %}Web Dev{% elif forloop.counter == 2 %}Mobile{% elif forloop.counter == 3 %}Hosting{% elif forloop.counter == 4 %}Network{% elif forloop.counter == 5 %}UI/UX{% else %}Systems{% endif %}
+              </span>
+            </div>
+          </div>
+          <div class="svc-img-body">
+            <div class="svc-img-title">
+              {% if forloop.counter == 1 %}Website Development
+              {% elif forloop.counter == 2 %}Mobile App Development
+              {% elif forloop.counter == 3 %}Web Hosting & Servers
+              {% elif forloop.counter == 4 %}Network Installation
+              {% elif forloop.counter == 5 %}UI/UX Design
+              {% else %}System Integration{% endif %}
+            </div>
+            <p class="svc-img-desc">
+              {% if forloop.counter == 1 %}Modern, responsive websites built with the latest frameworks for speed, security, and excellent user experience.
+              {% elif forloop.counter == 2 %}Android & iOS apps designed for scale, performance, and a seamless user journey across all devices.
+              {% elif forloop.counter == 3 %}Reliable hosting with 99.9% uptime, daily backups, and proactive monitoring for total peace of mind.
+              {% elif forloop.counter == 4 %}Professional network setup and IT infrastructure for offices and enterprises of any size.
+              {% elif forloop.counter == 5 %}Intuitive interfaces and thoughtful designs that users love and drive real business conversions.
+              {% else %}Smart integrations connecting your tools, APIs, and platforms into one seamless digital workflow.{% endif %}
+            </p>
+          </div>
+        </div>
       </div>
       {% endfor %}
+      {% endfor %}
     </div>
+
   </div>
 </section>
 
-<!-- FAQ -->
-<section style="padding:96px 0;background:var(--bg-light)">
-  <div class="container">
+
+<!-- ══════════════ FAQ ══════════════ -->
+<section class="section-faq">
+  <div class="container position-relative" style="z-index:2">
+
     <div class="row justify-content-center text-center mb-5">
       <div class="col-lg-6">
-        <div class="section-eyebrow"><span class="dot"></span> FAQ</div>
-        <h2 class="section-heading">Frequently Asked<br>Questions</h2>
+        <div class="section-label">FAQ</div>
+        <h2 class="section-title">
+          Frequently Asked <span class="accent">Questions</span>
+        </h2>
       </div>
     </div>
+
     <div class="row justify-content-center">
       <div class="col-lg-8">
+
         {% for q in questions %}
-        <div class="faq-item" id="faq-{{ forloop.counter }}">
+        <div class="faq-item reveal" id="faq-{{ forloop.counter }}">
           <button class="faq-trigger" onclick="toggleFaq('{{ forloop.counter }}')">
             {{ q.question }}
             <span class="fq-icon"><i class="fas fa-plus"></i></span>
@@ -129,7 +486,7 @@
         </div>
         {% empty %}
         {% for qa in "12345" %}
-        <div class="faq-item" id="faq-{{ forloop.counter }}">
+        <div class="faq-item reveal" data-delay="{{ forloop.counter0 }}00" id="faq-{{ forloop.counter }}">
           <button class="faq-trigger" onclick="toggleFaq('{{ forloop.counter }}')">
             {% if forloop.counter == 1 %}How long does a typical project take?
             {% elif forloop.counter == 2 %}What technologies do you use?
@@ -140,41 +497,73 @@
           </button>
           <div class="faq-body" id="faq-body-{{ forloop.counter }}">
             <p>
-              {% if forloop.counter == 1 %}Most projects are delivered in 2–6 weeks depending on complexity. We always agree on a timeline upfront and keep you informed throughout.
-              {% elif forloop.counter == 2 %}We use Django, React, Python, PostgreSQL, and modern cloud infrastructure. We choose the best tool for each specific project's needs.
-              {% elif forloop.counter == 3 %}Yes — we offer managed hosting packages with 99.9% uptime, daily backups, and priority technical support.
-              {% elif forloop.counter == 4 %}Absolutely. We provide post-launch support packages and can accommodate change requests based on scope.
-              {% else %}Simply click "Get a Quote" and fill in your project details. We'll respond within 24 hours with a proposal and next steps.{% endif %}
+              {% if forloop.counter == 1 %}Most projects are delivered in 2–6 weeks depending on scope and complexity. We always align on a timeline upfront and keep you informed at every stage.
+              {% elif forloop.counter == 2 %}We use Django, React, Python, PostgreSQL, and modern cloud infrastructure. We choose the best tool for each project's specific needs and scale.
+              {% elif forloop.counter == 3 %}Yes — we offer managed hosting packages with 99.9% uptime SLA, daily backups, SSL certificates, and priority technical support included.
+              {% elif forloop.counter == 4 %}Absolutely. We provide flexible post-launch support packages and can accommodate change requests based on agreed scope.
+              {% else %}Simply click "Start Project" below and fill in your project details. We'll respond within 24 hours with a detailed proposal and next steps — no commitment required.{% endif %}
             </p>
           </div>
         </div>
         {% endfor %}
         {% endfor %}
+
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ══════════════ CTA BAND ══════════════ -->
+<section class="section-cta">
+  <div class="container">
+    <div class="svc-cta-band reveal">
+      <div class="section-label justify-content-center">Ready to Build?</div>
+      <h2 class="svc-cta-title">
+        Let's Turn Your Idea Into<br>
+        <span class="accent">Something Real</span>
+      </h2>
+      <p class="svc-cta-sub">
+        Tell us about your project — we'll send back a detailed proposal within 24 hours, no commitment required.
+      </p>
+      <div class="d-flex flex-wrap gap-3 justify-content-center" style="position:relative;z-index:2">
+        <a href="{% url 'select_website' %}" class="btn-q">
+          <i class="fas fa-rocket"></i>
+          <span>Start Your Project</span>
+        </a>
+        <a href="{% url 'contact' %}" class="btn-outline">
+          <i class="fas fa-headset"></i> Talk to Us First
+        </a>
       </div>
     </div>
   </div>
 </section>
 
-<!-- CTA -->
-<section style="padding:80px 0;background:var(--ink)">
-  <div class="container text-center">
-    <h2 style="font-family:var(--font-display);font-size:clamp(26px,4vw,42px);font-weight:800;color:#fff;margin-bottom:16px">Ready to work together?</h2>
-    <p style="color:rgba(255,255,255,0.5);font-size:17px;margin-bottom:32px;max-width:440px;margin-inline:auto">Let's turn your idea into a product that works and impresses.</p>
-    <a href="{% url 'select_website' %}" class="btn-accent">Get a Free Quote <i class="fas fa-arrow-right"></i></a>
-  </div>
-</section>
 {% endblock %}
+
+
 {% block extra_js %}
 <script>
+/* FAQ toggle */
 function toggleFaq(id) {
   const item = document.getElementById('faq-' + id);
   const body = document.getElementById('faq-body-' + id);
   const isOpen = item.classList.contains('open');
-  // Close all
-  document.querySelectorAll('.faq-item').forEach(el => { el.classList.remove('open'); });
-  document.querySelectorAll('.faq-body').forEach(el => { el.classList.remove('open'); });
-  // Open clicked if it was closed
+  document.querySelectorAll('.faq-item').forEach(el => el.classList.remove('open'));
+  document.querySelectorAll('.faq-body').forEach(el => el.classList.remove('open'));
   if (!isOpen) { item.classList.add('open'); body.classList.add('open'); }
 }
+
+/* Scroll reveal */
+const revealObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      setTimeout(() => e.target.classList.add('in'), +(e.target.dataset.delay || 0));
+      revealObs.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
 </script>
 {% endblock %}
