@@ -153,48 +153,90 @@ def portal_logout(request):
 
 @client_required
 def portal_dashboard(request):
-    client   = request.client_profile
-    websites = ManagedWebsite.objects.filter(client=client)
-    domains  = DomainRecord.objects.filter(website__client=client)
+    import json as _json
+    client      = request.client_profile
+    websites    = ManagedWebsite.objects.filter(client=client).select_related('client')
+    domains     = DomainRecord.objects.filter(website__client=client)
     email_plans = EmailHostingPlan.objects.filter(client=client)
-    today    = date.today()
+    today       = date.today()
 
-    total_paid = HostingPayment.objects.filter(website__client=client).aggregate(
-        total=Sum('amount'))['total'] or 0
+    total_paid = HostingPayment.objects.filter(
+        website__client=client).aggregate(total=Sum('amount'))['total'] or 0
     notifications = ClientNotification.objects.filter(
         client=client).order_by('-sent_at')[:5]
 
+    # Alerts - no duplicate for suspended+overdue
     alerts = []
     for w in websites:
-        if w.is_overdue:
-            alerts.append({'type': 'danger', 'msg': f'<strong>{w.name}</strong> — hosting expired! Please make a payment.'})
-        elif w.days_until_expiry is not None and w.days_until_expiry <= 7:
-            alerts.append({'type': 'warning', 'msg': f'<strong>{w.name}</strong> — hosting expires in {w.days_until_expiry} day(s).'})
         if w.status == 'suspended':
-            alerts.append({'type': 'danger', 'msg': f'<strong>{w.name}</strong> is suspended. Contact JamiiTek.'})
+            alerts.append({'type': 'danger', 'msg': f'<strong>{w.name}</strong> is suspended. Contact JamiiTek to restore.'})
+        elif w.is_overdue:
+            alerts.append({'type': 'danger', 'msg': f'<strong>{w.name}</strong> — hosting expired! Please make a payment immediately.'})
+        elif w.days_until_expiry <= 3:
+            alerts.append({'type': 'danger', 'msg': f'<strong>{w.name}</strong> — hosting expires in <strong>{w.days_until_expiry}</strong> day(s)! Renew now.'})
+        elif w.days_until_expiry <= 7:
+            alerts.append({'type': 'warning', 'msg': f'<strong>{w.name}</strong> — hosting expires in {w.days_until_expiry} day(s).'})
 
     for d in domains:
-        if d.is_expired:
+        raw_d = (d.expiry_date - today).days
+        if raw_d <= 0:
             alerts.append({'type': 'danger', 'msg': f'Domain <strong>{d.domain_name}</strong> has expired!'})
-        elif d.days_until_expiry <= 30:
+        elif raw_d <= 14:
             alerts.append({'type': 'warning', 'msg': f'Domain <strong>{d.domain_name}</strong> expires in {d.days_until_expiry} day(s).'})
 
     for ep in email_plans:
-        if ep.is_overdue:
+        if ep.status == 'suspended':
+            alerts.append({'type': 'danger', 'msg': f'Email hosting <strong>{ep.email_domain}</strong> is suspended.'})
+        elif ep.is_overdue:
             alerts.append({'type': 'danger', 'msg': f'Email hosting <strong>{ep.email_domain}</strong> has expired!'})
         elif ep.days_until_expiry <= 7:
             alerts.append({'type': 'warning', 'msg': f'Email hosting <strong>{ep.email_domain}</strong> expires in {ep.days_until_expiry} day(s).'})
 
+    # Payment chart - last 6 months
+    try:
+        from dateutil.relativedelta import relativedelta
+        payments_qs = HostingPayment.objects.filter(website__client=client).order_by('payment_date')
+        months_data = {}
+        for p in payments_qs:
+            key = p.payment_date.strftime('%b %Y')
+            months_data[key] = months_data.get(key, 0) + float(p.amount)
+        chart_labels, chart_values = [], []
+        for i in range(5, -1, -1):
+            m = today - relativedelta(months=i)
+            chart_labels.append(m.strftime('%b'))
+            chart_values.append(months_data.get(m.strftime('%b %Y'), 0))
+    except Exception:
+        chart_labels = ['Jan','Feb','Mar','Apr','May','Jun']
+        chart_values = [0,0,0,0,0,0]
+
+    # Hosting expiry timeline
+    expiry_data = []
+    for w in websites:
+        raw = (w.hosting_end_date - today).days
+        st = 'expired' if raw <= 0 else ('critical' if raw <= 3 else ('warning' if raw <= 7 else 'ok'))
+        expiry_data.append({'name': w.name[:18], 'days': max(raw, 0), 'raw': raw, 'status': st})
+
+    health = {
+        'active':    websites.filter(status='active').count(),
+        'suspended': websites.filter(status='suspended').count(),
+        'expiring':  sum(1 for w in websites if 0 < (w.hosting_end_date - today).days <= 7),
+        'domains_ok': domains.filter(status='active').count(),
+    }
+
     return render(request, 'portal/dashboard.html', {
-        'title': 'My Dashboard',
-        'client': client,
-        'websites': websites,
-        'domains': domains,
-        'email_plans': email_plans,
-        'total_paid': total_paid,
+        'title':         'My Dashboard',
+        'client':        client,
+        'websites':      websites,
+        'domains':       domains,
+        'email_plans':   email_plans,
+        'total_paid':    total_paid,
         'notifications': notifications,
-        'alerts': alerts,
-        'today': today,
+        'alerts':        alerts,
+        'today':         today,
+        'chart_labels':  _json.dumps(chart_labels),
+        'chart_values':  _json.dumps(chart_values),
+        'expiry_data':   _json.dumps(expiry_data),
+        'health':        health,
     })
 
 

@@ -14,7 +14,7 @@ WEBSITE_TYPES_DIR = BASE_DIR / 'apps' / 'website_types'
 
 # Security settings
 SECRET_KEY = os.getenv('SECRET_KEY', 'fallback-secret-key')
-DEBUG = False
+DEBUG = True
 # DEBUG = os.getenv('DEBUG', 'False') == 'True'
 ALLOWED_HOSTS = ["*"]
 
@@ -145,7 +145,7 @@ JAZZMIN_UI_TWEAKS = {
 
 UPLOADCARE = {
     'pub_key': '96c9f49ee7fe6afeb1fc',
-    'secret': 'daeb85d5381946a91757',
+    'secret': '7c2ec708937b40ea415c',
     'use_secure': True, 
 }
 

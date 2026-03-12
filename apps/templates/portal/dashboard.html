@@ -1,118 +1,425 @@
 {% extends 'portal/base.html' %}
 {% block title %}Dashboard{% endblock %}
 {% block content %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<style>
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.fade-up  {animation:fadeUp .5s ease both}
+.fade-up-1{animation:fadeUp .5s .08s ease both}
+.fade-up-2{animation:fadeUp .5s .16s ease both}
+.fade-up-3{animation:fadeUp .5s .24s ease both}
+
+.dash-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+.dsc{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px 20px;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s;cursor:default}
+.dsc:hover{transform:translateY(-3px);box-shadow:0 8px 30px rgba(0,0,0,.3)}
+.dsc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.dsc-ico{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:17px}
+.dsc-trend{font-family:var(--mono);font-size:10px;padding:3px 9px;border-radius:100px}
+.dsc-val{font-family:var(--head);font-size:34px;font-weight:800;line-height:1;margin-bottom:4px}
+.dsc-label{font-size:12px;color:var(--text-3);font-weight:500}
+.dsc-bar{height:3px;border-radius:100px;background:var(--bg2);margin-top:14px;overflow:hidden}
+.dsc-bar-fill{height:100%;border-radius:100px;transition:width 1.3s cubic-bezier(.4,0,.2,1)}
+
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:18px}
+.chart-card-head{padding:16px 20px 0;display:flex;align-items:center;justify-content:space-between}
+.chart-title{font-family:var(--head);font-size:15px;font-weight:700;color:var(--text)}
+.chart-sub{font-family:var(--mono);font-size:10px;color:var(--text-3);letter-spacing:1px;text-transform:uppercase}
+.chart-body{padding:14px 16px 18px}
+
+.health-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.health-item{background:var(--bg2);border-radius:12px;padding:13px;display:flex;align-items:center;gap:11px}
+.ring-wrap{position:relative;width:48px;height:48px;flex-shrink:0}
+.ring-wrap svg{transform:rotate(-90deg)}
+.ring-val{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--head);font-size:14px;font-weight:800}
+.health-label{font-size:12px;color:var(--text-2);font-weight:600}
+.health-sub{font-family:var(--mono);font-size:10px;color:var(--text-3);margin-top:2px}
+
+.expiry-list{display:flex;flex-direction:column;gap:10px;padding:2px 0}
+.exp-row{display:grid;grid-template-columns:1fr 90px 44px;gap:10px;align-items:center}
+.exp-name{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.exp-bar-bg{height:7px;background:var(--bg2);border-radius:100px;overflow:hidden}
+.exp-bar-fill{height:100%;border-radius:100px;transition:width 1.2s ease}
+.exp-days{font-family:var(--mono);font-size:11px;text-align:right;white-space:nowrap}
+.fill-ok{background:linear-gradient(90deg,#00ff88,#00d4ff)}
+.fill-warning{background:linear-gradient(90deg,#ffb800,#ff6b00)}
+.fill-critical{background:linear-gradient(90deg,#ff2244,#ff6680)}
+.fill-expired{background:#ff2244}
+.col-ok{color:#00ff88}.col-warning{color:#ffb800}.col-critical{color:var(--red)}.col-expired{color:var(--red)}
+
+.site-row td{transition:background .15s}
+.site-row:hover td{background:rgba(255,255,255,.018)}
+.sp-dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:5px}
+.sp-dot.active{background:#00ff88;box-shadow:0 0 6px #00ff88;animation:pulse 2s infinite}
+.sp-dot.suspended{background:#ff2244;box-shadow:0 0 6px #ff2244;animation:pulse 1.2s infinite}
+.sp-dot.maintenance{background:#ffb800}
+
+.af-item{padding:11px 16px;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:flex-start;transition:background .15s}
+.af-item:hover{background:rgba(255,255,255,.015)}
+.af-item:last-child{border-bottom:none}
+.af-ico{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.af-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.af-date{font-family:var(--mono);font-size:10px;color:var(--text-3)}
+
+.qa-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.qa-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:14px 6px;border-radius:12px;background:var(--bg2);border:1px solid var(--border);text-decoration:none;color:var(--text-2);font-size:11px;font-weight:600;transition:all .2s}
+.qa-btn:hover{background:rgba(0,212,255,.07);border-color:rgba(0,212,255,.2);color:var(--cyan);transform:translateY(-2px)}
+.qa-btn-ico{font-size:18px}
+
+.paid-num{font-family:var(--head);font-size:36px;color:var(--green);line-height:1;text-align:center;filter:drop-shadow(0 0 10px rgba(0,255,136,.3))}
+.paid-sub{font-family:var(--mono);font-size:10px;color:var(--text-3);letter-spacing:1.5px;text-transform:uppercase;text-align:center;margin-top:5px}
+
+@media(max-width:992px){.dash-stats{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:576px){.exp-row{grid-template-columns:1fr 60px 38px}.qa-grid{grid-template-columns:repeat(4,1fr)}}
+</style>
 
 {% for alert in alerts %}
-<div class="jt-alert jt-alert-{{ alert.type }} mb-2">
+<div class="jt-alert jt-alert-{{ alert.type }} mb-2 fade-up">
   <i class="fas {% if alert.type == 'danger' %}fa-circle-exclamation{% else %}fa-triangle-exclamation{% endif %}" style="flex-shrink:0;margin-top:2px"></i>
   <span>{{ alert.msg|safe }}</span>
 </div>
 {% endfor %}
 
-<!-- HEADER -->
-<div style="display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:24px;flex-wrap:wrap">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:20px;flex-wrap:wrap" class="fade-up">
   <div>
-    <h1 style="font-family:var(--head);font-size:22px;font-weight:800;color:var(--text);margin-bottom:3px">Hello, {{ client.name|truncatewords:2 }} 👋</h1>
-    <div style="font-family:var(--mono);font-size:12px;color:var(--text-3)">Your hosting overview — {% now "d M Y" %}</div>
+    <h1 style="font-family:var(--head);font-size:24px;font-weight:800;color:var(--text);margin-bottom:3px">Hello, {{ client.name|truncatewords:2 }} 👋</h1>
+    <div style="font-family:var(--mono);font-size:11px;color:var(--text-3)">
+      Hosting Overview &nbsp;·&nbsp; {% now "d M Y" %} &nbsp;·&nbsp;
+      <span style="color:{% if health.suspended > 0 %}var(--red){% else %}#00ff88{% endif %}">
+        {% if health.suspended > 0 %}⚠ {{ health.suspended }} site(s) suspended{% else %}✓ All systems operational{% endif %}
+      </span>
+    </div>
   </div>
-  <a href="{% url 'portal_support' %}" class="jt-btn btn-primary"><i class="fas fa-headset"></i> Get Support</a>
+  <div style="display:flex;gap:8px">
+    <a href="{% url 'portal_billing' %}" class="jt-btn btn-ghost" style="font-size:12px"><i class="fas fa-coins" style="color:var(--green)"></i> Pay</a>
+    <a href="{% url 'portal_support' %}" class="jt-btn btn-primary" style="font-size:12px"><i class="fas fa-headset"></i> Support</a>
+  </div>
 </div>
 
-<!-- STATS -->
-<div class="row g-3 mb-4">
-  <div class="col-6 col-lg-3">
-    <div class="stat-card" style="--accent:var(--purple)">
-      <div class="sc-icon" style="background:var(--purple-d);color:var(--purple)"><i class="fas fa-globe"></i></div>
-      <div class="sc-val" style="color:var(--purple)">{{ websites.count }}</div>
-      <div class="sc-label">Websites</div>
+<!-- STAT CARDS -->
+<div class="dash-stats">
+  <div class="dsc fade-up">
+    <div class="dsc-top">
+      <div class="dsc-ico" style="background:rgba(139,92,246,.12);color:#8b5cf6"><i class="fas fa-globe"></i></div>
+      <span class="dsc-trend" style="background:rgba(0,255,136,.08);color:#00ff88">{{ health.active }} live</span>
     </div>
+    <div class="dsc-val" style="color:#8b5cf6">{{ websites.count }}</div>
+    <div class="dsc-label">Total Websites</div>
+    <div class="dsc-bar"><div class="dsc-bar-fill" id="b1" style="background:linear-gradient(90deg,#8b5cf6,#00d4ff);width:0"></div></div>
   </div>
-  <div class="col-6 col-lg-3">
-    <div class="stat-card" style="--accent:var(--cyan)">
-      <div class="sc-icon" style="background:var(--cyan-d);color:var(--cyan)"><i class="fas fa-at"></i></div>
-      <div class="sc-val" style="color:var(--cyan)">{{ domains.count }}</div>
-      <div class="sc-label">Domains</div>
+  <div class="dsc fade-up-1">
+    <div class="dsc-top">
+      <div class="dsc-ico" style="background:rgba(0,212,255,.12);color:var(--cyan)"><i class="fas fa-at"></i></div>
+      <span class="dsc-trend" style="background:rgba(0,212,255,.08);color:var(--cyan)">{{ health.domains_ok }} ok</span>
     </div>
+    <div class="dsc-val" style="color:var(--cyan)">{{ domains.count }}</div>
+    <div class="dsc-label">Domains</div>
+    <div class="dsc-bar"><div class="dsc-bar-fill" id="b2" style="background:linear-gradient(90deg,#00d4ff,#8b5cf6);width:0"></div></div>
   </div>
-  <div class="col-6 col-lg-3">
-    <div class="stat-card" style="--accent:var(--purple)">
-      <div class="sc-icon" style="background:var(--purple-d);color:var(--purple)"><i class="fas fa-envelope-open-text"></i></div>
-      <div class="sc-val" style="color:var(--purple)">{{ email_plans.count }}</div>
-      <div class="sc-label">Email Plans</div>
+  <div class="dsc fade-up-2">
+    <div class="dsc-top">
+      <div class="dsc-ico" style="background:rgba(255,184,0,.1);color:#ffb800"><i class="fas fa-envelope-open-text"></i></div>
+      <span class="dsc-trend" style="background:rgba(255,184,0,.08);color:#ffb800">{{ email_plans.count }} plan(s)</span>
     </div>
+    <div class="dsc-val" style="color:#ffb800">{{ email_plans.count }}</div>
+    <div class="dsc-label">Email Plans</div>
+    <div class="dsc-bar"><div class="dsc-bar-fill" id="b3" style="background:linear-gradient(90deg,#ffb800,#ff6b00);width:0"></div></div>
   </div>
-  <div class="col-6 col-lg-3">
-    <div class="stat-card" style="--accent:var(--green)">
-      <div class="sc-icon" style="background:var(--green-d);color:var(--green)"><i class="fas fa-coins"></i></div>
-      <div class="sc-val" style="font-size:18px;color:var(--green)">{{ total_paid|floatformat:0 }}</div>
-      <div class="sc-label">Total Paid (TZS)</div>
+  <div class="dsc fade-up-3">
+    <div class="dsc-top">
+      <div class="dsc-ico" style="background:rgba(0,255,136,.1);color:var(--green)"><i class="fas fa-coins"></i></div>
+      <span class="dsc-trend" style="background:rgba(0,255,136,.08);color:var(--green)">TZS</span>
     </div>
+    <div class="dsc-val" style="color:var(--green);font-size:20px">{{ total_paid|floatformat:0 }}</div>
+    <div class="dsc-label">Total Payments</div>
+    <div class="dsc-bar"><div class="dsc-bar-fill" id="b4" style="background:linear-gradient(90deg,#00ff88,#00d4ff);width:0"></div></div>
   </div>
 </div>
 
 <div class="row g-3">
-  <!-- Websites table -->
   <div class="col-lg-8">
-    <div class="jt-card" style="padding:0">
-      <div class="jt-card-head">
-        <span class="jt-card-title"><i class="fas fa-globe" style="color:var(--purple)"></i> My Websites</span>
-        <a href="{% url 'portal_website_list' %}" class="jt-btn btn-ghost" style="font-size:11px;padding:6px 12px">View All</a>
+
+    <!-- PAYMENT CHART -->
+    <div class="chart-card fade-up">
+      <div class="chart-card-head">
+        <div>
+          <div class="chart-title"><i class="fas fa-chart-area" style="color:var(--cyan);margin-right:8px"></i>Payment History</div>
+          <div class="chart-sub" style="margin-top:3px">Last 6 months — TZS</div>
+        </div>
+      </div>
+      <div class="chart-body"><canvas id="payChart" height="110"></canvas></div>
+    </div>
+
+    <!-- EXPIRY TIMELINE -->
+    <div class="chart-card fade-up-1">
+      <div class="chart-card-head">
+        <div>
+          <div class="chart-title"><i class="fas fa-clock" style="color:#ffb800;margin-right:8px"></i>Hosting Expiry Timeline</div>
+          <div class="chart-sub" style="margin-top:3px">Days remaining per website</div>
+        </div>
+      </div>
+      <div class="chart-body">
+        {% if websites %}
+        <div class="expiry-list">
+          {% for w in websites %}
+          <div class="exp-row">
+            <div>
+              <div class="exp-name">{{ w.name }}</div>
+              <div style="font-size:10px;color:var(--text-3);font-family:var(--mono)">{{ w.hosting_end_date|date:"d M Y" }}</div>
+            </div>
+            <div class="exp-bar-bg">
+              {% if w.status == 'suspended' or w.is_overdue %}
+              <div class="exp-bar-fill fill-expired" style="width:100%"></div>
+              {% elif w.days_until_expiry <= 3 %}
+              <div class="exp-bar-fill fill-critical" style="width:40%"></div>
+              {% elif w.days_until_expiry <= 7 %}
+              <div class="exp-bar-fill fill-warning" style="width:60%"></div>
+              {% else %}
+              <div class="exp-bar-fill fill-ok" style="width:100%"></div>
+              {% endif %}
+            </div>
+            <div class="exp-days {% if w.status == 'suspended' %}col-expired{% elif w.is_overdue %}col-expired{% elif w.days_until_expiry <= 3 %}col-critical{% elif w.days_until_expiry <= 7 %}col-warning{% else %}col-ok{% endif %}">
+              {% if w.status == 'suspended' %}SUSP{% elif w.is_overdue %}EXP{% else %}{{ w.days_until_expiry }}d{% endif %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="jt-empty"><div class="ei">🌐</div><p>No websites yet.</p></div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- WEBSITES TABLE -->
+    <div class="chart-card fade-up-2">
+      <div class="chart-card-head" style="padding-bottom:12px">
+        <div class="chart-title"><i class="fas fa-globe" style="color:#8b5cf6;margin-right:8px"></i>My Websites</div>
+        <a href="{% url 'portal_website_list' %}" style="font-family:var(--mono);font-size:11px;color:var(--purple)">All →</a>
       </div>
       {% if websites %}
       <div style="overflow-x:auto">
         <table class="jt-table">
-          <thead><tr><th>Website</th><th>Status</th><th>Expires</th><th>Monthly</th><th></th></tr></thead>
+          <thead><tr><th>Website</th><th>Status</th><th>Expires</th><th>Cost</th><th></th></tr></thead>
           <tbody>
             {% for w in websites %}
-            <tr>
+            <tr class="site-row">
               <td>
-                <div style="font-weight:600;color:var(--text)">{{ w.name }}</div>
-                <a href="{{ w.url }}" target="_blank" style="font-family:var(--mono);font-size:11px;color:var(--text-3)">{{ w.url|truncatechars:36 }}</a>
+                <div style="font-weight:700;color:var(--text)">{{ w.name }}</div>
+                <a href="{{ w.url }}" target="_blank" style="font-family:var(--mono);font-size:10px;color:var(--text-3)">{{ w.url|truncatechars:30 }}</a>
               </td>
-              <td><span class="jt-badge b-{{ w.status }}">{{ w.status|capfirst }}</span></td>
-              <td style="font-family:var(--mono);font-size:12px;{% if w.is_overdue %}color:var(--red){% elif w.days_until_expiry <= 7 %}color:var(--yellow){% else %}color:var(--text-3){% endif %}">
-                {{ w.hosting_end_date|date:"d M Y" }}{% if w.is_overdue %} ⚠{% endif %}
+              <td>
+                <span class="sp-dot {{ w.status }}"></span>
+                <span class="jt-badge b-{{ w.status }}" style="font-size:10px">{{ w.status|capfirst }}</span>
               </td>
-              <td style="font-family:var(--mono);font-size:12px;color:var(--text-2)">TZS {{ w.monthly_cost|floatformat:0 }}</td>
-              <td><a href="{% url 'portal_website_detail' w.pk %}" class="jt-btn btn-ghost" style="font-size:11px;padding:6px 12px">Details</a></td>
+              <td>
+                <div style="font-family:var(--mono);font-size:11px;{% if w.status == 'suspended' or w.is_overdue %}color:var(--red){% elif w.days_until_expiry <= 7 %}color:#ffb800{% else %}color:var(--text-3){% endif %}">
+                  {{ w.hosting_end_date|date:"d M Y" }}
+                </div>
+                <div style="font-family:var(--mono);font-size:10px;{% if w.status == 'suspended' or w.is_overdue %}color:var(--red){% elif w.days_until_expiry <= 3 %}color:var(--red){% elif w.days_until_expiry <= 7 %}color:#ffb800{% else %}color:var(--text-3){% endif %}">
+                  {% if w.status == 'suspended' %}● Suspended{% elif w.is_overdue %}● Expired{% else %}{{ w.days_until_expiry }}d remaining{% endif %}
+                </div>
+              </td>
+              <td style="font-family:var(--mono);font-size:11px;color:var(--text-2)">TZS {{ w.monthly_cost|floatformat:0 }}</td>
+              <td>
+                <div style="display:flex;gap:5px;flex-wrap:nowrap">
+                  <a href="{% url 'portal_website_detail' w.pk %}" class="jt-btn btn-ghost" style="font-size:10px;padding:5px 9px">Details</a>
+                  <a href="{% url 'portal_hosting_config' w.pk %}" class="jt-btn btn-ghost" style="font-size:10px;padding:5px 9px;color:var(--cyan);border-color:rgba(0,212,255,.2)" title="Hosting Panel"><i class="fas fa-server"></i></a>
+                </div>
+              </td>
             </tr>
             {% endfor %}
           </tbody>
         </table>
       </div>
       {% else %}
-      <div class="jt-empty"><div class="ei">🌐</div><p>No websites linked yet. Contact JamiiTek.</p></div>
+      <div class="jt-empty" style="padding:32px"><div class="ei">🌐</div><p>No websites linked yet.</p></div>
       {% endif %}
     </div>
+
   </div>
 
-  <!-- Right -->
   <div class="col-lg-4">
-    <!-- Recent messages -->
-    <div class="jt-card mb-3" style="padding:0">
-      <div class="jt-card-head">
-        <span class="jt-card-title"><i class="fas fa-envelope" style="color:var(--purple)"></i> Messages</span>
+
+    <!-- SERVICE HEALTH -->
+    <div class="chart-card fade-up mb-3">
+      <div class="chart-card-head" style="padding-bottom:14px">
+        <div class="chart-title"><i class="fas fa-shield-halved" style="color:#00ff88;margin-right:8px"></i>Service Health</div>
+      </div>
+      <div style="padding:0 16px 16px">
+        <div class="health-grid">
+          <div class="health-item">
+            <div class="ring-wrap">
+              <svg width="48" height="48" viewBox="0 0 48 48">
+                <circle cx="24" cy="24" r="19" fill="none" stroke="var(--bg)" stroke-width="5"/>
+                <circle cx="24" cy="24" r="19" fill="none" stroke="#00ff88" stroke-width="5"
+                  stroke-dasharray="119" stroke-dashoffset="{% if websites.count > 0 %}{{ websites.count|add:0 }}{% else %}119{% endif %}"
+                  stroke-linecap="round"/>
+              </svg>
+              <div class="ring-val" style="color:#00ff88">{{ health.active }}</div>
+            </div>
+            <div><div class="health-label">Active Sites</div><div class="health-sub">Running ok</div></div>
+          </div>
+          <div class="health-item">
+            <div class="ring-wrap">
+              <svg width="48" height="48" viewBox="0 0 48 48">
+                <circle cx="24" cy="24" r="19" fill="none" stroke="var(--bg)" stroke-width="5"/>
+                {% if health.suspended > 0 %}<circle cx="24" cy="24" r="19" fill="none" stroke="#ff2244" stroke-width="5" stroke-dasharray="119 0" stroke-linecap="round"/>{% endif %}
+              </svg>
+              <div class="ring-val" style="color:{% if health.suspended > 0 %}var(--red){% else %}var(--text-3){% endif %}">{{ health.suspended }}</div>
+            </div>
+            <div><div class="health-label">Suspended</div><div class="health-sub">Need payment</div></div>
+          </div>
+          <div class="health-item">
+            <div class="ring-wrap">
+              <svg width="48" height="48" viewBox="0 0 48 48">
+                <circle cx="24" cy="24" r="19" fill="none" stroke="var(--bg)" stroke-width="5"/>
+                {% if health.expiring > 0 %}<circle cx="24" cy="24" r="19" fill="none" stroke="#ffb800" stroke-width="5" stroke-dasharray="60 59" stroke-linecap="round"/>{% endif %}
+              </svg>
+              <div class="ring-val" style="color:{% if health.expiring > 0 %}#ffb800{% else %}var(--text-3){% endif %}">{{ health.expiring }}</div>
+            </div>
+            <div><div class="health-label">Expiring</div><div class="health-sub">Within 7 days</div></div>
+          </div>
+          <div class="health-item">
+            <div class="ring-wrap">
+              <svg width="48" height="48" viewBox="0 0 48 48">
+                <circle cx="24" cy="24" r="19" fill="none" stroke="var(--bg)" stroke-width="5"/>
+                <circle cx="24" cy="24" r="19" fill="none" stroke="var(--cyan)" stroke-width="5" stroke-dasharray="119 0" stroke-linecap="round"/>
+              </svg>
+              <div class="ring-val" style="color:var(--cyan)">{{ health.domains_ok }}</div>
+            </div>
+            <div><div class="health-label">Domains</div><div class="health-sub">Active & valid</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOTAL PAID + MINI CHART -->
+    <div class="chart-card fade-up-1 mb-3">
+      <div class="chart-card-head" style="padding-bottom:4px">
+        <div class="chart-title"><i class="fas fa-coins" style="color:var(--green);margin-right:8px"></i>Total Payments</div>
+      </div>
+      <div style="padding:6px 16px 16px">
+        <div class="paid-num">{{ total_paid|floatformat:0 }}</div>
+        <div class="paid-sub">Tanzanian Shillings</div>
+        <div style="margin-top:14px"><canvas id="miniChart" height="50"></canvas></div>
+      </div>
+    </div>
+
+    <!-- NOTIFICATIONS -->
+    <div class="chart-card fade-up-2 mb-3">
+      <div class="chart-card-head" style="padding-bottom:0">
+        <div class="chart-title"><i class="fas fa-bell" style="color:#8b5cf6;margin-right:8px"></i>Messages</div>
         <a href="{% url 'portal_notifications' %}" style="font-family:var(--mono);font-size:11px;color:var(--purple)">All →</a>
       </div>
-      {% for n in notifications %}
-      <div style="padding:12px 16px;border-bottom:1px solid var(--border)">
-        <div style="font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px">{{ n.subject|truncatechars:38 }}</div>
-        <div style="font-family:var(--mono);font-size:10px;color:var(--text-3)">{{ n.sent_at|date:"d M Y" }}</div>
+      <div class="activity-feed">
+        {% for n in notifications %}
+        <div class="af-item">
+          <div class="af-ico" style="background:rgba(139,92,246,.1);color:#8b5cf6">📩</div>
+          <div style="flex:1;min-width:0">
+            <div class="af-title">{{ n.subject|truncatechars:34 }}</div>
+            <div class="af-date">{{ n.sent_at|date:"d M Y" }}</div>
+          </div>
+        </div>
+        {% empty %}
+        <div class="jt-empty" style="padding:22px"><div class="ei" style="font-size:22px">📭</div><p>No messages</p></div>
+        {% endfor %}
       </div>
-      {% empty %}
-      <div class="jt-empty" style="padding:24px"><div class="ei" style="font-size:24px">📭</div><p>No messages</p></div>
-      {% endfor %}
     </div>
 
-    <!-- Quick actions -->
-    <div class="jt-card">
-      <div style="font-family:var(--mono);font-size:11px;color:var(--text-3);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px">Quick Actions</div>
-      <div style="display:flex;flex-direction:column;gap:8px">
-        <a href="{% url 'portal_billing' %}" class="jt-btn btn-ghost" style="justify-content:flex-start"><i class="fas fa-coins" style="color:var(--green)"></i> Make a Payment</a>
-        <a href="{% url 'portal_support' %}" class="jt-btn btn-ghost" style="justify-content:flex-start"><i class="fas fa-headset" style="color:var(--cyan)"></i> Contact Support</a>
-        <a href="{% url 'portal_profile' %}" class="jt-btn btn-ghost" style="justify-content:flex-start"><i class="fas fa-user-circle" style="color:var(--purple)"></i> Update Profile</a>
+    <!-- QUICK ACTIONS -->
+    <div class="chart-card fade-up-3">
+      <div class="chart-card-head" style="padding-bottom:12px">
+        <div class="chart-title">Quick Actions</div>
+      </div>
+      <div style="padding:0 16px 16px">
+        <div class="qa-grid">
+          <a href="{% url 'portal_billing' %}"        class="qa-btn"><span class="qa-btn-ico">💰</span>Pay</a>
+          <a href="{% url 'portal_website_list' %}"   class="qa-btn"><span class="qa-btn-ico">🌐</span>Sites</a>
+          <a href="{% url 'portal_domains' %}"        class="qa-btn"><span class="qa-btn-ico">🌍</span>Domains</a>
+          <a href="{% url 'portal_support' %}"        class="qa-btn"><span class="qa-btn-ico">🎧</span>Support</a>
+          <a href="{% url 'portal_email_hosting' %}"  class="qa-btn"><span class="qa-btn-ico">📧</span>Email</a>
+          <a href="{% url 'portal_profile' %}"        class="qa-btn"><span class="qa-btn-ico">👤</span>Profile</a>
+          <a href="{% url 'portal_notifications' %}"  class="qa-btn"><span class="qa-btn-ico">🔔</span>Alerts</a>
+          <a href="{% url 'portal_billing' %}"        class="qa-btn"><span class="qa-btn-ico">📊</span>History</a>
+        </div>
       </div>
     </div>
+
   </div>
 </div>
+
+<script>
+Chart.defaults.color = 'rgba(240,242,255,0.4)';
+Chart.defaults.font.family = "'DM Mono', monospace";
+Chart.defaults.font.size = 10;
+
+const labels = {{ chart_labels|safe }};
+const vals   = {{ chart_values|safe }};
+
+// Payment area chart
+const ctx = document.getElementById('payChart').getContext('2d');
+const grad = ctx.createLinearGradient(0,0,0,140);
+grad.addColorStop(0,'rgba(0,212,255,0.28)');
+grad.addColorStop(1,'rgba(0,212,255,0)');
+new Chart(ctx, {
+  type:'line',
+  data:{
+    labels,
+    datasets:[{
+      data:vals, fill:true,
+      backgroundColor:grad,
+      borderColor:'#00d4ff', borderWidth:2.5,
+      pointBackgroundColor:'#00d4ff',
+      pointBorderColor:'#050810', pointBorderWidth:2,
+      pointRadius:5, pointHoverRadius:7,
+      tension:0.4
+    }]
+  },
+  options:{
+    responsive:true,
+    plugins:{
+      legend:{display:false},
+      tooltip:{
+        backgroundColor:'rgba(5,8,16,.95)',
+        borderColor:'rgba(0,212,255,.2)', borderWidth:1,
+        callbacks:{label:c=>' TZS '+c.parsed.y.toLocaleString()}
+      }
+    },
+    scales:{
+      x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'rgba(240,242,255,.4)'}},
+      y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'rgba(240,242,255,.4)',callback:v=>v>=1000?(v/1000).toFixed(0)+'k':v}}
+    },
+    animation:{duration:1200,easing:'easeOutQuart'}
+  }
+});
+
+// Mini bar chart
+new Chart(document.getElementById('miniChart').getContext('2d'),{
+  type:'bar',
+  data:{
+    labels,
+    datasets:[{
+      data:vals,
+      backgroundColor:vals.map((_,i)=>i===vals.length-1?'#00ff88':'rgba(0,255,136,0.22)'),
+      borderRadius:4, borderSkipped:false
+    }]
+  },
+  options:{
+    responsive:true,
+    plugins:{legend:{display:false},tooltip:{enabled:false}},
+    scales:{x:{display:false},y:{display:false}},
+    animation:{duration:1200,delay:ctx=>ctx.dataIndex*80}
+  }
+});
+
+// Animate stat bars after load
+setTimeout(()=>{
+  document.getElementById('b1').style.width = '{{ health.active }}00%'.replace('00%','0%');
+  document.getElementById('b1').style.width = '100%';
+  document.getElementById('b2').style.width = '100%';
+  document.getElementById('b3').style.width = '100%';
+  document.getElementById('b4').style.width = '100%';
+},400);
+</script>
 {% endblock %}

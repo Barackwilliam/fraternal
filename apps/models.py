@@ -213,11 +213,20 @@ class ManagedWebsite(models.Model):
 
     @property
     def days_until_expiry(self):
-        return (self.hosting_end_date - timezone.now().date()).days
+        delta = (self.hosting_end_date - timezone.now().date()).days
+        return max(delta, 0)
 
     @property
     def is_overdue(self):
-        return self.hosting_end_date < timezone.now().date()
+        return self.hosting_end_date <= timezone.now().date()
+
+    @property
+    def expiry_status(self):
+        d = (self.hosting_end_date - timezone.now().date()).days
+        if d <= 0:  return 'expired'
+        if d <= 3:  return 'critical'
+        if d <= 7:  return 'warning'
+        return 'ok'
 
     @property
     def total_paid(self):
@@ -486,7 +495,8 @@ class DomainRecord(models.Model):
 
     @property
     def days_until_expiry(self):
-        return (self.expiry_date - timezone.now().date()).days
+        delta = (self.expiry_date - timezone.now().date()).days
+        return max(delta, 0)
 
     @property
     def is_expired(self):
@@ -560,11 +570,20 @@ class EmailHostingPlan(models.Model):
 
     @property
     def days_until_expiry(self):
-        return (self.end_date - timezone.now().date()).days
+        delta = (self.end_date - timezone.now().date()).days
+        return max(delta, 0)
 
     @property
     def is_overdue(self):
-        return self.end_date < timezone.now().date()
+        return self.end_date <= timezone.now().date()
+
+    @property
+    def expiry_status(self):
+        d = (self.end_date - timezone.now().date()).days
+        if d <= 0:  return 'expired'
+        if d <= 3:  return 'critical'
+        if d <= 7:  return 'warning'
+        return 'ok'
 
     @property
     def total_paid(self):
