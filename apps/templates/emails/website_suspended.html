@@ -1,41 +1,95 @@
 {% extends 'emails/base_email.html' %}
 {% block content %}
-<p class="greeting">Hello, {{ client_name }}</p>
 
-<div class="alert alert-danger">
-  <strong>🔒 Website Suspended</strong>
-  Your website <strong>{{ website_name }}</strong> has been suspended. Visitors are currently seeing a suspension notice instead of your website.
+<!-- SUSPENDED HEADER -->
+<div style="background:linear-gradient(135deg,#1a1a2e,#2d0a0a);border-radius:12px;padding:24px 20px;text-align:center;margin-bottom:24px;border:1px solid rgba(239,68,68,0.3)">
+  <div style="font-size:40px;margin-bottom:8px">🔒</div>
+  <div style="font-size:18px;font-weight:800;color:#ef4444;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">Your Website Has Been Suspended</div>
+  <div style="font-size:13px;color:rgba(255,255,255,0.55);line-height:1.6">Suspended on {{ suspended_date }} — Visitors are currently unable to access your website</div>
 </div>
 
+<p class="greeting">Hello, {{ client_name }}</p>
+
+<p>Your website <strong>{{ website_name }}</strong> has been <strong>suspended</strong> because your hosting period has expired and we have not received a renewal payment. Your website is currently offline and visitors are seeing a suspension notice instead of your website.</p>
+
+<p><strong>Do not worry — your website data is completely safe.</strong> As soon as we receive and confirm your payment, we will restore your website immediately, usually within a few hours.</p>
+
+<!-- STATUS BREAKDOWN -->
 <div class="info-box">
   <div class="info-row">
-    <span class="info-label">Website</span>
+    <span class="info-label">Website Name</span>
     <span class="info-value">{{ website_name }}</span>
   </div>
   <div class="info-row">
-    <span class="info-label">URL</span>
-    <span class="info-value">{{ website_url }}</span>
+    <span class="info-label">Website URL</span>
+    <span class="info-value"><a href="{{ website_url }}" style="color:#5b6ef5">{{ website_url }}</a></span>
+  </div>
+  <div class="info-row">
+    <span class="info-label">Current Status</span>
+    <span class="info-value" style="color:#ef4444;font-weight:700">🔴 Suspended</span>
   </div>
   <div class="info-row">
     <span class="info-label">Reason</span>
-    <span class="info-value" style="color:#ef4444">{{ reason }}</span>
+    <span class="info-value">{{ reason }}</span>
   </div>
   <div class="info-row">
     <span class="info-label">Suspended On</span>
     <span class="info-value">{{ suspended_date }}</span>
   </div>
+  <div class="info-row">
+    <span class="info-label">Restoration</span>
+    <span class="info-value" style="color:#22c55e">Immediate upon payment</span>
+  </div>
 </div>
 
 {% if suspension_message %}
-<div class="alert alert-info">
-  <strong>📋 Message from JamiiTek</strong>
+<div class="alert alert-danger">
+  <strong>📋 Notice from JamiiTek</strong>
   {{ suspension_message }}
 </div>
 {% endif %}
 
-<p>To restore your website, please settle any outstanding balance and contact us. Once payment is confirmed, your website will be restored immediately.</p>
+<!-- WHAT YOUR VISITORS SEE -->
+<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:18px 20px;margin:20px 0">
+  <div style="font-size:12px;font-weight:700;color:#64748b;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">👁 What visitors see right now</div>
+  <div style="background:#1a1a2e;border-radius:8px;padding:14px;text-align:center">
+    <div style="font-size:20px;margin-bottom:6px">🔒</div>
+    <div style="font-size:13px;color:#ef4444;font-weight:700">Website Suspended</div>
+    <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:4px">Your website visitors see this page instead of your website</div>
+  </div>
+</div>
 
+<!-- HOW TO RESTORE -->
+<p style="font-size:15px;font-weight:700;color:#1a1a2e;margin-bottom:8px">How to Restore Your Website</p>
+<p>Follow these 3 simple steps to get your website back online:</p>
+
+<div style="display:flex;flex-direction:column;gap:10px;margin:16px 0">
+  <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start">
+    <div style="background:#22c55e;color:white;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0">1</div>
+    <div>
+      <div style="font-size:13px;font-weight:700;color:#166534;margin-bottom:2px">Make the Payment</div>
+      <div style="font-size:13px;color:#15803d">Transfer TZS {{ monthly_cost|floatformat:0 }} to our NMB Bank account (details below).</div>
+    </div>
+  </div>
+  <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start">
+    <div style="background:#3b82f6;color:white;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0">2</div>
+    <div>
+      <div style="font-size:13px;font-weight:700;color:#1e40af;margin-bottom:2px">Send Payment Proof</div>
+      <div style="font-size:13px;color:#1d4ed8">Forward your receipt or bank confirmation via WhatsApp to <strong>+255 750 910 158</strong> or email <strong>info@jamiitek.co.tz</strong>.</div>
+    </div>
+  </div>
+  <div style="background:#faf5ff;border:1px solid #e9d5ff;border-radius:10px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start">
+    <div style="background:#8b5cf6;color:white;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0">3</div>
+    <div>
+      <div style="font-size:13px;font-weight:700;color:#6d28d9;margin-bottom:2px">We Restore Your Website</div>
+      <div style="font-size:13px;color:#7c3aed">Once we confirm your payment, we will restore your website and email you a confirmation. This usually happens within a few hours.</div>
+    </div>
+  </div>
+</div>
+
+<!-- PAYMENT DETAILS -->
 <div class="info-box">
+  <div style="font-size:11px;font-weight:700;color:#ef4444;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:12px">💳 Payment Details — NMB Bank</div>
   <div class="info-row">
     <span class="info-label">Bank</span>
     <span class="info-value">NMB Bank</span>
@@ -46,11 +100,25 @@
   </div>
   <div class="info-row">
     <span class="info-label">Account Number</span>
-    <span class="info-value">21410034200</span>
+    <span class="info-value" style="font-size:17px;font-weight:800;color:#1a1a2e">21410034200</span>
+  </div>
+  <div class="info-row">
+    <span class="info-label">Branch</span>
+    <span class="info-value">Dar es Salaam</span>
+  </div>
+  <div class="info-row">
+    <span class="info-label">Amount</span>
+    <span class="info-value" style="color:#22c55e;font-weight:700">TZS {{ monthly_cost|floatformat:0 }} (1 month)</span>
   </div>
 </div>
 
-<div class="btn-wrap">
-  <a href="{{ portal_url }}" class="btn">View My Portal</a>
+<div class="alert alert-info">
+  <strong>📱 Contact Us Immediately</strong>
+  The fastest way to restore your website is to make the payment and then contact us immediately on WhatsApp at <strong>+255 750 910 158</strong>. We are available every day and will process your restoration as quickly as possible.
 </div>
+
+<div class="btn-wrap">
+  <a href="{{ portal_url }}" class="btn" style="background:linear-gradient(135deg,#ef4444,#dc2626)">Go to Portal</a>
+</div>
+
 {% endblock %}

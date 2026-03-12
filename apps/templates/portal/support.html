@@ -1,21 +1,132 @@
 {% extends 'portal/base.html' %}
 {% block title %}Support{% endblock %}
 {% block content %}
+<style>
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.f0{animation:fadeUp .4s ease both}
+.f1{animation:fadeUp .4s .07s ease both}
+.f2{animation:fadeUp .4s .14s ease both}
 
-<div style="margin-bottom:24px">
-  <h1 style="font-family:var(--head);font-size:22px;font-weight:800;color:var(--text);margin-bottom:4px">Support Center</h1>
-  <div style="font-family:var(--mono);font-size:12px;color:var(--text-3)">Get help from the JamiiTek team — we respond within 24 hours</div>
+.pg-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:24px;flex-wrap:wrap}
+.pg-title{font-family:var(--head);font-size:24px;font-weight:800;color:var(--text);margin-bottom:4px}
+.pg-sub{font-family:var(--mono);font-size:11px;color:var(--text-3)}
+
+/* STATUS BANNER */
+.status-banner{background:linear-gradient(135deg,rgba(0,255,136,.04),rgba(0,212,255,.03));border:1px solid rgba(0,255,136,.12);border-radius:14px;padding:16px 20px;margin-bottom:22px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;animation:fadeUp .4s ease both}
+.sb-status-dot{width:9px;height:9px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s infinite;flex-shrink:0}
+.sb-status-text{font-size:14px;font-weight:600;color:var(--text)}
+.sb-status-sub{font-family:var(--mono);font-size:11px;color:var(--text-3)}
+
+/* SECTION */
+.sec{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:18px}
+.sec-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.sec-ico{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.sec-title{font-family:var(--head);font-size:14px;font-weight:700;color:var(--text)}
+.sec-body{padding:20px}
+
+/* PRIORITY SELECTOR */
+.priority-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:0}
+.prio-btn{padding:12px 8px;border-radius:11px;border:2px solid var(--border);background:transparent;cursor:pointer;transition:all .2s;text-align:center}
+.prio-btn:hover{transform:translateY(-2px)}
+.prio-btn.selected{transform:translateY(-2px)}
+.prio-ico{font-size:20px;display:block;margin-bottom:5px}
+.prio-label{font-family:var(--mono);font-size:10px;letter-spacing:1px;text-transform:uppercase;font-weight:700}
+.prio-desc{font-size:11px;color:var(--text-3);margin-top:3px}
+.p-low.selected{background:rgba(0,255,136,.07);border-color:rgba(0,255,136,.3);color:var(--green)}
+.p-normal.selected{background:rgba(255,184,0,.07);border-color:rgba(255,184,0,.3);color:var(--yellow)}
+.p-high.selected{background:rgba(255,59,92,.07);border-color:rgba(255,59,92,.3);color:var(--red)}
+
+/* CONTACT ITEMS */
+.contact-item{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--border);transition:all .15s}
+.contact-item:last-child{border-bottom:none}
+.contact-item:hover{padding-left:4px}
+.ci-ico{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;transition:transform .2s}
+.contact-item:hover .ci-ico{transform:scale(1.08)}
+.ci-label{font-family:var(--mono);font-size:9px;color:var(--text-3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px}
+.ci-val{font-size:14px;font-weight:700;color:var(--text)}
+.ci-sub{font-size:12px;color:var(--text-3);margin-top:1px}
+
+/* WHATSAPP BUTTON */
+.wa-btn{display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;border:none;border-radius:12px;padding:14px 18px;width:100%;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;text-decoration:none;justify-content:center;margin-bottom:10px}
+.wa-btn:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(37,211,102,.3);color:#fff}
+.email-btn{display:flex;align-items:center;gap:10px;background:rgba(0,212,255,.06);color:var(--cyan);border:1px solid rgba(0,212,255,.2);border-radius:12px;padding:12px 18px;width:100%;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;text-decoration:none;justify-content:center}
+.email-btn:hover{background:rgba(0,212,255,.12);transform:translateY(-2px);color:var(--cyan)}
+
+/* FAQ */
+.faq-item{border-bottom:1px solid var(--border)}
+.faq-item:last-child{border-bottom:none}
+.faq-q{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 20px;cursor:pointer;transition:background .12s;user-select:none}
+.faq-q:hover{background:rgba(255,255,255,.015)}
+.faq-q-text{font-size:13.5px;font-weight:600;color:var(--text)}
+.faq-icon{color:var(--text-3);font-size:11px;flex-shrink:0;transition:transform .22s}
+.faq-icon.open{transform:rotate(180deg)}
+.faq-a{display:none;padding:0 20px 16px;font-size:13px;color:var(--text-2);line-height:1.75;border-top:1px solid var(--border)}
+.faq-a.show{display:block;animation:fadeUp .2s ease both}
+
+/* HOURS */
+.hours-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.hour-cell{background:var(--bg2);border-radius:10px;padding:12px}
+.hc-day{font-family:var(--mono);font-size:10px;color:var(--text-3);margin-bottom:4px}
+.hc-time{font-size:13px;font-weight:600;color:var(--text)}
+</style>
+
+<!-- STATUS BANNER -->
+<div class="status-banner">
+  <div style="display:flex;align-items:center;gap:12px">
+    <div class="sb-status-dot"></div>
+    <div>
+      <div class="sb-status-text">All Systems Operational</div>
+      <div class="sb-status-sub">JamiiTek support team is online</div>
+    </div>
+  </div>
+  <div style="font-family:var(--mono);font-size:11px;color:var(--green)">Response within 24hrs</div>
+</div>
+
+<div class="pg-head f0" style="margin-bottom:20px">
+  <div>
+    <div class="pg-title">Support Center</div>
+    <div class="pg-sub">Get expert help from the JamiiTek team</div>
+  </div>
 </div>
 
 <div class="row g-3">
-  <!-- Support form -->
   <div class="col-lg-7">
-    <div class="jt-card">
-      <div class="jt-card-head"><span class="jt-card-title"><i class="fas fa-headset" style="color:var(--cyan)"></i> Submit Support Request</span></div>
-      <div class="jt-card-body">
+
+    <!-- SUPPORT FORM -->
+    <div class="sec f1">
+      <div class="sec-head">
+        <div class="sec-ico" style="background:var(--cyan-d);color:var(--cyan)"><i class="fas fa-headset"></i></div>
+        <div class="sec-title">Submit Support Request</div>
+      </div>
+      <div class="sec-body">
         <form method="post">
           {% csrf_token %}
           <div class="row g-3">
+
+            <!-- Priority -->
+            <div class="col-12">
+              <label class="f-label" style="margin-bottom:10px">Priority Level *</label>
+              <div class="priority-grid">
+                <button type="button" class="prio-btn p-low" onclick="setPrio('low',this)">
+                  <span class="prio-ico">🟢</span>
+                  <div class="prio-label" style="color:var(--green)">Low</div>
+                  <div class="prio-desc">General question</div>
+                </button>
+                <button type="button" class="prio-btn p-normal selected" onclick="setPrio('normal',this)">
+                  <span class="prio-ico">🟡</span>
+                  <div class="prio-label" style="color:var(--yellow)">Normal</div>
+                  <div class="prio-desc">Needs attention</div>
+                </button>
+                <button type="button" class="prio-btn p-high" onclick="setPrio('high',this)">
+                  <span class="prio-ico">🔴</span>
+                  <div class="prio-label" style="color:var(--red)">Urgent</div>
+                  <div class="prio-desc">Critical issue</div>
+                </button>
+              </div>
+              <input type="hidden" name="priority" id="prioInput" value="normal">
+            </div>
+
             <div class="col-md-6">
               <label class="f-label">Related Website</label>
               <select name="website" class="f-input">
@@ -24,11 +135,15 @@
               </select>
             </div>
             <div class="col-md-6">
-              <label class="f-label">Priority</label>
-              <select name="priority" class="f-input">
-                <option value="low">🟢 Low — General question</option>
-                <option value="normal" selected>🟡 Normal — Needs attention</option>
-                <option value="high">🔴 High — Urgent issue</option>
+              <label class="f-label">Issue Category</label>
+              <select name="category" class="f-input">
+                <option>Hosting / Uptime</option>
+                <option>Payment / Billing</option>
+                <option>Domain / DNS</option>
+                <option>Email Hosting</option>
+                <option>Website Content</option>
+                <option>Account / Login</option>
+                <option>Other</option>
               </select>
             </div>
             <div class="col-12">
@@ -37,18 +152,22 @@
             </div>
             <div class="col-12">
               <label class="f-label">Message *</label>
-              <textarea name="message" class="f-input" style="min-height:150px" placeholder="Please describe your issue in detail. Include any error messages or steps to reproduce..." required></textarea>
+              <textarea name="message" class="f-input" style="min-height:140px" placeholder="Describe your issue in detail. Include error messages or steps to reproduce..." required></textarea>
             </div>
-            <div class="col-12" style="background:rgba(0,212,255,0.05);border:1px solid rgba(0,212,255,0.1);border-radius:10px;padding:14px">
-              <div style="font-family:var(--mono);font-size:11px;color:var(--text-3);letter-spacing:1px;margin-bottom:8px">YOUR CONTACT INFO</div>
-              <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--text-2)">
-                <span><i class="fas fa-user fa-xs" style="color:var(--cyan);margin-right:6px"></i>{{ client.name }}</span>
-                <span><i class="fas fa-envelope fa-xs" style="color:var(--cyan);margin-right:6px"></i>{{ client.email }}</span>
-                {% if client.phone %}<span><i class="fas fa-phone fa-xs" style="color:var(--cyan);margin-right:6px"></i>{{ client.phone }}</span>{% endif %}
+
+            <!-- From info -->
+            <div class="col-12">
+              <div style="background:rgba(0,212,255,.04);border:1px solid rgba(0,212,255,.1);border-radius:11px;padding:14px 16px">
+                <div style="font-family:var(--mono);font-size:9px;color:var(--text-3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px">Sending As</div>
+                <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--text-2)">
+                  <span><i class="fas fa-user fa-xs" style="color:var(--cyan);margin-right:6px"></i>{{ client.name }}</span>
+                  <span><i class="fas fa-envelope fa-xs" style="color:var(--cyan);margin-right:6px"></i>{{ client.email }}</span>
+                  {% if client.phone %}<span><i class="fas fa-phone fa-xs" style="color:var(--cyan);margin-right:6px"></i>{{ client.phone }}</span>{% endif %}
+                </div>
               </div>
             </div>
             <div class="col-12">
-              <button type="submit" class="jt-btn btn-cyan" style="width:100%;justify-content:center;padding:12px">
+              <button type="submit" class="jt-btn btn-cyan" style="width:100%;justify-content:center;padding:12px 20px;font-size:14px">
                 <i class="fas fa-paper-plane"></i> Submit Support Request
               </button>
             </div>
@@ -58,72 +177,120 @@
     </div>
   </div>
 
-  <!-- Contact info + FAQ -->
   <div class="col-lg-5">
-    <!-- Direct contact -->
-    <div class="jt-card mb-3" style="padding:0">
-      <div class="jt-card-head"><span class="jt-card-title"><i class="fas fa-address-card" style="color:var(--purple)"></i> Direct Contact</span></div>
-      <div style="padding:18px;display:flex;flex-direction:column;gap:14px">
-        <div style="display:flex;align-items:center;gap:12px">
-          <div style="width:36px;height:36px;border-radius:9px;background:var(--green-d);display:flex;align-items:center;justify-content:center;color:var(--green);flex-shrink:0"><i class="fas fa-phone"></i></div>
+
+    <!-- DIRECT CONTACT -->
+    <div class="sec f1 mb-3">
+      <div class="sec-head">
+        <div class="sec-ico" style="background:var(--purple-d);color:var(--purple)"><i class="fas fa-address-card"></i></div>
+        <div class="sec-title">Direct Contact</div>
+      </div>
+      <div class="sec-body" style="padding:8px 20px 16px">
+        <div class="contact-item">
+          <div class="ci-ico" style="background:rgba(37,211,102,.1);color:#25d366"><i class="fab fa-whatsapp" style="font-size:18px"></i></div>
           <div>
-            <div style="font-family:var(--mono);font-size:10px;color:var(--text-3);letter-spacing:1px">PHONE / WHATSAPP</div>
-            <div style="font-weight:600;color:var(--text)">+255 629 712 678</div>
+            <div class="ci-label">WhatsApp</div>
+            <div class="ci-val">+255 750 910 158</div>
+            <div class="ci-sub">Fastest response method</div>
           </div>
         </div>
-        <div style="display:flex;align-items:center;gap:12px">
-          <div style="width:36px;height:36px;border-radius:9px;background:var(--cyan-d);display:flex;align-items:center;justify-content:center;color:var(--cyan);flex-shrink:0"><i class="fas fa-envelope"></i></div>
+        <div class="contact-item">
+          <div class="ci-ico" style="background:var(--cyan-d);color:var(--cyan)"><i class="fas fa-envelope"></i></div>
           <div>
-            <div style="font-family:var(--mono);font-size:10px;color:var(--text-3);letter-spacing:1px">EMAIL</div>
-            <div style="font-weight:600;color:var(--text)">info@jamiitek.com</div>
+            <div class="ci-label">Email</div>
+            <div class="ci-val">info@jamiitek.co.tz</div>
+            <div class="ci-sub">We reply within 24 hours</div>
           </div>
         </div>
-        <div style="display:flex;align-items:center;gap:12px">
-          <div style="width:36px;height:36px;border-radius:9px;background:var(--yellow-d);display:flex;align-items:center;justify-content:center;color:var(--yellow);flex-shrink:0"><i class="fas fa-clock"></i></div>
+        <div class="contact-item">
+          <div class="ci-ico" style="background:var(--yellow-d);color:var(--yellow)"><i class="fas fa-clock"></i></div>
           <div>
-            <div style="font-family:var(--mono);font-size:10px;color:var(--text-3);letter-spacing:1px">WORKING HOURS</div>
-            <div style="font-weight:600;color:var(--text)">Mon–Sat, 8:00am – 6:00pm</div>
+            <div class="ci-label">Business Hours</div>
+            <div class="ci-val">Mon–Sat, 8am – 6pm</div>
+            <div class="ci-sub">EAT (East Africa Time)</div>
           </div>
         </div>
-        <div style="display:flex;align-items:center;gap:12px">
-          <div style="width:36px;height:36px;border-radius:9px;background:var(--purple-d);display:flex;align-items:center;justify-content:center;color:var(--purple);flex-shrink:0"><i class="fas fa-location-dot"></i></div>
+        <div class="contact-item">
+          <div class="ci-ico" style="background:var(--red-d);color:var(--red)"><i class="fas fa-location-dot"></i></div>
           <div>
-            <div style="font-family:var(--mono);font-size:10px;color:var(--text-3);letter-spacing:1px">LOCATION</div>
-            <div style="font-weight:600;color:var(--text)">Dar es Salaam, Tanzania</div>
+            <div class="ci-label">Office</div>
+            <div class="ci-val">Dar es Salaam</div>
+            <div class="ci-sub">Tanzania</div>
           </div>
+        </div>
+        <div style="margin-top:16px;display:flex;flex-direction:column;gap:8px">
+          <a href="https://wa.me/255750910158?text=Hello JamiiTek, I need support for my website." target="_blank" class="wa-btn">
+            <i class="fab fa-whatsapp fa-lg"></i> Chat on WhatsApp
+          </a>
+          <a href="mailto:info@jamiitek.co.tz" class="email-btn">
+            <i class="fas fa-envelope"></i> Send Email
+          </a>
         </div>
       </div>
     </div>
 
     <!-- FAQ -->
-    <div class="jt-card" style="padding:0">
-      <div class="jt-card-head"><span class="jt-card-title"><i class="fas fa-circle-question" style="color:var(--yellow)"></i> Quick FAQ</span></div>
-      <div style="padding:6px 0">
-        {% for q, a in faq_items %}{% endfor %}
+    <div class="sec f2">
+      <div class="sec-head">
+        <div class="sec-ico" style="background:var(--yellow-d);color:var(--yellow)"><i class="fas fa-circle-question"></i></div>
+        <div class="sec-title">Quick FAQ</div>
+      </div>
+      <div>
         {% for faq in faqs %}
-        <div onclick="toggleFaq('faq{{ forloop.counter }}')" style="cursor:pointer;border-bottom:1px solid var(--border)">
-          <div style="padding:13px 18px;display:flex;justify-content:space-between;align-items:center;gap:8px;transition:background 0.12s" onmouseover="this.style.background='var(--card-s)'" onmouseout="this.style.background=''">
-            <span style="font-size:13.5px;font-weight:600;color:var(--text)">{{ faq.q }}</span>
-            <i id="faqarr{{ forloop.counter }}" class="fas fa-chevron-down" style="font-size:11px;color:var(--text-3);flex-shrink:0;transition:transform 0.2s"></i>
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq({{ forloop.counter }})">
+            <span class="faq-q-text">{{ faq.q }}</span>
+            <i class="fas fa-chevron-down faq-icon" id="fi{{ forloop.counter }}"></i>
           </div>
-          <div id="faq{{ forloop.counter }}" style="display:none;padding:0 18px 14px;font-size:13px;color:var(--text-2);line-height:1.7">{{ faq.a }}</div>
+          <div class="faq-a" id="fa{{ forloop.counter }}">{{ faq.a }}</div>
         </div>
+        {% empty %}
+        <!-- Default FAQs if none in context -->
+        {% for item in "1234567" %}
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq('d{{ forloop.counter }}')">
+            <span class="faq-q-text">
+              {% if forloop.counter == 1 %}How do I renew my hosting?
+              {% elif forloop.counter == 2 %}What happens when hosting expires?
+              {% elif forloop.counter == 3 %}How long does payment verification take?
+              {% elif forloop.counter == 4 %}Can I upgrade my hosting plan?
+              {% elif forloop.counter == 5 %}How do I get my website restored?
+              {% elif forloop.counter == 6 %}What payment methods are accepted?
+              {% else %}How do I update my website content?{% endif %}
+            </span>
+            <i class="fas fa-chevron-down faq-icon" id="fid{{ forloop.counter }}"></i>
+          </div>
+          <div class="faq-a" id="fad{{ forloop.counter }}">
+            {% if forloop.counter == 1 %}Go to Billing & Payments, transfer to our NMB account, then submit your payment proof with the transaction reference. We'll activate your hosting within 24 hours.
+            {% elif forloop.counter == 2 %}Your website is automatically suspended and visitors will see a "Website Suspended" page. Your data is safe — pay to restore it immediately.
+            {% elif forloop.counter == 3 %}We verify all payments within 24 hours of submission. For urgent cases, contact us directly on WhatsApp with your receipt.
+            {% elif forloop.counter == 4 %}Yes! Contact JamiiTek via WhatsApp or email to discuss available plans and pricing.
+            {% elif forloop.counter == 5 %}Make your outstanding payment, submit proof through the Billing page, and contact us on WhatsApp. We'll restore within a few hours.
+            {% elif forloop.counter == 6 %}We accept NMB Bank transfers, M-Pesa, Tigo Pesa, Airtel Money, and cash.
+            {% else %}Contact JamiiTek support through this form or via WhatsApp. We'll coordinate content updates with you directly.{% endif %}
+          </div>
+        </div>
+        {% endfor %}
         {% endfor %}
       </div>
     </div>
   </div>
 </div>
-{% endblock %}
 
-{% block extra_js %}
 <script>
+function setPrio(val, el) {
+  document.querySelectorAll('.prio-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('prioInput').value = val;
+}
 function toggleFaq(id) {
-  const el = document.getElementById(id);
-  const num = id.replace('faq','');
-  const arr = document.getElementById('faqarr'+num);
-  const open = el.style.display === 'block';
-  el.style.display = open ? 'none' : 'block';
-  arr.style.transform = open ? '' : 'rotate(180deg)';
+  const a = document.getElementById('fa'+id)||document.getElementById('fad'+id);
+  const i = document.getElementById('fi'+id)||document.getElementById('fid'+id);
+  if(!a) return;
+  const open = a.classList.contains('show');
+  a.classList.toggle('show', !open);
+  a.style.display = open ? 'none' : 'block';
+  if(i) i.classList.toggle('open', !open);
 }
 </script>
 {% endblock %}

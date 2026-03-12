@@ -1,78 +1,169 @@
 {% extends 'portal/base.html' %}
 {% block title %}Email Hosting{% endblock %}
 {% block content %}
-<div style="margin-bottom:24px">
-  <h1 style="font-family:var(--head);font-size:22px;font-weight:800;color:var(--text);margin-bottom:4px">Email Hosting</h1>
-  <div style="font-family:var(--mono);font-size:12px;color:var(--text-3)">{{ email_plans|length }} email plan{{ email_plans|length|pluralize }}</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.f0{animation:fadeUp .4s ease both}
+.f1{animation:fadeUp .4s .07s ease both}
+.f2{animation:fadeUp .4s .14s ease both}
+
+.pg-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:24px;flex-wrap:wrap}
+.pg-title{font-family:var(--head);font-size:24px;font-weight:800;color:var(--text);margin-bottom:4px}
+.pg-sub{font-family:var(--mono);font-size:11px;color:var(--text-3)}
+
+/* EMAIL PLAN CARD */
+.ep-card{background:var(--card);border:1px solid var(--border);border-radius:18px;overflow:hidden;transition:all .25s;height:100%}
+.ep-card:hover{transform:translateY(-4px);box-shadow:0 16px 50px rgba(0,0,0,.3)}
+.ep-header{padding:20px 22px 16px;position:relative;overflow:hidden}
+.ep-status-bar{position:absolute;top:0;left:0;right:0;height:3px}
+.ep-domain{font-family:var(--mono);font-size:18px;font-weight:800;color:var(--purple);margin-bottom:3px}
+.ep-plan{font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px}
+.ep-registrar{font-size:12px;color:var(--text-3)}
+
+/* EXPIRY TRACK */
+.ep-expiry{padding:14px 22px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:rgba(0,0,0,.12)}
+.exp-track{height:5px;background:var(--bg2);border-radius:100px;overflow:hidden;margin:8px 0}
+.exp-fill{height:100%;border-radius:100px;transition:width 1.4s ease}
+
+/* STATS GRID */
+.ep-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--border)}
+.ep-stat{background:var(--card);padding:13px 16px;text-align:center}
+.ep-stat-val{font-family:var(--head);font-size:22px;font-weight:800;color:var(--text)}
+.ep-stat-label{font-family:var(--mono);font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;margin-top:3px}
+
+/* EMAIL ACCOUNTS */
+.ep-accounts{padding:14px 22px;border-top:1px solid var(--border)}
+.ea-title{font-family:var(--mono);font-size:9px;color:var(--text-3);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px}
+.ea-item{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.ea-item:last-child{border-bottom:none}
+.ea-ico{width:26px;height:26px;border-radius:7px;background:var(--purple-d);display:flex;align-items:center;justify-content:center;color:var(--purple);font-size:11px;flex-shrink:0}
+.ea-addr{font-family:var(--mono);font-size:12px;color:var(--text-2)}
+
+/* ACTIONS */
+.ep-actions{padding:14px 18px;border-top:1px solid var(--border)}
+
+/* PAYMENT TABLE */
+.sec{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden}
+.sec-head{padding:15px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.sec-title{font-family:var(--head);font-size:14px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px}
+
+/* BANK MINI */
+.bank-mini{background:linear-gradient(135deg,#0a0f24,#0d1530);border:1px solid rgba(139,92,246,.2);border-radius:14px;padding:18px}
+.bm-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.bm-row:last-child{border-bottom:none}
+.bm-key{font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.3);letter-spacing:1px}
+.bm-val{font-weight:700;color:#fff;font-size:13px}
+</style>
+
+<div class="pg-head f0">
+  <div>
+    <div class="pg-title">Email Hosting</div>
+    <div class="pg-sub">{{ email_plans|length }} email plan{{ email_plans|length|pluralize }} — professional email for your domain</div>
+  </div>
+  <a href="{% url 'portal_support' %}" class="jt-btn btn-ghost" style="font-size:12px"><i class="fas fa-plus"></i> Add Email Plan</a>
 </div>
 
 {% if email_plans %}
-<!-- Plan status cards -->
+<!-- PLAN CARDS -->
 <div class="row g-3 mb-4">
   {% for p in email_plans %}
-  <div class="col-md-6 col-xl-4">
-    <div class="jt-card" style="overflow:hidden;transition:all 0.2s" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
-      <!-- Status header -->
-      <div style="margin:-20px -20px 18px -20px;padding:14px 20px;background:{% if p.status == 'suspended' or p.is_overdue %}linear-gradient(135deg,rgba(255,59,92,0.1),rgba(255,59,92,0.03)){% elif p.days_until_expiry <= 7 %}linear-gradient(135deg,rgba(255,184,0,0.1),rgba(255,184,0,0.03)){% else %}linear-gradient(135deg,rgba(139,92,246,0.1),rgba(139,92,246,0.03)){% endif %};border-bottom:1px solid var(--border)">
+  {% with raw=p.days_until_expiry %}
+  <div class="col-md-6 col-xl-4" style="animation:fadeUp .4s {{ forloop.counter0 }}s ease both">
+    <div class="ep-card">
+      <!-- Status bar top -->
+      <div class="ep-status-bar" style="background:{% if p.status == 'suspended' or p.is_overdue %}var(--red){% elif raw <= 7 %}var(--yellow){% else %}linear-gradient(90deg,var(--purple),var(--cyan)){% endif %}"></div>
+
+      <!-- Header -->
+      <div class="ep-header" style="background:{% if p.status == 'suspended' or p.is_overdue %}rgba(255,59,92,.04){% elif raw <= 7 %}rgba(255,184,0,.04){% else %}rgba(139,92,246,.04){% endif %}">
         <div style="display:flex;justify-content:space-between;align-items:flex-start">
           <div>
-            <div style="font-weight:700;font-size:16px;color:var(--text);margin-bottom:3px">{{ p.plan_name }}</div>
-            <div style="font-family:var(--mono);font-size:12px;color:var(--purple)">@{{ p.email_domain }}</div>
+            <div class="ep-plan">{{ p.plan_name }}</div>
+            <div class="ep-domain">@{{ p.email_domain }}</div>
           </div>
-          <span class="jt-badge b-{{ p.status }}" style="flex-shrink:0">{{ p.status|capfirst }}</span>
+          <span class="jt-badge b-{{ p.status }}" style="font-size:10px;flex-shrink:0">{{ p.status|capfirst }}</span>
+        </div>
+        {% if p.status == 'suspended' %}
+        <div class="jt-alert jt-alert-danger" style="font-size:11px;padding:8px 12px;margin-top:12px"><i class="fas fa-ban fa-xs"></i> {{ p.suspension_message|truncatechars:80 }}</div>
+        {% elif p.is_overdue %}
+        <div class="jt-alert jt-alert-danger" style="font-size:11px;padding:8px 12px;margin-top:12px"><i class="fas fa-triangle-exclamation fa-xs"></i> Email hosting expired — renew now</div>
+        {% elif raw <= 7 %}
+        <div class="jt-alert jt-alert-warning" style="font-size:11px;padding:8px 12px;margin-top:12px"><i class="fas fa-clock fa-xs"></i> Expires in <strong>{{ raw }}</strong> day(s)</div>
+        {% endif %}
+      </div>
+
+      <!-- Expiry track -->
+      <div class="ep-expiry">
+        <div style="display:flex;justify-content:space-between;margin-bottom:2px">
+          <span style="font-family:var(--mono);font-size:9px;color:var(--text-3)">EXPIRY</span>
+          <span style="font-family:var(--mono);font-size:9px;color:{% if p.is_overdue or p.status == 'suspended' %}var(--red){% elif raw <= 7 %}var(--yellow){% else %}var(--text-3){% endif %}">{{ p.end_date|date:"d M Y" }}</span>
+        </div>
+        <div class="exp-track">
+          {% if p.status == 'suspended' or p.is_overdue %}<div class="exp-fill" style="background:var(--red);width:100%"></div>
+          {% elif raw <= 3 %}<div class="exp-fill" style="background:linear-gradient(90deg,#ff2244,#ff6680);width:15%"></div>
+          {% elif raw <= 7 %}<div class="exp-fill" style="background:linear-gradient(90deg,#ffb800,#ff6b00);width:30%"></div>
+          {% elif raw <= 30 %}<div class="exp-fill" style="background:linear-gradient(90deg,#ffb800,#00d4ff);width:60%"></div>
+          {% else %}<div class="exp-fill" style="background:linear-gradient(90deg,#8b5cf6,#00d4ff);width:100%"></div>{% endif %}
+        </div>
+        <div style="display:flex;justify-content:space-between">
+          <span style="font-family:var(--mono);font-size:10px;color:{% if p.is_overdue or p.status == 'suspended' %}var(--red){% elif raw <= 7 %}var(--yellow){% else %}var(--green){% endif %}">{% if p.is_overdue or p.status == 'suspended' %}EXPIRED{% else %}{{ raw }}d left{% endif %}</span>
+          <span style="font-family:var(--mono);font-size:10px;color:var(--text-3)">TZS {{ p.monthly_cost|floatformat:0 }}/mo</span>
         </div>
       </div>
 
-      {% if p.status == 'suspended' %}
-      <div class="jt-alert jt-alert-danger" style="font-size:12px;padding:10px 13px;margin-bottom:14px"><i class="fas fa-ban fa-xs" style="flex-shrink:0"></i> {{ p.suspension_message|truncatechars:90 }}</div>
-      {% elif p.is_overdue %}
-      <div class="jt-alert jt-alert-danger" style="font-size:12px;padding:10px 13px;margin-bottom:14px"><i class="fas fa-triangle-exclamation fa-xs" style="flex-shrink:0"></i> Email hosting expired — please renew</div>
-      {% elif p.days_until_expiry <= 7 %}
-      <div class="jt-alert jt-alert-warning" style="font-size:12px;padding:10px 13px;margin-bottom:14px"><i class="fas fa-clock fa-xs" style="flex-shrink:0"></i> Expires in <strong>{{ p.days_until_expiry }}</strong> day(s)</div>
-      {% endif %}
-
-      <!-- Stats grid -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
-        <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:9px;padding:10px 12px">
-          <div style="font-family:var(--mono);font-size:10px;color:var(--text-3);letter-spacing:1px;margin-bottom:4px">ACCOUNTS</div>
-          <div style="font-size:22px;font-weight:700;color:var(--text)">{{ p.accounts_count }}</div>
+      <!-- Stats -->
+      <div class="ep-stats">
+        <div class="ep-stat">
+          <div class="ep-stat-val" style="color:var(--purple)">{{ p.accounts_count }}</div>
+          <div class="ep-stat-label">Email Accounts</div>
         </div>
-        <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:9px;padding:10px 12px">
-          <div style="font-family:var(--mono);font-size:10px;color:var(--text-3);letter-spacing:1px;margin-bottom:4px">STORAGE/ACCT</div>
-          <div style="font-size:22px;font-weight:700;color:var(--text)">{{ p.storage_gb }}<span style="font-size:12px;color:var(--text-3)"> GB</span></div>
-        </div>
-        <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:9px;padding:10px 12px">
-          <div style="font-family:var(--mono);font-size:10px;color:var(--text-3);letter-spacing:1px;margin-bottom:4px">EXPIRES</div>
-          <div style="font-size:13px;font-weight:600;{% if p.is_overdue %}color:var(--red){% elif p.days_until_expiry <= 7 %}color:var(--yellow){% else %}color:var(--text){% endif %}">{{ p.end_date|date:"d M Y" }}</div>
-        </div>
-        <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:9px;padding:10px 12px">
-          <div style="font-family:var(--mono);font-size:10px;color:var(--text-3);letter-spacing:1px;margin-bottom:4px">MONTHLY</div>
-          <div style="font-size:13px;font-weight:600;color:var(--text)">TZS {{ p.monthly_cost|floatformat:0 }}</div>
+        <div class="ep-stat">
+          <div class="ep-stat-val" style="color:var(--cyan)">{{ p.storage_gb }}<span style="font-size:14px;color:var(--text-3)">GB</span></div>
+          <div class="ep-stat-label">Storage/Account</div>
         </div>
       </div>
 
-      <!-- Email address examples -->
-      <div style="background:var(--purple-d);border:1px solid rgba(139,92,246,0.18);border-radius:10px;padding:12px 14px;margin-bottom:14px">
-        <div style="font-family:var(--mono);font-size:10px;color:var(--text-3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px">Your Email Addresses</div>
-        <div style="font-family:var(--mono);font-size:12px;color:var(--purple);margin-bottom:3px"><i class="fas fa-envelope fa-xs" style="margin-right:6px;opacity:0.6"></i>info@{{ p.email_domain }}</div>
-        {% if p.accounts_count >= 2 %}<div style="font-family:var(--mono);font-size:12px;color:var(--purple);margin-bottom:3px"><i class="fas fa-envelope fa-xs" style="margin-right:6px;opacity:0.6"></i>admin@{{ p.email_domain }}</div>{% endif %}
-        {% if p.accounts_count >= 3 %}<div style="font-family:var(--mono);font-size:12px;color:var(--purple);margin-bottom:3px"><i class="fas fa-envelope fa-xs" style="margin-right:6px;opacity:0.6"></i>support@{{ p.email_domain }}</div>{% endif %}
-        {% if p.accounts_count > 3 %}<div style="font-size:11px;color:var(--text-3);margin-top:4px">+ {{ p.accounts_count|add:"-3" }} more account{{ p.accounts_count|add:"-3"|pluralize }}</div>{% endif %}
+      <!-- Email addresses -->
+      <div class="ep-accounts">
+        <div class="ea-title"><i class="fas fa-at fa-xs" style="color:var(--purple);margin-right:4px"></i> Email Addresses</div>
+        <div class="ea-item">
+          <div class="ea-ico"><i class="fas fa-envelope fa-xs"></i></div>
+          <div class="ea-addr">info@{{ p.email_domain }}</div>
+        </div>
+        {% if p.accounts_count >= 2 %}
+        <div class="ea-item">
+          <div class="ea-ico"><i class="fas fa-envelope fa-xs"></i></div>
+          <div class="ea-addr">admin@{{ p.email_domain }}</div>
+        </div>{% endif %}
+        {% if p.accounts_count >= 3 %}
+        <div class="ea-item">
+          <div class="ea-ico"><i class="fas fa-envelope fa-xs"></i></div>
+          <div class="ea-addr">support@{{ p.email_domain }}</div>
+        </div>{% endif %}
+        {% if p.accounts_count > 3 %}
+        <div style="font-size:11px;color:var(--text-3);padding-top:6px;font-family:var(--mono)">+ {{ p.accounts_count|add:"-3" }} more account(s)</div>{% endif %}
       </div>
 
-      <a href="{% url 'portal_billing' %}" class="jt-btn btn-ghost" style="width:100%;justify-content:center;font-size:12px"><i class="fas fa-receipt"></i> Renew / Pay</a>
+      <!-- Actions -->
+      <div class="ep-actions">
+        <a href="{% url 'portal_billing' %}" class="jt-btn {% if p.is_overdue or p.status == 'suspended' %}btn-red{% else %}btn-ghost{% endif %}" style="width:100%;justify-content:center;font-size:12px">
+          {% if p.is_overdue or p.status == 'suspended' %}<i class="fas fa-bolt"></i> Renew Now{% else %}<i class="fas fa-receipt"></i> Renew / Pay{% endif %}
+        </a>
+      </div>
     </div>
   </div>
+  {% endwith %}
   {% endfor %}
 </div>
 
-<!-- Payment history + bank details -->
+<!-- PAYMENT HISTORY + BANK -->
 <div class="row g-3">
   <div class="col-lg-8">
-    <div class="jt-card" style="padding:0">
-      <div class="jt-card-head">
-        <span class="jt-card-title"><i class="fas fa-receipt" style="color:var(--green)"></i> Payment History</span>
-        <span style="font-family:var(--mono);font-size:12px;color:var(--green)">TZS {{ total_paid|floatformat:0 }} paid</span>
+    <div class="sec f2">
+      <div class="sec-head">
+        <div class="sec-title"><i class="fas fa-receipt" style="color:var(--green)"></i> Payment History</div>
+        <span style="font-family:var(--mono);font-size:11px;color:var(--green)">TZS {{ total_paid|floatformat:0 }} paid</span>
       </div>
       {% if payments %}
       <div style="overflow-x:auto">
@@ -82,8 +173,8 @@
             {% for p in payments %}
             <tr>
               <td style="font-family:var(--mono);font-size:12px;color:var(--text-3)">{{ p.payment_date|date:"d M Y" }}</td>
-              <td style="font-size:12px;color:var(--text-2)">@{{ p.plan.email_domain }}</td>
-              <td style="font-family:var(--mono);font-weight:600;color:var(--green)">TZS {{ p.amount|floatformat:0 }}</td>
+              <td style="font-size:12px;color:var(--purple)">@{{ p.plan.email_domain }}</td>
+              <td style="font-family:var(--mono);font-weight:700;color:var(--green)">TZS {{ p.amount|floatformat:0 }}</td>
               <td style="font-family:var(--mono);font-size:12px;text-align:center">{{ p.months_covered }}</td>
               <td style="font-size:12px;color:var(--text-2)">{{ p.payment_method|default:"—" }}</td>
               <td style="font-family:var(--mono);font-size:11px;color:var(--cyan)">{{ p.transaction_ref|default:"—"|truncatechars:16 }}</td>
@@ -97,31 +188,18 @@
       {% endif %}
     </div>
   </div>
-
-  <!-- How to pay -->
   <div class="col-lg-4">
-    <div class="jt-card" style="background:linear-gradient(145deg,rgba(5,8,16,0.99),rgba(12,8,30,0.99));border-color:rgba(139,92,246,0.18)">
-      <div style="padding:18px">
-        <div style="font-family:var(--head);font-size:15px;font-weight:700;color:var(--text);margin-bottom:16px">🏦 Payment Details</div>
-        <div style="background:var(--purple-d);border:1px solid rgba(139,92,246,0.2);border-radius:12px;padding:16px;margin-bottom:14px">
-          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
-            <span style="font-family:var(--mono);font-size:11px;color:var(--text-3)">BANK</span>
-            <span style="font-weight:600;color:var(--text)">NMB Bank</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
-            <span style="font-family:var(--mono);font-size:11px;color:var(--text-3)">ACCOUNT NO.</span>
-            <span style="font-family:var(--mono);font-weight:700;font-size:14px;color:var(--purple)">{{ payment_info.account_number }}</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;padding:8px 0">
-            <span style="font-family:var(--mono);font-size:11px;color:var(--text-3)">ACCOUNT NAME</span>
-            <span style="font-weight:600;font-size:13px;color:var(--text)">JamiiTek Technologies</span>
-          </div>
-        </div>
+    <div class="bank-mini f2">
+      <div style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.3);letter-spacing:2px;text-transform:uppercase;margin-bottom:14px">🏦 Payment Details</div>
+      <div class="bm-row"><span class="bm-key">Bank</span><span class="bm-val">NMB Bank</span></div>
+      <div class="bm-row"><span class="bm-key">Account No.</span><span class="bm-val" style="color:var(--purple);font-size:15px">{{ payment_info.account_number }}</span></div>
+      <div class="bm-row"><span class="bm-key">Account Name</span><span class="bm-val">JamiiTek Technologies</span></div>
+      <div class="bm-row"><span class="bm-key">Reference</span><span class="bm-val" style="color:var(--yellow)">Your name + domain</span></div>
+      <div style="margin-top:14px">
         <div class="jt-alert jt-alert-info" style="font-size:12px;padding:10px 12px;margin-bottom:14px">
           <i class="fas fa-circle-info fa-xs" style="flex-shrink:0"></i>
-          Use your <strong>name + domain</strong> as reference, e.g. "John mmexy.co.tz"
+          After paying, submit proof at <strong>Billing & Payments</strong>.
         </div>
-        <p style="font-size:12px;color:var(--text-2);margin-bottom:12px;line-height:1.7">After transferring, go to <strong>Billing &amp; Payments</strong> and submit your proof. We verify within 24 hours.</p>
         <a href="{% url 'portal_billing' %}" class="jt-btn btn-primary" style="width:100%;justify-content:center"><i class="fas fa-receipt"></i> Submit Payment Proof</a>
       </div>
     </div>
@@ -129,12 +207,11 @@
 </div>
 
 {% else %}
-<div class="jt-card">
-  <div class="jt-empty">
-    <div class="ei">📧</div>
-    <p>No email hosting plans yet.<br>Contact JamiiTek to get professional email for your domain.</p>
-    <a href="{% url 'portal_support' %}" class="jt-btn btn-primary" style="margin-top:16px;display:inline-flex"><i class="fas fa-headset"></i> Request Email Hosting</a>
-  </div>
+<div style="text-align:center;padding:80px 20px;animation:fadeUp .4s ease both">
+  <div style="font-size:64px;opacity:.12;margin-bottom:18px">📧</div>
+  <div style="font-family:var(--head);font-size:20px;font-weight:700;color:var(--text-2);margin-bottom:8px">No Email Plans Yet</div>
+  <div style="font-family:var(--mono);font-size:12px;color:var(--text-3);margin-bottom:24px">Get professional email for your domain — info@yourdomain.co.tz</div>
+  <a href="{% url 'portal_support' %}" class="jt-btn btn-primary"><i class="fas fa-headset"></i> Request Email Hosting</a>
 </div>
 {% endif %}
 {% endblock %}

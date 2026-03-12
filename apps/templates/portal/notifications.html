@@ -1,78 +1,178 @@
 {% extends 'portal/base.html' %}
 {% block title %}Messages{% endblock %}
 {% block content %}
+<style>
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideIn{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:translateX(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 
-<div style="margin-bottom:24px">
-  <h1 style="font-family:var(--head);font-size:22px;font-weight:800;color:var(--text);margin-bottom:4px">Messages & Notifications</h1>
-  <div style="font-family:var(--mono);font-size:12px;color:var(--text-3)">{{ notifications|length }} message{{ notifications|length|pluralize }} from JamiiTek</div>
+.pg-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:24px;flex-wrap:wrap;animation:fadeUp .4s ease both}
+.pg-title{font-family:var(--head);font-size:24px;font-weight:800;color:var(--text);margin-bottom:4px}
+.pg-sub{font-family:var(--mono);font-size:11px;color:var(--text-3)}
+
+/* STATS ROW */
+.notif-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px;animation:fadeUp .4s .05s ease both}
+.nsc{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:14px 16px;display:flex;align-items:center;gap:12px;transition:all .2s}
+.nsc:hover{border-color:rgba(139,92,246,.2);transform:translateY(-2px)}
+.nsc-ico{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.nsc-val{font-family:var(--head);font-size:20px;font-weight:800;color:var(--text);line-height:1}
+.nsc-label{font-family:var(--mono);font-size:10px;color:var(--text-3);margin-top:2px}
+
+/* MESSAGE LIST */
+.msg-list{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;animation:fadeUp .4s .1s ease both}
+.msg-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.msg-head-title{font-family:var(--head);font-size:15px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px}
+
+/* MESSAGE ITEM */
+.msg-item{border-bottom:1px solid var(--border);transition:background .15s;animation:slideIn .3s ease both}
+.msg-item:hover{background:rgba(255,255,255,.018)}
+.msg-item:last-child{border-bottom:none}
+.msg-trigger{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:16px 20px;cursor:pointer;user-select:none}
+.msg-ico{width:38px;height:38px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:15px}
+.msg-subject{font-weight:700;color:var(--text);font-size:14px;margin-bottom:3px;line-height:1.3}
+.msg-meta{font-size:12px;color:var(--text-3);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.msg-type-tag{font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:5px;text-transform:uppercase;letter-spacing:.5px}
+.msg-date{font-family:var(--mono);font-size:11px;color:var(--text-3)}
+.msg-email-badge{font-family:var(--mono);font-size:9px;background:var(--green-d);color:var(--green);padding:2px 7px;border-radius:5px;border:1px solid rgba(0,255,136,.2)}
+.msg-chevron{color:var(--text-3);font-size:12px;transition:transform .22s;flex-shrink:0;margin-top:3px}
+.msg-chevron.open{transform:rotate(180deg)}
+
+/* BODY EXPAND */
+.msg-body{display:none;padding:0 20px 18px 20px}
+.msg-body.show{display:block;animation:fadeUp .25s ease both}
+.msg-body-inner{background:rgba(0,0,0,.2);border:1px solid var(--border);border-radius:12px;padding:18px 20px}
+.msg-body-inner pre{font-family:var(--body);font-size:13.5px;color:var(--text-2);white-space:pre-wrap;margin:0;line-height:1.75}
+
+/* TYPE COLORS */
+.t-suspension{background:var(--red-d);color:var(--red)}
+.t-restoration{background:var(--green-d);color:var(--green)}
+.t-payment{background:var(--green-d);color:var(--green)}
+.t-reminder{background:var(--yellow-d);color:var(--yellow)}
+.t-maintenance{background:var(--yellow-d);color:var(--yellow)}
+.t-support{background:var(--cyan-d);color:var(--cyan)}
+.t-general{background:var(--purple-d);color:var(--purple)}
+
+/* EMPTY */
+.notif-empty{text-align:center;padding:80px 24px}
+
+@media(max-width:768px){.notif-stats{grid-template-columns:repeat(2,1fr)}}
+</style>
+
+<div class="pg-head">
+  <div>
+    <div class="pg-title">Messages & Notifications</div>
+    <div class="pg-sub">{{ notifications|length }} message{{ notifications|length|pluralize }} from JamiiTek</div>
+  </div>
 </div>
 
+<!-- STATS -->
+{% with total=notifications|length %}
+<div class="notif-stats">
+  <div class="nsc">
+    <div class="nsc-ico" style="background:var(--purple-d);color:var(--purple)"><i class="fas fa-envelope"></i></div>
+    <div>
+      <div class="nsc-val">{{ total }}</div>
+      <div class="nsc-label">Total Messages</div>
+    </div>
+  </div>
+  <div class="nsc">
+    <div class="nsc-ico" style="background:var(--green-d);color:var(--green)"><i class="fas fa-check-circle"></i></div>
+    <div>
+      <div class="nsc-val">{{ notifications|length }}</div>
+      <div class="nsc-label">Received</div>
+    </div>
+  </div>
+  <div class="nsc">
+    <div class="nsc-ico" style="background:var(--red-d);color:var(--red)"><i class="fas fa-ban"></i></div>
+    <div>
+      <div class="nsc-val">{% with c=0 %}{% for n in notifications %}{% if n.notification_type == 'suspension' %}{% with c=c|add:1 %}{% endwith %}{% endif %}{% endfor %}{{ notifications|length }}{% endwith %}</div>
+      <div class="nsc-label">All Types</div>
+    </div>
+  </div>
+  <div class="nsc">
+    <div class="nsc-ico" style="background:var(--cyan-d);color:var(--cyan)"><i class="fas fa-at"></i></div>
+    <div>
+      <div class="nsc-val">{{ notifications|length }}</div>
+      <div class="nsc-label">Email Sent</div>
+    </div>
+  </div>
+</div>
+{% endwith %}
+
 {% if notifications %}
-<div class="jt-card" style="padding:0">
+<div class="msg-list">
+  <div class="msg-head">
+    <div class="msg-head-title"><i class="fas fa-inbox" style="color:var(--purple)"></i> Inbox</div>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-3)">{{ notifications|length }} message(s)</span>
+  </div>
+
   {% for n in notifications %}
-  <div style="border-bottom:1px solid var(--border)">
-    <!-- clickable header -->
-    <div onclick="toggleMsg('msg{{ n.pk }}')" style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:16px 20px;cursor:pointer;transition:background 0.12s" onmouseover="this.style.background='var(--card-s)'" onmouseout="this.style.background=''">
+  <div class="msg-item" style="animation-delay:{{ forloop.counter0 }}s">
+    <div class="msg-trigger" onclick="toggleMsg('{{ n.pk }}')">
       <div style="display:flex;align-items:flex-start;gap:12px;flex:1;min-width:0">
-        <!-- type icon -->
-        <div style="width:36px;height:36px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:15px;
-          {% if n.notification_type == 'suspension' %}background:var(--red-d);color:var(--red)
-          {% elif n.notification_type == 'restoration' %}background:var(--green-d);color:var(--green)
-          {% elif n.notification_type == 'payment_received' %}background:var(--green-d);color:var(--green)
-          {% elif n.notification_type == 'payment_reminder' %}background:var(--yellow-d);color:var(--yellow)
-          {% elif n.notification_type == 'maintenance' %}background:var(--yellow-d);color:var(--yellow)
-          {% elif n.notification_type == 'support' %}background:var(--cyan-d);color:var(--cyan)
-          {% else %}background:var(--purple-d);color:var(--purple){% endif %}">
+        <!-- Icon -->
+        <div class="msg-ico
+          {% if n.notification_type == 'suspension' %}t-suspension
+          {% elif n.notification_type == 'restoration' %}t-restoration
+          {% elif n.notification_type == 'payment_received' %}t-payment
+          {% elif n.notification_type == 'payment_reminder' %}t-reminder
+          {% elif n.notification_type == 'maintenance' %}t-maintenance
+          {% elif n.notification_type == 'support' %}t-support
+          {% else %}t-general{% endif %}">
           {% if n.notification_type == 'suspension' %}<i class="fas fa-ban"></i>
-          {% elif n.notification_type == 'restoration' %}<i class="fas fa-play"></i>
-          {% elif n.notification_type == 'payment_received' %}<i class="fas fa-check-circle"></i>
-          {% elif n.notification_type == 'payment_reminder' %}<i class="fas fa-coins"></i>
+          {% elif n.notification_type == 'restoration' %}<i class="fas fa-circle-check"></i>
+          {% elif n.notification_type == 'payment_received' %}<i class="fas fa-coins"></i>
+          {% elif n.notification_type == 'payment_reminder' %}<i class="fas fa-clock"></i>
           {% elif n.notification_type == 'maintenance' %}<i class="fas fa-wrench"></i>
           {% elif n.notification_type == 'support' %}<i class="fas fa-headset"></i>
           {% else %}<i class="fas fa-envelope"></i>{% endif %}
         </div>
         <div style="flex:1;min-width:0">
-          <div style="font-weight:600;color:var(--text);font-size:14px;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ n.subject }}</div>
-          <div style="font-size:12px;color:var(--text-3)">
-            {% if n.website %}<span style="color:var(--purple)">{{ n.website.name }}</span> · {% endif %}
-            {{ n.notification_type }}
+          <div class="msg-subject">{{ n.subject }}</div>
+          <div class="msg-meta">
+            {% if n.website %}<span style="color:var(--purple);font-weight:600">{{ n.website.name }}</span>{% endif %}
+            <span class="msg-type-tag
+              {% if n.notification_type == 'suspension' %}t-suspension
+              {% elif n.notification_type == 'restoration' %}t-restoration
+              {% elif n.notification_type == 'payment_received' %}t-payment
+              {% else %}t-general{% endif %}">{{ n.notification_type }}</span>
+            {% if n.email_sent %}<span class="msg-email-badge">✓ emailed</span>{% endif %}
           </div>
         </div>
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0">
-        <span style="font-family:var(--mono);font-size:11px;color:var(--text-3)">{{ n.sent_at|date:"d M Y" }}</span>
-        {% if n.email_sent %}<span style="font-family:var(--mono);font-size:10px;background:var(--green-d);color:var(--green);padding:2px 7px;border-radius:4px;border:1px solid rgba(0,255,136,0.2)">✓ emailed</span>{% endif %}
-        <span id="arr{{ n.pk }}" style="font-size:11px;color:var(--text-3);transition:transform 0.2s"><i class="fas fa-chevron-down"></i></span>
+        <span class="msg-date">{{ n.sent_at|date:"d M Y" }}</span>
+        <span class="msg-date" style="font-size:10px">{{ n.sent_at|date:"H:i" }}</span>
+        <i class="fas fa-chevron-down msg-chevron" id="arr{{ n.pk }}"></i>
       </div>
     </div>
-    <!-- expandable body -->
-    <div id="msg{{ n.pk }}" style="display:none;padding:0 20px 18px 20px;padding-left:68px">
-      <div style="background:rgba(0,0,0,0.2);border:1px solid var(--border);border-radius:10px;padding:16px">
-        <pre style="font-family:var(--body);font-size:13.5px;color:var(--text-2);white-space:pre-wrap;margin:0;line-height:1.7">{{ n.message }}</pre>
+    <div class="msg-body" id="body{{ n.pk }}">
+      <div class="msg-body-inner">
+        <pre>{{ n.message }}</pre>
       </div>
     </div>
   </div>
   {% endfor %}
 </div>
+
 {% else %}
-<div class="jt-card">
-  <div class="jt-empty">
-    <div class="ei">📭</div>
-    <p>No messages yet. JamiiTek will send notices about your websites here.</p>
+<div class="msg-list">
+  <div class="notif-empty">
+    <div style="font-size:56px;opacity:.12;margin-bottom:18px">📭</div>
+    <div style="font-family:var(--head);font-size:18px;font-weight:700;color:var(--text-2);margin-bottom:8px">No Messages Yet</div>
+    <div style="font-family:var(--mono);font-size:12px;color:var(--text-3)">JamiiTek will send you notices about your websites here.</div>
   </div>
 </div>
 {% endif %}
-{% endblock %}
 
-{% block extra_js %}
 <script>
-function toggleMsg(id) {
-  const el = document.getElementById(id);
-  const pk = id.replace('msg','');
-  const arr = document.getElementById('arr'+pk);
-  const open = el.style.display !== 'none' && el.style.display !== '';
-  el.style.display = open ? 'none' : 'block';
-  arr.querySelector('i').style.transform = open ? '' : 'rotate(180deg)';
+function toggleMsg(pk){
+  const body = document.getElementById('body'+pk);
+  const arr  = document.getElementById('arr'+pk);
+  const open = body.classList.contains('show');
+  body.classList.toggle('show', !open);
+  body.style.display = open ? 'none' : 'block';
+  arr.classList.toggle('open', !open);
 }
 </script>
 {% endblock %}

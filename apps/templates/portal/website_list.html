@@ -1,68 +1,187 @@
 {% extends 'portal/base.html' %}
 {% block title %}My Websites{% endblock %}
 {% block content %}
-<div style="margin-bottom:24px">
-  <h1 style="font-family:var(--head);font-size:22px;font-weight:800;color:var(--text);margin-bottom:4px">My Websites</h1>
-  <div style="font-family:var(--mono);font-size:12px;color:var(--text-3)">{{ websites|length }} website{{ websites|length|pluralize }} linked to your account</div>
+<style>
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+.f0{animation:fadeUp .4s ease both}
+.f1{animation:fadeUp .4s .06s ease both}
+.f2{animation:fadeUp .4s .12s ease both}
+.f3{animation:fadeUp .4s .18s ease both}
+
+.pg-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:24px;flex-wrap:wrap}
+.pg-title{font-family:var(--head);font-size:24px;font-weight:800;color:var(--text);margin-bottom:4px}
+.pg-sub{font-family:var(--mono);font-size:11px;color:var(--text-3)}
+
+/* SITE CARD */
+.site-card{background:var(--card);border:1px solid var(--border);border-radius:18px;overflow:hidden;transition:all .25s;position:relative;height:100%}
+.site-card:hover{transform:translateY(-4px);border-color:rgba(139,92,246,.25);box-shadow:0 16px 50px rgba(0,0,0,.35)}
+.site-card:hover .site-shine{opacity:1}
+.site-shine{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .3s;overflow:hidden;border-radius:18px}
+.site-shine::after{content:'';position:absolute;inset:0;background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,.04) 50%,transparent 60%);transform:translateX(-100%);animation:shimmer 1.5s infinite}
+
+/* HEADER STRIPE */
+.site-stripe{padding:18px 20px 16px;position:relative;overflow:hidden}
+.site-stripe::before{content:'';position:absolute;inset:0;opacity:.06}
+.site-status-dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex-shrink:0}
+.s-active{background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s infinite}
+.s-suspended{background:var(--red);box-shadow:0 0 8px var(--red);animation:pulse 1.2s infinite}
+.s-maintenance{background:var(--yellow)}
+
+/* EXPIRY VISUAL */
+.expiry-visual{position:relative;padding:16px 20px;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.exp-label{font-family:var(--mono);font-size:9px;color:var(--text-3);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;display:flex;justify-content:space-between}
+.exp-track{height:6px;background:var(--bg2);border-radius:100px;overflow:hidden;position:relative;margin-bottom:8px}
+.exp-fill{height:100%;border-radius:100px;transition:width 1.4s cubic-bezier(.4,0,.2,1)}
+.exp-numbers{display:flex;justify-content:space-between;align-items:center}
+.exp-days-big{font-family:var(--head);font-size:28px;font-weight:800;line-height:1}
+.exp-date{font-family:var(--mono);font-size:10px;color:var(--text-3)}
+
+/* INFO GRID */
+.site-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border)}
+.sig-cell{background:var(--card);padding:12px 16px}
+.sig-key{font-family:var(--mono);font-size:9px;color:var(--text-3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px}
+.sig-val{font-size:13px;font-weight:600;color:var(--text)}
+
+/* ACTIONS */
+.site-actions{padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.action-row{display:flex;gap:8px}
+
+/* ALERT MINI */
+.site-alert{padding:10px 14px;font-size:12px;display:flex;align-items:center;gap:8px;border-top:1px solid var(--border)}
+.sa-danger{background:rgba(255,59,92,.06);color:var(--red)}
+.sa-warning{background:rgba(255,184,0,.06);color:var(--yellow)}
+
+/* SUSPENDED OVERLAY */
+.suspended-overlay{position:absolute;inset:0;background:rgba(5,8,16,.7);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;z-index:10;border-radius:18px}
+.susp-lock{text-align:center}
+.susp-lock-ico{font-size:36px;margin-bottom:8px;animation:pulse 1.5s infinite}
+.susp-lock-text{font-family:var(--mono);font-size:11px;color:var(--red);letter-spacing:1px;text-transform:uppercase}
+</style>
+
+<div class="pg-head f0">
+  <div>
+    <div class="pg-title">My Websites</div>
+    <div class="pg-sub">{{ websites|length }} website{{ websites|length|pluralize }} linked to your account</div>
+  </div>
+  <a href="{% url 'portal_support' %}" class="jt-btn btn-ghost" style="font-size:12px"><i class="fas fa-headset"></i> Add Website</a>
 </div>
 
 {% if websites %}
 <div class="row g-3">
   {% for w in websites %}
-  <div class="col-md-6 col-xl-4">
-    <div class="jt-card" style="position:relative;transition:all 0.2s" onmouseover="this.style.transform='translateY(-3px)';this.style.borderColor='rgba(139,92,246,0.3)'" onmouseout="this.style.transform='';this.style.borderColor=''">
-      <!-- Status badge -->
-      <div style="position:absolute;top:16px;right:16px">
-        <span class="jt-badge b-{{ w.status }}">{{ w.status|capfirst }}</span>
-      </div>
-      <div style="padding:18px">
-        <!-- Icon -->
-        <div style="width:44px;height:44px;border-radius:11px;background:var(--purple-d);display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--purple);margin-bottom:14px"><i class="fas fa-globe"></i></div>
-        <div style="font-family:var(--head);font-size:16px;font-weight:700;color:var(--text);margin-bottom:4px;padding-right:90px">{{ w.name }}</div>
-        <a href="{{ w.url }}" target="_blank" style="font-family:var(--mono);font-size:11px;color:var(--text-3);display:block;margin-bottom:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ w.url }}</a>
+  {% with raw=w.days_until_expiry %}
+  <div class="col-md-6 col-xl-4" style="animation:fadeUp .4s {{ forloop.counter0|add:0 }}s ease both">
+    <div class="site-card">
+      <div class="site-shine"></div>
 
-        <!-- Key info grid -->
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
-          <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:9px;padding:10px 12px">
-            <div style="font-family:var(--mono);font-size:10px;color:var(--text-3);letter-spacing:1px;margin-bottom:3px">EXPIRES</div>
-            <div style="font-size:13px;font-weight:600;{% if w.is_overdue %}color:var(--red){% elif w.days_until_expiry <= 7 %}color:var(--yellow){% else %}color:var(--text){% endif %}">
-              {{ w.hosting_end_date|date:"d M Y" }}{% if w.is_overdue %} ⚠{% endif %}
+      <!-- Suspended overlay -->
+      {% if w.status == 'suspended' %}
+      <div class="suspended-overlay">
+        <div class="susp-lock">
+          <div class="susp-lock-ico">🔒</div>
+          <div class="susp-lock-text">Suspended</div>
+          <a href="{% url 'portal_billing' %}" class="jt-btn btn-red" style="margin-top:12px;font-size:12px"><i class="fas fa-coins"></i> Pay to Restore</a>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Header -->
+      <div class="site-stripe" style="background:{% if w.status == 'suspended' %}rgba(255,59,92,.05){% elif w.is_overdue %}rgba(255,59,92,.04){% elif raw <= 7 %}rgba(255,184,0,.04){% else %}rgba(139,92,246,.04){% endif %}">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="width:42px;height:42px;border-radius:11px;background:var(--purple-d);display:flex;align-items:center;justify-content:center;font-size:19px;color:var(--purple);flex-shrink:0">
+              <i class="fas fa-globe"></i>
+            </div>
+            <div>
+              <div style="font-family:var(--head);font-size:15px;font-weight:700;color:var(--text);margin-bottom:2px">{{ w.name }}</div>
+              <a href="{{ w.url }}" target="_blank" style="font-family:var(--mono);font-size:10px;color:var(--text-3)">{{ w.url|truncatechars:30 }} <i class="fas fa-arrow-up-right-from-square fa-xs"></i></a>
             </div>
           </div>
-          <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:9px;padding:10px 12px">
-            <div style="font-family:var(--mono);font-size:10px;color:var(--text-3);letter-spacing:1px;margin-bottom:3px">MONTHLY</div>
-            <div style="font-size:13px;font-weight:600;color:var(--text)">TZS {{ w.monthly_cost|floatformat:0 }}</div>
+          <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+            <span class="site-status-dot s-{{ w.status }}"></span>
+            <span class="jt-badge b-{{ w.status }}" style="font-size:10px">{{ w.status|capfirst }}</span>
           </div>
         </div>
+      </div>
 
-        {% if w.is_overdue %}
-        <div class="jt-alert jt-alert-danger" style="margin-bottom:14px;padding:10px 12px;font-size:13px"><i class="fas fa-triangle-exclamation fa-xs"></i> Hosting expired — please renew</div>
-        {% elif w.days_until_expiry is not None and w.days_until_expiry <= 7 %}
-        <div class="jt-alert jt-alert-warning" style="margin-bottom:14px;padding:10px 12px;font-size:13px"><i class="fas fa-clock fa-xs"></i> {{ w.days_until_expiry }} day(s) until expiry</div>
-        {% endif %}
-
-        <div style="display:flex;gap:8px">
-          <a href="{% url 'portal_website_detail' w.pk %}" class="jt-btn btn-primary" style="flex:1;justify-content:center;font-size:13px;padding:8px 12px"><i class="fas fa-eye"></i> Details</a>
-          <a href="{% url 'portal_billing' %}" class="jt-btn btn-ghost" style="font-size:13px;padding:8px 12px"><i class="fas fa-receipt"></i> Pay</a>
+      <!-- Expiry Visual -->
+      <div class="expiry-visual">
+        <div class="exp-label">
+          <span>Hosting Expiry</span>
+          <span>{{ w.hosting_end_date|date:"d M Y" }}</span>
         </div>
-        <div style="display:flex;gap:8px;margin-top:8px">
-          <a href="{% url 'portal_hosting_config' w.pk %}" class="jt-btn btn-ghost" style="flex:1;justify-content:center;font-size:12px;padding:7px 10px;border-color:rgba(0,212,255,0.2);color:var(--cyan)"><i class="fas fa-server"></i> Hosting Panel</a>
+        <div class="exp-track">
+          {% if w.status == 'suspended' or w.is_overdue %}
+          <div class="exp-fill" style="background:var(--red);width:100%"></div>
+          {% elif raw <= 3 %}
+          <div class="exp-fill" style="background:linear-gradient(90deg,#ff2244,#ff6680);width:15%"></div>
+          {% elif raw <= 7 %}
+          <div class="exp-fill" style="background:linear-gradient(90deg,#ffb800,#ff6b00);width:25%"></div>
+          {% elif raw <= 30 %}
+          <div class="exp-fill" style="background:linear-gradient(90deg,#ffb800,#00d4ff);width:{{ raw }}%;max-width:100%"></div>
+          {% else %}
+          <div class="exp-fill" style="background:linear-gradient(90deg,#00ff88,#00d4ff);width:100%"></div>
+          {% endif %}
+        </div>
+        <div class="exp-numbers">
+          <div>
+            <div class="exp-days-big" style="color:{% if w.status == 'suspended' or w.is_overdue %}var(--red){% elif raw <= 3 %}var(--red){% elif raw <= 7 %}var(--yellow){% else %}var(--green){% endif %}">
+              {% if w.status == 'suspended' %}🔒{% elif w.is_overdue %}EXP{% else %}{{ raw }}{% endif %}
+            </div>
+            <div class="exp-date">{% if w.status == 'suspended' %}suspended{% elif w.is_overdue %}expired{% else %}days left{% endif %}</div>
+          </div>
+          <a href="{% url 'portal_billing' %}" class="jt-btn {% if w.is_overdue or w.status == 'suspended' %}btn-red{% elif raw <= 7 %}btn-yellow{% else %}btn-ghost{% endif %}" style="font-size:11px;padding:6px 12px">
+            {% if w.is_overdue or w.status == 'suspended' %}<i class="fas fa-bolt"></i> Renew Now{% elif raw <= 14 %}<i class="fas fa-rotate-right"></i> Renew{% else %}<i class="fas fa-receipt"></i> Pay{% endif %}
+          </a>
+        </div>
+      </div>
+
+      <!-- Info grid -->
+      <div class="site-info-grid">
+        <div class="sig-cell">
+          <div class="sig-key">Type</div>
+          <div class="sig-val" style="font-size:12px">{{ w.get_site_type_display }}</div>
+        </div>
+        <div class="sig-cell">
+          <div class="sig-key">Monthly Cost</div>
+          <div class="sig-val" style="color:var(--green)">TZS {{ w.monthly_cost|floatformat:0 }}</div>
+        </div>
+        <div class="sig-cell">
+          <div class="sig-key">Start Date</div>
+          <div class="sig-val" style="font-size:12px">{{ w.hosting_start_date|date:"d M Y" }}</div>
+        </div>
+        <div class="sig-cell">
+          <div class="sig-key">Auto Suspend</div>
+          <div class="sig-val" style="font-size:12px;color:{% if w.auto_suspend_on_expiry %}var(--yellow){% else %}var(--text-3){% endif %}">{% if w.auto_suspend_on_expiry %}✓ Enabled{% else %}Disabled{% endif %}</div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="site-actions">
+        <div class="action-row">
+          <a href="{% url 'portal_website_detail' w.pk %}" class="jt-btn btn-primary" style="flex:1;justify-content:center;font-size:12px;padding:8px"><i class="fas fa-eye"></i> Details</a>
+          <a href="{% url 'portal_billing' %}" class="jt-btn btn-ghost" style="font-size:12px;padding:8px 14px"><i class="fas fa-coins"></i></a>
+        </div>
+        <div class="action-row">
+          <a href="{% url 'portal_hosting_config' w.pk %}" class="jt-btn btn-ghost" style="flex:1;justify-content:center;font-size:11px;color:var(--cyan);border-color:rgba(0,212,255,.18)"><i class="fas fa-server"></i> Hosting Panel</a>
           {% with domain=w.domains.first %}{% if domain %}
-          <a href="{% url 'portal_dns_manager' domain.pk %}" class="jt-btn btn-ghost" style="flex:1;justify-content:center;font-size:12px;padding:7px 10px;border-color:rgba(139,92,246,0.2);color:#a78bfa"><i class="fas fa-network-wired"></i> DNS Manager</a>
+          <a href="{% url 'portal_dns_manager' domain.pk %}" class="jt-btn btn-ghost" style="flex:1;justify-content:center;font-size:11px;color:#a78bfa;border-color:rgba(139,92,246,.18)"><i class="fas fa-network-wired"></i> DNS</a>
           {% endif %}{% endwith %}
         </div>
       </div>
     </div>
   </div>
+  {% endwith %}
   {% endfor %}
 </div>
 {% else %}
-<div class="jt-card">
-  <div class="jt-empty">
-    <div class="ei">🌐</div>
-    <p>No websites linked to your account yet.<br>Contact JamiiTek to get your website added.</p>
-    <a href="{% url 'portal_support' %}" class="jt-btn btn-primary" style="margin-top:16px;display:inline-flex"><i class="fas fa-headset"></i> Contact Support</a>
-  </div>
+<div style="text-align:center;padding:80px 20px">
+  <div style="font-size:64px;opacity:.15;margin-bottom:20px">🌐</div>
+  <div style="font-family:var(--head);font-size:20px;font-weight:700;color:var(--text-2);margin-bottom:8px">No Websites Yet</div>
+  <div style="font-family:var(--mono);font-size:12px;color:var(--text-3);margin-bottom:24px">Contact JamiiTek to get your website added to your account.</div>
+  <a href="{% url 'portal_support' %}" class="jt-btn btn-primary"><i class="fas fa-headset"></i> Contact Support</a>
 </div>
 {% endif %}
 {% endblock %}

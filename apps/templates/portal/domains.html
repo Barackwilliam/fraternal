@@ -1,88 +1,186 @@
 {% extends 'portal/base.html' %}
 {% block title %}My Domains{% endblock %}
 {% block content %}
-<div style="margin-bottom:24px">
-  <h1 style="font-family:var(--head);font-size:22px;font-weight:800;color:var(--text);margin-bottom:4px">My Domains</h1>
-  <div style="font-family:var(--mono);font-size:12px;color:var(--text-3)">{{ domains|length }} domain{{ domains|length|pluralize }} managed by JamiiTek</div>
+<style>
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{0%{stroke-dashoffset:var(--from)}100%{stroke-dashoffset:var(--to)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+
+.pg-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:24px;flex-wrap:wrap;animation:fadeUp .4s ease both}
+.pg-title{font-family:var(--head);font-size:24px;font-weight:800;color:var(--text);margin-bottom:4px}
+.pg-sub{font-family:var(--mono);font-size:11px;color:var(--text-3)}
+
+/* DOMAIN CARD */
+.dom-card{background:var(--card);border:1px solid var(--border);border-radius:18px;overflow:hidden;height:100%;transition:all .25s;position:relative}
+.dom-card:hover{transform:translateY(-4px);box-shadow:0 16px 50px rgba(0,0,0,.3)}
+.dom-card.active-card:hover{border-color:rgba(0,212,255,.2)}
+.dom-card.warn-card:hover{border-color:rgba(255,184,0,.2)}
+.dom-card.danger-card:hover{border-color:rgba(255,59,92,.2)}
+
+/* CARD TOP GRADIENT */
+.dom-header{padding:22px 22px 18px;position:relative;overflow:hidden}
+.dom-header::after{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(135deg,var(--hg-a,.05),var(--hg-b,0));pointer-events:none}
+.dom-name{font-family:var(--mono);font-size:19px;font-weight:800;margin-bottom:4px;line-height:1}
+.dom-site{font-size:12px;color:var(--text-3);margin-bottom:12px}
+
+/* BIG COUNTDOWN RING */
+.ring-section{display:flex;justify-content:center;padding:18px 20px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:rgba(0,0,0,.15)}
+.big-ring{position:relative;width:110px;height:110px}
+.big-ring svg{transform:rotate(-90deg)}
+.ring-inner{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring-days{font-family:var(--head);font-size:30px;font-weight:900;line-height:1}
+.ring-label{font-family:var(--mono);font-size:9px;color:var(--text-3);letter-spacing:2px;text-transform:uppercase;margin-top:2px}
+
+/* DATES */
+.dom-dates{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border)}
+.dom-date-cell{background:var(--card);padding:12px 16px;text-align:center}
+.ddc-key{font-family:var(--mono);font-size:9px;color:var(--text-3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px}
+.ddc-val{font-size:13px;font-weight:600;color:var(--text)}
+
+/* NS BLOCK */
+.dom-ns{padding:14px 18px;border-top:1px solid var(--border)}
+.ns-row{font-family:var(--mono);font-size:11px;color:var(--cyan);padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04);display:flex;align-items:center;gap:8px}
+.ns-row:last-child{border-bottom:none}
+.ns-row::before{content:'NS';font-size:9px;color:var(--text-3);padding:1px 5px;border:1px solid var(--border);border-radius:4px;letter-spacing:1px}
+
+/* ACTIONS */
+.dom-actions{padding:14px 18px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:8px}
+
+/* STATUS PILL */
+.dom-status-pill{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:100px;font-family:var(--mono);font-size:10px;font-weight:700}
+.dsp-active{background:rgba(0,255,136,.08);border:1px solid rgba(0,255,136,.2);color:var(--green)}
+.dsp-warn{background:rgba(255,184,0,.08);border:1px solid rgba(255,184,0,.2);color:var(--yellow)}
+.dsp-expired{background:rgba(255,59,92,.08);border:1px solid rgba(255,59,92,.2);color:var(--red)}
+.dsp-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+.dsp-dot.pulse{animation:pulse 2s infinite}
+</style>
+
+<div class="pg-head">
+  <div>
+    <div class="pg-title">My Domains</div>
+    <div class="pg-sub">{{ domains|length }} domain{{ domains|length|pluralize }} — managed & monitored by JamiiTek</div>
+  </div>
+  <a href="{% url 'portal_support' %}" class="jt-btn btn-ghost" style="font-size:12px"><i class="fas fa-plus"></i> Register Domain</a>
 </div>
 
 {% if domains %}
-<div class="row g-3 mb-4">
+<div class="row g-3">
   {% for d in domains %}
-  <div class="col-md-6 col-xl-4">
-    <div class="jt-card" style="overflow:hidden;transition:all 0.2s" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
-      <!-- Colour accent stripe -->
-      <div style="margin:-20px -20px 18px -20px;padding:14px 20px;background:{% if d.is_expired %}linear-gradient(135deg,rgba(255,59,92,0.12),rgba(255,59,92,0.04)){% elif d.days_until_expiry <= 30 %}linear-gradient(135deg,rgba(255,184,0,0.1),rgba(255,184,0,0.03)){% else %}linear-gradient(135deg,rgba(0,212,255,0.08),rgba(0,212,255,0.02)){% endif %};border-bottom:1px solid {% if d.is_expired %}rgba(255,59,92,0.15){% elif d.days_until_expiry <= 30 %}rgba(255,184,0,0.15){% else %}rgba(0,212,255,0.12){% endif %}">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+  {% with raw=d.days_until_expiry %}
+  <div class="col-md-6 col-xl-4" style="animation:fadeUp .4s {{ forloop.counter0 }}s ease both">
+    {% with is_exp=d.is_expired %}
+    <div class="dom-card {% if is_exp %}danger-card{% elif raw <= 30 %}warn-card{% else %}active-card{% endif %}">
+
+      <!-- Top left: registrar tag -->
+      <div class="dom-header" style="--hg-a:{% if is_exp %}rgba(255,59,92{% elif raw <= 30 %}rgba(255,184,0{% else %}rgba(0,212,255{% endif %},.06);--hg-b:rgba(0,0,0,0)">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
           <div>
-            <div style="font-family:var(--mono);font-size:18px;font-weight:800;color:{% if d.is_expired %}var(--red){% elif d.days_until_expiry <= 30 %}var(--yellow){% else %}var(--cyan){% endif %};margin-bottom:3px">{{ d.domain_name }}</div>
-            <div style="font-size:12px;color:var(--text-3)">{{ d.website.name }} · {{ d.get_registrar_display }}</div>
+            <div class="dom-name" style="color:{% if is_exp %}var(--red){% elif raw <= 30 %}var(--yellow){% else %}var(--cyan){% endif %}">{{ d.domain_name }}</div>
+            <div class="dom-site">{{ d.website.name }} · {{ d.get_registrar_display }}</div>
+            <span class="dom-status-pill {% if is_exp %}dsp-expired{% elif raw <= 30 %}dsp-warn{% else %}dsp-active{% endif %}">
+              <span class="dsp-dot {% if not is_exp %}pulse{% endif %}"></span>
+              {% if is_exp %}EXPIRED{% elif raw <= 14 %}EXPIRING SOON{% elif raw <= 30 %}RENEW SOON{% else %}ACTIVE{% endif %}
+            </span>
           </div>
-          <span class="jt-badge {% if d.is_expired %}b-suspended{% elif d.days_until_expiry <= 30 %}b-maintenance{% else %}b-active{% endif %}" style="font-size:10px;flex-shrink:0">
-            {% if d.is_expired %}Expired{% elif d.days_until_expiry <= 30 %}Expiring{% else %}Active{% endif %}
-          </span>
+          {% if d.auto_renew %}
+          <div style="background:rgba(0,255,136,.07);border:1px solid rgba(0,255,136,.15);border-radius:9px;padding:7px 10px;text-align:center;flex-shrink:0">
+            <i class="fas fa-rotate" style="color:var(--green);font-size:14px;display:block;margin-bottom:3px"></i>
+            <div style="font-family:var(--mono);font-size:9px;color:var(--text-3)">AUTO<br>RENEW</div>
+          </div>
+          {% endif %}
         </div>
       </div>
 
-      <!-- Key dates -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
-        <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:9px;padding:10px 12px">
-          <div style="font-family:var(--mono);font-size:10px;color:var(--text-3);letter-spacing:1px;margin-bottom:4px">REGISTERED</div>
-          <div style="font-size:13px;font-weight:600;color:var(--text)">{{ d.registration_date|date:"d M Y" }}</div>
+      <!-- Big countdown ring -->
+      <div class="ring-section">
+        {% if is_exp %}
+        <div style="text-align:center;padding:10px 0">
+          <div style="font-size:40px;margin-bottom:8px;opacity:.8">⚠️</div>
+          <div style="font-family:var(--head);font-size:16px;font-weight:800;color:var(--red)">Domain Expired</div>
+          <div style="font-family:var(--mono);font-size:11px;color:var(--text-3);margin-top:4px">Contact JamiiTek to renew</div>
         </div>
-        <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:9px;padding:10px 12px">
-          <div style="font-family:var(--mono);font-size:10px;color:var(--text-3);letter-spacing:1px;margin-bottom:4px">EXPIRES</div>
-          <div style="font-size:13px;font-weight:600;{% if d.is_expired %}color:var(--red){% elif d.days_until_expiry <= 30 %}color:var(--yellow){% else %}color:var(--text){% endif %}">{{ d.expiry_date|date:"d M Y" }}</div>
+        {% else %}
+        <div>
+          <div class="big-ring">
+            <svg width="110" height="110" viewBox="0 0 110 110">
+              <circle cx="55" cy="55" r="46" fill="none" stroke="var(--bg2)" stroke-width="7"/>
+              <circle cx="55" cy="55" r="46" fill="none"
+                stroke="{% if raw <= 7 %}#ff2244{% elif raw <= 30 %}#ffb800{% else %}#00d4ff{% endif %}"
+                stroke-width="7" stroke-linecap="round"
+                stroke-dasharray="289"
+                stroke-dashoffset="{% if raw >= 365 %}0{% elif raw >= 30 %}{{ raw }}{% else %}200{% endif %}"/>
+            </svg>
+            <div class="ring-inner">
+              <div class="ring-days" style="color:{% if raw <= 7 %}var(--red){% elif raw <= 30 %}var(--yellow){% else %}var(--cyan){% endif %}">{{ raw }}</div>
+              <div class="ring-label">days left</div>
+            </div>
+          </div>
+          {% if raw <= 30 %}
+          <div style="text-align:center;margin-left:16px;align-self:center">
+            <div style="font-family:var(--mono);font-size:10px;color:var(--text-3);margin-bottom:6px">Expires</div>
+            <div style="font-size:14px;font-weight:700;color:{% if raw <= 7 %}var(--red){% else %}var(--yellow){% endif %}">{{ d.expiry_date|date:"d M" }}</div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--text-3)">{{ d.expiry_date|date:"Y" }}</div>
+            {% if raw <= 14 %}
+            <div style="margin-top:12px;font-family:var(--mono);font-size:9px;color:var(--yellow);letter-spacing:1px">JamiiTek will<br>handle renewal</div>
+            {% endif %}
+          </div>
+          {% endif %}
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Dates -->
+      <div class="dom-dates">
+        <div class="dom-date-cell">
+          <div class="ddc-key">Registered</div>
+          <div class="ddc-val">{{ d.registration_date|date:"d M Y" }}</div>
+        </div>
+        <div class="dom-date-cell">
+          <div class="ddc-key">Expires</div>
+          <div class="ddc-val" style="{% if is_exp %}color:var(--red){% elif raw <= 30 %}color:var(--yellow){% endif %}">{{ d.expiry_date|date:"d M Y" }}</div>
         </div>
       </div>
 
-      <!-- Countdown or expired -->
-      {% if d.is_expired %}
-      <div class="jt-alert jt-alert-danger" style="font-size:12px;padding:10px 13px;margin-bottom:14px"><i class="fas fa-triangle-exclamation fa-xs" style="flex-shrink:0"></i> Domain expired — contact JamiiTek to renew</div>
-      {% else %}
-      <div style="background:{% if d.days_until_expiry <= 30 %}var(--yellow-d){% else %}var(--cyan-d){% endif %};border:1px solid {% if d.days_until_expiry <= 30 %}rgba(255,184,0,0.18){% else %}rgba(0,212,255,0.15){% endif %};border-radius:10px;padding:14px;text-align:center;margin-bottom:14px">
-        <div style="font-family:var(--mono);font-size:32px;font-weight:800;color:{% if d.days_until_expiry <= 30 %}var(--yellow){% else %}var(--cyan){% endif %};line-height:1">{{ d.days_until_expiry }}</div>
-        <div style="font-family:var(--mono);font-size:10px;color:var(--text-3);letter-spacing:1.5px;text-transform:uppercase;margin-top:4px">days remaining</div>
+      <!-- Nameservers -->
+      {% if d.dns_nameservers %}
+      <div class="dom-ns">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--text-3);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:6px"><i class="fas fa-server fa-xs" style="color:var(--purple)"></i> Nameservers</div>
+        {% for ns in d.dns_nameservers.splitlines %}{% if ns %}
+        <div class="ns-row">{{ ns }}</div>
+        {% endif %}{% endfor %}
       </div>
-      {% if d.days_until_expiry <= 30 %}
-      <div class="jt-alert jt-alert-warning" style="font-size:12px;padding:10px 13px;margin-bottom:14px"><i class="fas fa-clock fa-xs" style="flex-shrink:0"></i> Renewal coming up — JamiiTek will handle it</div>
       {% endif %}
+
+      <!-- Alerts -->
+      {% if is_exp %}
+      <div class="jt-alert jt-alert-danger" style="margin:0 16px 14px;font-size:12px"><i class="fas fa-triangle-exclamation fa-xs"></i> Domain expired — contact JamiiTek to renew immediately</div>
+      {% elif raw <= 14 %}
+      <div class="jt-alert jt-alert-warning" style="margin:0 16px 14px;font-size:12px"><i class="fas fa-clock fa-xs"></i> Renewal coming up — JamiiTek will handle it for you</div>
       {% endif %}
 
-      <!-- Auto renew info -->
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:9px;margin-bottom:14px">
-        <span style="font-size:12px;color:var(--text-3)">Auto Renew</span>
-        <span style="font-size:12px;font-weight:600;{% if d.auto_renew %}color:var(--green){% else %}color:var(--text-3){% endif %}">{% if d.auto_renew %}✓ Enabled{% else %}Disabled{% endif %}</span>
+      <!-- Actions -->
+      <div class="dom-actions">
+        <a href="{% url 'portal_support' %}" class="jt-btn {% if is_exp %}btn-red{% elif raw <= 14 %}btn-ghost{% else %}btn-ghost{% endif %}" style="justify-content:center;font-size:12px">
+          {% if is_exp %}<i class="fas fa-rotate-right"></i> Renew Domain{% else %}<i class="fas fa-headset"></i> Ask About Domain{% endif %}
+        </a>
+        {% with domain=d %}
+        <a href="{% url 'portal_dns_manager' d.pk %}" class="jt-btn btn-ghost" style="justify-content:center;font-size:12px;color:#a78bfa;border-color:rgba(139,92,246,.18)">
+          <i class="fas fa-network-wired"></i> DNS Manager
+        </a>
+        {% endwith %}
       </div>
-
-      <a href="{% url 'portal_support' %}" class="jt-btn btn-ghost" style="width:100%;justify-content:center;font-size:12px">
-        <i class="fas fa-headset"></i> Ask About Renewal
-      </a>
     </div>
+    {% endwith %}
+    {% endwith %}
   </div>
   {% endfor %}
 </div>
-
-{% for d in domains %}
-{% if d.dns_nameservers %}
-<div class="jt-card mt-3" style="padding:0">
-  <div class="jt-card-head"><span class="jt-card-title"><i class="fas fa-server" style="color:var(--purple)"></i> DNS Nameservers — {{ d.domain_name }}</span></div>
-  <div class="jt-card-body">
-    {% for ns in d.dns_nameservers.splitlines %}{% if ns %}
-    <div style="font-family:var(--mono);font-size:12px;color:var(--cyan);padding:7px 0;border-bottom:1px solid var(--border)">{{ ns }}</div>
-    {% endif %}{% endfor %}
-  </div>
-</div>
-{% endif %}
-{% endfor %}
-
 {% else %}
-<div class="jt-card">
-  <div class="jt-empty">
-    <div class="ei">🌐</div>
-    <p>No domains tracked yet.<br>JamiiTek will add your domain once registered.</p>
-    <a href="{% url 'portal_support' %}" class="jt-btn btn-primary" style="margin-top:16px;display:inline-flex"><i class="fas fa-headset"></i> Ask About Domain Registration</a>
-  </div>
+<div style="text-align:center;padding:80px 20px;animation:fadeUp .4s ease both">
+  <div style="font-size:64px;opacity:.15;margin-bottom:20px">🌍</div>
+  <div style="font-family:var(--head);font-size:20px;font-weight:700;color:var(--text-2);margin-bottom:8px">No Domains Yet</div>
+  <div style="font-family:var(--mono);font-size:12px;color:var(--text-3);margin-bottom:24px">JamiiTek will add your domain once it's registered.</div>
+  <a href="{% url 'portal_support' %}" class="jt-btn btn-primary"><i class="fas fa-headset"></i> Ask About Domain Registration</a>
 </div>
 {% endif %}
 {% endblock %}

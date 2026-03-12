@@ -1,25 +1,107 @@
 {% extends 'portal/base.html' %}
 {% block title %}My Profile{% endblock %}
 {% block content %}
+<style>
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes avatarIn{from{opacity:0;transform:scale(.8) rotate(-5deg)}to{opacity:1;transform:scale(1) rotate(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 
-<div style="margin-bottom:24px">
-  <h1 style="font-family:var(--head);font-size:22px;font-weight:800;color:var(--text);margin-bottom:4px">My Profile</h1>
-  <div style="font-family:var(--mono);font-size:12px;color:var(--text-3)">Manage your account details and security</div>
+.f0{animation:fadeUp .4s ease both}
+.f1{animation:fadeUp .4s .07s ease both}
+.f2{animation:fadeUp .4s .14s ease both}
+.f3{animation:fadeUp .4s .21s ease both}
+
+.pg-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:24px;flex-wrap:wrap}
+.pg-title{font-family:var(--head);font-size:24px;font-weight:800;color:var(--text);margin-bottom:4px}
+.pg-sub{font-family:var(--mono);font-size:11px;color:var(--text-3)}
+
+/* PROFILE HERO */
+.profile-hero{background:linear-gradient(135deg,rgba(139,92,246,.06),rgba(0,212,255,.04));border:1px solid rgba(139,92,246,.15);border-radius:18px;padding:28px;display:flex;align-items:center;gap:24px;margin-bottom:22px;position:relative;overflow:hidden}
+.profile-hero::before{content:'';position:absolute;top:-40px;right:-40px;width:180px;height:180px;background:radial-gradient(circle,rgba(139,92,246,.08),transparent 70%);pointer-events:none}
+.av-wrap{position:relative;flex-shrink:0;animation:avatarIn .5s cubic-bezier(.34,1.56,.64,1) both}
+.av-circle{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--cyan));display:flex;align-items:center;justify-content:center;font-family:var(--head);font-size:32px;font-weight:800;color:var(--bg);position:relative;z-index:1}
+.av-ring{position:absolute;inset:-4px;border-radius:50%;border:2px solid transparent;background:linear-gradient(135deg,var(--purple),var(--cyan)) border-box;-webkit-mask:linear-gradient(#fff 0 0) padding-box,linear-gradient(#fff 0 0);-webkit-mask-composite:destination-out;animation:spin 6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.av-status{position:absolute;bottom:3px;right:3px;width:16px;height:16px;border-radius:50%;background:var(--green);border:2px solid var(--bg);box-shadow:0 0 8px var(--green);animation:pulse 2s infinite;z-index:2}
+.hero-info{flex:1}
+.hero-name{font-family:var(--head);font-size:22px;font-weight:800;color:var(--text);margin-bottom:4px}
+.hero-user{font-family:var(--mono);font-size:12px;color:var(--purple);margin-bottom:12px}
+.hero-tags{display:flex;gap:8px;flex-wrap:wrap}
+.h-tag{font-family:var(--mono);font-size:10px;padding:4px 10px;border-radius:7px;font-weight:600}
+
+/* FORM SECTION */
+.form-sec{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:18px}
+.form-sec-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.form-sec-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.form-sec-title{font-family:var(--head);font-size:14px;font-weight:700;color:var(--text)}
+.form-sec-body{padding:20px}
+
+/* ACCOUNT STAT */
+.acc-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px}
+.acc-stat{background:var(--bg2);border-radius:11px;padding:14px;text-align:center}
+.acc-stat-val{font-family:var(--head);font-size:22px;font-weight:800;color:var(--text)}
+.acc-stat-label{font-family:var(--mono);font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;margin-top:3px}
+
+/* DETAIL ROWS */
+.det-row{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--border)}
+.det-row:last-child{border-bottom:none}
+.det-key{font-family:var(--mono);font-size:11px;color:var(--text-3)}
+.det-val{font-size:13px;font-weight:600;color:var(--text);text-align:right}
+
+/* SECURITY INDICATOR */
+.sec-indicator{display:flex;gap:4px;margin:12px 0}
+.sec-bar{flex:1;height:4px;border-radius:2px;background:var(--bg2);transition:background .4s}
+.sec-bar.lit-green{background:var(--green)}
+.sec-bar.lit-yellow{background:var(--yellow)}
+.sec-bar.lit-red{background:var(--red)}
+
+/* PASSWORD STRENGTH */
+#pwStrength{margin:10px 0}
+.ps-bars{display:flex;gap:4px;margin-bottom:5px}
+.ps-bar{flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,.08);transition:background .3s}
+</style>
+
+<div class="pg-head f0">
+  <div>
+    <div class="pg-title">My Profile</div>
+    <div class="pg-sub">Manage your account information and security settings</div>
+  </div>
+</div>
+
+<!-- PROFILE HERO -->
+<div class="profile-hero f1">
+  <div class="av-wrap">
+    <div class="av-circle">{{ client.name|first|upper }}</div>
+    <div class="av-status"></div>
+  </div>
+  <div class="hero-info">
+    <div class="hero-name">{{ client.name }}</div>
+    <div class="hero-user">@{{ client.user.username }} · {{ client.email }}</div>
+    <div class="hero-tags">
+      <span class="h-tag" style="background:var(--green-d);color:var(--green);border:1px solid rgba(0,255,136,.2)">✓ Active Client</span>
+      <span class="h-tag" style="background:var(--purple-d);color:var(--purple);border:1px solid rgba(139,92,246,.2)">{{ client.managed_websites.count }} Website(s)</span>
+      <span class="h-tag" style="background:var(--cyan-d);color:var(--cyan);border:1px solid rgba(0,212,255,.2)">Member since {{ client.user.date_joined|date:"M Y" }}</span>
+    </div>
+  </div>
 </div>
 
 <div class="row g-3">
-  <!-- Profile info -->
   <div class="col-lg-7">
-    <div class="jt-card mb-3">
-      <div class="jt-card-head"><span class="jt-card-title"><i class="fas fa-user" style="color:var(--purple)"></i> Profile Information</span></div>
-      <div class="jt-card-body">
+
+    <!-- PROFILE FORM -->
+    <div class="form-sec f2">
+      <div class="form-sec-head">
+        <div class="form-sec-icon" style="background:var(--purple-d);color:var(--purple)"><i class="fas fa-user"></i></div>
+        <div class="form-sec-title">Profile Information</div>
+      </div>
+      <div class="form-sec-body">
         <form method="post">
           {% csrf_token %}
           <input type="hidden" name="action" value="update_profile">
           <div class="row g-3">
             <div class="col-md-6">
               <label class="f-label">Full Name *</label>
-              <input type="text" name="name" class="f-input" value="{{ client.name }}" required>
+              <input type="text" name="name" class="f-input" value="{{ client.name }}" required autofocus>
             </div>
             <div class="col-md-6">
               <label class="f-label">Phone Number</label>
@@ -31,20 +113,27 @@
             </div>
             <div class="col-12">
               <label class="f-label">Business / Company Name</label>
-              <input type="text" name="company" class="f-input" value="{{ client.company }}" placeholder="Your business name...">
+              <input type="text" name="company" class="f-input" value="{{ client.company }}" placeholder="Your business name">
             </div>
             <div class="col-12">
-              <button type="submit" class="jt-btn btn-primary"><i class="fas fa-save"></i> Save Changes</button>
+              <button type="submit" class="jt-btn btn-primary" style="padding:10px 24px"><i class="fas fa-save"></i> Save Changes</button>
             </div>
           </div>
         </form>
       </div>
     </div>
 
-    <!-- Change password -->
-    <div class="jt-card">
-      <div class="jt-card-head"><span class="jt-card-title"><i class="fas fa-lock" style="color:var(--yellow)"></i> Change Password</span></div>
-      <div class="jt-card-body">
+    <!-- PASSWORD FORM -->
+    <div class="form-sec f3">
+      <div class="form-sec-head">
+        <div class="form-sec-icon" style="background:var(--yellow-d);color:var(--yellow)"><i class="fas fa-lock"></i></div>
+        <div class="form-sec-title">Change Password</div>
+      </div>
+      <div class="form-sec-body">
+        <div class="jt-alert jt-alert-info" style="margin-bottom:18px;font-size:13px">
+          <i class="fas fa-shield-halved fa-sm" style="flex-shrink:0"></i>
+          Use a strong password with uppercase, numbers, and symbols to keep your account secure.
+        </div>
         <form method="post">
           {% csrf_token %}
           <input type="hidden" name="action" value="change_password">
@@ -55,41 +144,119 @@
             </div>
             <div class="col-md-6">
               <label class="f-label">New Password *</label>
-              <input type="password" name="new_password" class="f-input" placeholder="Min. 8 characters" required>
+              <input type="password" name="new_password" id="pw1" class="f-input" placeholder="Min. 8 characters" required>
+              <div id="pwStrength" style="display:none;margin-top:8px">
+                <div class="ps-bars">
+                  <div class="ps-bar" id="ps1"></div><div class="ps-bar" id="ps2"></div>
+                  <div class="ps-bar" id="ps3"></div><div class="ps-bar" id="ps4"></div>
+                </div>
+                <div id="psLabel" style="font-family:var(--mono);font-size:10px;color:var(--text-3)"></div>
+              </div>
             </div>
             <div class="col-md-6">
               <label class="f-label">Confirm New Password *</label>
-              <input type="password" name="confirm_password" class="f-input" placeholder="Repeat new password" required>
+              <input type="password" name="confirm_password" id="pw2" class="f-input" placeholder="Repeat new password" required>
             </div>
             <div class="col-12">
-              <button type="submit" class="jt-btn btn-yellow"><i class="fas fa-key"></i> Update Password</button>
+              <button type="submit" class="jt-btn btn-yellow" style="padding:10px 24px"><i class="fas fa-key"></i> Update Password</button>
             </div>
           </div>
         </form>
       </div>
     </div>
+
   </div>
 
-  <!-- Right: account info -->
   <div class="col-lg-5">
-    <!-- Avatar card -->
-    <div class="jt-card mb-3" style="text-align:center;padding:32px 20px">
-      <div style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--cyan));display:flex;align-items:center;justify-content:center;font-family:var(--head);font-size:28px;font-weight:800;color:var(--bg);margin:0 auto 14px">{{ client.name|first|upper }}</div>
-      <div style="font-family:var(--head);font-size:18px;font-weight:700;color:var(--text);margin-bottom:4px">{{ client.name }}</div>
-      <div style="font-family:var(--mono);font-size:12px;color:var(--text-3);margin-bottom:14px">@{{ client.user.username }}</div>
-      <span class="jt-badge b-active" style="font-size:11px">Client Account</span>
+
+    <!-- ACCOUNT STATS -->
+    <div class="form-sec f2 mb-3">
+      <div class="form-sec-head">
+        <div class="form-sec-icon" style="background:var(--cyan-d);color:var(--cyan)"><i class="fas fa-chart-bar"></i></div>
+        <div class="form-sec-title">Account Overview</div>
+      </div>
+      <div class="form-sec-body">
+        <div class="acc-stats">
+          <div class="acc-stat">
+            <div class="acc-stat-val" style="color:var(--purple)">{{ client.managed_websites.count }}</div>
+            <div class="acc-stat-label">Websites</div>
+          </div>
+          <div class="acc-stat">
+            <div class="acc-stat-val" style="color:var(--cyan)">{{ client.user.date_joined|date:"Y" }}</div>
+            <div class="acc-stat-label">Joined Year</div>
+          </div>
+        </div>
+
+        <!-- Account security indicator -->
+        <div style="margin-bottom:16px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+            <span style="font-family:var(--mono);font-size:10px;color:var(--text-3);letter-spacing:1px;text-transform:uppercase">Account Security</span>
+            <span style="font-family:var(--mono);font-size:10px;color:var(--green)">Good</span>
+          </div>
+          <div class="sec-indicator">
+            <div class="sec-bar lit-green"></div>
+            <div class="sec-bar lit-green"></div>
+            <div class="sec-bar lit-green"></div>
+            <div class="sec-bar" style="background:var(--bg2)"></div>
+          </div>
+          <div style="font-size:12px;color:var(--text-2);line-height:1.6">Your account is secure. To reach maximum security, enable two-factor authentication.</div>
+        </div>
+
+        <div class="det-row">
+          <span class="det-key">Username</span>
+          <span class="det-val" style="font-family:var(--mono);color:var(--cyan)">@{{ client.user.username }}</span>
+        </div>
+        <div class="det-row">
+          <span class="det-key">Member Since</span>
+          <span class="det-val">{{ client.user.date_joined|date:"d M Y" }}</span>
+        </div>
+        <div class="det-row">
+          <span class="det-key">Last Login</span>
+          <span class="det-val">{{ client.user.last_login|date:"d M Y" }}</span>
+        </div>
+        <div class="det-row">
+          <span class="det-key">Account Type</span>
+          <span class="det-val"><span class="jt-badge b-active" style="font-size:10px">Client</span></span>
+        </div>
+      </div>
     </div>
 
-    <!-- Account details readonly -->
-    <div class="jt-card">
-      <div class="jt-card-head"><span class="jt-card-title"><i class="fas fa-circle-info" style="color:var(--cyan)"></i> Account Details</span></div>
-      <div class="jt-card-body">
-        <div class="info-row"><span class="info-key">Username</span><span class="info-val" style="font-family:var(--mono);color:var(--cyan)">@{{ client.user.username }}</span></div>
-        <div class="info-row"><span class="info-key">Member Since</span><span class="info-val">{{ client.user.date_joined|date:"d M Y" }}</span></div>
-        <div class="info-row"><span class="info-key">Last Login</span><span class="info-val">{{ client.user.last_login|date:"d M Y" }}</span></div>
-        <div class="info-row" style="border:none"><span class="info-key">Websites</span><span class="info-val" style="color:var(--purple)">{{ client.managed_websites.count }}</span></div>
+    <!-- QUICK LINKS -->
+    <div class="form-sec f3">
+      <div class="form-sec-head">
+        <div class="form-sec-icon" style="background:var(--green-d);color:var(--green)"><i class="fas fa-bolt"></i></div>
+        <div class="form-sec-title">Quick Links</div>
+      </div>
+      <div class="form-sec-body" style="padding:14px">
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <a href="{% url 'portal_billing' %}" class="jt-btn btn-ghost" style="justify-content:flex-start"><i class="fas fa-coins" style="color:var(--green)"></i> Billing & Payments</a>
+          <a href="{% url 'portal_website_list' %}" class="jt-btn btn-ghost" style="justify-content:flex-start"><i class="fas fa-globe" style="color:var(--purple)"></i> My Websites</a>
+          <a href="{% url 'portal_support' %}" class="jt-btn btn-ghost" style="justify-content:flex-start"><i class="fas fa-headset" style="color:var(--cyan)"></i> Contact Support</a>
+          <a href="{% url 'portal_notifications' %}" class="jt-btn btn-ghost" style="justify-content:flex-start"><i class="fas fa-bell" style="color:var(--yellow)"></i> Notifications</a>
+          <a href="{% url 'portal_logout' %}" class="jt-btn btn-ghost" style="justify-content:flex-start;color:rgba(255,59,92,.6)" onclick="return confirm('Sign out of your account?')"><i class="fas fa-power-off"></i> Sign Out</a>
+        </div>
       </div>
     </div>
   </div>
 </div>
+
+<script>
+const pw=document.getElementById('pw1');
+const bars=[1,2,3,4].map(i=>document.getElementById('ps'+i));
+const lbl=document.getElementById('psLabel');
+const wrap=document.getElementById('pwStrength');
+const colors=['','#ff3b5c','#ffb800','#00d4ff','#00ff88'];
+const labels=['','Weak','Fair','Good','Strong'];
+pw.addEventListener('input',function(){
+  if(!this.value){wrap.style.display='none';return}
+  wrap.style.display='block';
+  let s=0;
+  if(this.value.length>=8)s++;
+  if(this.value.length>=12)s++;
+  if(/[A-Z]/.test(this.value)&&/[a-z]/.test(this.value))s++;
+  if(/[0-9]/.test(this.value)||/[^A-Za-z0-9]/.test(this.value))s++;
+  bars.forEach((b,i)=>{b.style.background=i<s?colors[s]:'rgba(255,255,255,.08)'});
+  lbl.textContent=labels[s];lbl.style.color=colors[s];
+});
+</script>
 {% endblock %}

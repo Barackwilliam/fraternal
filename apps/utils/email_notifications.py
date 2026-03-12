@@ -67,21 +67,34 @@ def _send(subject: str, template: str, context: dict, to_email: str) -> bool:
 # 1. HOSTING EXPIRY WARNING
 # ══════════════════════════════════════════════════════════════════════════════
 
-def send_hosting_expiry_warning(website) -> bool:
+def send_hosting_expiry_warning(website, days: int = None) -> bool:
     """
-    Send hosting expiry warning to client.
-    Call when days_until_expiry matches warning_days_before threshold.
+    Send the correct expiry warning email based on days remaining.
+      - 7 days  → hosting_7days_warning.html  (friendly reminder)
+      - 3 days  → hosting_3days_warning.html  (urgent notice)
+      - other   → hosting_7days_warning.html  (fallback)
     """
     client = website.client
+    raw_days = (website.hosting_end_date - timezone.now().date()).days
+    if days is None:
+        days = raw_days
+
+    if days <= 3:
+        template  = 'hosting_3days_warning.html'
+        subject   = f"🚨 URGENT — {website.name} suspends in 3 days! Renew now"
+    else:
+        template  = 'hosting_7days_warning.html'
+        subject   = f"⏰ Hosting Expiry Notice — {website.name} expires in 7 days"
+
     return _send(
-        subject=f"⚠ Hosting Expiry Notice — {website.name} expires in {website.days_until_expiry} days",
-        template='hosting_expiry_warning.html',
+        subject=subject,
+        template=template,
         context={
             'client_name':  client.name,
             'website_name': website.name,
             'website_url':  website.url,
             'expiry_date':  website.hosting_end_date.strftime('%d %B %Y'),
-            'days_left':    website.days_until_expiry,
+            'days_left':    max(days, 0),
             'monthly_cost': website.monthly_cost,
         },
         to_email=client.email,
@@ -93,18 +106,19 @@ def send_hosting_expiry_warning(website) -> bool:
 # ══════════════════════════════════════════════════════════════════════════════
 
 def send_website_suspended(website, reason: str = 'Hosting payment overdue') -> bool:
-    """Send suspension notice immediately when website is suspended."""
+    """Send suspension notice with full restore instructions."""
     client = website.client
     return _send(
-        subject=f"🔒 Your website '{website.name}' has been suspended",
+        subject=f"🔒 SUSPENDED — {website.name} is now offline | Pay to restore",
         template='website_suspended.html',
         context={
-            'client_name':          client.name,
-            'website_name':         website.name,
-            'website_url':          website.url,
-            'reason':               reason,
-            'suspended_date':       timezone.now().strftime('%d %B %Y'),
-            'suspension_message':   website.suspension_message,
+            'client_name':        client.name,
+            'website_name':       website.name,
+            'website_url':        website.url,
+            'reason':             reason,
+            'suspended_date':     timezone.now().strftime('%d %B %Y'),
+            'suspension_message': getattr(website, 'suspension_message', ''),
+            'monthly_cost':       website.monthly_cost,
         },
         to_email=client.email,
     )
@@ -242,10 +256,19 @@ def send_bulk_expiry_warnings():
             logger.info(f"[AutoSuspend] {site.name} — expired {site.hosting_end_date}")
             continue
 
-        # ── Expiry warnings for still-active sites ────────────────
+        # ── Expiry warnings for still-active sites ─────────────────
+        # 7 days: friendly reminder | 3 days: urgent | 1 day: final
         if site.send_expiry_warnings:
-            if raw_days in [site.warning_days_before, 7, 3, 1]:
-                ok = send_hosting_expiry_warning(site)
+            if raw_days == 7:
+                ok = send_hosting_expiry_warning(site, days=7)
+                sent += 1 if ok else 0
+                errors += 0 if ok else 1
+            elif raw_days == 3:
+                ok = send_hosting_expiry_warning(site, days=3)
+                sent += 1 if ok else 0
+                errors += 0 if ok else 1
+            elif raw_days == 1:
+                ok = send_hosting_expiry_warning(site, days=1)
                 sent += 1 if ok else 0
                 errors += 0 if ok else 1
             else:
