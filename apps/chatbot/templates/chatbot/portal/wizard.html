@@ -1,0 +1,413 @@
+{% extends 'chatbot/portal/base.html' %}
+{% block title %}Setup Wizard — Step {{ step }}{% endblock %}
+{% block page_title %}Bot Setup Wizard{% endblock %}
+{% block breadcrumb %}Step {{ step }} of 6{% endblock %}
+{% block content %}
+<style>
+.wizard-wrap{max-width:700px;margin:0 auto}
+.steps-bar{display:flex;align-items:center;margin-bottom:32px}
+.step-item{display:flex;align-items:center;flex:1}
+.step-circle{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;flex-shrink:0;transition:all .2s}
+.step-done{background:var(--green);color:var(--bg);border:2px solid var(--green)}
+.step-active{background:var(--purple);color:#fff;border:2px solid var(--purple);box-shadow:0 0 0 4px rgba(124,58,237,.2)}
+.step-todo{background:var(--card);color:var(--text-3);border:2px solid var(--border)}
+.step-line{flex:1;height:2px;background:var(--border);margin:0 6px}
+.step-line.done{background:var(--green)}
+.step-label{font-family:var(--mono);font-size:9px;color:var(--text-3);text-align:center;margin-top:4px;text-transform:uppercase;letter-spacing:.5px}
+
+.wizard-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:32px}
+.wiz-title{font-family:var(--head);font-size:20px;font-weight:800;color:var(--text);margin-bottom:6px}
+.wiz-sub{font-size:14px;color:var(--text-2);margin-bottom:28px}
+
+.plan-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.plan-opt input{display:none}
+.plan-card{border:2px solid var(--border);border-radius:14px;padding:18px;text-align:center;cursor:pointer;transition:all .2s}
+.plan-opt input:checked + .plan-card{border-color:var(--purple);background:var(--purple-d)}
+.plan-opt input:checked + .plan-card .plan-name{color:var(--purple)}
+.plan-name{font-family:var(--head);font-size:16px;font-weight:800;color:var(--text);margin-bottom:4px}
+.plan-price{font-family:var(--mono);font-size:12px;color:var(--text-2);margin-bottom:8px}
+.plan-feat{font-size:11px;color:var(--text-3);line-height:1.7}
+.plan-popular{position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--purple);color:#fff;font-family:var(--mono);font-size:9px;font-weight:700;padding:2px 10px;border-radius:100px;white-space:nowrap}
+
+.svc-item{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:13px 16px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between}
+.svc-name{font-weight:700;color:var(--text);font-size:13px}
+.svc-desc{font-size:12px;color:var(--text-2);margin-top:2px}
+.svc-price{font-family:var(--mono);font-size:11px;color:var(--green);margin-top:3px}
+.del-btn{background:var(--red-d);border:1px solid rgba(239,68,68,.2);color:var(--red);padding:4px 10px;border-radius:7px;font-size:11px;cursor:pointer;font-family:var(--mono);transition:all .15s;flex-shrink:0}
+.del-btn:hover{background:var(--red);color:#fff}
+
+.nav-btns{display:flex;justify-content:space-between;margin-top:28px;gap:12px}
+
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border)}
+.toggle-row:last-child{border-bottom:none}
+.toggle-label{font-size:13.5px;font-weight:600;color:var(--text)}
+.toggle-sub{font-size:12px;color:var(--text-2);margin-top:2px}
+.toggle-sw{position:relative;width:42px;height:24px;flex-shrink:0}
+.toggle-sw input{opacity:0;width:0;height:0}
+.toggle-sw .slider{position:absolute;inset:0;background:rgba(255,255,255,.12);border-radius:100px;cursor:pointer;transition:.3s}
+.toggle-sw input:checked + .slider{background:var(--green)}
+.toggle-sw .slider::before{content:'';position:absolute;width:18px;height:18px;border-radius:50%;background:#fff;top:3px;left:3px;transition:.3s}
+.toggle-sw input:checked + .slider::before{left:21px}
+
+.webhook-box{background:rgba(0,220,130,.05);border:1px solid rgba(0,220,130,.15);border-radius:12px;padding:16px;margin-top:16px}
+.wh-url-text{font-family:var(--mono);font-size:11px;color:var(--green);word-break:break-all}
+</style>
+
+<div class="wizard-wrap">
+  <!-- PROGRESS BAR -->
+  <div class="steps-bar mb-3">
+    {% for i in "123456" %}
+    {% with n=forloop.counter %}
+    <div style="display:flex;flex-direction:column;align-items:center;flex:{% if not forloop.last %}1{% endif %}">
+      <div style="display:flex;align-items:center;width:100%">
+        <div class="step-circle {% if n < step %}step-done{% elif n == step %}step-active{% else %}step-todo{% endif %}">
+          {% if n < step %}<i class="fas fa-check" style="font-size:12px"></i>{% else %}{{ n }}{% endif %}
+        </div>
+        {% if not forloop.last %}<div class="step-line {% if n < step %}done{% endif %}"></div>{% endif %}
+      </div>
+    </div>
+    {% endwith %}
+    {% endfor %}
+  </div>
+  <div style="display:flex;justify-content:space-between;margin-bottom:24px;font-family:var(--mono);font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.5px">
+    <span>Basic Info</span><span>Messages</span><span>Services</span><span>FAQs</span><span>WhatsApp</span><span>Deploy</span>
+  </div>
+
+  <div class="wizard-card">
+
+    <!-- STEP 1 — Basic Info -->
+    {% if step == 1 %}
+    <div class="wiz-title">🤖 Name Your Bot</div>
+    <div class="wiz-sub">Tell us about your business and what your bot should do.</div>
+    <form method="post">
+      {% csrf_token %}<input type="hidden" name="action" value="save_step1">
+      <div class="row g-3 mb-3">
+        <div class="col-6">
+          <label class="f-label">Bot Name *</label>
+          <input type="text" name="bot_name" class="f-input" placeholder="e.g. Amara, Juma, Helper" required value="{{ bot.bot_name|default:'' }}">
+        </div>
+        <div class="col-6">
+          <label class="f-label">Business Name *</label>
+          <input type="text" name="business_name" class="f-input" placeholder="Your business name" required value="{{ bot.business_name|default:client.business_name }}">
+        </div>
+      </div>
+      <div class="mb-3">
+        <label class="f-label">Business Description *</label>
+        <textarea name="description" class="f-input" style="min-height:100px" placeholder="Describe what your business does, what you sell, who your customers are..." required>{{ bot.description|default:'' }}</textarea>
+      </div>
+      <div class="row g-3 mb-3">
+        <div class="col-6">
+          <label class="f-label">Language</label>
+          <select name="language" class="f-input">
+            <option value="sw+en" {% if bot.language == 'sw+en' %}selected{% endif %}>Swahili + English (auto-detect)</option>
+            <option value="en" {% if bot.language == 'en' %}selected{% endif %}>English only</option>
+            <option value="sw" {% if bot.language == 'sw' %}selected{% endif %}>Swahili only</option>
+          </select>
+        </div>
+        <div class="col-6">
+          <label class="f-label">Bot Personality</label>
+          <select name="tone" class="f-input">
+            <option value="friendly" {% if bot.tone == 'friendly' %}selected{% endif %}>Friendly & Warm 😊</option>
+            <option value="professional" {% if bot.tone == 'professional' %}selected{% endif %}>Professional</option>
+            <option value="casual" {% if bot.tone == 'casual' %}selected{% endif %}>Casual & Fun</option>
+            <option value="formal" {% if bot.tone == 'formal' %}selected{% endif %}>Formal</option>
+          </select>
+        </div>
+      </div>
+      <div class="nav-btns">
+        <span></span>
+        <button type="submit" class="jt-btn btn-green"><i class="fas fa-arrow-right"></i> Continue</button>
+      </div>
+    </form>
+
+    <!-- STEP 2 — Messages -->
+    {% elif step == 2 %}
+    <div class="wiz-title">💬 Configure Messages</div>
+    <div class="wiz-sub">Customize what your bot says in different situations.</div>
+    <form method="post">
+      {% csrf_token %}<input type="hidden" name="action" value="save_step2">
+      <div class="mb-3">
+        <label class="f-label">Greeting Message *</label>
+        <textarea name="greeting_msg" class="f-input" style="min-height:80px" required>{{ bot.greeting_msg }}</textarea>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--text-3);margin-top:4px">Sent automatically when a new customer messages you</div>
+      </div>
+      <div class="mb-3">
+        <label class="f-label">Fallback Message</label>
+        <textarea name="fallback_msg" class="f-input">{{ bot.fallback_msg }}</textarea>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--text-3);margin-top:4px">Sent when the bot doesn't understand</div>
+      </div>
+      <div class="mb-3">
+        <label class="f-label">Human Handoff Message</label>
+        <textarea name="human_handoff_msg" class="f-input">{{ bot.human_handoff_msg }}</textarea>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--text-3);margin-top:4px">Sent when customer requests a human agent</div>
+      </div>
+      <div>
+        <div class="toggle-row">
+          <div><div class="toggle-label">Ask for customer name</div><div class="toggle-sub">Bot will ask new customers their name</div></div>
+          <label class="toggle-sw"><input type="checkbox" name="collect_name" {% if bot.collect_name %}checked{% endif %}><span class="slider"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div><div class="toggle-label">Ask for phone number</div><div class="toggle-sub">Bot will ask for customer's phone number</div></div>
+          <label class="toggle-sw"><input type="checkbox" name="collect_phone" {% if bot.collect_phone %}checked{% endif %}><span class="slider"></span></label>
+        </div>
+      </div>
+      <div class="nav-btns">
+        <a href="/chatbot/setup/?step=1" class="jt-btn btn-ghost"><i class="fas fa-arrow-left"></i> Back</a>
+        <button type="submit" class="jt-btn btn-green"><i class="fas fa-arrow-right"></i> Continue</button>
+      </div>
+    </form>
+
+    <!-- STEP 3 — Services -->
+    {% elif step == 3 %}
+    <div class="wiz-title">🛍️ Add Your Services</div>
+    <div class="wiz-sub">Tell the bot what you sell or offer. Add as many as needed.</div>
+
+    {% if services %}
+    <div style="margin-bottom:20px">
+      {% for svc in services %}
+      <div class="svc-item">
+        <div>
+          <div class="svc-name">{{ svc.name }}</div>
+          <div class="svc-desc">{{ svc.description|truncatechars:80 }}</div>
+          {% if svc.price %}<div class="svc-price">{{ svc.price }}</div>{% endif %}
+        </div>
+        <form method="post" style="margin-left:12px">
+          {% csrf_token %}<input type="hidden" name="action" value="delete_service"><input type="hidden" name="service_id" value="{{ svc.id }}">
+          <button type="submit" class="del-btn"><i class="fas fa-trash"></i></button>
+        </form>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <form method="post">
+      {% csrf_token %}<input type="hidden" name="action" value="add_service">
+      <div class="row g-2 mb-2">
+        <div class="col-6"><input type="text" name="service_name" class="f-input" placeholder="Service name *" required></div>
+        <div class="col-6"><input type="text" name="service_price" class="f-input" placeholder="Price (optional)"></div>
+      </div>
+      <div class="mb-3"><textarea name="service_desc" class="f-input" style="min-height:70px" placeholder="Describe this service..." required></textarea></div>
+      <button type="submit" class="jt-btn btn-ghost" style="width:100%;justify-content:center"><i class="fas fa-plus"></i> Add Service</button>
+    </form>
+
+    <div class="nav-btns">
+      <a href="/chatbot/setup/?step=2" class="jt-btn btn-ghost"><i class="fas fa-arrow-left"></i> Back</a>
+      <form method="post"><{% csrf_token %}<input type="hidden" name="action" value="next_step3"><button type="submit" class="jt-btn btn-green">Continue <i class="fas fa-arrow-right"></i></button></form>
+    </div>
+
+    <!-- STEP 4 — FAQs -->
+    {% elif step == 4 %}
+    <div class="wiz-title">❓ Add FAQs</div>
+    <div class="wiz-sub">Add common questions your customers ask. The bot will answer them automatically.</div>
+
+    {% if faqs %}
+    <div style="margin-bottom:20px">
+      {% for faq in faqs %}
+      <div class="svc-item">
+        <div>
+          <div class="svc-name">{{ faq.question|truncatechars:70 }}</div>
+          <div class="svc-desc">{{ faq.answer|truncatechars:80 }}</div>
+        </div>
+        <form method="post" style="margin-left:12px">
+          {% csrf_token %}<input type="hidden" name="action" value="delete_faq"><input type="hidden" name="faq_id" value="{{ faq.id }}">
+          <button type="submit" class="del-btn"><i class="fas fa-trash"></i></button>
+        </form>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <form method="post">
+      {% csrf_token %}<input type="hidden" name="action" value="add_faq">
+      <div class="mb-2"><textarea name="faq_question" class="f-input" style="min-height:60px" placeholder="Question e.g. What are your working hours?..." required></textarea></div>
+      <div class="mb-3"><textarea name="faq_answer" class="f-input" style="min-height:60px" placeholder="Answer..." required></textarea></div>
+      <button type="submit" class="jt-btn btn-ghost" style="width:100%;justify-content:center"><i class="fas fa-plus"></i> Add FAQ</button>
+    </form>
+
+    <div class="nav-btns">
+      <a href="/chatbot/setup/?step=3" class="jt-btn btn-ghost"><i class="fas fa-arrow-left"></i> Back</a>
+      <form method="post">{% csrf_token %}<input type="hidden" name="action" value="next_step4"><button type="submit" class="jt-btn btn-green">Continue <i class="fas fa-arrow-right"></i></button></form>
+    </div>
+
+    <!-- STEP 5 — WhatsApp -->
+    {% elif step == 5 %}
+    <div class="wiz-title">📱 Your WhatsApp Number</div>
+    <div class="wiz-sub">Enter the WhatsApp number your customers will use to contact your bot.</div>
+
+    <div class="jt-alert jt-alert-success mb-4">
+      <i class="fab fa-whatsapp fa-sm" style="flex-shrink:0;color:#25d366"></i>
+      <div>Our team will register your number and connect it to your bot. It will be live within 24 hours. <strong>You don't need to do anything else.</strong></div>
+    </div>
+
+    <form method="post" id="step5-form">
+      {% csrf_token %}<input type="hidden" name="action" value="save_step5">
+      <div class="mb-4">
+        <label class="f-label">WhatsApp Number <span style="color:var(--red)">*</span></label>
+        <div style="position:relative">
+          <span style="position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:20px;color:#25d366;pointer-events:none">
+            <i class="fab fa-whatsapp"></i>
+          </span>
+          <input type="tel" name="whatsapp_number" id="wa-input" class="f-input"
+            placeholder="+255 7XX XXX XXX"
+            value="{{ bot.whatsapp_number }}"
+            required
+            style="font-size:18px;font-weight:700;letter-spacing:1px;text-align:center;padding:14px 14px 14px 46px">
+        </div>
+        <div id="wa-hint" style="font-family:var(--mono);font-size:10px;color:var(--text-3);margin-top:6px;text-align:center">
+          Enter number with country code · Example: +255750123456
+        </div>
+        <div id="wa-error" style="display:none;font-size:12px;color:var(--red);margin-top:6px;text-align:center">
+          <i class="fas fa-circle-exclamation"></i> <span></span>
+        </div>
+      </div>
+
+      <div style="background:rgba(245,158,11,.07);border:1.5px solid rgba(245,158,11,.2);border-radius:12px;padding:12px 15px;margin-bottom:20px;display:flex;gap:10px;font-size:13px;color:var(--yellow)">
+        <i class="fas fa-triangle-exclamation fa-sm" style="flex-shrink:0;margin-top:2px"></i>
+        <div>This number must be <strong>removed from the WhatsApp app</strong> on your phone before it can be used by the bot.</div>
+      </div>
+
+      <div class="nav-btns">
+        <a href="/chatbot/setup/?step=4" class="jt-btn btn-ghost"><i class="fas fa-arrow-left"></i> Back</a>
+        <button type="submit" id="step5-submit" class="jt-btn btn-green">Continue <i class="fas fa-arrow-right"></i></button>
+      </div>
+    </form>
+
+    <script>
+    (function(){
+      const inp   = document.getElementById('wa-input');
+      const err   = document.getElementById('wa-error');
+      const hint  = document.getElementById('wa-hint');
+      const btn   = document.getElementById('step5-submit');
+
+      function showErr(msg){ err.querySelector('span').textContent=msg; err.style.display='block'; hint.style.display='none'; inp.style.borderColor='var(--red)'; btn.disabled=true; }
+      function clearErr(){ err.style.display='none'; hint.style.display='block'; inp.style.borderColor=''; btn.disabled=false; }
+
+      function formatNumber(val){
+        // Strip everything except digits and leading +
+        let digits = val.replace(/[^\d]/g,'');
+        // Tanzania: 07xx → +25507xx, 7xx → +2557xx
+        if(digits.startsWith('255')) return '+' + digits;
+        if(digits.startsWith('0') && digits.length >= 9) return '+255' + digits.slice(1);
+        if(digits.length >= 9 && !val.startsWith('+')) return '+255' + digits;
+        return val;
+      }
+
+      inp.addEventListener('blur', function(){
+        let v = this.value.trim();
+        if(!v){ showErr('Phone number is required'); return; }
+        let formatted = formatNumber(v);
+        this.value = formatted;
+        let digits = formatted.replace(/\D/g,'');
+        if(digits.length < 7 || digits.length > 15){
+          showErr('Invalid number. Example: +255750123456');
+        } else {
+          clearErr();
+        }
+      });
+
+      inp.addEventListener('input', function(){
+        if(err.style.display !== 'none') clearErr();
+      });
+
+      document.getElementById('step5-form').addEventListener('submit', function(e){
+        let v = inp.value.trim();
+        if(!v){ e.preventDefault(); showErr('Please enter your WhatsApp number.'); return; }
+        let digits = v.replace(/\D/g,'');
+        if(digits.length < 7 || digits.length > 15){ e.preventDefault(); showErr('Invalid number. Example: +255750123456'); }
+      });
+    })();
+    </script>
+
+    <!-- STEP 6 — Deploy -->
+    {% elif step == 6 %}
+    <div class="wiz-title">🚀 Launch Your Bot!</div>
+    <div class="wiz-sub">Start free for 7 days — billing begins after your trial.</div>
+
+    {% if plans %}
+    <form method="post" id="deploy-form">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="deploy">
+      <input type="hidden" name="plan_id" id="selectedPlanId" value="{{ plans.0.id }}">
+
+      <div class="plan-grid" style="margin-bottom:24px">
+        {% for plan in plans %}
+        <label class="plan-opt" style="position:relative" onclick="document.getElementById('selectedPlanId').value='{{ plan.id }}'">
+          {% if plan.slug == 'pro' %}<div class="plan-popular">Popular</div>{% endif %}
+          <input type="radio" name="plan_radio" value="{{ plan.id }}"
+            {% if forloop.first %}checked{% endif %}
+            onchange="document.getElementById('selectedPlanId').value=this.value">
+          <div class="plan-card">
+            <div class="plan-name">{{ plan.name }}</div>
+            <div class="plan-price">TZS {{ plan.price_tzs|floatformat:0 }}/month</div>
+            <div class="plan-feat">
+              {% if plan.is_unlimited %}Unlimited messages{% else %}{{ plan.msg_limit }} messages/month{% endif %}
+            </div>
+          </div>
+        </label>
+        {% endfor %}
+      </div>
+
+      <div style="border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:20px">
+        <div style="padding:11px 16px;background:rgba(255,255,255,.03);font-size:11px;font-weight:700;color:var(--text-2);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border)">
+          What happens after you register
+        </div>
+        <div style="display:flex;flex-direction:column">
+          <div style="display:flex;gap:14px;padding:13px 16px;border-bottom:1px solid var(--border);align-items:flex-start">
+            <div style="width:26px;height:26px;border-radius:50%;background:rgba(0,220,130,.12);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0">1</div>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:var(--text)">Our team connects your number</div>
+              <div style="font-size:12px;color:var(--text-2);margin-top:2px">Within 24 hours, your bot will be connected to WhatsApp. You will be notified when ready.</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:14px;padding:13px 16px;border-bottom:1px solid var(--border);align-items:flex-start">
+            <div style="width:26px;height:26px;border-radius:50%;background:rgba(0,220,130,.12);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0">2</div>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:var(--text)">Use free for 7 days</div>
+              <div style="font-size:12px;color:var(--text-2);margin-top:2px">No charges during the trial. Test your bot with real customers.</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:14px;padding:13px 16px;align-items:flex-start">
+            <div style="width:26px;height:26px;border-radius:50%;background:rgba(0,220,130,.12);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0">3</div>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:var(--text)">Pay to continue</div>
+              <div style="font-size:12px;color:var(--text-2);margin-top:2px">After 7 days we will send you payment instructions via NMB Bank · <strong>21410034200</strong> · WILLIAM CHIPINDI.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-btns">
+        <a href="/chatbot/setup/?step=5" class="jt-btn btn-ghost"><i class="fas fa-arrow-left"></i> Go Back</a>
+        <button type="submit" class="jt-btn btn-green" style="padding:12px 32px;font-size:15px">
+          <i class="fas fa-rocket"></i> Launch My Bot!
+        </button>
+      </div>
+    </form>
+
+    {% else %}
+    <div style="text-align:center;padding:32px 20px">
+      <div style="font-size:48px;margin-bottom:16px">⚙️</div>
+      <div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:8px">Welcome!</div>
+      <div style="font-size:13px;color:var(--text-2);max-width:340px;margin:0 auto 24px;line-height:1.7">
+        Our team is finalising your bot connection. Wait 24 hours to get started, or contact us directly if urgent.
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;max-width:280px;margin:0 auto">
+        <a href="https://wa.me/255750910158" target="_blank" class="jt-btn btn-green" style="justify-content:center">
+          <i class="fab fa-whatsapp"></i> Contact via WhatsApp
+        </a>
+        <a href="mailto:info@jamiitek.com" class="jt-btn btn-ghost" style="justify-content:center">
+          <i class="fas fa-envelope"></i> info@jamiitek.com
+        </a>
+      </div>
+      <div style="margin-top:24px">
+        <a href="/chatbot/setup/?step=5" class="jt-btn btn-ghost btn-sm">
+          <i class="fas fa-arrow-left"></i> Go Back
+        </a>
+      </div>
+    </div>
+    {% endif %}
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}

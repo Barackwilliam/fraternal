@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}JamiiBot{% endblock %} — JamiiTek ChatBot</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#040608;--bg2:#070c14;--card:rgba(255,255,255,.028);--card-s:rgba(255,255,255,.05);
+      --border:rgba(255,255,255,.07);--border-s:rgba(0,220,130,.2);
+      --green:#00dc82;--green-d:rgba(0,220,130,.1);
+      --cyan:#00d4ff;--cyan-d:rgba(0,212,255,.1);
+      --purple:#7c3aed;--purple-d:rgba(124,58,237,.1);
+      --blue:#3b82f6;--blue-d:rgba(59,130,246,.1);
+      --yellow:#f59e0b;--yellow-d:rgba(245,158,11,.1);
+      --red:#ef4444;--red-d:rgba(239,68,68,.1);
+      --orange:#f97316;--orange-d:rgba(249,115,22,.1);
+      --text:rgba(255,255,255,.88);--text-2:rgba(255,255,255,.45);--text-3:rgba(255,255,255,.22);
+      --mono:'JetBrains Mono',monospace;--head:'Syne',sans-serif;--body:'Space Grotesk',sans-serif;
+      --sb:260px;--top:58px;--r:10px;--r-lg:16px;
+    }
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{font-family:var(--body);background:var(--bg);color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+    body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background-image:radial-gradient(ellipse at 10% 20%,rgba(124,58,237,.04) 0%,transparent 50%),radial-gradient(ellipse at 90% 80%,rgba(0,220,130,.03) 0%,transparent 50%)}
+    a{text-decoration:none}
+
+    /* SIDEBAR */
+    .jt-sb{position:fixed;top:0;left:0;bottom:0;width:var(--sb);z-index:300;background:rgba(4,6,8,.98);border-right:1px solid var(--border);display:flex;flex-direction:column;backdrop-filter:blur(30px);transition:transform .3s}
+    .sb-glow{position:absolute;top:0;right:0;bottom:0;width:1px;background:linear-gradient(180deg,transparent 0%,rgba(0,220,130,.4) 40%,rgba(0,212,255,.3) 70%,transparent 100%);opacity:.3}
+    .sb-top{padding:22px 20px 18px;border-bottom:1px solid var(--border)}
+    .sb-logo{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+    .sb-logo-ico{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,var(--purple),var(--green));display:flex;align-items:center;justify-content:center;font-size:16px}
+    .sb-logo-text{font-family:var(--head);font-size:18px;font-weight:800;background:linear-gradient(135deg,#a855f7,var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .sb-tag{font-family:var(--mono);font-size:9px;color:var(--text-3);letter-spacing:2.5px;text-transform:uppercase}
+    .sb-pulse{display:inline-flex;align-items:center;gap:6px;margin-top:10px}
+    .sb-pulse-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s infinite}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+    .sb-pulse-txt{font-family:var(--mono);font-size:10px;color:var(--green)}
+
+    .sb-nav{flex:1;overflow-y:auto;padding:12px 0;scrollbar-width:none}
+    .sb-nav::-webkit-scrollbar{display:none}
+    .sb-section{font-family:var(--mono);font-size:9px;font-weight:600;color:var(--text-3);letter-spacing:2.5px;text-transform:uppercase;padding:16px 18px 6px}
+    .sb-link{display:flex;align-items:center;gap:10px;padding:9px 12px;margin:1px 10px;border-radius:10px;color:var(--text-2);font-size:13.5px;font-weight:500;transition:all .15s;position:relative;cursor:pointer}
+    .sb-link i{width:16px;text-align:center;font-size:13px;flex-shrink:0}
+    .sb-link:hover{color:var(--text);background:var(--card-s)}
+    .sb-link.active{color:var(--green);background:var(--green-d);border:1px solid rgba(0,220,130,.15)}
+    .sb-link.active::before{content:'';position:absolute;left:-1px;top:50%;transform:translateY(-50%);width:3px;height:55%;background:var(--green);border-radius:0 3px 3px 0}
+    .sb-badge{background:var(--red-d);color:var(--red);border:1px solid rgba(239,68,68,.2);font-family:var(--mono);font-size:9px;padding:2px 6px;border-radius:5px;margin-left:auto}
+
+    .sb-foot{padding:14px 10px;border-top:1px solid var(--border)}
+    .sb-user{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:11px;background:var(--card);border:1px solid var(--border);transition:border-color .2s}
+    .sb-user:hover{border-color:rgba(0,220,130,.2)}
+    .sb-av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--green));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:var(--bg);flex-shrink:0}
+    .sb-uname{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2}
+    .sb-urole{font-family:var(--mono);font-size:9px;color:var(--text-3)}
+
+    /* TOPBAR */
+    .jt-topbar{position:fixed;top:0;left:var(--sb);right:0;z-index:200;height:var(--top);background:rgba(4,6,8,.92);border-bottom:1px solid var(--border);backdrop-filter:blur(24px);display:flex;align-items:center;justify-content:space-between;padding:0 24px;transition:left .3s}
+    .tb-left{display:flex;align-items:center;gap:12px}
+    .tb-title{font-family:var(--head);font-size:16px;font-weight:700;color:var(--text)}
+    .tb-breadcrumb{font-family:var(--mono);font-size:11px;color:var(--text-3)}
+    .tb-right{display:flex;align-items:center;gap:8px}
+    .tb-btn{width:34px;height:34px;border-radius:8px;background:var(--card);border:1px solid var(--border);color:var(--text-2);display:flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer;transition:all .15s;text-decoration:none}
+    .tb-btn:hover{border-color:var(--border-s);color:var(--green)}
+    .mob-tog{display:none;background:none;border:none;color:var(--text-2);font-size:20px;cursor:pointer;padding:4px}
+
+    /* MAIN */
+    .jt-main{margin-left:var(--sb);margin-top:var(--top);padding:28px;min-height:calc(100vh - var(--top));position:relative;z-index:1}
+
+    /* MESSAGES */
+    .jt-msgs{margin-bottom:18px}
+    .jt-msg{display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:10px;font-size:13.5px;margin-bottom:8px}
+    .jt-msg-success{background:var(--green-d);border:1px solid rgba(0,220,130,.25);color:var(--green)}
+    .jt-msg-error{background:var(--red-d);border:1px solid rgba(239,68,68,.25);color:var(--red)}
+    .jt-msg-warning{background:var(--yellow-d);border:1px solid rgba(245,158,11,.25);color:var(--yellow)}
+    .jt-msg-info{background:var(--cyan-d);border:1px solid rgba(0,212,255,.25);color:var(--cyan)}
+
+    /* CARDS */
+    .jt-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);transition:border-color .2s}
+    .jt-card-head{padding:15px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+    .jt-card-title{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--text-2);text-transform:uppercase;letter-spacing:1px;display:flex;align-items:center;gap:8px}
+    .jt-card-body{padding:20px}
+
+    /* STAT CARDS */
+    .stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:20px;position:relative;overflow:hidden;transition:all .2s}
+    .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--accent,var(--green)),transparent)}
+    .stat-card:hover{transform:translateY(-2px);border-color:var(--accent,rgba(0,220,130,.2))}
+    .sc-ico{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;margin-bottom:14px}
+    .sc-val{font-family:var(--head);font-size:28px;font-weight:800;color:var(--text);line-height:1;margin-bottom:4px}
+    .sc-label{font-size:11px;color:var(--text-2);font-family:var(--mono);text-transform:uppercase;letter-spacing:.5px}
+
+    /* BADGES */
+    .jt-badge{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10px;font-weight:600;padding:3px 9px;border-radius:6px}
+    .jt-badge::before{content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0}
+    .b-active{background:rgba(0,220,130,.1);color:var(--green);border:1px solid rgba(0,220,130,.2)}
+    .b-active::before{background:var(--green);animation:pulse 2s infinite}
+    .b-draft{background:var(--blue-d);color:var(--blue);border:1px solid rgba(59,130,246,.2)}
+    .b-draft::before{background:var(--blue)}
+    .b-suspended{background:var(--red-d);color:var(--red);border:1px solid rgba(239,68,68,.2)}
+    .b-suspended::before{background:var(--red)}
+    .b-trial{background:var(--yellow-d);color:var(--yellow);border:1px solid rgba(245,158,11,.2)}
+    .b-trial::before{background:var(--yellow);animation:pulse 1.5s infinite}
+
+    /* BUTTONS */
+    .jt-btn{display:inline-flex;align-items:center;gap:7px;font-family:var(--body);font-size:13px;font-weight:600;padding:8px 16px;border-radius:8px;border:none;cursor:pointer;transition:all .15s;text-decoration:none;white-space:nowrap}
+    .jt-btn:hover{transform:translateY(-1px)}
+    .btn-primary{background:linear-gradient(135deg,var(--purple),var(--blue));color:#fff}
+    .btn-primary:hover{box-shadow:0 6px 24px rgba(124,58,237,.35);color:#fff}
+    .btn-green{background:linear-gradient(135deg,#00dc82,#00b5d8);color:var(--bg)}
+    .btn-green:hover{box-shadow:0 6px 24px rgba(0,220,130,.35);color:var(--bg)}
+    .btn-ghost{background:transparent;color:var(--text-2);border:1px solid var(--border)}
+    .btn-ghost:hover{border-color:var(--border-s);color:var(--text)}
+    .btn-red{background:var(--red-d);color:var(--red);border:1px solid rgba(239,68,68,.2)}
+    .btn-red:hover{background:var(--red);color:#fff}
+    .btn-yellow{background:var(--yellow-d);color:var(--yellow);border:1px solid rgba(245,158,11,.2)}
+    .btn-yellow:hover{background:var(--yellow);color:var(--bg)}
+    .btn-icon{width:32px;height:32px;border-radius:8px;padding:0;justify-content:center}
+
+    /* FORMS */
+    .f-label{display:block;font-family:var(--mono);font-size:10px;font-weight:600;color:var(--text-3);letter-spacing:1px;text-transform:uppercase;margin-bottom:7px}
+    .f-input{width:100%;padding:10px 13px;background:rgba(255,255,255,.04);border:1.5px solid var(--border);border-radius:var(--r);color:var(--text);font-family:var(--body);font-size:13.5px;outline:none;transition:all .2s}
+    .f-input:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(0,220,130,.1);background:rgba(255,255,255,.06)}
+    .f-input::placeholder{color:var(--text-3)}
+    select.f-input option{background:var(--bg2);color:var(--text)}
+    textarea.f-input{resize:vertical;min-height:90px}
+
+    /* ALERTS */
+    .jt-alert{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-radius:10px;font-size:13.5px}
+    .jt-alert-success{background:var(--green-d);border:1px solid rgba(0,220,130,.25);color:var(--green)}
+    .jt-alert-danger{background:var(--red-d);border:1px solid rgba(239,68,68,.25);color:var(--red)}
+    .jt-alert-warning{background:var(--yellow-d);border:1px solid rgba(245,158,11,.25);color:var(--yellow)}
+    .jt-alert-info{background:var(--cyan-d);border:1px solid rgba(0,212,255,.25);color:var(--cyan)}
+
+    /* TABLE */
+    .jt-table{width:100%;border-collapse:collapse}
+    .jt-table th{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:1.5px;padding:12px 16px;text-align:left;border-bottom:1px solid var(--border)}
+    .jt-table td{padding:12px 16px;border-bottom:1px solid var(--border);font-size:13.5px}
+    .jt-table tbody tr{transition:background .12s}
+    .jt-table tbody tr:hover td{background:var(--card-s)}
+    .jt-table tr:last-child td{border-bottom:none}
+
+    /* EMPTY */
+    .jt-empty{text-align:center;padding:48px 20px}
+    .jt-empty .ei{font-size:40px;opacity:.2;margin-bottom:14px}
+    .jt-empty p{color:var(--text-3);font-family:var(--mono);font-size:12px}
+
+    /* INFO ROWS */
+    .info-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);font-size:13.5px}
+    .info-row:last-child{border-bottom:none}
+    .info-key{color:var(--text-2);font-family:var(--mono);font-size:11px}
+    .info-val{color:var(--text);font-weight:500;text-align:right}
+
+    /* RESPONSIVE */
+    @media(max-width:991px){.jt-sb{transform:translateX(-100%)}.jt-sb.open{transform:translateX(0);box-shadow:0 0 60px rgba(0,0,0,.6)}.jt-topbar{left:0}.jt-main{margin-left:0;padding:16px}.mob-tog{display:block}}
+    @media(max-width:576px){.jt-main{padding:12px}}
+  </style>
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<aside class="jt-sb" id="jtSb">
+  <div class="sb-glow"></div>
+  <div class="sb-top">
+    <div class="sb-logo">
+      <div class="sb-logo-ico">🤖</div>
+      <div class="sb-logo-text">JamiiBot</div>
+    </div>
+    <div class="sb-tag">ChatBot Platform</div>
+    {% if client and client.active_bot %}
+    <div class="sb-pulse">
+      <div class="sb-pulse-dot"></div>
+      <span class="sb-pulse-txt">{{ client.active_bot.bot_name }} — ONLINE</span>
+    </div>
+    {% endif %}
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-section">Overview</div>
+    <a href="{% url 'chatbot_dashboard' %}" class="sb-link {% if request.resolver_match.url_name == 'chatbot_dashboard' %}active{% endif %}">
+      <i class="fas fa-chart-pie"></i> Dashboard
+    </a>
+    <a href="{% url 'chatbot_conversations' %}" class="sb-link {% if 'conversations' in request.resolver_match.url_name %}active{% endif %}">
+      <i class="fas fa-comments"></i> Conversations
+    </a>
+    <div class="sb-section">Bot Settings</div>
+    <a href="{% url 'chatbot_config' %}" class="sb-link {% if 'config' in request.resolver_match.url_name %}active{% endif %}">
+      <i class="fas fa-sliders"></i> Configure Bot
+    </a>
+    <div class="sb-section">Account</div>
+    <a href="{% url 'chatbot_billing' %}" class="sb-link {% if 'billing' in request.resolver_match.url_name %}active{% endif %}">
+      <i class="fas fa-credit-card"></i> Billing & Plan
+    </a>
+    <a href="{% url 'chatbot_logout' %}" class="sb-link" style="color:rgba(239,68,68,.5)" onclick="return confirm('Sign out?')">
+      <i class="fas fa-power-off"></i> Sign Out
+    </a>
+  </nav>
+  <div class="sb-foot">
+    {% if client %}
+    <a href="{% url 'chatbot_dashboard' %}" class="sb-user">
+      <div class="sb-av">{{ client.full_name|first|upper }}</div>
+      <div style="min-width:0">
+        <div class="sb-uname">{{ client.business_name }}</div>
+        <div class="sb-urole">{{ client.user.username }}</div>
+      </div>
+    </a>
+    {% endif %}
+  </div>
+</aside>
+<div id="mobOv" onclick="closeSb()" style="display:none;position:fixed;inset:0;z-index:290;background:rgba(0,0,0,.6)"></div>
+
+<header class="jt-topbar">
+  <div class="tb-left">
+    <button class="mob-tog" onclick="toggleSb()"><i class="fas fa-bars"></i></button>
+    <div>
+      <div class="tb-title">{% block page_title %}ChatBot Portal{% endblock %}</div>
+      <div class="tb-breadcrumb">{% block breadcrumb %}JamiiBot{% endblock %}</div>
+    </div>
+  </div>
+  <div class="tb-right">
+    {% if client and client.active_bot %}
+    <a href="{% url 'chatbot_conversations' %}" class="tb-btn" title="Conversations"><i class="fas fa-comments"></i></a>
+    {% endif %}
+    <a href="{% url 'chatbot_billing' %}" class="tb-btn" title="Billing"><i class="fas fa-credit-card"></i></a>
+  </div>
+</header>
+
+<main class="jt-main">
+  {% if messages %}
+  <div class="jt-msgs">
+    {% for m in messages %}
+    <div class="jt-msg jt-msg-{% if m.tags == 'success' %}success{% elif m.tags == 'error' %}error{% elif m.tags == 'warning' %}warning{% else %}info{% endif %}">
+      <i class="fas {% if m.tags == 'success' %}fa-check-circle{% elif m.tags == 'error' %}fa-circle-exclamation{% elif m.tags == 'warning' %}fa-triangle-exclamation{% else %}fa-circle-info{% endif %}" style="flex-shrink:0"></i>
+      {{ m }}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+  {% block content %}{% endblock %}
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+<script>
+function toggleSb(){const s=document.getElementById('jtSb');const o=document.getElementById('mobOv');const open=s.classList.contains('open');s.classList.toggle('open',!open);o.style.display=open?'none':'block';document.body.style.overflow=open?'':'hidden'}
+function closeSb(){document.getElementById('jtSb').classList.remove('open');document.getElementById('mobOv').style.display='none';document.body.style.overflow=''}
+setTimeout(()=>{document.querySelectorAll('.jt-msg').forEach(m=>{m.style.transition='opacity .5s';m.style.opacity='0';setTimeout(()=>m.remove(),500)})},5000);
+</script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>"https://wa.me/255750910158"

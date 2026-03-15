@@ -1,0 +1,271 @@
+{% extends 'chatbot/portal/base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block breadcrumb %}{{ client.business_name }}{% endblock %}
+{% block content %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes ping{0%{transform:scale(1);opacity:1}100%{transform:scale(2.2);opacity:0}}
+.f0{animation:fadeUp .4s ease both}
+.f1{animation:fadeUp .4s .06s ease both}
+.f2{animation:fadeUp .4s .12s ease both}
+.f3{animation:fadeUp .4s .18s ease both}
+.f4{animation:fadeUp .4s .24s ease both}
+
+/* HEADER */
+.dash-hero{background:linear-gradient(135deg,rgba(124,58,237,.06),rgba(0,220,130,.04));border:1px solid rgba(124,58,237,.15);border-radius:18px;padding:24px 28px;margin-bottom:22px;position:relative;overflow:hidden}
+.dash-hero::before{content:'';position:absolute;top:-40px;right:-40px;width:200px;height:200px;background:radial-gradient(circle,rgba(124,58,237,.08),transparent 70%)}
+.bot-name{font-family:var(--head);font-size:26px;font-weight:800;background:linear-gradient(135deg,#a855f7,var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px}
+.bot-sub{font-size:14px;color:var(--text-2)}
+
+/* STATUS INDICATOR */
+.live-indicator{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:100px;font-family:var(--mono);font-size:11px;font-weight:700;position:relative}
+.li-active{background:rgba(0,220,130,.1);border:1px solid rgba(0,220,130,.25);color:var(--green)}
+.li-draft{background:var(--blue-d);border:1px solid rgba(59,130,246,.2);color:var(--blue)}
+.li-suspended{background:var(--red-d);border:1px solid rgba(239,68,68,.2);color:var(--red)}
+.li-dot{width:8px;height:8px;border-radius:50%;background:currentColor;position:relative}
+.li-dot::after{content:'';position:absolute;inset:-2px;border-radius:50%;background:currentColor;animation:ping 1.5s cubic-bezier(0,0,.2,1) infinite;opacity:.4}
+
+/* STAT CARDS */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+.sc2{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;position:relative;overflow:hidden;transition:all .2s}
+.sc2::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--ac,var(--green))}
+.sc2:hover{transform:translateY(-3px);box-shadow:0 12px 36px rgba(0,0,0,.3)}
+.sc2-ico{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;margin-bottom:12px}
+.sc2-val{font-family:var(--head);font-size:30px;font-weight:900;line-height:1;margin-bottom:3px}
+.sc2-label{font-family:var(--mono);font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:1px}
+.sc2-trend{font-family:var(--mono);font-size:10px;margin-top:8px}
+
+/* CHART SECTION */
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:20px}
+.cc-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.cc-title{font-family:var(--head);font-size:14px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px}
+.cc-body{padding:16px 20px 12px}
+
+/* SUBSCRIPTION CARD */
+.sub-card{background:linear-gradient(135deg,rgba(124,58,237,.08),rgba(0,220,130,.05));border:1px solid rgba(124,58,237,.2);border-radius:16px;padding:20px;margin-bottom:20px}
+.sub-plan-name{font-family:var(--head);font-size:18px;font-weight:800;margin-bottom:4px}
+.usage-track{height:8px;background:rgba(255,255,255,.07);border-radius:100px;overflow:hidden;margin:12px 0 6px}
+.usage-fill{height:100%;border-radius:100px;transition:width 1.4s ease}
+
+/* CONVERSATIONS LIST */
+.conv-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border);transition:background .12s;cursor:pointer}
+.conv-item:hover{background:var(--card-s)}
+.conv-item:last-child{border-bottom:none}
+.conv-av{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--blue));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#fff;flex-shrink:0}
+.conv-phone{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--text)}
+.conv-preview{font-size:12px;color:var(--text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.conv-time{font-family:var(--mono);font-size:10px;color:var(--text-3);flex-shrink:0}
+.conv-handoff{width:7px;height:7px;border-radius:50%;background:var(--yellow);flex-shrink:0;animation:pulse 2s infinite}
+
+/* WEBHOOK INFO */
+.webhook-card{background:rgba(0,0,0,.3);border:1px solid rgba(0,220,130,.12);border-radius:14px;padding:18px}
+.wh-label{font-family:var(--mono);font-size:9px;color:var(--text-3);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px}
+.wh-url{font-family:var(--mono);font-size:11px;color:var(--green);word-break:break-all;background:rgba(0,220,130,.05);border:1px solid rgba(0,220,130,.12);border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:10px;justify-content:space-between}
+.copy-btn{background:rgba(0,220,130,.1);border:1px solid rgba(0,220,130,.2);border-radius:6px;padding:4px 10px;font-family:var(--mono);font-size:10px;color:var(--green);cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0}
+.copy-btn:hover{background:rgba(0,220,130,.2)}
+
+/* QUICK ACTIONS */
+.qa-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.qa-btn{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center;cursor:pointer;transition:all .2s;text-decoration:none;display:block}
+.qa-btn:hover{border-color:rgba(0,220,130,.2);transform:translateY(-2px)}
+.qa-ico{font-size:22px;margin-bottom:7px}
+.qa-lbl{font-size:12px;font-weight:600;color:var(--text-2)}
+
+@media(max-width:992px){.stats-row{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:576px){.stats-row{grid-template-columns:repeat(2,1fr)}.qa-grid{grid-template-columns:1fr}}
+</style>
+
+<!-- BOT STATUS HERO -->
+<div class="dash-hero f0">
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap">
+    <div>
+      <div class="bot-name">{{ bot.bot_name }}</div>
+      <div class="bot-sub">{{ bot.business_name }} · {{ bot.get_language_display }}</div>
+      <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <div class="live-indicator li-{{ bot.status }}">
+          <div class="li-dot"></div>
+          {{ bot.get_status_display|upper }}
+        </div>
+        {% if bot.deployed_at %}
+        <span style="font-family:var(--mono);font-size:11px;color:var(--text-3)">Deployed {{ bot.deployed_at|date:"d M Y" }}</span>
+        {% endif %}
+        {% if bot.whatsapp_number %}
+        <span style="font-family:var(--mono);font-size:11px;color:var(--text-3)"><i class="fab fa-whatsapp fa-sm" style="color:var(--green);margin-right:4px"></i>{{ bot.whatsapp_number }}</span>
+        {% endif %}
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <a href="{% url 'chatbot_config' %}" class="jt-btn btn-ghost" style="font-size:12px"><i class="fas fa-sliders"></i> Configure</a>
+      <a href="{% url 'chatbot_conversations' %}" class="jt-btn btn-green" style="font-size:12px"><i class="fas fa-comments"></i> View Chats</a>
+    </div>
+  </div>
+</div>
+
+<!-- SUSPENDED / TRIAL / PENDING ALERTS -->
+{% if bot.status == 'pending' %}
+<div class="jt-alert jt-alert-info f0 mb-3"><i class="fas fa-circle-notch fa-spin" style="flex-shrink:0"></i><div><strong>Bot Connecting...</strong><br>Our team is setting up your bot on WhatsApp. It will be ready within 24 hours. We will notify you when done.</div></div>
+{% elif bot.status == 'suspended' %}
+<div class="jt-alert jt-alert-danger f0 mb-3"><i class="fas fa-ban" style="flex-shrink:0"></i><div><strong>Bot Suspended</strong><br>{{ bot.admin_suspended_reason|default:"Pay subscription kuendelea." }} <a href="{% url 'chatbot_billing' %}" style="color:var(--red);font-weight:700;text-decoration:underline;margin-left:8px">Pay Sasa →</a></div></div>
+{% elif sub and sub.status == 'trial' %}
+<div class="jt-alert jt-alert-warning f0 mb-3"><i class="fas fa-clock" style="flex-shrink:0"></i><div><strong>Jaribio la Bure</strong> — Siku {{ sub.days_remaining }} remaining. <a href="{% url 'chatbot_billing' %}" style="color:var(--yellow);font-weight:700;margin-left:8px">Pay Sasa →</a></div></div>
+{% endif %}
+
+<!-- STAT CARDS -->
+<div class="stats-row">
+  <div class="sc2 f1" style="--ac:var(--green)">
+    <div class="sc2-ico" style="background:var(--green-d);color:var(--green)"><i class="fas fa-comments"></i></div>
+    <div class="sc2-val" style="color:var(--green)">{{ total_msgs }}</div>
+    <div class="sc2-label">Total Messages</div>
+    <div class="sc2-trend" style="color:var(--green)">↑ {{ today_msgs }} leo</div>
+  </div>
+  <div class="sc2 f2" style="--ac:var(--blue)">
+    <div class="sc2-ico" style="background:var(--blue-d);color:var(--blue)"><i class="fas fa-users"></i></div>
+    <div class="sc2-val" style="color:var(--blue)">{{ unique_users }}</div>
+    <div class="sc2-label">Unique Customers</div>
+  </div>
+  <div class="sc2 f3" style="--ac:var(--purple)">
+    <div class="sc2-ico" style="background:var(--purple-d);color:var(--purple)"><i class="fas fa-comment-dots"></i></div>
+    <div class="sc2-val" style="color:var(--purple)">{{ total_convs }}</div>
+    <div class="sc2-label">Conversations</div>
+  </div>
+  <div class="sc2 f4" style="--ac:var(--yellow)">
+    <div class="sc2-ico" style="background:var(--yellow-d);color:var(--yellow)"><i class="fas fa-bolt"></i></div>
+    <div class="sc2-val" style="color:var(--yellow)">{{ today_msgs }}</div>
+    <div class="sc2-label">Messages Today</div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-8">
+
+    <!-- MESSAGE CHART -->
+    <div class="chart-card f1">
+      <div class="cc-head">
+        <div class="cc-title"><i class="fas fa-chart-area" style="color:var(--green)"></i> 7-Day Messages</div>
+        <span style="font-family:var(--mono);font-size:10px;color:var(--text-3)">Messages from customers</span>
+      </div>
+      <div class="cc-body">
+        <canvas id="msgChart" height="80"></canvas>
+      </div>
+    </div>
+
+    <!-- RECENT CONVERSATIONS -->
+    <div class="jt-card f2" style="padding:0">
+      <div class="jt-card-head">
+        <span class="jt-card-title"><i class="fas fa-comments" style="color:var(--cyan)"></i> Conversations ya Hivi Karibuni</span>
+        <a href="{% url 'chatbot_conversations' %}" class="jt-btn btn-ghost" style="font-size:11px;padding:5px 12px">Yote →</a>
+      </div>
+      {% for conv in recent_convs %}
+      <a href="{% url 'chatbot_conversation_detail' conv.id %}" class="conv-item">
+        <div class="conv-av">{{ conv.customer_name|first|upper|default:"?" }}</div>
+        <div style="flex:1;min-width:0">
+          <div class="conv-phone">{{ conv.customer_name|default:conv.customer_phone }}</div>
+          <div class="conv-preview">{{ conv.customer_phone }}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+          <span class="conv-time">{{ conv.last_message_at|date:"d M H:i" }}</span>
+          {% if conv.is_human_handoff %}<div class="conv-handoff" title="Transferred to human"></div>{% endif %}
+        </div>
+      </a>
+      {% empty %}
+      <div class="jt-empty"><div class="ei">💬</div><p>No conversations yet.<br>Customers will appear once your bot is connected to WhatsApp.</p></div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+
+    <!-- SUBSCRIPTION -->
+    {% if sub %}
+    <div class="sub-card f1">
+      <div style="font-family:var(--mono);font-size:9px;color:var(--text-3);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">SUBSCRIPTION</div>
+      <div class="sub-plan-name" style="color:{% if sub.status == 'active' %}var(--green){% elif sub.status == 'trial' %}var(--yellow){% else %}var(--red){% endif %}">{{ sub.plan.name }}</div>
+      <div style="font-family:var(--mono);font-size:11px;color:var(--text-3)">TZS {{ sub.plan.price_tzs|floatformat:0 }}/month</div>
+      {% if sub.end_date %}
+      <div style="font-family:var(--mono);font-size:11px;color:var(--text-2);margin-top:6px">Expires: <strong style="color:{% if sub.days_remaining <= 3 %}var(--red){% elif sub.days_remaining <= 7 %}var(--yellow){% else %}var(--text){% endif %}">{{ sub.end_date|date:"d M Y" }} ({{ sub.days_remaining }}d)</strong></div>
+      {% endif %}
+      {% if not sub.plan.is_unlimited %}
+      <div style="margin-top:14px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+          <span style="font-family:var(--mono);font-size:9px;color:var(--text-3)">MESSAGES USED</span>
+          <span style="font-family:var(--mono);font-size:10px;color:var(--text-2)">{{ sub.messages_used }} / {{ sub.plan.msg_limit }}</span>
+        </div>
+        <div class="usage-track">
+          <div class="usage-fill" style="width:{{ sub.usage_percent }}%;background:{% if sub.usage_percent >= 90 %}var(--red){% elif sub.usage_percent >= 70 %}var(--yellow){% else %}linear-gradient(90deg,var(--green),var(--cyan)){% endif %}"></div>
+        </div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--text-3)">{{ sub.messages_remaining }} remaining</div>
+      </div>
+      {% else %}
+      <div style="font-family:var(--mono);font-size:10px;color:var(--green);margin-top:10px">∞ Unlimited messages</div>
+      {% endif %}
+      <a href="{% url 'chatbot_billing' %}" class="jt-btn btn-green" style="width:100%;justify-content:center;margin-top:16px;font-size:12px"><i class="fas fa-refresh"></i> Renew Plan</a>
+    </div>
+    {% endif %}
+
+    <!-- WEBHOOK URL -->
+    {% if bot.status == 'active' %}
+    <div class="jt-card f2 mb-3" style="padding:0">
+      <div class="jt-card-head">
+        <span class="jt-card-title"><i class="fab fa-whatsapp" style="color:var(--green)"></i> WhatsApp Webhook</span>
+      </div>
+      <div class="jt-card-body">
+        <div class="wh-label">WEBHOOK URL</div>
+        <div class="wh-url" id="webhookUrl">
+          <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ bot.webhook_url }}</span>
+          <button class="copy-btn" onclick="copyWebhook()"><i class="fas fa-copy"></i> Copy</button>
+        </div>
+        <div style="margin-top:12px">
+          <div class="wh-label">VERIFY TOKEN</div>
+          <div style="font-family:var(--mono);font-size:11px;color:var(--yellow);background:var(--yellow-d);border:1px solid rgba(245,158,11,.15);border-radius:8px;padding:8px 12px">{{ bot.webhook_verify_token }}</div>
+        </div>
+        <div class="jt-alert jt-alert-info" style="margin-top:14px;font-size:12px">
+          <i class="fas fa-circle-info fa-xs" style="flex-shrink:0"></i>
+          Add this URL in Meta Developer Console under WhatsApp → Webhooks.
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- QUICK ACTIONS -->
+    <div class="jt-card f3" style="padding:0">
+      <div class="jt-card-head"><span class="jt-card-title"><i class="fas fa-bolt" style="color:var(--yellow)"></i> Quick Actions</span></div>
+      <div class="jt-card-body">
+        <div class="qa-grid">
+          <a href="{% url 'chatbot_config' %}" class="qa-btn"><div class="qa-ico">⚙️</div><div class="qa-lbl">Configure Bot</div></a>
+          <a href="{% url 'chatbot_conversations' %}" class="qa-btn"><div class="qa-ico">💬</div><div class="qa-lbl">Conversations</div></a>
+          <a href="{% url 'chatbot_billing' %}" class="qa-btn"><div class="qa-ico">💳</div><div class="qa-lbl">Pay</div></a>
+          <a href="https://developers.facebook.com/apps" target="_blank" class="qa-btn"><div class="qa-ico">🔗</div><div class="qa-lbl">Meta Console</div></a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+Chart.defaults.color='rgba(255,255,255,.3)';
+Chart.defaults.font.family="'JetBrains Mono',monospace";
+Chart.defaults.font.size=10;
+const data7 = {{ analytics_7d|safe }};
+const ctx=document.getElementById('msgChart').getContext('2d');
+const g=ctx.createLinearGradient(0,0,0,120);
+g.addColorStop(0,'rgba(0,220,130,.3)');g.addColorStop(1,'rgba(0,220,130,0)');
+new Chart(ctx,{
+  type:'line',
+  data:{labels:data7.map(d=>d.date),datasets:[{data:data7.map(d=>d.count),fill:true,backgroundColor:g,borderColor:'#00dc82',borderWidth:2.5,pointBackgroundColor:'#00dc82',pointBorderColor:'#040608',pointBorderWidth:2,pointRadius:4,tension:.45}]},
+  options:{responsive:true,plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(4,6,8,.97)',borderColor:'rgba(0,220,130,.2)',borderWidth:1,callbacks:{label:c=>' '+c.parsed.y+' messages'}}},scales:{x:{grid:{color:'rgba(255,255,255,.04)'}},y:{grid:{color:'rgba(255,255,255,.04)'},min:0,ticks:{stepSize:1}}}}
+});
+
+function copyWebhook(){
+  const url=document.getElementById('webhookUrl').querySelector('span').textContent.trim();
+  navigator.clipboard.writeText(url).then(()=>{
+    const btn=document.querySelector('.copy-btn');
+    btn.innerHTML='<i class="fas fa-check"></i> Copied!';
+    btn.style.color='var(--green)';
+    setTimeout(()=>{btn.innerHTML='<i class="fas fa-copy"></i> Copy';btn.style.color=''},2000);
+  });
+}
+</script>
+{% endblock %}

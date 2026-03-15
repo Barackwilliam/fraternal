@@ -1,0 +1,193 @@
+{% extends 'chatbot/portal/base.html' %}
+{% block title %}Simulate — {{ bot.bot_name }}{% endblock %}
+{% block page_title %}Test Bot: {{ bot.bot_name }}{% endblock %}
+
+{% block content %}
+<style>
+.sim-wrap{display:grid;grid-template-columns:300px 1fr;gap:16px;height:calc(100vh - 160px)}
+.sim-panel{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+.panel-head{padding:12px 16px;border-bottom:1px solid var(--border);font-size:12px;font-weight:700;color:var(--text-2);text-transform:uppercase;letter-spacing:.06em}
+.chat-body{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
+.bubble{max-width:80%;padding:9px 13px;border-radius:14px;font-size:13px;line-height:1.5}
+.bubble-user{align-self:flex-end;background:#25D366;color:#fff;border-radius:14px 14px 4px 14px}
+.bubble-bot{align-self:flex-start;background:var(--border);color:var(--text);border-radius:14px 14px 14px 4px}
+.bubble-system{align-self:center;background:rgba(255,200,0,.08);border:1px solid rgba(255,200,0,.2);color:var(--yellow,#f59e0b);font-size:11px;padding:4px 10px;border-radius:20px}
+.chat-input{padding:12px;border-top:1px solid var(--border);display:flex;gap:8px}
+.chat-input input{flex:1;background:var(--bg-2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:10px;font-size:13px}
+.chat-input input:focus{outline:none;border-color:var(--accent)}
+.send-btn{background:var(--accent);color:#fff;border:none;border-radius:10px;padding:8px 14px;cursor:pointer;font-size:13px;font-weight:600;transition:opacity .2s}
+.send-btn:hover{opacity:.85}
+.send-btn:disabled{opacity:.4;cursor:not-allowed}
+.info-box{padding:12px 16px;font-size:12px;color:var(--text-2);border-bottom:1px solid var(--border)}
+.state-pill{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;background:rgba(0,220,130,.1);color:#00dc82;border:1px solid rgba(0,220,130,.2)}
+.conv-item{padding:10px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s;font-size:12px}
+.conv-item:hover{background:rgba(255,255,255,.03)}
+.conv-item.active{background:rgba(var(--accent-rgb),.08)}
+.reset-btn{font-size:11px;color:var(--red);cursor:pointer;background:none;border:none;padding:0;text-decoration:underline}
+.reset-btn:hover{opacity:.7}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.bubble{animation:fadeIn .2s ease both}
+.typing{display:flex;gap:4px;padding:9px 13px;align-self:flex-start}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--text-3);animation:bounce 1s infinite}
+.dot:nth-child(2){animation-delay:.15s}
+.dot:nth-child(3){animation-delay:.3s}
+@keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-5px)}}
+</style>
+
+<div style="margin-bottom:12px;display:flex;align-items:center;gap:10px">
+  <a href="{% url 'admin_bot_detail' bot.id %}" class="jt-btn btn-ghost btn-icon"><i class="fas fa-arrow-left"></i></a>
+  <div>
+    <div style="font-size:15px;font-weight:700;color:var(--text)">🧪 Bot Simulator</div>
+    <div style="font-size:12px;color:var(--text-2)">Test {{ bot.bot_name }} without WhatsApp</div>
+  </div>
+</div>
+
+<div class="sim-wrap">
+  <!-- Left: sessions -->
+  <div class="sim-panel">
+    <div class="panel-head">Test Sessions</div>
+    <div class="info-box">
+      <div>Phone: <code id="cur-phone">+255700000001</code></div>
+      <div style="margin-top:6px">State: <span class="state-pill" id="state-pill">greeting</span></div>
+      <div style="margin-top:6px">
+        <button class="reset-btn" onclick="resetConv()">↺ Reset conversation</button>
+      </div>
+    </div>
+    <div style="padding:10px 16px;border-bottom:1px solid var(--border)">
+      <label style="font-size:11px;color:var(--text-2);display:block;margin-bottom:4px">Test phone number</label>
+      <input id="phone-input" type="text" value="+255700000001"
+        style="width:100%;background:var(--bg-2);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:8px;font-size:12px"
+        onchange="document.getElementById('cur-phone').textContent=this.value">
+      <label style="font-size:11px;color:var(--text-2);display:block;margin-top:8px;margin-bottom:4px">Contact name (optional)</label>
+      <input id="contact-input" type="text" value="Test User"
+        style="width:100%;background:var(--bg-2);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:8px;font-size:12px">
+    </div>
+    <div class="panel-head" style="margin-top:auto">Recent conversations</div>
+    <div style="overflow-y:auto;flex:1">
+      {% for c in conversations %}
+      <div class="conv-item" onclick="loadConv('{{ c.customer_phone }}','{{ c.customer_name|default:c.customer_phone }}')">
+        <div style="font-weight:600;color:var(--text)">{{ c.customer_name|default:c.customer_phone }}</div>
+        <div style="color:var(--text-3)">{{ c.customer_phone }}</div>
+        <div style="color:var(--text-3);font-size:10px">State: {{ c.metadata.state|default:"?" }}</div>
+      </div>
+      {% empty %}
+      <div style="padding:20px;text-align:center;color:var(--text-3);font-size:12px">No conversations yet</div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Right: chat -->
+  <div class="sim-panel">
+    <div class="panel-head" style="display:flex;justify-content:space-between;align-items:center">
+      <span>Chat — <span id="chat-phone">+255700000001</span></span>
+      <span style="color:var(--text-3);font-size:11px;font-weight:400">Responses appear below</span>
+    </div>
+    <div class="chat-body" id="chat-body">
+      <div class="bubble bubble-system">Start typing to test the bot ↓</div>
+    </div>
+    <div class="chat-input">
+      <input type="text" id="msg-input" placeholder="Type a message..." onkeydown="if(event.key==='Enter')sendMsg()">
+      <button class="send-btn" id="send-btn" onclick="sendMsg()">Send</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const BOT_ID   = "{{ bot.id }}";
+const CSRF     = "{{ csrf_token }}";
+const chatBody = document.getElementById('chat-body');
+
+function scrollDown(){ chatBody.scrollTop = chatBody.scrollHeight; }
+
+function addBubble(text, role){
+  const b = document.createElement('div');
+  b.className = 'bubble ' + (role === 'user' ? 'bubble-user' : role === 'system' ? 'bubble-system' : 'bubble-bot');
+  b.textContent = text;
+  chatBody.appendChild(b);
+  scrollDown();
+}
+
+function showTyping(){
+  const t = document.createElement('div');
+  t.className = 'typing'; t.id = 'typing';
+  for(let i=0;i<3;i++){ const d = document.createElement('div'); d.className='dot'; t.appendChild(d); }
+  chatBody.appendChild(t); scrollDown();
+}
+function hideTyping(){ const t = document.getElementById('typing'); if(t) t.remove(); }
+
+function updateState(state, name, phone){
+  document.getElementById('state-pill').textContent = state;
+}
+
+async function sendMsg(){
+  const input   = document.getElementById('msg-input');
+  const phoneIn = document.getElementById('phone-input');
+  const contIn  = document.getElementById('contact-input');
+  const btn     = document.getElementById('send-btn');
+  const text    = input.value.trim();
+  if(!text) return;
+
+  const phone   = phoneIn.value.trim() || '+255700000001';
+  const contact = contIn.value.trim()  || 'Test User';
+
+  document.getElementById('chat-phone').textContent = phone;
+  document.getElementById('cur-phone').textContent  = phone;
+
+  addBubble(text, 'user');
+  input.value = '';
+  btn.disabled = true;
+  showTyping();
+
+  try {
+    const res = await fetch(`/chatbot/simulate/{{ bot.id }}/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+      body: JSON.stringify({ phone, message: text, contact_name: contact })
+    });
+    const data = await res.json();
+    hideTyping();
+
+    if(data.error){ addBubble('Error: ' + data.error, 'system'); }
+    else {
+      (data.bot_responses || []).forEach(r => addBubble(r, 'bot'));
+      updateState(data.conv_state);
+      document.getElementById('state-pill').textContent = data.conv_state;
+      if(data.customer_name)
+        addBubble(`[System] Customer name saved: ${data.customer_name}`, 'system');
+      if(data.customer_phone_collected)
+        addBubble(`[System] Phone saved: ${data.customer_phone_collected}`, 'system');
+    }
+  } catch(e){
+    hideTyping();
+    addBubble('Network error: ' + e.message, 'system');
+  }
+  btn.disabled = false;
+  input.focus();
+}
+
+async function resetConv(){
+  const phone = document.getElementById('phone-input').value.trim() || '+255700000001';
+  if(!confirm(`Reset conversation for ${phone}?`)) return;
+
+  const res = await fetch(`/chatbot/simulate/{{ bot.id }}/`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+    body: JSON.stringify({ phone, message: 'Hello', contact_name: document.getElementById('contact-input').value || 'Test User', reset: true })
+  });
+  const data = await res.json();
+  chatBody.innerHTML = '<div class="bubble bubble-system">Conversation reset ↺</div>';
+  (data.bot_responses || []).forEach(r => addBubble(r, 'bot'));
+  document.getElementById('state-pill').textContent = data.conv_state;
+}
+
+function loadConv(phone, name){
+  document.getElementById('phone-input').value = phone;
+  document.getElementById('contact-input').value = name;
+  document.getElementById('chat-phone').textContent = phone;
+  document.getElementById('cur-phone').textContent = phone;
+  chatBody.innerHTML = `<div class="bubble bubble-system">Loaded session for ${name} (${phone})</div>`;
+}
+
+document.getElementById('msg-input').focus();
+</script>
+{% endblock %}

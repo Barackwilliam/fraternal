@@ -1,0 +1,159 @@
+{% extends 'chatbot/portal/base.html' %}
+{% block title %}Configure Bot{% endblock %}
+{% block page_title %}Configure Bot{% endblock %}
+{% block breadcrumb %}{{ bot.bot_name }}{% endblock %}
+{% block content %}
+<style>
+.tab-nav{display:flex;gap:0;border-bottom:1.5px solid var(--border);margin-bottom:24px}
+.tab-btn{padding:9px 16px;font-size:13px;font-weight:600;color:var(--text-2);cursor:pointer;border-bottom:2.5px solid transparent;margin-bottom:-1.5px;transition:all .15s;background:none;border-top:none;border-left:none;border-right:none;font-family:var(--body)}
+.tab-btn.active{color:var(--green);border-bottom-color:var(--green)}
+.tab-pane{display:none}.tab-pane.active{display:block}
+.svc-item{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:13px 16px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between}
+.svc-name{font-weight:700;color:var(--text);font-size:13px}
+.svc-meta{font-size:12px;color:var(--text-2);margin-top:2px}
+.del-btn{background:var(--red-d);border:1px solid rgba(239,68,68,.2);color:var(--red);padding:4px 10px;border-radius:7px;font-size:11px;cursor:pointer;font-family:var(--mono);transition:all .15s;flex-shrink:0}
+.del-btn:hover{background:var(--red);color:#fff;border:none}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border)}
+.toggle-sw{position:relative;width:42px;height:24px;flex-shrink:0}
+.toggle-sw input{opacity:0;width:0;height:0}
+.toggle-sw .slider{position:absolute;inset:0;background:rgba(255,255,255,.12);border-radius:100px;cursor:pointer;transition:.3s}
+.toggle-sw input:checked + .slider{background:var(--green)}
+.toggle-sw .slider::before{content:'';position:absolute;width:18px;height:18px;border-radius:50%;background:#fff;top:3px;left:3px;transition:.3s}
+.toggle-sw input:checked + .slider::before{left:21px}
+</style>
+
+<div class="tab-nav">
+  <button class="tab-btn active" onclick="showTab('basic',this)"><i class="fas fa-robot"></i> Basic Info</button>
+  <button class="tab-btn" onclick="showTab('messages',this)"><i class="fas fa-comment"></i> Messages</button>
+  <button class="tab-btn" onclick="showTab('services',this)"><i class="fas fa-briefcase"></i> Services</button>
+  <button class="tab-btn" onclick="showTab('faqs',this)"><i class="fas fa-question-circle"></i> FAQs</button>
+  <button class="tab-btn" onclick="showTab('whatsapp',this)"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+</div>
+
+<!-- BASIC -->
+<div class="tab-pane active" id="tab-basic">
+  <div class="jt-card">
+    <div class="jt-card-head"><span class="jt-card-title"><i class="fas fa-robot" style="color:var(--purple)"></i> Basic Info</span></div>
+    <div class="jt-card-body">
+      <form method="post">{% csrf_token %}<input type="hidden" name="section" value="basic">
+        <div class="row g-3 mb-3">
+          <div class="col-6"><label class="f-label">Bot Name</label><input type="text" name="bot_name" class="f-input" value="{{ bot.bot_name }}" required></div>
+          <div class="col-6"><label class="f-label">Language</label>
+            <select name="language" class="f-input">
+              <option value="sw+en" {% if bot.language == 'sw+en' %}selected{% endif %}>Swahili + English</option>
+              <option value="en" {% if bot.language == 'en' %}selected{% endif %}>English only</option>
+              <option value="sw" {% if bot.language == 'sw' %}selected{% endif %}>Swahili only</option>
+            </select>
+          </div>
+        </div>
+        <div class="row g-3 mb-3">
+          <div class="col-6"><label class="f-label">Tone</label>
+            <select name="tone" class="f-input">
+              <option value="friendly" {% if bot.tone == 'friendly' %}selected{% endif %}>Friendly & Warm</option>
+              <option value="professional" {% if bot.tone == 'professional' %}selected{% endif %}>Professional</option>
+              <option value="casual" {% if bot.tone == 'casual' %}selected{% endif %}>Casual</option>
+              <option value="formal" {% if bot.tone == 'formal' %}selected{% endif %}>Formal</option>
+            </select>
+          </div>
+          <div class="col-6"><label class="f-label">AI Temperature (0=strict, 1=creative)</label><input type="number" name="ai_temperature" class="f-input" value="{{ bot.ai_temperature }}" step="0.1" min="0" max="1"></div>
+        </div>
+        <div class="mb-3"><label class="f-label">Business Description</label><textarea name="description" class="f-input">{{ bot.description }}</textarea></div>
+        <button type="submit" class="jt-btn btn-green"><i class="fas fa-save"></i> Save Changes</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- MESSAGES -->
+<div class="tab-pane" id="tab-messages">
+  <div class="jt-card">
+    <div class="jt-card-head"><span class="jt-card-title"><i class="fas fa-comment" style="color:var(--cyan)"></i> Bot Messages</span></div>
+    <div class="jt-card-body">
+      <form method="post">{% csrf_token %}<input type="hidden" name="section" value="messages">
+        <div class="mb-3"><label class="f-label">Greeting Message</label><textarea name="greeting_msg" class="f-input">{{ bot.greeting_msg }}</textarea></div>
+        <div class="mb-3"><label class="f-label">Fallback Message</label><textarea name="fallback_msg" class="f-input">{{ bot.fallback_msg }}</textarea></div>
+        <div class="mb-3"><label class="f-label">Human Handoff Message</label><textarea name="human_handoff_msg" class="f-input">{{ bot.human_handoff_msg }}</textarea></div>
+        <div class="mb-3">
+          <div class="toggle-row"><div><div style="font-weight:600;color:var(--text)">Ask for customer name</div></div><label class="toggle-sw"><input type="checkbox" name="collect_name" {% if bot.collect_name %}checked{% endif %}><span class="slider"></span></label></div>
+          <div class="toggle-row"><div><div style="font-weight:600;color:var(--text)">Ask for phone number</div></div><label class="toggle-sw"><input type="checkbox" name="collect_phone" {% if bot.collect_phone %}checked{% endif %}><span class="slider"></span></label></div>
+        </div>
+        <button type="submit" class="jt-btn btn-green"><i class="fas fa-save"></i> Save Messages</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- SERVICES -->
+<div class="tab-pane" id="tab-services">
+  <div class="jt-card" style="padding:0">
+    <div class="jt-card-head"><span class="jt-card-title"><i class="fas fa-briefcase" style="color:var(--yellow)"></i> Services ({{ services|length }})</span></div>
+    <div class="jt-card-body">
+      {% for svc in services %}
+      <div class="svc-item">
+        <div><div class="svc-name">{{ svc.name }}</div><div class="svc-meta">{{ svc.description|truncatechars:80 }}{% if svc.price %} · <span style="color:var(--green)">{{ svc.price }}</span>{% endif %}</div></div>
+        <form method="post">{% csrf_token %}<input type="hidden" name="section" value="delete_service"><input type="hidden" name="service_id" value="{{ svc.id }}"><button type="submit" class="del-btn"><i class="fas fa-trash"></i></button></form>
+      </div>
+      {% empty %}<p style="font-family:var(--mono);font-size:12px;color:var(--text-3);margin-bottom:16px">No services yet. Add your first service below.</p>{% endfor %}
+      <hr style="border-color:var(--border);margin:16px 0">
+      <form method="post">{% csrf_token %}<input type="hidden" name="section" value="add_service">
+        <div class="row g-2 mb-2"><div class="col-6"><input type="text" name="service_name" class="f-input" placeholder="Service name *" required></div><div class="col-6"><input type="text" name="service_price" class="f-input" placeholder="Price (optional)"></div></div>
+        <div class="mb-3"><textarea name="service_desc" class="f-input" style="min-height:70px" placeholder="Description *" required></textarea></div>
+        <button type="submit" class="jt-btn btn-ghost"><i class="fas fa-plus"></i> Add Service</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- FAQS -->
+<div class="tab-pane" id="tab-faqs">
+  <div class="jt-card" style="padding:0">
+    <div class="jt-card-head"><span class="jt-card-title"><i class="fas fa-question-circle" style="color:var(--blue)"></i> FAQs ({{ faqs|length }})</span></div>
+    <div class="jt-card-body">
+      {% for faq in faqs %}
+      <div class="svc-item">
+        <div><div class="svc-name">{{ faq.question|truncatechars:70 }}</div><div class="svc-meta">{{ faq.answer|truncatechars:80 }}</div></div>
+        <form method="post">{% csrf_token %}<input type="hidden" name="section" value="delete_faq"><input type="hidden" name="faq_id" value="{{ faq.id }}"><button type="submit" class="del-btn"><i class="fas fa-trash"></i></button></form>
+      </div>
+      {% empty %}<p style="font-family:var(--mono);font-size:12px;color:var(--text-3);margin-bottom:16px">No FAQs yet.</p>{% endfor %}
+      <hr style="border-color:var(--border);margin:16px 0">
+      <form method="post">{% csrf_token %}<input type="hidden" name="section" value="add_faq">
+        <div class="mb-2"><textarea name="faq_question" class="f-input" style="min-height:60px" placeholder="Question *" required></textarea></div>
+        <div class="mb-3"><textarea name="faq_answer" class="f-input" style="min-height:60px" placeholder="Answer *" required></textarea></div>
+        <button type="submit" class="jt-btn btn-ghost"><i class="fas fa-plus"></i> Add FAQ</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- WHATSAPP -->
+<div class="tab-pane" id="tab-whatsapp">
+  <div class="jt-card">
+    <div class="jt-card-head"><span class="jt-card-title"><i class="fab fa-whatsapp" style="color:var(--green)"></i> WhatsApp Configuration</span></div>
+    <div class="jt-card-body">
+      {% if bot.is_active %}
+      <div class="jt-alert jt-alert-success mb-3">
+        <i class="fas fa-circle-check fa-sm" style="flex-shrink:0"></i>
+        <div>
+          <strong>Webhook URL:</strong><br>
+          <span style="font-family:var(--mono);font-size:11px;color:var(--green)">{{ bot.webhook_url }}</span>
+        </div>
+      </div>
+      <div class="jt-alert jt-alert-warning mb-3">
+        <i class="fas fa-key fa-sm" style="flex-shrink:0"></i>
+        <div><strong>Verify Token:</strong> <span style="font-family:var(--mono);font-size:11px">{{ bot.webhook_verify_token }}</span></div>
+      </div>
+      {% endif %}
+      <form method="post">{% csrf_token %}<input type="hidden" name="section" value="whatsapp">
+        <div class="mb-3"><label class="f-label">WhatsApp Number</label><input type="text" name="whatsapp_number" class="f-input" value="{{ bot.whatsapp_number }}" placeholder="+255XXXXXXXXX"></div>
+        <div class="mb-3"><label class="f-label">Phone Number ID (from Meta)</label><input type="text" name="whatsapp_phone_id" class="f-input" value="{{ bot.whatsapp_phone_id }}" placeholder="From Meta Developer Console"></div>
+        <div class="mb-3"><label class="f-label">API Token</label><input type="text" name="whatsapp_token" class="f-input" value="{{ bot.whatsapp_token }}" placeholder="EAAxxxxx..."></div>
+        <button type="submit" class="jt-btn btn-green"><i class="fas fa-save"></i> Save WhatsApp Config</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+function showTab(id,btn){document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));document.getElementById('tab-'+id).classList.add('active');btn.classList.add('active')}
+</script>
+{% endblock %}

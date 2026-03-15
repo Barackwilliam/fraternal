@@ -1,0 +1,200 @@
+{% extends 'management/base.html' %}
+{% block title %}ChatBot Manager{% endblock %}
+{% block page_title %}ChatBot Manager{% endblock %}
+{% block breadcrumb %}Manage / ChatBot SaaS{% endblock %}
+{% block extra_css %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.f0{animation:fadeUp .3s ease both}.f1{animation:fadeUp .3s .06s ease both}
+.f2{animation:fadeUp .3s .12s ease both}.f3{animation:fadeUp .3s .18s ease both}
+.f4{animation:fadeUp .3s .24s ease both}
+
+.pay-banner{background:linear-gradient(135deg,#fffbeb,#fef9c3);border:1.5px solid #fde68a;border-radius:14px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:20px;flex-wrap:wrap}
+
+.filter-bar{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+.f-pill{padding:5px 13px;border-radius:100px;border:1.5px solid var(--border);background:#fff;font-size:12px;font-weight:600;color:var(--text2);cursor:pointer;transition:all .15s;font-family:var(--mono)}
+.f-pill.active,.f-pill:hover{background:var(--primary);border-color:var(--primary);color:#fff}
+.s-box{flex:1;max-width:260px;display:flex;align-items:center;gap:8px;background:#fff;border:1.5px solid var(--border);border-radius:9px;padding:6px 12px}
+.s-box:focus-within{border-color:var(--primary);box-shadow:0 0 0 3px rgba(79,70,229,.1)}
+.s-box input{border:none;outline:none;font-size:13px;color:var(--text);flex:1;background:transparent}
+.s-box input::placeholder{color:var(--text3)}
+
+.bot-row{display:flex;align-items:center;gap:13px;padding:14px 18px;border-bottom:1px solid var(--border2);transition:background .1s}
+.bot-row:hover{background:#fafbff}
+.bot-row:last-child{border-bottom:none}
+.bot-av{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;color:#fff;flex-shrink:0}
+.av-active{background:linear-gradient(135deg,#4f46e5,#7c3aed)}
+.av-suspended{background:linear-gradient(135deg,#ef4444,#f97316)}
+.av-draft{background:linear-gradient(135deg,#3b82f6,#06b6d4)}
+.av-trial{background:linear-gradient(135deg,#f59e0b,#f97316)}
+.bot-name{font-weight:700;color:var(--text);font-size:13.5px;line-height:1.2}
+.bot-meta{font-family:var(--mono);font-size:10.5px;color:var(--text3);margin-top:2px}
+.wa-tag{font-family:var(--mono);font-size:11px;color:#059669;display:flex;align-items:center;gap:4px}
+
+.act{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid;transition:all .15s;font-family:var(--mono);text-decoration:none}
+.act-view{background:#eff6ff;border-color:#bfdbfe;color:#1d4ed8}
+.act-view:hover{background:#1d4ed8;color:#fff}
+.act-pause{background:var(--red-l);border-color:#fca5a5;color:#dc2626}
+.act-pause:hover{background:#dc2626;color:#fff}
+.act-play{background:var(--green-l);border-color:#a7f3d0;color:#059669}
+.act-play:hover{background:#059669;color:#fff}
+
+/* SUSPEND MODAL */
+.modal-ov{display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.5);align-items:center;justify-content:center;padding:16px}
+.modal-box{background:#fff;border-radius:16px;padding:28px;max-width:440px;width:100%;box-shadow:0 24px 64px rgba(0,0,0,.18)}
+
+/* USAGE BAR */
+.ubar{height:6px;background:#f1f5f9;border-radius:100px;overflow:hidden;width:80px}
+.ubar-fill{height:100%;border-radius:100px;transition:width 1s ease}
+</style>
+{% endblock %}
+{% block content %}
+
+{% if pending_bot_payments > 0 %}
+<div class="pay-banner f0">
+  <div style="display:flex;align-items:center;gap:14px">
+    <div style="font-size:30px">💰</div>
+    <div>
+      <div style="font-weight:800;color:#92400e;font-size:15px">{{ pending_bot_payments }} Payment{{ pending_bot_payments|pluralize }} Awaiting Verification</div>
+      <div style="font-size:12px;color:#78350f;margin-top:2px">Verify payments to keep customer bots active.</div>
+    </div>
+  </div>
+  <a href="/manage/chatbot/payments/" class="btn btn-warning btn-sm"><i class="fas fa-check-circle"></i> Verify Now</a>
+</div>
+{% endif %}
+
+<!-- STATS -->
+<div class="g5 mb-4">
+  <div class="stat f1" style="--ac:#10b981">
+    <div class="stat-ico" style="background:var(--green-l);color:#059669"><i class="fas fa-robot"></i></div>
+    <div class="stat-val" style="color:#059669">{{ active_bots }}</div>
+    <div class="stat-label">Active Bots</div>
+  </div>
+  <div class="stat f1" style="--ac:#4f46e5">
+    <div class="stat-ico" style="background:var(--primary-l);color:var(--primary)"><i class="fas fa-users"></i></div>
+    <div class="stat-val" style="color:var(--primary)">{{ clients }}</div>
+    <div class="stat-label">Bot Clients</div>
+  </div>
+  <div class="stat f2" style="--ac:#3b82f6">
+    <div class="stat-ico" style="background:var(--blue-l);color:var(--blue)"><i class="fas fa-comments"></i></div>
+    <div class="stat-val" style="color:var(--blue)">{{ total_msgs }}</div>
+    <div class="stat-label">Messages</div>
+  </div>
+  <div class="stat f2" style="--ac:#f59e0b">
+    <div class="stat-ico" style="background:var(--yellow-l);color:#d97706"><i class="fas fa-coins"></i></div>
+    <div class="stat-val" style="color:#d97706;font-size:18px">{{ total_revenue|floatformat:0 }}</div>
+    <div class="stat-label">Revenue (TZS)</div>
+  </div>
+  <div class="stat f3" style="--ac:#ef4444">
+    <div class="stat-ico" style="background:var(--red-l);color:var(--red)"><i class="fas fa-clock"></i></div>
+    <div class="stat-val" style="color:var(--red)">{{ pending_bot_payments }}</div>
+    <div class="stat-label">Pending Pay.</div>
+  </div>
+</div>
+
+<!-- CHARTS -->
+<div class="g2 mb-4 f3">
+  <div class="card">
+    <div class="card-head"><span class="card-title"><i class="fas fa-chart-bar" style="color:var(--primary)"></i> Messages — Last 30 Days</span></div>
+    <div class="card-body" style="padding:16px 18px 12px"><canvas id="msgChart" height="100"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-head"><span class="card-title"><i class="fas fa-chart-pie" style="color:var(--yellow)"></i> Status Overview</span></div>
+    <div class="card-body">
+      <div style="display:flex;align-items:center;gap:20px">
+        <canvas id="statusChart" style="max-width:110px;max-height:110px"></canvas>
+        <div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="width:10px;height:10px;border-radius:50%;background:#10b981;display:inline-block"></span><span style="font-size:12px;color:var(--text2)">Active: <strong style="color:var(--text)">{{ active_bots }}</strong></span></div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="width:10px;height:10px;border-radius:50%;background:#f59e0b;display:inline-block"></span><span style="font-size:12px;color:var(--text2)">Trial: <strong style="color:var(--text)">{{ trial_bots }}</strong></span></div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="width:10px;height:10px;border-radius:50%;background:#ef4444;display:inline-block"></span><span style="font-size:12px;color:var(--text2)">Suspended: <strong style="color:var(--text)">{{ suspended_bots }}</strong></span></div>
+          <div style="display:flex;align-items:center;gap:8px"><span style="width:10px;height:10px;border-radius:50%;background:#3b82f6;display:inline-block"></span><span style="font-size:12px;color:var(--text2)">Draft: <strong style="color:var(--text)">{{ draft_bots }}</strong></span></div>
+          <hr style="border-color:var(--border2);margin:12px 0">
+          <div style="font-family:var(--mono);font-size:10px;color:var(--text3)">TOTAL VERIFIED REVENUE</div>
+          <div style="font-size:20px;font-weight:900;color:var(--text);margin-top:2px">TZS {{ total_revenue|floatformat:0 }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FILTER + TABLE -->
+<div class="card f4" style="padding:0">
+  <div class="card-head">
+    <span class="card-title"><i class="fas fa-robot" style="color:var(--primary)"></i> All Bots ({{ bots.count }})</span>
+    <a href="/manage/chatbot/clients/" class="btn btn-ghost btn-sm"><i class="fas fa-user-plus"></i> View Clients</a>
+  </div>
+  <div style="padding:12px 16px;border-bottom:1px solid var(--border2)">
+    <div class="filter-bar">
+      <button class="f-pill active" onclick="filter('all',this)">All</button>
+      <button class="f-pill" onclick="filter('active',this)">🟢 Active</button>
+      <button class="f-pill" onclick="filter('trial',this)">🟡 Trial</button>
+      <button class="f-pill" onclick="filter('suspended',this)">🔴 Suspended</button>
+      <button class="f-pill" onclick="filter('draft',this)">🔵 Draft</button>
+      <div class="s-box"><i class="fas fa-search" style="color:var(--text3);font-size:12px"></i><input type="text" placeholder="Search bots, clients..." oninput="search(this.value)"></div>
+    </div>
+  </div>
+  <div id="botList">
+    {% for bot in bots %}
+    <div class="bot-row" data-status="{{ bot.status }}" data-search="{{ bot.bot_name|lower }} {{ bot.business_name|lower }} {{ bot.client.full_name|lower }} {{ bot.client.email|lower }}">
+      <div class="bot-av av-{{ bot.status }}">{{ bot.bot_name|first|upper }}</div>
+      <div style="flex:1;min-width:0">
+        <div class="bot-name">{{ bot.bot_name }}<span style="font-weight:400;color:var(--text2);font-size:12px;margin-left:6px">— {{ bot.business_name }}</span></div>
+        <div class="bot-meta">{{ bot.client.full_name }} · {{ bot.client.email }}</div>
+        {% if bot.whatsapp_number %}<div class="wa-tag mt-1"><i class="fab fa-whatsapp"></i> {{ bot.whatsapp_number }}</div>{% endif %}
+      </div>
+      <div style="text-align:center;min-width:60px">
+        <div style="font-family:var(--mono);font-size:16px;font-weight:800;color:var(--primary)">{{ bot.conversations.count }}</div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--text3)">CONVS</div>
+      </div>
+      {% with sub=bot.subscription %}{% if sub %}
+      <div style="min-width:90px">
+        <div style="font-size:12px;font-weight:700;color:var(--text)">{{ sub.plan.name }}</div>
+        <div class="ubar mt-1"><div class="ubar-fill" style="width:{{ sub.usage_percent }}%;background:{% if sub.usage_percent >= 90 %}var(--red){% elif sub.usage_percent >= 70 %}var(--yellow){% else %}var(--green){% endif %}"></div></div>
+        <div style="font-family:var(--mono);font-size:9px;color:{% if sub.days_remaining <= 3 %}var(--red){% elif sub.days_remaining <= 7 %}#d97706{% else %}var(--text3){% endif %};margin-top:3px">{% if sub.days_remaining is not None %}{{ sub.days_remaining }}d left{% endif %}</div>
+      </div>
+      {% endif %}{% endwith %}
+      <span class="badge b-{{ bot.status }}">{{ bot.status|capfirst }}</span>
+      <div style="display:flex;gap:5px">
+        <a href="/manage/chatbot/bots/{{ bot.id }}/" class="act act-view"><i class="fas fa-eye"></i></a>
+        {% if bot.status == 'active' %}
+        <button onclick="openSuspend('{{ bot.id }}','{{ bot.bot_name }}')" class="act act-pause"><i class="fas fa-pause"></i></button>
+        {% elif bot.status == 'suspended' %}
+        <form method="post" action="/manage/chatbot/bots/{{ bot.id }}/action/" style="display:inline">{% csrf_token %}<input type="hidden" name="action" value="activate"><button type="submit" class="act act-play"><i class="fas fa-play"></i></button></form>
+        {% endif %}
+      </div>
+    </div>
+    {% empty %}
+    <div class="empty"><div class="eico">🤖</div><p>No bots registered yet.</p></div>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- SUSPEND MODAL -->
+<div class="modal-ov" id="suspendModal" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal-box">
+    <div style="font-size:17px;font-weight:800;color:var(--text);margin-bottom:5px">Suspend Bot: <span id="sBotName" style="color:var(--red)"></span></div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:20px">The bot will immediately stop responding to customers.</div>
+    <form method="post" id="suspendForm">{% csrf_token %}<input type="hidden" name="action" value="suspend">
+      <label class="f-label">Reason *</label>
+      <textarea name="reason" class="f-input" style="margin-bottom:14px" placeholder="e.g. Payment overdue, policy violation..." required></textarea>
+      <div style="display:flex;gap:10px">
+        <button type="submit" class="btn btn-danger" style="flex:1"><i class="fas fa-pause"></i> Suspend</button>
+        <button type="button" class="btn btn-ghost" onclick="document.getElementById('suspendModal').style.display='none'">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+Chart.defaults.color='#94a3b8';Chart.defaults.font.family='IBM Plex Mono';Chart.defaults.font.size=10;
+const cd={{ chart_data|safe }};
+new Chart(document.getElementById('msgChart').getContext('2d'),{type:'bar',data:{labels:cd.map(d=>d.date),datasets:[{data:cd.map(d=>d.count),backgroundColor:'rgba(79,70,229,.4)',borderColor:'#4f46e5',borderWidth:1.5,borderRadius:5}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#f1f5f9'},min:0,ticks:{stepSize:1}}}}});
+new Chart(document.getElementById('statusChart').getContext('2d'),{type:'doughnut',data:{labels:['Active','Trial','Suspended','Draft'],datasets:[{data:[{{ active_bots }},{{ trial_bots }},{{ suspended_bots }},{{ draft_bots }}],backgroundColor:['#10b981','#f59e0b','#ef4444','#3b82f6'],borderWidth:0,hoverOffset:4}]},options:{responsive:true,plugins:{legend:{display:false}},cutout:'68%'}});
+
+function filter(s,btn){document.querySelectorAll('.f-pill').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.querySelectorAll('.bot-row').forEach(r=>{r.style.display=(s==='all'||r.dataset.status===s)?'':'none'})}
+function search(q){const lq=q.toLowerCase();document.querySelectorAll('.bot-row').forEach(r=>{r.style.display=r.dataset.search.includes(lq)?'':'none'})}
+function openSuspend(id,name){document.getElementById('sBotName').textContent=name;document.getElementById('suspendForm').action='/manage/chatbot/bots/'+id+'/action/';document.getElementById('suspendModal').style.display='flex'}
+</script>
+{% endblock %}

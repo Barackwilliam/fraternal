@@ -1,0 +1,77 @@
+{% extends 'management/base.html' %}
+{% block title %}Bot Clients{% endblock %}
+{% block page_title %}Bot Clients{% endblock %}
+{% block breadcrumb %}Manage / ChatBot / Clients{% endblock %}
+{% block content %}
+<style>
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.f0{animation:fadeUp .3s ease both}.f1{animation:fadeUp .3s .06s ease both}
+.client-row{display:flex;align-items:center;gap:14px;padding:15px 20px;border-bottom:1px solid var(--border2);transition:background .1s}
+.client-row:hover{background:#fafbff}
+.client-row:last-child{border-bottom:none}
+.c-av{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#4f46e5,#7c3aed);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;color:#fff;flex-shrink:0}
+.c-biz{font-weight:800;color:var(--text);font-size:14px}
+.c-name{font-family:var(--mono);font-size:11px;color:var(--text3);margin-top:2px}
+.c-email{font-size:12px;color:var(--slate);margin-top:1px}
+.c-phone{font-family:var(--mono);font-size:11px;color:#059669;margin-top:2px}
+</style>
+
+<div class="g3 mb-4 f0">
+  <div class="stat" style="--ac:var(--primary)">
+    <div class="stat-ico" style="background:var(--primary-l);color:var(--primary)"><i class="fas fa-users"></i></div>
+    <div class="stat-val" style="color:var(--primary)">{{ clients.count }}</div>
+    <div class="stat-label">Total Clients</div>
+  </div>
+  <div class="stat" style="--ac:var(--green)">
+    <div class="stat-ico" style="background:var(--green-l);color:#059669"><i class="fas fa-robot"></i></div>
+    <div class="stat-val" style="color:#059669">{{ clients|length }}</div>
+    <div class="stat-label">With Active Bots</div>
+  </div>
+  <div class="stat" style="--ac:var(--yellow)">
+    <div class="stat-ico" style="background:var(--yellow-l);color:#d97706"><i class="fas fa-calendar-plus"></i></div>
+    <div class="stat-val" style="color:#d97706">{{ clients|length }}</div>
+    <div class="stat-label">This Month</div>
+  </div>
+</div>
+
+<div class="card f1" style="padding:0">
+  <div class="card-head">
+    <span class="card-title"><i class="fas fa-users" style="color:var(--primary)"></i> All JamiiBot Clients ({{ clients.count }})</span>
+    <a href="/chatbot/register/" target="_blank" class="btn btn-primary btn-sm"><i class="fas fa-user-plus"></i> Register New Client</a>
+  </div>
+  {% for c in clients %}
+  <div class="client-row">
+    <div class="c-av">{{ c.full_name|first|upper }}</div>
+    <div style="flex:1;min-width:0">
+      <div class="c-biz">{{ c.business_name }}</div>
+      <div class="c-name">{{ c.full_name }}</div>
+      <div class="c-email">{{ c.email }}</div>
+      {% if c.phone %}<div class="c-phone"><i class="fas fa-phone fa-xs"></i> {{ c.phone }}</div>{% endif %}
+    </div>
+    <div style="text-align:center;min-width:60px">
+      <div style="font-family:var(--mono);font-size:10px;color:var(--text3)">JOINED</div>
+      <div style="font-size:12px;font-weight:600;color:var(--text)">{{ c.created_at|date:"d M Y" }}</div>
+    </div>
+    <div style="text-align:center;min-width:80px">
+      {% if c.active_bot %}
+      <span class="badge b-{{ c.active_bot.status }}">{{ c.active_bot.status|capfirst }}</span>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:4px">{{ c.active_bot.bot_name }}</div>
+      {% else %}
+      <span class="badge b-draft">No Bot</span>
+      {% endif %}
+    </div>
+    <div style="display:flex;gap:6px">
+      {% if c.active_bot %}
+      <a href="/manage/chatbot/bots/{{ c.active_bot.id }}/" class="btn btn-ghost btn-sm btn-icon" title="View Bot"><i class="fas fa-robot"></i></a>
+      {% endif %}
+      <a href="mailto:{{ c.email }}" class="btn btn-ghost btn-sm btn-icon" title="Email"><i class="fas fa-envelope"></i></a>
+      {% if c.phone %}
+      <a href="https://wa.me/{{ c.phone|cut:'+' }}" target="_blank" class="btn btn-ghost btn-sm btn-icon" title="WhatsApp" style="color:#25d366"><i class="fab fa-whatsapp"></i></a>
+      {% endif %}
+    </div>
+  </div>
+  {% empty %}
+  <div class="empty"><div class="eico">👥</div><p>No chatbot clients registered yet.<br><a href="/chatbot/register/" style="color:var(--primary)">Register the first one →</a></p></div>
+  {% endfor %}
+</div>
+{% endblock %}

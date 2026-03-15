@@ -1,0 +1,307 @@
+{% extends 'management/base.html' %}
+{% block title %}Bot: {{ bot.bot_name }}{% endblock %}
+{% block page_title %}Bot Control — {{ bot.bot_name }}{% endblock %}
+{% block breadcrumb %}Manage / ChatBot / {{ bot.bot_name }}{% endblock %}
+{% block extra_css %}
+<style>
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.f0{animation:fadeUp .3s ease both}.f1{animation:fadeUp .3s .06s ease both}.f2{animation:fadeUp .3s .12s ease both}
+.ctrl-panel{background:linear-gradient(135deg,#fef2f2,#fff1f1);border:1.5px solid #fca5a5;border-radius:14px;padding:18px;margin-bottom:16px}
+.ctrl-panel-active{background:linear-gradient(135deg,#f0fdf4,#ecfdf5);border-color:#a7f3d0}
+.ctrl-panel-warning{background:linear-gradient(135deg,#fffbeb,#fef9c3);border-color:#fde68a}
+.sec-title{font-size:13px;font-weight:800;color:var(--text);display:flex;align-items:center;gap:7px;margin-bottom:14px}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.ig-item{padding:10px 0;border-bottom:1px solid var(--border2)}
+.ig-item:nth-child(odd){padding-right:12px}
+.ig-item:nth-child(even){padding-left:12px;border-left:1px solid var(--border2)}
+.ig-key{font-family:var(--mono);font-size:10px;color:var(--text3);text-transform:uppercase;margin-bottom:3px}
+.ig-val{font-size:13px;font-weight:600;color:var(--text)}
+.pay-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border2);transition:background .1s}
+.pay-row:hover{background:#fafbff}
+.pay-row:last-child{border-bottom:none}
+.conv-row{display:flex;align-items:center;gap:11px;padding:12px 16px;border-bottom:1px solid var(--border2);transition:background .1s}
+.conv-row:hover{background:#fafbff}
+.conv-row:last-child{border-bottom:none}
+.ubar{height:8px;background:#f1f5f9;border-radius:100px;overflow:hidden;flex:1}
+.ubar-fill{height:100%;border-radius:100px}
+.wh-url{background:#f8fafc;border:1.5px solid var(--border);border-radius:9px;padding:10px 14px;font-family:var(--mono);font-size:11px;color:#059669;word-break:break-all;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.copy-btn{background:var(--primary-l);border:1px solid #c4b5fd;border-radius:6px;padding:4px 9px;font-family:var(--mono);font-size:10px;color:var(--primary);cursor:pointer;white-space:nowrap;flex-shrink:0;transition:all .15s}
+.copy-btn:hover{background:var(--primary);color:#fff}
+.tab-nav{display:flex;gap:0;border-bottom:1.5px solid var(--border);margin-bottom:18px}
+.tab-btn{padding:9px 16px;font-size:13px;font-weight:600;color:var(--text2);cursor:pointer;border-bottom:2.5px solid transparent;margin-bottom:-1.5px;transition:all .15s;background:none;border-top:none;border-left:none;border-right:none}
+.tab-btn.active{color:var(--primary);border-bottom-color:var(--primary)}
+.tab-btn:hover{color:var(--text)}
+.tab-pane{display:none}.tab-pane.active{display:block}
+.msg-bubble{display:flex;gap:9px;margin-bottom:10px}
+.mb-user{justify-content:flex-end}
+.mb-bot{justify-content:flex-start}
+.mb-content{padding:9px 13px;border-radius:12px;max-width:75%;font-size:13px;line-height:1.5}
+.mb-user .mb-content{background:var(--primary);color:#fff;border-bottom-right-radius:3px}
+.mb-bot .mb-content{background:#f1f5f9;color:var(--text);border-bottom-left-radius:3px}
+.mb-time{font-family:var(--mono);font-size:9px;color:var(--text3);margin-top:3px;text-align:right}
+</style>
+{% endblock %}
+{% block content %}
+
+<!-- HEADER -->
+<div style="display:flex;align-items:center;gap:14px;margin-bottom:22px;flex-wrap:wrap" class="f0">
+  <a href="/manage/chatbot/" class="btn btn-ghost btn-sm btn-icon"><i class="fas fa-arrow-left"></i></a>
+  <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#4f46e5,#7c3aed);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;color:#fff;flex-shrink:0">{{ bot.bot_name|first|upper }}</div>
+  <div>
+    <div style="font-size:18px;font-weight:800;color:var(--text);line-height:1.2">{{ bot.bot_name }}<span style="font-weight:400;color:var(--text2);font-size:14px;margin-left:8px">{{ bot.business_name }}</span></div>
+    <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-top:2px">{{ bot.client.full_name }} · {{ bot.client.email }} {% if bot.whatsapp_number %}· <span style="color:#059669"><i class="fab fa-whatsapp"></i> {{ bot.whatsapp_number }}</span>{% endif %}</div>
+  </div>
+  <span class="badge b-{{ bot.status }}" style="font-size:11px">{{ bot.status|capfirst }}</span>
+  {% if bot.deployed_at %}<span style="font-family:var(--mono);font-size:10px;color:var(--text3)">Deployed {{ bot.deployed_at|date:"d M Y" }}</span>{% endif %}
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-4">
+
+    <!-- ADMIN CONTROLS -->
+    <div class="{% if bot.status == 'active' %}ctrl-panel-active{% elif bot.status == 'suspended' %}ctrl-panel{% else %}ctrl-panel-warning{% endif %} ctrl-panel f1">
+      <div class="sec-title">
+        <i class="fas fa-shield-halved" style="color:{% if bot.status == 'active' %}#059669{% else %}var(--red){% endif %}"></i> Admin Controls
+      </div>
+      {% if bot.status == 'active' %}
+      <form method="post" action="/manage/chatbot/bots/{{ bot.id }}/action/">
+        {% csrf_token %}<input type="hidden" name="action" value="suspend">
+        <label class="f-label">Suspension Reason *</label>
+        <textarea name="reason" class="f-input" style="min-height:70px;margin-bottom:12px" placeholder="e.g. Payment overdue..." required></textarea>
+        <button type="submit" class="btn btn-danger" style="width:100%;justify-content:center" onclick="return confirm('Suspend this bot?')">
+          <i class="fas fa-pause"></i> Suspend Bot
+        </button>
+      </form>
+      {% elif bot.status == 'suspended' %}
+      <div class="alert alert-danger mb-3"><i class="fas fa-info-circle fa-sm" style="flex-shrink:0"></i>Reason: {{ bot.admin_suspended_reason|default:"Admin action" }}</div>
+      <form method="post" action="/manage/chatbot/bots/{{ bot.id }}/action/">
+        {% csrf_token %}<input type="hidden" name="action" value="activate">
+        <button type="submit" class="btn btn-success" style="width:100%;justify-content:center"><i class="fas fa-play"></i> Reactivate Bot</button>
+      </form>
+      {% else %}
+      <form method="post" action="/manage/chatbot/bots/{{ bot.id }}/action/">
+        {% csrf_token %}<input type="hidden" name="action" value="activate">
+        <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center"><i class="fas fa-rocket"></i> Force Activate</button>
+      </form>
+      {% endif %}
+
+      <hr style="border-color:rgba(0,0,0,.08);margin:14px 0">
+      <form method="post" action="/manage/chatbot/bots/{{ bot.id }}/action/">
+        {% csrf_token %}<input type="hidden" name="action" value="save_note">
+        <label class="f-label">Admin Notes</label>
+        <textarea name="note" class="f-input" style="min-height:80px;margin-bottom:10px">{{ bot.admin_notes }}</textarea>
+        <button type="submit" class="btn btn-ghost btn-sm" style="width:100%;justify-content:center"><i class="fas fa-save"></i> Save Note</button>
+      </form>
+    </div>
+
+    <!-- BOT INFO -->
+    <div class="card f1 mb-3">
+      <div class="card-head"><span class="card-title"><i class="fas fa-info-circle" style="color:var(--blue)"></i> Bot Details</span></div>
+      <div class="card-body" style="padding:8px 16px">
+        <div class="info-grid">
+          <div class="ig-item"><div class="ig-key">Language</div><div class="ig-val">{{ bot.get_language_display }}</div></div>
+          <div class="ig-item"><div class="ig-key">Tone</div><div class="ig-val">{{ bot.get_tone_display }}</div></div>
+          <div class="ig-item"><div class="ig-key">AI Model</div><div class="ig-val" style="font-family:var(--mono);font-size:11px;color:var(--primary)">{{ bot.ai_model }}</div></div>
+          <div class="ig-item"><div class="ig-key">Temperature</div><div class="ig-val">{{ bot.ai_temperature }}</div></div>
+          <div class="ig-item"><div class="ig-key">Services</div><div class="ig-val">{{ bot.services.count }}</div></div>
+          <div class="ig-item"><div class="ig-key">FAQs</div><div class="ig-val">{{ bot.faqs.count }}</div></div>
+          <div class="ig-item"><div class="ig-key">Conversations</div><div class="ig-val" style="color:var(--primary)">{{ total_convs }}</div></div>
+          <div class="ig-item"><div class="ig-key">Messages</div><div class="ig-val" style="color:var(--green)">{{ total_msgs }}</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUBSCRIPTION -->
+    {% if sub %}
+    <div class="card f2 mb-3">
+      <div class="card-head"><span class="card-title"><i class="fas fa-credit-card" style="color:var(--yellow)"></i> Subscription</span></div>
+      <div class="card-body" style="padding:8px 16px">
+        <div class="info-item"><span class="info-key">Plan</span><span class="info-val" style="color:var(--primary)">{{ sub.plan.name }}</span></div>
+        <div class="info-item"><span class="info-key">Status</span><span class="info-val"><span class="badge b-{{ sub.status }}">{{ sub.status|capfirst }}</span></span></div>
+        <div class="info-item"><span class="info-key">Expires</span><span class="info-val" style="color:{% if sub.days_remaining <= 3 %}var(--red){% elif sub.days_remaining <= 7 %}#d97706{% else %}var(--text){% endif %}">{{ sub.end_date|date:"d M Y"|default:"—" }}</span></div>
+        <div class="info-item"><span class="info-key">Days Left</span><span class="info-val" style="color:{% if sub.days_remaining <= 3 %}var(--red){% elif sub.days_remaining <= 7 %}#d97706{% else %}var(--green){% endif %}">{{ sub.days_remaining }}</span></div>
+        <div class="info-item" style="border:none">
+          <span class="info-key">Usage</span>
+          <div style="display:flex;align-items:center;gap:8px;flex:1;margin-left:16px">
+            <div class="ubar"><div class="ubar-fill" style="width:{{ sub.usage_percent }}%;background:{% if sub.usage_percent >= 90 %}var(--red){% elif sub.usage_percent >= 70 %}var(--yellow){% else %}var(--green){% endif %}"></div></div>
+            <span style="font-family:var(--mono);font-size:11px;color:var(--text2);flex-shrink:0">{{ sub.messages_used }}/{% if sub.plan.is_unlimited %}∞{% else %}{{ sub.plan.msg_limit }}{% endif %}</span>
+          </div>
+        </div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:8px">TZS {{ sub.plan.price_tzs|floatformat:0 }}/month</div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- WEBHOOK -->
+    {% if bot.is_active %}
+    <div class="card f2">
+      <div class="card-head"><span class="card-title"><i class="fab fa-whatsapp" style="color:#25d366"></i> Webhook Config</span></div>
+      <div class="card-body">
+        <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">Webhook URL</div>
+        <div class="wh-url"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ bot.webhook_url }}</span><button class="copy-btn" onclick="copy('{{ bot.webhook_url }}',this)"><i class="fas fa-copy"></i> Copy</button></div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin:12px 0 5px;text-transform:uppercase;letter-spacing:1px">Verify Token</div>
+        <div style="font-family:var(--mono);font-size:11px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:9px 12px;color:#92400e;word-break:break-all">{{ bot.webhook_verify_token }}</div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="col-lg-8">
+
+    <!-- TABS -->
+    <div class="card f1" style="padding:18px">
+      <div class="tab-nav">
+        <button class="tab-btn active" onclick="showTab('payments',this)"><i class="fas fa-coins"></i> Payments</button>
+        <button class="tab-btn" onclick="showTab('convs',this)"><i class="fas fa-comments"></i> Conversations</button>
+        <button class="tab-btn" onclick="showTab('config',this)"><i class="fas fa-sliders"></i> Bot Config</button>
+        <button class="tab-btn" onclick="showTab('services',this)"><i class="fas fa-list"></i> Services & FAQs</button>
+      </div>
+
+      <!-- PAYMENTS TAB -->
+      <div class="tab-pane active" id="tab-payments">
+        {% for pay in payments %}
+        <div class="pay-row">
+          <div style="width:38px;height:38px;border-radius:10px;background:{% if pay.status == 'verified' %}var(--green-l){% elif pay.status == 'rejected' %}var(--red-l){% else %}var(--yellow-l){% endif %};display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">
+            {% if pay.status == 'verified' %}✓{% elif pay.status == 'rejected' %}✗{% else %}⏳{% endif %}
+          </div>
+          <div style="flex:1;min-width:0">
+            <div style="font-weight:800;font-size:14px;color:{% if pay.status == 'verified' %}var(--green){% elif pay.status == 'rejected' %}var(--red){% else %}#d97706{% endif %}">TZS {{ pay.amount|floatformat:0 }}</div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--primary);margin-top:1px">REF: {{ pay.transaction_ref }}</div>
+            <div style="font-size:11px;color:var(--text3)">{{ pay.payment_method }} · {{ pay.months_covered }} month{{ pay.months_covered|pluralize }} · {{ pay.payment_date|date:"d M Y" }}</div>
+          </div>
+          <div style="text-align:right">
+            <span class="badge b-{{ pay.status }}" style="margin-bottom:6px;display:inline-flex">{{ pay.status|capfirst }}</span><br>
+            {% if pay.status == 'pending' %}
+            <div style="display:flex;gap:5px;justify-content:flex-end">
+              <form method="post" action="/manage/chatbot/bots/{{ bot.id }}/action/" style="display:inline">
+                {% csrf_token %}<input type="hidden" name="action" value="verify_payment"><input type="hidden" name="payment_id" value="{{ pay.id }}"><input type="hidden" name="months" value="{{ pay.months_covered }}">
+                <button type="submit" class="btn btn-success btn-sm" onclick="return confirm('Verify this payment?')"><i class="fas fa-check"></i> Verify</button>
+              </form>
+              <form method="post" action="/manage/chatbot/bots/{{ bot.id }}/action/" style="display:inline">
+                {% csrf_token %}<input type="hidden" name="action" value="reject_payment"><input type="hidden" name="payment_id" value="{{ pay.id }}">
+                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Reject?')"><i class="fas fa-times"></i></button>
+              </form>
+            </div>
+            {% elif pay.verified_by %}
+            <div style="font-family:var(--mono);font-size:9px;color:var(--text3)">by {{ pay.verified_by.username }}</div>
+            {% endif %}
+          </div>
+        </div>
+        {% empty %}<div class="empty"><div class="eico">💳</div><p>No payments yet</p></div>{% endfor %}
+      </div>
+
+      <!-- CONVERSATIONS TAB -->
+      <div class="tab-pane" id="tab-convs">
+        {% for conv in conversations %}
+        <a href="/chatbot/conversations/{{ conv.id }}/" class="conv-row" style="display:flex;text-decoration:none;color:inherit">
+          <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--primary),#7c3aed);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#fff;flex-shrink:0">{{ conv.customer_name|first|upper|default:"?" }}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-weight:700;font-size:13px;color:var(--text)">{{ conv.customer_name|default:conv.customer_phone }}</div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--text3)">{{ conv.customer_phone }}</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-family:var(--mono);font-size:10px;color:var(--text3)">{{ conv.last_message_at|date:"d M H:i" }}</div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--text2);margin-top:2px">{{ conv.message_count }} msgs</div>
+            {% if conv.is_human_handoff %}<span class="badge b-trial" style="font-size:9px">HANDOFF</span>{% endif %}
+          </div>
+        </a>
+        {% empty %}<div class="empty"><div class="eico">💬</div><p>No conversations yet</p></div>{% endfor %}
+      </div>
+
+      <!-- CONFIG TAB -->
+      <div class="tab-pane" id="tab-config">
+        <form method="post" action="/manage/chatbot/bots/{{ bot.id }}/action/">{% csrf_token %}<input type="hidden" name="action" value="update_config">
+          <div class="g2 mb-3">
+            <div>
+              <label class="f-label">Bot Name</label>
+              <input type="text" name="bot_name" class="f-input" value="{{ bot.bot_name }}">
+            </div>
+            <div>
+              <label class="f-label">Language</label>
+              <select name="language" class="f-input">
+                <option value="sw+en" {% if bot.language == 'sw+en' %}selected{% endif %}>Swahili + English (auto-detect)</option>
+                <option value="en" {% if bot.language == 'en' %}selected{% endif %}>English only</option>
+                <option value="sw" {% if bot.language == 'sw' %}selected{% endif %}>Swahili only</option>
+              </select>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="f-label">Description</label>
+            <textarea name="description" class="f-input">{{ bot.description }}</textarea>
+          </div>
+          <div class="g2 mb-3">
+            <div>
+              <label class="f-label">AI Model</label>
+              <select name="ai_model" class="f-input">
+                <option value="claude-haiku-4-5-20251001" {% if bot.ai_model == 'claude-haiku-4-5-20251001' %}selected{% endif %}>Claude Haiku (Fast)</option>
+                <option value="claude-sonnet-4-5" {% if bot.ai_model == 'claude-sonnet-4-5' %}selected{% endif %}>Claude Sonnet (Smart)</option>
+              </select>
+            </div>
+            <div>
+              <label class="f-label">Tone</label>
+              <select name="tone" class="f-input">
+                <option value="friendly" {% if bot.tone == 'friendly' %}selected{% endif %}>Friendly & Warm</option>
+                <option value="professional" {% if bot.tone == 'professional' %}selected{% endif %}>Professional</option>
+                <option value="casual" {% if bot.tone == 'casual' %}selected{% endif %}>Casual</option>
+                <option value="formal" {% if bot.tone == 'formal' %}selected{% endif %}>Formal</option>
+              </select>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="f-label">Greeting Message</label>
+            <textarea name="greeting_msg" class="f-input">{{ bot.greeting_msg }}</textarea>
+          </div>
+          <div class="mb-3">
+            <label class="f-label">Fallback Message (when bot can't answer)</label>
+            <textarea name="fallback_msg" class="f-input">{{ bot.fallback_msg }}</textarea>
+          </div>
+          <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Configuration</button>
+        </form>
+      </div>
+
+      <!-- SERVICES & FAQS TAB -->
+      <div class="tab-pane" id="tab-services">
+        <div class="g2">
+          <div>
+            <div style="font-weight:700;font-size:13px;color:var(--text);margin-bottom:12px;display:flex;align-items:center;gap:8px"><i class="fas fa-briefcase" style="color:var(--primary)"></i> Services ({{ bot.services.count }})</div>
+            {% for svc in bot.services.all %}
+            <div style="background:#f8fafc;border:1px solid var(--border);border-radius:9px;padding:11px 14px;margin-bottom:8px;position:relative">
+              <div style="font-weight:700;font-size:13px;color:var(--text)">{{ svc.name }}</div>
+              <div style="font-size:12px;color:var(--text2);margin-top:3px">{{ svc.description|truncatechars:80 }}</div>
+              {% if svc.price %}<div style="font-family:var(--mono);font-size:11px;color:var(--green);margin-top:4px">{{ svc.price }}</div>{% endif %}
+              <form method="post" action="/manage/chatbot/bots/{{ bot.id }}/action/" style="position:absolute;top:10px;right:10px">{% csrf_token %}<input type="hidden" name="action" value="delete_service"><input type="hidden" name="service_id" value="{{ svc.id }}"><button type="submit" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:12px"><i class="fas fa-trash"></i></button></form>
+            </div>
+            {% empty %}<p style="font-family:var(--mono);font-size:11px;color:var(--text3)">No services yet</p>{% endfor %}
+            <form method="post" action="/manage/chatbot/bots/{{ bot.id }}/action/" style="margin-top:12px">{% csrf_token %}<input type="hidden" name="action" value="add_service">
+              <input type="text" name="service_name" class="f-input mb-2" placeholder="Service name...">
+              <textarea name="service_desc" class="f-input mb-2" style="min-height:60px" placeholder="Description..."></textarea>
+              <input type="text" name="service_price" class="f-input mb-2" placeholder="Price (optional)...">
+              <button type="submit" class="btn btn-ghost btn-sm" style="width:100%;justify-content:center"><i class="fas fa-plus"></i> Add Service</button>
+            </form>
+          </div>
+          <div>
+            <div style="font-weight:700;font-size:13px;color:var(--text);margin-bottom:12px;display:flex;align-items:center;gap:8px"><i class="fas fa-circle-question" style="color:var(--blue)"></i> FAQs ({{ bot.faqs.count }})</div>
+            {% for faq in bot.faqs.all %}
+            <div style="background:#f8fafc;border:1px solid var(--border);border-radius:9px;padding:11px 14px;margin-bottom:8px;position:relative">
+              <div style="font-weight:600;font-size:12px;color:var(--text)">{{ faq.question|truncatechars:70 }}</div>
+              <div style="font-size:11px;color:var(--text2);margin-top:3px">{{ faq.answer|truncatechars:80 }}</div>
+              <form method="post" action="/manage/chatbot/bots/{{ bot.id }}/action/" style="position:absolute;top:10px;right:10px">{% csrf_token %}<input type="hidden" name="action" value="delete_faq"><input type="hidden" name="faq_id" value="{{ faq.id }}"><button type="submit" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:12px"><i class="fas fa-trash"></i></button></form>
+            </div>
+            {% empty %}<p style="font-family:var(--mono);font-size:11px;color:var(--text3)">No FAQs yet</p>{% endfor %}
+            <form method="post" action="/manage/chatbot/bots/{{ bot.id }}/action/" style="margin-top:12px">{% csrf_token %}<input type="hidden" name="action" value="add_faq">
+              <textarea name="faq_question" class="f-input mb-2" style="min-height:55px" placeholder="Question..."></textarea>
+              <textarea name="faq_answer" class="f-input mb-2" style="min-height:55px" placeholder="Answer..."></textarea>
+              <button type="submit" class="btn btn-ghost btn-sm" style="width:100%;justify-content:center"><i class="fas fa-plus"></i> Add FAQ</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function showTab(id,btn){document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));document.getElementById('tab-'+id).classList.add('active');btn.classList.add('active')}
+function copy(text,btn){navigator.clipboard.writeText(text).then(()=>{btn.innerHTML='<i class="fas fa-check"></i> Copied!';btn.style.color='var(--green)';setTimeout(()=>{btn.innerHTML='<i class="fas fa-copy"></i> Copy';btn.style.color=''},2000)})}
+</script>
+{% endblock %}

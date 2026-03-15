@@ -3,22 +3,16 @@ from pathlib import Path
 from dotenv import load_dotenv
 import cloudinary
 
-# Load .env file
 load_dotenv()
 
-# Build paths inside the project
-
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 WEBSITE_TYPES_DIR = BASE_DIR / 'apps' / 'website_types'
 
-# Security settings
-SECRET_KEY = os.getenv('SECRET_KEY', 'fallback-secret-key')
-DEBUG = True
-# DEBUG = os.getenv('DEBUG', 'False') == 'True'
-ALLOWED_HOSTS = ["*"]
+# ── Security ──────────────────────────────────────────
+SECRET_KEY   = os.getenv('SECRET_KEY', 'fallback-secret-key-change-in-production')
+DEBUG        = os.getenv('DEBUG', 'False') == 'True'
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'jamiitek.com,www.jamiitek.com,127.0.0.1,localhost').split(',')
 
-# Application definition
 INSTALLED_APPS = [
     'jazzmin',
     'django.contrib.admin',
@@ -28,6 +22,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'apps',
+    'apps.chatbot',
     'uploadcare',
     'cloudinary',
 ]
@@ -48,7 +43,7 @@ ROOT_URLCONF = 'ebenezeri.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'apps', 'templates')],
+        'DIRS': [BASE_DIR / 'apps' / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -63,29 +58,17 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'ebenezeri.wsgi.application'
 
-                    
-
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres', 
-        'USER': 'postgres.frapnewfadymevdkznrq',
-        'PASSWORD':'NyumbaChap',
-        'HOST': 'aws-1-eu-north-1.pooler.supabase.com',  
-        'PORT': '5432',  
+        'ENGINE':   'django.db.backends.postgresql',
+        'NAME':     os.getenv('DB_NAME', 'postgres'),
+        'USER':     os.getenv('DB_USER', 'postgres.frapnewfadymevdkznrq'),
+        'PASSWORD': os.getenv('DB_PASSWORD', ''),
+        'HOST':     os.getenv('DB_HOST', 'aws-1-eu-north-1.pooler.supabase.com'),
+        'PORT':     os.getenv('DB_PORT', '5432'),
     }
 }
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
-
-
-# Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -93,74 +76,77 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-# Internationalization
+# ── Internationalization ───────────────────────────────
 LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
-USE_I18N = True
-USE_TZ = True
+TIME_ZONE     = 'Africa/Dar_es_Salaam'
+USE_I18N      = True
+USE_TZ        = True
 
-# Static and media files
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
-STATIC_ROOT = os.path.join(BASE_DIR, 'assets')
-
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
+# ── Static & Media ─────────────────────────────────────
+STATIC_URL        = '/static/'
+STATICFILES_DIRS  = [BASE_DIR / 'apps' / 'static']
+STATIC_ROOT       = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
+MEDIA_URL  = f"https://res.cloudinary.com/{os.getenv('CLOUDINARY_CLOUD_NAME', '')}/"
+MEDIA_ROOT = BASE_DIR / 'media'
 
-
-MEDIA_URL = f"https://res.cloudinary.com/{os.getenv('CLOUDINARY_CLOUD_NAME')}/"
-
-# Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
-
-# Jazzmin Settings
+# ── Jazzmin ────────────────────────────────────────────
 JAZZMIN_SETTINGS = {
-    "site_title": "My Admin Panel",
-    "site_header": "My Dashboard",
-    "site_brand": "JamiiTek Company",
+    "site_title":   "JamiiTek Admin",
+    "site_header":  "JamiiTek Dashboard",
+    "site_brand":   "JamiiTek",
     "welcome_sign": "Welcome to JamiiTek Dashboard",
-    "copyright": "JamiiTek Company © 2025",
+    "copyright":    "JamiiTek © 2025",
     "search_model": "auth.User",
     "topmenu_links": [
-        {"name": "Home", "url": "admin:index", "permissions": ["auth.view_user"]},
+        {"name": "Home",  "url": "admin:index", "permissions": ["auth.view_user"]},
         {"model": "auth.User"},
-        {"app": "JamiiTek System"},
+        {"app":   "JamiiTek System"},
     ],
 }
 
 JAZZMIN_UI_TWEAKS = {
-    "theme": "darkly",
-    "navbar_fixed": True,
+    "theme":         "darkly",
+    "navbar_fixed":  True,
     "sidebar_fixed": True,
-    "footer_fixed": False,
+    "footer_fixed":  False,
     "show_ui_builder": True,
 }
 
-
-
+# ── Uploadcare & Cloudinary ────────────────────────────
 UPLOADCARE = {
-    'pub_key': '96c9f49ee7fe6afeb1fc',
-    'secret': '7c2ec708937b40ea415c',
-    'use_secure': True, 
+    'pub_key':    os.getenv('UPLOADCARE_PUB_KEY', '96c9f49ee7fe6afeb1fc'),
+    'secret':     os.getenv('UPLOADCARE_SECRET', '7c2ec708937b40ea415c'),
+    'use_secure': True,
 }
 
-WEASYPRINT_BASEURL = BASE_DIR
+WEASPRINT_BASEURL = BASE_DIR
 
+# ── Email ──────────────────────────────────────────────
+EMAIL_BACKEND       = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST          = 'smtp.gmail.com'
+EMAIL_PORT          = 587
+EMAIL_USE_TLS       = True
+EMAIL_HOST_USER     = os.getenv('EMAIL_HOST_USER', 'info@jamiitek.com')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+DEFAULT_FROM_EMAIL  = f"JamiiTek <{os.getenv('EMAIL_HOST_USER', 'info@jamiitek.com')}>"
+PORTAL_BASE_URL     = os.getenv('PORTAL_BASE_URL', 'https://jamiitek.com/portal/')
 
-# ══════════════════════════════════════
-# EMAIL CONFIGURATION
-# ══════════════════════════════════════
+# ── Chatbot / WhatsApp ─────────────────────────────────
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', '')
+SITE_URL       = os.getenv('SITE_URL', 'https://jamiitek.com')
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'info@jamiitek.com'       # ← email yako
-EMAIL_HOST_PASSWORD = 'tbgh swtl zple dhiv'   # ← App Password (ona Step 3)
-DEFAULT_FROM_EMAIL = 'JamiiTek <info@jamiitek.com>'
-PORTAL_BASE_URL = 'https://jamiitek.com/portal/'
+WHATSAPP_MASTER_TOKEN         = os.getenv('WHATSAPP_MASTER_TOKEN', '')
+WHATSAPP_WEBHOOK_VERIFY_TOKEN = os.getenv('WHATSAPP_WEBHOOK_VERIFY_TOKEN', '')
+WILLIAM_WHATSAPP              = os.getenv('WILLIAM_WHATSAPP', '')
+WILLIAM_PHONE_NUMBER_ID       = os.getenv('WILLIAM_PHONE_NUMBER_ID', '')
+
+CHATBOT_PAYMENT_INFO = {
+    'bank':           'NMB Bank',
+    'account_number': os.getenv('NMB_ACCOUNT', '21410034200'),
+    'account_name':   os.getenv('NMB_NAME', 'WILLIAM CHIPINDI'),
+    'branch':         'Dar es Salaam',
+}

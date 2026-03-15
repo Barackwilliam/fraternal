@@ -1,0 +1,197 @@
+{% extends 'chatbot/portal/base.html' %}
+{% block title %}Admin — {{ bot.bot_name }}{% endblock %}
+{% block page_title %}Bot Control: {{ bot.bot_name }}{% endblock %}
+{% block content %}
+<style>
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.f0{animation:fadeUp .3s ease both}.f1{animation:fadeUp .3s .06s ease both}.f2{animation:fadeUp .3s .12s ease both}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:16px}
+.sec-head{padding:15px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.sec-title{font-family:var(--head);font-size:14px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px}
+.sec-body{padding:20px}
+.info-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)}
+.info-row:last-child{border-bottom:none}
+.info-key{font-family:var(--mono);font-size:11px;color:var(--text-2)}
+.info-val{font-size:13px;font-weight:600;color:var(--text);text-align:right}
+.ctrl-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;font-family:var(--mono);font-size:11px;font-weight:700;cursor:pointer;transition:all .2s;border:1px solid}
+.ctrl-suspend{background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.2);color:var(--red)}
+.ctrl-suspend:hover{background:var(--red);color:#fff}
+.ctrl-activate{background:rgba(0,220,130,.08);border-color:rgba(0,220,130,.2);color:var(--green)}
+.ctrl-activate:hover{background:var(--green);color:var(--bg)}
+.pay-row{display:flex;align-items:center;gap:12px;padding:13px 20px;border-bottom:1px solid var(--border)}
+.pay-row:last-child{border-bottom:none}
+.conv-row{display:flex;align-items:center;gap:12px;padding:12px 20px;border-bottom:1px solid var(--border);transition:background .12s}
+.conv-row:hover{background:rgba(255,255,255,.015)}
+.msg-prev{font-size:12px;color:var(--text-3);font-style:italic;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:250px}
+</style>
+
+<div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap" class="f0">
+  <a href="{% url 'admin_bot_dashboard' %}" class="jt-btn btn-ghost btn-icon"><i class="fas fa-arrow-left"></i></a>
+  <div>
+    <div style="font-family:var(--head);font-size:20px;font-weight:800;color:var(--text)">{{ bot.bot_name }}</div>
+    <div style="font-family:var(--mono);font-size:11px;color:var(--text-3)">{{ bot.business_name }} · {{ bot.client.full_name }} · {{ bot.client.email }}</div>
+  </div>
+  <span class="jt-badge b-{{ bot.status }}" style="font-size:11px">{{ bot.status|capfirst }}</span>
+  {% if bot.whatsapp_number %}
+  <span style="font-family:var(--mono);font-size:11px;color:var(--green)"><i class="fab fa-whatsapp"></i> {{ bot.whatsapp_number }}</span>
+  {% endif %}
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-4">
+
+    <!-- BOT INFO -->
+    <div class="sec f1">
+      <div class="sec-head">
+        <div class="sec-title"><i class="fas fa-robot" style="color:var(--purple)"></i> Bot Info</div>
+      </div>
+      <div class="sec-body" style="padding:8px 18px">
+        <div class="info-row"><span class="info-key">Status</span><span class="info-val"><span class="jt-badge b-{{ bot.status }}" style="font-size:10px">{{ bot.status|capfirst }}</span></span></div>
+        <div class="info-row"><span class="info-key">Language</span><span class="info-val">{{ bot.get_language_display }}</span></div>
+        <div class="info-row"><span class="info-key">Tone</span><span class="info-val">{{ bot.get_tone_display }}</span></div>
+        <div class="info-row"><span class="info-key">AI Model</span><span class="info-val" style="font-family:var(--mono);font-size:11px;color:var(--cyan)">{{ bot.ai_model }}</span></div>
+        <div class="info-row"><span class="info-key">Deployed</span><span class="info-val">{% if bot.deployed_at %}{{ bot.deployed_at|date:"d M Y H:i" }}{% else %}—{% endif %}</span></div>
+        <div class="info-row"><span class="info-key">Conversations</span><span class="info-val" style="color:var(--blue)">{{ total_users }}</span></div>
+        <div class="info-row"><span class="info-key">Messages</span><span class="info-val" style="color:var(--green)">{{ total_msgs }}</span></div>
+        {% if bot.admin_suspended_reason %}
+        <div class="info-row"><span class="info-key">Suspension Reason</span><span class="info-val" style="color:var(--red);font-size:12px">{{ bot.admin_suspended_reason }}</span></div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- ADMIN CONTROLS -->
+    <div class="sec f1">
+      <div class="sec-head">
+        <div class="sec-title"><i class="fas fa-shield-halved" style="color:var(--red)"></i> Admin Controls</div>
+      </div>
+      <div class="sec-body">
+        {% if bot.status == 'active' %}
+        <form method="post" style="margin-bottom:12px">
+          {% csrf_token %}<input type="hidden" name="action" value="suspend">
+          <label class="f-label">Sababu ya Kusimamisha *</label>
+          <textarea name="reason" class="f-input" style="min-height:60px;margin-bottom:10px" placeholder="e.g. Malipo yamekwisha..." required></textarea>
+          <button type="submit" class="jt-btn btn-red" style="width:100%;justify-content:center" onclick="return confirm('Simamisha bot hii?')">
+            <i class="fas fa-pause"></i> Simamisha Bot
+          </button>
+        </form>
+        {% elif bot.status == 'suspended' %}
+        <form method="post" style="margin-bottom:12px">
+          {% csrf_token %}<input type="hidden" name="action" value="activate">
+          <div class="jt-alert jt-alert-warning" style="font-size:12px;margin-bottom:12px">
+            <i class="fas fa-info fa-xs"></i> Bot ilisimamishwa: {{ bot.admin_suspended_reason|default:"Admin action" }}
+          </div>
+          <button type="submit" class="jt-btn btn-green" style="width:100%;justify-content:center">
+            <i class="fas fa-play"></i> Washa Bot
+          </button>
+        </form>
+        {% elif bot.status == 'draft' %}
+        <form method="post">
+          {% csrf_token %}<input type="hidden" name="action" value="activate">
+          <button type="submit" class="jt-btn btn-green" style="width:100%;justify-content:center">
+            <i class="fas fa-rocket"></i> Force Activate
+          </button>
+        </form>
+        {% endif %}
+
+        <hr style="border-color:var(--border);margin:16px 0">
+        <form method="post">
+          {% csrf_token %}<input type="hidden" name="action" value="admin_note">
+          <label class="f-label">Admin Notes</label>
+          <textarea name="note" class="f-input" style="min-height:80px;margin-bottom:10px">{{ bot.admin_notes }}</textarea>
+          <button type="submit" class="jt-btn btn-ghost" style="width:100%;justify-content:center;font-size:12px"><i class="fas fa-save"></i> Save Note</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- SUBSCRIPTION -->
+    {% if sub %}
+    <div class="sec f2">
+      <div class="sec-head">
+        <div class="sec-title"><i class="fas fa-credit-card" style="color:var(--yellow)"></i> Subscription</div>
+      </div>
+      <div class="sec-body" style="padding:8px 18px">
+        <div class="info-row"><span class="info-key">Plan</span><span class="info-val" style="color:var(--yellow)">{{ sub.plan.name }}</span></div>
+        <div class="info-row"><span class="info-key">Status</span><span class="info-val"><span class="jt-badge b-{{ sub.status }}" style="font-size:10px">{{ sub.status|capfirst }}</span></span></div>
+        <div class="info-row"><span class="info-key">End Date</span><span class="info-val">{{ sub.end_date|date:"d M Y"|default:"—" }}</span></div>
+        <div class="info-row"><span class="info-key">Days Left</span><span class="info-val" style="color:{% if sub.days_remaining <= 3 %}var(--red){% elif sub.days_remaining <= 7 %}var(--yellow){% else %}var(--green){% endif %}">{{ sub.days_remaining }}</span></div>
+        <div class="info-row"><span class="info-key">Msgs Used</span><span class="info-val">{{ sub.messages_used }} / {% if sub.plan.is_unlimited %}∞{% else %}{{ sub.plan.msg_limit }}{% endif %}</span></div>
+        <div class="info-row"><span class="info-key">Monthly Fee</span><span class="info-val">TZS {{ sub.plan.price_tzs|floatformat:0 }}</span></div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="col-lg-8">
+
+    <!-- PAYMENTS TO VERIFY -->
+    <div class="sec f1">
+      <div class="sec-head">
+        <div class="sec-title"><i class="fas fa-coins" style="color:var(--green)"></i> Malipo</div>
+        <span style="font-family:var(--mono);font-size:10px;color:var(--text-3)">{{ payments|length }} total</span>
+      </div>
+      {% for pay in payments %}
+      <div class="pay-row">
+        <div style="width:36px;height:36px;border-radius:9px;background:{% if pay.status == 'verified' %}var(--green-d){% elif pay.status == 'rejected' %}var(--red-d){% else %}var(--yellow-d){% endif %};display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0">
+          {% if pay.status == 'verified' %}✓{% elif pay.status == 'rejected' %}✗{% else %}⏳{% endif %}
+        </div>
+        <div style="flex:1;min-width:0">
+          <div style="font-family:var(--mono);font-size:14px;font-weight:700;color:{% if pay.status == 'verified' %}var(--green){% elif pay.status == 'rejected' %}var(--red){% else %}var(--yellow){% endif %}">TZS {{ pay.amount|floatformat:0 }}</div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--cyan)">{{ pay.transaction_ref }}</div>
+          <div style="font-size:11px;color:var(--text-3)">{{ pay.payment_method }} · {{ pay.months_covered }}mo · {{ pay.payment_date|date:"d M Y" }}</div>
+        </div>
+        <div style="text-align:right">
+          <span class="jt-badge b-{% if pay.status == 'verified' %}active{% elif pay.status == 'rejected' %}suspended{% else %}trial{% endif %}" style="font-size:10px;margin-bottom:6px;display:inline-flex">{{ pay.status|capfirst }}</span>
+          {% if pay.status == 'pending' %}
+          <div style="display:flex;gap:6px;justify-content:flex-end">
+            <form method="post" style="display:inline">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="verify_payment">
+              <input type="hidden" name="payment_id" value="{{ pay.id }}">
+              <input type="hidden" name="months" value="{{ pay.months_covered }}">
+              <button type="submit" class="ctrl-btn ctrl-activate" onclick="return confirm('Thibitisha malipo haya?')"><i class="fas fa-check"></i> Verify</button>
+            </form>
+            <form method="post" style="display:inline">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="reject_payment">
+              <input type="hidden" name="payment_id" value="{{ pay.id }}">
+              <button type="submit" class="ctrl-btn ctrl-suspend" onclick="return confirm('Kataa malipo haya?')"><i class="fas fa-times"></i></button>
+            </form>
+          </div>
+          {% elif pay.verified_by %}
+          <div style="font-family:var(--mono);font-size:9px;color:var(--text-3)">by {{ pay.verified_by.username }}</div>
+          {% endif %}
+        </div>
+      </div>
+      {% empty %}
+      <div class="jt-empty" style="padding:24px"><div class="ei">💳</div><p>Hakuna malipo</p></div>
+      {% endfor %}
+    </div>
+
+    <!-- RECENT CONVERSATIONS -->
+    <div class="sec f2">
+      <div class="sec-head">
+        <div class="sec-title"><i class="fas fa-comments" style="color:var(--cyan)"></i> Mazungumzo ya Hivi Karibuni</div>
+        <span style="font-family:var(--mono);font-size:10px;color:var(--text-3)">{{ conversations|length }} shown</span>
+      </div>
+      {% for conv in conversations %}
+      <a href="{% url 'chatbot_conversation_detail' conv.id %}" class="conv-row">
+        <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--blue));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#fff;flex-shrink:0">
+          {{ conv.customer_name|first|upper|default:"?" }}
+        </div>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:600;color:var(--text);font-size:13px">{{ conv.customer_name|default:conv.customer_phone }}</div>
+          <div class="msg-prev">{{ conv.customer_phone }}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <div style="font-family:var(--mono);font-size:10px;color:var(--text-3)">{{ conv.last_message_at|date:"d M H:i" }}</div>
+          <div style="font-family:var(--mono);font-size:11px;color:var(--text-2);margin-top:2px">{{ conv.message_count }} msgs</div>
+          {% if conv.is_human_handoff %}<span style="font-family:var(--mono);font-size:9px;background:var(--yellow-d);color:var(--yellow);border:1px solid rgba(245,158,11,.2);padding:1px 6px;border-radius:4px">HANDOFF</span>{% endif %}
+        </div>
+      </a>
+      {% empty %}
+      <div class="jt-empty" style="padding:24px"><div class="ei">💬</div><p>Hakuna mazungumzo bado</p></div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}
