@@ -136,7 +136,7 @@ DEFAULT_FROM_EMAIL  = f"JamiiTek <{os.getenv('EMAIL_HOST_USER', 'info@jamiitek.c
 PORTAL_BASE_URL     = os.getenv('PORTAL_BASE_URL', 'https://jamiitek.com/portal/')
 
 # ── Chatbot / WhatsApp ─────────────────────────────────
-GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', '')
+GROQ_API_KEY = os.getenv('GROQ_API_KEY', '')
 SITE_URL       = os.getenv('SITE_URL', 'https://jamiitek.com')
 
 WHATSAPP_MASTER_TOKEN         = os.getenv('WHATSAPP_MASTER_TOKEN', '')

@@ -1,7 +1,8 @@
 """
-JamiiTek ChatBot — AI Engine (Google Gemini)
-Uses Google Gemini API (FREE tier) instead of Anthropic Claude.
-Free limits: 1,500 requests/day, 15 requests/minute — enough to start.
+JamiiTek ChatBot — AI Engine (Groq)
+Uses Groq API (FREE tier) — 14,400 requests/day, responds in under 1 second.
+Get your free key at: https://console.groq.com
+Model: llama-3.3-70b-versatile
 """
 import time
 import logging
@@ -10,27 +11,32 @@ from django.conf import settings
 
 logger = logging.getLogger('chatbot.ai')
 
-GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent"
+GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
+GROQ_MODEL   = "llama-3.3-70b-versatile"
 
 
 class BotAIEngine:
 
     def __init__(self, bot_config):
-        self.bot = bot_config
-        self.api_key = getattr(settings, 'GEMINI_API_KEY', '')
+        self.bot     = bot_config
+        self.api_key = getattr(settings, 'GROQ_API_KEY', '')
 
-    def build_gemini_contents(self, conversation, new_user_message: str) -> list:
-        contents = []
-        limit = getattr(self.bot, 'max_context_msgs', 10)
+    def build_messages(self, conversation, new_user_message: str) -> list:
+        messages = []
+        messages.append({
+            "role":    "system",
+            "content": self.bot.build_system_prompt()
+        })
+        limit  = getattr(self.bot, 'max_context_msgs', 10)
         recent = list(conversation.messages.order_by('-created_at')[:limit * 2])
         recent.reverse()
         for msg in recent:
             if msg.role == 'user':
-                contents.append({"role": "user", "parts": [{"text": msg.content}]})
+                messages.append({"role": "user",      "content": msg.content})
             elif msg.role == 'assistant':
-                contents.append({"role": "model", "parts": [{"text": msg.content}]})
-        contents.append({"role": "user", "parts": [{"text": new_user_message}]})
-        return contents
+                messages.append({"role": "assistant", "content": msg.content})
+        messages.append({"role": "user", "content": new_user_message})
+        return messages
 
     def get_response(self, conversation, user_message: str) -> dict:
         start_time = time.time()
@@ -41,7 +47,7 @@ class BotAIEngine:
         try:
             sub = self.bot.subscription
             if not sub.is_active:
-                return {'success': False, 'content': "Huduma hii imesimamishwa. Wasiliana na kampuni moja kwa moja.", 'tokens': 0, 'latency_ms': 0, 'error': 'Subscription inactive'}
+                return {'success': False, 'content': "This service has been suspended. Please contact the business directly.", 'tokens': 0, 'latency_ms': 0, 'error': 'Subscription inactive'}
             if sub.messages_remaining <= 0 and not sub.plan.is_unlimited:
                 return {'success': False, 'content': self.bot.fallback_msg, 'tokens': 0, 'latency_ms': 0, 'error': 'Message limit reached'}
         except Exception:
@@ -52,41 +58,39 @@ class BotAIEngine:
             return {'success': True, 'content': self.bot.human_handoff_msg, 'tokens': 0, 'latency_ms': 0, 'is_handoff': True}
 
         if not self.api_key:
-            logger.error("GEMINI_API_KEY not set in settings.py")
-            return {'success': False, 'content': self.bot.fallback_msg, 'tokens': 0, 'latency_ms': 0, 'error': 'GEMINI_API_KEY not configured'}
+            logger.error("GROQ_API_KEY not set in settings.py")
+            return {'success': False, 'content': self.bot.fallback_msg, 'tokens': 0, 'latency_ms': 0, 'error': 'GROQ_API_KEY not configured'}
 
         try:
-            system_prompt = self.bot.build_system_prompt()
-            contents = self.build_gemini_contents(conversation, user_message)
+            messages = self.build_messages(conversation, user_message)
 
             payload = {
-                "system_instruction": {"parts": [{"text": system_prompt}]},
-                "contents": contents,
-                "generationConfig": {
-                    "temperature": float(getattr(self.bot, 'ai_temperature', 0.7)),
-                    "maxOutputTokens": 500,
-                    "topP": 0.9,
-                }
+                "model":       GROQ_MODEL,
+                "messages":    messages,
+                "temperature": float(getattr(self.bot, 'ai_temperature', 0.7)),
+                "max_tokens":  500,
+                "top_p":       0.9,
             }
 
-            response = requests.post(
-                f"{GEMINI_API_URL}?key={self.api_key}",
-                json=payload, timeout=30,
-                headers={"Content-Type": "application/json"}
-            )
+            headers = {
+                "Authorization": f"Bearer {self.api_key}",
+                "Content-Type":  "application/json",
+            }
+
+            response = requests.post(GROQ_API_URL, json=payload, headers=headers, timeout=30)
 
             latency = int((time.time() - start_time) * 1000)
 
             if response.status_code != 200:
                 error_msg = response.json().get('error', {}).get('message', 'Unknown error')
-                logger.error(f"Gemini API error {response.status_code}: {error_msg}")
+                logger.error(f"Groq API error {response.status_code}: {error_msg}")
                 return {'success': False, 'content': self.bot.fallback_msg, 'tokens': 0, 'latency_ms': latency, 'error': error_msg}
 
-            data = response.json()
-            content = (data.get('candidates', [{}])[0].get('content', {}).get('parts', [{}])[0].get('text', self.bot.fallback_msg))
-            tokens = data.get('usageMetadata', {}).get('totalTokenCount', 0)
+            data    = response.json()
+            content = data['choices'][0]['message']['content'].strip()
+            tokens  = data.get('usage', {}).get('total_tokens', 0)
 
-            return {'success': True, 'content': content, 'tokens': tokens, 'latency_ms': latency, 'model': 'gemini-2.0-flash', 'is_handoff': False}
+            return {'success': True, 'content': content, 'tokens': tokens, 'latency_ms': latency, 'model': GROQ_MODEL, 'is_handoff': False}
 
         except requests.Timeout:
             latency = int((time.time() - start_time) * 1000)
