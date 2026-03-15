@@ -9,9 +9,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 WEBSITE_TYPES_DIR = BASE_DIR / 'apps' / 'website_types'
 
 # ── Security ──────────────────────────────────────────
-SECRET_KEY   = os.getenv('SECRET_KEY', 'fallback-secret-key-change-in-production')
-DEBUG        = os.getenv('DEBUG', 'False') == 'True'
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'jamiitek.com,www.jamiitek.com,127.0.0.1,localhost').split(',')
+SECRET_KEY    = os.getenv('SECRET_KEY',    'django-insecure-@&r$)$xpb)f6pm=_73pupatv2#n-%0%d=(cky=kab5ww6&*tzs')
+DEBUG         = os.getenv('DEBUG', 'False') == 'True'
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'jamiitek.com,www.jamiitek.com,jamiitek.onrender.com,127.0.0.1,localhost').split(',')
 
 INSTALLED_APPS = [
     'jazzmin',
@@ -58,15 +58,14 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'ebenezeri.wsgi.application'
 
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres', 
-        'USER': 'postgres.frapnewfadymevdkznrq',
-        'PASSWORD':'NyumbaChap',
-        'HOST': 'aws-1-eu-north-1.pooler.supabase.com',  
-        'PORT': '5432',  
+        'ENGINE':   'django.db.backends.postgresql',
+        'NAME':     os.getenv('DB_NAME',     'postgres'),
+        'USER':     os.getenv('DB_USER',     'postgres.frapnewfadymevdkznrq'),
+        'PASSWORD': os.getenv('DB_PASSWORD', 'NyumbaChap'),
+        'HOST':     os.getenv('DB_HOST',     'aws-1-eu-north-1.pooler.supabase.com'),
+        'PORT':     os.getenv('DB_PORT',     '5432'),
     }
 }
 
@@ -84,12 +83,12 @@ USE_I18N      = True
 USE_TZ        = True
 
 # ── Static & Media ─────────────────────────────────────
-STATIC_URL        = '/static/'
-STATICFILES_DIRS  = [BASE_DIR / 'apps' / 'static']
-STATIC_ROOT       = BASE_DIR / 'staticfiles'
+STATIC_URL          = '/static/'
+STATICFILES_DIRS    = [BASE_DIR / 'apps' / 'static']
+STATIC_ROOT         = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-MEDIA_URL  = f"https://res.cloudinary.com/{os.getenv('CLOUDINARY_CLOUD_NAME', '')}/"
+MEDIA_URL  = f"https://res.cloudinary.com/{os.getenv('CLOUDINARY_CLOUD_NAME', 'drc3xiipg')}/"
 MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -110,17 +109,17 @@ JAZZMIN_SETTINGS = {
 }
 
 JAZZMIN_UI_TWEAKS = {
-    "theme":         "darkly",
-    "navbar_fixed":  True,
-    "sidebar_fixed": True,
-    "footer_fixed":  False,
+    "theme":           "darkly",
+    "navbar_fixed":    True,
+    "sidebar_fixed":   True,
+    "footer_fixed":    False,
     "show_ui_builder": True,
 }
 
 # ── Uploadcare & Cloudinary ────────────────────────────
 UPLOADCARE = {
     'pub_key':    os.getenv('UPLOADCARE_PUB_KEY', '96c9f49ee7fe6afeb1fc'),
-    'secret':     os.getenv('UPLOADCARE_SECRET', '7c2ec708937b40ea415c'),
+    'secret':     os.getenv('UPLOADCARE_SECRET',  '7c2ec708937b40ea415c'),
     'use_secure': True,
 }
 
@@ -131,23 +130,27 @@ EMAIL_BACKEND       = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST          = 'smtp.gmail.com'
 EMAIL_PORT          = 587
 EMAIL_USE_TLS       = True
-EMAIL_HOST_USER     = os.getenv('EMAIL_HOST_USER', 'info@jamiitek.com')
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+EMAIL_HOST_USER     = os.getenv('EMAIL_HOST_USER',     'info@jamiitek.com')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', 'tbgh swtl zple dhiv')
 DEFAULT_FROM_EMAIL  = f"JamiiTek <{os.getenv('EMAIL_HOST_USER', 'info@jamiitek.com')}>"
-PORTAL_BASE_URL     = os.getenv('PORTAL_BASE_URL', 'https://jamiitek.com/portal/')
+PORTAL_BASE_URL     = os.getenv('PORTAL_BASE_URL',     'https://jamiitek.com/portal/')
+
+# ── Cloudinary ─────────────────────────────────────────
+CLOUDINARY_API_KEY    = os.getenv('CLOUDINARY_API_KEY',    '321181265585861')
+CLOUDINARY_API_SECRET = os.getenv('CLOUDINARY_API_SECRET', 'KA2L_qJUCyBBZFcyeQDGzH1kfUo')
 
 # ── Chatbot / WhatsApp ─────────────────────────────────
-GROQ_API_KEY = os.getenv('GROQ_API_KEY', '')
-SITE_URL       = os.getenv('SITE_URL', 'https://jamiitek.com')
+GROQ_API_KEY = os.getenv('GROQ_API_KEY', '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')
+SITE_URL     = os.getenv('SITE_URL',     'https://jamiitek.com')
 
-WHATSAPP_MASTER_TOKEN         = os.getenv('WHATSAPP_MASTER_TOKEN', '')
-WHATSAPP_WEBHOOK_VERIFY_TOKEN = os.getenv('WHATSAPP_WEBHOOK_VERIFY_TOKEN', '')
-WILLIAM_WHATSAPP              = os.getenv('WILLIAM_WHATSAPP', '')
-WILLIAM_PHONE_NUMBER_ID       = os.getenv('WILLIAM_PHONE_NUMBER_ID', '')
+WHATSAPP_MASTER_TOKEN         = os.getenv('WHATSAPP_MASTER_TOKEN',         'EAAVFDD2nBFgBQ3MKo241uoGuZCDFYtJBJcY2xZA7WmwJ8MXu16KmfZBZCSeo5CKUXNhEGyG4PxHF6DLZCwEBRCsX1TmcXJ8hjZBzftVBKXLezfNwoOS9ZArBP0EGEazLpU6usAhkDp10NrQd8X90Bs31IJNjGA1qiRLeNp1WVH1myT1kg4anfoOHlXOWDcTUob4bwZDZD')
+WHATSAPP_WEBHOOK_VERIFY_TOKEN = os.getenv('WHATSAPP_WEBHOOK_VERIFY_TOKEN', 'jamiitek_wh_2025')
+WILLIAM_WHATSAPP              = os.getenv('WILLIAM_WHATSAPP',              '15551681112')
+WILLIAM_PHONE_NUMBER_ID       = os.getenv('WILLIAM_PHONE_NUMBER_ID',       '1057453324112615')
 
 CHATBOT_PAYMENT_INFO = {
     'bank':           'NMB Bank',
     'account_number': os.getenv('NMB_ACCOUNT', '21410034200'),
-    'account_name':   os.getenv('NMB_NAME', 'WILLIAM CHIPINDI'),
+    'account_name':   os.getenv('NMB_NAME',    'WILLIAM CHIPINDI'),
     'branch':         'Dar es Salaam',
 }
