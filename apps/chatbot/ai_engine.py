@@ -10,7 +10,7 @@ from django.conf import settings
 
 logger = logging.getLogger('chatbot.ai')
 
-GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
+GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
 
 
 class BotAIEngine:
@@ -86,7 +86,7 @@ class BotAIEngine:
             content = (data.get('candidates', [{}])[0].get('content', {}).get('parts', [{}])[0].get('text', self.bot.fallback_msg))
             tokens = data.get('usageMetadata', {}).get('totalTokenCount', 0)
 
-            return {'success': True, 'content': content, 'tokens': tokens, 'latency_ms': latency, 'model': 'gemini-1.5-flash', 'is_handoff': False}
+            return {'success': True, 'content': content, 'tokens': tokens, 'latency_ms': latency, 'model': 'gemini-2.0-flash', 'is_handoff': False}
 
         except requests.Timeout:
             latency = int((time.time() - start_time) * 1000)
