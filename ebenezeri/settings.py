@@ -58,14 +58,15 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'ebenezeri.wsgi.application'
 
+
 DATABASES = {
     'default': {
-        'ENGINE':   'django.db.backends.postgresql',
-        'NAME':     os.getenv('DB_NAME', 'postgres'),
-        'USER':     os.getenv('DB_USER', 'postgres.frapnewfadymevdkznrq'),
-        'PASSWORD': os.getenv('DB_PASSWORD', ''),
-        'HOST':     os.getenv('DB_HOST', 'aws-1-eu-north-1.pooler.supabase.com'),
-        'PORT':     os.getenv('DB_PORT', '5432'),
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'postgres', 
+        'USER': 'postgres.frapnewfadymevdkznrq',
+        'PASSWORD':'NyumbaChap',
+        'HOST': 'aws-1-eu-north-1.pooler.supabase.com',  
+        'PORT': '5432',  
     }
 }
 
