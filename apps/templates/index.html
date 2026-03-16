@@ -1,314 +1,563 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}JamiiTek — Modern Web Development in Tanzania{% endblock %}
+{% block title %}JamiiTek — Modern Web Development & AI WhatsApp Bots in Tanzania{% endblock %}
 {% block extra_css %}
 <style>
-/* ══════════════════════════════════════════
-   HERO — DEEP SPACE SCI-FI
-══════════════════════════════════════════ */
-.hero {
-  min-height: 100vh; display: flex; align-items: center;
-  background: #020510; position: relative; overflow: hidden;
-  padding: 110px 0 80px;
+/* ═══════════════════════════════════════════════════════════
+   GLOBAL ANIMATIONS
+═══════════════════════════════════════════════════════════ */
+@keyframes fadeUp   { from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:translateY(0)} }
+@keyframes fadeIn   { from{opacity:0} to{opacity:1} }
+@keyframes floatY   { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+@keyframes floatYS  { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+@keyframes glitch   { 0%,100%{clip-path:inset(0 0 98% 0)} 10%{clip-path:inset(15% 0 66% 0)} 20%{clip-path:inset(44% 0 32% 0)} 30%{clip-path:inset(72% 0 8% 0)} 40%{clip-path:inset(30% 0 60% 0)} 50%{clip-path:inset(0 0 98% 0)} }
+@keyframes scanline { 0%{transform:translateY(-100%)} 100%{transform:translateY(100vh)} }
+@keyframes pulse2   { 0%,100%{opacity:1;box-shadow:0 0 8px currentColor} 50%{opacity:.3;box-shadow:none} }
+@keyframes ringExp  { 0%{transform:translate(-50%,-50%) scale(1);opacity:.5} 100%{transform:translate(-50%,-50%) scale(2.2);opacity:0} }
+@keyframes textShim { 0%{background-position:200% center} 100%{background-position:-200% center} }
+@keyframes borderGlow { 0%,100%{box-shadow:0 0 8px rgba(0,200,255,.2)} 50%{box-shadow:0 0 24px rgba(0,200,255,.5)} }
+@keyframes waveMsg  { 0%{transform:translateY(0) scaleX(1)} 50%{transform:translateY(-4px) scaleX(.98)} 100%{transform:translateY(0) scaleX(1)} }
+@keyframes botTyp   { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-5px)} }
+@keyframes revealX  { from{opacity:0;transform:translateX(-20px)} to{opacity:1;transform:translateX(0)} }
+@keyframes slideR   { from{opacity:0;transform:translateX(32px)} to{opacity:1;transform:translateX(0)} }
+@keyframes counterUp{ from{opacity:0;transform:scale(.8)} to{opacity:1;transform:scale(1)} }
+
+/* INTERSECTION OBSERVER classes */
+.reveal { opacity:0; transform:translateY(28px); transition:opacity .7s ease, transform .7s ease; }
+.reveal.visible { opacity:1; transform:translateY(0); }
+.reveal-l { opacity:0; transform:translateX(-28px); transition:opacity .7s ease, transform .7s ease; }
+.reveal-l.visible { opacity:1; transform:translateX(0); }
+.reveal-r { opacity:0; transform:translateX(28px); transition:opacity .7s ease, transform .7s ease; }
+.reveal-r.visible { opacity:1; transform:translateX(0); }
+
+/* ═══════════════════════════════════════════════════════════
+   BOT PROMO HERO STRIP — full-width top announcement
+═══════════════════════════════════════════════════════════ */
+.bot-announce {
+  position:relative; overflow:hidden; z-index:10;
+  background:linear-gradient(135deg,rgba(0,20,10,.98),rgba(0,10,20,.98));
+  border-bottom:1px solid rgba(37,211,102,.2);
 }
-.hero-stars {
-  position: absolute; inset: 0; pointer-events: none;
-  background-image:
-    radial-gradient(1px 1px at 8% 12%, rgba(255,255,255,0.75) 0%, transparent 100%),
-    radial-gradient(1px 1px at 22% 38%, rgba(255,255,255,0.5)  0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 58% 8%,  rgba(255,255,255,0.8)  0%, transparent 100%),
-    radial-gradient(1px 1px at 78% 28%, rgba(255,255,255,0.45) 0%, transparent 100%),
-    radial-gradient(1px 1px at 42% 65%, rgba(255,255,255,0.6)  0%, transparent 100%),
-    radial-gradient(1px 1px at 88% 55%, rgba(255,255,255,0.5)  0%, transparent 100%),
-    radial-gradient(1px 1px at 14% 82%, rgba(255,255,255,0.4)  0%, transparent 100%),
-    radial-gradient(1px 1px at 68% 78%, rgba(255,255,255,0.6)  0%, transparent 100%),
-    radial-gradient(1px 1px at 33% 22%, rgba(255,255,255,0.5)  0%, transparent 100%),
-    radial-gradient(1px 1px at 52% 88%, rgba(255,255,255,0.4)  0%, transparent 100%),
-    radial-gradient(1px 1px at 4%  52%, rgba(255,255,255,0.6)  0%, transparent 100%),
-    radial-gradient(1px 1px at 96% 15%, rgba(255,255,255,0.5)  0%, transparent 100%),
-    radial-gradient(1px 1px at 75% 92%, rgba(255,255,255,0.4)  0%, transparent 100%);
+.bot-announce::before {
+  content:''; position:absolute; inset:0; pointer-events:none;
+  background:radial-gradient(ellipse 60% 100% at 80% 50%,rgba(37,211,102,.08),transparent 65%),
+             radial-gradient(ellipse 40% 100% at 20% 50%,rgba(0,212,255,.05),transparent 65%);
+}
+.bot-announce-inner {
+  display:flex; align-items:center; gap:20px; padding:18px 24px;
+  position:relative; z-index:2; flex-wrap:wrap;
+}
+.ba-badge {
+  display:inline-flex; align-items:center; gap:7px;
+  background:rgba(37,211,102,.1); border:1px solid rgba(37,211,102,.3);
+  border-radius:100px; padding:5px 14px;
+  font-family:var(--ff-mono); font-size:10px; font-weight:700;
+  color:#25d366; letter-spacing:1.5px; text-transform:uppercase;
+  white-space:nowrap; flex-shrink:0;
+}
+.ba-badge .dot { width:6px; height:6px; border-radius:50%; background:#25d366; animation:pulse2 2s infinite; flex-shrink:0; }
+.ba-text { flex:1; min-width:180px; }
+.ba-text strong { font-family:var(--ff-display); font-size:13px; color:#fff; font-weight:700; letter-spacing:.5px; }
+.ba-text span { font-family:var(--ff-mono); font-size:11px; color:rgba(255,255,255,.38); margin-left:8px; }
+.ba-btns { display:flex; gap:8px; flex-wrap:wrap; flex-shrink:0; }
+.ba-btn-primary {
+  display:inline-flex; align-items:center; gap:7px; padding:9px 20px;
+  border-radius:9px; background:linear-gradient(135deg,#25d366,#00b5d8);
+  color:#000; font-family:var(--ff-display); font-size:11px; font-weight:800;
+  text-decoration:none; transition:all .2s; white-space:nowrap;
+  letter-spacing:.5px; box-shadow:0 4px 16px rgba(37,211,102,.25);
+}
+.ba-btn-primary:hover { color:#000; transform:translateY(-2px); box-shadow:0 8px 28px rgba(37,211,102,.5); }
+.ba-btn-ghost {
+  display:inline-flex; align-items:center; gap:6px; padding:9px 18px;
+  border-radius:9px; background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.1); color:rgba(255,255,255,.5);
+  font-family:var(--ff-mono); font-size:11px; text-decoration:none;
+  transition:all .2s; white-space:nowrap;
+}
+.ba-btn-ghost:hover { border-color:rgba(37,211,102,.3); color:#25d366; }
+.ba-close { background:none; border:none; color:rgba(255,255,255,.2); font-size:16px; cursor:pointer; padding:4px; flex-shrink:0; transition:color .2s; }
+.ba-close:hover { color:rgba(255,255,255,.6); }
+
+/* TICKER inside announce */
+.ba-ticker { display:flex; align-items:center; gap:12px; }
+.ba-ticker .plans { display:flex; gap:10px; flex-shrink:0; }
+.ba-plan { font-family:var(--ff-mono); font-size:10px; color:rgba(255,255,255,.35); display:flex; align-items:center; gap:5px; }
+.ba-plan strong { color:#25d366; font-size:11px; }
+.ba-plan .sep { color:rgba(255,255,255,.12); }
+
+/* ═══════════════════════════════════════════════════════════
+   HERO
+═══════════════════════════════════════════════════════════ */
+.hero {
+  min-height:100vh; display:flex; align-items:center;
+  background:#00010a; position:relative; overflow:hidden;
+  padding:120px 0 80px;
+}
+.hero-bg-canvas { position:absolute; inset:0; z-index:0; pointer-events:none; }
+.hero-scanline {
+  position:absolute; inset:0; z-index:1; pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,200,255,.006) 3px,rgba(0,200,255,.006) 4px);
+}
+.hero-grid {
+  position:absolute; inset:0; z-index:1; pointer-events:none;
+  background-image:linear-gradient(rgba(0,200,255,.032) 1px,transparent 1px),linear-gradient(90deg,rgba(0,200,255,.032) 1px,transparent 1px);
+  background-size:60px 60px;
+  mask-image:radial-gradient(ellipse 90% 80% at 50% 50%,black 20%,transparent 100%);
 }
 .hero-nebula {
-  position: absolute; inset: 0; pointer-events: none;
-  background:
-    radial-gradient(ellipse 72% 55% at 68% 22%, rgba(91,110,245,0.22) 0%, transparent 65%),
-    radial-gradient(ellipse 45% 60% at 12% 72%, rgba(139,92,246,0.14) 0%, transparent 60%),
-    radial-gradient(ellipse 38% 40% at 88% 78%, rgba(0,212,255,0.09) 0%, transparent 55%);
-  animation: nebula 14s ease-in-out infinite alternate;
+  position:absolute; inset:0; z-index:1; pointer-events:none;
+  background:radial-gradient(ellipse 75% 60% at 65% 20%,rgba(91,110,245,.18) 0%,transparent 65%),
+             radial-gradient(ellipse 50% 65% at 10% 75%,rgba(180,77,255,.1) 0%,transparent 60%),
+             radial-gradient(ellipse 40% 40% at 90% 80%,rgba(0,212,255,.08) 0%,transparent 55%);
+  animation:nebula 16s ease-in-out infinite alternate;
 }
-@keyframes nebula { from{opacity:.8;transform:scale(1)} to{opacity:1;transform:scale(1.05)} }
-.hero-grid {
-  position: absolute; inset: 0; pointer-events: none;
-  background-image:
-    linear-gradient(rgba(0,212,255,0.045) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,212,255,0.045) 1px, transparent 1px);
-  background-size: 56px 56px;
-  mask-image: radial-gradient(ellipse 85% 75% at 50% 50%, black 25%, transparent 100%);
-}
-.hero-scan {
-  position: absolute; inset: 0; pointer-events: none; z-index: 1;
-  background: repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,212,255,0.011) 3px,rgba(0,212,255,0.011) 4px);
-}
-.hero-inner { position: relative; z-index: 2; }
+@keyframes nebula { from{opacity:.7;transform:scale(1)} to{opacity:1;transform:scale(1.06)} }
+.hero-inner { position:relative; z-index:3; }
 
+/* PILL */
 .h-pill {
-  display: inline-flex; align-items: center; gap: 10px;
-  background: rgba(0,212,255,0.07); border: 1px solid rgba(0,212,255,0.2);
-  border-radius: 100px; padding: 7px 18px;
-  font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 2px;
-  color: rgba(0,212,255,0.85); text-transform: uppercase; margin-bottom: 28px;
+  display:inline-flex; align-items:center; gap:10px;
+  background:rgba(0,200,255,.07); border:1px solid rgba(0,200,255,.2);
+  border-radius:100px; padding:7px 18px; margin-bottom:24px;
+  font-family:var(--ff-mono); font-size:11px; letter-spacing:2px; text-transform:uppercase;
+  color:rgba(0,200,255,.85);
+  animation:fadeUp .6s .1s ease both;
 }
-.h-pill .dot {
-  width: 7px; height: 7px; background: #00ff88; border-radius: 50%;
-  box-shadow: 0 0 8px #00ff88; animation: blink 2s infinite; flex-shrink: 0;
-}
-@keyframes blink { 0%,100%{opacity:1;box-shadow:0 0 8px #00ff88} 50%{opacity:.3;box-shadow:none} }
+.h-pill .live { width:7px; height:7px; background:#00ff88; border-radius:50%; box-shadow:0 0 8px #00ff88; animation:pulse2 2s infinite; flex-shrink:0; }
 
+/* BOT STRIP inside hero */
+.h-bot-strip {
+  display:inline-flex; align-items:center; gap:10px;
+  background:rgba(37,211,102,.06); border:1px solid rgba(37,211,102,.18);
+  border-radius:100px; padding:7px 18px; margin-bottom:24px;
+  font-family:var(--ff-mono); font-size:11px; letter-spacing:1.5px;
+  color:rgba(37,211,102,.8); text-transform:uppercase;
+  animation:fadeUp .6s .15s ease both;
+  text-decoration:none; transition:all .2s;
+}
+.h-bot-strip:hover { border-color:rgba(37,211,102,.4); color:#25d366; background:rgba(37,211,102,.1); }
+.h-bot-strip .waDot { width:7px; height:7px; background:#25d366; border-radius:50%; box-shadow:0 0 8px #25d366; animation:pulse2 2s .5s infinite; flex-shrink:0; }
+
+/* TITLE */
 .h-title {
-  font-family: 'Syne', sans-serif;
-  font-size: clamp(36px, 6.5vw, 84px);
-  font-weight: 800; color: #fff;
-  letter-spacing: -2px; line-height: 1.05;
-  margin-bottom: 20px;
+  font-family:var(--ff-display);
+  font-size:clamp(32px,6vw,80px);
+  font-weight:900; color:#fff;
+  letter-spacing:-1px; line-height:1.05;
+  margin-bottom:18px;
+  animation:fadeUp .7s .2s ease both;
 }
-.h-title .glow-line {
-  background: linear-gradient(110deg, #00d4ff, #a78bfa 45%, #ff2d8a);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-  filter: drop-shadow(0 0 24px rgba(0,212,255,0.25));
+.h-title .line-web {
+  display:block;
+  background:linear-gradient(110deg,var(--cyan),var(--plasma) 50%,#ff2d8a);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text; background-size:200% auto;
+  animation:textShim 4s linear infinite;
+  filter:drop-shadow(0 0 28px rgba(0,200,255,.25));
 }
+.h-title .line-bot {
+  display:block;
+  background:linear-gradient(110deg,#25d366,#00d4ff 50%,#25d366);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text; background-size:200% auto;
+  animation:textShim 4s 1s linear infinite;
+  filter:drop-shadow(0 0 28px rgba(37,211,102,.25));
+}
+
 .h-sub {
-  font-size: clamp(14px, 1.4vw, 18px);
-  color: rgba(255,255,255,0.45); line-height: 1.8;
-  max-width: 490px; margin-bottom: 32px;
+  font-size:clamp(14px,1.4vw,17px); color:rgba(232,244,255,.45);
+  line-height:1.85; max-width:500px; margin-bottom:28px;
+  animation:fadeUp .7s .3s ease both;
 }
 
-.h-btn-primary {
-  display: inline-flex; align-items: center; justify-content: center; gap: 9px;
-  padding: 14px 28px; border-radius: 12px;
-  background: linear-gradient(135deg, #5b6ef5, #8b5cf6);
-  color: #fff; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 15px;
-  text-decoration: none; transition: all .25s;
-  box-shadow: 0 8px 28px rgba(91,110,245,0.3);
+/* DUAL CTA ROW */
+.h-ctas { display:flex; gap:12px; flex-wrap:wrap; animation:fadeUp .7s .35s ease both; }
+.h-cta-main {
+  display:inline-flex; align-items:center; gap:9px;
+  padding:13px 26px; border-radius:11px;
+  background:linear-gradient(135deg,rgba(0,200,255,.2),rgba(180,77,255,.2));
+  border:1px solid rgba(0,200,255,.35); color:#fff;
+  font-family:var(--ff-display); font-weight:700; font-size:13px;
+  text-decoration:none; transition:all .25s; letter-spacing:.5px;
+  box-shadow:0 6px 24px rgba(0,200,255,.15);
 }
-.h-btn-primary:hover { color:#fff; transform:translateY(-2px); box-shadow: 0 12px 40px rgba(91,110,245,0.55); }
-.h-btn-ghost {
-  display: inline-flex; align-items: center; justify-content: center; gap: 9px;
-  padding: 14px 26px; border-radius: 12px;
-  background: transparent; border: 1px solid rgba(255,255,255,0.14);
-  color: rgba(255,255,255,0.6);
-  font-family: 'Syne', sans-serif; font-weight: 600; font-size: 15px;
-  text-decoration: none; transition: all .25s;
+.h-cta-main:hover { color:#fff; border-color:rgba(0,200,255,.7); box-shadow:0 10px 36px rgba(0,200,255,.35); transform:translateY(-2px); }
+.h-cta-bot {
+  display:inline-flex; align-items:center; gap:9px;
+  padding:13px 26px; border-radius:11px;
+  background:linear-gradient(135deg,#25d366,#00b5d8);
+  color:#000; font-family:var(--ff-display); font-weight:800; font-size:13px;
+  text-decoration:none; transition:all .25s; letter-spacing:.5px;
+  box-shadow:0 6px 24px rgba(37,211,102,.25);
 }
-.h-btn-ghost:hover { color:#fff; border-color:rgba(0,212,255,0.4); background:rgba(0,212,255,0.06); }
+.h-cta-bot:hover { color:#000; transform:translateY(-2px); box-shadow:0 10px 36px rgba(37,211,102,.5); }
+.h-cta-ghost {
+  display:inline-flex; align-items:center; gap:9px;
+  padding:13px 22px; border-radius:11px;
+  border:1px solid rgba(255,255,255,.1); background:transparent;
+  color:rgba(255,255,255,.5); font-family:var(--ff-display);
+  font-weight:600; font-size:12px; text-decoration:none; transition:all .25s;
+}
+.h-cta-ghost:hover { color:#fff; border-color:rgba(255,255,255,.28); background:rgba(255,255,255,.04); }
 
+/* PORTAL BOX */
 .h-portal {
-  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
-  padding: 14px 18px; margin-top: 24px; margin-bottom: 28px;
-  background: rgba(0,212,255,0.04); border: 1px solid rgba(0,212,255,0.13);
-  border-radius: 16px; position: relative; overflow: hidden;
-  backdrop-filter: blur(8px);
+  display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+  padding:14px 18px; margin-top:22px; margin-bottom:24px;
+  background:rgba(0,200,255,.04); border:1px solid rgba(0,200,255,.12);
+  border-radius:16px; position:relative; overflow:hidden;
+  animation:fadeUp .7s .4s ease both;
 }
-.h-portal::before {
-  content:''; position:absolute; left:0; top:0; bottom:0; width:3px;
-  background: linear-gradient(180deg, #00d4ff, #8b5cf6);
-  border-radius: 3px 0 0 3px;
+.h-portal::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:linear-gradient(180deg,var(--cyan),var(--plasma)); }
+.h-portal-ico { width:38px; height:38px; border-radius:10px; background:rgba(0,200,255,.1); border:1px solid rgba(0,200,255,.2); display:flex; align-items:center; justify-content:center; color:var(--cyan); flex-shrink:0; }
+.h-portal-txt strong { display:block; font-size:13px; font-weight:700; color:rgba(232,244,255,.85); margin-bottom:2px; }
+.h-portal-txt span { font-family:var(--ff-mono); font-size:10px; color:rgba(255,255,255,.3); letter-spacing:.4px; }
+.h-sign { display:inline-flex; align-items:center; gap:6px; padding:8px 16px; border-radius:9px; background:rgba(0,200,255,.12); border:1px solid rgba(0,200,255,.28); color:var(--cyan); font-size:12px; font-weight:700; text-decoration:none; transition:all .2s; }
+.h-sign:hover { background:rgba(0,200,255,.22); color:#fff; }
+.h-reg  { display:inline-flex; align-items:center; gap:6px; padding:8px 16px; border-radius:9px; border:1px solid rgba(255,255,255,.1); color:rgba(255,255,255,.45); font-size:12px; font-weight:600; text-decoration:none; transition:all .2s; }
+.h-reg:hover { border-color:rgba(180,77,255,.4); color:#fff; background:rgba(180,77,255,.07); }
+
+/* TRUST ROW */
+.h-trust { display:flex; align-items:center; gap:14px; flex-wrap:wrap; padding-top:20px; border-top:1px solid rgba(255,255,255,.06); animation:fadeUp .7s .45s ease both; }
+.h-av { width:30px; height:30px; border-radius:50%; margin-right:-8px; border:2px solid #00010a; font-family:var(--ff-display); font-size:9px; font-weight:800; color:#fff; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; }
+
+/* HERO VISUAL */
+.h-vis { position:relative; height:520px; }
+.h-ring { position:absolute; top:50%; left:50%; border-radius:50%; border:1px solid; pointer-events:none; animation:ringPulse 5s ease-in-out infinite; }
+.h-ring-1 { width:420px; height:420px; border-color:rgba(0,200,255,.1); box-shadow:0 0 60px rgba(0,200,255,.05); }
+.h-ring-2 { width:280px; height:280px; border-color:rgba(180,77,255,.13); animation-direction:reverse; }
+.h-ring-exp { position:absolute; top:50%; left:50%; width:420px; height:420px; border-radius:50%; border:1px solid rgba(0,200,255,.15); animation:ringExp 4s ease-out infinite; pointer-events:none; }
+@keyframes ringPulse { 0%,100%{opacity:.5;transform:translate(-50%,-50%) scale(1)} 50%{opacity:1;transform:translate(-50%,-50%) scale(1.03)} }
+.h-cards-grid { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); display:grid; grid-template-columns:1fr 1fr; gap:14px; width:300px; }
+.hc { background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.07); border-radius:18px; padding:20px; backdrop-filter:blur(10px); transition:all .3s; }
+.hc:hover { border-color:rgba(0,200,255,.3); transform:translateY(-3px); box-shadow:0 12px 32px rgba(0,200,255,.08); }
+.hc:nth-child(even) { margin-top:28px; }
+.hc-ico { font-size:22px; margin-bottom:8px; }
+.hc-t { font-family:var(--ff-display); font-weight:700; font-size:12px; color:rgba(255,255,255,.85); margin-bottom:3px; letter-spacing:.5px; }
+.hc-s { font-family:var(--ff-mono); font-size:9px; color:rgba(255,255,255,.3); }
+.h-float { position:absolute; background:rgba(2,8,24,.96); border:1px solid rgba(0,200,255,.18); border-radius:14px; padding:12px 16px; box-shadow:0 20px 48px rgba(0,0,0,.6),0 0 24px rgba(0,200,255,.07); display:flex; align-items:center; gap:10px; backdrop-filter:blur(14px); }
+.h-float.f1 { top:16px; right:0; animation:floatY 4s ease-in-out infinite; }
+.h-float.f2 { bottom:20px; left:0; animation:floatY 4s 2s ease-in-out infinite; }
+.h-float.f3 { top:50%; right:-20px; transform:translateY(-50%); animation:floatY 4s 1s ease-in-out infinite; }
+.hf-ico { font-size:20px; }
+.hf-t { font-family:var(--ff-display); font-size:12px; font-weight:700; color:#fff; }
+.hf-s { font-family:var(--ff-mono); font-size:9px; color:rgba(255,255,255,.35); margin-top:2px; }
+
+/* ═══════════════════════════════════════════════════════════
+   BOT HERO SECTION — dedicated powerful section after main hero
+═══════════════════════════════════════════════════════════ */
+.bot-hero {
+  padding:100px 0; background:#000d08; position:relative; overflow:hidden;
 }
-.h-portal-ico { width:40px; height:40px; border-radius:10px; background:rgba(0,212,255,0.1); border:1px solid rgba(0,212,255,0.2); display:flex; align-items:center; justify-content:center; font-size:16px; color:#00d4ff; flex-shrink:0; }
-.h-portal-text { flex:1; min-width:120px; }
-.h-portal-text strong { display:block; font-size:13px; font-weight:700; color:rgba(255,255,255,0.85); margin-bottom:2px; }
-.h-portal-text span { font-family:'DM Mono',monospace; font-size:10px; color:rgba(255,255,255,0.32); letter-spacing:.4px; }
-.h-portal-btns { display:flex; gap:8px; flex-wrap:wrap; }
-.h-sign { display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:8px 16px; border-radius:9px; background:rgba(0,212,255,0.12); border:1px solid rgba(0,212,255,0.28); color:#00d4ff; font-size:13px; font-weight:700; text-decoration:none; transition:all .2s; white-space:nowrap; }
-.h-sign:hover { background:rgba(0,212,255,0.22); color:#fff; }
-.h-reg { display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:8px 16px; border-radius:9px; background:transparent; border:1px solid rgba(255,255,255,0.11); color:rgba(255,255,255,0.5); font-size:13px; font-weight:600; text-decoration:none; transition:all .2s; white-space:nowrap; }
-.h-reg:hover { border-color:rgba(139,92,246,0.4); color:#fff; background:rgba(139,92,246,0.08); }
+.bot-hero::before {
+  content:''; position:absolute; inset:0; pointer-events:none;
+  background:radial-gradient(ellipse 65% 55% at 50% 0%,rgba(37,211,102,.1),transparent 65%),
+             radial-gradient(ellipse 40% 40% at 5% 100%,rgba(0,212,255,.05),transparent 60%);
+}
+.bot-hero-grid {
+  position:absolute; inset:0; pointer-events:none;
+  background-image:linear-gradient(rgba(37,211,102,.022) 1px,transparent 1px),linear-gradient(90deg,rgba(37,211,102,.022) 1px,transparent 1px);
+  background-size:56px 56px;
+}
+/* GLITCH TITLE */
+.bot-h-title {
+  font-family:var(--ff-display);
+  font-size:clamp(30px,5.5vw,72px);
+  font-weight:900; color:#fff;
+  letter-spacing:-1px; line-height:1.06; margin-bottom:16px;
+  position:relative;
+}
+.bot-h-title .gl {
+  background:linear-gradient(110deg,#25d366,#00d4ff 40%,#25d366);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text; background-size:200% auto;
+  animation:textShim 3s linear infinite;
+  filter:drop-shadow(0 0 24px rgba(37,211,102,.3));
+}
+.bot-h-title::after {
+  content:attr(data-text);
+  position:absolute; left:2px; top:0; width:100%;
+  font-family:var(--ff-display); font-size:inherit; font-weight:900;
+  color:rgba(37,211,102,.25); letter-spacing:-1px; line-height:1.06;
+  animation:glitch 8s step-end infinite; pointer-events:none;
+}
 
-.h-trust { display:flex; align-items:center; gap:14px; flex-wrap:wrap; padding-top:22px; border-top:1px solid rgba(255,255,255,0.06); }
-.h-avs { display:flex; }
-.h-avs .av { width:32px; height:32px; border-radius:50%; margin-right:-8px; border:2px solid #020510; font-family:'Syne',sans-serif; font-size:10px; font-weight:800; color:#fff; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+/* ANIMATED CHAT DEMO */
+.bot-chat-demo {
+  background:rgba(0,0,0,.6); border:1px solid rgba(37,211,102,.15);
+  border-radius:20px; overflow:hidden; backdrop-filter:blur(20px);
+  box-shadow:0 32px 80px rgba(0,0,0,.7),0 0 40px rgba(37,211,102,.06);
+  max-width:340px; width:100%;
+}
+.bcd-head {
+  padding:12px 16px; background:rgba(37,211,102,.06);
+  border-bottom:1px solid rgba(37,211,102,.1);
+  display:flex; align-items:center; gap:10px;
+}
+.bcd-av {
+  width:36px; height:36px; border-radius:50%;
+  background:linear-gradient(135deg,#25d366,#00d4ff);
+  display:flex; align-items:center; justify-content:center;
+  font-size:16px; flex-shrink:0;
+  animation:floatYS 3s ease-in-out infinite;
+}
+.bcd-name { font-family:var(--ff-display); font-size:13px; font-weight:700; color:#fff; }
+.bcd-online { font-family:var(--ff-mono); font-size:9px; color:#25d366; margin-top:2px; display:flex; align-items:center; gap:4px; }
+.bcd-online .od { width:5px; height:5px; border-radius:50%; background:#25d366; animation:pulse2 2s infinite; }
+.bcd-body { padding:16px; display:flex; flex-direction:column; gap:10px; min-height:220px; background:#060a06; }
+.bcd-msg { max-width:85%; padding:9px 13px; border-radius:14px; font-size:12px; line-height:1.55; opacity:0; transition:opacity .4s,transform .4s; transform:translateY(8px); }
+.bcd-msg.show { opacity:1; transform:translateY(0); }
+.bcd-msg.bot { background:rgba(255,255,255,.07); color:rgba(255,255,255,.85); border-bottom-left-radius:3px; align-self:flex-start; }
+.bcd-msg.user { background:#25d366; color:#000; font-weight:600; border-bottom-right-radius:3px; align-self:flex-end; }
+.bcd-typing { display:flex; gap:4px; padding:9px 13px; background:rgba(255,255,255,.05); border-radius:12px; width:52px; align-self:flex-start; opacity:0; transition:opacity .3s; }
+.bcd-typing.show { opacity:1; }
+.bcd-dot { width:5px; height:5px; border-radius:50%; background:rgba(255,255,255,.4); animation:botTyp 1s infinite; }
+.bcd-dot:nth-child(2){animation-delay:.15s}.bcd-dot:nth-child(3){animation-delay:.3s}
+.bcd-foot { padding:10px 14px; border-top:1px solid rgba(37,211,102,.08); display:flex; align-items:center; gap:8px; background:rgba(0,0,0,.4); }
+.bcd-input { flex:1; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08); border-radius:8px; padding:7px 12px; font-family:var(--ff-mono); font-size:10px; color:rgba(255,255,255,.4); }
+.bcd-send { width:28px; height:28px; border-radius:8px; background:rgba(37,211,102,.15); border:1px solid rgba(37,211,102,.25); color:#25d366; display:flex; align-items:center; justify-content:center; font-size:11px; cursor:pointer; }
 
-.h-vis { position:relative; height:480px; }
-.h-ring { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); border-radius:50%; border:1px solid rgba(0,212,255,0.1); animation:ringPulse 5s ease-in-out infinite; pointer-events:none; }
-.h-ring-1 { width:380px; height:380px; box-shadow:0 0 60px rgba(0,212,255,0.05); }
-.h-ring-2 { width:250px; height:250px; border-color:rgba(139,92,246,0.14); animation-direction:reverse; }
-@keyframes ringPulse { 0%,100%{opacity:.6;transform:translate(-50%,-50%) scale(1)} 50%{opacity:1;transform:translate(-50%,-50%) scale(1.03)} }
-.h-cards-grid { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); display:grid; grid-template-columns:1fr 1fr; gap:14px; width:310px; }
-.hc { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.07); border-radius:18px; padding:20px 22px; backdrop-filter:blur(10px); transition:border-color .3s; }
-.hc:hover { border-color:rgba(0,212,255,0.3); }
-.hc:nth-child(even) { margin-top:26px; }
-.hc-ico { font-size:24px; margin-bottom:9px; }
-.hc-t { font-family:'Syne',sans-serif; font-weight:700; font-size:14px; color:rgba(255,255,255,0.85); margin-bottom:3px; }
-.hc-s { font-family:'DM Mono',monospace; font-size:10px; color:rgba(255,255,255,0.3); }
-.h-badge { position:absolute; background:rgba(5,9,22,0.96); border:1px solid rgba(0,212,255,0.18); border-radius:14px; padding:11px 16px; box-shadow:0 16px 40px rgba(0,0,0,0.5), 0 0 20px rgba(0,212,255,0.07); display:flex; align-items:center; gap:10px; animation:lev 4s ease-in-out infinite; backdrop-filter:blur(12px); }
-.h-badge.d2 { animation-delay:2s; }
-@keyframes lev { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
-.h-badge .bi { font-size:20px; }
-.h-badge strong { display:block; font-family:'Syne',sans-serif; font-size:13px; font-weight:700; color:#fff; }
-.h-badge span { font-family:'DM Mono',monospace; font-size:10px; color:rgba(255,255,255,0.35); }
+/* STATS ROW */
+.bot-stats-row { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:28px; }
+.bot-stat { text-align:center; padding:20px 16px; background:rgba(37,211,102,.03); border:1px solid rgba(37,211,102,.1); border-radius:14px; transition:all .25s; }
+.bot-stat:hover { border-color:rgba(37,211,102,.3); background:rgba(37,211,102,.07); transform:translateY(-3px); }
+.bot-stat-n { font-family:var(--ff-display); font-size:clamp(22px,3vw,36px); font-weight:900; color:#25d366; line-height:1; margin-bottom:5px; }
+.bot-stat-l { font-family:var(--ff-mono); font-size:10px; color:rgba(255,255,255,.3); text-transform:uppercase; letter-spacing:1px; }
 
-.sf-strip { background:#020510; border-top:1px solid rgba(0,212,255,0.07); border-bottom:1px solid rgba(0,212,255,0.07); }
-.sf-strip-inner { display:flex; overflow-x:auto; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
+/* FEAT CARDS */
+.bot-feat { background:rgba(255,255,255,.02); border:1px solid rgba(255,255,255,.07); border-radius:18px; padding:26px; height:100%; transition:all .3s; position:relative; overflow:hidden; }
+.bot-feat::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; transform:scaleX(0); transform-origin:left; transition:transform .4s; }
+.bot-feat:hover { transform:translateY(-5px); box-shadow:0 20px 48px rgba(0,0,0,.5); }
+.bot-feat:hover::before { transform:scaleX(1); }
+.bot-feat.green::before { background:linear-gradient(90deg,#25d366,#00d4ff); }
+.bot-feat.cyan::before { background:linear-gradient(90deg,#00d4ff,#8b5cf6); }
+.bot-feat.purple::before { background:linear-gradient(90deg,#8b5cf6,#ff2d8a); }
+.bot-feat:hover.green { border-color:rgba(37,211,102,.2); }
+.bot-feat:hover.cyan { border-color:rgba(0,212,255,.2); }
+.bot-feat:hover.purple { border-color:rgba(139,92,246,.2); }
+.bot-feat-ico { width:48px; height:48px; border-radius:13px; display:flex; align-items:center; justify-content:center; font-size:22px; margin-bottom:18px; }
+.bot-feat-t { font-family:var(--ff-display); font-weight:700; font-size:15px; color:rgba(255,255,255,.9); margin-bottom:10px; letter-spacing:.3px; }
+.bot-feat-d { font-size:13px; color:rgba(255,255,255,.35); line-height:1.8; margin-bottom:18px; }
+.bot-feat-list { display:flex; flex-direction:column; gap:7px; }
+.bot-feat-li { display:flex; align-items:center; gap:8px; font-family:var(--ff-mono); font-size:10px; letter-spacing:.3px; }
+.bot-feat-li .d { width:5px; height:5px; border-radius:50%; flex-shrink:0; }
+
+/* PRICING SECTION */
+.bot-pricing-sect { background:#00060a; padding:80px 0; position:relative; overflow:hidden; }
+.bot-pricing-sect::before { content:''; position:absolute; inset:0; pointer-events:none; background:radial-gradient(ellipse 50% 60% at 50% 100%,rgba(37,211,102,.06),transparent 65%); }
+.bot-plan { border-radius:20px; padding:28px; text-align:center; position:relative; overflow:hidden; transition:all .3s; height:100%; }
+.bot-plan.starter { background:rgba(255,255,255,.03); border:1.5px solid rgba(255,255,255,.08); }
+.bot-plan.business { background:rgba(37,211,102,.06); border:1.5px solid rgba(37,211,102,.3); box-shadow:0 0 40px rgba(37,211,102,.1); }
+.bot-plan.enterprise { background:rgba(255,255,255,.03); border:1.5px solid rgba(255,255,255,.08); }
+.bot-plan:hover { transform:translateY(-6px); box-shadow:0 24px 56px rgba(0,0,0,.5); }
+.bot-plan.business:hover { box-shadow:0 24px 56px rgba(0,0,0,.5),0 0 50px rgba(37,211,102,.15); }
+.bp-badge { position:absolute; top:-1px; left:50%; transform:translateX(-50%); background:linear-gradient(135deg,#25d366,#00d4ff); color:#000; font-family:var(--ff-mono); font-size:9px; font-weight:800; padding:4px 14px; border-radius:0 0 10px 10px; letter-spacing:1px; white-space:nowrap; }
+.bp-name { font-family:var(--ff-display); font-size:14px; font-weight:700; color:rgba(255,255,255,.7); margin-bottom:10px; letter-spacing:1px; }
+.bp-price { font-family:var(--ff-display); font-size:clamp(28px,4vw,44px); font-weight:900; color:#fff; line-height:1; margin-bottom:4px; }
+.bp-unit { font-family:var(--ff-mono); font-size:10px; color:rgba(255,255,255,.28); margin-bottom:18px; }
+.bp-feat { font-family:var(--ff-mono); font-size:10px; color:rgba(255,255,255,.45); padding:6px 0; border-bottom:1px solid rgba(255,255,255,.05); display:flex; align-items:center; gap:7px; text-align:left; }
+.bp-feat:last-of-type { border-bottom:none; }
+.bp-feat .bi { flex-shrink:0; }
+.bp-btn { display:block; width:100%; padding:11px; border-radius:10px; font-family:var(--ff-display); font-size:12px; font-weight:800; text-decoration:none; transition:all .2s; margin-top:18px; letter-spacing:.5px; text-align:center; }
+.bp-btn.g { background:linear-gradient(135deg,#25d366,#00b5d8); color:#000; }
+.bp-btn.g:hover { color:#000; box-shadow:0 8px 28px rgba(37,211,102,.4); transform:translateY(-1px); }
+.bp-btn.o { background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); color:rgba(255,255,255,.65); }
+.bp-btn.o:hover { background:rgba(255,255,255,.1); color:#fff; }
+.bp-trial { display:inline-flex; align-items:center; gap:6px; font-family:var(--ff-mono); font-size:10px; color:rgba(37,211,102,.6); margin-top:10px; }
+.bp-trial .d { width:5px; height:5px; border-radius:50%; background:#25d366; animation:pulse2 2s infinite; flex-shrink:0; }
+
+/* ═══════════════════════════════════════════════════════════
+   STRIP
+═══════════════════════════════════════════════════════════ */
+.sf-strip { background:#020510; border-top:1px solid rgba(0,200,255,.07); border-bottom:1px solid rgba(0,200,255,.07); }
+.sf-strip-inner { display:flex; overflow-x:auto; scrollbar-width:none; }
 .sf-strip-inner::-webkit-scrollbar { display:none; }
-.sf-si { display:flex; align-items:center; gap:12px; flex-shrink:0; padding:20px 28px; border-right:1px solid rgba(255,255,255,0.04); }
+.sf-si { display:flex; align-items:center; gap:12px; flex-shrink:0; padding:20px 28px; border-right:1px solid rgba(255,255,255,.04); }
 .sf-si:last-child { border-right:none; }
-.sf-si-ico { width:38px; height:38px; border-radius:10px; background:rgba(0,212,255,0.07); border:1px solid rgba(0,212,255,0.12); display:flex; align-items:center; justify-content:center; font-size:16px; color:#00d4ff; flex-shrink:0; }
-.sf-si strong { display:block; font-family:'Syne',sans-serif; font-weight:700; font-size:13px; color:rgba(255,255,255,0.82); margin-bottom:2px; white-space:nowrap; }
-.sf-si span { font-family:'DM Mono',monospace; font-size:10px; color:rgba(255,255,255,0.28); white-space:nowrap; }
+.sf-si-ico { width:38px; height:38px; border-radius:10px; background:rgba(0,200,255,.07); border:1px solid rgba(0,200,255,.12); display:flex; align-items:center; justify-content:center; font-size:16px; color:var(--cyan); flex-shrink:0; }
+.sf-si strong { display:block; font-family:var(--ff-display); font-weight:700; font-size:12px; color:rgba(232,244,255,.82); margin-bottom:2px; white-space:nowrap; letter-spacing:.5px; }
+.sf-si span { font-family:var(--ff-mono); font-size:10px; color:rgba(255,255,255,.28); white-space:nowrap; }
 
-.sf-eye { display:inline-flex; align-items:center; gap:10px; font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2.5px; text-transform:uppercase; color:#00d4ff; margin-bottom:14px; }
-.sf-eye::before,.sf-eye::after { content:''; display:block; width:18px; height:1px; background:#00d4ff; opacity:.5; }
-
+/* ═══════════════════════════════════════════════════════════
+   SERVICES
+═══════════════════════════════════════════════════════════ */
 .sf-svc { padding:88px 0; background:#020510; position:relative; }
-.sf-svc::before { content:''; position:absolute; inset:0; pointer-events:none; background-image:linear-gradient(rgba(0,212,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,0.025) 1px,transparent 1px); background-size:56px 56px; }
-.sf-card { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:20px; padding:28px; height:100%; position:relative; overflow:hidden; transition:all .35s; }
-.sf-card::after { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,#00d4ff,#8b5cf6); transform:scaleX(0); transform-origin:left; transition:transform .35s; }
-.sf-card:hover { border-color:rgba(0,212,255,0.18); transform:translateY(-5px); box-shadow:0 20px 40px rgba(0,0,0,0.4),0 0 24px rgba(0,212,255,0.06); }
+.sf-svc::before { content:''; position:absolute; inset:0; pointer-events:none; background-image:linear-gradient(rgba(0,200,255,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(0,200,255,.02) 1px,transparent 1px); background-size:56px 56px; }
+.sf-card { background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.07); border-radius:20px; padding:28px; height:100%; position:relative; overflow:hidden; transition:all .35s; }
+.sf-card::after { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,var(--cyan),var(--plasma)); transform:scaleX(0); transform-origin:left; transition:transform .35s; }
+.sf-card:hover { border-color:rgba(0,200,255,.18); transform:translateY(-5px); box-shadow:0 20px 40px rgba(0,0,0,.4),0 0 24px rgba(0,200,255,.05); }
 .sf-card:hover::after { transform:scaleX(1); }
-.sf-card-n { font-family:'DM Mono',monospace; font-size:10px; color:rgba(0,212,255,0.5); letter-spacing:3px; margin-bottom:16px; }
-.sf-card-ico { width:48px; height:48px; border-radius:13px; background:rgba(0,212,255,0.07); border:1px solid rgba(0,212,255,0.12); display:flex; align-items:center; justify-content:center; font-size:20px; color:#00d4ff; margin-bottom:16px; transition:all .3s; }
-.sf-card:hover .sf-card-ico { background:#00d4ff; color:#000; box-shadow:0 0 20px rgba(0,212,255,0.4); }
-.sf-card-t { font-family:'Syne',sans-serif; font-weight:700; font-size:16px; color:rgba(255,255,255,0.88); margin-bottom:8px; }
-.sf-card-d { font-size:13px; color:rgba(255,255,255,0.38); line-height:1.75; margin:0; }
+.sf-card-n { font-family:var(--ff-mono); font-size:10px; color:rgba(0,200,255,.5); letter-spacing:3px; margin-bottom:16px; }
+.sf-card-ico { width:48px; height:48px; border-radius:13px; background:rgba(0,200,255,.07); border:1px solid rgba(0,200,255,.12); display:flex; align-items:center; justify-content:center; font-size:20px; color:var(--cyan); margin-bottom:16px; transition:all .3s; }
+.sf-card:hover .sf-card-ico { background:var(--cyan); color:#000; box-shadow:0 0 20px rgba(0,200,255,.4); }
+.sf-card-t { font-family:var(--ff-display); font-weight:700; font-size:15px; color:rgba(232,244,255,.88); margin-bottom:8px; letter-spacing:.3px; }
+.sf-card-d { font-size:13px; color:rgba(255,255,255,.35); line-height:1.75; margin:0; }
 
-.sf-stats { background:#020510; border-top:1px solid rgba(0,212,255,0.08); border-bottom:1px solid rgba(0,212,255,0.08); }
+/* ═══════════════════════════════════════════════════════════
+   STATS
+═══════════════════════════════════════════════════════════ */
+.sf-stats { background:#020510; border-top:1px solid rgba(0,200,255,.08); border-bottom:1px solid rgba(0,200,255,.08); }
 .sf-stats-g { display:grid; grid-template-columns:repeat(4,1fr); }
-.sf-stat { padding:56px 24px; text-align:center; border-right:1px solid rgba(255,255,255,0.05); }
+.sf-stat { padding:56px 24px; text-align:center; border-right:1px solid rgba(255,255,255,.05); position:relative; overflow:hidden; }
 .sf-stat:last-child { border-right:none; }
-.sf-stat-n { font-family:'Syne',sans-serif; font-size:clamp(36px,5vw,64px); font-weight:800; color:#fff; line-height:1; margin-bottom:8px; }
-.sf-stat-n em { color:#00d4ff; font-style:normal; filter:drop-shadow(0 0 8px rgba(0,212,255,.5)); }
-.sf-stat-l { font-family:'DM Mono',monospace; font-size:10px; color:rgba(255,255,255,.32); letter-spacing:1.5px; text-transform:uppercase; }
+.sf-stat-n { font-family:var(--ff-display); font-size:clamp(36px,5vw,60px); font-weight:900; color:#fff; line-height:1; margin-bottom:8px; }
+.sf-stat-n em { color:var(--cyan); font-style:normal; filter:drop-shadow(0 0 8px rgba(0,200,255,.5)); }
+.sf-stat-l { font-family:var(--ff-mono); font-size:10px; color:rgba(255,255,255,.3); letter-spacing:1.5px; text-transform:uppercase; }
 
+/* ═══════════════════════════════════════════════════════════
+   PROCESS
+═══════════════════════════════════════════════════════════ */
 .sf-proc { padding:88px 0; background:#040918; position:relative; overflow:hidden; }
-.sf-proc::before { content:''; position:absolute; width:600px; height:600px; border-radius:50%; background:radial-gradient(circle,rgba(139,92,246,.07) 0%,transparent 70%); top:-200px; right:-200px; pointer-events:none; }
+.sf-proc::before { content:''; position:absolute; width:600px; height:600px; border-radius:50%; background:radial-gradient(circle,rgba(180,77,255,.07) 0%,transparent 70%); top:-200px; right:-200px; pointer-events:none; }
 .sf-pstep { text-align:center; position:relative; }
-.sf-pstep+.sf-pstep::before { content:''; position:absolute; top:30px; right:calc(50% + 44px); left:calc(-50% + 44px); height:1px; background:linear-gradient(90deg,transparent,rgba(0,212,255,.3),transparent); }
-.sf-pn { width:60px; height:60px; border-radius:18px; background:linear-gradient(135deg,rgba(0,212,255,.15),rgba(139,92,246,.15)); border:1px solid rgba(0,212,255,.22); font-family:'DM Mono',monospace; font-size:20px; font-weight:700; color:#00d4ff; display:inline-flex; align-items:center; justify-content:center; margin-bottom:18px; box-shadow:0 0 20px rgba(0,212,255,.1); }
-.sf-pt { font-family:'Syne',sans-serif; font-weight:700; font-size:15px; color:rgba(255,255,255,.85); margin-bottom:8px; }
-.sf-pd { font-size:13px; color:rgba(255,255,255,.36); line-height:1.7; margin:0; }
+.sf-pstep+.sf-pstep::before { content:''; position:absolute; top:30px; right:calc(50% + 44px); left:calc(-50% + 44px); height:1px; background:linear-gradient(90deg,transparent,rgba(0,200,255,.3),transparent); }
+.sf-pn { width:60px; height:60px; border-radius:18px; background:linear-gradient(135deg,rgba(0,200,255,.15),rgba(180,77,255,.15)); border:1px solid rgba(0,200,255,.22); font-family:var(--ff-mono); font-size:20px; font-weight:700; color:var(--cyan); display:inline-flex; align-items:center; justify-content:center; margin-bottom:18px; box-shadow:0 0 20px rgba(0,200,255,.1); }
+.sf-pt { font-family:var(--ff-display); font-weight:700; font-size:14px; color:rgba(255,255,255,.85); margin-bottom:8px; letter-spacing:.5px; }
+.sf-pd { font-size:13px; color:rgba(255,255,255,.35); line-height:1.7; margin:0; }
 
-.sf-team { padding:88px 0; background:#020510; }
-.sf-tmcard { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,.07); border-radius:20px; padding:24px 16px; text-align:center; transition:all .3s; }
-.sf-tmcard:hover { transform:translateY(-5px); border-color:rgba(139,92,246,.25); box-shadow:0 20px 40px rgba(0,0,0,.4),0 0 28px rgba(139,92,246,.08); }
-.sf-tm-photo { width:80px; height:80px; border-radius:50%; object-fit:cover; margin:0 auto 14px; display:block; border:2px solid transparent; outline:2px solid transparent; outline-offset:3px; transition:all .3s; }
-.sf-tmcard:hover .sf-tm-photo { outline-color:#00d4ff; box-shadow:0 0 20px rgba(0,212,255,.2); }
-.sf-tm-init { width:80px; height:80px; border-radius:50%; background:linear-gradient(135deg,rgba(0,212,255,.2),rgba(139,92,246,.2)); border:1px solid rgba(0,212,255,.2); display:inline-flex; align-items:center; justify-content:center; font-family:'Syne',sans-serif; font-size:28px; font-weight:800; color:#00d4ff; margin:0 auto 14px; }
-.sf-tm-name { font-family:'Syne',sans-serif; font-weight:700; font-size:15px; color:rgba(255,255,255,.88); margin-bottom:4px; }
-.sf-tm-role { font-family:'DM Mono',monospace; font-size:10px; color:#00d4ff; letter-spacing:1px; margin-bottom:14px; }
-.sf-tm-soc { display:flex; justify-content:center; gap:7px; }
-.sf-tm-soc a { width:30px; height:30px; border-radius:8px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); color:rgba(255,255,255,.38); display:inline-flex; align-items:center; justify-content:center; font-size:11px; text-decoration:none; transition:all .2s; }
-.sf-tm-soc a:hover { background:rgba(0,212,255,.15); border-color:rgba(0,212,255,.3); color:#00d4ff; }
-
+/* ═══════════════════════════════════════════════════════════
+   CTA
+═══════════════════════════════════════════════════════════ */
 .sf-cta-sec { padding:88px 0; background:#040918; }
-.sf-cta-band { position:relative; overflow:hidden; background:linear-gradient(135deg,rgba(0,212,255,.06),rgba(91,110,245,.1),rgba(139,92,246,.06)); border:1px solid rgba(0,212,255,.12); border-radius:28px; padding:72px 48px; text-align:center; }
-.sf-cta-band::before { content:''; position:absolute; inset:0; background-image:linear-gradient(rgba(0,212,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,.025) 1px,transparent 1px); background-size:50px 50px; pointer-events:none; }
+.sf-cta-band { position:relative; overflow:hidden; background:linear-gradient(135deg,rgba(0,200,255,.06),rgba(91,110,245,.1),rgba(180,77,255,.06)); border:1px solid rgba(0,200,255,.12); border-radius:28px; padding:72px 48px; text-align:center; }
+.sf-cta-band::before { content:''; position:absolute; inset:0; background-image:linear-gradient(rgba(0,200,255,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(0,200,255,.02) 1px,transparent 1px); background-size:50px 50px; pointer-events:none; }
 .sf-cta-band::after { content:''; position:absolute; width:500px; height:500px; border-radius:50%; background:radial-gradient(circle,rgba(91,110,245,.1) 0%,transparent 70%); top:-200px; right:-100px; pointer-events:none; }
-.sf-cta-h { font-family:'Syne',sans-serif; font-size:clamp(26px,4vw,52px); font-weight:800; color:#fff; letter-spacing:-1.5px; margin-bottom:14px; line-height:1.1; position:relative; z-index:2; }
-.sf-cta-p { font-size:16px; color:rgba(255,255,255,.42); max-width:460px; margin:0 auto 36px; line-height:1.7; position:relative; z-index:2; }
-.sf-cta-main { display:inline-flex; align-items:center; justify-content:center; gap:9px; padding:14px 30px; border-radius:12px; background:linear-gradient(135deg,#00d4ff,#5b6ef5); color:#000; font-family:'Syne',sans-serif; font-weight:800; font-size:15px; text-decoration:none; transition:all .25s; box-shadow:0 0 28px rgba(0,212,255,.2); position:relative; z-index:2; }
-.sf-cta-main:hover { color:#000; transform:translateY(-2px); box-shadow:0 0 50px rgba(0,212,255,.4); }
-.sf-cta-alt { display:inline-flex; align-items:center; justify-content:center; gap:9px; padding:14px 30px; border-radius:12px; border:1px solid rgba(255,255,255,.14); background:transparent; color:rgba(255,255,255,.65); font-family:'Syne',sans-serif; font-weight:600; font-size:15px; text-decoration:none; transition:all .25s; position:relative; z-index:2; }
+.sf-cta-h { font-family:var(--ff-display); font-size:clamp(24px,4vw,50px); font-weight:900; color:#fff; letter-spacing:-1px; margin-bottom:14px; line-height:1.1; position:relative; z-index:2; }
+.sf-cta-p { font-size:16px; color:rgba(232,244,255,.38); max-width:460px; margin:0 auto 36px; line-height:1.7; position:relative; z-index:2; }
+.sf-cta-main { display:inline-flex; align-items:center; justify-content:center; gap:9px; padding:14px 30px; border-radius:12px; background:linear-gradient(135deg,var(--cyan),#5b6ef5); color:#000; font-family:var(--ff-display); font-weight:800; font-size:14px; text-decoration:none; transition:all .25s; box-shadow:0 0 28px rgba(0,200,255,.2); position:relative; z-index:2; letter-spacing:.5px; }
+.sf-cta-main:hover { color:#000; transform:translateY(-2px); box-shadow:0 0 50px rgba(0,200,255,.4); }
+.sf-cta-alt { display:inline-flex; align-items:center; justify-content:center; gap:9px; padding:14px 30px; border-radius:12px; border:1px solid rgba(255,255,255,.14); background:transparent; color:rgba(255,255,255,.6); font-family:var(--ff-display); font-weight:600; font-size:13px; text-decoration:none; transition:all .25s; position:relative; z-index:2; }
 .sf-cta-alt:hover { color:#fff; border-color:rgba(255,255,255,.32); }
 
-@keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-5px)}}
+.sf-eye { display:inline-flex; align-items:center; gap:10px; font-family:var(--ff-mono); font-size:10px; letter-spacing:2.5px; text-transform:uppercase; color:var(--cyan); margin-bottom:14px; }
+.sf-eye::before,.sf-eye::after { content:''; display:block; width:18px; height:1px; background:var(--cyan); opacity:.5; }
 
-/* ══════════════════════════════════════════
-   MOBILE RESPONSIVE
-══════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════════════════════ */
 @media(max-width:991px){
   .h-vis{ display:none; }
+  .bot-hero .col-lg-5 { display:none; }
 }
 @media(max-width:768px){
   .hero{ padding:90px 0 56px; min-height:auto; }
-  .h-title{ font-size:clamp(32px,8.5vw,52px); letter-spacing:-1.2px; line-height:1.08; margin-bottom:16px; }
-  .h-sub{ font-size:15px; margin-bottom:24px; max-width:100%; }
-  .h-pill{ font-size:10px; padding:6px 14px; margin-bottom:18px; letter-spacing:1.5px; }
-  .hero .d-flex.flex-wrap.gap-3{ flex-direction:column; gap:10px!important; }
-  .h-btn-primary,.h-btn-ghost{ width:100%; padding:13px 20px; font-size:14px; }
-  .h-portal{ flex-direction:column; align-items:stretch; gap:12px; padding:14px 16px; margin-top:20px; margin-bottom:22px; }
-  .h-portal-btns{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
-  .h-sign,.h-reg{ padding:9px 10px; font-size:12px; border-radius:8px; }
-  .sf-si{ padding:14px 18px; gap:10px; }
-  .sf-svc{ padding:60px 0; }
+  .h-ctas{ flex-direction:column; gap:10px; }
+  .h-cta-main,.h-cta-bot,.h-cta-ghost{ width:100%; padding:13px 20px; }
+  .h-portal{ flex-direction:column; gap:12px; }
+  .h-portal-btns-wrap{ display:grid; grid-template-columns:1fr 1fr; gap:8px; width:100%; }
+  .bot-hero{ padding:64px 0; }
+  .bot-stats-row{ grid-template-columns:1fr 1fr; }
+  .bot-hero-grid{ display:none; }
   .sf-stats-g{ grid-template-columns:1fr 1fr; }
   .sf-stat{ padding:36px 16px; }
   .sf-stat:nth-child(2){ border-right:none; }
-  .sf-stat:nth-child(3){ border-right:1px solid rgba(255,255,255,.05); }
-  .sf-stat:nth-child(3),.sf-stat:nth-child(4){ border-top:1px solid rgba(255,255,255,.05); }
   .sf-proc{ padding:60px 0; }
   .sf-pstep+.sf-pstep::before{ display:none; }
-  .sf-team{ padding:60px 0; }
-  .sf-cta-sec{ padding:60px 0; }
   .sf-cta-band{ padding:48px 20px; border-radius:20px; }
   .sf-cta-sec .d-flex.flex-wrap{ flex-direction:column; align-items:stretch; }
-  .sf-cta-main,.sf-cta-alt{ width:100%; padding:14px 20px; font-size:14px; }
+  .sf-cta-main,.sf-cta-alt{ padding:14px 20px; font-size:13px; }
+  .bot-pricing-sect .row{ flex-direction:column; }
+  .ba-text span{ display:none; }
+  .ba-plan{ display:none; }
 }
 @media(max-width:480px){
-  .hero{ padding:80px 0 48px; }
-  .h-title{ font-size:clamp(28px,9.5vw,42px); letter-spacing:-0.8px; }
-  .sf-cta-band{ padding:40px 16px; border-radius:16px; }
+  .bot-stats-row{ grid-template-columns:repeat(3,1fr); gap:10px; }
+  .bot-stat-n{ font-size:22px; }
 }
 </style>
 {% endblock %}
 
 {% block content %}
 
-<!-- ══════════════ HERO ══════════════ -->
+<!-- ══════════════════════════════════════════════════════════
+
+
+<!-- ══════════════════════════════════════════════════════════
+     HERO
+══════════════════════════════════════════════════════════ -->
 <section class="hero">
-  <div class="hero-stars"></div>
+  <canvas class="hero-bg-canvas" id="heroCanvas"></canvas>
   <div class="hero-nebula"></div>
   <div class="hero-grid"></div>
-  <div class="hero-scan"></div>
+  <div class="hero-scanline"></div>
   <div class="container hero-inner">
     <div class="row align-items-center g-4 g-lg-5">
       <div class="col-lg-6">
-        <div class="h-pill"><span class="dot"></span> System Online — Accepting New Projects</div>
-        <h1 class="h-title">We Build<br><span class="glow-line">Digital Products</span><br>That Perform.</h1>
-        <p class="h-sub">From sleek websites to powerful web applications — JamiiTek delivers fast, secure, and scalable digital solutions for businesses across Tanzania.</p>
-        <div class="d-flex flex-wrap gap-3">
-          <a href="{% url 'select_website' %}" class="h-btn-primary">Start Your Project <i class="fas fa-arrow-right"></i></a>
-          <a href="{% url 'service' %}" class="h-btn-ghost">Explore Services</a>
+
+        <!-- WEB pill -->
+        <div class="h-pill"><span class="live"></span> System Online — Accepting New Projects</div>
+
+        <!-- BOT pill -->
+        <a href="{% url 'chatbot_register' %}" class="h-bot-strip d-block" style="display:inline-flex!important">
+          <span class="waDot"></span>
+          <i class="fab fa-whatsapp"></i>&nbsp; JamiiBot — AI WhatsApp Bot · Free Trial Available
+          <i class="fas fa-arrow-right" style="font-size:10px;margin-left:4px"></i>
+        </a>
+
+        <h1 class="h-title">
+          We Build<br>
+          <span class="line-web">Digital Products</span>
+          That Perform.<br>
+          <span class="line-bot" style="font-size:.65em">& AI Bots That Sell.</span>
+        </h1>
+        <p class="h-sub">From sleek websites to AI-powered WhatsApp bots — JamiiTek delivers fast, secure, and scalable digital solutions for businesses across Tanzania.</p>
+
+        <div class="h-ctas">
+          <a href="{% url 'select_website' %}" class="h-cta-main">Start Your Website <i class="fas fa-arrow-right"></i></a>
+          <a href="{% url 'chatbot_register' %}" class="h-cta-bot"><i class="fab fa-whatsapp" style="font-size:16px"></i> Get AI Bot Free</a>
+          <a href="{% url 'service' %}" class="h-cta-ghost">Services</a>
         </div>
+
         <div class="h-portal">
           <div class="h-portal-ico"><i class="fas fa-user-shield"></i></div>
-          <div class="h-portal-text">
+          <div class="h-portal-txt flex-grow-1">
             <strong>Already a JamiiTek client?</strong>
             <span>ACCESS_PORTAL // websites · domains · email hosting</span>
           </div>
-          <div class="h-portal-btns">
-            <a href="{% url 'portal_login' %}" class="h-sign"><i class="fas fa-sign-in-alt"></i> Sign In</a>
+          <div class="h-portal-btns-wrap d-flex gap-2 flex-wrap" style="flex-shrink:0">
+            <a href="{% url 'portal_login' %}" class="h-sign"><i class="fas fa-sign-in-alt"></i> Portal</a>
+            <a href="{% url 'chatbot_login' %}" class="h-sign" style="background:rgba(37,211,102,.12);border-color:rgba(37,211,102,.28);color:#25d366"><i class="fab fa-whatsapp"></i> Bot</a>
             <a href="{% url 'portal_register' %}" class="h-reg"><i class="fas fa-user-plus"></i> Register</a>
           </div>
         </div>
+
         <div class="h-trust">
           <div class="h-avs">
-            <div class="av" style="background:linear-gradient(135deg,#5b6ef5,#8b5cf6)">AK</div>
-            <div class="av" style="background:linear-gradient(135deg,#00d4ff,#5b6ef5)">JM</div>
-            <div class="av" style="background:linear-gradient(135deg,#8b5cf6,#ff2d8a)">EM</div>
-            <div class="av" style="background:rgba(0,212,255,.1);border-color:#020510;color:#00d4ff;font-size:14px">+</div>
+            <div class="h-av" style="background:linear-gradient(135deg,#5b6ef5,#8b5cf6)">AK</div>
+            <div class="h-av" style="background:linear-gradient(135deg,#00d4ff,#5b6ef5)">JM</div>
+            <div class="h-av" style="background:linear-gradient(135deg,#8b5cf6,#ff2d8a)">EM</div>
+            <div class="h-av" style="background:rgba(0,200,255,.1);border:2px solid #00010a;color:var(--cyan);font-size:13px">+</div>
           </div>
           <div>
-            <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;color:rgba(255,255,255,.8)">485+ satisfied clients</div>
-            <div style="font-family:'DM Mono',monospace;font-size:10px;color:rgba(255,255,255,.28);letter-spacing:1.5px;text-transform:uppercase">Tanzania &amp; East Africa</div>
+            <div style="font-family:var(--ff-display);font-weight:700;font-size:13px;color:rgba(255,255,255,.8);letter-spacing:.5px">485+ satisfied clients</div>
+            <div style="font-family:var(--ff-mono);font-size:10px;color:rgba(255,255,255,.28);letter-spacing:1.5px;text-transform:uppercase">Tanzania &amp; East Africa</div>
           </div>
         </div>
       </div>
+
       <div class="col-lg-6 d-none d-lg-block">
         <div class="h-vis">
-          <div class="h-ring h-ring-1"></div>
-          <div class="h-ring h-ring-2"></div>
+          <div class="h-ring h-ring-1" style="transform:translate(-50%,-50%)"></div>
+          <div class="h-ring h-ring-2" style="transform:translate(-50%,-50%)"></div>
+          <div class="h-ring-exp"></div>
           <div class="h-cards-grid">
-            <div class="hc"><div class="hc-ico">🌐</div><div class="hc-t">Web Apps</div><div class="hc-s">// full-stack</div></div>
-            <div class="hc"><div class="hc-ico">📱</div><div class="hc-t">Mobile-First</div><div class="hc-s">// every screen</div></div>
-            <div class="hc"><div class="hc-ico">⚡</div><div class="hc-t">Fast Delivery</div><div class="hc-s">// 2–6 weeks</div></div>
-            <div class="hc"><div class="hc-ico">🔒</div><div class="hc-t">Secure Hosted</div><div class="hc-s">// 99.9% uptime</div></div>
+            <div class="hc"><div class="hc-ico">🌐</div><div class="hc-t">WEB APPS</div><div class="hc-s">// full-stack</div></div>
+            <div class="hc"><div class="hc-ico">🤖</div><div class="hc-t">AI BOTS</div><div class="hc-s">// whatsapp</div></div>
+            <div class="hc"><div class="hc-ico">⚡</div><div class="hc-t">FAST BUILD</div><div class="hc-s">// 2-6 weeks</div></div>
+            <div class="hc"><div class="hc-ico">🔒</div><div class="hc-t">SECURE HOST</div><div class="hc-s">// 99.9% up</div></div>
           </div>
-          <div class="h-badge" style="top:20px;right:10px">
-            <div class="bi">🚀</div>
-            <div><strong>Project Launched</strong><span>DELIVERED IN 3 WEEKS</span></div>
+          <div class="h-float f1">
+            <div class="hf-ico">🚀</div>
+            <div><div class="hf-t">Project Launched</div><div class="hf-s">DELIVERED IN 3 WEEKS</div></div>
           </div>
-          <div class="h-badge d2" style="bottom:24px;left:0">
-            <div class="bi">⭐</div>
-            <div><strong>5.0 Rating</strong><span>FROM 789 PROJECTS</span></div>
+          <div class="h-float f2">
+            <div class="hf-ico">🤖</div>
+            <div><div class="hf-t">Bot Live!</div><div class="hf-s">24/7 RESPONDING</div></div>
+          </div>
+          <div class="h-float f3" style="background:rgba(2,14,8,.96);border-color:rgba(37,211,102,.2)">
+            <div class="hf-ico">⭐</div>
+            <div><div class="hf-t">5.0 Rating</div><div class="hf-s" style="color:#25d366">789 PROJECTS</div></div>
           </div>
         </div>
       </div>
@@ -316,31 +565,228 @@
   </div>
 </section>
 
-<!-- ══════════════ STRIP ══════════════ -->
+<!-- ══════════════════════════════════════════════════════════
+     STRIP
+══════════════════════════════════════════════════════════ -->
 <div class="sf-strip">
   <div class="sf-strip-inner">
     <div class="sf-si"><div class="sf-si-ico"><i class="fas fa-rocket"></i></div><div><strong>Fast Delivery</strong><span>2–6 week turnaround</span></div></div>
+    <div class="sf-si"><div class="sf-si-ico"><i class="fas fa-robot" style="color:#25d366"></i></div><div><strong>AI WhatsApp Bot</strong><span>JamiiBot — free trial</span></div></div>
     <div class="sf-si"><div class="sf-si-ico"><i class="fas fa-shield-halved"></i></div><div><strong>Secure by Default</strong><span>Best-practice code</span></div></div>
-    <div class="sf-si"><div class="sf-si-ico"><i class="fas fa-mobile-screen"></i></div><div><strong>Mobile-First</strong><span>Every device supported</span></div></div>
+    <div class="sf-si"><div class="sf-si-ico"><i class="fas fa-mobile-screen"></i></div><div><strong>Mobile-First</strong><span>Every device</span></div></div>
     <div class="sf-si"><div class="sf-si-ico"><i class="fas fa-headset"></i></div><div><strong>24/7 Support</strong><span>Post-launch care</span></div></div>
-    <div class="sf-si"><div class="sf-si-ico"><i class="fas fa-code"></i></div><div><strong>Clean Code</strong><span>Maintainable &amp; scalable</span></div></div>
-    <div class="sf-si"><div class="sf-si-ico"><i class="fas fa-server"></i></div><div><strong>Local Hosting</strong><span>Tanzania-based infra</span></div></div>
+    <div class="sf-si"><div class="sf-si-ico"><i class="fas fa-server"></i></div><div><strong>Local Hosting</strong><span>Tanzania infrastructure</span></div></div>
+    <div class="sf-si"><div class="sf-si-ico"><i class="fab fa-whatsapp" style="color:#25d366"></i></div><div><strong>Swahili + English AI</strong><span>Auto-detects language</span></div></div>
   </div>
 </div>
 
-<!-- ══════════════ SERVICES ══════════════ -->
+<!-- ══════════════════════════════════════════════════════════
+     JAMIIBOT HERO SECTION
+══════════════════════════════════════════════════════════ -->
+<section class="bot-hero">
+  <div class="bot-hero-grid"></div>
+  <div class="container position-relative" style="z-index:2">
+    <div class="row align-items-center g-5">
+
+      <div class="col-lg-7 reveal-l">
+        <div style="display:inline-flex;align-items:center;gap:10px;font-family:var(--ff-mono);font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:#25d366;margin-bottom:18px">
+          <span style="width:18px;height:1px;background:#25d366;opacity:.5;display:block"></span>
+          JamiiBot · AI WhatsApp Platform
+          <span style="width:18px;height:1px;background:#25d366;opacity:.5;display:block"></span>
+        </div>
+        <h2 class="bot-h-title" data-text="Your Business Answering Customers 24/7">
+          Your Business<br>
+          Answering Customers<br>
+          <span class="gl">24/7 — Automatically.</span>
+        </h2>
+        <p style="font-size:15px;color:rgba(255,255,255,.42);line-height:1.85;max-width:520px;margin-bottom:28px">
+          JamiiBot is an AI-powered WhatsApp assistant that handles customer questions, shares your services, qualifies leads, and never sleeps — in Swahili and English.
+        </p>
+
+        <div class="bot-stats-row">
+          <div class="bot-stat"><div class="bot-stat-n" data-target="10">10<span style="color:rgba(37,211,102,.4)">m</span></div><div class="bot-stat-l">Setup Time</div></div>
+          <div class="bot-stat"><div class="bot-stat-n">&lt;2<span style="font-size:.5em;color:rgba(37,211,102,.4)">s</span></div><div class="bot-stat-l">Reply Speed</div></div>
+          <div class="bot-stat"><div class="bot-stat-n">24<span style="font-size:.5em;color:rgba(37,211,102,.4)">/7</span></div><div class="bot-stat-l">Always Live</div></div>
+        </div>
+
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:28px">
+          <a href="{% url 'chatbot_register' %}" class="h-cta-bot" style="animation:none"><i class="fab fa-whatsapp" style="font-size:17px"></i> Get Your Bot — Free Trial</a>
+          <a href="{% url 'chatbot_login' %}" class="h-cta-ghost" style="animation:none"><i class="fas fa-sign-in-alt"></i> Sign In to Bot Portal</a>
+          <a href="/bot/" class="h-cta-ghost" style="animation:none">Learn More <i class="fas fa-external-link-alt" style="font-size:11px"></i></a>
+        </div>
+      </div>
+
+      <div class="col-lg-5 reveal-r d-none d-lg-block">
+        <div class="bot-chat-demo" style="margin:0 auto;animation:floatY 5s ease-in-out infinite">
+          <div class="bcd-head">
+            <div class="bcd-av">🤖</div>
+            <div>
+              <div class="bcd-name">YourBusinessBot</div>
+              <div class="bcd-online"><span class="od"></span> Online · replies instantly</div>
+            </div>
+            <div style="margin-left:auto;font-family:var(--ff-mono);font-size:9px;color:rgba(37,211,102,.4);background:rgba(37,211,102,.06);padding:3px 10px;border-radius:6px">LIVE</div>
+          </div>
+          <div class="bcd-body" id="demoBody">
+            <div class="bcd-msg bot" id="dm1">Habari! 👋 I'm your AI assistant. How can I help you today?</div>
+            <div class="bcd-msg user" id="dm2">What services do you offer?</div>
+            <div class="bcd-typing" id="dmTyp"><div class="bcd-dot"></div><div class="bcd-dot"></div><div class="bcd-dot"></div></div>
+            <div class="bcd-msg bot" id="dm3">We offer website development, hosting, domain registration, and AI bots. Which one interests you? 😊</div>
+            <div class="bcd-msg user" id="dm4">How much is a website?</div>
+            <div class="bcd-typing" id="dmTyp2"><div class="bcd-dot"></div><div class="bcd-dot"></div><div class="bcd-dot"></div></div>
+            <div class="bcd-msg bot" id="dm5">Basic websites start from TZS 300,000 — includes hosting & domain! Want a custom quote? 🔍</div>
+          </div>
+          <div class="bcd-foot">
+            <div class="bcd-input">Type a message...</div>
+            <div class="bcd-send"><i class="fas fa-paper-plane"></i></div>
+          </div>
+        </div>
+        <!-- Floating plans -->
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px">
+          <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px;text-align:center">
+            <div style="font-family:var(--ff-display);font-size:11px;font-weight:700;color:rgba(255,255,255,.6);margin-bottom:4px">Starter</div>
+            <div style="font-family:var(--ff-display);font-size:18px;font-weight:900;color:#fff">15K</div>
+            <div style="font-family:var(--ff-mono);font-size:9px;color:rgba(255,255,255,.25)">TZS/mo</div>
+          </div>
+          <div style="background:rgba(37,211,102,.07);border:1px solid rgba(37,211,102,.25);border-radius:12px;padding:12px;text-align:center;position:relative">
+            <div style="position:absolute;top:-8px;left:50%;transform:translateX(-50%);background:#25d366;color:#000;font-family:var(--ff-mono);font-size:8px;font-weight:800;padding:2px 10px;border-radius:100px;white-space:nowrap">POPULAR</div>
+            <div style="font-family:var(--ff-display);font-size:11px;font-weight:700;color:#25d366;margin-bottom:4px">Business</div>
+            <div style="font-family:var(--ff-display);font-size:18px;font-weight:900;color:#fff">30K</div>
+            <div style="font-family:var(--ff-mono);font-size:9px;color:rgba(255,255,255,.25)">TZS/mo</div>
+          </div>
+          <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px;text-align:center">
+            <div style="font-family:var(--ff-display);font-size:11px;font-weight:700;color:rgba(255,255,255,.6);margin-bottom:4px">Enterprise</div>
+            <div style="font-family:var(--ff-display);font-size:18px;font-weight:900;color:#fff">60K</div>
+            <div style="font-family:var(--ff-mono);font-size:9px;color:rgba(255,255,255,.25)">TZS/mo</div>
+          </div>
+        </div>
+        <div style="text-align:center;margin-top:10px;font-family:var(--ff-mono);font-size:10px;color:rgba(37,211,102,.5);display:flex;align-items:center;justify-content:center;gap:6px">
+          <span style="width:5px;height:5px;border-radius:50%;background:#25d366;animation:pulse2 2s infinite;flex-shrink:0"></span>
+          7-day free trial · No payment required
+        </div>
+      </div>
+    </div>
+
+    <!-- BOT FEATURE CARDS -->
+    <div class="row g-4 mt-5">
+      <div class="col-md-4 reveal">
+        <div class="bot-feat green">
+          <div class="bot-feat-ico" style="background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.2)">🤖</div>
+          <div class="bot-feat-t">Powered by Groq AI</div>
+          <div class="bot-feat-d">Lightning-fast AI engine understands Swahili and English. Gives smart, accurate answers about your business every time.</div>
+          <div class="bot-feat-list">
+            <div class="bot-feat-li" style="color:rgba(37,211,102,.7)"><span class="d" style="background:#25d366"></span>Auto-detects customer language</div>
+            <div class="bot-feat-li" style="color:rgba(37,211,102,.7)"><span class="d" style="background:#25d366"></span>Responds in under 2 seconds</div>
+            <div class="bot-feat-li" style="color:rgba(37,211,102,.7)"><span class="d" style="background:#25d366"></span>Available 24 hours a day</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4 reveal" style="transition-delay:.1s">
+        <div class="bot-feat cyan">
+          <div class="bot-feat-ico" style="background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.2)">⚡</div>
+          <div class="bot-feat-t">Ready in 10 Minutes</div>
+          <div class="bot-feat-d">Fill your business details, add services and FAQs, enter your WhatsApp number — our team handles the technical setup within 24 hours.</div>
+          <div class="bot-feat-list">
+            <div class="bot-feat-li" style="color:rgba(0,212,255,.7)"><span class="d" style="background:#00d4ff"></span>No coding required</div>
+            <div class="bot-feat-li" style="color:rgba(0,212,255,.7)"><span class="d" style="background:#00d4ff"></span>Simple 6-step setup wizard</div>
+            <div class="bot-feat-li" style="color:rgba(0,212,255,.7)"><span class="d" style="background:#00d4ff"></span>Live within 24 hours</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4 reveal" style="transition-delay:.2s">
+        <div class="bot-feat purple">
+          <div class="bot-feat-ico" style="background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.2)">📊</div>
+          <div class="bot-feat-t">Your Own Dashboard</div>
+          <div class="bot-feat-d">See every conversation, track messages your bot handled, and update your bot's knowledge — all from one powerful panel.</div>
+          <div class="bot-feat-list">
+            <div class="bot-feat-li" style="color:rgba(139,92,246,.9)"><span class="d" style="background:#8b5cf6"></span>Live conversation history</div>
+            <div class="bot-feat-li" style="color:rgba(139,92,246,.9)"><span class="d" style="background:#8b5cf6"></span>Message analytics</div>
+            <div class="bot-feat-li" style="color:rgba(139,92,246,.9)"><span class="d" style="background:#8b5cf6"></span>Edit services & FAQs live</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     BOT PRICING
+══════════════════════════════════════════════════════════ -->
+<section class="bot-pricing-sect">
+  <div class="container position-relative" style="z-index:2">
+    <div class="row justify-content-center text-center mb-5">
+      <div class="col-lg-6 reveal">
+        <div class="sf-eye" style="justify-content:center;color:#25d366">
+          <span style="width:18px;height:1px;background:#25d366;opacity:.5;display:block"></span>
+          JamiiBot Pricing
+          <span style="width:18px;height:1px;background:#25d366;opacity:.5;display:block"></span>
+        </div>
+        <h2 style="font-family:var(--ff-display);font-size:clamp(24px,4vw,48px);font-weight:900;color:#fff;letter-spacing:-1px;line-height:1.1;margin-bottom:12px">Simple Pricing,<br>Powerful Results</h2>
+        <p style="color:rgba(255,255,255,.35);font-size:14px;line-height:1.8;font-family:var(--ff-mono)">All plans include 7-day free trial · No payment required to start</p>
+      </div>
+    </div>
+    <div class="row g-4 justify-content-center reveal">
+      <div class="col-md-4">
+        <div class="bot-plan starter">
+          <div class="bp-name">STARTER</div>
+          <div class="bp-price">15,000</div>
+          <div class="bp-unit">TZS / month</div>
+          <div class="bp-feat"><i class="fas fa-check bi" style="color:#25d366"></i>5,000 messages / month</div>
+          <div class="bp-feat"><i class="fas fa-check bi" style="color:#25d366"></i>WhatsApp Integration</div>
+          <div class="bp-feat"><i class="fas fa-check bi" style="color:#25d366"></i>Swahili + English AI</div>
+          <div class="bp-feat"><i class="fas fa-check bi" style="color:#25d366"></i>Basic Dashboard</div>
+          <div class="bp-feat"><i class="fas fa-check bi" style="color:#25d366"></i>Services & FAQs</div>
+          <a href="{% url 'chatbot_register' %}" class="bp-btn o">Get Started</a>
+          <div class="bp-trial"><span class="d"></span> 7-day free trial</div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="bot-plan business">
+          <div class="bp-badge">⭐ Most Popular</div>
+          <div class="bp-name" style="color:#25d366">BUSINESS</div>
+          <div class="bp-price">30,000</div>
+          <div class="bp-unit">TZS / month</div>
+          <div class="bp-feat"><i class="fas fa-check bi" style="color:#25d366"></i>10,000 messages / month</div>
+          <div class="bp-feat"><i class="fas fa-check bi" style="color:#25d366"></i>WhatsApp Integration</div>
+          <div class="bp-feat"><i class="fas fa-check bi" style="color:#25d366"></i>Swahili + English AI</div>
+          <div class="bp-feat"><i class="fas fa-check bi" style="color:#25d366"></i>Full Analytics Dashboard</div>
+          <div class="bp-feat"><i class="fas fa-check bi" style="color:#25d366"></i>Priority Support</div>
+          <a href="{% url 'chatbot_register' %}?plan=pro" class="bp-btn g">Get Started</a>
+          <div class="bp-trial"><span class="d"></span> 7-day free trial</div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="bot-plan enterprise">
+          <div class="bp-name">ENTERPRISE</div>
+          <div class="bp-price">60,000</div>
+          <div class="bp-unit">TZS / month</div>
+          <div class="bp-feat"><i class="fas fa-infinity bi" style="color:#25d366"></i>Unlimited messages</div>
+          <div class="bp-feat"><i class="fas fa-check bi" style="color:#25d366"></i>WhatsApp Integration</div>
+          <div class="bp-feat"><i class="fas fa-check bi" style="color:#25d366"></i>Swahili + English AI</div>
+          <div class="bp-feat"><i class="fas fa-check bi" style="color:#25d366"></i>Advanced Analytics</div>
+          <div class="bp-feat"><i class="fas fa-check bi" style="color:#25d366"></i>Dedicated Support</div>
+          <a href="{% url 'chatbot_register' %}?plan=enterprise" class="bp-btn o">Get Started</a>
+          <div class="bp-trial"><span class="d"></span> 7-day free trial</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     SERVICES
+══════════════════════════════════════════════════════════ -->
 <section class="sf-svc">
   <div class="container position-relative" style="z-index:2">
     <div class="row justify-content-center text-center mb-5">
-      <div class="col-lg-6">
-        <div class="sf-eye">What We Do</div>
-        <h2 style="font-family:'Syne',sans-serif;font-size:clamp(26px,4vw,48px);font-weight:800;color:#fff;letter-spacing:-1px;line-height:1.1;margin-bottom:12px">Services Built for<br>Modern Businesses</h2>
-        <p style="color:rgba(255,255,255,.38);font-size:15px;line-height:1.8">End-to-end digital services — from UI design to deployment and ongoing support.</p>
+      <div class="col-lg-6 reveal">
+        <div class="sf-eye">What We Build</div>
+        <h2 style="font-family:var(--ff-display);font-size:clamp(24px,4vw,46px);font-weight:900;color:#fff;letter-spacing:-1px;line-height:1.1;margin-bottom:12px">Services Built for<br>Modern Businesses</h2>
+        <p style="color:rgba(255,255,255,.35);font-size:14px;line-height:1.8;font-family:var(--ff-mono)">End-to-end digital services — from UI design to deployment and ongoing support.</p>
       </div>
     </div>
     <div class="row g-3 g-md-4">
       {% for svc in services %}
-      <div class="col-12 col-sm-6 col-lg-4">
+      <div class="col-12 col-sm-6 col-lg-4 reveal" style="transition-delay:{{ forloop.counter0 }}00ms">
         <div class="sf-card">
           <div class="sf-card-n">{{ forloop.counter|stringformat:"02d" }} / {{ services|length|stringformat:"02d" }}</div>
           <div class="sf-card-ico"><i class="fas fa-globe"></i></div>
@@ -349,209 +795,183 @@
         </div>
       </div>
       {% empty %}
-      {% for n in "123456" %}
-      <div class="col-12 col-sm-6 col-lg-4">
-        <div class="sf-card">
-          <div class="sf-card-n">0{{ forloop.counter }} / 06</div>
-          <div class="sf-card-ico">{% if forloop.counter == 1 %}<i class="fas fa-globe"></i>{% elif forloop.counter == 2 %}<i class="fas fa-mobile-screen"></i>{% elif forloop.counter == 3 %}<i class="fas fa-server"></i>{% elif forloop.counter == 4 %}<i class="fas fa-network-wired"></i>{% elif forloop.counter == 5 %}<i class="fas fa-palette"></i>{% else %}<i class="fas fa-gears"></i>{% endif %}</div>
-          <div class="sf-card-t">{% if forloop.counter == 1 %}Website Development{% elif forloop.counter == 2 %}Mobile App Development{% elif forloop.counter == 3 %}Web Hosting &amp; Servers{% elif forloop.counter == 4 %}Network Installation{% elif forloop.counter == 5 %}UI/UX Design{% else %}System Integration{% endif %}</div>
-          <p class="sf-card-d">{% if forloop.counter == 1 %}Modern, responsive websites built with the latest frameworks for speed, security, and user experience.{% elif forloop.counter == 2 %}Android &amp; iOS apps designed for scale, performance, and seamless user experience.{% elif forloop.counter == 3 %}Reliable hosting with 99.9% uptime, daily backups, and proactive monitoring.{% elif forloop.counter == 4 %}Professional network setup and IT infrastructure for offices of any size.{% elif forloop.counter == 5 %}Intuitive interfaces and thoughtful designs that users love and convert well.{% else %}Smart integrations connecting your tools, APIs, and platforms into one seamless workflow.{% endif %}</p>
-        </div>
+      <div class="col-12 col-sm-6 col-lg-4 reveal">
+        <div class="sf-card"><div class="sf-card-n">01 / 06</div><div class="sf-card-ico"><i class="fas fa-globe"></i></div><div class="sf-card-t">Website Development</div><p class="sf-card-d">Modern responsive websites built with the latest frameworks for speed, security, and user experience.</p></div>
+      </div>
+      <div class="col-12 col-sm-6 col-lg-4 reveal" style="transition-delay:100ms">
+        <div class="sf-card"><div class="sf-card-n">02 / 06</div><div class="sf-card-ico"><i class="fas fa-mobile-screen"></i></div><div class="sf-card-t">Mobile App Development</div><p class="sf-card-d">Android &amp; iOS apps designed for scale, performance, and seamless user experience.</p></div>
+      </div>
+      <div class="col-12 col-sm-6 col-lg-4 reveal" style="transition-delay:200ms">
+        <div class="sf-card"><div class="sf-card-n">03 / 06</div><div class="sf-card-ico"><i class="fas fa-server"></i></div><div class="sf-card-t">Web Hosting &amp; Servers</div><p class="sf-card-d">Reliable hosting with 99.9% uptime, daily backups, and proactive monitoring.</p></div>
+      </div>
+      <div class="col-12 col-sm-6 col-lg-4 reveal" style="transition-delay:300ms">
+        <div class="sf-card" style="border-color:rgba(37,211,102,.15)"><div class="sf-card-n">04 / 06</div><div class="sf-card-ico"><i class="fab fa-whatsapp" style="color:#25d366"></i></div><div class="sf-card-t">AI WhatsApp Bot</div><p class="sf-card-d">JamiiBot — AI assistant that handles customer questions 24/7 in Swahili and English automatically.</p></div>
+      </div>
+      <div class="col-12 col-sm-6 col-lg-4 reveal" style="transition-delay:400ms">
+        <div class="sf-card"><div class="sf-card-n">05 / 06</div><div class="sf-card-ico"><i class="fas fa-palette"></i></div><div class="sf-card-t">UI/UX Design</div><p class="sf-card-d">Intuitive interfaces and thoughtful designs that users love and convert well.</p></div>
+      </div>
+      <div class="col-12 col-sm-6 col-lg-4 reveal" style="transition-delay:500ms">
+        <div class="sf-card"><div class="sf-card-n">06 / 06</div><div class="sf-card-ico"><i class="fas fa-gears"></i></div><div class="sf-card-t">System Integration</div><p class="sf-card-d">Smart integrations connecting your tools, APIs, and platforms into one seamless workflow.</p></div>
       </div>
       {% endfor %}
-      {% endfor %}
     </div>
-    <div class="text-center mt-4 mt-md-5">
-      <a href="{% url 'service' %}" class="h-btn-ghost" style="display:inline-flex">View All Services <i class="fas fa-arrow-right"></i></a>
+    <div class="text-center mt-4 mt-md-5 reveal">
+      <a href="{% url 'service' %}" class="h-cta-ghost" style="display:inline-flex">View All Services <i class="fas fa-arrow-right" style="margin-left:4px"></i></a>
     </div>
   </div>
 </section>
 
+<!-- ══════════════════════════════════════════════════════════
+     STATS
+══════════════════════════════════════════════════════════ -->
+<div class="sf-stats">
+  <div class="sf-stats-g">
+    <div class="sf-stat reveal"><div class="sf-stat-n"><span class="counter" data-target="485">0</span><em>+</em></div><div class="sf-stat-l">Satisfied Clients</div></div>
+    <div class="sf-stat reveal" style="transition-delay:.1s"><div class="sf-stat-n"><span class="counter" data-target="320">0</span><em>+</em></div><div class="sf-stat-l">Projects Delivered</div></div>
+    <div class="sf-stat reveal" style="transition-delay:.2s"><div class="sf-stat-n"><span class="counter" data-target="99">0</span><em>%</em></div><div class="sf-stat-l">Uptime Guarantee</div></div>
+    <div class="sf-stat reveal" style="transition-delay:.3s"><div class="sf-stat-n"><span class="counter" data-target="24">0</span><em>/7</em></div><div class="sf-stat-l">Bot Availability</div></div>
+  </div>
+</div>
 
-<!-- ══════════════ PROCESS ══════════════ -->
+<!-- ══════════════════════════════════════════════════════════
+     PROCESS
+══════════════════════════════════════════════════════════ -->
 <section class="sf-proc">
   <div class="container position-relative" style="z-index:2">
     <div class="row justify-content-center text-center mb-5">
-      <div class="col-lg-6">
-        <div class="sf-eye">Our Process</div>
-        <h2 style="font-family:'Syne',sans-serif;font-size:clamp(26px,4vw,48px);font-weight:800;color:#fff;letter-spacing:-1px;line-height:1.1">From Idea to Launch<br>in 4 Steps</h2>
+      <div class="col-lg-6 reveal">
+        <div class="sf-eye">How It Works</div>
+        <h2 style="font-family:var(--ff-display);font-size:clamp(24px,4vw,46px);font-weight:900;color:#fff;letter-spacing:-1px;line-height:1.1">From Idea to Launch<br>in 4 Steps</h2>
       </div>
     </div>
     <div class="row g-4">
-      <div class="col-6 col-md-3"><div class="sf-pstep"><div class="sf-pn">01</div><div class="sf-pt">Discovery</div><p class="sf-pd">We understand your goals, audience, and technical requirements in depth.</p></div></div>
-      <div class="col-6 col-md-3"><div class="sf-pstep"><div class="sf-pn">02</div><div class="sf-pt">Design</div><p class="sf-pd">We craft beautiful, intuitive wireframes and UI designs tailored to your brand.</p></div></div>
-      <div class="col-6 col-md-3"><div class="sf-pstep"><div class="sf-pn">03</div><div class="sf-pt">Development</div><p class="sf-pd">We build with clean, modern, scalable code — tested thoroughly before launch.</p></div></div>
-      <div class="col-6 col-md-3"><div class="sf-pstep"><div class="sf-pn">04</div><div class="sf-pt">Launch &amp; Support</div><p class="sf-pd">We deploy, monitor, and provide ongoing support so you're always running smoothly.</p></div></div>
+      <div class="col-6 col-md-3 reveal"><div class="sf-pstep"><div class="sf-pn">01</div><div class="sf-pt">Discovery</div><p class="sf-pd">We understand your goals, audience, and technical requirements in depth.</p></div></div>
+      <div class="col-6 col-md-3 reveal" style="transition-delay:.1s"><div class="sf-pstep"><div class="sf-pn">02</div><div class="sf-pt">Design</div><p class="sf-pd">We craft beautiful, intuitive wireframes and UI designs tailored to your brand.</p></div></div>
+      <div class="col-6 col-md-3 reveal" style="transition-delay:.2s"><div class="sf-pstep"><div class="sf-pn">03</div><div class="sf-pt">Development</div><p class="sf-pd">We build with clean, modern, scalable code — tested thoroughly before launch.</p></div></div>
+      <div class="col-6 col-md-3 reveal" style="transition-delay:.3s"><div class="sf-pstep"><div class="sf-pn">04</div><div class="sf-pt">Launch &amp; Support</div><p class="sf-pd">We deploy, monitor, and provide ongoing support so you're always running smoothly.</p></div></div>
     </div>
   </div>
 </section>
 
-<!-- ══════════════ JAMIIBOT ══════════════ -->
-<section style="padding:88px 0;background:#020510;position:relative;overflow:hidden">
-
-  <div style="position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 60% 50% at 50% 50%,rgba(37,211,102,0.06) 0%,transparent 70%)"></div>
-  <div style="position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(37,211,102,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(37,211,102,0.02) 1px,transparent 1px);background-size:56px 56px"></div>
-
-  <div class="container position-relative" style="z-index:2">
-
-    <div class="row justify-content-center text-center mb-5">
-      <div class="col-lg-7">
-        <div style="display:inline-flex;align-items:center;gap:10px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:#25d366;margin-bottom:14px">
-          <span style="width:18px;height:1px;background:#25d366;opacity:.5;display:block"></span>
-          New — AI WhatsApp Bot
-          <span style="width:18px;height:1px;background:#25d366;opacity:.5;display:block"></span>
-        </div>
-        <h2 style="font-family:'Syne',sans-serif;font-size:clamp(28px,4.5vw,54px);font-weight:800;color:#fff;letter-spacing:-1.5px;line-height:1.08;margin-bottom:14px">
-          Your Business, Answering<br>
-          <span style="background:linear-gradient(110deg,#25d366,#00d4ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 20px rgba(37,211,102,0.3))">Customers 24/7</span>
-        </h2>
-        <p style="color:rgba(255,255,255,.42);font-size:15px;line-height:1.85;max-width:520px;margin:0 auto">
-          JamiiBot is an AI-powered WhatsApp assistant that handles customer questions, shares your services, and qualifies leads — automatically, in Swahili and English.
-        </p>
-      </div>
-    </div>
-
-    <!-- 3 FEATURE CARDS -->
-    <div class="row g-3 g-md-4 mb-5">
-      <div class="col-12 col-md-4">
-        <div style="background:rgba(37,211,102,0.04);border:1px solid rgba(37,211,102,0.14);border-radius:20px;padding:28px;height:100%;position:relative;overflow:hidden;transition:all .3s" onmouseenter="this.style.borderColor='rgba(37,211,102,0.35)';this.style.transform='translateY(-5px)';this.style.boxShadow='0 20px 40px rgba(0,0,0,.4),0 0 30px rgba(37,211,102,0.08)'" onmouseleave="this.style.borderColor='rgba(37,211,102,0.14)';this.style.transform='';this.style.boxShadow=''">
-          <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#25d366,#00d4ff);border-radius:2px 2px 0 0"></div>
-          <div style="width:48px;height:48px;border-radius:13px;background:rgba(37,211,102,0.1);border:1px solid rgba(37,211,102,0.2);display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:18px">🤖</div>
-          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:17px;color:rgba(255,255,255,.9);margin-bottom:10px">Powered by Gemini AI</div>
-          <p style="font-size:13px;color:rgba(255,255,255,.38);line-height:1.75;margin:0 0 20px">Your bot understands customer questions in Swahili and English, gives smart answers, and never gets tired.</p>
-          <div style="display:flex;flex-direction:column;gap:7px">
-            <div style="display:flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:11px;color:rgba(37,211,102,.7)"><span style="width:5px;height:5px;border-radius:50%;background:#25d366;flex-shrink:0"></span>Auto-detects language</div>
-            <div style="display:flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:11px;color:rgba(37,211,102,.7)"><span style="width:5px;height:5px;border-radius:50%;background:#25d366;flex-shrink:0"></span>Responds in under 2 seconds</div>
-            <div style="display:flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:11px;color:rgba(37,211,102,.7)"><span style="width:5px;height:5px;border-radius:50%;background:#25d366;flex-shrink:0"></span>Available 24 hours a day</div>
-          </div>
-        </div>
-      </div>
-      <div class="col-12 col-md-4">
-        <div style="background:rgba(0,212,255,0.04);border:1px solid rgba(0,212,255,0.14);border-radius:20px;padding:28px;height:100%;position:relative;overflow:hidden;transition:all .3s" onmouseenter="this.style.borderColor='rgba(0,212,255,0.35)';this.style.transform='translateY(-5px)';this.style.boxShadow='0 20px 40px rgba(0,0,0,.4),0 0 30px rgba(0,212,255,0.08)'" onmouseleave="this.style.borderColor='rgba(0,212,255,0.14)';this.style.transform='';this.style.boxShadow=''">
-          <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#00d4ff,#8b5cf6);border-radius:2px 2px 0 0"></div>
-          <div style="width:48px;height:48px;border-radius:13px;background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.2);display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:18px">⚡</div>
-          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:17px;color:rgba(255,255,255,.9);margin-bottom:10px">Set Up in 10 Minutes</div>
-          <p style="font-size:13px;color:rgba(255,255,255,.38);line-height:1.75;margin:0 0 20px">Fill in your business details, add your services and FAQs, enter your WhatsApp number — we handle the rest.</p>
-          <div style="display:flex;flex-direction:column;gap:7px">
-            <div style="display:flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:11px;color:rgba(0,212,255,.7)"><span style="width:5px;height:5px;border-radius:50%;background:#00d4ff;flex-shrink:0"></span>No coding required</div>
-            <div style="display:flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:11px;color:rgba(0,212,255,.7)"><span style="width:5px;height:5px;border-radius:50%;background:#00d4ff;flex-shrink:0"></span>Simple 6-step wizard</div>
-            <div style="display:flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:11px;color:rgba(0,212,255,.7)"><span style="width:5px;height:5px;border-radius:50%;background:#00d4ff;flex-shrink:0"></span>Live within 24 hours</div>
-          </div>
-        </div>
-      </div>
-      <div class="col-12 col-md-4">
-        <div style="background:rgba(139,92,246,0.04);border:1px solid rgba(139,92,246,0.14);border-radius:20px;padding:28px;height:100%;position:relative;overflow:hidden;transition:all .3s" onmouseenter="this.style.borderColor='rgba(139,92,246,0.35)';this.style.transform='translateY(-5px)';this.style.boxShadow='0 20px 40px rgba(0,0,0,.4),0 0 30px rgba(139,92,246,0.08)'" onmouseleave="this.style.borderColor='rgba(139,92,246,0.14)';this.style.transform='';this.style.boxShadow=''">
-          <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#8b5cf6,#ff2d8a);border-radius:2px 2px 0 0"></div>
-          <div style="width:48px;height:48px;border-radius:13px;background:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.2);display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:18px">📊</div>
-          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:17px;color:rgba(255,255,255,.9);margin-bottom:10px">Your Own Dashboard</div>
-          <p style="font-size:13px;color:rgba(255,255,255,.38);line-height:1.75;margin:0 0 20px">See every conversation, track how many customers your bot helped, and update your bot's knowledge any time.</p>
-          <div style="display:flex;flex-direction:column;gap:7px">
-            <div style="display:flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:11px;color:rgba(139,92,246,.8)"><span style="width:5px;height:5px;border-radius:50%;background:#8b5cf6;flex-shrink:0"></span>Live conversation history</div>
-            <div style="display:flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:11px;color:rgba(139,92,246,.8)"><span style="width:5px;height:5px;border-radius:50%;background:#8b5cf6;flex-shrink:0"></span>Message usage analytics</div>
-            <div style="display:flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:11px;color:rgba(139,92,246,.8)"><span style="width:5px;height:5px;border-radius:50%;background:#8b5cf6;flex-shrink:0"></span>Edit services &amp; FAQs live</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- PRICING + CHAT PREVIEW -->
-    <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.07);border-radius:24px;padding:36px 40px;margin-bottom:40px">
-      <div class="row align-items-center g-4">
-        <div class="col-lg-7">
-          <div style="font-family:'DM Mono',monospace;font-size:10px;color:rgba(255,255,255,.3);letter-spacing:2.5px;text-transform:uppercase;margin-bottom:16px">Plans &amp; Pricing</div>
-          <div class="row g-3">
-            <div class="col-12 col-sm-4">
-              <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:18px 16px;text-align:center">
-                <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;color:rgba(255,255,255,.7);margin-bottom:6px">Starter</div>
-                <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:24px;color:#fff;line-height:1">15K</div>
-                <div style="font-family:'DM Mono',monospace;font-size:9px;color:rgba(255,255,255,.3);margin-bottom:10px">TZS / month</div>
-                <div style="font-size:11px;color:rgba(255,255,255,.4)">5000 messages/mo</div>
-              </div>
-            </div>
-            <div class="col-12 col-sm-4">
-              <div style="background:rgba(37,211,102,0.06);border:1.5px solid rgba(37,211,102,0.25);border-radius:14px;padding:18px 16px;text-align:center;position:relative">
-                <div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:#25d366;color:#000;font-family:'DM Mono',monospace;font-size:9px;font-weight:700;padding:3px 12px;border-radius:100px;white-space:nowrap">POPULAR</div>
-                <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;color:#25d366;margin-bottom:6px">Business</div>
-                <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:24px;color:#fff;line-height:1">30K</div>
-                <div style="font-family:'DM Mono',monospace;font-size:9px;color:rgba(255,255,255,.3);margin-bottom:10px">TZS / month</div>
-                <div style="font-size:11px;color:rgba(255,255,255,.4)">10000 messages/mo</div>
-              </div>
-            </div>
-            <div class="col-12 col-sm-4">
-              <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:18px 16px;text-align:center">
-                <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;color:rgba(255,255,255,.7);margin-bottom:6px">Enterprise</div>
-                <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:24px;color:#fff;line-height:1">60K</div>
-                <div style="font-family:'DM Mono',monospace;font-size:9px;color:rgba(255,255,255,.3);margin-bottom:10px">TZS / month</div>
-                <div style="font-size:11px;color:rgba(255,255,255,.4)">Unlimited messages</div>
-              </div>
-            </div>
-          </div>
-          <div style="margin-top:14px;font-family:'DM Mono',monospace;font-size:10px;color:rgba(37,211,102,.6);display:flex;align-items:center;gap:6px">
-            <span style="width:5px;height:5px;border-radius:50%;background:#25d366;animation:blink 2s infinite;flex-shrink:0"></span>
-            7-day free trial on all plans — no payment required to start
-          </div>
-        </div>
-        <div class="col-lg-5">
-          <div style="background:#111;border:1px solid rgba(255,255,255,.08);border-radius:18px;overflow:hidden;max-width:300px;margin:0 auto">
-            <div style="background:#1a1a1a;padding:10px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,.06)">
-              <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#25d366,#00d4ff);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">🤖</div>
-              <div>
-                <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:#fff">JamiiBot</div>
-                <div style="font-family:'DM Mono',monospace;font-size:9px;color:#25d366">● Online</div>
-              </div>
-            </div>
-            <div style="padding:14px;display:flex;flex-direction:column;gap:8px;background:#0b0b0b">
-              <div style="background:#1e2535;border-radius:12px 12px 12px 3px;padding:9px 12px;max-width:85%;font-size:12px;color:rgba(255,255,255,.8);line-height:1.5">
-                Hello! I'm JamiiBot 👋 How can I help you today?
-              </div>
-              <div style="background:#25d366;border-radius:12px 12px 3px 12px;padding:9px 12px;max-width:85%;align-self:flex-end;font-size:12px;color:#000;line-height:1.5;font-weight:500">
-                What's the price for a website?
-              </div>
-              <div style="background:#1e2535;border-radius:12px 12px 12px 3px;padding:9px 12px;max-width:90%;font-size:12px;color:rgba(255,255,255,.8);line-height:1.5">
-                Basic websites start from TZS 300,000. Share more details and I'll find the perfect fit! 😊
-              </div>
-              <div style="display:flex;align-items:center;gap:4px;padding:6px 10px;background:#1e2535;border-radius:12px;width:52px">
-                <span style="width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.4);animation:bounce 1s infinite"></span>
-                <span style="width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.4);animation:bounce 1s .15s infinite"></span>
-                <span style="width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.4);animation:bounce 1s .3s infinite"></span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- CTA BUTTONS -->
-    <div style="display:flex;flex-wrap:wrap;gap:14px;justify-content:center;align-items:center">
-      <a href="{% url 'chatbot_register' %}" style="display:inline-flex;align-items:center;gap:10px;padding:15px 32px;border-radius:12px;background:linear-gradient(135deg,#25d366,#00b5d8);color:#000;font-family:'Syne',sans-serif;font-weight:800;font-size:15px;text-decoration:none;transition:all .25s;box-shadow:0 8px 28px rgba(37,211,102,0.3)" onmouseenter="this.style.transform='translateY(-2px)';this.style.boxShadow='0 14px 40px rgba(37,211,102,0.5)'" onmouseleave="this.style.transform='';this.style.boxShadow='0 8px 28px rgba(37,211,102,0.3)'">
-        <i class="fab fa-whatsapp" style="font-size:18px"></i>
-        Get Your Bot — Free Trial
-        <i class="fas fa-arrow-right"></i>
-      </a>
-      <a href="{% url 'chatbot_login' %}" style="display:inline-flex;align-items:center;gap:9px;padding:15px 26px;border-radius:12px;background:transparent;border:1px solid rgba(37,211,102,0.25);color:rgba(37,211,102,.8);font-family:'Syne',sans-serif;font-weight:600;font-size:15px;text-decoration:none;transition:all .25s" onmouseenter="this.style.borderColor='rgba(37,211,102,.5)';this.style.color='#25d366';this.style.background='rgba(37,211,102,.06)'" onmouseleave="this.style.borderColor='rgba(37,211,102,.25)';this.style.color='rgba(37,211,102,.8)';this.style.background='transparent'">
-        <i class="fas fa-sign-in-alt"></i> Sign In to Your Bot
-      </a>
-      <a href="/bot/" style="display:inline-flex;align-items:center;gap:9px;padding:15px 26px;border-radius:12px;background:transparent;border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.5);font-family:'Syne',sans-serif;font-weight:600;font-size:14px;text-decoration:none;transition:all .25s" onmouseenter="this.style.borderColor='rgba(255,255,255,.25)';this.style.color='rgba(255,255,255,.8)'" onmouseleave="this.style.borderColor='rgba(255,255,255,.1)';this.style.color='rgba(255,255,255,.5)'">
-        Learn More <i class="fas fa-external-link-alt" style="font-size:11px"></i>
-      </a>
-    </div>
-
-  </div>
-</section>
-
-<!-- ══════════════ CTA ══════════════ -->
+<!-- ══════════════════════════════════════════════════════════
+     FINAL CTA
+══════════════════════════════════════════════════════════ -->
 <section class="sf-cta-sec">
   <div class="container">
-    <div class="sf-cta-band">
+    <div class="sf-cta-band reveal">
       <div class="sf-eye" style="justify-content:center">Ready to Build?</div>
       <h2 class="sf-cta-h">Let's Create Something<br>Remarkable Together</h2>
       <p class="sf-cta-p">Tell us about your project — we'll send back a detailed proposal within 24 hours, no commitment required.</p>
       <div class="d-flex flex-wrap gap-3 justify-content-center" style="position:relative;z-index:2">
         <a href="{% url 'select_website' %}" class="sf-cta-main">Start Your Project <i class="fas fa-arrow-right"></i></a>
+        <a href="{% url 'chatbot_register' %}" class="sf-cta-main" style="background:linear-gradient(135deg,#25d366,#00b5d8)"><i class="fab fa-whatsapp"></i> Get AI Bot Free</a>
         <a href="{% url 'contact' %}" class="sf-cta-alt">Talk to Us First</a>
       </div>
     </div>
   </div>
 </section>
 
+<!-- ══════════════════════════════════════════════════════════
+     SCRIPTS
+══════════════════════════════════════════════════════════ -->
+<script>
+/* ── PARTICLE CANVAS ─────────────────────────────── */
+(function(){
+  const c=document.getElementById('heroCanvas');
+  if(!c)return;
+  const ctx=c.getContext('2d');
+  let W,H,pts=[],mouse={x:0,y:0};
+  function rs(){W=c.width=window.innerWidth;H=c.height=c.parentElement.offsetHeight||window.innerHeight}
+  rs();window.addEventListener('resize',rs);
+  window.addEventListener('mousemove',e=>{mouse.x=e.clientX;mouse.y=e.clientY});
+  for(let i=0;i<80;i++)pts.push({
+    x:Math.random()*window.innerWidth,y:Math.random()*1200,
+    vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,
+    r:Math.random()*1.5+.3,o:Math.random()*.4+.05,
+    c:Math.random()>.7?'180,77,255':Math.random()>.5?'0,200,255':'37,211,102'
+  });
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    /* connections */
+    for(let i=0;i<pts.length;i++){
+      for(let j=i+1;j<pts.length;j++){
+        const dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y;
+        const dist=Math.sqrt(dx*dx+dy*dy);
+        if(dist<130){
+          ctx.beginPath();
+          ctx.moveTo(pts[i].x,pts[i].y);
+          ctx.lineTo(pts[j].x,pts[j].y);
+          ctx.strokeStyle=`rgba(0,200,255,${.06*(1-dist/130)})`;
+          ctx.lineWidth=.5;
+          ctx.stroke();
+        }
+      }
+    }
+    pts.forEach(p=>{
+      /* mouse repel */
+      const dx=p.x-mouse.x,dy=p.y-mouse.y;
+      const d=Math.sqrt(dx*dx+dy*dy);
+      if(d<100){p.vx+=dx/d*.04;p.vy+=dy/d*.04}
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(${p.c},${p.o})`;ctx.fill();
+      p.x+=p.vx;p.y+=p.vy;
+      if(p.x<0)p.x=W;if(p.x>W)p.x=0;
+      if(p.y<0)p.y=H;if(p.y>H)p.y=0;
+      p.vx*=.99;p.vy*=.99;
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+/* ── CHAT DEMO ANIMATION ─────────────────────────── */
+(function(){
+  const seq=[
+    {id:'dm1',delay:400},{id:'dm2',delay:1600},
+    {id:'dmTyp',delay:2200,hideAt:3200},
+    {id:'dm3',delay:3200},{id:'dm4',delay:4600},
+    {id:'dmTyp2',delay:5200,hideAt:6200},
+    {id:'dm5',delay:6200}
+  ];
+  function run(){
+    seq.forEach(s=>{
+      const el=document.getElementById(s.id);
+      if(!el)return;
+      el.classList.remove('show');
+      setTimeout(()=>el.classList.add('show'),s.delay);
+      if(s.hideAt)setTimeout(()=>el.classList.remove('show'),s.hideAt);
+    });
+    setTimeout(run,10000);
+  }
+  run();
+})();
+
+/* ── SCROLL REVEAL ───────────────────────────────── */
+(function(){
+  const io=new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');io.unobserve(e.target);}});
+  },{threshold:.12});
+  document.querySelectorAll('.reveal,.reveal-l,.reveal-r').forEach(el=>io.observe(el));
+})();
+
+/* ── COUNTER ANIMATION ───────────────────────────── */
+(function(){
+  const io=new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){
+        const el=e.target,target=+el.dataset.target;
+        let start=0,dur=1800,step=16;
+        const inc=target/(dur/step);
+        const t=setInterval(()=>{
+          start+=inc;
+          if(start>=target){start=target;clearInterval(t);}
+          el.textContent=Math.floor(start);
+        },step);
+        io.unobserve(e.target);
+      }
+    });
+  },{threshold:.3});
+  document.querySelectorAll('.counter').forEach(el=>io.observe(el));
+})();
+</script>
 {% endblock %}
