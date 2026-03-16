@@ -9,25 +9,76 @@ from django.contrib.auth.decorators import login_required
 
 # Home Page
 def home(request):
+    from apps.seo.schema import (
+        organization_schema, website_schema, local_business_schema,
+        jamiibot_product_schema, faq_schema, render_schemas
+    )
     team = Team.objects.all()
 
+    faqs = [
+        ("Je, JamiiTek ni nini?", "JamiiTek ni kampuni ya teknolojia Tanzania inayotengeneza websites, apps, na AI WhatsApp bots kwa biashara."),
+        ("What is JamiiBot?", "JamiiBot is an AI-powered WhatsApp chatbot that responds to customer questions 24/7 in Swahili and English, starting from TZS 15,000/month."),
+        ("How much does a website cost in Tanzania?", "JamiiTek builds websites starting from TZS 150,000. Price depends on complexity, features, and design requirements."),
+        ("Je, JamiiBot inafanya kazi vipi?", "JamiiBot inajibu maswali ya wateja kupitia WhatsApp kiotomatiki, saa 24 kwa lugha ya Kiswahili na Kiingereza."),
+        ("Do you offer web hosting in Tanzania?", "Yes, JamiiTek offers reliable web hosting with 99.9% uptime, SSL certificates, and daily backups."),
+        ("How long does website development take?", "Most websites are delivered within 2-6 weeks depending on scope and content availability."),
+        ("Je, mnaunda WhatsApp bot Tanzania?", "Ndiyo! JamiiBot ni AI WhatsApp bot ya biashara Tanzania. Inajibu wateja saa 24 bila msaada wa binadamu."),
+        ("What programming languages do you use?", "We use Python/Django, JavaScript, React, and modern web technologies for all our projects."),
+    ]
+
+    schema_html = render_schemas(
+        organization_schema(),
+        website_schema(),
+        local_business_schema(),
+        jamiibot_product_schema(),
+        faq_schema(faqs),
+    )
+
     context = {
-        'team':team
+        'team': team,
+        'schema_markup': schema_html,
+        'page_title': 'JamiiTek — Web Development & AI WhatsApp Bot Tanzania',
+        'page_desc': (
+            "JamiiTek: Tanzania's leading web developer. We build websites, AI WhatsApp bots "
+            "(JamiiBot), web hosting & domains. Serving Dar es Salaam and all Tanzania. "
+            "Tunajenga website Tanzania. Bot WhatsApp Tanzania."
+        ),
+        'canonical': 'https://jamiitek.com/',
     }
-    return render(request, 'index.html',context)
+    return render(request, 'index.html', context)
 
 # Elimu ya Ufahamu
 def service(request):
+    from apps.seo.schema import (
+        organization_schema, faq_schema, render_schemas, breadcrumb_schema
+    )
     services = Service.objects.all()
     questions = Question.objects.all()
 
+    # Build FAQ from DB questions
+    faqs_data = [(q.question, q.answer) for q in questions] if questions else [
+        ("What web services does JamiiTek offer?", "JamiiTek offers website development, mobile app development, AI WhatsApp bots, web hosting, domain registration, UI/UX design, and system integration."),
+        ("How much does website development cost in Tanzania?", "Websites start from TZS 150,000 for basic sites up to TZS 5,000,000+ for complex web applications."),
+        ("Je, mnatengeneza website Tanzania?", "Ndiyo, JamiiTek inatengeneza websites za hali ya juu Tanzania kwa bei nafuu."),
+        ("Do you build mobile apps?", "Yes, we develop Android and iOS apps using modern frameworks."),
+    ]
+
+    schema_html = render_schemas(
+        organization_schema(),
+        breadcrumb_schema([("Home", "/"), ("Services", "/service/")]),
+        faq_schema(faqs_data),
+    )
+
     context = {
-        'services':services,
-        'questions':questions
-
+        'services': services,
+        'questions': questions,
+        'schema_markup': schema_html,
+        'page_title': 'Our Services — Web Development, AI Bots & Hosting | JamiiTek Tanzania',
+        'page_desc': 'JamiiTek services: website development, AI WhatsApp bots, web hosting, domain registration, mobile apps, UI/UX design. Best web developer in Tanzania.',
+        'canonical': 'https://jamiitek.com/service/',
+        'page_keywords': 'web development services Tanzania, AI WhatsApp bot, website design Tanzania, web hosting Tanzania, domain registration Tanzania, mobile app Tanzania',
     }
-
-    return render(request, 'service.html',context)
+    return render(request, 'service.html', context)
 
 # Warsha za Kiroho
 def contact(request):

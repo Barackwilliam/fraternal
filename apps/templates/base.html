@@ -1,12 +1,58 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" prefix="og: https://ogp.me/ns#">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}JamiiTek — Next-Generation Digital Solutions{% endblock %}</title>
-  <meta name="description" content="{% block meta_desc %}JamiiTek builds next-generation websites, web apps, and digital solutions for businesses across Tanzania and East Africa.{% endblock %}">
 
+  <!-- ══ PRIMARY META ══════════════════════════════════════ -->
+  <title>{% block title %}JamiiTek — Web Development & AI WhatsApp Bot Tanzania{% endblock %}</title>
+  <meta name="description" content="{% block meta_desc %}JamiiTek: Tanzania's leading web developer. We build websites, mobile apps, AI WhatsApp bots (JamiiBot), web hosting & domain services. Serving Dar es Salaam and all Tanzania. Tunajenga website Tanzania.{% endblock %}">
+  <meta name="keywords" content="{% block meta_keywords %}web developer Tanzania, website development Tanzania, web design Dar es Salaam, WhatsApp bot Tanzania, AI chatbot Tanzania, JamiiBot, WhatsApp chatbot, bot WhatsApp Tanzania, web hosting Tanzania, domain registration Tanzania, mobile app developer Tanzania, software developer Tanzania, website bei nafuu Tanzania, kutengeneza website Tanzania, chatbot Swahili, AI bot Tanzania, web developer Dar es Salaam, online business Tanzania{% endblock %}">
+  <meta name="author" content="JamiiTek">
+  <meta name="robots" content="{% block meta_robots %}index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1{% endblock %}">
+  <meta name="googlebot" content="index, follow">
+  <link rel="canonical" href="{% block canonical %}https://jamiitek.com{% endblock %}">
+
+  <!-- ══ GEO / LOCAL SEO ════════════════════════════════ -->
+  <meta name="geo.region" content="TZ-02">
+  <meta name="geo.placename" content="Dar es Salaam, Tanzania">
+  <meta name="geo.position" content="-6.7924;39.2083">
+  <meta name="ICBM" content="-6.7924, 39.2083">
+  <meta name="language" content="English, Swahili">
+  <meta name="content-language" content="en, sw">
+
+  <!-- ══ OPEN GRAPH (Facebook / WhatsApp / LinkedIn) ════ -->
+  <meta property="og:type"        content="{% block og_type %}website{% endblock %}">
+  <meta property="og:url"         content="{% block og_url %}https://jamiitek.com{% endblock %}">
+  <meta property="og:site_name"   content="JamiiTek">
+  <meta property="og:title"       content="{% block og_title %}JamiiTek — Web Development & AI WhatsApp Bot Tanzania{% endblock %}">
+  <meta property="og:description" content="{% block og_desc %}Tanzania's leading web developer. Websites, AI WhatsApp bots, hosting & domains. JamiiBot responds to customers 24/7 in Swahili & English.{% endblock %}">
+  <meta property="og:image"       content="{% block og_image %}https://jamiitek.com/static/images/og-image.jpg{% endblock %}">
+  <meta property="og:image:width"  content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt"    content="{% block og_image_alt %}JamiiTek — Web Development & AI WhatsApp Bot Tanzania{% endblock %}">
+  <meta property="og:locale"      content="en_TZ">
+  <meta property="og:locale:alternate" content="sw_TZ">
+
+  <!-- ══ TWITTER CARD ═══════════════════════════════════ -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:site"        content="@JamiiTek">
+  <meta name="twitter:title"       content="{% block tw_title %}JamiiTek — Web Development & AI WhatsApp Bot Tanzania{% endblock %}">
+  <meta name="twitter:description" content="{% block tw_desc %}Tanzania's leading web developer. AI WhatsApp bots, websites, hosting. JamiiBot responds 24/7 in Swahili & English.{% endblock %}">
+  <meta name="twitter:image"       content="{% block tw_image %}https://jamiitek.com/static/images.jpg{% endblock %}">
+
+  <!-- ══ THEME / APP ════════════════════════════════════ -->
+  <meta name="theme-color" content="#00c8ff">
+  <meta name="msapplication-TileColor" content="#00010a">
+  <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
+  <link rel="apple-touch-icon" sizes="180x180" href="{% static 'images/apple-touch-icon.png' %}">
+  <link rel="manifest" href="/manifest.json">
+
+  <!-- ══ STRUCTURED DATA (JSON-LD) ══════════════════════ -->
+  {% block schema_markup %}{% endblock %}
+
+  <!-- ══ FONTS & LIBS ═══════════════════════════════════ -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Exo+2:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">

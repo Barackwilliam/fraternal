@@ -1,121 +1,629 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
   <title>Create Account — JamiiBot</title>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
   <style>
-  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-  :root{--bg:#040608;--border:rgba(255,255,255,.08);--green:#00dc82;--purple:#7c3aed;--text:rgba(255,255,255,.88);--text2:rgba(255,255,255,.45);--text3:rgba(255,255,255,.22);--mono:'JetBrains Mono',monospace;--head:'Syne',sans-serif;--body:'Space Grotesk',sans-serif}
-  body{font-family:var(--body);background:var(--bg);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;position:relative;overflow:hidden}
-  body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 60% 55% at 15% 30%,rgba(124,58,237,.07),transparent 55%),radial-gradient(ellipse 50% 50% at 85% 75%,rgba(0,220,130,.05),transparent 55%);pointer-events:none}
-  canvas{position:fixed;inset:0;z-index:0;pointer-events:none}
+  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 
-  .wrap{position:relative;z-index:1;display:grid;grid-template-columns:400px 560px;max-width:960px;width:100%;border-radius:24px;overflow:hidden;box-shadow:0 40px 120px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.06)}
+  :root {
+    --bg:     #040608;
+    --card:   rgba(255,255,255,.03);
+    --border: rgba(255,255,255,.08);
+    --green:  #00dc82;
+    --purple: #7c3aed;
+    --red:    #ef4444;
+    --text:   rgba(255,255,255,.9);
+    --text2:  rgba(255,255,255,.45);
+    --text3:  rgba(255,255,255,.22);
+    --mono:   'JetBrains Mono', monospace;
+    --head:   'Syne', sans-serif;
+    --body:   'Space Grotesk', sans-serif;
+  }
 
-  /* LEFT */
-  .left{background:linear-gradient(160deg,rgba(14,8,32,.99),rgba(6,10,20,.99));padding:48px 40px;display:flex;flex-direction:column;position:relative;overflow:hidden;border-right:1px solid rgba(255,255,255,.05)}
-  .left::before{content:'';position:absolute;top:-80px;right:-80px;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,rgba(124,58,237,.1),transparent 65%);pointer-events:none}
-  .brand{display:flex;align-items:center;gap:12px;margin-bottom:40px;position:relative;z-index:1}
-  .brand-ico{width:40px;height:40px;border-radius:11px;background:linear-gradient(135deg,var(--purple),var(--green));display:flex;align-items:center;justify-content:center;font-size:19px;box-shadow:0 4px 16px rgba(124,58,237,.35)}
-  .brand-name{font-family:var(--head);font-size:20px;font-weight:800;background:linear-gradient(135deg,#a855f7,var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-  .left-title{font-family:var(--head);font-size:28px;font-weight:800;color:var(--text);line-height:1.2;margin-bottom:12px;position:relative;z-index:1}
-  .left-title em{font-style:normal;background:linear-gradient(135deg,var(--green),#00b5d8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-  .left-sub{font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:32px;position:relative;z-index:1}
-  .feat{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px;position:relative;z-index:1;padding:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:12px}
-  .feat-ico{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
-  .feat-title{font-size:12px;font-weight:700;color:var(--text)}
-  .feat-sub{font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:2px}
-  .trial-box{margin-top:auto;padding:14px;background:rgba(0,220,130,.06);border:1px solid rgba(0,220,130,.18);border-radius:12px;text-align:center;position:relative;z-index:1}
-  .trial-box strong{display:block;font-family:var(--head);font-size:15px;color:var(--green);margin-bottom:3px}
-  .trial-box span{font-family:var(--mono);font-size:10px;color:var(--text3)}
+  html { scroll-behavior: smooth; }
 
-  /* RIGHT */
-  .right{background:rgba(5,8,15,.97);padding:40px 44px;overflow-y:auto;max-height:100vh}
-  .right-title{font-family:var(--head);font-size:24px;font-weight:800;color:var(--text);margin-bottom:4px}
-  .right-sub{font-size:13px;color:var(--text2);margin-bottom:24px}
-  .right-sub a{color:var(--green);font-weight:600;text-decoration:none}
+  body {
+    font-family: var(--body);
+    background: var(--bg);
+    min-height: 100vh;
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
 
-  .msg{display:flex;align-items:center;gap:9px;padding:10px 14px;border-radius:9px;font-size:12.5px;margin-bottom:8px}
-  .msg-error{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);color:#f87171}
-  .msg-success{background:rgba(0,220,130,.07);border:1px solid rgba(0,220,130,.2);color:var(--green)}
+  /* ── BACKGROUND ──────────────────────────────────── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background:
+      radial-gradient(ellipse 55% 50% at 15% 25%, rgba(124,58,237,.08), transparent 60%),
+      radial-gradient(ellipse 45% 45% at 90% 80%, rgba(0,220,130,.06), transparent 55%),
+      radial-gradient(ellipse 35% 40% at 60% 10%, rgba(0,212,255,.04), transparent 55%);
+  }
+  canvas { position:fixed; inset:0; z-index:0; pointer-events:none; }
 
-  .f-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  .f-group{margin-bottom:14px}
-  .f-label{display:block;font-family:var(--mono);font-size:10px;font-weight:600;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:7px}
-  .f-wrap{position:relative}
-  .f-ico{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:12px;pointer-events:none}
-  .fi-ta{position:absolute;left:13px;top:14px;color:var(--text3);font-size:12px;pointer-events:none}
-  .f-input{width:100%;padding:11px 13px 11px 38px;background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.07);border-radius:10px;color:var(--text);font-family:var(--body);font-size:13.5px;outline:none;transition:all .2s}
-  .f-input:focus{border-color:var(--green);background:rgba(0,220,130,.04);box-shadow:0 0 0 3px rgba(0,220,130,.08)}
-  .f-input::placeholder{color:var(--text3);font-size:12.5px}
+  /* ── PAGE LAYOUT ─────────────────────────────────── */
+  .page {
+    position: relative; z-index: 1;
+    min-height: 100vh;
+    display: flex; align-items: stretch;
+  }
 
-  /* PLAN CARDS */
-  .plan-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px}
-  .plan-opt input{display:none}
-  .plan-card{border:1.5px solid rgba(255,255,255,.07);border-radius:11px;padding:12px 10px;text-align:center;cursor:pointer;transition:all .18s;background:rgba(255,255,255,.02)}
-  .plan-opt input:checked + .plan-card{border-color:var(--purple);background:rgba(124,58,237,.1);box-shadow:0 0 16px rgba(124,58,237,.15)}
-  .plan-name{font-family:var(--head);font-size:12px;font-weight:800;color:var(--text);margin-bottom:3px}
-  .plan-price{font-family:var(--mono);font-size:11px;color:var(--text2)}
-  .plan-msgs{font-family:var(--mono);font-size:9px;color:var(--text3);margin-top:2px}
+  /* ── LEFT PANEL (desktop only) ───────────────────── */
+  .left {
+    width: 380px; flex-shrink: 0;
+    background: linear-gradient(160deg, rgba(14,8,32,.98), rgba(6,10,20,.98));
+    border-right: 1px solid rgba(255,255,255,.05);
+    padding: 48px 36px;
+    display: flex; flex-direction: column;
+    position: relative; overflow: hidden;
+  }
+  .left::before {
+    content: ''; position: absolute; top: -80px; right: -80px;
+    width: 300px; height: 300px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(124,58,237,.12), transparent 65%);
+    pointer-events: none;
+  }
+  .left::after {
+    content: ''; position: absolute; bottom: -60px; left: -60px;
+    width: 220px; height: 220px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,220,130,.07), transparent 65%);
+    pointer-events: none;
+  }
 
-  .submit-btn{width:100%;padding:13px;background:linear-gradient(135deg,var(--green),#00b5d8);color:#000;border:none;border-radius:11px;font-family:var(--head);font-size:15px;font-weight:900;cursor:pointer;transition:all .25s;letter-spacing:.3px;box-shadow:0 6px 24px rgba(0,220,130,.3);margin-bottom:12px}
-  .submit-btn:hover{transform:translateY(-2px);box-shadow:0 10px 36px rgba(0,220,130,.45)}
-  .tos{text-align:center;font-family:var(--mono);font-size:10px;color:var(--text3)}
-  .tos a{color:var(--text2);text-decoration:none}
+  .brand {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 44px; position: relative; z-index: 1;
+  }
+  .brand-ico {
+    width: 42px; height: 42px; border-radius: 12px; font-size: 20px;
+    background: linear-gradient(135deg, var(--purple), var(--green));
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 18px rgba(124,58,237,.35); flex-shrink: 0;
+  }
+  .brand-name {
+    font-family: var(--head); font-size: 22px; font-weight: 800;
+    background: linear-gradient(135deg, #a855f7, var(--green));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
 
-  @media(max-width:900px){.wrap{grid-template-columns:1fr}.left{display:none}}
+  .left-tagline {
+    font-family: var(--head); font-size: 28px; font-weight: 800;
+    color: var(--text); line-height: 1.2; margin-bottom: 12px;
+    position: relative; z-index: 1;
+  }
+  .left-tagline em {
+    font-style: normal;
+    background: linear-gradient(110deg, var(--green), #00b5d8);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .left-sub {
+    font-size: 13px; color: var(--text2); line-height: 1.75;
+    margin-bottom: 32px; position: relative; z-index: 1;
+  }
+
+  .feat {
+    display: flex; align-items: flex-start; gap: 12px;
+    margin-bottom: 10px; position: relative; z-index: 1;
+    padding: 12px 14px;
+    background: rgba(255,255,255,.03);
+    border: 1px solid rgba(255,255,255,.06);
+    border-radius: 12px; transition: border-color .2s;
+  }
+  .feat:hover { border-color: rgba(0,220,130,.15); }
+  .feat-ico {
+    width: 34px; height: 34px; border-radius: 9px; font-size: 15px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .feat-t { font-size: 12px; font-weight: 700; color: var(--text); }
+  .feat-s { font-family: var(--mono); font-size: 10px; color: var(--text3); margin-top: 2px; }
+
+  .trial-card {
+    margin-top: auto; padding: 16px;
+    background: rgba(0,220,130,.06);
+    border: 1px solid rgba(0,220,130,.18);
+    border-radius: 12px; text-align: center;
+    position: relative; z-index: 1;
+  }
+  .trial-card strong {
+    display: block; font-family: var(--head); font-size: 16px;
+    color: var(--green); margin-bottom: 4px;
+  }
+  .trial-card span {
+    font-family: var(--mono); font-size: 10px; color: var(--text3);
+  }
+
+  /* ── RIGHT / FORM AREA ───────────────────────────── */
+  .right {
+    flex: 1; min-width: 0;
+    background: rgba(5,8,15,.97);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: flex-start;
+    padding: 40px 24px 60px;
+    overflow-y: auto;
+  }
+
+  .form-wrap {
+    width: 100%; max-width: 520px;
+  }
+
+  /* Mobile brand bar — only shows on mobile */
+  .mob-brand {
+    display: none;
+    align-items: center; justify-content: space-between;
+    margin-bottom: 28px;
+  }
+  .mob-brand-left { display: flex; align-items: center; gap: 10px; }
+  .mob-brand-ico {
+    width: 38px; height: 38px; border-radius: 10px; font-size: 18px;
+    background: linear-gradient(135deg, var(--purple), var(--green));
+    display: flex; align-items: center; justify-content: center;
+  }
+  .mob-brand-name {
+    font-family: var(--head); font-size: 18px; font-weight: 800;
+    background: linear-gradient(135deg, #a855f7, var(--green));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .mob-trial {
+    font-family: var(--mono); font-size: 10px; color: var(--green);
+    background: rgba(0,220,130,.08); border: 1px solid rgba(0,220,130,.2);
+    padding: 4px 10px; border-radius: 100px; display: flex; align-items: center; gap: 5px;
+  }
+  .mob-trial .dot {
+    width: 5px; height: 5px; border-radius: 50%; background: var(--green);
+    animation: blink 2s infinite; flex-shrink: 0;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+  /* Mobile features strip */
+  .mob-feats {
+    display: none;
+    gap: 8px; margin-bottom: 24px;
+  }
+  .mob-feat {
+    flex: 1; min-width: 0; padding: 10px 8px; text-align: center;
+    background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.06);
+    border-radius: 10px;
+  }
+  .mob-feat .ico { font-size: 18px; margin-bottom: 4px; }
+  .mob-feat .lbl { font-family: var(--mono); font-size: 9px; color: var(--text3); line-height: 1.4; }
+
+  /* ── FORM HEADER ─────────────────────────────────── */
+  .form-title {
+    font-family: var(--head); font-size: 24px; font-weight: 800;
+    color: var(--text); margin-bottom: 4px;
+  }
+  .form-sub {
+    font-size: 13px; color: var(--text2); margin-bottom: 24px; line-height: 1.5;
+  }
+  .form-sub a { color: var(--green); font-weight: 600; text-decoration: none; }
+  .form-sub a:hover { text-decoration: underline; }
+
+  /* ── MESSAGES ────────────────────────────────────── */
+  .msgs { margin-bottom: 16px; }
+  .msg {
+    display: flex; align-items: flex-start; gap: 9px;
+    padding: 11px 14px; border-radius: 10px; font-size: 13px; margin-bottom: 8px;
+    line-height: 1.5;
+  }
+  .msg i { flex-shrink: 0; margin-top: 1px; }
+  .msg-error  { background: rgba(239,68,68,.08);  border: 1px solid rgba(239,68,68,.2);  color: #f87171; }
+  .msg-success{ background: rgba(0,220,130,.07);  border: 1px solid rgba(0,220,130,.2);  color: var(--green); }
+
+  /* ── FORM FIELDS ─────────────────────────────────── */
+  .f-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .f-group { margin-bottom: 14px; }
+
+  .f-label {
+    display: block; font-family: var(--mono); font-size: 10px; font-weight: 600;
+    color: var(--text3); letter-spacing: 1.5px; text-transform: uppercase;
+    margin-bottom: 7px;
+  }
+  .f-wrap { position: relative; }
+  .f-ico {
+    position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
+    color: var(--text3); font-size: 13px; pointer-events: none; z-index: 1;
+  }
+  .f-input {
+    width: 100%; padding: 12px 14px 12px 40px;
+    background: rgba(255,255,255,.04);
+    border: 1.5px solid rgba(255,255,255,.08);
+    border-radius: 10px; color: var(--text);
+    font-family: var(--body); font-size: 14px; outline: none;
+    transition: all .2s; -webkit-appearance: none;
+  }
+  .f-input:focus {
+    border-color: var(--green);
+    background: rgba(0,220,130,.04);
+    box-shadow: 0 0 0 3px rgba(0,220,130,.1);
+  }
+  .f-input::placeholder { color: var(--text3); font-size: 13px; }
+  .f-input.error { border-color: var(--red); }
+  .f-hint { font-family: var(--mono); font-size: 10px; color: var(--text3); margin-top: 5px; }
+
+  /* No icon inputs */
+  .f-input.no-ico { padding-left: 14px; }
+
+  /* ── PLAN CARDS ──────────────────────────────────── */
+  .plan-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 20px; }
+  .plan-opt { cursor: pointer; }
+  .plan-opt input { display: none; }
+  .plan-card {
+    border: 1.5px solid rgba(255,255,255,.07);
+    border-radius: 12px; padding: 14px 10px; text-align: center;
+    background: rgba(255,255,255,.02); transition: all .2s; position: relative;
+  }
+  .plan-card:hover { border-color: rgba(124,58,237,.3); background: rgba(124,58,237,.04); }
+  .plan-opt input:checked + .plan-card {
+    border-color: var(--purple);
+    background: rgba(124,58,237,.1);
+    box-shadow: 0 0 20px rgba(124,58,237,.15), inset 0 1px 0 rgba(255,255,255,.05);
+  }
+  .plan-popular {
+    position: absolute; top: -9px; left: 50%; transform: translateX(-50%);
+    background: linear-gradient(135deg, var(--purple), var(--green));
+    color: #fff; font-family: var(--mono); font-size: 8px; font-weight: 700;
+    padding: 2px 10px; border-radius: 100px; white-space: nowrap; letter-spacing: .5px;
+  }
+  .plan-name { font-family: var(--head); font-size: 12px; font-weight: 800; color: var(--text); margin-bottom: 4px; }
+  .plan-price { font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--purple); margin-bottom: 2px; }
+  .plan-msgs { font-family: var(--mono); font-size: 9px; color: var(--text3); }
+
+  /* ── DIVIDER ─────────────────────────────────────── */
+  .divider {
+    display: flex; align-items: center; gap: 12px;
+    margin: 20px 0; color: var(--text3);
+    font-family: var(--mono); font-size: 10px; letter-spacing: 1px;
+  }
+  .divider::before, .divider::after {
+    content: ''; flex: 1; height: 1px; background: rgba(255,255,255,.06);
+  }
+
+  /* ── SUBMIT BUTTON ───────────────────────────────── */
+  .submit-btn {
+    width: 100%; padding: 14px;
+    background: linear-gradient(135deg, var(--green), #00b5d8);
+    color: #000; border: none; border-radius: 11px;
+    font-family: var(--head); font-size: 15px; font-weight: 900;
+    cursor: pointer; letter-spacing: .4px;
+    box-shadow: 0 6px 24px rgba(0,220,130,.3);
+    transition: all .25s; margin-bottom: 12px;
+    display: flex; align-items: center; justify-content: center; gap: 9px;
+  }
+  .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 36px rgba(0,220,130,.5); }
+  .submit-btn:active { transform: translateY(0); }
+  .submit-btn:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+
+  .tos {
+    text-align: center; font-family: var(--mono); font-size: 10px; color: var(--text3);
+    line-height: 1.6;
+  }
+  .tos a { color: var(--text2); text-decoration: none; transition: color .15s; }
+  .tos a:hover { color: var(--text); }
+
+  /* ── PASSWORD STRENGTH ───────────────────────────── */
+  .pw-strength { display: flex; gap: 4px; margin-top: 6px; }
+  .pw-bar { height: 3px; flex: 1; border-radius: 2px; background: rgba(255,255,255,.08); transition: background .3s; }
+  .pw-label { font-family: var(--mono); font-size: 10px; color: var(--text3); margin-top: 4px; }
+
+  /* ── RESPONSIVE ──────────────────────────────────── */
+
+  /* Tablet */
+  @media (max-width: 960px) {
+    .left { width: 320px; padding: 36px 28px; }
+    .left-tagline { font-size: 24px; }
+    .right { padding: 36px 20px 56px; }
+  }
+
+  /* Mobile — hide left, show mobile header */
+  @media (max-width: 768px) {
+    .page { flex-direction: column; }
+
+    .left { display: none; }
+
+    .right {
+      padding: 24px 16px 48px;
+      justify-content: flex-start;
+      min-height: 100vh;
+    }
+
+    .form-wrap { max-width: 100%; }
+
+    .mob-brand { display: flex; }
+    .mob-feats { display: flex; }
+
+    /* Stack 2-col rows on small screens */
+    .f-row { grid-template-columns: 1fr; gap: 0; }
+    .plan-grid { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+
+    .form-title { font-size: 22px; }
+  }
+
+  /* Very small phones */
+  @media (max-width: 380px) {
+    .right { padding: 20px 14px 44px; }
+    .mob-brand { flex-direction: column; align-items: flex-start; gap: 10px; }
+    .plan-grid { grid-template-columns: repeat(3, 1fr); gap: 5px; }
+    .plan-card { padding: 10px 6px; }
+    .plan-name { font-size: 10px; }
+    .plan-price { font-size: 11px; }
+    .submit-btn { font-size: 14px; padding: 13px; }
+  }
   </style>
 </head>
 <body>
 <canvas id="c"></canvas>
-<div class="wrap">
+
+<div class="page">
+
+  <!-- ═══ LEFT PANEL (desktop) ═══════════════════════ -->
   <div class="left">
-    <div class="brand"><div class="brand-ico">🤖</div><div class="brand-name">JamiiBot</div></div>
-    <div class="left-title">Start your<br><em>AI WhatsApp</em><br>bot today</div>
-    <div class="left-sub">Set up in 10 minutes. Responds in Swahili & English. Handles customer questions 24/7.</div>
-    <div class="feat"><div class="feat-ico" style="background:rgba(0,220,130,.1)">🇹🇿</div><div><div class="feat-title">Swahili + English</div><div class="feat-sub">Auto-detects language</div></div></div>
-    <div class="feat"><div class="feat-ico" style="background:rgba(124,58,237,.1)">🧠</div><div><div class="feat-title">Groq AI Engine</div><div class="feat-sub">llama-3.3-70b — blazing fast</div></div></div>
-    <div class="feat"><div class="feat-ico" style="background:rgba(245,158,11,.1)">⚡</div><div><div class="feat-title">Under 2 seconds</div><div class="feat-sub">Always instant replies</div></div></div>
-    <div class="trial-box"><strong>7-Day Free Trial</strong><span>No payment required to start</span></div>
+    <div class="brand">
+      <div class="brand-ico">🤖</div>
+      <div class="brand-name">JamiiBot</div>
+    </div>
+
+    <div class="left-tagline">
+      Start your<br><em>AI WhatsApp</em><br>bot today
+    </div>
+    <div class="left-sub">
+      Set up in 10 minutes. Responds in Swahili & English. Handles customer questions 24/7 without you lifting a finger.
+    </div>
+
+    <div class="feat">
+      <div class="feat-ico" style="background:rgba(0,220,130,.1)">🇹🇿</div>
+      <div><div class="feat-t">Swahili + English</div><div class="feat-s">Auto-detects customer language</div></div>
+    </div>
+    <div class="feat">
+      <div class="feat-ico" style="background:rgba(124,58,237,.1)">🧠</div>
+      <div><div class="feat-t">Groq AI Engine</div><div class="feat-s">llama-3.3-70b — blazing fast</div></div>
+    </div>
+    <div class="feat">
+      <div class="feat-ico" style="background:rgba(245,158,11,.1)">⚡</div>
+      <div><div class="feat-t">Under 2 seconds</div><div class="feat-s">Always instant replies, 24/7</div></div>
+    </div>
+
+    <div class="trial-card">
+      <strong>7-Day Free Trial</strong>
+      <span>No payment required to start</span>
+    </div>
   </div>
+
+  <!-- ═══ RIGHT PANEL (form) ══════════════════════════ -->
   <div class="right">
-    <div class="right-title">Create Your Account</div>
-    <div class="right-sub">Already have one? <a href="/chatbot/login/">Sign in →</a></div>
-    {% if messages %}<div style="margin-bottom:14px">{% for m in messages %}<div class="msg msg-{% if m.tags == 'error' %}error{% else %}success{% endif %}"><i class="fas {% if m.tags == 'error' %}fa-circle-xmark{% else %}fa-circle-check{% endif %}"></i> {{ m }}</div>{% endfor %}</div>{% endif %}
-    <form method="post">
-      {% csrf_token %}
-      <div class="f-row">
-        <div class="f-group"><label class="f-label">Full Name *</label><div class="f-wrap"><i class="fas fa-user f-ico"></i><input type="text" name="full_name" class="f-input" placeholder="Your full name" required value="{{ request.POST.full_name }}"></div></div>
-        <div class="f-group"><label class="f-label">Business Name *</label><div class="f-wrap"><i class="fas fa-building f-ico"></i><input type="text" name="business_name" class="f-input" placeholder="Company / Shop" required value="{{ request.POST.business_name }}"></div></div>
-      </div>
-      <div class="f-group"><label class="f-label">Email Address *</label><div class="f-wrap"><i class="fas fa-envelope f-ico"></i><input type="email" name="email" class="f-input" placeholder="email@example.com" required value="{{ request.POST.email }}"></div></div>
-      <div class="f-group"><label class="f-label">Phone Number</label><div class="f-wrap"><i class="fab fa-whatsapp f-ico" style="color:#25d366"></i><input type="text" name="phone" class="f-input" placeholder="+255 7XX XXX XXX" value="{{ request.POST.phone }}"></div></div>
-      <div class="f-row">
-        <div class="f-group"><label class="f-label">Username *</label><div class="f-wrap"><i class="fas fa-at f-ico"></i><input type="text" name="username" class="f-input" placeholder="juma123" required value="{{ request.POST.username }}"></div></div>
-        <div class="f-group"><label class="f-label">Password *</label><div class="f-wrap"><i class="fas fa-lock f-ico"></i><input type="password" name="password" class="f-input" placeholder="Min. 8 chars" required></div></div>
-      </div>
-      <div class="f-group"><label class="f-label">Confirm Password *</label><div class="f-wrap"><i class="fas fa-shield f-ico"></i><input type="password" name="password2" class="f-input" placeholder="Repeat password" required></div></div>
-      <div class="f-group">
-        <label class="f-label">Choose Plan</label>
-        <div class="plan-row">
-          {% for plan in plans %}
-          <label class="plan-opt"><input type="radio" name="plan" value="{{ plan.slug }}" {% if request.GET.plan == plan.slug or forloop.first %}checked{% endif %}>
-          <div class="plan-card"><div class="plan-name">{{ plan.name }}</div><div class="plan-price">TZS {{ plan.price_tzs|floatformat:0 }}/mo</div><div class="plan-msgs">{% if plan.is_unlimited %}∞ Unlimited{% else %}{{ plan.msg_limit }} msgs{% endif %}</div></div></label>
-          {% endfor %}
+    <div class="form-wrap">
+
+      <!-- Mobile brand (hidden on desktop) -->
+      <div class="mob-brand">
+        <div class="mob-brand-left">
+          <div class="mob-brand-ico">🤖</div>
+          <div class="mob-brand-name">JamiiBot</div>
         </div>
+        <div class="mob-trial"><span class="dot"></span> Free Trial</div>
       </div>
-      <button type="submit" class="submit-btn"><i class="fas fa-rocket"></i> Create Account & Start Free Trial</button>
-      <div class="tos">By registering you agree to our <a href="#">Terms of Service</a></div>
-    </form>
+
+      <!-- Mobile features strip (hidden on desktop) -->
+      <div class="mob-feats">
+        <div class="mob-feat"><div class="ico">🇹🇿</div><div class="lbl">Swahili +<br>English</div></div>
+        <div class="mob-feat"><div class="ico">⚡</div><div class="lbl">Under<br>2 seconds</div></div>
+        <div class="mob-feat"><div class="ico">🤖</div><div class="lbl">24/7<br>Online</div></div>
+      </div>
+
+      <div class="form-title">Create Your Account</div>
+      <div class="form-sub">
+        Already have one? <a href="/chatbot/login/">Sign in →</a>
+      </div>
+
+      <!-- Messages -->
+      {% if messages %}
+      <div class="msgs">
+        {% for m in messages %}
+        <div class="msg msg-{% if m.tags == 'error' %}error{% else %}success{% endif %}">
+          <i class="fas {% if m.tags == 'error' %}fa-circle-xmark{% else %}fa-circle-check{% endif %}"></i>
+          {{ m }}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <form method="post" id="regForm" novalidate>
+        {% csrf_token %}
+
+        <!-- Row: Full Name + Business Name -->
+        <div class="f-row">
+          <div class="f-group">
+            <label class="f-label">Full Name *</label>
+            <div class="f-wrap">
+              <i class="fas fa-user f-ico"></i>
+              <input type="text" name="full_name" class="f-input" placeholder="Your full name" required autocomplete="name" value="{{ request.POST.full_name }}">
+            </div>
+          </div>
+          <div class="f-group">
+            <label class="f-label">Business Name *</label>
+            <div class="f-wrap">
+              <i class="fas fa-building f-ico"></i>
+              <input type="text" name="business_name" class="f-input" placeholder="Company / Shop" required autocomplete="organization" value="{{ request.POST.business_name }}">
+            </div>
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div class="f-group">
+          <label class="f-label">Email Address *</label>
+          <div class="f-wrap">
+            <i class="fas fa-envelope f-ico"></i>
+            <input type="email" name="email" class="f-input" placeholder="email@example.com" required autocomplete="email" value="{{ request.POST.email }}">
+          </div>
+        </div>
+
+        <!-- Phone -->
+        <div class="f-group">
+          <label class="f-label">WhatsApp Number</label>
+          <div class="f-wrap">
+            <i class="fab fa-whatsapp f-ico" style="color:#25d366"></i>
+            <input type="tel" name="phone" class="f-input" placeholder="+255 7XX XXX XXX" autocomplete="tel" value="{{ request.POST.phone }}" inputmode="tel">
+          </div>
+          <div class="f-hint">Optional — used to contact you about your bot</div>
+        </div>
+
+        <!-- Row: Username + Password -->
+        <div class="f-row">
+          <div class="f-group">
+            <label class="f-label">Username *</label>
+            <div class="f-wrap">
+              <i class="fas fa-at f-ico"></i>
+              <input type="text" name="username" id="username" class="f-input" placeholder="juma123" required autocomplete="username" value="{{ request.POST.username }}" autocorrect="off" autocapitalize="none" spellcheck="false">
+            </div>
+          </div>
+          <div class="f-group">
+            <label class="f-label">Password *</label>
+            <div class="f-wrap">
+              <i class="fas fa-lock f-ico"></i>
+              <input type="password" name="password" id="password" class="f-input" placeholder="Min. 8 characters" required autocomplete="new-password">
+            </div>
+            <div class="pw-strength" id="pwStrength">
+              <div class="pw-bar" id="pb1"></div>
+              <div class="pw-bar" id="pb2"></div>
+              <div class="pw-bar" id="pb3"></div>
+              <div class="pw-bar" id="pb4"></div>
+            </div>
+            <div class="pw-label" id="pwLabel"></div>
+          </div>
+        </div>
+
+        <!-- Confirm Password -->
+        <div class="f-group">
+          <label class="f-label">Confirm Password *</label>
+          <div class="f-wrap">
+            <i class="fas fa-shield-halved f-ico"></i>
+            <input type="password" name="password2" id="password2" class="f-input" placeholder="Repeat password" required autocomplete="new-password">
+          </div>
+          <div class="f-hint" id="pw2Hint"></div>
+        </div>
+
+        <!-- Plan chooser -->
+        <div class="f-group">
+          <label class="f-label">Choose Your Plan</label>
+          <div class="plan-grid">
+            {% for plan in plans %}
+            <label class="plan-opt">
+              <input type="radio" name="plan" value="{{ plan.slug }}"
+                {% if request.GET.plan == plan.slug or forloop.first %}checked{% endif %}>
+              <div class="plan-card">
+                {% if plan.slug == 'pro' %}<div class="plan-popular">POPULAR</div>{% endif %}
+                <div class="plan-name">{{ plan.name }}</div>
+                <div class="plan-price">{{ plan.price_tzs|floatformat:0 }}</div>
+                <div class="plan-msgs">TZS/mo</div>
+                <div class="plan-msgs" style="margin-top:3px">{% if plan.is_unlimited %}∞ Unlimited{% else %}{{ plan.msg_limit }} msgs{% endif %}</div>
+              </div>
+            </label>
+            {% endfor %}
+          </div>
+          <div class="f-hint" style="color:rgba(0,220,130,.5);display:flex;align-items:center;gap:6px">
+            <span style="width:5px;height:5px;border-radius:50%;background:#00dc82;animation:blink 2s infinite;flex-shrink:0"></span>
+            7-day free trial on all plans — no payment required
+          </div>
+        </div>
+
+        <div class="divider">or continue with</div>
+
+        <button type="submit" class="submit-btn" id="submitBtn">
+          <i class="fas fa-rocket"></i>
+          Create Account &amp; Start Free Trial
+        </button>
+
+        <div class="tos">
+          By registering you agree to our
+          <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+        </div>
+      </form>
+
+    </div>
   </div>
 </div>
+
 <script>
-const cv=document.getElementById('c'),ctx=cv.getContext('2d');let W,H,pts=[];
-function rs(){W=cv.width=window.innerWidth;H=cv.height=window.innerHeight}rs();window.addEventListener('resize',rs);
-for(let i=0;i<55;i++)pts.push({x:Math.random()*2000,y:Math.random()*1200,vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3,r:Math.random()*1.3+.3,o:Math.random()*.3+.05,c:Math.random()>.65?'124,58,237':'0,220,130'});
-(function loop(){ctx.clearRect(0,0,W,H);pts.forEach(p=>{ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=`rgba(${p.c},${p.o})`;ctx.fill();p.x+=p.vx;p.y+=p.vy;if(p.x<0)p.x=W;if(p.x>W)p.x=0;if(p.y<0)p.y=H;if(p.y>H)p.y=0});requestAnimationFrame(loop)})();
+/* ── PARTICLE CANVAS ──────────────────────────── */
+(function(){
+  const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+  let W,H,pts=[];
+  function rs(){W=cv.width=window.innerWidth;H=cv.height=window.innerHeight;}
+  rs(); window.addEventListener('resize',rs);
+  for(let i=0;i<50;i++) pts.push({
+    x:Math.random()*2000,y:Math.random()*1200,
+    vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,
+    r:Math.random()*1.3+.3,o:Math.random()*.25+.04,
+    c:Math.random()>.6?'124,58,237':'0,220,130'
+  });
+  (function loop(){
+    ctx.clearRect(0,0,W,H);
+    pts.forEach(p=>{
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(${p.c},${p.o})`;ctx.fill();
+      p.x+=p.vx;p.y+=p.vy;
+      if(p.x<0)p.x=W;if(p.x>W)p.x=0;
+      if(p.y<0)p.y=H;if(p.y>H)p.y=0;
+    });
+    requestAnimationFrame(loop);
+  })();
+})();
+
+/* ── PASSWORD STRENGTH ────────────────────────── */
+const pwInput = document.getElementById('password');
+const bars    = [document.getElementById('pb1'),document.getElementById('pb2'),document.getElementById('pb3'),document.getElementById('pb4')];
+const pwLabel = document.getElementById('pwLabel');
+
+pwInput.addEventListener('input', function(){
+  const v = this.value;
+  let score = 0;
+  if(v.length >= 8)  score++;
+  if(v.length >= 12) score++;
+  if(/[A-Z]/.test(v) && /[a-z]/.test(v)) score++;
+  if(/[0-9]/.test(v) || /[^A-Za-z0-9]/.test(v)) score++;
+
+  const colors = ['#ef4444','#f59e0b','#3b82f6','#00dc82'];
+  const labels = ['Too short','Weak','Good','Strong'];
+  bars.forEach((b,i)=>{
+    b.style.background = i < score ? colors[score-1] : 'rgba(255,255,255,.08)';
+  });
+  pwLabel.textContent = v.length > 0 ? labels[Math.max(score-1,0)] : '';
+  pwLabel.style.color = v.length > 0 ? colors[Math.max(score-1,0)] : 'transparent';
+});
+
+/* ── PASSWORD MATCH ───────────────────────────── */
+const pw2  = document.getElementById('password2');
+const hint = document.getElementById('pw2Hint');
+pw2.addEventListener('input', function(){
+  if(!this.value) { hint.textContent=''; return; }
+  if(this.value === pwInput.value){
+    hint.textContent='✓ Passwords match';
+    hint.style.color='#00dc82';
+    this.classList.remove('error');
+  } else {
+    hint.textContent='✗ Passwords do not match';
+    hint.style.color='#ef4444';
+    this.classList.add('error');
+  }
+});
+
+/* ── FORM SUBMIT ──────────────────────────────── */
+document.getElementById('regForm').addEventListener('submit', function(e){
+  const btn = document.getElementById('submitBtn');
+  if(pw2.value && pw2.value !== pwInput.value){
+    e.preventDefault();
+    hint.textContent='✗ Passwords do not match';
+    hint.style.color='#ef4444';
+    pw2.classList.add('error');
+    pw2.focus();
+    return;
+  }
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Creating account...';
+});
 </script>
 </body>
 </html>
