@@ -188,6 +188,15 @@
     <a href="{% url 'portal_logout' %}" class="sb-link" style="color:rgba(255,59,92,0.5)" onclick="return confirm('Sign out?')"><i class="fas fa-power-off"></i> Sign Out</a>
   </nav>
   <div class="sb-foot">
+    <!-- SWITCH TO BOT PORTAL -->
+    <a href="/chatbot/dashboard/" style="display:flex;align-items:center;gap:10px;padding:9px 12px;margin:0 0 8px;border-radius:11px;background:rgba(37,211,102,.05);border:1px solid rgba(37,211,102,.15);text-decoration:none;transition:all .2s" onmouseenter="this.style.borderColor='rgba(37,211,102,.35)'" onmouseleave="this.style.borderColor='rgba(37,211,102,.15)'">
+      <div style="width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,rgba(37,211,102,.15),rgba(0,212,255,.15));display:flex;align-items:center;justify-content:center;flex-shrink:0">🤖</div>
+      <div style="min-width:0">
+        <div style="font-size:12px;font-weight:700;color:#25d366;line-height:1.2">JamiiBot</div>
+        <div style="font-size:9px;color:rgba(255,255,255,.3);font-family:monospace">WhatsApp AI Bot</div>
+      </div>
+      <i class="fas fa-arrow-right" style="font-size:11px;color:rgba(255,255,255,.2);margin-left:auto"></i>
+    </a>
     <div class="sb-user">
       <div class="sb-av">{{ client.name|first|upper }}</div>
       <div style="min-width:0">

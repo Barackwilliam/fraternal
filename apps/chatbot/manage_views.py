@@ -52,48 +52,56 @@ def manage_context(request):
 @staff_required
 def manage_chatbot_overview(request):
     """Main JamiiBot management dashboard."""
-    all_bots    = BotConfig.objects.select_related('client').order_by('-created_at')
+    from datetime import date, timedelta
+    from django.db.models import Count
+
+    all_bots    = BotConfig.objects.select_related('client').prefetch_related('conversations', 'subscription__plan').order_by('-created_at')
     all_clients = ChatbotClient.objects.count()
-    active_bots = all_bots.filter(status='active').count()
-    pending_bots = all_bots.filter(status='pending').count()
+    active_bots    = all_bots.filter(status='active').count()
+    pending_bots   = all_bots.filter(status='pending').count()
     suspended_bots = all_bots.filter(status='suspended').count()
+    draft_bots     = all_bots.filter(status='draft').count()
 
     total_msgs  = Message.objects.count()
     total_convs = Conversation.objects.count()
     today_msgs  = Message.objects.filter(created_at__date=date.today()).count()
 
-    # Revenue
     total_revenue = SubscriptionPayment.objects.filter(
         status='verified'
     ).aggregate(t=Sum('amount'))['t'] or 0
 
     pending_payments = SubscriptionPayment.objects.filter(status='pending').count()
-    pending_amount   = SubscriptionPayment.objects.filter(
-        status='pending'
-    ).aggregate(t=Sum('amount'))['t'] or 0
 
-    # Recent signups
     recent_clients = ChatbotClient.objects.select_related('user').order_by('-created_at')[:8]
 
-    # Bots needing WhatsApp setup (pending)
     bots_needing_setup = all_bots.filter(
         status='pending'
     ).select_related('client')
 
+    # Chart data — last 30 days
+    chart_data = []
+    for i in range(29, -1, -1):
+        day = date.today() - timedelta(days=i)
+        count = Message.objects.filter(created_at__date=day).count()
+        chart_data.append({'date': day.strftime('%d %b'), 'count': count})
+
+    import json
     context = {
-        'all_bots': all_bots[:20],
+        'all_bots': all_bots,
         'all_clients': all_clients,
         'active_bots': active_bots,
         'pending_bots': pending_bots,
         'suspended_bots': suspended_bots,
+        'draft_bots': draft_bots,
+        'clients': all_clients,
         'total_msgs': total_msgs,
         'total_convs': total_convs,
         'today_msgs': today_msgs,
         'total_revenue': total_revenue,
-        'pending_payments': pending_payments,
-        'pending_amount': pending_amount,
+        'pending_bot_payments': pending_payments,
         'recent_clients': recent_clients,
         'bots_needing_setup': bots_needing_setup,
+        'chart_data': json.dumps(chart_data),
     }
     return render(request, 'management/chatbot_overview.html', context)
 
@@ -124,6 +132,8 @@ def manage_bot_detail(request, bot_id):
         'total_users': total_users,
         'today_msgs': today_msgs,
         'global_token_set': bool(getattr(settings, 'WHATSAPP_MASTER_TOKEN', '')),
+        'services': bot.services.all(),
+        'faqs': bot.faqs.all(),
     }
     return render(request, 'management/chatbot_bot_detail.html', context)
 
@@ -179,13 +189,77 @@ def manage_bot_action(request, bot_id):
     elif action == 'admin_note':
         bot.admin_notes = request.POST.get('note', '')
         bot.save(update_fields=['admin_notes'])
-        messages.success(request, "Maelezo ya admin yamehifadhiwa.")
+        messages.success(request, "Admin notes saved.")
 
     elif action == 'reset_webhook':
         import secrets
         bot.webhook_verify_token = secrets.token_hex(16)
         bot.save(update_fields=['webhook_verify_token'])
-        messages.success(request, "Webhook token imebadilishwa.")
+        messages.success(request, "Webhook token has been reset.")
+
+    elif action == 'save_config':
+        bot.bot_name      = request.POST.get('bot_name', bot.bot_name).strip()
+        bot.description   = request.POST.get('description', bot.description).strip()
+        bot.language      = request.POST.get('language', bot.language)
+        bot.tone          = request.POST.get('tone', bot.tone)
+        bot.ai_temperature = float(request.POST.get('ai_temperature', bot.ai_temperature))
+        bot.business_name = request.POST.get('business_name', bot.business_name).strip()
+        bot.save(update_fields=['bot_name', 'description', 'language', 'tone', 'ai_temperature', 'business_name'])
+        messages.success(request, f"✅ Bot configuration saved.")
+
+    elif action == 'save_messages':
+        bot.greeting_msg     = request.POST.get('greeting_msg', bot.greeting_msg).strip()
+        bot.fallback_msg     = request.POST.get('fallback_msg', bot.fallback_msg).strip()
+        bot.human_handoff_msg = request.POST.get('human_handoff_msg', bot.human_handoff_msg).strip()
+        bot.collect_name     = 'collect_name' in request.POST
+        bot.collect_phone    = 'collect_phone' in request.POST
+        bot.save(update_fields=['greeting_msg', 'fallback_msg', 'human_handoff_msg', 'collect_name', 'collect_phone'])
+        messages.success(request, "✅ Bot messages saved.")
+
+    elif action == 'add_service':
+        from .models import BotService
+        name  = request.POST.get('service_name', '').strip()
+        desc  = request.POST.get('service_desc', '').strip()
+        price = request.POST.get('service_price', '').strip()
+        if name and desc:
+            BotService.objects.create(bot=bot, name=name, description=desc, price=price)
+            messages.success(request, f"✅ Service '{name}' added.")
+        else:
+            messages.error(request, "Service name and description are required.")
+
+    elif action == 'delete_service':
+        from .models import BotService
+        svc_id = request.POST.get('service_id')
+        BotService.objects.filter(id=svc_id, bot=bot).delete()
+        messages.success(request, "Service deleted.")
+
+    elif action == 'add_faq':
+        from .models import BotFAQ
+        question = request.POST.get('faq_question', '').strip()
+        answer   = request.POST.get('faq_answer', '').strip()
+        if question and answer:
+            BotFAQ.objects.create(bot=bot, question=question, answer=answer)
+            messages.success(request, "✅ FAQ added.")
+        else:
+            messages.error(request, "Question and answer are required.")
+
+    elif action == 'delete_faq':
+        from .models import BotFAQ
+        faq_id = request.POST.get('faq_id')
+        BotFAQ.objects.filter(id=faq_id, bot=bot).delete()
+        messages.success(request, "FAQ deleted.")
+
+    elif action == 'extend_subscription':
+        if sub:
+            from datetime import timedelta
+            days = int(request.POST.get('days', 30))
+            from django.utils import timezone
+            import datetime
+            base = sub.end_date if sub.end_date and sub.end_date >= datetime.date.today() else datetime.date.today()
+            sub.end_date = base + timedelta(days=days)
+            sub.status   = 'active'
+            sub.save()
+            messages.success(request, f"✅ Subscription extended by {days} days.")
 
     return redirect('manage_bot_detail', bot_id=bot_id)
 
@@ -317,8 +391,13 @@ def manage_bulk_payment_action(request):
 @staff_required
 def manage_bot_clients(request):
     """All registered JamiiBot clients."""
+    from datetime import date
     search = request.GET.get('q', '').strip()
-    clients = ChatbotClient.objects.select_related('user').order_by('-created_at')
+    filter_status = request.GET.get('status', '').strip()
+
+    clients = ChatbotClient.objects.select_related('user').prefetch_related(
+        'bots', 'bots__subscription__plan'
+    ).order_by('-created_at')
 
     if search:
         clients = clients.filter(
@@ -328,10 +407,21 @@ def manage_bot_clients(request):
             Q(phone__icontains=search)
         )
 
+    today = date.today()
+    total_clients   = ChatbotClient.objects.count()
+    active_bots     = ChatbotClient.objects.filter(bots__status='active').distinct().count()
+    this_month      = ChatbotClient.objects.filter(
+        created_at__month=today.month, created_at__year=today.year
+    ).count()
+    no_bot          = ChatbotClient.objects.filter(bots__isnull=True).count()
+
     context = {
-        'clients': clients,
-        'search': search,
-        'total_clients': ChatbotClient.objects.count(),
+        'clients':       clients,
+        'search':        search,
+        'total_clients': total_clients,
+        'active_bots':   active_bots,
+        'this_month':    this_month,
+        'no_bot':        no_bot,
     }
     return render(request, 'management/chatbot_clients.html', context)
 

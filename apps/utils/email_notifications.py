@@ -26,14 +26,15 @@ from django.utils.html import strip_tags
 logger = logging.getLogger(__name__)
 
 # ── Config ────────────────────────────────────────────────────────────────────
-FROM_EMAIL   = getattr(settings, 'DEFAULT_FROM_EMAIL', 'JamiiTek <noreply@jamiitek.co.tz>')
-PORTAL_URL   = getattr(settings, 'PORTAL_BASE_URL', 'https://jamiitek.co.tz/portal/')
+FROM_EMAIL   = getattr(settings, 'DEFAULT_FROM_EMAIL', 'JamiiTek <noreply@jamiitek.com>')
+PORTAL_URL   = getattr(settings, 'PORTAL_BASE_URL', 'https://jamiitek.com/portal/')
 
 
 def _send(subject: str, template: str, context: dict, to_email: str) -> bool:
     """
     Core send helper. Renders HTML template, generates plain-text fallback,
     sends via Django's email backend. Returns True on success, False on failure.
+    NEVER raises — all exceptions are caught and logged.
     """
     if not to_email:
         logger.warning(f"[Email] No recipient for: {subject}")
@@ -53,7 +54,7 @@ def _send(subject: str, template: str, context: dict, to_email: str) -> bool:
             to=[to_email],
         )
         msg.attach_alternative(html_body, 'text/html')
-        msg.send(fail_silently=False)
+        msg.send(fail_silently=True)
 
         logger.info(f"[Email ✅] '{subject}' → {to_email}")
         return True

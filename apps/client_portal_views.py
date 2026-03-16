@@ -2,6 +2,7 @@
 # JamiiTek Client Portal — Website owners can log in and manage their account
 
 import secrets
+import logging
 from decimal import Decimal
 from datetime import date, timedelta
 
@@ -9,10 +10,13 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib import messages
+from django.db import transaction
 from django.db.models import Sum
 from django.views.decorators.http import require_POST
 from django.utils import timezone
 from django.conf import settings
+
+logger = logging.getLogger(__name__)
 
 from apps.utils.email_notifications import send_welcome_email
 from django.core.mail import send_mail
@@ -27,7 +31,7 @@ from .models import (
 # ── HELPER ─────────────────────────────────────────────────────────
 
 def client_required(view_func):
-    """Require login as a client (non-staff user with Client profile)."""
+    """Require login as a client. Accepts both portal clients AND chatbot-only users."""
     def wrapper(request, *args, **kwargs):
         if not request.user.is_authenticated:
             return redirect(f'/portal/login/?next={request.path}')
@@ -36,8 +40,23 @@ def client_required(view_func):
         try:
             request.client_profile = Client.objects.get(user=request.user)
         except Client.DoesNotExist:
-            messages.error(request, 'Your account is not linked to a client profile. Please contact JamiiTek.')
-            return redirect('/portal/login/')
+            # Allow chatbot users to access portal — create a minimal Client profile
+            from apps.chatbot.models import ChatbotClient
+            try:
+                bot_client = ChatbotClient.objects.get(user=request.user)
+                # Auto-create a Client profile linked to this user
+                client, _ = Client.objects.get_or_create(
+                    user=request.user,
+                    defaults={
+                        'name':  bot_client.full_name,
+                        'email': bot_client.email,
+                        'phone': bot_client.phone or '',
+                    }
+                )
+                request.client_profile = client
+            except ChatbotClient.DoesNotExist:
+                messages.error(request, 'Account not linked to a client profile. Please contact JamiiTek.')
+                return redirect('/portal/login/')
         return view_func(request, *args, **kwargs)
     wrapper.__name__ = view_func.__name__
     return wrapper
@@ -75,44 +94,68 @@ def portal_register(request):
             for e in errors:
                 messages.error(request, e)
         else:
-            user = User.objects.create_user(
-                username=username, email=email, password=password,
-                first_name=full_name.split()[0],
-                last_name=' '.join(full_name.split()[1:]) if len(full_name.split()) > 1 else '',
-            )
-            client = Client.objects.create(
-                user=user, name=full_name,
-                email=email, phone=phone,
-                company=website_name,
-            )
-            # Send branded welcome email
-            send_welcome_email(client)
-            # Store website URL as a pending managed website note
-            if website_url:
-                from .models import ClientNotification
-                ClientNotification.objects.create(
-                    website=None, client=client,
-                    notification_type='general',
-                    subject=f'New Registration — Website URL: {website_url}',
-                    # ✅ Use \n instead
-message=f'Client {full_name} registered and provided website URL: {website_url}\nPhone: {phone}\nPlease add their website in the management panel.',
-                    email_sent=False,
-                )
-            # Notify JamiiTek staff
             try:
-                send_mail(
-                    subject=f'New Portal Registration — {full_name}',
-                    message=f'New client registered on JamiiTek portal.\n\nName: {full_name}\nEmail: {email}\nPhone: {phone}\nWebsite interest: {website_name}\nUsername: {username}\n\nLog in to the management panel to review.',
-                    from_email=getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@jamiitek.com'),
-                    recipient_list=[getattr(settings, 'ADMIN_EMAIL', 'info@jamiitek.com')],
-                    fail_silently=True,
-                )
-            except Exception:
-                pass
+                with transaction.atomic():
+                    user = User.objects.create_user(
+                        username=username, email=email, password=password,
+                        first_name=full_name.split()[0],
+                        last_name=' '.join(full_name.split()[1:]) if len(full_name.split()) > 1 else '',
+                    )
+                    client = Client.objects.create(
+                        user=user, name=full_name,
+                        email=email, phone=phone,
+                        company=website_name,
+                    )
 
-            login(request, user)
-            messages.success(request, f'Welcome, {full_name}! Your account has been created.')
-            return redirect('portal_dashboard')
+                # Welcome email — never crash registration
+                try:
+                    send_welcome_email(client)
+                except Exception as e:
+                    logger.warning(f"Welcome email failed (non-fatal): {e}")
+
+                # Store website URL note
+                if website_url:
+                    try:
+                        from .models import ClientNotification
+                        ClientNotification.objects.create(
+                            website=None, client=client,
+                            notification_type='general',
+                            subject=f'New Registration — Website URL: {website_url}',
+                            message=(
+                                f'Client {full_name} registered.\n'
+                                f'Website URL: {website_url}\n'
+                                f'Phone: {phone}\n'
+                                f'Please add their website in the management panel.'
+                            ),
+                            email_sent=False,
+                        )
+                    except Exception as e:
+                        logger.warning(f"Notification creation failed (non-fatal): {e}")
+
+                # Notify staff
+                try:
+                    send_mail(
+                        subject=f'New Portal Registration — {full_name}',
+                        message=(
+                            f'New client registered on JamiiTek portal.\n\n'
+                            f'Name: {full_name}\nEmail: {email}\nPhone: {phone}\n'
+                            f'Website interest: {website_name}\nUsername: {username}\n\n'
+                            f'Log in to the management panel to review.'
+                        ),
+                        from_email=getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@jamiitek.com'),
+                        recipient_list=[getattr(settings, 'ADMIN_EMAIL', 'info@jamiitek.com')],
+                        fail_silently=True,
+                    )
+                except Exception as e:
+                    logger.warning(f"Staff notification email failed (non-fatal): {e}")
+
+                login(request, user)
+                messages.success(request, f'Welcome, {full_name}! Your account has been created.')
+                return redirect('portal_dashboard')
+
+            except Exception as e:
+                logger.exception(f"Portal registration failed: {e}")
+                messages.error(request, 'Registration failed due to a technical error. Please try again or contact support.')
 
     return render(request, 'portal/register.html', {'title': 'Create Account'})
 
@@ -223,6 +266,17 @@ def portal_dashboard(request):
         'domains_ok': domains.filter(status='active').count(),
     }
 
+    # Check if client has a JamiiBot account (same Django user)
+    bot_client = None
+    bot_config = None
+    try:
+        from apps.chatbot.models import ChatbotClient as BotClient, BotConfig
+        bot_client = BotClient.objects.filter(user=request.user).first()
+        if bot_client:
+            bot_config = BotConfig.objects.filter(client=bot_client).first()
+    except Exception:
+        pass
+
     return render(request, 'portal/dashboard.html', {
         'title':         'My Dashboard',
         'client':        client,
@@ -237,6 +291,8 @@ def portal_dashboard(request):
         'chart_values':  _json.dumps(chart_values),
         'expiry_data':   _json.dumps(expiry_data),
         'health':        health,
+        'bot_client':    bot_client,
+        'bot_config':    bot_config,
     })
 
 

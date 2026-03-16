@@ -1,40 +1,59 @@
 {% extends 'chatbot/portal/base.html' %}
-{% block title %}Conversations{% endblock %}
+{% block title %}Conversations — {{ bot.bot_name }}{% endblock %}
 {% block page_title %}Conversations{% endblock %}
-{% block breadcrumb %}{{ bot.bot_name }} / Conversations{% endblock %}
+{% block breadcrumb %}{{ bot.bot_name }} / Chats{% endblock %}
 {% block content %}
 <style>
-.conv-item{display:flex;align-items:center;gap:13px;padding:14px 18px;border-bottom:1px solid var(--border);transition:background .1s;text-decoration:none;color:inherit;cursor:pointer}
-.conv-item:hover{background:rgba(255,255,255,.03)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.f0{animation:fadeUp .3s ease both}.f1{animation:fadeUp .3s .06s ease both}
+
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px}
+.sc{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;position:relative;overflow:hidden;transition:all .2s}
+.sc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--ac,var(--green))}
+.sc:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(0,0,0,.3)}
+.sc-ico{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;margin-bottom:10px}
+.sc-val{font-family:var(--head);font-size:26px;font-weight:900;color:var(--text);line-height:1;margin-bottom:3px}
+.sc-lbl{font-family:var(--mono);font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px}
+
+/* FILTER */
+.filter-wrap{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:12px 18px;border-bottom:1px solid var(--border)}
+.f-pill{padding:6px 14px;border-radius:100px;border:1.5px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);font-size:12px;font-weight:600;color:var(--text2);cursor:pointer;transition:all .15s;font-family:var(--mono)}
+.f-pill.active{background:rgba(124,58,237,.2);border-color:rgba(124,58,237,.4);color:#c4b5fd}
+.f-pill:hover:not(.active){border-color:rgba(255,255,255,.15);color:var(--text)}
+.s-wrap{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.08);border-radius:9px;padding:7px 13px;flex:1;max-width:280px}
+.s-wrap:focus-within{border-color:rgba(124,58,237,.3)}
+.s-wrap input{border:none;outline:none;font-size:13px;color:var(--text);background:transparent;flex:1}
+.s-wrap input::placeholder{color:var(--text3)}
+
+/* CONV ITEM */
+.conv-item{display:flex;align-items:center;gap:14px;padding:14px 20px;border-bottom:1px solid rgba(255,255,255,.04);transition:background .12s;text-decoration:none;color:inherit;position:relative}
+.conv-item::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;opacity:0;transition:opacity .2s;background:linear-gradient(180deg,var(--purple),var(--cyan))}
+.conv-item:hover{background:rgba(255,255,255,.025)}
+.conv-item:hover::before{opacity:1}
 .conv-item:last-child{border-bottom:none}
-.conv-av{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--cyan));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;color:#fff;flex-shrink:0}
-.conv-name{font-weight:700;color:var(--text);font-size:13.5px}
-.conv-phone{font-family:var(--mono);font-size:11px;color:var(--text-3);margin-top:2px}
-.conv-last{font-size:12px;color:var(--text-2);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:300px}
-.conv-time{font-family:var(--mono);font-size:10px;color:var(--text-3);white-space:nowrap}
-.conv-count{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--purple);background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.2);padding:2px 8px;border-radius:6px}
-.filter-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:12px 18px;border-bottom:1px solid var(--border)}
-.f-pill{padding:5px 13px;border-radius:100px;border:1.5px solid var(--border);background:transparent;font-size:12px;font-weight:600;color:var(--text-2);cursor:pointer;transition:all .15s;font-family:var(--mono)}
-.f-pill.active,.f-pill:hover{background:var(--purple);border-color:var(--purple);color:#fff}
-.s-box{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.05);border:1.5px solid var(--border);border-radius:9px;padding:6px 12px;flex:1;max-width:280px}
-.s-box input{border:none;outline:none;font-size:13px;color:var(--text);flex:1;background:transparent}
+.conv-av{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--cyan));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;color:#fff;flex-shrink:0;box-shadow:0 4px 12px rgba(124,58,237,.2)}
+.conv-name{font-weight:700;color:var(--text);font-size:13.5px;line-height:1.2}
+.conv-phone{font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:2px}
+.conv-preview{font-size:12px;color:var(--text2);margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:340px}
+.conv-time{font-family:var(--mono);font-size:10px;color:var(--text3);white-space:nowrap}
+.msg-count{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--purple);background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.2);padding:3px 8px;border-radius:6px}
 </style>
 
-<div class="row g-3 mb-4">
-  <div class="col-3"><div class="jt-stat"><div class="jt-stat-ico" style="background:rgba(124,58,237,.1);color:var(--purple)"><i class="fas fa-comments"></i></div><div class="jt-stat-val">{{ total_convs }}</div><div class="jt-stat-label">Total Conversations</div></div></div>
-  <div class="col-3"><div class="jt-stat"><div class="jt-stat-ico" style="background:rgba(0,220,130,.1);color:var(--green)"><i class="fas fa-comment-dots"></i></div><div class="jt-stat-val">{{ total_msgs }}</div><div class="jt-stat-label">Messages</div></div></div>
-  <div class="col-3"><div class="jt-stat"><div class="jt-stat-ico" style="background:rgba(0,212,255,.1);color:var(--cyan)"><i class="fas fa-users"></i></div><div class="jt-stat-val">{{ unique_customers }}</div><div class="jt-stat-label">Unique Customers</div></div></div>
-  <div class="col-3"><div class="jt-stat"><div class="jt-stat-ico" style="background:rgba(245,158,11,.1);color:var(--yellow)"><i class="fas fa-clock"></i></div><div class="jt-stat-val">{{ today_convs }}</div><div class="jt-stat-label">Today</div></div></div>
+<!-- STATS -->
+<div class="stats-row f0">
+  <div class="sc" style="--ac:var(--purple)"><div class="sc-ico" style="background:var(--purple-d);color:var(--purple)"><i class="fas fa-comments"></i></div><div class="sc-val">{{ total_convs }}</div><div class="sc-lbl">Total</div></div>
+  <div class="sc" style="--ac:var(--green)"><div class="sc-ico" style="background:var(--green-d);color:var(--green)"><i class="fas fa-comment-dots"></i></div><div class="sc-val">{{ total_msgs }}</div><div class="sc-lbl">Messages</div></div>
+  <div class="sc" style="--ac:var(--cyan)"><div class="sc-ico" style="background:var(--cyan-d);color:var(--cyan)"><i class="fas fa-users"></i></div><div class="sc-val">{{ unique_customers }}</div><div class="sc-lbl">Customers</div></div>
+  <div class="sc" style="--ac:var(--yellow)"><div class="sc-ico" style="background:var(--yellow-d);color:var(--yellow)"><i class="fas fa-clock"></i></div><div class="sc-val">{{ today_convs }}</div><div class="sc-lbl">Today</div></div>
 </div>
 
-<div class="jt-card" style="padding:0">
-  <div class="jt-card-head">
-    <span class="jt-card-title"><i class="fas fa-comments" style="color:var(--purple)"></i> All Conversations</span>
-  </div>
-  <div class="filter-bar">
+<!-- LIST -->
+<div class="jt-card f1" style="padding:0">
+  <div class="jt-card-head"><span class="jt-card-title"><i class="fas fa-comments" style="color:var(--purple)"></i> All Conversations</span></div>
+  <div class="filter-wrap">
     <button class="f-pill active" onclick="filterConv('all',this)">All</button>
     <button class="f-pill" onclick="filterConv('handoff',this)">🤝 Handoff</button>
-    <div class="s-box"><i class="fas fa-search" style="color:var(--text-3);font-size:12px"></i><input type="text" placeholder="Search name, phone..." oninput="searchConv(this.value)"></div>
+    <div class="s-wrap"><i class="fas fa-search" style="color:var(--text3);font-size:12px"></i><input type="text" placeholder="Search name or phone..." oninput="searchConv(this.value)"></div>
   </div>
   <div id="convList">
     {% for conv in conversations %}
@@ -42,24 +61,20 @@
       <div class="conv-av">{{ conv.customer_name|first|upper|default:"?" }}</div>
       <div style="flex:1;min-width:0">
         <div class="conv-name">{{ conv.customer_name|default:conv.customer_phone }}</div>
-        <div class="conv-phone"><i class="fab fa-whatsapp" style="color:var(--green)"></i> {{ conv.customer_phone }}</div>
-        {% if conv.last_message %}<div class="conv-last">{{ conv.last_message }}</div>{% endif %}
+        <div class="conv-phone"><i class="fab fa-whatsapp" style="color:#25d366"></i> {{ conv.customer_phone }}</div>
+        {% if conv.last_message %}<div class="conv-preview">{{ conv.last_message }}</div>{% endif %}
       </div>
       <div style="text-align:right;flex-shrink:0">
         <div class="conv-time">{{ conv.last_message_at|date:"d M H:i"|default:"—" }}</div>
-        <div class="conv-count" style="margin-top:5px">{{ conv.message_count }} msgs</div>
-        {% if conv.is_human_handoff %}<div style="margin-top:4px"><span class="badge b-trial" style="font-size:9px">HANDOFF</span></div>{% endif %}
+        <div class="msg-count" style="margin-top:5px">{{ conv.message_count }} msgs</div>
+        {% if conv.is_human_handoff %}<div style="margin-top:4px"><span class="jt-badge b-trial" style="font-size:9px">HANDOFF</span></div>{% endif %}
       </div>
     </a>
     {% empty %}
-    <div style="text-align:center;padding:48px 16px">
-      <div style="font-size:36px;opacity:.25;margin-bottom:12px">💬</div>
-      <div style="font-family:var(--mono);font-size:12px;color:var(--text-3)">No conversations yet.<br>Customers will appear here once they message your bot.</div>
-    </div>
+    <div class="jt-empty"><div class="ei">💬</div><p>No conversations yet.<br>Customers appear here once they message your bot.</p></div>
     {% endfor %}
   </div>
 </div>
-
 <script>
 function filterConv(f,btn){document.querySelectorAll('.f-pill').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.querySelectorAll('.conv-item').forEach(r=>{r.style.display=(f==='all'||(f==='handoff'&&r.dataset.handoff==='True'))?'flex':'none'})}
 function searchConv(q){const lq=q.toLowerCase();document.querySelectorAll('.conv-item').forEach(r=>{r.style.display=r.dataset.search.includes(lq)?'flex':'none'})}

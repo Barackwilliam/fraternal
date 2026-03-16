@@ -1,77 +1,380 @@
 {% extends 'management/base.html' %}
 {% block title %}Bot Clients{% endblock %}
 {% block page_title %}Bot Clients{% endblock %}
-{% block breadcrumb %}Manage / ChatBot / Clients{% endblock %}
-{% block content %}
+{% block breadcrumb %}Manage / JamiiBot / Clients{% endblock %}
+{% block extra_css %}
 <style>
-@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+/* ══ DARK THEME ══════════════════════════════════════════ */
+.jt-main{background:#080c18 !important}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 7px currentColor}50%{opacity:.3;box-shadow:none}}
 .f0{animation:fadeUp .3s ease both}.f1{animation:fadeUp .3s .06s ease both}
-.client-row{display:flex;align-items:center;gap:14px;padding:15px 20px;border-bottom:1px solid var(--border2);transition:background .1s}
-.client-row:hover{background:#fafbff}
-.client-row:last-child{border-bottom:none}
-.c-av{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#4f46e5,#7c3aed);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;color:#fff;flex-shrink:0}
-.c-biz{font-weight:800;color:var(--text);font-size:14px}
-.c-name{font-family:var(--mono);font-size:11px;color:var(--text3);margin-top:2px}
-.c-email{font-size:12px;color:var(--slate);margin-top:1px}
-.c-phone{font-family:var(--mono);font-size:11px;color:#059669;margin-top:2px}
+.f2{animation:fadeUp .3s .12s ease both}.f3{animation:fadeUp .3s .18s ease both}
+
+/* HERO */
+.page-hero{background:linear-gradient(135deg,rgba(99,102,241,.1),rgba(139,92,246,.06));border:1.5px solid rgba(99,102,241,.18);border-radius:20px;padding:22px 28px;margin-bottom:22px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;position:relative;overflow:hidden}
+.page-hero::before{content:'';position:absolute;top:-50px;right:-50px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(99,102,241,.1),transparent 70%);pointer-events:none}
+
+/* STAT CARDS */
+.dstats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px}
+.dsc{border-radius:16px;padding:20px 18px;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s}
+.dsc:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(0,0,0,.4)}
+.dsc-bar{position:absolute;top:0;left:0;right:0;height:3px;border-radius:3px 3px 0 0}
+.dsc-glow{position:absolute;bottom:-18px;right:-18px;width:80px;height:80px;border-radius:50%}
+.dsc-ico{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;margin-bottom:12px;position:relative;z-index:1}
+.dsc-val{font-size:32px;font-weight:900;color:#fff;line-height:1;margin-bottom:6px;position:relative;z-index:1}
+.dsc-lbl{font-family:var(--mono);font-size:9px;color:rgba(255,255,255,.38);text-transform:uppercase;letter-spacing:1.5px;position:relative;z-index:1}
+
+/* SEARCH + FILTER */
+.toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:14px 20px;border-bottom:1px solid rgba(255,255,255,.06)}
+.s-box{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.1);border-radius:9px;padding:8px 14px;flex:1;max-width:320px}
+.s-box:focus-within{border-color:rgba(99,102,241,.4);box-shadow:0 0 0 3px rgba(99,102,241,.12)}
+.s-box input{border:none;outline:none;font-size:13px;color:rgba(255,255,255,.85);flex:1;background:transparent}
+.s-box input::placeholder{color:rgba(255,255,255,.22)}
+.f-pill{padding:6px 14px;border-radius:100px;border:1.5px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);font-size:12px;font-weight:600;color:rgba(255,255,255,.4);cursor:pointer;transition:all .15s;font-family:var(--mono)}
+.f-pill.active{background:rgba(99,102,241,.25);border-color:rgba(99,102,241,.45);color:#a5b4fc}
+.f-pill:hover:not(.active){border-color:rgba(255,255,255,.2);color:rgba(255,255,255,.65)}
+
+/* CLIENT CARD — rich row */
+.client-card{display:flex;align-items:center;gap:16px;padding:16px 22px;border-bottom:1px solid rgba(255,255,255,.05);transition:background .12s;position:relative}
+.client-card:hover{background:rgba(255,255,255,.02)}
+.client-card:last-child{border-bottom:none}
+.client-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;opacity:0;transition:opacity .2s;border-radius:0 2px 2px 0}
+.client-card:hover::before{opacity:1}
+.client-card.has-bot::before{background:linear-gradient(180deg,#4f46e5,#7c3aed)}
+.client-card.no-bot::before{background:linear-gradient(180deg,#475569,#64748b)}
+
+/* AVATAR */
+.c-av{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;color:#fff;flex-shrink:0;position:relative}
+.c-av-status{position:absolute;bottom:-3px;right:-3px;width:13px;height:13px;border-radius:50%;border:2px solid #080c18}
+
+/* BADGES */
+.dk-badge{display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:10px;font-weight:700;padding:3px 9px;border-radius:6px;white-space:nowrap}
+.b-active-dk{background:rgba(16,185,129,.15);color:#4ade80;border:1px solid rgba(16,185,129,.25)}
+.b-pending-dk{background:rgba(245,158,11,.15);color:#fcd34d;border:1px solid rgba(245,158,11,.25)}
+.b-suspended-dk{background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.25)}
+.b-nobot-dk{background:rgba(100,116,139,.15);color:#94a3b8;border:1px solid rgba(100,116,139,.2)}
+.b-draft-dk{background:rgba(59,130,246,.15);color:#93c5fd;border:1px solid rgba(59,130,246,.2)}
+
+/* ACTION BUTTONS */
+.cact{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid;transition:all .15s;text-decoration:none;font-family:var(--mono);white-space:nowrap}
+.cact-bot{background:rgba(99,102,241,.1);border-color:rgba(99,102,241,.25);color:#a5b4fc}
+.cact-bot:hover{background:#4f46e5;color:#fff;border-color:#4f46e5}
+.cact-wa{background:rgba(37,211,102,.08);border-color:rgba(37,211,102,.2);color:#4ade80}
+.cact-wa:hover{background:#25d366;color:#000;border-color:#25d366}
+.cact-mail{background:rgba(6,182,212,.08);border-color:rgba(6,182,212,.2);color:#22d3ee}
+.cact-mail:hover{background:#06b6d4;color:#000;border-color:#06b6d4}
+.cact-setup{background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.25);color:#fbbf24}
+.cact-setup:hover{background:#f59e0b;color:#000;border-color:#f59e0b}
+
+/* USAGE BAR */
+.ubar{height:4px;background:rgba(255,255,255,.07);border-radius:100px;overflow:hidden;margin:4px 0;width:100px}
+.ubar-fill{height:100%;border-radius:100px}
+
+/* DARK CARD */
+.dk-card{background:#0f1629;border:1px solid rgba(255,255,255,.07);border-radius:16px;overflow:hidden}
+.dk-card-head{padding:14px 22px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between}
+.dk-card-title{font-family:var(--mono);font-size:11px;font-weight:600;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1.2px;display:flex;align-items:center;gap:8px}
+
+/* EXPAND DETAIL */
+.client-detail{display:none;padding:14px 22px 18px;background:rgba(0,0,0,.2);border-bottom:1px solid rgba(255,255,255,.04)}
+.client-detail.open{display:block}
+.detail-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+.detail-item{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:12px 14px}
+.detail-key{font-family:var(--mono);font-size:9px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px}
+.detail-val{font-size:13px;color:rgba(255,255,255,.8);font-weight:600;word-break:break-word}
+
+/* EMPTY */
+.dk-empty{text-align:center;padding:56px 20px}
+.dk-empty .ei{font-size:44px;opacity:.15;margin-bottom:16px}
+.dk-empty p{color:rgba(255,255,255,.28);font-family:var(--mono);font-size:12px;line-height:1.7}
+
+/* BUTTONS */
+.dk-btn-primary{display:inline-flex;align-items:center;gap:7px;padding:8px 18px;border-radius:9px;background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;border:none;cursor:pointer}
+.dk-btn-primary:hover{opacity:.9;color:#fff;transform:translateY(-1px)}
+.dk-btn-ghost{display:inline-flex;align-items:center;gap:7px;padding:8px 16px;border-radius:9px;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.1);color:rgba(255,255,255,.55);font-size:13px;font-weight:600;text-decoration:none;transition:all .2s;cursor:pointer}
+.dk-btn-ghost:hover{background:rgba(255,255,255,.09);color:rgba(255,255,255,.85)}
+
+@media(max-width:768px){.dstats{grid-template-columns:repeat(2,1fr)}}
 </style>
+{% endblock %}
+{% block content %}
 
-<div class="g3 mb-4 f0">
-  <div class="stat" style="--ac:var(--primary)">
-    <div class="stat-ico" style="background:var(--primary-l);color:var(--primary)"><i class="fas fa-users"></i></div>
-    <div class="stat-val" style="color:var(--primary)">{{ clients.count }}</div>
-    <div class="stat-label">Total Clients</div>
+<!-- HERO -->
+<div class="page-hero f0">
+  <div>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+      <div style="width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#4f46e5,#7c3aed);display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 3px 12px rgba(99,102,241,.35)">👥</div>
+      <div>
+        <div style="font-size:20px;font-weight:800;color:rgba(255,255,255,.92);letter-spacing:-.3px">Bot Clients</div>
+        <div style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1.5px">JamiiBot Subscriber Directory</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:rgba(255,255,255,.4)">All clients who have registered for JamiiBot. Manage bots, contact clients, and track subscriptions.</div>
   </div>
-  <div class="stat" style="--ac:var(--green)">
-    <div class="stat-ico" style="background:var(--green-l);color:#059669"><i class="fas fa-robot"></i></div>
-    <div class="stat-val" style="color:#059669">{{ clients|length }}</div>
-    <div class="stat-label">With Active Bots</div>
-  </div>
-  <div class="stat" style="--ac:var(--yellow)">
-    <div class="stat-ico" style="background:var(--yellow-l);color:#d97706"><i class="fas fa-calendar-plus"></i></div>
-    <div class="stat-val" style="color:#d97706">{{ clients|length }}</div>
-    <div class="stat-label">This Month</div>
+  <div style="display:flex;gap:9px;flex-wrap:wrap">
+    <a href="/chatbot/register/" target="_blank" class="dk-btn-primary"><i class="fas fa-user-plus"></i> Register New Client</a>
+    <a href="/manage/chatbot/" class="dk-btn-ghost"><i class="fas fa-arrow-left"></i> Back to Bots</a>
   </div>
 </div>
 
-<div class="card f1" style="padding:0">
-  <div class="card-head">
-    <span class="card-title"><i class="fas fa-users" style="color:var(--primary)"></i> All JamiiBot Clients ({{ clients.count }})</span>
-    <a href="/chatbot/register/" target="_blank" class="btn btn-primary btn-sm"><i class="fas fa-user-plus"></i> Register New Client</a>
+<!-- STAT CARDS -->
+<div class="dstats f1">
+  <div class="dsc" style="background:linear-gradient(135deg,#12102e,#1a1550);border:1px solid rgba(99,102,241,.2)">
+    <div class="dsc-bar" style="background:linear-gradient(90deg,#6366f1,#8b5cf6)"></div>
+    <div class="dsc-glow" style="background:radial-gradient(circle,rgba(99,102,241,.15),transparent 70%)"></div>
+    <div class="dsc-ico" style="background:rgba(99,102,241,.12);color:#a5b4fc"><i class="fas fa-users"></i></div>
+    <div class="dsc-val">{{ total_clients }}</div>
+    <div class="dsc-lbl">Total Clients</div>
   </div>
-  {% for c in clients %}
-  <div class="client-row">
-    <div class="c-av">{{ c.full_name|first|upper }}</div>
-    <div style="flex:1;min-width:0">
-      <div class="c-biz">{{ c.business_name }}</div>
-      <div class="c-name">{{ c.full_name }}</div>
-      <div class="c-email">{{ c.email }}</div>
-      {% if c.phone %}<div class="c-phone"><i class="fas fa-phone fa-xs"></i> {{ c.phone }}</div>{% endif %}
-    </div>
-    <div style="text-align:center;min-width:60px">
-      <div style="font-family:var(--mono);font-size:10px;color:var(--text3)">JOINED</div>
-      <div style="font-size:12px;font-weight:600;color:var(--text)">{{ c.created_at|date:"d M Y" }}</div>
-    </div>
-    <div style="text-align:center;min-width:80px">
-      {% if c.active_bot %}
-      <span class="badge b-{{ c.active_bot.status }}">{{ c.active_bot.status|capfirst }}</span>
-      <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:4px">{{ c.active_bot.bot_name }}</div>
-      {% else %}
-      <span class="badge b-draft">No Bot</span>
-      {% endif %}
-    </div>
-    <div style="display:flex;gap:6px">
-      {% if c.active_bot %}
-      <a href="/manage/chatbot/bots/{{ c.active_bot.id }}/" class="btn btn-ghost btn-sm btn-icon" title="View Bot"><i class="fas fa-robot"></i></a>
-      {% endif %}
-      <a href="mailto:{{ c.email }}" class="btn btn-ghost btn-sm btn-icon" title="Email"><i class="fas fa-envelope"></i></a>
-      {% if c.phone %}
-      <a href="https://wa.me/{{ c.phone|cut:'+' }}" target="_blank" class="btn btn-ghost btn-sm btn-icon" title="WhatsApp" style="color:#25d366"><i class="fab fa-whatsapp"></i></a>
-      {% endif %}
-    </div>
+  <div class="dsc" style="background:linear-gradient(135deg,#0b1f14,#0d2b1c);border:1px solid rgba(16,185,129,.2)">
+    <div class="dsc-bar" style="background:linear-gradient(90deg,#10b981,#059669)"></div>
+    <div class="dsc-glow" style="background:radial-gradient(circle,rgba(16,185,129,.15),transparent 70%)"></div>
+    <div class="dsc-ico" style="background:rgba(16,185,129,.12);color:#34d399"><i class="fas fa-robot"></i></div>
+    <div class="dsc-val">{{ active_bots }}</div>
+    <div class="dsc-lbl">With Active Bots</div>
   </div>
-  {% empty %}
-  <div class="empty"><div class="eico">👥</div><p>No chatbot clients registered yet.<br><a href="/chatbot/register/" style="color:var(--primary)">Register the first one →</a></p></div>
-  {% endfor %}
+  <div class="dsc" style="background:linear-gradient(135deg,#1f1306,#2b1a08);border:1px solid rgba(245,158,11,.2)">
+    <div class="dsc-bar" style="background:linear-gradient(90deg,#f59e0b,#f97316)"></div>
+    <div class="dsc-glow" style="background:radial-gradient(circle,rgba(245,158,11,.15),transparent 70%)"></div>
+    <div class="dsc-ico" style="background:rgba(245,158,11,.12);color:#fbbf24"><i class="fas fa-calendar-plus"></i></div>
+    <div class="dsc-val">{{ this_month }}</div>
+    <div class="dsc-lbl">This Month</div>
+  </div>
+  <div class="dsc" style="background:linear-gradient(135deg,#1a0a0a,#2a1212);border:1px solid rgba(239,68,68,.18)">
+    <div class="dsc-bar" style="background:linear-gradient(90deg,#ef4444,#f97316)"></div>
+    <div class="dsc-glow" style="background:radial-gradient(circle,rgba(239,68,68,.12),transparent 70%)"></div>
+    <div class="dsc-ico" style="background:rgba(239,68,68,.1);color:#f87171"><i class="fas fa-user-slash"></i></div>
+    <div class="dsc-val">{{ no_bot }}</div>
+    <div class="dsc-lbl">No Bot Yet</div>
+  </div>
 </div>
+
+<!-- CLIENTS TABLE -->
+<div class="dk-card f2">
+  <div class="dk-card-head">
+    <span class="dk-card-title"><i class="fas fa-users" style="color:#818cf8"></i> All Clients ({{ clients.count }})</span>
+    <div style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.3)">Click a row to expand details</div>
+  </div>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar">
+    <form method="get" style="display:contents">
+      <div class="s-box">
+        <i class="fas fa-search" style="color:rgba(255,255,255,.22);font-size:12px"></i>
+        <input type="text" name="q" value="{{ search }}" placeholder="Search name, email, phone, business..." autocomplete="off">
+      </div>
+    </form>
+    <button class="f-pill active" onclick="filterClients('all',this)">All</button>
+    <button class="f-pill" onclick="filterClients('bot',this)">🟢 Has Bot</button>
+    <button class="f-pill" onclick="filterClients('nobot',this)">⚪ No Bot</button>
+    <button class="f-pill" onclick="filterClients('pending',this)">🟡 Pending</button>
+    {% if search %}
+    <a href="/manage/chatbot/clients/" style="font-family:var(--mono);font-size:11px;color:rgba(255,255,255,.35);text-decoration:none;padding:6px 10px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);border-radius:7px;color:#f87171"><i class="fas fa-times"></i> Clear</a>
+    {% endif %}
+  </div>
+
+  <!-- CLIENT LIST -->
+  <div id="clientList">
+    {% for c in clients %}
+    {% with bot=c.active_bot %}
+    <div class="client-card {% if bot %}has-bot{% else %}no-bot{% endif %}" 
+         data-bot="{% if bot %}{{ bot.status }}{% else %}nobot{% endif %}"
+         onclick="toggleDetail('detail-{{ c.id }}')"
+         style="cursor:pointer">
+
+      <!-- AVATAR with status indicator -->
+      <div class="c-av" style="background:linear-gradient(135deg,{% if bot and bot.status == 'active' %}#4f46e5,#7c3aed{% elif bot and bot.status == 'pending' %}#d97706,#f59e0b{% elif bot and bot.status == 'suspended' %}#dc2626,#f97316{% else %}#334155,#475569{% endif %})">
+        {{ c.full_name|first|upper }}
+        <span class="c-av-status" style="background:{% if bot and bot.status == 'active' %}#10b981{% elif bot and bot.status == 'pending' %}#f59e0b{% elif bot and bot.status == 'suspended' %}#ef4444{% else %}#475569{% endif %}"></span>
+      </div>
+
+      <!-- MAIN INFO -->
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span style="font-weight:800;font-size:14px;color:rgba(255,255,255,.9)">{{ c.business_name }}</span>
+          {% if bot %}
+          <span class="dk-badge b-{{ bot.status }}-dk">
+            <span style="width:5px;height:5px;border-radius:50%;background:currentColor{% if bot.status == 'active' %};animation:pulse 2s infinite{% endif %}"></span>
+            {{ bot.status|capfirst }}
+          </span>
+          {% else %}
+          <span class="dk-badge b-nobot-dk">No Bot</span>
+          {% endif %}
+        </div>
+        <div style="font-size:12px;color:rgba(255,255,255,.45);margin-top:3px">{{ c.full_name }}</div>
+        <div style="display:flex;align-items:center;gap:12px;margin-top:4px;flex-wrap:wrap">
+          <span style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.35)"><i class="fas fa-envelope" style="font-size:9px"></i> {{ c.email }}</span>
+          {% if c.phone %}<span style="font-family:var(--mono);font-size:10px;color:#4ade80"><i class="fab fa-whatsapp" style="font-size:9px"></i> {{ c.phone }}</span>{% endif %}
+        </div>
+      </div>
+
+      <!-- BOT INFO -->
+      <div style="min-width:140px;text-align:right">
+        {% if bot %}
+        <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.75)">{{ bot.bot_name }}</div>
+        {% with sub=bot.subscription %}
+        {% if sub %}
+        <div style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.35);margin-top:2px">{{ sub.plan.name }}</div>
+        {% if not sub.plan.is_unlimited %}
+        <div class="ubar" style="margin-left:auto">
+          <div class="ubar-fill" style="width:{{ sub.usage_percent }}%;background:{% if sub.usage_percent >= 90 %}#ef4444{% elif sub.usage_percent >= 70 %}#f59e0b{% else %}#10b981{% endif %}"></div>
+        </div>
+        <div style="font-family:var(--mono);font-size:9px;color:rgba(255,255,255,.25)">{{ sub.usage_percent }}% used</div>
+        {% else %}
+        <div style="font-family:var(--mono);font-size:9px;color:#34d399">∞ Unlimited</div>
+        {% endif %}
+        {% if sub.days_remaining is not None %}
+        <div style="font-family:var(--mono);font-size:9px;color:{% if sub.days_remaining <= 3 %}#f87171{% elif sub.days_remaining <= 7 %}#fbbf24{% else %}rgba(255,255,255,.28){% endif %};margin-top:2px">{{ sub.days_remaining }}d left</div>
+        {% endif %}
+        {% endif %}
+        {% endwith %}
+        {% else %}
+        <div style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.25)">Not registered</div>
+        {% endif %}
+      </div>
+
+      <!-- DATE -->
+      <div style="min-width:80px;text-align:center;flex-shrink:0">
+        <div style="font-family:var(--mono);font-size:9px;color:rgba(255,255,255,.25);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px">Joined</div>
+        <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,.6)">{{ c.created_at|date:"d M" }}</div>
+        <div style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.28)">{{ c.created_at|date:"Y" }}</div>
+      </div>
+
+      <!-- ACTIONS -->
+      <div style="display:flex;gap:6px;flex-shrink:0" onclick="event.stopPropagation()">
+        {% if bot %}
+        <a href="/manage/chatbot/bots/{{ bot.id }}/" class="cact cact-bot" title="Manage Bot"><i class="fas fa-sliders"></i> Manage</a>
+        {% if not bot.whatsapp_phone_id %}
+        <a href="/manage/chatbot/bots/{{ bot.id }}/whatsapp/" class="cact cact-setup" title="Setup WhatsApp"><i class="fab fa-whatsapp"></i> Setup</a>
+        {% endif %}
+        {% else %}
+        <a href="/chatbot/register/" target="_blank" class="cact cact-setup" title="Register Bot"><i class="fas fa-plus"></i> Add Bot</a>
+        {% endif %}
+        <a href="mailto:{{ c.email }}" class="cact cact-mail" title="Email Client"><i class="fas fa-envelope"></i></a>
+        {% if c.phone %}
+        <a href="https://wa.me/{{ c.phone|cut:'+' }}" target="_blank" class="cact cact-wa" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+        {% endif %}
+        <button onclick="toggleDetail('detail-{{ c.id }}')" class="cact" style="background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.1);color:rgba(255,255,255,.4)" title="Expand"><i class="fas fa-chevron-down" id="chevron-{{ c.id }}"></i></button>
+      </div>
+    </div>
+
+    <!-- EXPANDED DETAIL -->
+    <div class="client-detail" id="detail-{{ c.id }}">
+      <div class="detail-grid">
+        <div class="detail-item">
+          <div class="detail-key">Full Name</div>
+          <div class="detail-val">{{ c.full_name }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-key">Business</div>
+          <div class="detail-val">{{ c.business_name }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-key">Email</div>
+          <div class="detail-val" style="font-size:12px">{{ c.email }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-key">Phone</div>
+          <div class="detail-val">{{ c.phone|default:"—" }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-key">Username</div>
+          <div class="detail-val" style="font-family:var(--mono);font-size:12px">{{ c.user.username }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-key">Registered</div>
+          <div class="detail-val">{{ c.created_at|date:"d M Y H:i" }}</div>
+        </div>
+        {% if bot %}
+        <div class="detail-item">
+          <div class="detail-key">Bot Name</div>
+          <div class="detail-val">{{ bot.bot_name }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-key">WhatsApp No.</div>
+          <div class="detail-val" style="color:#4ade80">{{ bot.whatsapp_number|default:"Not set" }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-key">Phone Number ID</div>
+          <div class="detail-val" style="font-family:var(--mono);font-size:11px;color:{% if bot.whatsapp_phone_id %}#a5b4fc{% else %}#f87171{% endif %}">{{ bot.whatsapp_phone_id|default:"❌ Not set" }}</div>
+        </div>
+        {% with sub=bot.subscription %}
+        {% if sub %}
+        <div class="detail-item">
+          <div class="detail-key">Plan / Status</div>
+          <div class="detail-val">{{ sub.plan.name }} · {{ sub.status|capfirst }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-key">Subscription Ends</div>
+          <div class="detail-val" style="color:{% if sub.days_remaining <= 3 %}#f87171{% elif sub.days_remaining <= 7 %}#fbbf24{% else %}rgba(255,255,255,.8){% endif %}">{{ sub.end_date|date:"d M Y"|default:"—" }}</div>
+        </div>
+        {% endif %}
+        {% endwith %}
+        {% endif %}
+      </div>
+      {% if bot %}
+      <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
+        <a href="/manage/chatbot/bots/{{ bot.id }}/" class="cact cact-bot"><i class="fas fa-sliders"></i> Full Bot Panel</a>
+        <a href="/manage/chatbot/bots/{{ bot.id }}/whatsapp/" class="cact cact-wa"><i class="fab fa-whatsapp"></i> WhatsApp Setup</a>
+        <a href="{% url 'chatbot_simulate' bot.id %}" class="cact" style="background:rgba(139,92,246,.1);border-color:rgba(139,92,246,.25);color:#c084fc"><i class="fas fa-flask"></i> Test Bot</a>
+      </div>
+      {% endif %}
+    </div>
+    {% endwith %}
+    {% empty %}
+    <div class="dk-empty">
+      <div class="ei">👥</div>
+      <p>
+        {% if search %}No clients found for "{{ search }}"{% else %}No chatbot clients registered yet.{% endif %}<br>
+        <a href="/chatbot/register/" style="color:#818cf8;text-decoration:none">Register the first one →</a>
+      </p>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<script>
+function toggleDetail(id){
+  const el = document.getElementById(id);
+  const cid = id.replace('detail-', '');
+  const ch = document.getElementById('chevron-' + cid);
+  el.classList.toggle('open');
+  if(ch) ch.style.transform = el.classList.contains('open') ? 'rotate(180deg)' : '';
+}
+
+function filterClients(f, btn){
+  document.querySelectorAll('.f-pill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.client-card').forEach(row => {
+    const bot = row.dataset.bot;
+    let show = true;
+    if(f === 'bot')     show = bot !== 'nobot';
+    if(f === 'nobot')   show = bot === 'nobot';
+    if(f === 'pending') show = bot === 'pending';
+    row.style.display = show ? '' : 'none';
+    // hide associated detail
+    const did = row.nextElementSibling;
+    if(did && did.classList.contains('client-detail')){
+      if(!show) { did.classList.remove('open'); }
+      did.style.display = show ? '' : 'none';
+    }
+  });
+}
+
+// Live search
+document.querySelector('.s-box input').addEventListener('input', function(){
+  const q = this.value.toLowerCase();
+  document.querySelectorAll('.client-card').forEach(row => {
+    const text = row.innerText.toLowerCase();
+    const show = text.includes(q);
+    row.style.display = show ? '' : 'none';
+    const did = row.nextElementSibling;
+    if(did && did.classList.contains('client-detail')){
+      did.style.display = show ? '' : 'none';
+    }
+  });
+});
+</script>
 {% endblock %}

@@ -67,6 +67,25 @@ def management_dashboard(request):
     recent_payments = HostingPayment.objects.select_related(
         'website__client').order_by('-payment_date')[:6]
 
+    # ── Bot stats ──────────────────────────────────────────────────
+    try:
+        from apps.chatbot.models import BotConfig, BotSubscription, SubscriptionPayment, Message, Conversation
+        from django.db.models import Sum as DSum
+        bot_stats = {
+            'total':     BotConfig.objects.count(),
+            'active':    BotConfig.objects.filter(status='active').count(),
+            'pending':   BotConfig.objects.filter(status='pending').count(),
+            'suspended': BotConfig.objects.filter(status='suspended').count(),
+            'revenue':   SubscriptionPayment.objects.filter(status='verified').aggregate(t=DSum('amount'))['t'] or 0,
+            'pending_payments': SubscriptionPayment.objects.filter(status='pending').count(),
+            'total_msgs': Message.objects.count(),
+            'today_msgs': Message.objects.filter(created_at__date=today).count(),
+        }
+        bots_pending_setup = BotConfig.objects.filter(status='pending').select_related('client')[:5]
+    except Exception:
+        bot_stats = {}
+        bots_pending_setup = []
+
     return render(request, 'management/dashboard.html', {
         'title': 'Dashboard',
         'websites': websites.order_by('-created_at')[:10],
@@ -76,6 +95,8 @@ def management_dashboard(request):
         'pending_actions': pending_actions,
         'recent_notifications': recent_notifications,
         'recent_payments': recent_payments,
+        'bot_stats': bot_stats,
+        'bots_pending_setup': bots_pending_setup,
     })
 
 

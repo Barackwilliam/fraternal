@@ -422,4 +422,237 @@ setTimeout(()=>{
   document.getElementById('b4').style.width = '100%';
 },400);
 </script>
+
+<!-- ══ JAMIIBOT PROMO SECTION ══════════════════════════════════ -->
+<style>
+@keyframes botFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes botPulse{0%,100%{box-shadow:0 0 0 0 rgba(37,211,102,.4)}70%{box-shadow:0 0 0 12px rgba(37,211,102,0)}}
+@keyframes msgSlide{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:translateX(0)}}
+@keyframes typingBounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
+@keyframes gradShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+
+.bot-promo-section{
+  background:linear-gradient(135deg,#020d08,#050f1a,#080518);
+  background-size:300% 300%;
+  animation:gradShift 8s ease infinite;
+  border:1.5px solid rgba(37,211,102,.15);
+  border-radius:24px;
+  padding:0;
+  margin-top:28px;
+  overflow:hidden;
+  position:relative;
+}
+.bot-promo-section::before{
+  content:'';position:absolute;top:-80px;left:-80px;width:300px;height:300px;
+  border-radius:50%;background:radial-gradient(circle,rgba(37,211,102,.06),transparent 70%);
+  pointer-events:none
+}
+.bot-promo-section::after{
+  content:'';position:absolute;bottom:-60px;right:-60px;width:240px;height:240px;
+  border-radius:50%;background:radial-gradient(circle,rgba(0,212,255,.05),transparent 70%);
+  pointer-events:none
+}
+.promo-inner{display:grid;grid-template-columns:1fr 380px;gap:0;align-items:stretch;position:relative;z-index:2}
+.promo-left{padding:40px 44px}
+.promo-right{background:rgba(0,0,0,.25);border-left:1px solid rgba(255,255,255,.06);padding:28px;display:flex;flex-direction:column;justify-content:center}
+
+.promo-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.25);border-radius:100px;padding:5px 14px;font-size:11px;font-weight:700;color:#4ade80;letter-spacing:.8px;text-transform:uppercase;margin-bottom:18px}
+.promo-badge .dot{width:7px;height:7px;border-radius:50%;background:#25d366;animation:botPulse 2s infinite;flex-shrink:0}
+.promo-title{font-size:clamp(22px,3vw,36px);font-weight:900;color:#fff;letter-spacing:-1px;line-height:1.1;margin-bottom:12px}
+.promo-title .hl{background:linear-gradient(110deg,#25d366,#00d4ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.promo-sub{font-size:14px;color:rgba(255,255,255,.45);line-height:1.8;margin-bottom:24px;max-width:440px}
+
+.promo-feats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:28px}
+.promo-feat{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:12px}
+.promo-feat-ico{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.promo-feat-title{font-size:12px;font-weight:700;color:rgba(255,255,255,.85);margin-bottom:2px}
+.promo-feat-sub{font-size:11px;color:rgba(255,255,255,.35);line-height:1.4}
+
+.promo-cta-main{display:inline-flex;align-items:center;gap:9px;padding:13px 28px;border-radius:12px;background:linear-gradient(135deg,#25d366,#00b5d8);color:#000;font-weight:900;font-size:14px;text-decoration:none;transition:all .25s;box-shadow:0 6px 24px rgba(37,211,102,.3);margin-right:10px}
+.promo-cta-main:hover{transform:translateY(-2px);box-shadow:0 10px 36px rgba(37,211,102,.5);color:#000}
+.promo-cta-ghost{display:inline-flex;align-items:center;gap:7px;padding:13px 22px;border-radius:12px;background:transparent;border:1.5px solid rgba(255,255,255,.12);color:rgba(255,255,255,.55);font-weight:600;font-size:14px;text-decoration:none;transition:all .25s}
+.promo-cta-ghost:hover{border-color:rgba(37,211,102,.3);color:#4ade80;background:rgba(37,211,102,.05)}
+
+/* CHAT DEMO */
+.chat-demo{background:#0a0f1a;border:1px solid rgba(255,255,255,.08);border-radius:16px;overflow:hidden}
+.chat-demo-head{padding:10px 14px;background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:10px}
+.chat-demo-av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#25d366,#00d4ff);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;animation:botFloat 3s ease-in-out infinite}
+.chat-demo-body{padding:14px;display:flex;flex-direction:column;gap:9px;min-height:220px}
+.chat-msg{max-width:85%;padding:9px 13px;border-radius:14px;font-size:12px;line-height:1.55;opacity:0}
+.chat-msg.bot-msg{align-self:flex-start;background:rgba(255,255,255,.08);color:rgba(255,255,255,.85);border-bottom-left-radius:4px}
+.chat-msg.user-msg{align-self:flex-end;background:#25d366;color:#000;border-bottom-right-radius:4px;font-weight:600}
+.chat-typing{display:flex;gap:4px;padding:9px 13px;background:rgba(255,255,255,.06);border-radius:12px;width:50px;align-self:flex-start;opacity:0}
+.chat-dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.4);animation:typingBounce 1s infinite}
+.chat-dot:nth-child(2){animation-delay:.15s}.chat-dot:nth-child(3){animation-delay:.3s}
+.chat-msg.visible{animation:msgSlide .3s ease both;opacity:1}
+.chat-typing.visible{opacity:1}
+
+.promo-plans{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px}
+.pplan{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:12px 10px;text-align:center;transition:all .2s;cursor:default}
+.pplan:hover{border-color:rgba(37,211,102,.25);background:rgba(37,211,102,.05)}
+.pplan.popular{background:rgba(37,211,102,.07);border-color:rgba(37,211,102,.25);position:relative}
+.pplan.popular::before{content:'HOT';position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:#25d366;color:#000;font-size:8px;font-weight:900;padding:2px 8px;border-radius:100px;letter-spacing:.5px}
+.pplan-name{font-size:11px;font-weight:700;color:rgba(255,255,255,.6);margin-bottom:4px}
+.pplan-price{font-size:18px;font-weight:900;color:#fff;line-height:1}
+.pplan-unit{font-size:9px;color:rgba(255,255,255,.3);letter-spacing:.5px}
+
+@media(max-width:900px){.promo-inner{grid-template-columns:1fr}.promo-right{display:none}.promo-feats{grid-template-columns:1fr}}
+</style>
+
+{% if bot_config %}
+<!-- CLIENT HAS A BOT — show status widget -->
+<div class="bot-promo-section">
+  <div style="padding:28px 32px;position:relative;z-index:2">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px">
+      <div style="display:flex;align-items:center;gap:14px">
+        <div style="width:50px;height:50px;border-radius:14px;background:linear-gradient(135deg,#25d366,#00d4ff);display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 14px rgba(37,211,102,.3);animation:botFloat 3s ease-in-out infinite">🤖</div>
+        <div>
+          <div style="font-size:18px;font-weight:800;color:#fff">{{ bot_config.bot_name }}</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.45);margin-top:2px">{{ bot_config.business_name }} · WhatsApp Bot</div>
+          <div style="margin-top:6px;display:flex;align-items:center;gap:8px">
+            <span style="display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;background:rgba({% if bot_config.status == 'active' %}37,211,102{% elif bot_config.status == 'pending' %}245,158,11{% else %}239,68,68{% endif %},.15);color:{% if bot_config.status == 'active' %}#4ade80{% elif bot_config.status == 'pending' %}#fbbf24{% else %}#f87171{% endif %};border:1px solid rgba({% if bot_config.status == 'active' %}37,211,102{% elif bot_config.status == 'pending' %}245,158,11{% else %}239,68,68{% endif %},.25)">
+              <span style="width:6px;height:6px;border-radius:50%;background:currentColor{% if bot_config.status == 'active' %};animation:botPulse 2s infinite{% endif %}"></span>
+              {{ bot_config.status|capfirst }}
+            </span>
+            {% if bot_config.whatsapp_number %}<span style="font-size:11px;color:#4ade80;font-family:monospace"><i class="fab fa-whatsapp"></i> {{ bot_config.whatsapp_number }}</span>{% endif %}
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:9px;flex-wrap:wrap">
+        <a href="/chatbot/dashboard/" class="promo-cta-main" style="font-size:13px;padding:10px 22px"><i class="fas fa-robot"></i> Bot Dashboard</a>
+        <a href="/chatbot/config/" class="promo-cta-ghost" style="font-size:13px;padding:10px 18px"><i class="fas fa-sliders"></i> Configure</a>
+        <a href="/chatbot/conversations/" class="promo-cta-ghost" style="font-size:13px;padding:10px 18px"><i class="fas fa-comments"></i> Chats</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% else %}
+<!-- CLIENT HAS NO BOT — show powerful promo -->
+<div class="bot-promo-section">
+  <div class="promo-inner">
+
+    <!-- LEFT: Main promo content -->
+    <div class="promo-left">
+      <div class="promo-badge"><span class="dot"></span> New Feature Available</div>
+      <h2 class="promo-title">Your Customers Deserve<br>Answers <span class="hl">24/7.</span></h2>
+      <p class="promo-sub">Add an AI-powered WhatsApp bot to your business today. It handles customer questions, shares your services, and never misses a message — in Swahili and English.</p>
+
+      <div class="promo-feats">
+        <div class="promo-feat">
+          <div class="promo-feat-ico" style="background:rgba(37,211,102,.1);color:#4ade80">🤖</div>
+          <div><div class="promo-feat-title">AI-Powered</div><div class="promo-feat-sub">Smart replies using Gemini AI</div></div>
+        </div>
+        <div class="promo-feat">
+          <div class="promo-feat-ico" style="background:rgba(0,212,255,.1);color:#22d3ee">⚡</div>
+          <div><div class="promo-feat-title">Ready in 10 min</div><div class="promo-feat-sub">No coding, simple setup</div></div>
+        </div>
+        <div class="promo-feat">
+          <div class="promo-feat-ico" style="background:rgba(139,92,246,.1);color:#c084fc">🇹🇿</div>
+          <div><div class="promo-feat-title">Swahili + English</div><div class="promo-feat-sub">Auto-detects customer language</div></div>
+        </div>
+        <div class="promo-feat">
+          <div class="promo-feat-ico" style="background:rgba(245,158,11,.1);color:#fbbf24">📊</div>
+          <div><div class="promo-feat-title">Your Dashboard</div><div class="promo-feat-sub">See every conversation live</div></div>
+        </div>
+      </div>
+
+      <div style="margin-bottom:20px">
+        <div class="promo-plans">
+          <div class="pplan"><div class="pplan-name">Starter</div><div class="pplan-price">15K</div><div class="pplan-unit">TZS/MONTH</div></div>
+          <div class="pplan popular"><div class="pplan-name">Business</div><div class="pplan-price">30K</div><div class="pplan-unit">TZS/MONTH</div></div>
+          <div class="pplan"><div class="pplan-name">Enterprise</div><div class="pplan-price">60K</div><div class="pplan-unit">TZS/MONTH</div></div>
+        </div>
+        <div style="font-size:12px;color:rgba(37,211,102,.6);display:flex;align-items:center;gap:6px;font-family:monospace">
+          <span style="width:5px;height:5px;border-radius:50%;background:#25d366;animation:botPulse 2s infinite"></span>
+          7-day free trial · No payment required to start
+        </div>
+      </div>
+
+      <div>
+        <a href="/chatbot/register/" class="promo-cta-main"><i class="fab fa-whatsapp" style="font-size:16px"></i> Get My Bot — Free Trial</a>
+        <a href="/bot/" class="promo-cta-ghost">Learn More <i class="fas fa-arrow-right" style="font-size:11px"></i></a>
+      </div>
+    </div>
+
+    <!-- RIGHT: Live chat demo -->
+    <div class="promo-right">
+      <div style="font-family:monospace;font-size:9px;color:rgba(255,255,255,.25);text-transform:uppercase;letter-spacing:2px;margin-bottom:12px;text-align:center">Live Demo</div>
+      <div class="chat-demo">
+        <div class="chat-demo-head">
+          <div class="chat-demo-av">🤖</div>
+          <div>
+            <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.85)">{{ client.name|cut:" "|default:"Your" }}Bot</div>
+            <div style="font-size:10px;color:#25d366;font-family:monospace">● Online · replies instantly</div>
+          </div>
+        </div>
+        <div class="chat-demo-body" id="chatDemo">
+          <div class="chat-msg bot-msg" id="dm1">Habari! 👋 I'm your AI assistant. How can I help you today?</div>
+          <div class="chat-msg user-msg" id="dm2">What services do you offer?</div>
+          <div class="chat-typing" id="dmTyping"><div class="chat-dot"></div><div class="chat-dot"></div><div class="chat-dot"></div></div>
+          <div class="chat-msg bot-msg" id="dm3">We offer web hosting, domain registration, and email services. Which one interests you? 😊</div>
+          <div class="chat-msg user-msg" id="dm4">Domain price?</div>
+          <div class="chat-msg bot-msg" id="dm5">.com domains start from TZS 35,000/year. Want me to check availability for your name? 🔍</div>
+        </div>
+      </div>
+      <div style="margin-top:14px;padding:12px 14px;background:rgba(37,211,102,.06);border:1px solid rgba(37,211,102,.15);border-radius:10px">
+        <div style="font-size:12px;font-weight:700;color:#4ade80;margin-bottom:4px">✅ This could be YOUR bot</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.4);line-height:1.55">Customized with your business name, services, and prices. Responds 24/7 — even when you're sleeping.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// Animate chat messages sequentially
+(function(){
+  const seq = [
+    {el:'dm1', delay:600},
+    {el:'dm2', delay:1800},
+    {el:'dmTyping', delay:2400, hide:3400},
+    {el:'dm3', delay:3400},
+    {el:'dm4', delay:5000},
+    {el:'dmTyping', delay:5600, hide:6400, second:true},
+    {el:'dm5', delay:6400},
+  ];
+  let typingShown = false;
+  seq.forEach(s => {
+    if(s.el === 'dmTyping'){
+      if(s.second && typingShown) return;
+      setTimeout(()=>{
+        const el = document.getElementById(s.el);
+        if(el) el.classList.add('visible');
+        typingShown = true;
+      }, s.delay);
+      if(s.hide) setTimeout(()=>{
+        const el = document.getElementById(s.el);
+        if(el) el.classList.remove('visible');
+      }, s.hide);
+    } else {
+      setTimeout(()=>{
+        const el = document.getElementById(s.el);
+        if(el) el.classList.add('visible');
+      }, s.delay);
+    }
+  });
+  // Loop animation every 10 seconds
+  setTimeout(function loop(){
+    document.querySelectorAll('.chat-msg,.chat-typing').forEach(e=>e.classList.remove('visible'));
+    typingShown = false;
+    seq.forEach(s => {
+      if(s.el === 'dmTyping'){
+        setTimeout(()=>{const el=document.getElementById(s.el);if(el)el.classList.add('visible');},s.delay);
+        if(s.hide)setTimeout(()=>{const el=document.getElementById(s.el);if(el)el.classList.remove('visible');},s.hide);
+      } else {
+        setTimeout(()=>{const el=document.getElementById(s.el);if(el)el.classList.add('visible');},s.delay);
+      }
+    });
+    setTimeout(loop, 10000);
+  }, 10000);
+})();
+</script>
+{% endif %}
+<!-- ══ END JAMIIBOT PROMO ══════════════════════════════════════ -->
+
 {% endblock %}

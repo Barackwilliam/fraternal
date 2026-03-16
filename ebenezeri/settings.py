@@ -10,7 +10,7 @@ WEBSITE_TYPES_DIR = BASE_DIR / 'apps' / 'website_types'
 
 # ── Security ──────────────────────────────────────────
 SECRET_KEY    = os.getenv('SECRET_KEY',    'django-insecure-@&r$)$xpb)f6pm=_73pupatv2#n-%0%d=(cky=kab5ww6&*tzs')
-DEBUG         = os.getenv('DEBUG', 'False') == 'True'
+DEBUG = 'True'
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'jamiitek.com,www.jamiitek.com,jamiitek.onrender.com,127.0.0.1,localhost').split(',')
 
 INSTALLED_APPS = [
@@ -66,6 +66,11 @@ DATABASES = {
         'PASSWORD': os.getenv('DB_PASSWORD', 'NyumbaChap'),
         'HOST':     os.getenv('DB_HOST',     'aws-1-eu-north-1.pooler.supabase.com'),
         'PORT':     os.getenv('DB_PORT',     '5432'),
+        'CONN_MAX_AGE': 60,
+        'OPTIONS': {
+            'sslmode': 'require',
+            'connect_timeout': 10,
+        },
     }
 }
 
@@ -124,17 +129,27 @@ UPLOADCARE = {
 }
 
 WEASPRINT_BASEURL = BASE_DIR
-
+ 
 # ── Email ──────────────────────────────────────────────
-EMAIL_BACKEND       = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST          = 'smtp.gmail.com'
-EMAIL_PORT          = 587
-EMAIL_USE_TLS       = True
-EMAIL_HOST_USER     = os.getenv('EMAIL_HOST_USER',     'info@jamiitek.com')
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', 'tbgh swtl zple dhiv')
-DEFAULT_FROM_EMAIL  = f"JamiiTek <{os.getenv('EMAIL_HOST_USER', 'info@jamiitek.com')}>"
-PORTAL_BASE_URL     = os.getenv('PORTAL_BASE_URL',     'https://jamiitek.com/portal/')
-
+_email_user = os.getenv('EMAIL_HOST_USER', 'info@jamiitek.com')
+_email_pass = os.getenv('EMAIL_HOST_PASSWORD', 'tbgh swtl zple dhiv')
+ 
+if _email_user and _email_pass:
+    EMAIL_BACKEND       = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST          = 'smtp.gmail.com'
+    EMAIL_PORT          = 587
+    EMAIL_USE_TLS       = True
+    EMAIL_HOST_USER     = _email_user
+    EMAIL_HOST_PASSWORD = _email_pass
+    DEFAULT_FROM_EMAIL  = f"JamiiTek <{_email_user}>"
+else:
+    # Fallback: log emails to console instead of crashing
+    EMAIL_BACKEND   = 'django.core.mail.backends.console.EmailBackend'
+    EMAIL_HOST_USER = 'info@jamiitek.com'
+    DEFAULT_FROM_EMAIL = 'JamiiTek <info@jamiitek.com>'
+ 
+PORTAL_BASE_URL = os.getenv('PORTAL_BASE_URL', 'https://jamiitek.com/portal/')
+ 
 # ── Cloudinary ─────────────────────────────────────────
 CLOUDINARY_API_KEY    = os.getenv('CLOUDINARY_API_KEY',    '321181265585861')
 CLOUDINARY_API_SECRET = os.getenv('CLOUDINARY_API_SECRET', 'KA2L_qJUCyBBZFcyeQDGzH1kfUo')

@@ -1,307 +1,404 @@
 {% extends 'management/base.html' %}
-{% block title %}Bot: {{ bot.bot_name }}{% endblock %}
-{% block page_title %}Bot Control — {{ bot.bot_name }}{% endblock %}
-{% block breadcrumb %}Manage / ChatBot / {{ bot.bot_name }}{% endblock %}
+{% block title %}{{ bot.bot_name }} — Bot Control{% endblock %}
+{% block page_title %}Bot Control Panel{% endblock %}
+{% block breadcrumb %}Bots / {{ bot.bot_name }}{% endblock %}
 {% block extra_css %}
 <style>
-@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-.f0{animation:fadeUp .3s ease both}.f1{animation:fadeUp .3s .06s ease both}.f2{animation:fadeUp .3s .12s ease both}
-.ctrl-panel{background:linear-gradient(135deg,#fef2f2,#fff1f1);border:1.5px solid #fca5a5;border-radius:14px;padding:18px;margin-bottom:16px}
-.ctrl-panel-active{background:linear-gradient(135deg,#f0fdf4,#ecfdf5);border-color:#a7f3d0}
-.ctrl-panel-warning{background:linear-gradient(135deg,#fffbeb,#fef9c3);border-color:#fde68a}
-.sec-title{font-size:13px;font-weight:800;color:var(--text);display:flex;align-items:center;gap:7px;margin-bottom:14px}
-.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:0}
-.ig-item{padding:10px 0;border-bottom:1px solid var(--border2)}
-.ig-item:nth-child(odd){padding-right:12px}
-.ig-item:nth-child(even){padding-left:12px;border-left:1px solid var(--border2)}
-.ig-key{font-family:var(--mono);font-size:10px;color:var(--text3);text-transform:uppercase;margin-bottom:3px}
-.ig-val{font-size:13px;font-weight:600;color:var(--text)}
-.pay-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border2);transition:background .1s}
-.pay-row:hover{background:#fafbff}
-.pay-row:last-child{border-bottom:none}
-.conv-row{display:flex;align-items:center;gap:11px;padding:12px 16px;border-bottom:1px solid var(--border2);transition:background .1s}
-.conv-row:hover{background:#fafbff}
-.conv-row:last-child{border-bottom:none}
-.ubar{height:8px;background:#f1f5f9;border-radius:100px;overflow:hidden;flex:1}
-.ubar-fill{height:100%;border-radius:100px}
-.wh-url{background:#f8fafc;border:1.5px solid var(--border);border-radius:9px;padding:10px 14px;font-family:var(--mono);font-size:11px;color:#059669;word-break:break-all;display:flex;align-items:center;justify-content:space-between;gap:10px}
-.copy-btn{background:var(--primary-l);border:1px solid #c4b5fd;border-radius:6px;padding:4px 9px;font-family:var(--mono);font-size:10px;color:var(--primary);cursor:pointer;white-space:nowrap;flex-shrink:0;transition:all .15s}
-.copy-btn:hover{background:var(--primary);color:#fff}
-.tab-nav{display:flex;gap:0;border-bottom:1.5px solid var(--border);margin-bottom:18px}
-.tab-btn{padding:9px 16px;font-size:13px;font-weight:600;color:var(--text2);cursor:pointer;border-bottom:2.5px solid transparent;margin-bottom:-1.5px;transition:all .15s;background:none;border-top:none;border-left:none;border-right:none}
+.tab-nav{display:flex;gap:0;border-bottom:2px solid rgba(255,255,255,.08);margin-bottom:24px;overflow-x:auto;scrollbar-width:none}
+.tab-nav::-webkit-scrollbar{display:none}
+.tab-btn{padding:10px 18px;font-size:13px;font-weight:600;color:rgba(255,255,255,.4);cursor:pointer;border-bottom:2.5px solid transparent;margin-bottom:-2px;transition:all .15s;background:none;border-top:none;border-left:none;border-right:none;font-family:var(--body);white-space:nowrap;display:flex;align-items:center;gap:7px}
 .tab-btn.active{color:var(--primary);border-bottom-color:var(--primary)}
-.tab-btn:hover{color:var(--text)}
+.tab-btn:hover:not(.active){color:rgba(255,255,255,.8);border-bottom-color:rgba(255,255,255,.2)}
 .tab-pane{display:none}.tab-pane.active{display:block}
-.msg-bubble{display:flex;gap:9px;margin-bottom:10px}
-.mb-user{justify-content:flex-end}
-.mb-bot{justify-content:flex-start}
-.mb-content{padding:9px 13px;border-radius:12px;max-width:75%;font-size:13px;line-height:1.5}
-.mb-user .mb-content{background:var(--primary);color:#fff;border-bottom-right-radius:3px}
-.mb-bot .mb-content{background:#f1f5f9;color:var(--text);border-bottom-left-radius:3px}
-.mb-time{font-family:var(--mono);font-size:9px;color:var(--text3);margin-top:3px;text-align:right}
+.status-hero{border-radius:16px;padding:22px 26px;margin-bottom:20px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.status-active{background:linear-gradient(135deg,rgba(16,185,129,.08),rgba(6,182,212,.06));border:1.5px solid rgba(16,185,129,.25)}
+.status-pending{background:linear-gradient(135deg,rgba(245,158,11,.08),rgba(249,115,22,.06));border:1.5px solid rgba(245,158,11,.25)}
+.status-suspended{background:linear-gradient(135deg,rgba(239,68,68,.08),rgba(249,115,22,.06));border:1.5px solid rgba(239,68,68,.25)}
+.status-draft{background:linear-gradient(135deg,rgba(59,130,246,.08),rgba(99,102,241,.06));border:1.5px solid rgba(59,130,246,.25)}
+.metric-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:20px}
+.metric{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:11px;padding:14px 16px;text-align:center;border-top:3px solid var(--primary)}
+.metric-val{font-size:28px;font-weight:900;color:#fff;line-height:1;margin-bottom:3px}
+.metric-lbl{font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.8px}
+.info-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:13px}
+.info-row:last-child{border-bottom:none}
+.info-key{color:rgba(255,255,255,.4);font-family:var(--mono);font-size:11px}
+.info-val{color:rgba(255,255,255,.82);font-weight:600;text-align:right;word-break:break-all;max-width:280px}
+.wa-input{width:100%;padding:10px 13px;border:1.5px solid rgba(255,255,255,.1);border-radius:9px;font-size:13.5px;font-family:var(--body);outline:none;transition:all .2s;color:rgba(255,255,255,.85);background:rgba(255,255,255,.05)}
+.wa-input:focus{border-color:#25d366;box-shadow:0 0 0 3px rgba(37,211,102,.1)}
+.wa-input::placeholder{color:rgba(255,255,255,.2)}
+.token-box{font-family:var(--mono);font-size:11px;background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.15);border-radius:8px;padding:10px 14px;color:#059669;word-break:break-all;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.copy-btn{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);border-radius:5px;padding:3px 9px;font-family:var(--mono);font-size:9px;color:#059669;cursor:pointer;white-space:nowrap;transition:all .15s}
+.copy-btn:hover{background:#059669;color:#fff}
+.conv-row{display:flex;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid var(--border2);transition:background .1s;text-decoration:none;color:inherit}
+.conv-row:hover{background:rgba(255,255,255,.03)}
+.conv-row:last-child{border-bottom:none}
+.action-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;border:1.5px solid;transition:all .15s;text-decoration:none;font-family:var(--body)}
+.btn-activate{background:rgba(16,185,129,.08);border-color:rgba(16,185,129,.25);color:#059669}
+.btn-activate:hover{background:#059669;color:#fff;border-color:#059669}
+.btn-suspend{background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.25);color:#dc2626}
+.btn-suspend:hover{background:#dc2626;color:#fff;border-color:#dc2626}
+.btn-wa{background:rgba(37,211,102,.08);border-color:rgba(37,211,102,.25);color:#059669}
+.btn-wa:hover{background:#25d366;color:#000;border-color:#25d366}
+.ubar{height:8px;background:rgba(255,255,255,.07);border-radius:100px;overflow:hidden;margin:6px 0}
+.ubar-fill{height:100%;border-radius:100px;transition:width 1s ease}
+.modal-ov{display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.5);align-items:center;justify-content:center;padding:16px}
+.modal-ov.open{display:flex}
+.modal-box .f-input{background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.1);color:rgba(255,255,255,.85)}
+.modal-box .f-input::placeholder{color:rgba(255,255,255,.2)}
+.modal-box .f-label{color:rgba(255,255,255,.4)}
+.modal-box{background:#0f1629;border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:28px;max-width:440px;width:100%;box-shadow:0 32px 80px rgba(0,0,0,.6)}
 </style>
 {% endblock %}
 {% block content %}
 
-<!-- HEADER -->
-<div style="display:flex;align-items:center;gap:14px;margin-bottom:22px;flex-wrap:wrap" class="f0">
-  <a href="/manage/chatbot/" class="btn btn-ghost btn-sm btn-icon"><i class="fas fa-arrow-left"></i></a>
-  <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#4f46e5,#7c3aed);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;color:#fff;flex-shrink:0">{{ bot.bot_name|first|upper }}</div>
-  <div>
-    <div style="font-size:18px;font-weight:800;color:var(--text);line-height:1.2">{{ bot.bot_name }}<span style="font-weight:400;color:var(--text2);font-size:14px;margin-left:8px">{{ bot.business_name }}</span></div>
-    <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-top:2px">{{ bot.client.full_name }} · {{ bot.client.email }} {% if bot.whatsapp_number %}· <span style="color:#059669"><i class="fab fa-whatsapp"></i> {{ bot.whatsapp_number }}</span>{% endif %}</div>
+<!-- STATUS HERO -->
+<div class="status-hero status-{{ bot.status }}">
+  <div style="display:flex;align-items:center;gap:14px">
+    <div style="width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#4f46e5,#7c3aed);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:22px;color:#fff;flex-shrink:0">{{ bot.bot_name|first|upper }}</div>
+    <div>
+      <div style="font-family:var(--head);font-size:20px;font-weight:800;color:var(--text)">{{ bot.bot_name }}</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.45);margin-top:2px">{{ bot.business_name }} · {{ bot.client.full_name }} · {{ bot.client.email }}</div>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:6px;flex-wrap:wrap">
+        <span class="badge b-{{ bot.status }}">{{ bot.get_status_display }}</span>
+        {% if bot.whatsapp_number %}<span style="font-family:var(--mono);font-size:11px;color:#059669"><i class="fab fa-whatsapp"></i> {{ bot.whatsapp_number }}</span>{% endif %}
+        {% if bot.deployed_at %}<span style="font-family:var(--mono);font-size:11px;color:rgba(255,255,255,.28)">Deployed {{ bot.deployed_at|date:"d M Y" }}</span>{% endif %}
+      </div>
+    </div>
   </div>
-  <span class="badge b-{{ bot.status }}" style="font-size:11px">{{ bot.status|capfirst }}</span>
-  {% if bot.deployed_at %}<span style="font-family:var(--mono);font-size:10px;color:var(--text3)">Deployed {{ bot.deployed_at|date:"d M Y" }}</span>{% endif %}
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    {% if bot.status != 'active' %}<button onclick="document.getElementById('activateModal').classList.add('open')" class="action-btn btn-activate"><i class="fas fa-play"></i> Activate</button>{% endif %}
+    {% if bot.status == 'active' %}<button onclick="document.getElementById('suspendModal').classList.add('open')" class="action-btn btn-suspend"><i class="fas fa-pause"></i> Suspend</button>{% endif %}
+    <a href="{% url 'chatbot_simulate' bot.id %}" class="action-btn" style="background:rgba(139,92,246,.08);border-color:rgba(139,92,246,.25);color:#7c3aed"><i class="fas fa-flask"></i> Test Bot</a>
+  </div>
 </div>
 
-<div class="row g-3">
-  <div class="col-lg-4">
+<!-- METRICS -->
+<div class="metric-row">
+  <div class="metric" style="border-top-color:#4f46e5"><div class="metric-val" style="color:#4f46e5">{{ total_msgs }}</div><div class="metric-lbl">Total Messages</div></div>
+  <div class="metric" style="border-top-color:#10b981"><div class="metric-val" style="color:#10b981">{{ total_users }}</div><div class="metric-lbl">Unique Users</div></div>
+  <div class="metric" style="border-top-color:#06b6d4"><div class="metric-val" style="color:#06b6d4">{{ today_msgs }}</div><div class="metric-lbl">Today</div></div>
+  <div class="metric" style="border-top-color:#f59e0b"><div class="metric-val" style="color:#f59e0b">{{ conversations|length }}</div><div class="metric-lbl">Conversations</div></div>
+  {% if sub %}<div class="metric" style="border-top-color:{% if sub.days_remaining <= 3 %}#dc2626{% elif sub.days_remaining <= 7 %}#f59e0b{% else %}#10b981{% endif %}"><div class="metric-val" style="color:{% if sub.days_remaining <= 3 %}#dc2626{% elif sub.days_remaining <= 7 %}#f59e0b{% else %}#10b981{% endif %}">{{ sub.days_remaining|default:"—" }}</div><div class="metric-lbl">Days Left</div></div>{% endif %}
+</div>
 
-    <!-- ADMIN CONTROLS -->
-    <div class="{% if bot.status == 'active' %}ctrl-panel-active{% elif bot.status == 'suspended' %}ctrl-panel{% else %}ctrl-panel-warning{% endif %} ctrl-panel f1">
-      <div class="sec-title">
-        <i class="fas fa-shield-halved" style="color:{% if bot.status == 'active' %}#059669{% else %}var(--red){% endif %}"></i> Admin Controls
-      </div>
-      {% if bot.status == 'active' %}
-      <form method="post" action="/manage/chatbot/bots/{{ bot.id }}/action/">
-        {% csrf_token %}<input type="hidden" name="action" value="suspend">
-        <label class="f-label">Suspension Reason *</label>
-        <textarea name="reason" class="f-input" style="min-height:70px;margin-bottom:12px" placeholder="e.g. Payment overdue..." required></textarea>
-        <button type="submit" class="btn btn-danger" style="width:100%;justify-content:center" onclick="return confirm('Suspend this bot?')">
-          <i class="fas fa-pause"></i> Suspend Bot
-        </button>
-      </form>
-      {% elif bot.status == 'suspended' %}
-      <div class="alert alert-danger mb-3"><i class="fas fa-info-circle fa-sm" style="flex-shrink:0"></i>Reason: {{ bot.admin_suspended_reason|default:"Admin action" }}</div>
-      <form method="post" action="/manage/chatbot/bots/{{ bot.id }}/action/">
-        {% csrf_token %}<input type="hidden" name="action" value="activate">
-        <button type="submit" class="btn btn-success" style="width:100%;justify-content:center"><i class="fas fa-play"></i> Reactivate Bot</button>
-      </form>
-      {% else %}
-      <form method="post" action="/manage/chatbot/bots/{{ bot.id }}/action/">
-        {% csrf_token %}<input type="hidden" name="action" value="activate">
-        <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center"><i class="fas fa-rocket"></i> Force Activate</button>
-      </form>
-      {% endif %}
+<!-- TABS -->
+<div class="tab-nav">
+  <button class="tab-btn active" onclick="showTab('overview',this)"><i class="fas fa-chart-pie"></i> Overview</button>
+  <button class="tab-btn" onclick="showTab('whatsapp',this)"><i class="fab fa-whatsapp" style="color:#25d366"></i> WhatsApp</button>
+  <button class="tab-btn" onclick="showTab('subscription',this)"><i class="fas fa-credit-card"></i> Subscription</button>
+  <button class="tab-btn" onclick="showTab('conversations',this)"><i class="fas fa-comments"></i> Conversations</button>
+  <button class="tab-btn" onclick="showTab('config',this)"><i class="fas fa-sliders"></i> Bot Config</button>
+  <button class="tab-btn" onclick="showTab('admin',this)"><i class="fas fa-shield-halved"></i> Admin</button>
+</div>
 
-      <hr style="border-color:rgba(0,0,0,.08);margin:14px 0">
-      <form method="post" action="/manage/chatbot/bots/{{ bot.id }}/action/">
-        {% csrf_token %}<input type="hidden" name="action" value="save_note">
-        <label class="f-label">Admin Notes</label>
-        <textarea name="note" class="f-input" style="min-height:80px;margin-bottom:10px">{{ bot.admin_notes }}</textarea>
-        <button type="submit" class="btn btn-ghost btn-sm" style="width:100%;justify-content:center"><i class="fas fa-save"></i> Save Note</button>
-      </form>
-    </div>
-
-    <!-- BOT INFO -->
-    <div class="card f1 mb-3">
-      <div class="card-head"><span class="card-title"><i class="fas fa-info-circle" style="color:var(--blue)"></i> Bot Details</span></div>
-      <div class="card-body" style="padding:8px 16px">
-        <div class="info-grid">
-          <div class="ig-item"><div class="ig-key">Language</div><div class="ig-val">{{ bot.get_language_display }}</div></div>
-          <div class="ig-item"><div class="ig-key">Tone</div><div class="ig-val">{{ bot.get_tone_display }}</div></div>
-          <div class="ig-item"><div class="ig-key">AI Model</div><div class="ig-val" style="font-family:var(--mono);font-size:11px;color:var(--primary)">{{ bot.ai_model }}</div></div>
-          <div class="ig-item"><div class="ig-key">Temperature</div><div class="ig-val">{{ bot.ai_temperature }}</div></div>
-          <div class="ig-item"><div class="ig-key">Services</div><div class="ig-val">{{ bot.services.count }}</div></div>
-          <div class="ig-item"><div class="ig-key">FAQs</div><div class="ig-val">{{ bot.faqs.count }}</div></div>
-          <div class="ig-item"><div class="ig-key">Conversations</div><div class="ig-val" style="color:var(--primary)">{{ total_convs }}</div></div>
-          <div class="ig-item"><div class="ig-key">Messages</div><div class="ig-val" style="color:var(--green)">{{ total_msgs }}</div></div>
+<!-- TAB: OVERVIEW -->
+<div class="tab-pane active" id="tab-overview">
+  <div class="row g-3">
+    <div class="col-lg-6">
+      <div class="jt-card">
+        <div class="card-head"><span class="jt-card-title"><i class="fas fa-robot"></i> Bot Details</span></div>
+        <div style="padding:16px 18px">
+          <div class="info-row"><span class="info-key">Bot Name</span><span class="info-val">{{ bot.bot_name }}</span></div>
+          <div class="info-row"><span class="info-key">Business</span><span class="info-val">{{ bot.business_name }}</span></div>
+          <div class="info-row"><span class="info-key">Language</span><span class="info-val">{{ bot.get_language_display }}</span></div>
+          <div class="info-row"><span class="info-key">Tone</span><span class="info-val">{{ bot.get_tone_display }}</span></div>
+          <div class="info-row"><span class="info-key">AI Temperature</span><span class="info-val">{{ bot.ai_temperature }}</span></div>
+          <div class="info-row"><span class="info-key">Collect Name</span><span class="info-val">{% if bot.collect_name %}✅ Yes{% else %}❌ No{% endif %}</span></div>
+          <div class="info-row"><span class="info-key">Collect Phone</span><span class="info-val">{% if bot.collect_phone %}✅ Yes{% else %}❌ No{% endif %}</span></div>
+          <div class="info-row"><span class="info-key">Services</span><span class="info-val">{{ bot.services.count }}</span></div>
+          <div class="info-row"><span class="info-key">FAQs</span><span class="info-val">{{ bot.faqs.count }}</span></div>
+          <div class="info-row"><span class="info-key">Created</span><span class="info-val">{{ bot.created_at|date:"d M Y H:i" }}</span></div>
+          <div class="info-row"><span class="info-key">Bot UUID</span><span class="info-val" style="font-family:var(--mono);font-size:10px">{{ bot.id }}</span></div>
         </div>
       </div>
     </div>
-
-    <!-- SUBSCRIPTION -->
-    {% if sub %}
-    <div class="card f2 mb-3">
-      <div class="card-head"><span class="card-title"><i class="fas fa-credit-card" style="color:var(--yellow)"></i> Subscription</span></div>
-      <div class="card-body" style="padding:8px 16px">
-        <div class="info-item"><span class="info-key">Plan</span><span class="info-val" style="color:var(--primary)">{{ sub.plan.name }}</span></div>
-        <div class="info-item"><span class="info-key">Status</span><span class="info-val"><span class="badge b-{{ sub.status }}">{{ sub.status|capfirst }}</span></span></div>
-        <div class="info-item"><span class="info-key">Expires</span><span class="info-val" style="color:{% if sub.days_remaining <= 3 %}var(--red){% elif sub.days_remaining <= 7 %}#d97706{% else %}var(--text){% endif %}">{{ sub.end_date|date:"d M Y"|default:"—" }}</span></div>
-        <div class="info-item"><span class="info-key">Days Left</span><span class="info-val" style="color:{% if sub.days_remaining <= 3 %}var(--red){% elif sub.days_remaining <= 7 %}#d97706{% else %}var(--green){% endif %}">{{ sub.days_remaining }}</span></div>
-        <div class="info-item" style="border:none">
-          <span class="info-key">Usage</span>
-          <div style="display:flex;align-items:center;gap:8px;flex:1;margin-left:16px">
-            <div class="ubar"><div class="ubar-fill" style="width:{{ sub.usage_percent }}%;background:{% if sub.usage_percent >= 90 %}var(--red){% elif sub.usage_percent >= 70 %}var(--yellow){% else %}var(--green){% endif %}"></div></div>
-            <span style="font-family:var(--mono);font-size:11px;color:var(--text2);flex-shrink:0">{{ sub.messages_used }}/{% if sub.plan.is_unlimited %}∞{% else %}{{ sub.plan.msg_limit }}{% endif %}</span>
-          </div>
+    <div class="col-lg-6">
+      <div class="jt-card mb-3">
+        <div class="card-head"><span class="jt-card-title"><i class="fas fa-user"></i> Client Details</span></div>
+        <div style="padding:16px 18px">
+          <div class="info-row"><span class="info-key">Full Name</span><span class="info-val">{{ bot.client.full_name }}</span></div>
+          <div class="info-row"><span class="info-key">Business</span><span class="info-val">{{ bot.client.business_name }}</span></div>
+          <div class="info-row"><span class="info-key">Email</span><span class="info-val">{{ bot.client.email }}</span></div>
+          <div class="info-row"><span class="info-key">Phone</span><span class="info-val">{{ bot.client.phone|default:"—" }}</span></div>
+          <div class="info-row"><span class="info-key">City</span><span class="info-val">{{ bot.client.city|default:"—" }}</span></div>
+          <div class="info-row"><span class="info-key">Member Since</span><span class="info-val">{{ bot.client.created_at|date:"d M Y" }}</span></div>
         </div>
-        <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:8px">TZS {{ sub.plan.price_tzs|floatformat:0 }}/month</div>
       </div>
     </div>
-    {% endif %}
-
-    <!-- WEBHOOK -->
-    {% if bot.is_active %}
-    <div class="card f2">
-      <div class="card-head"><span class="card-title"><i class="fab fa-whatsapp" style="color:#25d366"></i> Webhook Config</span></div>
-      <div class="card-body">
-        <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">Webhook URL</div>
-        <div class="wh-url"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ bot.webhook_url }}</span><button class="copy-btn" onclick="copy('{{ bot.webhook_url }}',this)"><i class="fas fa-copy"></i> Copy</button></div>
-        <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin:12px 0 5px;text-transform:uppercase;letter-spacing:1px">Verify Token</div>
-        <div style="font-family:var(--mono);font-size:11px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:9px 12px;color:#92400e;word-break:break-all">{{ bot.webhook_verify_token }}</div>
-      </div>
-    </div>
-    {% endif %}
   </div>
+</div>
 
-  <div class="col-lg-8">
-
-    <!-- TABS -->
-    <div class="card f1" style="padding:18px">
-      <div class="tab-nav">
-        <button class="tab-btn active" onclick="showTab('payments',this)"><i class="fas fa-coins"></i> Payments</button>
-        <button class="tab-btn" onclick="showTab('convs',this)"><i class="fas fa-comments"></i> Conversations</button>
-        <button class="tab-btn" onclick="showTab('config',this)"><i class="fas fa-sliders"></i> Bot Config</button>
-        <button class="tab-btn" onclick="showTab('services',this)"><i class="fas fa-list"></i> Services & FAQs</button>
-      </div>
-
-      <!-- PAYMENTS TAB -->
-      <div class="tab-pane active" id="tab-payments">
-        {% for pay in payments %}
-        <div class="pay-row">
-          <div style="width:38px;height:38px;border-radius:10px;background:{% if pay.status == 'verified' %}var(--green-l){% elif pay.status == 'rejected' %}var(--red-l){% else %}var(--yellow-l){% endif %};display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">
-            {% if pay.status == 'verified' %}✓{% elif pay.status == 'rejected' %}✗{% else %}⏳{% endif %}
+<!-- TAB: WHATSAPP -->
+<div class="tab-pane" id="tab-whatsapp">
+  <div class="row g-3">
+    <div class="col-lg-7">
+      <div class="jt-card">
+        <div class="card-head"><span class="jt-card-title"><i class="fab fa-whatsapp" style="color:#25d366"></i> WhatsApp Setup</span></div>
+        <div style="padding:20px">
+          {% if not bot.whatsapp_phone_id %}
+          <div style="background:#fef3c7;border:1.5px solid #fde68a;border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:#92400e">
+            <i class="fas fa-triangle-exclamation"></i> <strong>Phone Number ID missing</strong> — bot cannot receive messages until this is set.
           </div>
-          <div style="flex:1;min-width:0">
-            <div style="font-weight:800;font-size:14px;color:{% if pay.status == 'verified' %}var(--green){% elif pay.status == 'rejected' %}var(--red){% else %}#d97706{% endif %}">TZS {{ pay.amount|floatformat:0 }}</div>
-            <div style="font-family:var(--mono);font-size:10px;color:var(--primary);margin-top:1px">REF: {{ pay.transaction_ref }}</div>
-            <div style="font-size:11px;color:var(--text3)">{{ pay.payment_method }} · {{ pay.months_covered }} month{{ pay.months_covered|pluralize }} · {{ pay.payment_date|date:"d M Y" }}</div>
-          </div>
-          <div style="text-align:right">
-            <span class="badge b-{{ pay.status }}" style="margin-bottom:6px;display:inline-flex">{{ pay.status|capfirst }}</span><br>
-            {% if pay.status == 'pending' %}
-            <div style="display:flex;gap:5px;justify-content:flex-end">
-              <form method="post" action="/manage/chatbot/bots/{{ bot.id }}/action/" style="display:inline">
-                {% csrf_token %}<input type="hidden" name="action" value="verify_payment"><input type="hidden" name="payment_id" value="{{ pay.id }}"><input type="hidden" name="months" value="{{ pay.months_covered }}">
-                <button type="submit" class="btn btn-success btn-sm" onclick="return confirm('Verify this payment?')"><i class="fas fa-check"></i> Verify</button>
-              </form>
-              <form method="post" action="/manage/chatbot/bots/{{ bot.id }}/action/" style="display:inline">
-                {% csrf_token %}<input type="hidden" name="action" value="reject_payment"><input type="hidden" name="payment_id" value="{{ pay.id }}">
-                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Reject?')"><i class="fas fa-times"></i></button>
-              </form>
+          {% endif %}
+          <form method="post" action="/manage/chatbot/bots/{{ bot.id }}/action/">
+            {% csrf_token %}<input type="hidden" name="action" value="save_whatsapp">
+            <div class="mb-3">
+              <label class="f-label">WhatsApp Number</label>
+              <input type="text" name="whatsapp_number" class="wa-input" value="{{ bot.whatsapp_number }}" placeholder="+255750123456">
             </div>
-            {% elif pay.verified_by %}
-            <div style="font-family:var(--mono);font-size:9px;color:var(--text3)">by {{ pay.verified_by.username }}</div>
-            {% endif %}
+            <div class="mb-3">
+              <label class="f-label">Phone Number ID <span style="color:#dc2626">*</span></label>
+              <input type="text" name="whatsapp_phone_id" class="wa-input" value="{{ bot.whatsapp_phone_id }}" placeholder="From Meta → WhatsApp → Phone Numbers">
+              <div style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.28);margin-top:4px">developers.facebook.com → your app → WhatsApp → API Setup</div>
+            </div>
+            <div class="mb-3">
+              <label class="f-label">API Token <span style="color:rgba(255,255,255,.28)">(optional — uses master token if blank)</span></label>
+              <input type="text" name="whatsapp_token" class="wa-input" value="{{ bot.whatsapp_token }}" placeholder="EAAxxxx...">
+            </div>
+            <button type="submit" class="jt-btn btn-cyan"><i class="fas fa-save"></i> Save & Connect</button>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-5">
+      <div class="jt-card mb-3">
+        <div class="card-head"><span class="jt-card-title"><i class="fas fa-link"></i> Webhook Info</span></div>
+        <div style="padding:16px 18px">
+          <div style="font-family:var(--mono);font-size:9px;color:rgba(255,255,255,.28);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px">WEBHOOK URL — paste in Meta</div>
+          <div class="token-box mb-3">
+            <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px">{{ bot.webhook_url }}</span>
+            <button class="copy-btn" onclick="copyText('{{ bot.webhook_url }}',this)"><i class="fas fa-copy"></i> Copy</button>
+          </div>
+          <div style="font-family:var(--mono);font-size:9px;color:rgba(255,255,255,.28);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px">VERIFY TOKEN</div>
+          <div class="token-box mb-3">
+            <span>{{ bot.webhook_verify_token }}</span>
+            <button class="copy-btn" onclick="copyText('{{ bot.webhook_verify_token }}',this)"><i class="fas fa-copy"></i> Copy</button>
+          </div>
+          <div style="font-family:var(--mono);font-size:9px;color:rgba(255,255,255,.28);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px">MASTER TOKEN</div>
+          <div style="font-size:13px;color:{% if global_token_set %}#059669{% else %}#dc2626{% endif %}">
+            {% if global_token_set %}✅ Master token is configured{% else %}❌ Master token not set in settings{% endif %}
           </div>
         </div>
-        {% empty %}<div class="empty"><div class="eico">💳</div><p>No payments yet</p></div>{% endfor %}
       </div>
-
-      <!-- CONVERSATIONS TAB -->
-      <div class="tab-pane" id="tab-convs">
-        {% for conv in conversations %}
-        <a href="/chatbot/conversations/{{ conv.id }}/" class="conv-row" style="display:flex;text-decoration:none;color:inherit">
-          <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--primary),#7c3aed);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#fff;flex-shrink:0">{{ conv.customer_name|first|upper|default:"?" }}</div>
-          <div style="flex:1;min-width:0">
-            <div style="font-weight:700;font-size:13px;color:var(--text)">{{ conv.customer_name|default:conv.customer_phone }}</div>
-            <div style="font-family:var(--mono);font-size:10px;color:var(--text3)">{{ conv.customer_phone }}</div>
-          </div>
-          <div style="text-align:right">
-            <div style="font-family:var(--mono);font-size:10px;color:var(--text3)">{{ conv.last_message_at|date:"d M H:i" }}</div>
-            <div style="font-family:var(--mono);font-size:11px;color:var(--text2);margin-top:2px">{{ conv.message_count }} msgs</div>
-            {% if conv.is_human_handoff %}<span class="badge b-trial" style="font-size:9px">HANDOFF</span>{% endif %}
-          </div>
-        </a>
-        {% empty %}<div class="empty"><div class="eico">💬</div><p>No conversations yet</p></div>{% endfor %}
+      <div class="jt-card">
+        <div class="card-head"><span class="jt-card-title"><i class="fas fa-rotate"></i> Reset Webhook Token</span></div>
+        <div style="padding:14px 18px">
+          <p style="font-size:12px;color:rgba(255,255,255,.45);margin-bottom:12px">Generates a new verify token. Update it in Meta dashboard too.</p>
+          <form method="post" action="/manage/chatbot/bots/{{ bot.id }}/action/">
+            {% csrf_token %}<input type="hidden" name="action" value="reset_webhook">
+            <button type="submit" class="jt-btn btn-ghost" style="font-size:12px" onclick="return confirm('Reset webhook token? You must update Meta dashboard too.')"><i class="fas fa-rotate"></i> Reset Token</button>
+          </form>
+        </div>
       </div>
+    </div>
+  </div>
+</div>
 
-      <!-- CONFIG TAB -->
-      <div class="tab-pane" id="tab-config">
-        <form method="post" action="/manage/chatbot/bots/{{ bot.id }}/action/">{% csrf_token %}<input type="hidden" name="action" value="update_config">
-          <div class="g2 mb-3">
-            <div>
-              <label class="f-label">Bot Name</label>
-              <input type="text" name="bot_name" class="f-input" value="{{ bot.bot_name }}">
-            </div>
-            <div>
-              <label class="f-label">Language</label>
-              <select name="language" class="f-input">
-                <option value="sw+en" {% if bot.language == 'sw+en' %}selected{% endif %}>Swahili + English (auto-detect)</option>
-                <option value="en" {% if bot.language == 'en' %}selected{% endif %}>English only</option>
-                <option value="sw" {% if bot.language == 'sw' %}selected{% endif %}>Swahili only</option>
-              </select>
-            </div>
+<!-- TAB: SUBSCRIPTION -->
+<div class="tab-pane" id="tab-subscription">
+  {% if sub %}
+  <div class="row g-3">
+    <div class="col-lg-6">
+      <div class="jt-card">
+        <div class="card-head"><span class="jt-card-title"><i class="fas fa-crown"></i> Current Plan</span></div>
+        <div style="padding:16px 18px">
+          <div class="info-row"><span class="info-key">Plan</span><span class="info-val"><strong>{{ sub.plan.name }}</strong></span></div>
+          <div class="info-row"><span class="info-key">Status</span><span class="info-val"><span class="badge b-{{ sub.status }}">{{ sub.get_status_display }}</span></span></div>
+          <div class="info-row"><span class="info-key">Price</span><span class="info-val">TZS {{ sub.plan.price_tzs|floatformat:0 }}/month</span></div>
+          <div class="info-row"><span class="info-key">Start Date</span><span class="info-val">{{ sub.start_date|date:"d M Y" }}</span></div>
+          <div class="info-row"><span class="info-key">End Date</span><span class="info-val" style="color:{% if sub.days_remaining <= 3 %}#dc2626{% elif sub.days_remaining <= 7 %}#f59e0b{% else %}var(--text){% endif %}">{{ sub.end_date|date:"d M Y"|default:"—" }}</span></div>
+          <div class="info-row"><span class="info-key">Days Remaining</span><span class="info-val" style="font-size:20px;font-weight:900;color:{% if sub.days_remaining <= 3 %}#dc2626{% elif sub.days_remaining <= 7 %}#f59e0b{% else %}#10b981{% endif %}">{{ sub.days_remaining|default:"—" }}</span></div>
+          <div class="info-row"><span class="info-key">Messages Limit</span><span class="info-val">{% if sub.plan.is_unlimited %}Unlimited{% else %}{{ sub.plan.msg_limit|floatformat:0 }}{% endif %}</span></div>
+          <div class="info-row"><span class="info-key">Messages Used</span><span class="info-val">{{ sub.messages_used }}</span></div>
+          {% if not sub.plan.is_unlimited %}
+          <div style="padding:10px 0">
+            <div class="ubar"><div class="ubar-fill" style="width:{{ sub.usage_percent }}%;background:{% if sub.usage_percent >= 90 %}#dc2626{% elif sub.usage_percent >= 70 %}#f59e0b{% else %}#10b981{% endif %}"></div></div>
+            <div style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.28)">{{ sub.usage_percent }}% used · {{ sub.messages_remaining }} remaining</div>
           </div>
-          <div class="mb-3">
-            <label class="f-label">Description</label>
-            <textarea name="description" class="f-input">{{ bot.description }}</textarea>
-          </div>
-          <div class="g2 mb-3">
-            <div>
-              <label class="f-label">AI Model</label>
-              <select name="ai_model" class="f-input">
-                <option value="claude-haiku-4-5-20251001" {% if bot.ai_model == 'claude-haiku-4-5-20251001' %}selected{% endif %}>Claude Haiku (Fast)</option>
-                <option value="claude-sonnet-4-5" {% if bot.ai_model == 'claude-sonnet-4-5' %}selected{% endif %}>Claude Sonnet (Smart)</option>
-              </select>
-            </div>
-            <div>
-              <label class="f-label">Tone</label>
-              <select name="tone" class="f-input">
-                <option value="friendly" {% if bot.tone == 'friendly' %}selected{% endif %}>Friendly & Warm</option>
-                <option value="professional" {% if bot.tone == 'professional' %}selected{% endif %}>Professional</option>
-                <option value="casual" {% if bot.tone == 'casual' %}selected{% endif %}>Casual</option>
-                <option value="formal" {% if bot.tone == 'formal' %}selected{% endif %}>Formal</option>
-              </select>
-            </div>
-          </div>
-          <div class="mb-3">
-            <label class="f-label">Greeting Message</label>
-            <textarea name="greeting_msg" class="f-input">{{ bot.greeting_msg }}</textarea>
-          </div>
-          <div class="mb-3">
-            <label class="f-label">Fallback Message (when bot can't answer)</label>
-            <textarea name="fallback_msg" class="f-input">{{ bot.fallback_msg }}</textarea>
-          </div>
-          <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Configuration</button>
-        </form>
+          {% endif %}
+        </div>
       </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="jt-card">
+        <div class="card-head"><span class="jt-card-title"><i class="fas fa-history"></i> Payment History</span></div>
+        {% for pay in payments %}
+        <div style="display:flex;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid var(--border2){% if forloop.last %};border-bottom:none{% endif %}">
+          <div style="width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;background:{% if pay.status == 'verified' %}rgba(16,185,129,.1){% elif pay.status == 'rejected' %}rgba(239,68,68,.1){% else %}rgba(245,158,11,.1){% endif %}">
+            {% if pay.status == 'verified' %}✅{% elif pay.status == 'rejected' %}❌{% else %}⏳{% endif %}
+          </div>
+          <div style="flex:1">
+            <div style="font-weight:700;font-size:13px;color:{% if pay.status == 'verified' %}#059669{% elif pay.status == 'rejected' %}#dc2626{% else %}#d97706{% endif %}">TZS {{ pay.amount|floatformat:0 }}</div>
+            <div style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.28)">{{ pay.transaction_ref }} · {{ pay.payment_date|date:"d M Y" }}</div>
+          </div>
+          <span class="badge b-{{ pay.status }}">{{ pay.get_status_display }}</span>
+        </div>
+        {% empty %}
+        <div style="padding:24px;text-align:center;font-family:var(--mono);font-size:12px;color:rgba(255,255,255,.28)">No payments yet</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <div style="text-align:center;padding:48px;font-family:var(--mono);font-size:12px;color:rgba(255,255,255,.28)">No subscription found for this bot.</div>
+  {% endif %}
+</div>
 
-      <!-- SERVICES & FAQS TAB -->
-      <div class="tab-pane" id="tab-services">
-        <div class="g2">
+<!-- TAB: CONVERSATIONS -->
+<div class="tab-pane" id="tab-conversations">
+  <div class="jt-card" style="padding:0">
+    <div class="card-head">
+      <span class="jt-card-title"><i class="fas fa-comments"></i> Recent Conversations</span>
+      <span style="font-family:var(--mono);font-size:11px;color:rgba(255,255,255,.28)">{{ conversations|length }} shown</span>
+    </div>
+    {% for conv in conversations %}
+    <div class="conv-row">
+      <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#4f46e5,#7c3aed);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#fff;flex-shrink:0">{{ conv.customer_name|first|upper|default:"?" }}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:700;font-size:13px;color:var(--text)">{{ conv.customer_name|default:conv.customer_phone }}</div>
+        <div style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.28)"><i class="fab fa-whatsapp" style="color:#25d366"></i> {{ conv.customer_phone }}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.28)">{{ conv.last_message_at|date:"d M H:i"|default:"—" }}</div>
+        <div style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--primary);margin-top:3px">{{ conv.message_count }} msgs</div>
+        {% if conv.is_human_handoff %}<span class="badge b-trial" style="font-size:9px;margin-top:3px">HANDOFF</span>{% endif %}
+      </div>
+    </div>
+    {% empty %}
+    <div style="padding:32px;text-align:center;font-family:var(--mono);font-size:12px;color:rgba(255,255,255,.28)">No conversations yet</div>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- TAB: BOT CONFIG -->
+<div class="tab-pane" id="tab-config">
+  <div class="row g-3">
+    <div class="col-lg-6">
+      <div class="jt-card">
+        <div class="card-head"><span class="jt-card-title"><i class="fas fa-comment-dots"></i> Bot Messages</span></div>
+        <div style="padding:16px 18px">
+          {% for label, val in forloop_msgs %}{% endfor %}
+          <div style="margin-bottom:14px">
+            <div style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.28);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px">Greeting</div>
+            <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:10px 12px;font-size:13px;color:rgba(255,255,255,.82);line-height:1.5">{{ bot.greeting_msg }}</div>
+          </div>
+          <div style="margin-bottom:14px">
+            <div style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.28);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px">Fallback</div>
+            <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:10px 12px;font-size:13px;color:rgba(255,255,255,.82);line-height:1.5">{{ bot.fallback_msg }}</div>
+          </div>
           <div>
-            <div style="font-weight:700;font-size:13px;color:var(--text);margin-bottom:12px;display:flex;align-items:center;gap:8px"><i class="fas fa-briefcase" style="color:var(--primary)"></i> Services ({{ bot.services.count }})</div>
-            {% for svc in bot.services.all %}
-            <div style="background:#f8fafc;border:1px solid var(--border);border-radius:9px;padding:11px 14px;margin-bottom:8px;position:relative">
-              <div style="font-weight:700;font-size:13px;color:var(--text)">{{ svc.name }}</div>
-              <div style="font-size:12px;color:var(--text2);margin-top:3px">{{ svc.description|truncatechars:80 }}</div>
-              {% if svc.price %}<div style="font-family:var(--mono);font-size:11px;color:var(--green);margin-top:4px">{{ svc.price }}</div>{% endif %}
-              <form method="post" action="/manage/chatbot/bots/{{ bot.id }}/action/" style="position:absolute;top:10px;right:10px">{% csrf_token %}<input type="hidden" name="action" value="delete_service"><input type="hidden" name="service_id" value="{{ svc.id }}"><button type="submit" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:12px"><i class="fas fa-trash"></i></button></form>
-            </div>
-            {% empty %}<p style="font-family:var(--mono);font-size:11px;color:var(--text3)">No services yet</p>{% endfor %}
-            <form method="post" action="/manage/chatbot/bots/{{ bot.id }}/action/" style="margin-top:12px">{% csrf_token %}<input type="hidden" name="action" value="add_service">
-              <input type="text" name="service_name" class="f-input mb-2" placeholder="Service name...">
-              <textarea name="service_desc" class="f-input mb-2" style="min-height:60px" placeholder="Description..."></textarea>
-              <input type="text" name="service_price" class="f-input mb-2" placeholder="Price (optional)...">
-              <button type="submit" class="btn btn-ghost btn-sm" style="width:100%;justify-content:center"><i class="fas fa-plus"></i> Add Service</button>
-            </form>
+            <div style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.28);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px">Human Handoff</div>
+            <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:10px 12px;font-size:13px;color:rgba(255,255,255,.82);line-height:1.5">{{ bot.human_handoff_msg }}</div>
           </div>
-          <div>
-            <div style="font-weight:700;font-size:13px;color:var(--text);margin-bottom:12px;display:flex;align-items:center;gap:8px"><i class="fas fa-circle-question" style="color:var(--blue)"></i> FAQs ({{ bot.faqs.count }})</div>
-            {% for faq in bot.faqs.all %}
-            <div style="background:#f8fafc;border:1px solid var(--border);border-radius:9px;padding:11px 14px;margin-bottom:8px;position:relative">
-              <div style="font-weight:600;font-size:12px;color:var(--text)">{{ faq.question|truncatechars:70 }}</div>
-              <div style="font-size:11px;color:var(--text2);margin-top:3px">{{ faq.answer|truncatechars:80 }}</div>
-              <form method="post" action="/manage/chatbot/bots/{{ bot.id }}/action/" style="position:absolute;top:10px;right:10px">{% csrf_token %}<input type="hidden" name="action" value="delete_faq"><input type="hidden" name="faq_id" value="{{ faq.id }}"><button type="submit" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:12px"><i class="fas fa-trash"></i></button></form>
-            </div>
-            {% empty %}<p style="font-family:var(--mono);font-size:11px;color:var(--text3)">No FAQs yet</p>{% endfor %}
-            <form method="post" action="/manage/chatbot/bots/{{ bot.id }}/action/" style="margin-top:12px">{% csrf_token %}<input type="hidden" name="action" value="add_faq">
-              <textarea name="faq_question" class="f-input mb-2" style="min-height:55px" placeholder="Question..."></textarea>
-              <textarea name="faq_answer" class="f-input mb-2" style="min-height:55px" placeholder="Answer..."></textarea>
-              <button type="submit" class="btn btn-ghost btn-sm" style="width:100%;justify-content:center"><i class="fas fa-plus"></i> Add FAQ</button>
-            </form>
+          <div style="margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,.06)">
+            <div style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.28);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Description</div>
+            <div style="font-size:13px;color:rgba(255,255,255,.5);line-height:1.6">{{ bot.description|default:"No description" }}</div>
           </div>
         </div>
       </div>
     </div>
+    <div class="col-lg-6">
+      <div class="jt-card mb-3">
+        <div class="card-head"><span class="jt-card-title"><i class="fas fa-briefcase"></i> Services ({{ bot.services.count }})</span></div>
+        <div style="max-height:220px;overflow-y:auto">
+          {% for svc in bot.services.all %}
+          <div style="padding:10px 16px;border-bottom:1px solid rgba(255,255,255,.05);font-size:13px{% if forloop.last %};border-bottom:none{% endif %}">
+            <div style="font-weight:700;color:rgba(255,255,255,.85)">{{ svc.name }} {% if svc.price %}<span style="color:#10b981;font-size:11px">· {{ svc.price }}</span>{% endif %}</div>
+            <div style="color:rgba(255,255,255,.35);font-size:12px;margin-top:2px">{{ svc.description|truncatechars:80 }}</div>
+          </div>
+          {% empty %}
+          <div style="padding:16px;text-align:center;color:rgba(255,255,255,.28);font-family:var(--mono);font-size:11px">No services</div>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="jt-card">
+        <div class="card-head"><span class="jt-card-title"><i class="fas fa-question-circle"></i> FAQs ({{ bot.faqs.count }})</span></div>
+        <div style="max-height:200px;overflow-y:auto">
+          {% for faq in bot.faqs.all %}
+          <div style="padding:10px 16px;border-bottom:1px solid rgba(255,255,255,.05);font-size:13px{% if forloop.last %};border-bottom:none{% endif %}">
+            <div style="font-weight:700;color:rgba(255,255,255,.85)">{{ faq.question|truncatechars:60 }}</div>
+            <div style="color:rgba(255,255,255,.35);font-size:12px;margin-top:2px">{{ faq.answer|truncatechars:80 }}</div>
+          </div>
+          {% empty %}
+          <div style="padding:16px;text-align:center;color:rgba(255,255,255,.28);font-family:var(--mono);font-size:11px">No FAQs</div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB: ADMIN -->
+<div class="tab-pane" id="tab-admin">
+  <div class="row g-3">
+    <div class="col-lg-6">
+      <div class="jt-card mb-3">
+        <div class="card-head"><span class="jt-card-title"><i class="fas fa-sticky-note"></i> Admin Notes</span></div>
+        <div style="padding:16px 18px">
+          <form method="post" action="/manage/chatbot/bots/{{ bot.id }}/action/">
+            {% csrf_token %}<input type="hidden" name="action" value="admin_note">
+            <textarea name="note" class="f-input" style="min-height:100px;margin-bottom:10px" placeholder="Internal notes...">{{ bot.admin_notes }}</textarea>
+            <button type="submit" class="jt-btn btn-ghost" style="font-size:12px"><i class="fas fa-save"></i> Save Note</button>
+          </form>
+        </div>
+      </div>
+      {% if bot.admin_suspended_reason %}
+      <div class="jt-card" style="border-color:rgba(239,68,68,.2)">
+        <div class="card-head"><span class="jt-card-title" style="color:#dc2626"><i class="fas fa-ban"></i> Suspension Reason</span></div>
+        <div style="padding:14px 18px;font-size:13px;color:#dc2626">{{ bot.admin_suspended_reason }}</div>
+      </div>
+      {% endif %}
+    </div>
+    <div class="col-lg-6">
+      <div class="jt-card">
+        <div class="card-head"><span class="jt-card-title"><i class="fas fa-bolt"></i> Quick Actions</span></div>
+        <div style="padding:16px 18px;display:flex;flex-direction:column;gap:10px">
+          {% if bot.status != 'active' %}<button onclick="document.getElementById('activateModal').classList.add('open')" class="action-btn btn-activate" style="justify-content:center"><i class="fas fa-play"></i> Activate Bot</button>{% endif %}
+          {% if bot.status == 'active' %}<button onclick="document.getElementById('suspendModal').classList.add('open')" class="action-btn btn-suspend" style="justify-content:center"><i class="fas fa-pause"></i> Suspend Bot</button>{% endif %}
+          <a href="{% url 'chatbot_simulate' bot.id %}" class="action-btn" style="justify-content:center;background:rgba(139,92,246,.08);border-color:rgba(139,92,246,.25);color:#7c3aed"><i class="fas fa-flask"></i> Test Bot in Simulator</a>
+          <a href="/manage/chatbot/payments/" class="action-btn" style="justify-content:center;background:rgba(16,185,129,.08);border-color:rgba(16,185,129,.25);color:#059669"><i class="fas fa-credit-card"></i> Manage Payments</a>
+          <a href="/manage/chatbot/clients/" class="action-btn" style="justify-content:center;background:rgba(99,102,241,.08);border-color:rgba(99,102,241,.25);color:#4f46e5"><i class="fas fa-users"></i> All Clients</a>
+          <a href="/manage/chatbot/" class="action-btn" style="justify-content:center;background:rgba(6,182,212,.08);border-color:rgba(6,182,212,.25);color:#0891b2"><i class="fas fa-robot"></i> Bot Overview</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODALS -->
+<div class="modal-ov" id="activateModal">
+  <div class="modal-box">
+    <h3 style="font-family:var(--head);font-size:18px;font-weight:800;color:var(--text);margin-bottom:8px">Activate Bot</h3>
+    {% if not bot.whatsapp_phone_id %}<div style="background:#fef3c7;border:1px solid #fde68a;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:#92400e"><i class="fas fa-triangle-exclamation"></i> Phone Number ID is not set — set it in WhatsApp tab first for best results.</div>{% endif %}
+    <p style="font-size:13px;color:rgba(255,255,255,.55);margin-bottom:16px">Activate <strong>{{ bot.bot_name }}</strong>? It will start responding to customers immediately.</p>
+    <form method="post" action="/manage/chatbot/bots/{{ bot.id }}/action/">
+      {% csrf_token %}<input type="hidden" name="action" value="activate">
+      <div style="display:flex;gap:10px">
+        <button type="submit" class="jt-btn btn-cyan"><i class="fas fa-play"></i> Activate</button>
+        <button type="button" onclick="document.getElementById('activateModal').classList.remove('open')" class="jt-btn btn-ghost">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal-ov" id="suspendModal">
+  <div class="modal-box">
+    <h3 style="font-family:var(--head);font-size:18px;font-weight:800;color:var(--text);margin-bottom:8px">Suspend Bot</h3>
+    <p style="font-size:13px;color:rgba(255,255,255,.55);margin-bottom:14px">Bot will stop responding to customers immediately.</p>
+    <form method="post" action="/manage/chatbot/bots/{{ bot.id }}/action/">
+      {% csrf_token %}<input type="hidden" name="action" value="suspend">
+      <div class="mb-3"><label class="f-label">Reason (shown to client)</label><input type="text" name="reason" class="f-input" placeholder="e.g. Payment overdue" required></div>
+      <div style="display:flex;gap:10px">
+        <button type="submit" class="jt-btn btn-red"><i class="fas fa-pause"></i> Suspend</button>
+        <button type="button" onclick="document.getElementById('suspendModal').classList.remove('open')" class="jt-btn btn-ghost">Cancel</button>
+      </div>
+    </form>
   </div>
 </div>
 
 <script>
 function showTab(id,btn){document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));document.getElementById('tab-'+id).classList.add('active');btn.classList.add('active')}
-function copy(text,btn){navigator.clipboard.writeText(text).then(()=>{btn.innerHTML='<i class="fas fa-check"></i> Copied!';btn.style.color='var(--green)';setTimeout(()=>{btn.innerHTML='<i class="fas fa-copy"></i> Copy';btn.style.color=''},2000)})}
+function copyText(text,btn){navigator.clipboard.writeText(text).then(()=>{const orig=btn.innerHTML;btn.innerHTML='✅ Copied!';setTimeout(()=>btn.innerHTML=orig,2000)})}
+document.querySelectorAll('.modal-ov').forEach(m=>m.addEventListener('click',function(e){if(e.target===this)this.classList.remove('open')}))
 </script>
 {% endblock %}

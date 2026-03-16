@@ -136,17 +136,51 @@ def chatbot_register(request):
 
 
 def chatbot_login(request):
-    if request.user.is_authenticated and hasattr(request.user, 'chatbot_profile'):
-        return redirect('chatbot_dashboard')
+    # Already logged in with chatbot account → go to dashboard
+    if request.user.is_authenticated:
+        if hasattr(request.user, 'chatbot_profile'):
+            return redirect('chatbot_dashboard')
 
     if request.method == 'POST':
         username = request.POST.get('username', '').strip()
         password = request.POST.get('password', '')
         user = authenticate(request, username=username, password=password)
-        if user and hasattr(user, 'chatbot_profile'):
+
+        if user and not user.is_staff:
+            # Ensure ChatbotClient exists for this user
+            # Works for BOTH chatbot-registered users AND portal-registered users
+            if not hasattr(user, 'chatbot_profile'):
+                from apps.chatbot.models import ChatbotClient
+                # Try to get info from portal Client profile
+                full_name     = user.get_full_name() or user.username
+                business_name = user.username
+                email         = user.email or f"{user.username}@jamiitek.com"
+                phone         = ''
+                try:
+                    from apps.models import Client as PortalClient
+                    pc = PortalClient.objects.get(user=user)
+                    full_name     = pc.name or full_name
+                    business_name = pc.company or pc.name or business_name
+                    phone         = pc.phone or ''
+                except Exception:
+                    pass
+                ChatbotClient.objects.create(
+                    user=user,
+                    full_name=full_name,
+                    business_name=business_name,
+                    email=email,
+                    phone=phone,
+                )
+
             login(request, user)
             return redirect('chatbot_dashboard')
-        messages.error(request, "Jina la mtumiaji au nywila si sahihi.")
+
+        elif user and user.is_staff:
+            # Staff/admin — just log in and go to dashboard
+            login(request, user)
+            return redirect('chatbot_dashboard')
+
+        messages.error(request, "Invalid username or password.")
 
     return render(request, 'chatbot/portal/login.html')
 
@@ -166,10 +200,19 @@ def chatbot_setup_wizard(request):
     step   = int(request.GET.get('step', 1))
     bot    = client.bots.first()
 
-    if bot and bot.status == 'active' and step == 1:
-        return redirect('chatbot_dashboard')
+    # Bot already deployed (pending or active) — go to dashboard unless editing
+    if bot and bot.status in ('active', 'pending') and not request.GET.get('edit') and request.method == 'GET':
+        if step == 1:
+            return redirect('chatbot_dashboard')
 
-    context = {'client': client, 'step': step, 'bot': bot}
+    services = bot.services.all() if bot else []
+    faqs     = bot.faqs.all() if bot else []
+    plans    = SubscriptionPlan.objects.filter(is_active=True).order_by('sort_order')
+
+    context = {
+        'client': client, 'step': step, 'bot': bot,
+        'services': services, 'faqs': faqs, 'plans': plans,
+    }
 
     if request.method == 'POST':
         action = request.POST.get('action')
@@ -312,10 +355,11 @@ def chatbot_setup_wizard(request):
             messages.success(request, f"🎉 Bot yako '{bot.bot_name}' imesajiliwa! Itaanza kufanya kazi ndani ya saa 24.")
             return redirect('chatbot_dashboard')
 
+    # Refresh services/faqs after any POST changes
     if bot:
         context['services'] = bot.services.all()
         context['faqs']     = bot.faqs.all()
-    context['plans'] = SubscriptionPlan.objects.filter(is_active=True)
+        context['bot']      = bot
 
     return render(request, 'chatbot/portal/wizard.html', context)
 
@@ -358,7 +402,10 @@ def chatbot_dashboard(request):
 @login_required(login_url='chatbot_login')
 def chatbot_config(request):
     client = get_object_or_404(ChatbotClient, user=request.user)
-    bot    = get_object_or_404(BotConfig, client=client)
+    bot    = client.bots.first()
+    if not bot:
+        messages.warning(request, "Please complete your bot setup first.")
+        return redirect('chatbot_setup_wizard')
 
     if request.method == 'POST':
         section = request.POST.get('section')
@@ -410,7 +457,10 @@ def chatbot_config(request):
 @login_required(login_url='chatbot_login')
 def chatbot_conversations(request):
     client = get_object_or_404(ChatbotClient, user=request.user)
-    bot    = get_object_or_404(BotConfig, client=client)
+    bot    = client.bots.first()
+    if not bot:
+        messages.warning(request, "Complete your bot setup to view conversations.")
+        return redirect('chatbot_setup_wizard')
     convs  = bot.conversations.order_by('-last_message_at')
 
     total_convs   = convs.count()
@@ -428,7 +478,9 @@ def chatbot_conversations(request):
 @login_required(login_url='chatbot_login')
 def chatbot_conversation_detail(request, conv_id):
     client = get_object_or_404(ChatbotClient, user=request.user)
-    bot    = get_object_or_404(BotConfig, client=client)
+    bot    = client.bots.first()
+    if not bot:
+        return redirect('chatbot_setup_wizard')
     conv   = get_object_or_404(Conversation, id=conv_id, bot=bot)
     return render(request, 'chatbot/portal/conversation_detail.html', {
         'client': client, 'bot': bot, 'conv': conv,
@@ -439,7 +491,13 @@ def chatbot_conversation_detail(request, conv_id):
 @login_required(login_url='chatbot_login')
 def chatbot_billing(request):
     client   = get_object_or_404(ChatbotClient, user=request.user)
-    bot      = get_object_or_404(BotConfig, client=client)
+    bot      = client.bots.first()
+
+    if not bot:
+        messages.warning(request, "Please complete your bot setup first.")
+        return redirect('chatbot_setup_wizard')
+
+    # Allow billing even if bot is pending/draft — client needs to pay
     sub      = getattr(bot, 'subscription', None)
     plans    = SubscriptionPlan.objects.filter(is_active=True)
     payments = sub.payments.order_by('-payment_date') if sub else []

@@ -170,18 +170,23 @@
       <div class="sb-logo-text">JamiiBot</div>
     </div>
     <div class="sb-tag">ChatBot Platform</div>
-    {% if client and client.active_bot %}
+    {% with bot=client.bots.first %}
+    {% if bot %}
     <div class="sb-pulse">
-      <div class="sb-pulse-dot"></div>
-      <span class="sb-pulse-txt">{{ client.active_bot.bot_name }} — ONLINE</span>
+      <div class="sb-pulse-dot" style="background:{% if bot.status == 'active' %}var(--green){% else %}var(--yellow){% endif %}"></div>
+      <span class="sb-pulse-txt" style="color:{% if bot.status == 'active' %}var(--green){% else %}var(--yellow){% endif %}">{{ bot.bot_name }} — {{ bot.status|upper }}</span>
     </div>
     {% endif %}
+    {% endwith %}
   </div>
   <nav class="sb-nav">
     <div class="sb-section">Overview</div>
     <a href="{% url 'chatbot_dashboard' %}" class="sb-link {% if request.resolver_match.url_name == 'chatbot_dashboard' %}active{% endif %}">
       <i class="fas fa-chart-pie"></i> Dashboard
     </a>
+
+    {% with bot=client.bots.first %}
+    {% if bot %}
     <a href="{% url 'chatbot_conversations' %}" class="sb-link {% if 'conversations' in request.resolver_match.url_name %}active{% endif %}">
       <i class="fas fa-comments"></i> Conversations
     </a>
@@ -189,15 +194,39 @@
     <a href="{% url 'chatbot_config' %}" class="sb-link {% if 'config' in request.resolver_match.url_name %}active{% endif %}">
       <i class="fas fa-sliders"></i> Configure Bot
     </a>
+    <a href="{% url 'chatbot_setup_wizard' %}?edit=1" class="sb-link {% if 'setup' in request.resolver_match.url_name %}active{% endif %}" style="{% if not 'setup' in request.resolver_match.url_name %}color:var(--text-2){% endif %}">
+      <i class="fas fa-wand-magic-sparkles"></i> Setup Wizard
+    </a>
     <div class="sb-section">Account</div>
     <a href="{% url 'chatbot_billing' %}" class="sb-link {% if 'billing' in request.resolver_match.url_name %}active{% endif %}">
       <i class="fas fa-credit-card"></i> Billing & Plan
     </a>
+    {% else %}
+    <div class="sb-section">Bot Setup</div>
+    <a href="{% url 'chatbot_setup_wizard' %}" class="sb-link {% if 'setup' in request.resolver_match.url_name %}active{% endif %}" style="color:var(--yellow);background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.15);margin:0 10px;border-radius:10px">
+      <i class="fas fa-rocket"></i> Complete Setup
+    </a>
+    <div class="sb-section">Account</div>
+    <a href="{% url 'chatbot_billing' %}" class="sb-link {% if 'billing' in request.resolver_match.url_name %}active{% endif %}">
+      <i class="fas fa-credit-card"></i> Billing & Plan
+    </a>
+    {% endif %}
+    {% endwith %}
+
     <a href="{% url 'chatbot_logout' %}" class="sb-link" style="color:rgba(239,68,68,.5)" onclick="return confirm('Sign out?')">
       <i class="fas fa-power-off"></i> Sign Out
     </a>
   </nav>
   <div class="sb-foot">
+    <!-- SWITCH TO PORTAL -->
+    <a href="/portal/" style="display:flex;align-items:center;gap:10px;padding:9px 12px;margin:0 0 8px;border-radius:11px;background:rgba(0,212,255,.05);border:1px solid rgba(0,212,255,.15);text-decoration:none;transition:all .2s" onmouseenter="this.style.borderColor='rgba(0,212,255,.35)'" onmouseleave="this.style.borderColor='rgba(0,212,255,.15)'">
+      <div style="width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,rgba(0,212,255,.15),rgba(59,130,246,.15));display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="fas fa-globe" style="font-size:12px;color:var(--cyan)"></i></div>
+      <div style="min-width:0">
+        <div style="font-size:12px;font-weight:700;color:var(--cyan);line-height:1.2">Client Portal</div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--text3)">Hosting & Domains</div>
+      </div>
+      <i class="fas fa-arrow-right" style="font-size:11px;color:var(--text3);margin-left:auto"></i>
+    </a>
     {% if client %}
     <a href="{% url 'chatbot_dashboard' %}" class="sb-user">
       <div class="sb-av">{{ client.full_name|first|upper }}</div>
@@ -220,9 +249,12 @@
     </div>
   </div>
   <div class="tb-right">
-    {% if client and client.active_bot %}
+    {% with bot=client.bots.first %}
+    {% if bot %}
     <a href="{% url 'chatbot_conversations' %}" class="tb-btn" title="Conversations"><i class="fas fa-comments"></i></a>
+    <a href="{% url 'chatbot_config' %}" class="tb-btn" title="Configure Bot"><i class="fas fa-sliders"></i></a>
     {% endif %}
+    {% endwith %}
     <a href="{% url 'chatbot_billing' %}" class="tb-btn" title="Billing"><i class="fas fa-credit-card"></i></a>
   </div>
 </header>
@@ -249,4 +281,4 @@ setTimeout(()=>{document.querySelectorAll('.jt-msg').forEach(m=>{m.style.transit
 </script>
 {% block extra_js %}{% endblock %}
 </body>
-</html>"https://wa.me/255750910158"
+</html>

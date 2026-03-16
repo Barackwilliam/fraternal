@@ -1,413 +1,846 @@
 {% extends 'chatbot/portal/base.html' %}
-{% block title %}Setup Wizard — Step {{ step }}{% endblock %}
-{% block page_title %}Bot Setup Wizard{% endblock %}
-{% block breadcrumb %}Step {{ step }} of 6{% endblock %}
+{% block title %}Bot Setup — Step {{ step }} of 6{% endblock %}
+{% block page_title %}Setup{% endblock %}
+{% block breadcrumb %}Step {{ step }} · 6{% endblock %}
 {% block content %}
 <style>
-.wizard-wrap{max-width:700px;margin:0 auto}
-.steps-bar{display:flex;align-items:center;margin-bottom:32px}
-.step-item{display:flex;align-items:center;flex:1}
-.step-circle{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;flex-shrink:0;transition:all .2s}
-.step-done{background:var(--green);color:var(--bg);border:2px solid var(--green)}
-.step-active{background:var(--purple);color:#fff;border:2px solid var(--purple);box-shadow:0 0 0 4px rgba(124,58,237,.2)}
-.step-todo{background:var(--card);color:var(--text-3);border:2px solid var(--border)}
-.step-line{flex:1;height:2px;background:var(--border);margin:0 6px}
-.step-line.done{background:var(--green)}
-.step-label{font-family:var(--mono);font-size:9px;color:var(--text-3);text-align:center;margin-top:4px;text-transform:uppercase;letter-spacing:.5px}
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
-.wizard-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:32px}
-.wiz-title{font-family:var(--head);font-size:20px;font-weight:800;color:var(--text);margin-bottom:6px}
-.wiz-sub{font-size:14px;color:var(--text-2);margin-bottom:28px}
+/* ═══════════════════════════════════════════════════════
+   WIZARD — CINEMATIC DARK UI
+═══════════════════════════════════════════════════════ */
+:root{
+  --wiz-bg:#05080f;
+  --wiz-card:rgba(12,18,35,.85);
+  --wiz-border:rgba(255,255,255,.07);
+  --wiz-border-hi:rgba(100,120,255,.4);
+  --wiz-glow:#6366f1;
+  --wiz-green:#00e5a0;
+  --wiz-amber:#f59e0b;
+  --wiz-red:#ef4444;
+  --wiz-mono:'JetBrains Mono',monospace;
+  --wiz-head:'Syne',sans-serif;
+}
 
-.plan-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
-.plan-opt input{display:none}
-.plan-card{border:2px solid var(--border);border-radius:14px;padding:18px;text-align:center;cursor:pointer;transition:all .2s}
-.plan-opt input:checked + .plan-card{border-color:var(--purple);background:var(--purple-d)}
-.plan-opt input:checked + .plan-card .plan-name{color:var(--purple)}
-.plan-name{font-family:var(--head);font-size:16px;font-weight:800;color:var(--text);margin-bottom:4px}
-.plan-price{font-family:var(--mono);font-size:12px;color:var(--text-2);margin-bottom:8px}
-.plan-feat{font-size:11px;color:var(--text-3);line-height:1.7}
-.plan-popular{position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--purple);color:#fff;font-family:var(--mono);font-size:9px;font-weight:700;padding:2px 10px;border-radius:100px;white-space:nowrap}
+/* BG canvas */
+.wiz-scene{
+  position:fixed;inset:0;z-index:0;
+  background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(99,102,241,.08),transparent 65%),
+             radial-gradient(ellipse 40% 40% at 85% 80%,rgba(0,229,160,.04),transparent 55%),
+             #05080f;
+  pointer-events:none;
+}
+.wiz-scene canvas{position:absolute;inset:0;width:100%;height:100%}
 
-.svc-item{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:13px 16px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between}
-.svc-name{font-weight:700;color:var(--text);font-size:13px}
-.svc-desc{font-size:12px;color:var(--text-2);margin-top:2px}
-.svc-price{font-family:var(--mono);font-size:11px;color:var(--green);margin-top:3px}
-.del-btn{background:var(--red-d);border:1px solid rgba(239,68,68,.2);color:var(--red);padding:4px 10px;border-radius:7px;font-size:11px;cursor:pointer;font-family:var(--mono);transition:all .15s;flex-shrink:0}
-.del-btn:hover{background:var(--red);color:#fff}
+/* OUTER WRAP */
+.wiz-outer{
+  position:relative;z-index:1;
+  max-width:800px;margin:0 auto;
+  padding-bottom:60px;
+}
 
-.nav-btns{display:flex;justify-content:space-between;margin-top:28px;gap:12px}
+/* ── STEP TRACK ──────────────────────────────────────── */
+.step-track{
+  display:flex;align-items:center;
+  margin-bottom:36px;padding:0 4px;
+}
+.step-node{display:flex;flex-direction:column;align-items:center;position:relative;z-index:2}
+.step-orb{
+  width:44px;height:44px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--wiz-mono);font-weight:700;font-size:13px;
+  transition:all .4s cubic-bezier(.34,1.56,.64,1);
+  position:relative;
+}
+.step-orb::before{
+  content:'';position:absolute;inset:-3px;border-radius:50%;
+  background:conic-gradient(var(--wiz-glow) var(--pct,0%),transparent 0%);
+  opacity:0;transition:opacity .4s;
+}
+.s-done .step-orb{
+  background:linear-gradient(135deg,var(--wiz-green),#00b5d8);
+  color:#000;box-shadow:0 0 20px rgba(0,229,160,.35),0 0 60px rgba(0,229,160,.1);
+}
+.s-done .step-orb::before{opacity:0}
+.s-active .step-orb{
+  background:linear-gradient(135deg,#6366f1,#8b5cf6);
+  color:#fff;
+  box-shadow:0 0 24px rgba(99,102,241,.5),0 0 60px rgba(99,102,241,.15);
+  animation:orbPulse 3s ease-in-out infinite;
+}
+.s-todo .step-orb{
+  background:rgba(255,255,255,.04);
+  color:rgba(255,255,255,.25);
+  border:1.5px solid rgba(255,255,255,.08);
+}
+.step-lbl{
+  font-family:var(--wiz-mono);font-size:9px;
+  text-transform:uppercase;letter-spacing:1px;
+  margin-top:8px;transition:color .3s;
+}
+.s-done .step-lbl{color:var(--wiz-green)}
+.s-active .step-lbl{color:#a5b4fc;font-weight:600}
+.s-todo .step-lbl{color:rgba(255,255,255,.2)}
 
-.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border)}
+.step-line{
+  flex:1;height:1px;margin:0 4px;margin-bottom:26px;
+  background:rgba(255,255,255,.06);position:relative;overflow:hidden;
+}
+.step-line::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,var(--wiz-green),#00b5d8);
+  transform:scaleX(0);transform-origin:left;
+  transition:transform .6s ease;
+}
+.step-line.done::after{transform:scaleX(1)}
+
+/* ── WIZARD CARD ─────────────────────────────────────── */
+.wiz-card{
+  background:var(--wiz-card);
+  border:1px solid var(--wiz-border);
+  border-radius:24px;
+  backdrop-filter:blur(24px);
+  overflow:hidden;
+  box-shadow:0 32px 80px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.03);
+  animation:cardIn .4s cubic-bezier(.34,1.56,.64,1) both;
+}
+.wiz-card-glow{
+  position:absolute;top:-1px;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--wiz-glow),transparent);
+  opacity:.6;
+}
+
+/* CARD HEADER */
+.wiz-head{
+  padding:24px 32px;
+  border-bottom:1px solid var(--wiz-border);
+  display:flex;align-items:center;gap:16px;
+  position:relative;
+  background:linear-gradient(135deg,rgba(99,102,241,.06),transparent 60%);
+}
+.wiz-head-num{
+  width:52px;height:52px;border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:24px;flex-shrink:0;position:relative;
+}
+.wiz-head-num::before{
+  content:'';position:absolute;inset:0;border-radius:14px;
+  background:inherit;filter:blur(12px);opacity:.4;z-index:-1;
+}
+.wiz-title{font-family:var(--wiz-head);font-size:22px;font-weight:800;color:#fff;letter-spacing:-.5px}
+.wiz-sub{font-size:13px;color:rgba(255,255,255,.4);margin-top:3px;line-height:1.5}
+.step-counter{
+  margin-left:auto;flex-shrink:0;
+  font-family:var(--wiz-mono);font-size:11px;
+  color:rgba(255,255,255,.2);
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.06);
+  padding:5px 12px;border-radius:100px;
+}
+
+/* CARD BODY */
+.wiz-body{padding:32px}
+
+/* ── FORM ELEMENTS ───────────────────────────────────── */
+.fw-group{margin-bottom:20px}
+.fw-label{
+  display:flex;align-items:center;gap:8px;
+  font-family:var(--wiz-mono);font-size:10px;font-weight:600;
+  color:rgba(255,255,255,.3);
+  text-transform:uppercase;letter-spacing:1.5px;
+  margin-bottom:9px;
+}
+.fw-label-dot{width:5px;height:5px;border-radius:50%;background:var(--wiz-glow);flex-shrink:0}
+.fw-input{
+  width:100%;padding:13px 16px;
+  background:rgba(255,255,255,.04);
+  border:1.5px solid rgba(255,255,255,.08);
+  border-radius:11px;
+  color:rgba(255,255,255,.88);
+  font-family:var(--wiz-head);font-size:14px;
+  outline:none;transition:all .2s;
+}
+.fw-input:focus{
+  border-color:rgba(99,102,241,.5);
+  background:rgba(99,102,241,.06);
+  box-shadow:0 0 0 3px rgba(99,102,241,.1),inset 0 1px 0 rgba(255,255,255,.04);
+}
+.fw-input::placeholder{color:rgba(255,255,255,.18);font-family:var(--wiz-mono);font-size:12px}
+textarea.fw-input{resize:vertical;min-height:95px;line-height:1.6}
+.fw-hint{font-family:var(--wiz-mono);font-size:10px;color:rgba(255,255,255,.2);margin-top:6px}
+
+/* ── CHOICE CARDS (language / tone) ─────────────────── */
+.choice-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+.choice-opt input{display:none}
+.choice-card{
+  border:1.5px solid rgba(255,255,255,.07);
+  border-radius:14px;padding:14px 12px;
+  cursor:pointer;transition:all .2s;
+  text-align:center;
+  background:rgba(255,255,255,.02);
+  position:relative;overflow:hidden;
+}
+.choice-card::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(99,102,241,.08),transparent);
+  opacity:0;transition:opacity .2s;
+}
+.choice-card:hover{border-color:rgba(99,102,241,.3);transform:translateY(-2px)}
+.choice-card:hover::before{opacity:1}
+.choice-opt input:checked + .choice-card{
+  border-color:rgba(99,102,241,.6);
+  background:rgba(99,102,241,.1);
+  box-shadow:0 0 20px rgba(99,102,241,.15),inset 0 1px 0 rgba(255,255,255,.05);
+}
+.choice-opt input:checked + .choice-card::before{opacity:1}
+.choice-card .ci{font-size:24px;margin-bottom:7px;display:block}
+.choice-card .ct{font-family:var(--wiz-head);font-size:12px;font-weight:700;color:rgba(255,255,255,.85)}
+.choice-card .cs{font-family:var(--wiz-mono);font-size:10px;color:rgba(255,255,255,.3);margin-top:3px}
+.check-mark{
+  position:absolute;top:8px;right:8px;
+  width:18px;height:18px;border-radius:50%;
+  background:#6366f1;display:flex;align-items:center;justify-content:center;
+  font-size:9px;color:#fff;opacity:0;transform:scale(0);transition:all .2s;
+}
+.choice-opt input:checked + .choice-card .check-mark{opacity:1;transform:scale(1)}
+
+/* ── SECTION DIVIDER ─────────────────────────────────── */
+.fw-section{
+  display:flex;align-items:center;gap:12px;
+  margin:24px 0 16px;
+}
+.fw-section span{font-family:var(--wiz-mono);font-size:10px;color:rgba(255,255,255,.25);text-transform:uppercase;letter-spacing:1.5px;white-space:nowrap}
+.fw-section::before,.fw-section::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.06)}
+
+/* ── TOGGLE SWITCH ───────────────────────────────────── */
+.toggle-block{
+  background:rgba(255,255,255,.03);
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:14px;overflow:hidden;
+}
+.toggle-row{
+  display:flex;align-items:center;
+  justify-content:space-between;
+  padding:14px 18px;
+  border-bottom:1px solid rgba(255,255,255,.05);
+  transition:background .15s;
+}
 .toggle-row:last-child{border-bottom:none}
-.toggle-label{font-size:13.5px;font-weight:600;color:var(--text)}
-.toggle-sub{font-size:12px;color:var(--text-2);margin-top:2px}
-.toggle-sw{position:relative;width:42px;height:24px;flex-shrink:0}
-.toggle-sw input{opacity:0;width:0;height:0}
-.toggle-sw .slider{position:absolute;inset:0;background:rgba(255,255,255,.12);border-radius:100px;cursor:pointer;transition:.3s}
-.toggle-sw input:checked + .slider{background:var(--green)}
-.toggle-sw .slider::before{content:'';position:absolute;width:18px;height:18px;border-radius:50%;background:#fff;top:3px;left:3px;transition:.3s}
-.toggle-sw input:checked + .slider::before{left:21px}
+.toggle-row:hover{background:rgba(255,255,255,.02)}
+.toggle-label{font-family:var(--wiz-head);font-size:13.5px;font-weight:600;color:rgba(255,255,255,.82)}
+.toggle-sub{font-family:var(--wiz-mono);font-size:10px;color:rgba(255,255,255,.28);margin-top:3px}
+.toggle-sw{position:relative;width:46px;height:26px;flex-shrink:0}
+.toggle-sw input{display:none}
+.toggle-sw .slider{
+  position:absolute;inset:0;
+  background:rgba(255,255,255,.1);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:100px;cursor:pointer;transition:.3s;
+}
+.toggle-sw input:checked + .slider{background:var(--wiz-green);border-color:transparent;box-shadow:0 0 12px rgba(0,229,160,.4)}
+.toggle-sw .slider::before{
+  content:'';position:absolute;
+  width:20px;height:20px;border-radius:50%;
+  background:#fff;top:2px;left:2px;transition:.3s;
+  box-shadow:0 2px 4px rgba(0,0,0,.3);
+}
+.toggle-sw input:checked + .slider::before{left:23px}
 
-.webhook-box{background:rgba(0,220,130,.05);border:1px solid rgba(0,220,130,.15);border-radius:12px;padding:16px;margin-top:16px}
-.wh-url-text{font-family:var(--mono);font-size:11px;color:var(--green);word-break:break-all}
+/* ── ITEM ROWS (services / faqs) ─────────────────────── */
+.item-list{display:flex;flex-direction:column;gap:8px;margin-bottom:20px}
+.item-row{
+  background:rgba(255,255,255,.03);
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:12px;padding:14px 16px;
+  display:flex;align-items:flex-start;gap:13px;
+  transition:border-color .15s;
+  animation:itemIn .3s ease both;
+}
+.item-row:hover{border-color:rgba(99,102,241,.2)}
+.item-ico{
+  width:38px;height:38px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;flex-shrink:0;
+}
+.item-name{font-family:var(--wiz-head);font-weight:700;color:rgba(255,255,255,.85);font-size:13px}
+.item-desc{font-family:var(--wiz-mono);font-size:11px;color:rgba(255,255,255,.35);margin-top:3px;line-height:1.5}
+.item-price{font-family:var(--wiz-mono);font-size:11px;color:var(--wiz-green);margin-top:4px;font-weight:600}
+.del-btn{
+  margin-left:auto;flex-shrink:0;
+  width:32px;height:32px;border-radius:9px;
+  background:rgba(239,68,68,.08);
+  border:1px solid rgba(239,68,68,.15);
+  color:rgba(239,68,68,.6);
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;cursor:pointer;transition:all .15s;
+}
+.del-btn:hover{background:rgba(239,68,68,.2);color:#f87171;border-color:rgba(239,68,68,.3)}
+
+/* ADD FORM BOX */
+.add-box{
+  background:rgba(255,255,255,.02);
+  border:1.5px dashed rgba(255,255,255,.08);
+  border-radius:14px;padding:20px;
+  transition:border-color .2s;
+}
+.add-box:focus-within{border-color:rgba(99,102,241,.3);background:rgba(99,102,241,.03)}
+.add-box-title{
+  font-family:var(--wiz-mono);font-size:10px;
+  color:rgba(255,255,255,.25);text-transform:uppercase;
+  letter-spacing:1.5px;margin-bottom:14px;
+  display:flex;align-items:center;gap:8px;
+}
+
+/* ── PLAN CARDS ──────────────────────────────────────── */
+.plan-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px}
+.plan-opt{cursor:pointer;position:relative}
+.plan-opt input{display:none}
+.plan-card{
+  border:1.5px solid rgba(255,255,255,.08);
+  border-radius:18px;padding:22px 16px;
+  text-align:center;transition:all .25s;
+  background:rgba(255,255,255,.02);
+  position:relative;overflow:hidden;
+}
+.plan-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,rgba(99,102,241,.5),transparent);
+  opacity:0;transition:opacity .25s;
+}
+.plan-card:hover{border-color:rgba(99,102,241,.3);transform:translateY(-3px)}
+.plan-opt input:checked + .plan-card{
+  border-color:#6366f1;
+  background:rgba(99,102,241,.1);
+  box-shadow:0 0 40px rgba(99,102,241,.2),inset 0 1px 0 rgba(255,255,255,.06);
+  transform:translateY(-4px);
+}
+.plan-opt input:checked + .plan-card::before{opacity:1}
+.plan-badge{
+  position:absolute;top:-1px;left:50%;transform:translateX(-50%);
+  background:linear-gradient(135deg,#6366f1,#8b5cf6);
+  color:#fff;font-family:var(--wiz-mono);font-size:9px;font-weight:700;
+  padding:4px 14px;border-radius:0 0 10px 10px;
+  white-space:nowrap;letter-spacing:.5px;
+}
+.plan-name{font-family:var(--wiz-head);font-size:15px;font-weight:800;color:rgba(255,255,255,.8);margin-bottom:6px}
+.plan-price{font-family:var(--wiz-head);font-size:30px;font-weight:900;color:#fff;line-height:1}
+.plan-currency{font-family:var(--wiz-mono);font-size:11px;color:rgba(255,255,255,.3);margin-bottom:14px}
+.plan-feat{
+  display:flex;align-items:center;gap:7px;
+  padding:6px 0;border-bottom:1px solid rgba(255,255,255,.05);
+  font-family:var(--wiz-mono);font-size:10px;color:rgba(255,255,255,.45);
+  text-align:left;
+}
+.plan-feat:last-child{border-bottom:none}
+.plan-feat i{color:var(--wiz-green);font-size:9px;flex-shrink:0}
+
+/* ── WHATSAPP INPUT ──────────────────────────────────── */
+.wa-wrap{position:relative}
+.wa-prefix{
+  position:absolute;left:0;top:0;bottom:0;
+  width:56px;display:flex;align-items:center;justify-content:center;
+  font-size:24px;color:#25d366;pointer-events:none;
+  border-right:1px solid rgba(255,255,255,.08);
+}
+.wa-input{
+  width:100%;padding:18px 18px 18px 68px;
+  background:rgba(255,255,255,.04);
+  border:2px solid rgba(255,255,255,.08);
+  border-radius:14px;
+  color:#fff;
+  font-family:var(--wiz-mono);font-size:22px;font-weight:600;
+  letter-spacing:2px;outline:none;transition:all .2s;
+}
+.wa-input:focus{border-color:#25d366;background:rgba(37,211,102,.04);box-shadow:0 0 0 4px rgba(37,211,102,.1)}
+.wa-input.valid{border-color:var(--wiz-green);box-shadow:0 0 20px rgba(0,229,160,.15)}
+.wa-input.error{border-color:var(--wiz-red)}
+.wa-status{
+  display:flex;align-items:center;gap:8px;
+  font-family:var(--wiz-mono);font-size:11px;
+  margin-top:8px;min-height:20px;
+}
+
+/* ── TIMELINE ────────────────────────────────────────── */
+.timeline-box{
+  background:rgba(0,229,160,.03);
+  border:1px solid rgba(0,229,160,.1);
+  border-radius:16px;overflow:hidden;margin-bottom:22px;
+}
+.timeline-head{
+  padding:12px 20px;
+  border-bottom:1px solid rgba(0,229,160,.08);
+  font-family:var(--wiz-mono);font-size:10px;
+  color:rgba(0,229,160,.6);text-transform:uppercase;letter-spacing:1.5px;
+}
+.tl-item{display:flex;gap:16px;padding:16px 20px;border-bottom:1px solid rgba(255,255,255,.04)}
+.tl-item:last-child{border-bottom:none}
+.tl-num{
+  width:32px;height:32px;border-radius:50%;flex-shrink:0;
+  background:rgba(0,229,160,.1);border:1px solid rgba(0,229,160,.2);
+  color:var(--wiz-green);font-family:var(--wiz-mono);font-weight:700;font-size:13px;
+  display:flex;align-items:center;justify-content:center;margin-top:1px;
+}
+.tl-title{font-family:var(--wiz-head);font-size:14px;font-weight:700;color:rgba(255,255,255,.85);margin-bottom:4px}
+.tl-sub{font-family:var(--wiz-mono);font-size:11px;color:rgba(255,255,255,.35);line-height:1.6}
+
+/* ── NAV BUTTONS ─────────────────────────────────────── */
+.nav-btns{
+  display:flex;justify-content:space-between;align-items:center;
+  gap:12px;margin-top:28px;padding-top:22px;
+  border-top:1px solid rgba(255,255,255,.06);
+}
+.btn-wiz-back{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:11px 20px;border-radius:11px;
+  background:rgba(255,255,255,.04);
+  border:1.5px solid rgba(255,255,255,.08);
+  color:rgba(255,255,255,.45);
+  font-family:var(--wiz-mono);font-size:13px;font-weight:600;
+  text-decoration:none;transition:all .2s;cursor:pointer;
+}
+.btn-wiz-back:hover{background:rgba(255,255,255,.07);color:rgba(255,255,255,.7);border-color:rgba(255,255,255,.14)}
+.btn-wiz-next{
+  display:inline-flex;align-items:center;gap:10px;
+  padding:12px 28px;border-radius:11px;
+  background:linear-gradient(135deg,#6366f1,#8b5cf6);
+  color:#fff;font-family:var(--wiz-head);font-size:14px;font-weight:800;
+  border:none;cursor:pointer;transition:all .25s;
+  box-shadow:0 6px 24px rgba(99,102,241,.35);letter-spacing:.3px;
+}
+.btn-wiz-next:hover{transform:translateY(-2px);box-shadow:0 10px 36px rgba(99,102,241,.5)}
+.btn-wiz-launch{
+  display:inline-flex;align-items:center;gap:10px;
+  padding:14px 36px;border-radius:12px;
+  background:linear-gradient(135deg,var(--wiz-green),#00b5d8);
+  color:#000;font-family:var(--wiz-head);font-size:15px;font-weight:900;
+  border:none;cursor:pointer;transition:all .25s;
+  box-shadow:0 8px 28px rgba(0,229,160,.3);letter-spacing:.3px;
+}
+.btn-wiz-launch:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(0,229,160,.5)}
+
+/* ── SMALL BTN ───────────────────────────────────────── */
+.btn-wiz-add{
+  display:inline-flex;align-items:center;gap:7px;
+  padding:9px 18px;border-radius:9px;
+  background:rgba(99,102,241,.1);
+  border:1.5px solid rgba(99,102,241,.25);
+  color:#a5b4fc;font-family:var(--wiz-mono);font-size:12px;font-weight:600;
+  cursor:pointer;transition:all .2s;
+}
+.btn-wiz-add:hover{background:rgba(99,102,241,.2);border-color:rgba(99,102,241,.4);color:#c7d2fe}
+
+/* ── EMPTY STATE ─────────────────────────────────────── */
+.empty-state{
+  text-align:center;padding:28px;
+  border:1.5px dashed rgba(255,255,255,.07);
+  border-radius:14px;margin-bottom:16px;
+}
+.empty-state .ei{font-size:36px;opacity:.2;margin-bottom:10px}
+.empty-state p{font-family:var(--wiz-mono);font-size:11px;color:rgba(255,255,255,.2);line-height:1.6}
+
+/* ── INPUT ROW ───────────────────────────────────────── */
+.fw-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fw-row-3{display:grid;grid-template-columns:2fr 1fr;gap:12px}
+
+/* ── ANIMATIONS ──────────────────────────────────────── */
+@keyframes orbPulse{0%,100%{box-shadow:0 0 24px rgba(99,102,241,.5),0 0 60px rgba(99,102,241,.15)}50%{box-shadow:0 0 32px rgba(99,102,241,.7),0 0 80px rgba(99,102,241,.2)}}
+@keyframes cardIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes itemIn{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 </style>
 
-<div class="wizard-wrap">
-  <!-- PROGRESS BAR -->
-  <div class="steps-bar mb-3">
-    {% for i in "123456" %}
-    {% with n=forloop.counter %}
-    <div style="display:flex;flex-direction:column;align-items:center;flex:{% if not forloop.last %}1{% endif %}">
-      <div style="display:flex;align-items:center;width:100%">
-        <div class="step-circle {% if n < step %}step-done{% elif n == step %}step-active{% else %}step-todo{% endif %}">
-          {% if n < step %}<i class="fas fa-check" style="font-size:12px"></i>{% else %}{{ n }}{% endif %}
-        </div>
-        {% if not forloop.last %}<div class="step-line {% if n < step %}done{% endif %}"></div>{% endif %}
+<!-- BG SCENE -->
+<div class="wiz-scene">
+  <canvas id="particleCanvas"></canvas>
+</div>
+
+<div class="wiz-outer">
+
+  <!-- ── STEP TRACK ─────────────────────────────────── -->
+  <div class="step-track">
+    {% for i in "123456" %}{% with n=forloop.counter %}
+    <div class="step-node {% if n < step %}s-done{% elif n == step %}s-active{% else %}s-todo{% endif %}">
+      <div class="step-orb">
+        {% if n < step %}<i class="fas fa-check" style="font-size:15px"></i>
+        {% else %}{{ n }}{% endif %}
+      </div>
+      <div class="step-lbl">
+        {% if n == 1 %}Identity{% elif n == 2 %}Messages{% elif n == 3 %}Services{% elif n == 4 %}FAQs{% elif n == 5 %}WhatsApp{% else %}Launch{% endif %}
       </div>
     </div>
-    {% endwith %}
-    {% endfor %}
-  </div>
-  <div style="display:flex;justify-content:space-between;margin-bottom:24px;font-family:var(--mono);font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.5px">
-    <span>Basic Info</span><span>Messages</span><span>Services</span><span>FAQs</span><span>WhatsApp</span><span>Deploy</span>
+    {% if not forloop.last %}<div class="step-line {% if n < step %}done{% endif %}"></div>{% endif %}
+    {% endwith %}{% endfor %}
   </div>
 
-  <div class="wizard-card">
+  <!-- ── WIZARD CARD ────────────────────────────────── -->
+  <div class="wiz-card" style="position:relative">
+    <div class="wiz-card-glow"></div>
 
-    <!-- STEP 1 — Basic Info -->
+    <!-- ══ STEP 1 ══════════════════════════════════════ -->
     {% if step == 1 %}
-    <div class="wiz-title">🤖 Name Your Bot</div>
-    <div class="wiz-sub">Tell us about your business and what your bot should do.</div>
-    <form method="post">
-      {% csrf_token %}<input type="hidden" name="action" value="save_step1">
-      <div class="row g-3 mb-3">
-        <div class="col-6">
-          <label class="f-label">Bot Name *</label>
-          <input type="text" name="bot_name" class="f-input" placeholder="e.g. Amara, Juma, Helper" required value="{{ bot.bot_name|default:'' }}">
-        </div>
-        <div class="col-6">
-          <label class="f-label">Business Name *</label>
-          <input type="text" name="business_name" class="f-input" placeholder="Your business name" required value="{{ bot.business_name|default:client.business_name }}">
-        </div>
-      </div>
-      <div class="mb-3">
-        <label class="f-label">Business Description *</label>
-        <textarea name="description" class="f-input" style="min-height:100px" placeholder="Describe what your business does, what you sell, who your customers are..." required>{{ bot.description|default:'' }}</textarea>
-      </div>
-      <div class="row g-3 mb-3">
-        <div class="col-6">
-          <label class="f-label">Language</label>
-          <select name="language" class="f-input">
-            <option value="sw+en" {% if bot.language == 'sw+en' %}selected{% endif %}>Swahili + English (auto-detect)</option>
-            <option value="en" {% if bot.language == 'en' %}selected{% endif %}>English only</option>
-            <option value="sw" {% if bot.language == 'sw' %}selected{% endif %}>Swahili only</option>
-          </select>
-        </div>
-        <div class="col-6">
-          <label class="f-label">Bot Personality</label>
-          <select name="tone" class="f-input">
-            <option value="friendly" {% if bot.tone == 'friendly' %}selected{% endif %}>Friendly & Warm 😊</option>
-            <option value="professional" {% if bot.tone == 'professional' %}selected{% endif %}>Professional</option>
-            <option value="casual" {% if bot.tone == 'casual' %}selected{% endif %}>Casual & Fun</option>
-            <option value="formal" {% if bot.tone == 'formal' %}selected{% endif %}>Formal</option>
-          </select>
-        </div>
-      </div>
-      <div class="nav-btns">
-        <span></span>
-        <button type="submit" class="jt-btn btn-green"><i class="fas fa-arrow-right"></i> Continue</button>
-      </div>
-    </form>
-
-    <!-- STEP 2 — Messages -->
-    {% elif step == 2 %}
-    <div class="wiz-title">💬 Configure Messages</div>
-    <div class="wiz-sub">Customize what your bot says in different situations.</div>
-    <form method="post">
-      {% csrf_token %}<input type="hidden" name="action" value="save_step2">
-      <div class="mb-3">
-        <label class="f-label">Greeting Message *</label>
-        <textarea name="greeting_msg" class="f-input" style="min-height:80px" required>{{ bot.greeting_msg }}</textarea>
-        <div style="font-family:var(--mono);font-size:10px;color:var(--text-3);margin-top:4px">Sent automatically when a new customer messages you</div>
-      </div>
-      <div class="mb-3">
-        <label class="f-label">Fallback Message</label>
-        <textarea name="fallback_msg" class="f-input">{{ bot.fallback_msg }}</textarea>
-        <div style="font-family:var(--mono);font-size:10px;color:var(--text-3);margin-top:4px">Sent when the bot doesn't understand</div>
-      </div>
-      <div class="mb-3">
-        <label class="f-label">Human Handoff Message</label>
-        <textarea name="human_handoff_msg" class="f-input">{{ bot.human_handoff_msg }}</textarea>
-        <div style="font-family:var(--mono);font-size:10px;color:var(--text-3);margin-top:4px">Sent when customer requests a human agent</div>
-      </div>
+    <div class="wiz-head">
+      <div class="wiz-head-num" style="background:rgba(99,102,241,.15)">🤖</div>
       <div>
-        <div class="toggle-row">
-          <div><div class="toggle-label">Ask for customer name</div><div class="toggle-sub">Bot will ask new customers their name</div></div>
-          <label class="toggle-sw"><input type="checkbox" name="collect_name" {% if bot.collect_name %}checked{% endif %}><span class="slider"></span></label>
-        </div>
-        <div class="toggle-row">
-          <div><div class="toggle-label">Ask for phone number</div><div class="toggle-sub">Bot will ask for customer's phone number</div></div>
-          <label class="toggle-sw"><input type="checkbox" name="collect_phone" {% if bot.collect_phone %}checked{% endif %}><span class="slider"></span></label>
-        </div>
+        <div class="wiz-title">Bot Identity</div>
+        <div class="wiz-sub">Give your AI assistant a name and personality it will own</div>
       </div>
-      <div class="nav-btns">
-        <a href="/chatbot/setup/?step=1" class="jt-btn btn-ghost"><i class="fas fa-arrow-left"></i> Back</a>
-        <button type="submit" class="jt-btn btn-green"><i class="fas fa-arrow-right"></i> Continue</button>
-      </div>
-    </form>
-
-    <!-- STEP 3 — Services -->
-    {% elif step == 3 %}
-    <div class="wiz-title">🛍️ Add Your Services</div>
-    <div class="wiz-sub">Tell the bot what you sell or offer. Add as many as needed.</div>
-
-    {% if services %}
-    <div style="margin-bottom:20px">
-      {% for svc in services %}
-      <div class="svc-item">
-        <div>
-          <div class="svc-name">{{ svc.name }}</div>
-          <div class="svc-desc">{{ svc.description|truncatechars:80 }}</div>
-          {% if svc.price %}<div class="svc-price">{{ svc.price }}</div>{% endif %}
-        </div>
-        <form method="post" style="margin-left:12px">
-          {% csrf_token %}<input type="hidden" name="action" value="delete_service"><input type="hidden" name="service_id" value="{{ svc.id }}">
-          <button type="submit" class="del-btn"><i class="fas fa-trash"></i></button>
-        </form>
-      </div>
-      {% endfor %}
+      <div class="step-counter">01 / 06</div>
     </div>
-    {% endif %}
+    <div class="wiz-body">
+      <form method="post">
+        {% csrf_token %}<input type="hidden" name="action" value="save_step1">
 
-    <form method="post">
-      {% csrf_token %}<input type="hidden" name="action" value="add_service">
-      <div class="row g-2 mb-2">
-        <div class="col-6"><input type="text" name="service_name" class="f-input" placeholder="Service name *" required></div>
-        <div class="col-6"><input type="text" name="service_price" class="f-input" placeholder="Price (optional)"></div>
-      </div>
-      <div class="mb-3"><textarea name="service_desc" class="f-input" style="min-height:70px" placeholder="Describe this service..." required></textarea></div>
-      <button type="submit" class="jt-btn btn-ghost" style="width:100%;justify-content:center"><i class="fas fa-plus"></i> Add Service</button>
-    </form>
-
-    <div class="nav-btns">
-      <a href="/chatbot/setup/?step=2" class="jt-btn btn-ghost"><i class="fas fa-arrow-left"></i> Back</a>
-      <form method="post"><{% csrf_token %}<input type="hidden" name="action" value="next_step3"><button type="submit" class="jt-btn btn-green">Continue <i class="fas fa-arrow-right"></i></button></form>
-    </div>
-
-    <!-- STEP 4 — FAQs -->
-    {% elif step == 4 %}
-    <div class="wiz-title">❓ Add FAQs</div>
-    <div class="wiz-sub">Add common questions your customers ask. The bot will answer them automatically.</div>
-
-    {% if faqs %}
-    <div style="margin-bottom:20px">
-      {% for faq in faqs %}
-      <div class="svc-item">
-        <div>
-          <div class="svc-name">{{ faq.question|truncatechars:70 }}</div>
-          <div class="svc-desc">{{ faq.answer|truncatechars:80 }}</div>
-        </div>
-        <form method="post" style="margin-left:12px">
-          {% csrf_token %}<input type="hidden" name="action" value="delete_faq"><input type="hidden" name="faq_id" value="{{ faq.id }}">
-          <button type="submit" class="del-btn"><i class="fas fa-trash"></i></button>
-        </form>
-      </div>
-      {% endfor %}
-    </div>
-    {% endif %}
-
-    <form method="post">
-      {% csrf_token %}<input type="hidden" name="action" value="add_faq">
-      <div class="mb-2"><textarea name="faq_question" class="f-input" style="min-height:60px" placeholder="Question e.g. What are your working hours?..." required></textarea></div>
-      <div class="mb-3"><textarea name="faq_answer" class="f-input" style="min-height:60px" placeholder="Answer..." required></textarea></div>
-      <button type="submit" class="jt-btn btn-ghost" style="width:100%;justify-content:center"><i class="fas fa-plus"></i> Add FAQ</button>
-    </form>
-
-    <div class="nav-btns">
-      <a href="/chatbot/setup/?step=3" class="jt-btn btn-ghost"><i class="fas fa-arrow-left"></i> Back</a>
-      <form method="post">{% csrf_token %}<input type="hidden" name="action" value="next_step4"><button type="submit" class="jt-btn btn-green">Continue <i class="fas fa-arrow-right"></i></button></form>
-    </div>
-
-    <!-- STEP 5 — WhatsApp -->
-    {% elif step == 5 %}
-    <div class="wiz-title">📱 Your WhatsApp Number</div>
-    <div class="wiz-sub">Enter the WhatsApp number your customers will use to contact your bot.</div>
-
-    <div class="jt-alert jt-alert-success mb-4">
-      <i class="fab fa-whatsapp fa-sm" style="flex-shrink:0;color:#25d366"></i>
-      <div>Our team will register your number and connect it to your bot. It will be live within 24 hours. <strong>You don't need to do anything else.</strong></div>
-    </div>
-
-    <form method="post" id="step5-form">
-      {% csrf_token %}<input type="hidden" name="action" value="save_step5">
-      <div class="mb-4">
-        <label class="f-label">WhatsApp Number <span style="color:var(--red)">*</span></label>
-        <div style="position:relative">
-          <span style="position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:20px;color:#25d366;pointer-events:none">
-            <i class="fab fa-whatsapp"></i>
-          </span>
-          <input type="tel" name="whatsapp_number" id="wa-input" class="f-input"
-            placeholder="+255 7XX XXX XXX"
-            value="{{ bot.whatsapp_number }}"
-            required
-            style="font-size:18px;font-weight:700;letter-spacing:1px;text-align:center;padding:14px 14px 14px 46px">
-        </div>
-        <div id="wa-hint" style="font-family:var(--mono);font-size:10px;color:var(--text-3);margin-top:6px;text-align:center">
-          Enter number with country code · Example: +255750123456
-        </div>
-        <div id="wa-error" style="display:none;font-size:12px;color:var(--red);margin-top:6px;text-align:center">
-          <i class="fas fa-circle-exclamation"></i> <span></span>
-        </div>
-      </div>
-
-      <div style="background:rgba(245,158,11,.07);border:1.5px solid rgba(245,158,11,.2);border-radius:12px;padding:12px 15px;margin-bottom:20px;display:flex;gap:10px;font-size:13px;color:var(--yellow)">
-        <i class="fas fa-triangle-exclamation fa-sm" style="flex-shrink:0;margin-top:2px"></i>
-        <div>This number must be <strong>removed from the WhatsApp app</strong> on your phone before it can be used by the bot.</div>
-      </div>
-
-      <div class="nav-btns">
-        <a href="/chatbot/setup/?step=4" class="jt-btn btn-ghost"><i class="fas fa-arrow-left"></i> Back</a>
-        <button type="submit" id="step5-submit" class="jt-btn btn-green">Continue <i class="fas fa-arrow-right"></i></button>
-      </div>
-    </form>
-
-    <script>
-    (function(){
-      const inp   = document.getElementById('wa-input');
-      const err   = document.getElementById('wa-error');
-      const hint  = document.getElementById('wa-hint');
-      const btn   = document.getElementById('step5-submit');
-
-      function showErr(msg){ err.querySelector('span').textContent=msg; err.style.display='block'; hint.style.display='none'; inp.style.borderColor='var(--red)'; btn.disabled=true; }
-      function clearErr(){ err.style.display='none'; hint.style.display='block'; inp.style.borderColor=''; btn.disabled=false; }
-
-      function formatNumber(val){
-        // Strip everything except digits and leading +
-        let digits = val.replace(/[^\d]/g,'');
-        // Tanzania: 07xx → +25507xx, 7xx → +2557xx
-        if(digits.startsWith('255')) return '+' + digits;
-        if(digits.startsWith('0') && digits.length >= 9) return '+255' + digits.slice(1);
-        if(digits.length >= 9 && !val.startsWith('+')) return '+255' + digits;
-        return val;
-      }
-
-      inp.addEventListener('blur', function(){
-        let v = this.value.trim();
-        if(!v){ showErr('Phone number is required'); return; }
-        let formatted = formatNumber(v);
-        this.value = formatted;
-        let digits = formatted.replace(/\D/g,'');
-        if(digits.length < 7 || digits.length > 15){
-          showErr('Invalid number. Example: +255750123456');
-        } else {
-          clearErr();
-        }
-      });
-
-      inp.addEventListener('input', function(){
-        if(err.style.display !== 'none') clearErr();
-      });
-
-      document.getElementById('step5-form').addEventListener('submit', function(e){
-        let v = inp.value.trim();
-        if(!v){ e.preventDefault(); showErr('Please enter your WhatsApp number.'); return; }
-        let digits = v.replace(/\D/g,'');
-        if(digits.length < 7 || digits.length > 15){ e.preventDefault(); showErr('Invalid number. Example: +255750123456'); }
-      });
-    })();
-    </script>
-
-    <!-- STEP 6 — Deploy -->
-    {% elif step == 6 %}
-    <div class="wiz-title">🚀 Launch Your Bot!</div>
-    <div class="wiz-sub">Start free for 7 days — billing begins after your trial.</div>
-
-    {% if plans %}
-    <form method="post" id="deploy-form">
-      {% csrf_token %}
-      <input type="hidden" name="action" value="deploy">
-      <input type="hidden" name="plan_id" id="selectedPlanId" value="{{ plans.0.id }}">
-
-      <div class="plan-grid" style="margin-bottom:24px">
-        {% for plan in plans %}
-        <label class="plan-opt" style="position:relative" onclick="document.getElementById('selectedPlanId').value='{{ plan.id }}'">
-          {% if plan.slug == 'pro' %}<div class="plan-popular">Popular</div>{% endif %}
-          <input type="radio" name="plan_radio" value="{{ plan.id }}"
-            {% if forloop.first %}checked{% endif %}
-            onchange="document.getElementById('selectedPlanId').value=this.value">
-          <div class="plan-card">
-            <div class="plan-name">{{ plan.name }}</div>
-            <div class="plan-price">TZS {{ plan.price_tzs|floatformat:0 }}/month</div>
-            <div class="plan-feat">
-              {% if plan.is_unlimited %}Unlimited messages{% else %}{{ plan.msg_limit }} messages/month{% endif %}
-            </div>
+        <div class="fw-row">
+          <div class="fw-group">
+            <label class="fw-label"><span class="fw-label-dot"></span>Bot Name</label>
+            <input type="text" name="bot_name" class="fw-input" value="{{ bot.bot_name|default:'' }}" placeholder="e.g. Amara, Juma, NyumbaBot" required maxlength="60">
+            <div class="fw-hint">What customers will call your assistant</div>
           </div>
-        </label>
+          <div class="fw-group">
+            <label class="fw-label"><span class="fw-label-dot"></span>Business Name</label>
+            <input type="text" name="business_name" class="fw-input" value="{{ bot.business_name|default:'' }}" placeholder="Your company name" required>
+            <div class="fw-hint">Appears in all bot responses</div>
+          </div>
+        </div>
+
+        <div class="fw-group">
+          <label class="fw-label"><span class="fw-label-dot"></span>Business Description</label>
+          <textarea name="description" class="fw-input" placeholder="Describe what your business does. The more detail you give, the smarter your bot becomes..." required>{{ bot.description|default:'' }}</textarea>
+          <div class="fw-hint">Be specific — this trains your AI engine</div>
+        </div>
+
+        <div class="fw-section"><span>Language</span></div>
+        <div class="fw-group">
+          <div class="choice-grid">
+            <label class="choice-opt"><input type="radio" name="language" value="sw+en" {% if not bot or bot.language == 'sw+en' %}checked{% endif %}>
+              <div class="choice-card"><div class="check-mark"><i class="fas fa-check"></i></div><span class="ci">🇹🇿</span><div class="ct">Auto-Detect</div><div class="cs">SW + EN</div></div></label>
+            <label class="choice-opt"><input type="radio" name="language" value="en" {% if bot.language == 'en' %}checked{% endif %}>
+              <div class="choice-card"><div class="check-mark"><i class="fas fa-check"></i></div><span class="ci">🇬🇧</span><div class="ct">English</div><div class="cs">International</div></div></label>
+            <label class="choice-opt"><input type="radio" name="language" value="sw" {% if bot.language == 'sw' %}checked{% endif %}>
+              <div class="choice-card"><div class="check-mark"><i class="fas fa-check"></i></div><span class="ci">🌍</span><div class="ct">Swahili</div><div class="cs">Local market</div></div></label>
+          </div>
+        </div>
+
+        <div class="fw-section"><span>Personality</span></div>
+        <div class="fw-group">
+          <div class="choice-grid">
+            <label class="choice-opt"><input type="radio" name="tone" value="friendly" {% if not bot or bot.tone == 'friendly' %}checked{% endif %}>
+              <div class="choice-card"><div class="check-mark"><i class="fas fa-check"></i></div><span class="ci">😊</span><div class="ct">Friendly</div><div class="cs">Warm & helpful</div></div></label>
+            <label class="choice-opt"><input type="radio" name="tone" value="professional" {% if bot.tone == 'professional' %}checked{% endif %}>
+              <div class="choice-card"><div class="check-mark"><i class="fas fa-check"></i></div><span class="ci">💼</span><div class="ct">Professional</div><div class="cs">Formal & precise</div></div></label>
+            <label class="choice-opt"><input type="radio" name="tone" value="casual" {% if bot.tone == 'casual' %}checked{% endif %}>
+              <div class="choice-card"><div class="check-mark"><i class="fas fa-check"></i></div><span class="ci">😎</span><div class="ct">Casual</div><div class="cs">Relaxed & fun</div></div></label>
+            <label class="choice-opt"><input type="radio" name="tone" value="formal" {% if bot.tone == 'formal' %}checked{% endif %}>
+              <div class="choice-card"><div class="check-mark"><i class="fas fa-check"></i></div><span class="ci">🎩</span><div class="ct">Formal</div><div class="cs">Official tone</div></div></label>
+          </div>
+        </div>
+
+        <div class="nav-btns">
+          <div style="font-family:var(--wiz-mono);font-size:11px;color:rgba(255,255,255,.2)">Progress saved automatically</div>
+          <button type="submit" class="btn-wiz-next">Continue <i class="fas fa-arrow-right"></i></button>
+        </div>
+      </form>
+    </div>
+
+    <!-- ══ STEP 2 ══════════════════════════════════════ -->
+    {% elif step == 2 %}
+    <div class="wiz-head">
+      <div class="wiz-head-num" style="background:rgba(0,212,255,.1)">💬</div>
+      <div>
+        <div class="wiz-title">Bot Messages</div>
+        <div class="wiz-sub">Words your bot speaks in key customer moments</div>
+      </div>
+      <div class="step-counter">02 / 06</div>
+    </div>
+    <div class="wiz-body">
+      <form method="post">
+        {% csrf_token %}<input type="hidden" name="action" value="save_step2">
+
+        <div class="fw-group">
+          <label class="fw-label"><span class="fw-label-dot" style="background:#25d366"></span>Greeting Message</label>
+          <textarea name="greeting_msg" class="fw-input" placeholder="e.g. Hello! 👋 I'm Amara, your AI assistant at JamiiTek. How can I help you today?" required>{{ bot.greeting_msg|default:"" }}</textarea>
+          <div class="fw-hint">First message sent to every new customer</div>
+        </div>
+
+        <div class="fw-group">
+          <label class="fw-label"><span class="fw-label-dot" style="background:var(--wiz-amber)"></span>Fallback Message</label>
+          <textarea name="fallback_msg" class="fw-input">{{ bot.fallback_msg|default:"Sorry, I didn't quite understand that. Could you rephrase? Or contact us directly for help." }}</textarea>
+          <div class="fw-hint">Sent when the AI can't answer a question</div>
+        </div>
+
+        <div class="fw-group">
+          <label class="fw-label"><span class="fw-label-dot" style="background:#a78bfa"></span>Human Handoff</label>
+          <textarea name="human_handoff_msg" class="fw-input">{{ bot.human_handoff_msg|default:"I'm connecting you with a team member now. Please hold on for a moment... 🙏" }}</textarea>
+          <div class="fw-hint">When customer asks to speak to a real person</div>
+        </div>
+
+        <div class="fw-section"><span>Data Collection</span></div>
+        <div class="toggle-block">
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">Ask for customer name</div>
+              <div class="toggle-sub">Bot will say: "What's your name?" at the start of every conversation</div>
+            </div>
+            <label class="toggle-sw"><input type="checkbox" name="collect_name" {% if not bot or bot.collect_name %}checked{% endif %}><span class="slider"></span></label>
+          </div>
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">Ask for phone number</div>
+              <div class="toggle-sub">Bot will collect the customer's phone for follow-up</div>
+            </div>
+            <label class="toggle-sw"><input type="checkbox" name="collect_phone" {% if bot.collect_phone %}checked{% endif %}><span class="slider"></span></label>
+          </div>
+        </div>
+
+        <div class="nav-btns">
+          <a href="/chatbot/setup/?step=1" class="btn-wiz-back"><i class="fas fa-arrow-left"></i> Back</a>
+          <button type="submit" class="btn-wiz-next">Continue <i class="fas fa-arrow-right"></i></button>
+        </div>
+      </form>
+    </div>
+
+    <!-- ══ STEP 3 ══════════════════════════════════════ -->
+    {% elif step == 3 %}
+    <div class="wiz-head">
+      <div class="wiz-head-num" style="background:rgba(245,158,11,.1)">🛍️</div>
+      <div>
+        <div class="wiz-title">Your Services</div>
+        <div class="wiz-sub">Products and services your bot will know how to explain</div>
+      </div>
+      <div class="step-counter">03 / 06 · <span style="color:var(--wiz-green)">{{ services|length }} added</span></div>
+    </div>
+    <div class="wiz-body">
+      {% if services %}
+      <div class="item-list">
+        {% for svc in services %}
+        <div class="item-row">
+          <div class="item-ico" style="background:rgba(245,158,11,.1)">🛍️</div>
+          <div style="flex:1;min-width:0">
+            <div class="item-name">{{ svc.name }}</div>
+            <div class="item-desc">{{ svc.description|truncatechars:90 }}</div>
+            {% if svc.price %}<div class="item-price">{{ svc.price }}</div>{% endif %}
+          </div>
+          <form method="post">{% csrf_token %}<input type="hidden" name="action" value="delete_service"><input type="hidden" name="service_id" value="{{ svc.id }}"><button type="submit" class="del-btn"><i class="fas fa-trash"></i></button></form>
+        </div>
         {% endfor %}
       </div>
+      {% else %}
+      <div class="empty-state"><div class="ei">🛍️</div><p>No services added yet.<br>Add your first service below.</p></div>
+      {% endif %}
 
-      <div style="border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:20px">
-        <div style="padding:11px 16px;background:rgba(255,255,255,.03);font-size:11px;font-weight:700;color:var(--text-2);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border)">
-          What happens after you register
-        </div>
-        <div style="display:flex;flex-direction:column">
-          <div style="display:flex;gap:14px;padding:13px 16px;border-bottom:1px solid var(--border);align-items:flex-start">
-            <div style="width:26px;height:26px;border-radius:50%;background:rgba(0,220,130,.12);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0">1</div>
-            <div>
-              <div style="font-size:13px;font-weight:600;color:var(--text)">Our team connects your number</div>
-              <div style="font-size:12px;color:var(--text-2);margin-top:2px">Within 24 hours, your bot will be connected to WhatsApp. You will be notified when ready.</div>
-            </div>
+      <div class="add-box">
+        <div class="add-box-title"><i class="fas fa-plus" style="color:#6366f1"></i> Add a Service</div>
+        <form method="post">
+          {% csrf_token %}<input type="hidden" name="action" value="add_service">
+          <div class="fw-row-3 mb-3">
+            <input type="text" name="service_name" class="fw-input" placeholder="Service name *" required>
+            <input type="text" name="service_price" class="fw-input" placeholder="Price (optional)">
           </div>
-          <div style="display:flex;gap:14px;padding:13px 16px;border-bottom:1px solid var(--border);align-items:flex-start">
-            <div style="width:26px;height:26px;border-radius:50%;background:rgba(0,220,130,.12);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0">2</div>
-            <div>
-              <div style="font-size:13px;font-weight:600;color:var(--text)">Use free for 7 days</div>
-              <div style="font-size:12px;color:var(--text-2);margin-top:2px">No charges during the trial. Test your bot with real customers.</div>
-            </div>
-          </div>
-          <div style="display:flex;gap:14px;padding:13px 16px;align-items:flex-start">
-            <div style="width:26px;height:26px;border-radius:50%;background:rgba(0,220,130,.12);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0">3</div>
-            <div>
-              <div style="font-size:13px;font-weight:600;color:var(--text)">Pay to continue</div>
-              <div style="font-size:12px;color:var(--text-2);margin-top:2px">After 7 days we will send you payment instructions via NMB Bank · <strong>21410034200</strong> · WILLIAM CHIPINDI.</div>
-            </div>
-          </div>
-        </div>
+          <div style="margin-bottom:14px"><textarea name="service_desc" class="fw-input" style="min-height:75px" placeholder="Describe this service in detail *" required></textarea></div>
+          <button type="submit" class="btn-wiz-add"><i class="fas fa-plus"></i> Add Service</button>
+        </form>
       </div>
 
       <div class="nav-btns">
-        <a href="/chatbot/setup/?step=5" class="jt-btn btn-ghost"><i class="fas fa-arrow-left"></i> Go Back</a>
-        <button type="submit" class="jt-btn btn-green" style="padding:12px 32px;font-size:15px">
-          <i class="fas fa-rocket"></i> Launch My Bot!
-        </button>
-      </div>
-    </form>
-
-    {% else %}
-    <div style="text-align:center;padding:32px 20px">
-      <div style="font-size:48px;margin-bottom:16px">⚙️</div>
-      <div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:8px">Welcome!</div>
-      <div style="font-size:13px;color:var(--text-2);max-width:340px;margin:0 auto 24px;line-height:1.7">
-        Our team is finalising your bot connection. Wait 24 hours to get started, or contact us directly if urgent.
-      </div>
-      <div style="display:flex;flex-direction:column;gap:10px;max-width:280px;margin:0 auto">
-        <a href="https://wa.me/255750910158" target="_blank" class="jt-btn btn-green" style="justify-content:center">
-          <i class="fab fa-whatsapp"></i> Contact via WhatsApp
-        </a>
-        <a href="mailto:info@jamiitek.com" class="jt-btn btn-ghost" style="justify-content:center">
-          <i class="fas fa-envelope"></i> info@jamiitek.com
-        </a>
-      </div>
-      <div style="margin-top:24px">
-        <a href="/chatbot/setup/?step=5" class="jt-btn btn-ghost btn-sm">
-          <i class="fas fa-arrow-left"></i> Go Back
-        </a>
+        <a href="/chatbot/setup/?step=2" class="btn-wiz-back"><i class="fas fa-arrow-left"></i> Back</a>
+        <form method="post">{% csrf_token %}<input type="hidden" name="action" value="next_step3"><button type="submit" class="btn-wiz-next">Continue <i class="fas fa-arrow-right"></i></button></form>
       </div>
     </div>
-    {% endif %}
+
+    <!-- ══ STEP 4 ══════════════════════════════════════ -->
+    {% elif step == 4 %}
+    <div class="wiz-head">
+      <div class="wiz-head-num" style="background:rgba(59,130,246,.1)">❓</div>
+      <div>
+        <div class="wiz-title">FAQs</div>
+        <div class="wiz-sub">Common questions your customers ask — answered instantly</div>
+      </div>
+      <div class="step-counter">04 / 06 · <span style="color:var(--wiz-green)">{{ faqs|length }} added</span></div>
+    </div>
+    <div class="wiz-body">
+      {% if faqs %}
+      <div class="item-list">
+        {% for faq in faqs %}
+        <div class="item-row">
+          <div class="item-ico" style="background:rgba(59,130,246,.1)">❓</div>
+          <div style="flex:1;min-width:0">
+            <div class="item-name">{{ faq.question|truncatechars:70 }}</div>
+            <div class="item-desc">{{ faq.answer|truncatechars:90 }}</div>
+          </div>
+          <form method="post">{% csrf_token %}<input type="hidden" name="action" value="delete_faq"><input type="hidden" name="faq_id" value="{{ faq.id }}"><button type="submit" class="del-btn"><i class="fas fa-trash"></i></button></form>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state"><div class="ei">❓</div><p>No FAQs added yet.<br>Add common questions your customers ask.</p></div>
+      {% endif %}
+
+      <div class="add-box">
+        <div class="add-box-title"><i class="fas fa-plus" style="color:#3b82f6"></i> Add a FAQ</div>
+        <form method="post">
+          {% csrf_token %}<input type="hidden" name="action" value="add_faq">
+          <div style="margin-bottom:10px"><textarea name="faq_question" class="fw-input" style="min-height:60px" placeholder="e.g. What are your working hours?" required></textarea></div>
+          <div style="margin-bottom:14px"><textarea name="faq_answer" class="fw-input" style="min-height:60px" placeholder="e.g. We are open Monday–Saturday, 8am–6pm." required></textarea></div>
+          <button type="submit" class="btn-wiz-add" style="background:rgba(59,130,246,.1);border-color:rgba(59,130,246,.25);color:#93c5fd"><i class="fas fa-plus"></i> Add FAQ</button>
+        </form>
+      </div>
+
+      <div class="nav-btns">
+        <a href="/chatbot/setup/?step=3" class="btn-wiz-back"><i class="fas fa-arrow-left"></i> Back</a>
+        <form method="post">{% csrf_token %}<input type="hidden" name="action" value="next_step4"><button type="submit" class="btn-wiz-next">Continue <i class="fas fa-arrow-right"></i></button></form>
+      </div>
+    </div>
+
+    <!-- ══ STEP 5 ══════════════════════════════════════ -->
+    {% elif step == 5 %}
+    <div class="wiz-head">
+      <div class="wiz-head-num" style="background:rgba(37,211,102,.1)">📱</div>
+      <div>
+        <div class="wiz-title">WhatsApp Number</div>
+        <div class="wiz-sub">The number your customers will message — we handle the rest</div>
+      </div>
+      <div class="step-counter">05 / 06</div>
+    </div>
+    <div class="wiz-body">
+      <div class="jt-alert jt-alert-success" style="margin-bottom:22px;font-size:13px">
+        <i class="fab fa-whatsapp" style="flex-shrink:0;color:#25d366;font-size:18px"></i>
+        <div>Our team will register and connect your number within <strong>24 hours</strong>. You don't need to do anything technical.</div>
+      </div>
+
+      <form method="post" id="step5-form">
+        {% csrf_token %}<input type="hidden" name="action" value="save_step5">
+        <div class="fw-group">
+          <label class="fw-label"><span class="fw-label-dot" style="background:#25d366"></span>WhatsApp Number</label>
+          <div class="wa-wrap">
+            <div class="wa-prefix"><i class="fab fa-whatsapp"></i></div>
+            <input type="tel" name="whatsapp_number" id="wa-input" class="wa-input" placeholder="+255 7XX XXX XXX" value="{{ bot.whatsapp_number|default:'' }}" required>
+          </div>
+          <div class="wa-status" id="wa-status">
+            <span style="color:rgba(255,255,255,.25);font-size:10px">Enter number with country code · e.g. +255750123456</span>
+          </div>
+        </div>
+
+        <div style="background:rgba(245,158,11,.05);border:1px solid rgba(245,158,11,.15);border-radius:12px;padding:14px 18px;margin-bottom:22px;display:flex;gap:12px;align-items:flex-start">
+          <i class="fas fa-triangle-exclamation" style="color:var(--wiz-amber);font-size:14px;flex-shrink:0;margin-top:1px"></i>
+          <div style="font-family:var(--wiz-mono);font-size:11px;color:rgba(245,158,11,.7);line-height:1.6">This number must be <strong style="color:var(--wiz-amber)">deregistered from the WhatsApp app</strong> on your phone before it can be used by the bot.</div>
+        </div>
+
+        <div class="nav-btns">
+          <a href="/chatbot/setup/?step=4" class="btn-wiz-back"><i class="fas fa-arrow-left"></i> Back</a>
+          <button type="submit" id="step5-submit" class="btn-wiz-next">Continue <i class="fas fa-arrow-right"></i></button>
+        </div>
+      </form>
+
+      <script>
+      (function(){
+        const inp=document.getElementById('wa-input'),status=document.getElementById('wa-status'),btn=document.getElementById('step5-submit');
+        function set(type,msg){status.innerHTML=type==='ok'?`<i class="fas fa-circle-check" style="color:#00e5a0;font-size:12px"></i><span style="color:#00e5a0;font-size:11px">${msg}</span>`:type==='err'?`<i class="fas fa-circle-xmark" style="color:#ef4444;font-size:12px"></i><span style="color:#ef4444;font-size:11px">${msg}</span>`:`<span style="color:rgba(255,255,255,.25);font-size:10px">${msg}</span>`;inp.className='wa-input'+(type==='ok'?' valid':type==='err'?' error':'');btn.disabled=type==='err';}
+        function fmt(v){let d=v.replace(/\D/g,'');if(d.startsWith('255'))return'+'+d;if(d.startsWith('0')&&d.length>=9)return'+255'+d.slice(1);if(d.length>=9&&!v.startsWith('+'))return'+255'+d;return v;}
+        inp.addEventListener('blur',function(){let v=this.value.trim();if(!v){set('err','Phone number is required');return;}let f=fmt(v);this.value=f;let d=f.replace(/\D/g,'');d.length>=7&&d.length<=15?set('ok','Valid number ✓'):set('err','Invalid format. Example: +255750123456');});
+        inp.addEventListener('input',function(){set('neutral','Enter number with country code · e.g. +255750123456');});
+        document.getElementById('step5-form').addEventListener('submit',function(e){let v=inp.value.trim(),d=v.replace(/\D/g,'');if(!v||d.length<7||d.length>15){e.preventDefault();set('err','Please enter a valid WhatsApp number.');}});
+      })();
+      </script>
+    </div>
+
+    <!-- ══ STEP 6 ══════════════════════════════════════ -->
+    {% elif step == 6 %}
+    <div class="wiz-head">
+      <div class="wiz-head-num" style="background:rgba(0,229,160,.1);animation:float 3s ease-in-out infinite">🚀</div>
+      <div>
+        <div class="wiz-title">Launch Your Bot!</div>
+        <div class="wiz-sub">7-day free trial · No payment required to start</div>
+      </div>
+      <div class="step-counter">06 / 06</div>
+    </div>
+    <div class="wiz-body">
+      {% if plans %}
+      <form method="post" id="deploy-form">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="deploy">
+        <input type="hidden" name="plan_id" id="selectedPlanId" value="{{ plans.0.id }}">
+
+        <div style="font-family:var(--wiz-mono);font-size:10px;color:rgba(255,255,255,.25);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:14px">Choose a Plan</div>
+        <div class="plan-grid">
+          {% for plan in plans %}
+          <label class="plan-opt" onclick="document.getElementById('selectedPlanId').value='{{ plan.id }}'">
+            {% if plan.slug == 'pro' %}<div class="plan-badge">⭐ Most Popular</div>{% endif %}
+            <input type="radio" name="plan_radio" value="{{ plan.id }}" {% if forloop.first %}checked{% endif %} onchange="document.getElementById('selectedPlanId').value=this.value">
+            <div class="plan-card">
+              <div class="plan-name">{{ plan.name }}</div>
+              <div class="plan-price">{{ plan.price_tzs|floatformat:0 }}</div>
+              <div class="plan-currency">TZS / month</div>
+              <div class="plan-feat"><i class="fas fa-check"></i>{% if plan.is_unlimited %}Unlimited messages{% else %}{{ plan.msg_limit }} msgs / month{% endif %}</div>
+              <div class="plan-feat"><i class="fas fa-check"></i>WhatsApp Integration</div>
+              <div class="plan-feat"><i class="fas fa-check"></i>Swahili + English AI</div>
+              <div class="plan-feat"><i class="fas fa-check"></i>Live Dashboard</div>
+            </div>
+          </label>
+          {% endfor %}
+        </div>
+
+        <div class="timeline-box">
+          <div class="timeline-head">What happens after you launch</div>
+          <div class="tl-item"><div class="tl-num">1</div><div><div class="tl-title">We connect your number</div><div class="tl-sub">Our team registers your WhatsApp number and links it to your bot within 24 hours.</div></div></div>
+          <div class="tl-item"><div class="tl-num">2</div><div><div class="tl-title">Free 7-day trial begins</div><div class="tl-sub">No charges. Test with real customers and see the results live in your dashboard.</div></div></div>
+          <div class="tl-item"><div class="tl-num">3</div><div><div class="tl-title">Pay to continue</div><div class="tl-sub">After your trial, pay via NMB Bank · <strong style="color:rgba(255,255,255,.7)">21410034200</strong> · WILLIAM CHIPINDI.</div></div></div>
+        </div>
+
+        <div class="nav-btns">
+          <a href="/chatbot/setup/?step=5" class="btn-wiz-back"><i class="fas fa-arrow-left"></i> Back</a>
+          <button type="submit" class="btn-wiz-launch"><i class="fas fa-rocket"></i> Launch My Bot!</button>
+        </div>
+      </form>
+      {% else %}
+      <div style="text-align:center;padding:40px 20px">
+        <div style="font-size:56px;margin-bottom:20px;animation:float 3s ease-in-out infinite">✅</div>
+        <div class="wiz-title" style="margin-bottom:8px">You're all set!</div>
+        <div style="font-family:var(--wiz-mono);font-size:12px;color:rgba(255,255,255,.35);max-width:340px;margin:0 auto 28px;line-height:1.8">Our team will finish connecting your bot within 24 hours. Contact us if you need it sooner.</div>
+        <div style="display:flex;flex-direction:column;gap:10px;max-width:280px;margin:0 auto">
+          <a href="https://wa.me/255750910158" target="_blank" class="btn-wiz-launch" style="justify-content:center;text-decoration:none"><i class="fab fa-whatsapp"></i> WhatsApp Us</a>
+          <a href="mailto:info@jamiitek.com" class="btn-wiz-back" style="justify-content:center;text-decoration:none"><i class="fas fa-envelope"></i> info@jamiitek.com</a>
+        </div>
+      </div>
+      {% endif %}
     {% endif %}
 
-  </div>
-</div>
+  </div><!-- /wiz-card -->
+</div><!-- /wiz-outer -->
+
+<script>
+/* ── PARTICLE CANVAS ─────────────────────────────────── */
+(function(){
+  const c=document.getElementById('particleCanvas');
+  if(!c)return;
+  const ctx=c.getContext('2d');
+  let W,H,particles=[];
+  function resize(){W=c.width=window.innerWidth;H=c.height=window.innerHeight;}
+  resize();window.addEventListener('resize',resize);
+  for(let i=0;i<55;i++){
+    particles.push({
+      x:Math.random()*window.innerWidth,
+      y:Math.random()*window.innerHeight,
+      r:Math.random()*1.5+.3,
+      dx:(Math.random()-.5)*.25,
+      dy:(Math.random()-.5)*.25,
+      o:Math.random()*.4+.05,
+      hue:Math.random()>0.7?'99,102,241':'0,229,160'
+    });
+  }
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    particles.forEach(p=>{
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(${p.hue},${p.o})`;
+      ctx.fill();
+      p.x+=p.dx;p.y+=p.dy;
+      if(p.x<0)p.x=W;if(p.x>W)p.x=0;
+      if(p.y<0)p.y=H;if(p.y>H)p.y=0;
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+</script>
 {% endblock %}
