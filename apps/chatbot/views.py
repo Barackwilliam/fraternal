@@ -39,6 +39,32 @@ logger = logging.getLogger('chatbot.views')
 # HELPERS
 # ════════════════════════════════════════════════════════
 
+def _get_or_create_client(user):
+    """
+    Return the ChatbotClient for this user, creating one if needed.
+    Handles users who logged in via the main portal (not chatbot_login).
+    """
+    client = ChatbotClient.objects.filter(user=user).first()
+    if client:
+        return client
+    full_name     = user.get_full_name() or user.username
+    business_name = user.username
+    email         = user.email or f"{user.username}@jamiitek.com"
+    phone         = ''
+    try:
+        from apps.models import Client as PortalClient
+        pc = PortalClient.objects.get(user=user)
+        full_name     = pc.name or full_name
+        business_name = pc.company or pc.name or business_name
+        phone         = pc.phone or ''
+    except Exception:
+        pass
+    return ChatbotClient.objects.create(
+        user=user, full_name=full_name,
+        business_name=business_name, email=email, phone=phone,
+    )
+
+
 def _notify_william(bot):
     """
     Notify William via WhatsApp that a new bot needs setup.
@@ -196,7 +222,7 @@ def chatbot_logout(request):
 
 @login_required(login_url='chatbot_login')
 def chatbot_setup_wizard(request):
-    client = get_object_or_404(ChatbotClient, user=request.user)
+    client = _get_or_create_client(request.user)
     step   = int(request.GET.get('step', 1))
     bot    = client.bots.first()
 
@@ -370,7 +396,7 @@ def chatbot_setup_wizard(request):
 
 @login_required(login_url='chatbot_login')
 def chatbot_dashboard(request):
-    client = get_object_or_404(ChatbotClient, user=request.user)
+    client = _get_or_create_client(request.user)
     bot    = client.bots.first()
     if not bot:
         return redirect('chatbot_setup_wizard')
@@ -401,7 +427,7 @@ def chatbot_dashboard(request):
 
 @login_required(login_url='chatbot_login')
 def chatbot_config(request):
-    client = get_object_or_404(ChatbotClient, user=request.user)
+    client = _get_or_create_client(request.user)
     bot    = client.bots.first()
     if not bot:
         messages.warning(request, "Please complete your bot setup first.")
@@ -456,7 +482,7 @@ def chatbot_config(request):
 
 @login_required(login_url='chatbot_login')
 def chatbot_conversations(request):
-    client = get_object_or_404(ChatbotClient, user=request.user)
+    client = _get_or_create_client(request.user)
     bot    = client.bots.first()
     if not bot:
         messages.warning(request, "Complete your bot setup to view conversations.")
@@ -477,7 +503,7 @@ def chatbot_conversations(request):
 
 @login_required(login_url='chatbot_login')
 def chatbot_conversation_detail(request, conv_id):
-    client = get_object_or_404(ChatbotClient, user=request.user)
+    client = _get_or_create_client(request.user)
     bot    = client.bots.first()
     if not bot:
         return redirect('chatbot_setup_wizard')
@@ -490,7 +516,7 @@ def chatbot_conversation_detail(request, conv_id):
 
 @login_required(login_url='chatbot_login')
 def chatbot_billing(request):
-    client   = get_object_or_404(ChatbotClient, user=request.user)
+    client   = _get_or_create_client(request.user)
     bot      = client.bots.first()
 
     if not bot:
