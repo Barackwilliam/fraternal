@@ -10,7 +10,7 @@ WEBSITE_TYPES_DIR = BASE_DIR / 'apps' / 'website_types'
 
 # ── Security ──────────────────────────────────────────
 SECRET_KEY    = os.getenv('SECRET_KEY',    'django-insecure-@&r$)$xpb)f6pm=_73pupatv2#n-%0%d=(cky=kab5ww6&*tzs')
-DEBUG = 'False'
+DEBUG = False
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'jamiitek.com,www.jamiitek.com,jamiitek.onrender.com,127.0.0.1,localhost').split(',')
 
 INSTALLED_APPS = [
