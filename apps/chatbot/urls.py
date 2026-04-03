@@ -26,3 +26,9 @@ urlpatterns = [
     # ── Simulate / Test (staff only) ──
     path('simulate/<uuid:bot_id>/', views.simulate_message, name='chatbot_simulate'),
 ]
+
+# ── Legal ──
+from django.urls import path as _p
+urlpatterns += [
+    _p('privacy-policy/', views.privacy_policy, name='privacy_policy'),
+]

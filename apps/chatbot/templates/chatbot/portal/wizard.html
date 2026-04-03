@@ -696,38 +696,72 @@ textarea.fw-input{resize:vertical;min-height:95px;line-height:1.6}
     <div class="wiz-head">
       <div class="wiz-head-num" style="background:rgba(37,211,102,.1)">📱</div>
       <div>
-        <div class="wiz-title">WhatsApp Number</div>
-        <div class="wiz-sub">The number your customers will message — we handle the rest</div>
+        <div class="wiz-title">Nambari yako ya WhatsApp</div>
+        <div class="wiz-sub">Wateja wako watatumia nambari hii kukuwasiliana na bot</div>
       </div>
       <div class="step-counter">05 / 06</div>
     </div>
     <div class="wiz-body">
-      <div class="jt-alert jt-alert-success" style="margin-bottom:22px;font-size:13px">
-        <i class="fab fa-whatsapp" style="flex-shrink:0;color:#25d366;font-size:18px"></i>
-        <div>Our team will register and connect your number within <strong>24 hours</strong>. You don't need to do anything technical.</div>
+      <!-- PROCESS FLOW -->
+      <div style="margin-bottom:24px">
+        <div style="font-family:var(--wiz-mono);font-size:9px;color:rgba(255,255,255,.3);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px">ITAKAYOTOKEA BAADA YA KUSAJILI</div>
+        <div style="display:flex;flex-direction:column;gap:0">
+          <div style="display:flex;gap:14px;align-items:flex-start">
+            <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0">
+              <div style="width:32px;height:32px;border-radius:50%;background:rgba(37,211,102,.15);border:1.5px solid rgba(37,211,102,.4);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#25d366">1</div>
+              <div style="width:1.5px;height:28px;background:rgba(255,255,255,.08)"></div>
+            </div>
+            <div style="padding:4px 0 24px">
+              <div style="font-size:13px;font-weight:700;color:rgba(255,255,255,.9);margin-bottom:3px">Unajaza nambari yako hapa chini</div>
+              <div style="font-size:11px;color:rgba(255,255,255,.4);line-height:1.6">Weka nambari ambayo wateja wako watatumia kukupata — lazima ifutwe kwenye WhatsApp app ya simu kwanza</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:14px;align-items:flex-start">
+            <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0">
+              <div style="width:32px;height:32px;border-radius:50%;background:rgba(124,58,237,.15);border:1.5px solid rgba(124,58,237,.4);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#a78bfa">2</div>
+              <div style="width:1.5px;height:28px;background:rgba(255,255,255,.08)"></div>
+            </div>
+            <div style="padding:4px 0 24px">
+              <div style="font-size:13px;font-weight:700;color:rgba(255,255,255,.9);margin-bottom:3px">Timu yetu inaipokea na kuiweka Meta</div>
+              <div style="font-size:11px;color:rgba(255,255,255,.4);line-height:1.6">System Administrator ataenda Meta Developer Console → ataongeza nambari yako → ataipata <span style="font-family:var(--wiz-mono);color:#a78bfa">Phone Number ID</span> → ataiweka kwenye mfumo wetu</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:14px;align-items:flex-start">
+            <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0">
+              <div style="width:32px;height:32px;border-radius:50%;background:rgba(0,220,130,.15);border:1.5px solid rgba(0,220,130,.4);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#00dc82">3</div>
+            </div>
+            <div style="padding:4px 0">
+              <div style="font-size:13px;font-weight:700;color:rgba(255,255,255,.9);margin-bottom:3px">Bot yako inaanza kufanya kazi! 🎉</div>
+              <div style="font-size:11px;color:rgba(255,255,255,.4);line-height:1.6">Ndani ya masaa 24 bot itakuwa <span style="color:#00dc82;font-weight:700">ACTIVE</span> — wateja wanapoandika, bot itajibu mara moja</div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <form method="post" id="step5-form">
         {% csrf_token %}<input type="hidden" name="action" value="save_step5">
         <div class="fw-group">
-          <label class="fw-label"><span class="fw-label-dot" style="background:#25d366"></span>WhatsApp Number</label>
+          <label class="fw-label"><span class="fw-label-dot" style="background:#25d366"></span>Nambari ya WhatsApp yako</label>
           <div class="wa-wrap">
             <div class="wa-prefix"><i class="fab fa-whatsapp"></i></div>
             <input type="tel" name="whatsapp_number" id="wa-input" class="wa-input" placeholder="+255 7XX XXX XXX" value="{{ bot.whatsapp_number|default:'' }}" required>
           </div>
           <div class="wa-status" id="wa-status">
-            <span style="color:rgba(255,255,255,.25);font-size:10px">Enter number with country code · e.g. +255750123456</span>
+            <span style="color:rgba(255,255,255,.25);font-size:10px">Weka nambari na country code · mfano: +255750123456</span>
           </div>
         </div>
 
-        <div style="background:rgba(245,158,11,.05);border:1px solid rgba(245,158,11,.15);border-radius:12px;padding:14px 18px;margin-bottom:22px;display:flex;gap:12px;align-items:flex-start">
-          <i class="fas fa-triangle-exclamation" style="color:var(--wiz-amber);font-size:14px;flex-shrink:0;margin-top:1px"></i>
-          <div style="font-family:var(--wiz-mono);font-size:11px;color:rgba(245,158,11,.7);line-height:1.6">This number must be <strong style="color:var(--wiz-amber)">deregistered from the WhatsApp app</strong> on your phone before it can be used by the bot.</div>
+        <div style="background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.25);border-radius:12px;padding:14px 16px;margin-bottom:22px;display:flex;gap:12px;align-items:flex-start">
+          <i class="fas fa-triangle-exclamation" style="color:var(--wiz-amber);font-size:16px;flex-shrink:0;margin-top:1px"></i>
+          <div>
+            <div style="font-size:13px;font-weight:700;color:var(--wiz-amber);margin-bottom:5px">Hatua muhimu kabla ya kuendelea</div>
+            <div style="font-size:12px;color:rgba(245,158,11,.7);line-height:1.7">Nambari unayotaka kutumia kwa bot lazima <strong style="color:var(--wiz-amber)">ifutwe kwenye WhatsApp app</strong> ya simu yako kwanza.<br><span style="opacity:.7">Njia: WhatsApp → Settings → Account → Delete my account</span></div>
+          </div>
         </div>
 
         <div class="nav-btns">
           <a href="/chatbot/setup/?step=4" class="btn-wiz-back"><i class="fas fa-arrow-left"></i> Back</a>
-          <button type="submit" id="step5-submit" class="btn-wiz-next">Continue <i class="fas fa-arrow-right"></i></button>
+          <button type="submit" id="step5-submit" class="btn-wiz-next">Endelea <i class="fas fa-arrow-right"></i></button>
         </div>
       </form>
 
@@ -736,9 +770,9 @@ textarea.fw-input{resize:vertical;min-height:95px;line-height:1.6}
         const inp=document.getElementById('wa-input'),status=document.getElementById('wa-status'),btn=document.getElementById('step5-submit');
         function set(type,msg){status.innerHTML=type==='ok'?`<i class="fas fa-circle-check" style="color:#00e5a0;font-size:12px"></i><span style="color:#00e5a0;font-size:11px">${msg}</span>`:type==='err'?`<i class="fas fa-circle-xmark" style="color:#ef4444;font-size:12px"></i><span style="color:#ef4444;font-size:11px">${msg}</span>`:`<span style="color:rgba(255,255,255,.25);font-size:10px">${msg}</span>`;inp.className='wa-input'+(type==='ok'?' valid':type==='err'?' error':'');btn.disabled=type==='err';}
         function fmt(v){let d=v.replace(/\D/g,'');if(d.startsWith('255'))return'+'+d;if(d.startsWith('0')&&d.length>=9)return'+255'+d.slice(1);if(d.length>=9&&!v.startsWith('+'))return'+255'+d;return v;}
-        inp.addEventListener('blur',function(){let v=this.value.trim();if(!v){set('err','Phone number is required');return;}let f=fmt(v);this.value=f;let d=f.replace(/\D/g,'');d.length>=7&&d.length<=15?set('ok','Valid number ✓'):set('err','Invalid format. Example: +255750123456');});
-        inp.addEventListener('input',function(){set('neutral','Enter number with country code · e.g. +255750123456');});
-        document.getElementById('step5-form').addEventListener('submit',function(e){let v=inp.value.trim(),d=v.replace(/\D/g,'');if(!v||d.length<7||d.length>15){e.preventDefault();set('err','Please enter a valid WhatsApp number.');}});
+        inp.addEventListener('blur',function(){let v=this.value.trim();if(!v){set('err','Nambari inahitajika');return;}let f=fmt(v);this.value=f;let d=f.replace(/\D/g,'');d.length>=7&&d.length<=15?set('ok','Nambari sahihi ✓'):set('err','Muundo si sahihi. Mfano: +255750123456');});
+        inp.addEventListener('input',function(){set('neutral','Weka nambari na country code · mfano: +255750123456');});
+        document.getElementById('step5-form').addEventListener('submit',function(e){let v=inp.value.trim(),d=v.replace(/\D/g,'');if(!v||d.length<7||d.length>15){e.preventDefault();set('err','Tafadhali weka nambari sahihi ya WhatsApp.');}});
       })();
       </script>
     </div>

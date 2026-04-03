@@ -106,7 +106,47 @@
 
 <!-- SUSPENDED / TRIAL / PENDING ALERTS -->
 {% if bot.status == 'pending' %}
-<div class="jt-alert jt-alert-info f0 mb-3"><i class="fas fa-circle-notch fa-spin" style="flex-shrink:0"></i><div><strong>Bot Connecting...</strong><br>Our team is setting up your bot on WhatsApp. It will be ready within 24 hours. We will notify you when done.</div></div>
+<div class="f0 mb-3" style="background:linear-gradient(135deg,rgba(124,58,237,.08),rgba(37,211,102,.04));border:1.5px solid rgba(124,58,237,.2);border-radius:16px;padding:20px 24px">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+    <i class="fas fa-circle-notch fa-spin" style="color:#a78bfa;font-size:16px"></i>
+    <div style="font-size:15px;font-weight:800;color:var(--text)">Bot yako inaunganishwa na WhatsApp</div>
+    <span style="margin-left:auto;font-family:var(--mono);font-size:9px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2);color:var(--yellow);padding:3px 8px;border-radius:100px">INASUBIRI</span>
+  </div>
+  <div style="display:flex;align-items:flex-start;gap:0">
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px">
+      <div style="width:34px;height:34px;border-radius:50%;background:rgba(0,220,130,.15);border:2px solid rgba(0,220,130,.6);display:flex;align-items:center;justify-content:center">
+        <i class="fas fa-check" style="color:#00dc82;font-size:13px"></i>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:11px;font-weight:700;color:#00dc82">Nambari</div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--text-3)">{{ bot.whatsapp_number }}</div>
+      </div>
+    </div>
+    <div style="flex:1;height:2px;background:linear-gradient(90deg,rgba(0,220,130,.4),rgba(124,58,237,.4));margin-top:17px"></div>
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px">
+      <div style="width:34px;height:34px;border-radius:50%;background:rgba(124,58,237,.15);border:2px solid rgba(124,58,237,.5);display:flex;align-items:center;justify-content:center">
+        <i class="fas fa-circle-notch fa-spin" style="color:#a78bfa;font-size:13px"></i>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:11px;font-weight:700;color:#a78bfa">Meta Setup</div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--text-3)">Phone ID inawekwa</div>
+      </div>
+    </div>
+    <div style="flex:1;height:2px;background:rgba(255,255,255,.07);margin-top:17px"></div>
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px">
+      <div style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center">
+        <i class="fab fa-whatsapp" style="color:rgba(255,255,255,.2);font-size:15px"></i>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:11px;font-weight:700;color:var(--text-3)">Bot Hai</div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--text-3)">Inasubiri</div>
+      </div>
+    </div>
+  </div>
+  <div style="margin-top:14px;font-size:12px;color:var(--text-3);border-top:1px solid rgba(255,255,255,.06);padding-top:12px">
+    <i class="fas fa-clock fa-xs" style="margin-right:5px"></i>Kawaida inachukua <strong style="color:var(--text-2)">chini ya masaa 24</strong>. Tutakutumia ujumbe wa WhatsApp ukisha kuwa tayari.
+  </div>
+</div>
 {% elif bot.status == 'suspended' %}
 <div class="jt-alert jt-alert-danger f0 mb-3"><i class="fas fa-ban" style="flex-shrink:0"></i><div><strong>Bot Suspended</strong><br>{{ bot.admin_suspended_reason|default:"Pay subscription kuendelea." }} <a href="{% url 'chatbot_billing' %}" style="color:var(--red);font-weight:700;text-decoration:underline;margin-left:8px">Pay Sasa →</a></div></div>
 {% elif sub and sub.status == 'trial' %}

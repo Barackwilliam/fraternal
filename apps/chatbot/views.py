@@ -1126,3 +1126,11 @@ def simulate_message(request, bot_id):
         'customer_phone_collected': cust_phone,
         'phone':         phone,
     })
+
+# ════════════════════════════════════════════════════════
+# LEGAL PAGES
+# ════════════════════════════════════════════════════════
+
+def privacy_policy(request):
+    """Public privacy policy page — required by Meta App Review."""
+    return render(request, 'chatbot/privacy_policy.html')
