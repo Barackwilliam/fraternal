@@ -402,7 +402,7 @@
         <div class="svc-img-card">
           <div class="svc-img-wrap">
             {% if svc.image %}
-            <img src="{{ svc.get_image_url }}" alt="{{ svc.service_type }}">
+            <img src="{{ svc.image}}" alt="{{ svc.service_type }}">
             {% else %}
             <div class="svc-placeholder">🌐</div>
             {% endif %}
