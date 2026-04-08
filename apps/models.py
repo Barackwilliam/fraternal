@@ -661,7 +661,7 @@ class HostingConfiguration(models.Model):
     stack           = models.CharField(max_length=20, choices=STACK_CHOICES, default='django')
     server_location = models.CharField(max_length=100, default='Dar es Salaam, Tanzania')
     ip_address      = models.GenericIPAddressField(default='197.250.10.1')
-    server_hostname = models.CharField(max_length=200, default='srv1.jamiitek.co.tz')
+    server_hostname = models.CharField(max_length=200, default='srv1.jamiitek.com')
 
     # Resources
     disk_total_gb   = models.DecimalField(max_digits=6, decimal_places=1, default=10.0)
@@ -680,12 +680,12 @@ class HostingConfiguration(models.Model):
     web_server      = models.CharField(max_length=50, default='Nginx 1.24')
 
     # FTP / SFTP
-    ftp_host        = models.CharField(max_length=200, default='ftp.jamiitek.co.tz')
+    ftp_host        = models.CharField(max_length=200, default='ftp.jamiitek.com')
     ftp_username    = models.CharField(max_length=100, blank=True)
     ftp_port        = models.IntegerField(default=22)
 
     # Database
-    db_host         = models.CharField(max_length=200, default='db.jamiitek.co.tz')
+    db_host         = models.CharField(max_length=200, default='db.jamiitek.com')
     db_name         = models.CharField(max_length=100, blank=True)
     db_username     = models.CharField(max_length=100, blank=True)
     db_port         = models.IntegerField(default=5432)

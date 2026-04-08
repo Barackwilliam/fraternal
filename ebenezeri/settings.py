@@ -125,8 +125,8 @@ JAZZMIN_UI_TWEAKS = {
 
 # ── Uploadcare & Cloudinary ────────────────────────────
 UPLOADCARE = {
-    'pub_key':    os.getenv('UPLOADCARE_PUB_KEY', '96c9f49ee7fe6afeb1fc'),
-    'secret':     os.getenv('UPLOADCARE_SECRET',  '7c2ec708937b40ea415c'),
+    'pub_key':    os.getenv('UPLOADCARE_PUB_KEY', '4c3ba9de492e0e0eaddc'),
+    'secret':     os.getenv('UPLOADCARE_SECRET',  '28410d13b3cb1098451e'),
     'use_secure': True,
 }
 

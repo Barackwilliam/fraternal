@@ -36,7 +36,7 @@ class ServiceAdmin(admin.ModelAdmin):
         if db_field.name == "image":
             formfield.widget.attrs.update({
                 "role": "uploadcare-uploader",
-                "data-public-key": "76122001cca4add87f02",
+                "data-public-key": "4c3ba9de492e0e0eaddc",
             })
 
         return formfield
@@ -120,7 +120,7 @@ class TeamAdmin(admin.ModelAdmin):
         if db_field.name == "image":
             formfield.widget.attrs.update({
                 "role": "uploadcare-uploader",
-                "data-public-key": "76122001cca4add87f02",
+                "data-public-key": "4c3ba9de492e0e0eaddc",
             })
 
         return formfield
