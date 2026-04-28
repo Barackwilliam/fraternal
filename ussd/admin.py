@@ -1,3 +1,6 @@
 from django.contrib import admin
+from .models import USSDConfig
 
-# Register your models here.
+@admin.register(USSDConfig)
+class USSDConfigAdmin(admin.ModelAdmin):
+    list_display = ['is_active', 'message_imezimwa']
