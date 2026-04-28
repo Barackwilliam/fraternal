@@ -328,3 +328,75 @@ def run_email_cron(request, secret):
     from django.http import JsonResponse
     result = send_bulk_expiry_warnings()
     return JsonResponse(result)
+
+# ============================================================
+# WEBSITE TEMPLATES MARKETPLACE
+# ============================================================
+from .models import WebsiteTemplate
+from django.utils.safestring import mark_safe
+
+def templates_marketplace(request):
+    """Page inayoonyesha templates zote zilizowekwa na admin"""
+    category = request.GET.get('category', 'all')
+    templates = WebsiteTemplate.objects.filter(is_active=True)
+    if category != 'all':
+        templates = templates.filter(category=category)
+    
+    all_templates = WebsiteTemplate.objects.filter(is_active=True)
+    categories_used = all_templates.values_list('category', flat=True).distinct()
+
+    return render(request, 'templates_marketplace.html', {
+        'templates': templates,
+        'selected_category': category,
+        'total_count': all_templates.count(),
+        'filtered_count': templates.count(),
+        'categories_used': list(categories_used),
+    })
+
+
+def template_preview(request, pk):
+    """Injects topbar into template HTML and returns it directly — no iframe"""
+    from django.shortcuts import get_object_or_404
+    from django.http import HttpResponse
+    tpl = get_object_or_404(WebsiteTemplate, pk=pk, is_active=True)
+
+    topbar = f'''
+<style>
+  #jt-preview-bar{{position:fixed;top:0;left:0;right:0;height:52px;z-index:2147483647;background:#1a1a2e;display:flex;align-items:center;justify-content:space-between;padding:0 16px;gap:1rem;box-shadow:0 2px 12px rgba(0,0,0,0.5);font-family:sans-serif;}}
+  #jt-preview-bar a,#jt-preview-bar button{{font-size:.75rem;font-weight:700;padding:7px 14px;border-radius:8px;border:none;cursor:pointer;text-decoration:none;transition:all .2s;white-space:nowrap;}}
+  .jt-logo{{font-weight:900;font-size:1rem;color:#6c63ff !important;text-decoration:none !important;}}
+  .jt-sep{{color:#444;margin:0 4px;}}
+  .jt-tpl-name{{font-size:.85rem;font-weight:700;color:#ddd;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}}
+  .jt-cat{{font-size:.62rem;font-weight:700;padding:3px 9px;border-radius:10px;background:rgba(108,99,255,.2);color:#a78bfa;border:1px solid rgba(108,99,255,.3);}}
+  .jt-back{{background:rgba(255,255,255,.08);color:#ccc !important;}}
+  .jt-back:hover{{background:rgba(255,255,255,.15);color:#fff !important;}}
+  .jt-order{{background:linear-gradient(135deg,#6c63ff,#ff6584);color:#fff !important;box-shadow:0 3px 12px rgba(108,99,255,.4);}}
+  .jt-order:hover{{transform:translateY(-1px);}}
+  .jt-bar-left{{display:flex;align-items:center;gap:8px;overflow:hidden;flex:1;}}
+  .jt-bar-right{{display:flex;align-items:center;gap:8px;flex-shrink:0;}}
+  body{{padding-top:52px !important;}}
+  @media(max-width:480px){{.jt-tpl-name,.jt-cat,.jt-sep{{display:none;}}}}
+</style>
+<div id=jt-preview-bar>
+  <div class=jt-bar-left>
+    <a href=/templates/ class=jt-logo>JamiiTek</a>
+    <span class=jt-sep>|</span>
+    <span class=jt-tpl-name>{tpl.name}</span>
+    <span class=jt-cat>{tpl.get_category_display()}</span>
+  </div>
+  <div class=jt-bar-right>
+    <a href=/templates/ class=jt-back>← Back</a>
+    <button class=jt-order onclick="(function(){{var m='Habari JamiiTek! 👋\n\nNimetazama preview ya *{tpl.name}* na ninapenda!\n\nNaomba maelezo zaidi.';window.open('https://wa.me/255629712678?text='+encodeURIComponent(m),'_blank');}})();">🛒 Get This Template</button>
+  </div>
+</div>
+'''
+
+    # Inject topbar right after <body> tag if exists, else prepend
+    html = tpl.preview_html
+    if '<body' in html.lower():
+        import re
+        html = re.sub(r'(<body[^>]*>)', r'' + topbar, html, count=1, flags=re.IGNORECASE)
+    else:
+        html = topbar + html
+
+    return HttpResponse(html, content_type='text/html; charset=utf-8')

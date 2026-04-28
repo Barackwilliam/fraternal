@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Preview: {{ template.name }} — JamiiTek</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { height: 100%; overflow: hidden; font-family: sans-serif; }
+  .preview-bar {
+    position: fixed;
+    top: 0; left: 0; right: 0; height: 52px;
+    z-index: 99999;
+    background: #1a1a2e;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 16px; gap: 1rem;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+  }
+  .bar-left { display: flex; align-items: center; gap: 10px; overflow: hidden; }
+  .bar-logo { font-weight: 900; font-size: 1rem; color: #6c63ff; text-decoration: none; white-space: nowrap; }
+  .bar-sep { color: #333; font-size: 1.2rem; }
+  .bar-name { font-size: 0.85rem; font-weight: 700; color: #ddd; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; }
+  .bar-cat { font-size: 0.65rem; font-weight: 700; padding: 3px 10px; border-radius: 10px; background: rgba(108,99,255,0.2); color: #a78bfa; border: 1px solid rgba(108,99,255,0.3); white-space: nowrap; }
+  .bar-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .bar-btn { font-size: 0.75rem; font-weight: 700; padding: 8px 15px; border-radius: 8px; border: none; cursor: pointer; text-decoration: none; transition: all 0.2s; white-space: nowrap; }
+  .btn-back { background: rgba(255,255,255,0.08); color: #ccc; }
+  .btn-back:hover { background: rgba(255,255,255,0.14); color: #fff; }
+  .btn-order { background: linear-gradient(135deg, #6c63ff, #ff6584); color: #fff; box-shadow: 0 3px 12px rgba(108,99,255,0.4); }
+  .btn-order:hover { transform: translateY(-1px); }
+  .frame-wrap { position: fixed; top: 52px; left: 0; right: 0; bottom: 0; }
+  .frame-wrap iframe { width: 100%; height: 100%; border: none; display: block; background: #fff; }
+  .frame-loader { position: absolute; inset: 0; background: #f5f5fa; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; z-index: 10; transition: opacity 0.4s; }
+  .frame-loader.hidden { opacity: 0; pointer-events: none; }
+  .loader-spinner { width: 40px; height: 40px; border: 3px solid #e0e0e0; border-top-color: #6c63ff; border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loader-text { font-size: 0.85rem; color: #999; font-weight: 600; }
+  @media(max-width: 480px) { .bar-name,.bar-cat,.bar-sep { display: none; } }
+</style>
+</head>
+<body>
+<div class="preview-bar">
+  <div class="bar-left">
+    <a href="/templates/" class="bar-logo">JamiiTek</a>
+    <span class="bar-sep">|</span>
+    <span class="bar-name">{{ template.name }}</span>
+    <span class="bar-cat">{{ template.get_category_display }}</span>
+  </div>
+  <div class="bar-right">
+    <a href="/templates/" class="bar-btn btn-back">← Back</a>
+    <button class="bar-btn btn-order" onclick="orderNow()">🛒 Get This Template</button>
+  </div>
+</div>
+<div class="frame-wrap">
+  <div class="frame-loader" id="loader">
+    <div class="loader-spinner"></div>
+    <div class="loader-text">Inapakia preview...</div>
+  </div>
+  <iframe
+    src="{% url 'template_preview_raw' template.pk %}"
+    title="Preview: {{ template.name }}"
+    onload="document.getElementById('loader').classList.add('hidden')"
+  ></iframe>
+</div>
+<script>
+  function orderNow() {
+    var msg = "Habari JamiiTek! 👋\n\nNimetazama preview ya template *{{ template.name|escapejs }}* na ninapenda!\n\nNaomba tuongee kuhusu jinsi ya kuipata. Asante!";
+    window.open('https://wa.me/255629712678?text=' + encodeURIComponent(msg), '_blank');
+  }
+</script>
+</body>
+</html>

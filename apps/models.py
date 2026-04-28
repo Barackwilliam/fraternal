@@ -783,3 +783,72 @@ class DomainDNSRecord(models.Model):
         verbose_name = 'DNS Record'
         verbose_name_plural = 'DNS Records'
         ordering = ['record_type', 'name']
+
+
+# ============================================================
+# WEBSITE TEMPLATES MARKETPLACE
+# ============================================================
+
+class WebsiteTemplate(models.Model):
+
+    CATEGORY_CHOICES = [
+        ('restaurant', '🍽️ Restaurant'),
+        ('salon',      '💅 Salon & Beauty'),
+        ('hotel',      '🏨 Hotel & Lodging'),
+        ('shop',       '🛒 Shop / Duka'),
+        ('clinic',     '🏥 Clinic & Healthcare'),
+        ('church',     '⛪ Church & Religion'),
+        ('school',     '🎓 School & Education'),
+        ('portfolio',  '🎨 Portfolio & Personal'),
+        ('other',      '🌐 Other'),
+    ]
+
+    BADGE_CHOICES = [
+        ('HOT', '🔥 HOT'),
+        ('NEW', '✨ NEW'),
+        ('PRO', '⭐ PRO'),
+        ('',    'No Badge'),
+    ]
+
+    name        = models.CharField(max_length=200, verbose_name='Template Name')
+    category    = models.CharField(max_length=50, choices=CATEGORY_CHOICES, verbose_name='Category')
+    description = models.TextField(verbose_name='Description (Short)')
+    badge       = models.CharField(max_length=10, choices=BADGE_CHOICES, blank=True, verbose_name='Badge')
+    rating      = models.DecimalField(max_digits=2, decimal_places=1, default=4.9, verbose_name='Rating')
+
+    # Pricing
+    price_hosted_monthly = models.IntegerField(default=30000, verbose_name='Hosted Monthly Price (TSh)')
+    price_source_code    = models.IntegerField(default=150000, verbose_name='Source Code Price (TSh)')
+
+    # The full HTML code of the template — admin anaweka hapa
+    preview_html = models.TextField(
+        verbose_name='Preview HTML Code',
+        help_text='Weka HTML code yote ya template hapa. Itaonekana kwenye preview page automatically.'
+    )
+
+    # Card gradient colors
+    gradient_start = models.CharField(max_length=20, default='#6c63ff', verbose_name='Card Color Start')
+    gradient_end   = models.CharField(max_length=20, default='#ff6584', verbose_name='Card Color End')
+
+    is_active = models.BooleanField(default=True, verbose_name='Show on Website')
+    order     = models.IntegerField(default=0, verbose_name='Display Order')
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f'{self.name} ({self.get_category_display()})'
+
+    def gradient_css(self):
+        return f'linear-gradient(135deg, {self.gradient_start}, {self.gradient_end})'
+
+    def price_hosted_formatted(self):
+        return f"{self.price_hosted_monthly:,}"
+
+    def price_source_formatted(self):
+        return f"{self.price_source_code:,}"
+
+    class Meta:
+        verbose_name = 'Website Template'
+        verbose_name_plural = 'Website Templates'
+        ordering = ['order', '-created_at']

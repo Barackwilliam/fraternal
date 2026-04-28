@@ -3,6 +3,7 @@
 from django.urls import path
 from . import views
 from .views import select_website_type, dynamic_form, proposal_preview, generate_pdf
+from .views import templates_marketplace, template_preview
 from . import management_views
 from . import client_portal_views as portal
 
@@ -12,6 +13,10 @@ urlpatterns = [
     path('service/', views.service, name='service'),
     path('About/', views.About, name='About'),
     path('contact/', views.contact, name='contact'),
+
+    # ── TEMPLATES MARKETPLACE ─────────────────────────────
+    path('templates/', templates_marketplace, name='templates_marketplace'),
+    path('templates/preview/<int:pk>/', template_preview, name='template_preview'),
 
     # Proposal System
     path('proposals/', select_website_type, name='select_website'),

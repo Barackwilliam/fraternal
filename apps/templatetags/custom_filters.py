@@ -99,3 +99,9 @@ def split_last(value, delimiter='|'):
 def has_delimiter(value, delimiter='|'):
     """Check if string contains delimiter"""
     return delimiter in value
+
+@register.filter
+def tojson(value):
+    """Convert value to JSON string for use in JavaScript"""
+    import json
+    return json.dumps(value)

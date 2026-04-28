@@ -446,6 +446,7 @@
     <ul class="nav-menu">
       <li><a href="{% url 'home' %}" {% if request.resolver_match.url_name == 'index' %}class="active"{% endif %}>Home</a></li>
       <li><a href="{% url 'service' %}" {% if 'service' in request.path %}class="active"{% endif %}>Services</a></li>
+      <li><a href="{% url 'templates_marketplace' %}" {% if 'templates' in request.path %}class="active"{% endif %}>Templates</a></li>
       <li><a href="{% url 'About' %}" {% if 'about' in request.path %}class="active"{% endif %}>About</a></li>
       <li><a href="{% url 'contact' %}" {% if 'contact' in request.path %}class="active"{% endif %}>Contact</a></li>
       <li><a href="{% url 'portal_login' %}" class="nav-portal"><i class="fas fa-shield-halved"></i> Portal</a></li>
@@ -462,6 +463,7 @@
 <div id="mob-nav">
   <a href="{% url 'home' %}">Home</a>
   <a href="{% url 'service' %}">Services</a>
+  <a href="{% url 'templates_marketplace' %}">Templates</a>
   <a href="{% url 'About' %}">About</a>
   <a href="{% url 'contact' %}">Contact</a>
   <a href="{% url 'portal_login' %}">Client Portal</a>

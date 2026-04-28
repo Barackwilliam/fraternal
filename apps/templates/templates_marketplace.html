@@ -1,0 +1,663 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+{% block title %}Website Templates — JamiiTek{% endblock %}
+{% block meta_desc %}Chagua template ya website kwa biashara yako. Plans 3: Hosted (30K/mo), Full Build, au Source Code. JamiiTek Tanzania.{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ══════════════════════════════════════════
+   TEMPLATES MARKETPLACE — JAMIITEK
+══════════════════════════════════════════ */
+
+/* ── HERO ─────────────────────────────── */
+.tpl-hero {
+  background: linear-gradient(135deg, #6c63ff 0%, #ff6584 50%, #ffa62b 100%);
+  padding: 140px 0 80px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.tpl-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='20'/%3E%3C/g%3E%3C/svg%3E");
+}
+.tpl-hero-emoji { font-size: 3rem; display: block; margin-bottom: 0.5rem; animation: bounce 2s infinite; }
+@keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+.tpl-hero h1 {
+  font-size: clamp(1.8rem, 5vw, 3rem);
+  font-weight: 900;
+  color: #fff;
+  line-height: 1.2;
+  margin-bottom: 1rem;
+  position: relative;
+}
+.tpl-hero p {
+  color: rgba(255,255,255,0.9);
+  font-size: 1.1rem;
+  max-width: 550px;
+  margin: 0 auto 2rem;
+  position: relative;
+  line-height: 1.6;
+}
+.hero-badges {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  position: relative;
+}
+.hero-badge {
+  background: rgba(255,255,255,0.2);
+  border: 1px solid rgba(255,255,255,0.35);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 8px 18px;
+  border-radius: 30px;
+  backdrop-filter: blur(6px);
+}
+
+/* wave */
+.tpl-wave { margin-top: -2px; line-height: 0; background: #f5f5fa; }
+.tpl-wave svg { display: block; width: 100%; }
+
+/* ── FILTER ─────────────────────────── */
+.tpl-filter-section { background: #f5f5fa; padding: 1.5rem 0 0.5rem; }
+.filter-scroll-wrap {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding: 0 15px 0.75rem;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.filter-scroll-wrap::-webkit-scrollbar { display: none; }
+.filter-chip {
+  flex-shrink: 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 9px 18px;
+  border-radius: 25px;
+  border: 2px solid #e0e0e0;
+  background: #fff;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  text-decoration: none;
+  display: inline-block;
+}
+.filter-chip:hover { border-color: #6c63ff; color: #6c63ff; }
+.filter-chip.active { background: #6c63ff; border-color: #6c63ff; color: #fff; box-shadow: 0 4px 14px rgba(108,99,255,0.35); }
+
+/* ── GRID ───────────────────────────── */
+.tpl-grid-section { background: #f5f5fa; padding: 1.5rem 0 3rem; }
+.tpl-grid-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.2rem;
+  padding: 0 15px;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.tpl-grid-header h2 { font-size: 1.1rem; font-weight: 800; color: #333; }
+.tpl-grid-header h2 span { color: #6c63ff; }
+.tpl-count { font-size: 0.8rem; color: #999; font-weight: 600; }
+
+.tpl-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+  gap: 1rem;
+  padding: 0 15px;
+}
+
+/* ── CARD ───────────────────────────── */
+.tpl-card {
+  background: #fff;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+.tpl-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 14px 40px rgba(0,0,0,0.13);
+}
+.tpl-card:active { transform: scale(0.98); }
+
+/* Preview area */
+.card-preview-area {
+  position: relative;
+  height: 190px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.browser-mock {
+  width: 87%;
+  height: 158px;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.22);
+  overflow: hidden;
+  position: relative;
+  z-index: 2;
+  background: #fff;
+}
+.browser-bar {
+  height: 24px;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  gap: 5px;
+  background: rgba(0,0,0,0.2);
+}
+.b-dot { width: 7px; height: 7px; border-radius: 50%; }
+.b-dot:nth-child(1) { background: #ff5f56; }
+.b-dot:nth-child(2) { background: #ffbd2e; }
+.b-dot:nth-child(3) { background: #27c93f; }
+.browser-body {
+  height: calc(100% - 24px);
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+  gap: 6px;
+}
+.b-hero {
+  flex: 1;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.55rem;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #fff;
+}
+.b-row { display: flex; gap: 5px; height: 22px; }
+.b-col { flex: 1; border-radius: 5px; opacity: 0.45; }
+.b-bar { height: 7px; border-radius: 5px; opacity: 0.35; }
+
+/* badge */
+.card-badge-label {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 5;
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 4px 11px;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
+}
+.badge-HOT { background: #ff3b3b; color: #fff; }
+.badge-NEW { background: #00c853; color: #fff; }
+.badge-PRO { background: #6c63ff; color: #fff; }
+
+/* Card body */
+.card-body-area { padding: 1rem 1.1rem 1.2rem; }
+.card-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.4rem;
+}
+.card-cat-pill {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 20px;
+  color: #fff;
+}
+.card-rating { font-size: 0.78rem; font-weight: 700; color: #ffa62b; }
+.card-name { font-size: 1.05rem; font-weight: 800; color: #1a1a2e; margin-bottom: 0.35rem; }
+.card-desc { font-size: 0.8rem; color: #888; line-height: 1.55; margin-bottom: 0.9rem; }
+
+/* Mini plan pills */
+.mini-plans { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 1rem; }
+.mini-plan {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 15px;
+}
+.mp-blue   { background: #e8f4ff; color: #2196f3; }
+.mp-green  { background: #e8fff4; color: #00a854; }
+.mp-orange { background: #fff3e0; color: #ff6b35; }
+
+/* CTA button */
+.card-cta-btn {
+  width: 100%;
+  padding: 13px;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.88rem;
+  font-weight: 800;
+  cursor: pointer;
+  color: #fff;
+  transition: all 0.25s;
+  letter-spacing: 0.3px;
+}
+.card-cta-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.2); }
+.card-cta-btn:active { transform: scale(0.97); }
+
+/* preview button overlay */
+.preview-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s;
+  z-index: 3;
+}
+.card-preview-area:hover .preview-overlay { background: rgba(0,0,0,0.45); }
+.preview-btn {
+  opacity: 0;
+  transform: translateY(8px);
+  transition: all 0.3s;
+  background: #fff;
+  color: #333;
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 10px 20px;
+  border-radius: 25px;
+  text-decoration: none;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+.card-preview-area:hover .preview-btn {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── MODAL ─────────────────────────── */
+.tpl-modal-bg {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  z-index: 9999;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+@media(min-width:600px) { .tpl-modal-bg { align-items: center; } }
+.tpl-modal-bg.open { opacity: 1; pointer-events: all; }
+
+.tpl-modal {
+  background: #fff;
+  border-radius: 24px 24px 0 0;
+  width: 100%;
+  max-width: 520px;
+  max-height: 92vh;
+  overflow-y: auto;
+  transform: translateY(100%);
+  transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+}
+@media(min-width:600px) {
+  .tpl-modal { border-radius: 24px; transform: scale(0.85); }
+  .tpl-modal-bg.open .tpl-modal { transform: scale(1); }
+}
+.tpl-modal-bg.open .tpl-modal { transform: translateY(0); }
+
+.modal-drag-handle {
+  width: 40px; height: 4px;
+  background: #e0e0e0;
+  border-radius: 4px;
+  margin: 12px auto 0;
+}
+@media(min-width:600px) { .modal-drag-handle { display: none; } }
+
+.modal-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 1.2rem 1.3rem 0;
+  gap: 1rem;
+}
+.modal-close-x {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: #f0f0f0;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+.modal-close-x:hover { background: #ddd; }
+.modal-tpl-name { font-size: 1.4rem; font-weight: 900; color: #1a1a2e; }
+.modal-tpl-cat  { font-size: 0.8rem; color: #999; margin-top: 3px; }
+
+.modal-body-area { padding: 1.1rem 1.3rem 1.5rem; }
+.modal-tpl-desc { font-size: 0.85rem; color: #666; line-height: 1.6; margin-bottom: 1.3rem; }
+.modal-plan-label { font-size: 0.75rem; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: #aaa; margin-bottom: 0.75rem; }
+
+.plan-options { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.3rem; }
+.plan-opt-card {
+  border: 2px solid #eee;
+  border-radius: 16px;
+  padding: 1rem 1.1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+.plan-opt-card:hover { border-color: #6c63ff; background: #fafafe; }
+.plan-opt-card.selected { border-color: #6c63ff; background: #f0eeff; }
+.plan-icon-box {
+  width: 46px; height: 46px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+.pib-blue   { background: #e8f4ff; }
+.pib-green  { background: #e8fff4; }
+.pib-orange { background: #fff3e0; }
+.plan-opt-info { flex: 1; }
+.plan-opt-name { font-weight: 800; font-size: 0.92rem; color: #1a1a2e; }
+.plan-opt-sub  { font-size: 0.75rem; color: #888; margin-top: 3px; line-height: 1.4; }
+.plan-opt-price { text-align: right; font-weight: 800; font-size: 0.88rem; white-space: nowrap; }
+.plan-opt-price small { display: block; font-size: 0.6rem; color: #bbb; font-weight: 600; margin-top: 2px; }
+.pop-blue   { color: #2196f3; }
+.pop-green  { color: #00a854; }
+.pop-orange { color: #ff6b35; }
+
+.modal-whatsapp-btn {
+  width: 100%;
+  padding: 15px;
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #6c63ff, #ff6584);
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.25s;
+  box-shadow: 0 4px 20px rgba(108,99,255,0.35);
+  letter-spacing: 0.3px;
+}
+.modal-whatsapp-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(108,99,255,0.45); }
+.modal-whatsapp-btn:active { transform: scale(0.97); }
+
+/* ── EMPTY STATE ────────────────────── */
+.tpl-empty {
+  text-align: center;
+  padding: 4rem 1rem;
+  color: #aaa;
+}
+.tpl-empty-emoji { font-size: 3rem; display: block; margin-bottom: 1rem; }
+
+/* ── BOTTOM CTA ─────────────────────── */
+.tpl-bottom-cta {
+  background: linear-gradient(135deg, #6c63ff, #ff6584);
+  border-radius: 20px;
+  margin: 2rem 15px;
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  color: #fff;
+}
+.tpl-bottom-cta h2 { font-size: 1.5rem; font-weight: 900; margin-bottom: 0.6rem; }
+.tpl-bottom-cta p { font-size: 0.9rem; opacity: 0.9; margin-bottom: 1.5rem; line-height: 1.6; }
+.tpl-bottom-cta a {
+  display: inline-block;
+  background: #fff;
+  color: #6c63ff;
+  font-weight: 800;
+  font-size: 0.9rem;
+  padding: 13px 28px;
+  border-radius: 12px;
+  text-decoration: none;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+  transition: transform 0.2s;
+}
+.tpl-bottom-cta a:hover { transform: translateY(-2px); }
+
+@media(max-width:576px) {
+  .tpl-grid { grid-template-columns: 1fr; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- HERO -->
+<div class="tpl-hero">
+  <span class="tpl-hero-emoji">🚀</span>
+  <h1>Website Templates<br>za Biashara Yako!</h1>
+  <p>Chagua template, chagua plan yako — tunaanza haraka. Kila template ina plan 3 za kukufaa.</p>
+  <div class="hero-badges">
+    <span class="hero-badge">🌐 Hosted 30K/mo</span>
+    <span class="hero-badge">🛠️ Full Build</span>
+    <span class="hero-badge">💻 Source Code</span>
+  </div>
+</div>
+
+<!-- WAVE -->
+<div class="tpl-wave">
+  <svg viewBox="0 0 1440 50" xmlns="http://www.w3.org/2000/svg">
+    <path fill="#f5f5fa" d="M0,30 C360,60 1080,0 1440,30 L1440,0 L0,0 Z"/>
+  </svg>
+</div>
+
+<!-- FILTERS -->
+<div class="tpl-filter-section">
+  <div class="filter-scroll-wrap">
+    <a href="?category=all" class="filter-chip {% if selected_category == 'all' %}active{% endif %}">🌟 Zote ({{ total_count }})</a>
+    {% if 'restaurant' in categories_used %}<a href="?category=restaurant" class="filter-chip {% if selected_category == 'restaurant' %}active{% endif %}">🍽️ Restaurant</a>{% endif %}
+    {% if 'salon' in categories_used %}<a href="?category=salon" class="filter-chip {% if selected_category == 'salon' %}active{% endif %}">💅 Salon</a>{% endif %}
+    {% if 'hotel' in categories_used %}<a href="?category=hotel" class="filter-chip {% if selected_category == 'hotel' %}active{% endif %}">🏨 Hotel</a>{% endif %}
+    {% if 'shop' in categories_used %}<a href="?category=shop" class="filter-chip {% if selected_category == 'shop' %}active{% endif %}">🛒 Duka</a>{% endif %}
+    {% if 'clinic' in categories_used %}<a href="?category=clinic" class="filter-chip {% if selected_category == 'clinic' %}active{% endif %}">🏥 Clinic</a>{% endif %}
+    {% if 'church' in categories_used %}<a href="?category=church" class="filter-chip {% if selected_category == 'church' %}active{% endif %}">⛪ Church</a>{% endif %}
+    {% if 'school' in categories_used %}<a href="?category=school" class="filter-chip {% if selected_category == 'school' %}active{% endif %}">🎓 School</a>{% endif %}
+    {% if 'portfolio' in categories_used %}<a href="?category=portfolio" class="filter-chip {% if selected_category == 'portfolio' %}active{% endif %}">🎨 Portfolio</a>{% endif %}
+    {% if 'other' in categories_used %}<a href="?category=other" class="filter-chip {% if selected_category == 'other' %}active{% endif %}">🌐 Nyingine</a>{% endif %}
+  </div>
+</div>
+
+<!-- GRID -->
+<div class="tpl-grid-section">
+  <div class="tpl-grid-header">
+    <h2>Templates <span>{{ filtered_count }}</span> Zinapatikana</h2>
+    {% if selected_category != 'all' %}<a href="?category=all" class="tpl-count">← Onyesha zote</a>{% endif %}
+  </div>
+
+  {% if templates %}
+  <div class="tpl-grid">
+    {% for tpl in templates %}
+    <div class="tpl-card">
+      <!-- Preview area with browser mockup -->
+      <div class="card-preview-area" style="background: {{ tpl.gradient_css }};">
+        <div class="browser-mock">
+          <div class="browser-bar">
+            <div class="b-dot"></div><div class="b-dot"></div><div class="b-dot"></div>
+          </div>
+          <div class="browser-body">
+            <div class="b-hero" style="background: {{ tpl.gradient_css }};">
+              {{ tpl.name|upper }}
+            </div>
+            <div class="b-row">
+              <div class="b-col" style="background: {{ tpl.gradient_start }};"></div>
+              <div class="b-col" style="background: {{ tpl.gradient_end }};"></div>
+              <div class="b-col" style="background: {{ tpl.gradient_start }};"></div>
+            </div>
+            <div class="b-bar" style="background: {{ tpl.gradient_start }}; width: 70%;"></div>
+            <div class="b-bar" style="background: {{ tpl.gradient_end }}; width: 45%;"></div>
+          </div>
+        </div>
+        <!-- Hover overlay to preview -->
+        <div class="preview-overlay">
+          <a href="{% url 'template_preview' tpl.pk %}" target="_blank" class="preview-btn">👁️ Live Preview</a>
+        </div>
+        {% if tpl.badge %}
+        <span class="card-badge-label badge-{{ tpl.badge }}">
+          {% if tpl.badge == 'HOT' %}🔥{% elif tpl.badge == 'NEW' %}✨{% else %}⭐{% endif %} {{ tpl.badge }}
+        </span>
+        {% endif %}
+      </div>
+
+      <!-- Card body -->
+      <div class="card-body-area">
+        <div class="card-top-row">
+          <span class="card-cat-pill" style="background: {{ tpl.gradient_css }};">{{ tpl.get_category_display }}</span>
+          <span class="card-rating">⭐ {{ tpl.rating }}</span>
+        </div>
+        <div class="card-name">{{ tpl.name }}</div>
+        <div class="card-desc">{{ tpl.description }}</div>
+        <div class="mini-plans">
+          <span class="mini-plan mp-blue">🌐 {{ tpl.price_hosted_formatted }} TSh/mo</span>
+          <span class="mini-plan mp-green">🛠️ Full Build</span>
+          <span class="mini-plan mp-orange">💻 {{ tpl.price_source_formatted }} TSh</span>
+        </div>
+        <button class="card-cta-btn"
+          style="background: {{ tpl.gradient_css }};"
+          onclick="openTplModal(
+            '{{ tpl.name|escapejs }}',
+            '{{ tpl.get_category_display|escapejs }}',
+            '{{ tpl.description|escapejs }}',
+            '{{ tpl.price_hosted_formatted|escapejs }}',
+            '{{ tpl.price_source_formatted|escapejs }}'
+          )">
+          Chagua Template Hii 🚀
+        </button>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <div class="tpl-empty">
+    <span class="tpl-empty-emoji">😔</span>
+    <p>Hakuna templates katika category hii kwa sasa.<br>Rudi hivi karibuni!</p>
+    <a href="?category=all" class="filter-chip active" style="margin-top:1rem;display:inline-block;">← Onyesha zote</a>
+  </div>
+  {% endif %}
+
+  <!-- BOTTOM CTA -->
+  <div class="tpl-bottom-cta">
+    <h2>🤔 Haupati Unaotaka?</h2>
+    <p>Tuambie unahitaji nini — tutatengeneza template mpya specifically kwa biashara yako, haraka na bei nzuri!</p>
+    <a href="{% url 'select_website' %}">✉️ Omba Custom Template</a>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="tpl-modal-bg" id="tplModal" onclick="closeTplOutside(event)">
+  <div class="tpl-modal">
+    <div class="modal-drag-handle"></div>
+    <div class="modal-top">
+      <div>
+        <div class="modal-tpl-name" id="mName">Template</div>
+        <div class="modal-tpl-cat" id="mCat">Category</div>
+      </div>
+      <button class="modal-close-x" onclick="closeTplModal()">✕</button>
+    </div>
+    <div class="modal-body-area">
+      <p class="modal-tpl-desc" id="mDesc"></p>
+      <div class="modal-plan-label">Chagua Plan Yako 👇</div>
+      <div class="plan-options">
+        <!-- Plan 1 -->
+        <div class="plan-opt-card" onclick="selectTplPlan(this,'hosted')">
+          <div class="plan-icon-box pib-blue">🌐</div>
+          <div class="plan-opt-info">
+            <div class="plan-opt-name">Hosted Plan</div>
+            <div class="plan-opt-sub">Domain fee + kila mwezi — sisi tunashughulikia hosting, updates na security yote</div>
+          </div>
+          <div class="plan-opt-price pop-blue">
+            <span id="mPriceHosted">30,000</span> TSh
+            <small>/month + domain</small>
+          </div>
+        </div>
+        <!-- Plan 2 -->
+        <div class="plan-opt-card" onclick="selectTplPlan(this,'build')">
+          <div class="plan-icon-box pib-green">🛠️</div>
+          <div class="plan-opt-info">
+            <div class="plan-opt-name">Full Build</div>
+            <div class="plan-opt-sub">Tunabuild website yako yote from scratch — custom kabisa kulingana na brand yako</div>
+          </div>
+          <div class="plan-opt-price pop-green">
+            Custom<small>tunawasiliana nawe</small>
+          </div>
+        </div>
+        <!-- Plan 3 -->
+        <div class="plan-opt-card" onclick="selectTplPlan(this,'source')">
+          <div class="plan-icon-box pib-orange">💻</div>
+          <div class="plan-opt-info">
+            <div class="plan-opt-name">Source Code</div>
+            <div class="plan-opt-sub">Unapata code — unabadili mwenyewe. ⚠️ Footer ya JamiiTek.com lazima ibaki</div>
+          </div>
+          <div class="plan-opt-price pop-orange">
+            <span id="mPriceSource">150,000</span> TSh
+            <small>one-time · licensed</small>
+          </div>
+        </div>
+      </div>
+      <button class="modal-whatsapp-btn" onclick="goToWhatsApp()">
+        💬 Endelea kwa WhatsApp
+      </button>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  let selectedTplPlan = null;
+  let currentTplName  = '';
+
+  function openTplModal(name, cat, desc, priceHosted, priceSource) {
+    currentTplName = name;
+    document.getElementById('mName').textContent = name;
+    document.getElementById('mCat').textContent  = cat;
+    document.getElementById('mDesc').textContent = desc;
+    document.getElementById('mPriceHosted').textContent = priceHosted;
+    document.getElementById('mPriceSource').textContent = priceSource;
+    selectedTplPlan = null;
+    document.querySelectorAll('.plan-opt-card').forEach(c => c.classList.remove('selected'));
+    document.getElementById('tplModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeTplModal() {
+    document.getElementById('tplModal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function closeTplOutside(e) {
+    if (e.target.id === 'tplModal') closeTplModal();
+  }
+
+  function selectTplPlan(el, plan) {
+    document.querySelectorAll('.plan-opt-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedTplPlan = plan;
+  }
+
+  function goToWhatsApp() {
+    if (!selectedTplPlan) {
+      alert('⚠️ Tafadhali chagua plan kwanza!');
+      return;
+    }
+    const planNames = {
+      hosted: 'Hosted Plan (30,000 TSh/month + domain)',
+      build:  'Full Build (Custom Quote)',
+      source: 'Source Code (One-Time Payment)'
+    };
+    const msg = `Habari JamiiTek! 👋\n\nNataka template ya *${currentTplName}*.\n\nPlan niliyochagua: *${planNames[selectedTplPlan]}*\n\nNaomba maelezo zaidi na jinsi ya kuendelea. Asante!`;
+    window.open(`https://wa.me/255629712678?text=${encodeURIComponent(msg)}`, '_blank');
+  }
+</script>
+{% endblock %}

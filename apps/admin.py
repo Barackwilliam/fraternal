@@ -2,7 +2,6 @@
 
 from django.contrib import admin
 from django.utils.safestring import mark_safe
-
 from .forms import ServiceAdminForm, TeamAdminForm
 from .models import (
     Service,
@@ -371,3 +370,45 @@ class DomainDNSRecordAdmin(admin.ModelAdmin):
 
 # Patch DomainRecordAdmin to include DomainDNSRecordInline (defined above)
 DomainRecordAdmin.inlines = [DomainRenewalPaymentInline, DomainDNSRecordInline]
+
+# ============================================================
+# WEBSITE TEMPLATES ADMIN
+# ============================================================
+from .models import WebsiteTemplate
+
+@admin.register(WebsiteTemplate)
+class WebsiteTemplateAdmin(admin.ModelAdmin):
+    list_display  = ('name', 'category', 'badge', 'rating', 'price_hosted_monthly', 'price_source_code', 'is_active', 'order')
+    list_editable = ('is_active', 'order', 'badge')
+    list_filter   = ('category', 'is_active', 'badge')
+    search_fields = ('name', 'description')
+    ordering      = ('order', '-created_at')
+
+    fieldsets = (
+        ('📋 Basic Info', {
+            'fields': ('name', 'category', 'description', 'badge', 'rating')
+        }),
+        ('💰 Pricing', {
+            'fields': ('price_hosted_monthly', 'price_source_code'),
+            'description': 'Bei za plan 1 (hosted) na plan 3 (source code). Plan 2 (Full Build) ni Custom Quote daima.'
+        }),
+        ('🎨 Card Appearance', {
+            'fields': ('gradient_start', 'gradient_end'),
+            'description': 'Rangi za gradient kwenye card. Tumia hex colors kama #ff6584'
+        }),
+        ('💻 Template HTML Code', {
+            'fields': ('preview_html',),
+            'description': '⚠️ Weka HTML code yote ya template hapa. Itaonekana kwenye /templates/preview/<id>/'
+        }),
+        ('⚙️ Settings', {
+            'fields': ('is_active', 'order')
+        }),
+    )
+
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        form.base_fields['preview_html'].widget.attrs.update({
+            'rows': 30,
+            'style': 'font-family: monospace; font-size: 12px; background: #1e1e1e; color: #d4d4d4; padding: 10px;'
+        })
+        return form

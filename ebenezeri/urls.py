@@ -25,7 +25,7 @@ urlpatterns = [
 
     # JamiiBot Landing Page
     path('bot/', jamiibot_landing, name='jamiibot_landing'),
-
+    path('ussd/', include('ussd.urls')),
     # Manage ChatBot Section
     path('manage/chatbot/', manage_chatbot_overview, name='manage_chatbot'),
     path('manage/chatbot/bots/<uuid:bot_id>/', manage_bot_detail, name='manage_bot_detail'),
