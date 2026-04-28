@@ -71,3 +71,6 @@ def ussd_callback(request):
             response = "END Samahani, chaguo hilo halipo."
 
         return HttpResponse(response, content_type='text/plain')
+
+    # GET request — browser tu, si Africa's Talking
+    return HttpResponse("Shamba Mfukoni USSD Service inafanya kazi! ✅", content_type='text/plain')
