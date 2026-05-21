@@ -3,7 +3,7 @@
 from django.urls import path
 from . import views
 from .views import select_website_type, dynamic_form, proposal_preview, generate_pdf
-from .views import templates_marketplace, template_preview
+from .views import templates_marketplace, template_preview, template_preview_raw
 from . import management_views
 from . import client_portal_views as portal
 
@@ -17,6 +17,7 @@ urlpatterns = [
     # ── TEMPLATES MARKETPLACE ─────────────────────────────
     path('templates/', templates_marketplace, name='templates_marketplace'),
     path('templates/preview/<int:pk>/', template_preview, name='template_preview'),
+    path('templates/preview/<int:pk>/raw/', template_preview_raw, name='template_preview_raw'),
 
     # Proposal System
     path('proposals/', select_website_type, name='select_website'),

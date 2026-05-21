@@ -1,613 +1,980 @@
 {% extends 'base.html' %}
 {% load custom_filters %}
 {% block title %}Website Templates — JamiiTek{% endblock %}
-{% block meta_desc %}Chagua template ya website kwa biashara yako. Plans 3: Hosted (30K/mo), Full Build, au Source Code. JamiiTek Tanzania.{% endblock %}
+{% block meta_desc %}Browse professional website templates for your business. 3 plans: Hosted (30K/mo), Full Build, or Source Code. JamiiTek Tanzania.{% endblock %}
 
 {% block extra_css %}
 <style>
-/* ══════════════════════════════════════════
-   TEMPLATES MARKETPLACE — JAMIITEK
-══════════════════════════════════════════ */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Clash+Display:wght@400;500;600;700&display=swap');
 
-/* ── HERO ─────────────────────────────── */
-.tpl-hero {
-  background: linear-gradient(135deg, #6c63ff 0%, #ff6584 50%, #ffa62b 100%);
-  padding: 140px 0 80px;
-  text-align: center;
-  position: relative;
-  overflow: hidden;
+/* ── TOKENS ── */
+:root{
+  --ink:#07070f;--ink2:#1c1c2e;--muted:#6b7280;--subtle:#9ca3af;
+  --surface:#f5f5fa;--surface2:#ebebf5;--white:#fff;
+  --v:#6c47ff;--v2:#ff4081;--v3:#ff9f1c;--cyan:#06d6ff;--emerald:#00c47a;
+  --border:rgba(0,0,0,.07);--border2:rgba(0,0,0,.11);
+  --sh-xs:0 1px 4px rgba(0,0,0,.06);
+  --sh-sm:0 4px 16px rgba(0,0,0,.08);
+  --sh-md:0 10px 36px rgba(0,0,0,.12);
+  --sh-lg:0 24px 64px rgba(0,0,0,.16);
+  --r-s:8px;--r-m:14px;--r-l:20px;--r-xl:28px;--r-2xl:40px;
+  --ff-h:'Clash Display',sans-serif;
+  --ff-b:'Plus Jakarta Sans',sans-serif;
 }
-.tpl-hero::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='20'/%3E%3C/g%3E%3C/svg%3E");
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+img{max-width:100%;display:block}
+
+/* ── KEYFRAMES ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+@keyframes shimmer{from{background-position:200% center}to{background-position:-200% center}}
+@keyframes scan{0%{top:-10%}100%{top:110%}}
+@keyframes orb1{0%,100%{transform:translate(0,0)}33%{transform:translate(28px,-22px)}66%{transform:translate(-18px,20px)}}
+@keyframes orb2{0%,100%{transform:translate(0,0)}33%{transform:translate(-22px,18px)}66%{transform:translate(24px,-28px)}}
+@keyframes cardIn{from{opacity:0;transform:translateY(18px) scale(.97)}to{opacity:1;transform:none}}
+@keyframes pulse-ring{0%{box-shadow:0 0 0 0 rgba(108,71,255,.5)}100%{box-shadow:0 0 0 12px rgba(108,71,255,0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes modalIn{from{opacity:0;transform:translateY(100%)}to{opacity:1;transform:translateY(0)}}
+@keyframes planGlow{0%,100%{box-shadow:0 0 0 0 rgba(108,71,255,0)}50%{box-shadow:0 0 0 6px rgba(108,71,255,.15)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+@keyframes tick{0%{transform:scale(0) rotate(-20deg);opacity:0}60%{transform:scale(1.2) rotate(5deg);opacity:1}100%{transform:scale(1) rotate(0);opacity:1}}
+
+/* ══════════════════════════════════════════════════
+   HERO
+══════════════════════════════════════════════════ */
+.hero{
+  position:relative;overflow:hidden;
+  background:#050510;
+  padding:clamp(90px,14vw,160px) 0 clamp(60px,8vw,100px);
+  text-align:center;
 }
-.tpl-hero-emoji { font-size: 3rem; display: block; margin-bottom: 0.5rem; animation: bounce 2s infinite; }
-@keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
-.tpl-hero h1 {
-  font-size: clamp(1.8rem, 5vw, 3rem);
-  font-weight: 900;
-  color: #fff;
-  line-height: 1.2;
-  margin-bottom: 1rem;
-  position: relative;
+.hero-bg-grid{
+  position:absolute;inset:0;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(108,71,255,.045) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(108,71,255,.045) 1px,transparent 1px);
+  background-size:52px 52px;
+  mask-image:radial-gradient(ellipse 85% 85% at 50% 50%,#000 20%,transparent 100%);
 }
-.tpl-hero p {
-  color: rgba(255,255,255,0.9);
-  font-size: 1.1rem;
-  max-width: 550px;
-  margin: 0 auto 2rem;
-  position: relative;
-  line-height: 1.6;
+.hero-scan{position:absolute;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,rgba(108,71,255,.6),transparent);
+  animation:scan 7s linear infinite;pointer-events:none;z-index:1}
+.hero-orb{position:absolute;pointer-events:none;border-radius:50%;filter:blur(72px);}
+.orb-a{width:clamp(300px,50vw,640px);height:clamp(300px,50vw,640px);
+  background:radial-gradient(circle,rgba(108,71,255,.4) 0%,transparent 70%);
+  top:-25%;left:-15%;animation:orb1 20s ease-in-out infinite;}
+.orb-b{width:clamp(250px,45vw,560px);height:clamp(250px,45vw,560px);
+  background:radial-gradient(circle,rgba(255,64,129,.32) 0%,transparent 70%);
+  top:-15%;right:-10%;animation:orb2 26s ease-in-out infinite;}
+.orb-c{width:clamp(200px,35vw,420px);height:clamp(200px,35vw,420px);
+  background:radial-gradient(circle,rgba(6,214,255,.2) 0%,transparent 70%);
+  bottom:-15%;left:50%;transform:translateX(-50%);}
+
+.hero-inner{position:relative;z-index:2;padding:0 clamp(16px,4vw,24px);}
+
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(108,71,255,.12);border:1px solid rgba(108,71,255,.28);
+  border-radius:100px;padding:6px 18px;
+  font-family:var(--ff-b);font-size:clamp(.7rem,.9vw,.78rem);font-weight:700;
+  color:rgba(180,165,255,.95);letter-spacing:1.8px;text-transform:uppercase;
+  margin-bottom:clamp(14px,2vw,22px);
+  animation:fadeUp .5s ease both;
 }
-.hero-badges {
-  display: flex;
-  justify-content: center;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-  position: relative;
+.eyebrow-dot{width:6px;height:6px;border-radius:50%;background:#6c47ff;
+  animation:pulse-ring 2s infinite;}
+
+.hero h1{
+  font-family:var(--ff-h);
+  font-size:clamp(2rem,5.5vw,4.2rem);
+  font-weight:700;line-height:1.07;letter-spacing:-.5px;
+  color:#fff;margin-bottom:clamp(14px,2vw,20px);
+  animation:fadeUp .6s .1s ease both;
 }
-.hero-badge {
-  background: rgba(255,255,255,0.2);
-  border: 1px solid rgba(255,255,255,0.35);
-  color: #fff;
-  font-size: 0.85rem;
-  font-weight: 700;
-  padding: 8px 18px;
-  border-radius: 30px;
-  backdrop-filter: blur(6px);
+.hero h1 .grd{
+  background:linear-gradient(110deg,#b79aff,#6c47ff 35%,#ff4081 72%,#ff9f1c);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;background-size:220% auto;
+  animation:shimmer 5s linear infinite;
 }
+.hero-sub{
+  font-family:var(--ff-b);font-size:clamp(.9rem,1.5vw,1.1rem);font-weight:400;
+  color:rgba(255,255,255,.5);line-height:1.75;
+  max-width:560px;margin:0 auto clamp(28px,4vw,40px);
+  animation:fadeUp .6s .2s ease both;
+}
+.hero-chips{
+  display:flex;justify-content:center;gap:clamp(6px,1vw,10px);
+  flex-wrap:wrap;animation:fadeUp .6s .3s ease both;
+}
+.h-chip{
+  display:inline-flex;align-items:center;gap:7px;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
+  border-radius:100px;padding:8px clamp(12px,2vw,20px);
+  font-family:var(--ff-b);font-size:clamp(.72rem,.9vw,.82rem);font-weight:500;
+  color:rgba(255,255,255,.65);backdrop-filter:blur(8px);
+  transition:all .25s;
+}
+.h-chip:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2);color:#fff;}
+.h-chip strong{font-weight:800;color:#fff;font-size:1.05em;}
 
 /* wave */
-.tpl-wave { margin-top: -2px; line-height: 0; background: #f5f5fa; }
-.tpl-wave svg { display: block; width: 100%; }
+.hero-wave{line-height:0;background:var(--surface);}
+.hero-wave svg{display:block;width:100%;}
 
-/* ── FILTER ─────────────────────────── */
-.tpl-filter-section { background: #f5f5fa; padding: 1.5rem 0 0.5rem; }
-.filter-scroll-wrap {
-  display: flex;
-  gap: 0.5rem;
-  overflow-x: auto;
-  padding: 0 15px 0.75rem;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
+/* ══════════════════════════════════════════════════
+   STICKY FILTER BAR
+══════════════════════════════════════════════════ */
+.filter-bar{
+  position:sticky;top:0;z-index:300;
+  background:rgba(245,245,250,.88);
+  backdrop-filter:blur(22px) saturate(180%);
+  -webkit-backdrop-filter:blur(22px) saturate(180%);
+  border-bottom:1px solid var(--border2);
+  transition:box-shadow .3s;
 }
-.filter-scroll-wrap::-webkit-scrollbar { display: none; }
-.filter-chip {
-  flex-shrink: 0;
-  font-size: 0.82rem;
-  font-weight: 700;
-  padding: 9px 18px;
-  border-radius: 25px;
-  border: 2px solid #e0e0e0;
-  background: #fff;
-  color: #666;
-  cursor: pointer;
-  transition: all 0.2s;
-  white-space: nowrap;
-  text-decoration: none;
-  display: inline-block;
+.filter-bar.shadowed{box-shadow:0 4px 24px rgba(0,0,0,.08);}
+.filter-bar-inner{
+  display:flex;align-items:center;gap:10px;
+  padding:clamp(10px,1.5vw,14px) clamp(12px,3vw,24px);
+  overflow-x:auto;scrollbar-width:none;
 }
-.filter-chip:hover { border-color: #6c63ff; color: #6c63ff; }
-.filter-chip.active { background: #6c63ff; border-color: #6c63ff; color: #fff; box-shadow: 0 4px 14px rgba(108,99,255,0.35); }
+.filter-bar-inner::-webkit-scrollbar{display:none;}
+.filter-lbl{
+  font-family:var(--ff-b);font-size:.68rem;font-weight:700;
+  color:var(--subtle);letter-spacing:1.2px;text-transform:uppercase;
+  white-space:nowrap;flex-shrink:0;
+}
+.filter-sep{width:1px;height:22px;background:var(--border2);flex-shrink:0;}
+.chip-row{display:flex;gap:6px;flex-shrink:0;}
 
-/* ── GRID ───────────────────────────── */
-.tpl-grid-section { background: #f5f5fa; padding: 1.5rem 0 3rem; }
-.tpl-grid-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1.2rem;
-  padding: 0 15px;
-  flex-wrap: wrap;
-  gap: 0.5rem;
+.chip{
+  flex-shrink:0;display:inline-flex;align-items:center;gap:5px;
+  font-family:var(--ff-b);font-size:clamp(.72rem,.85vw,.8rem);font-weight:700;
+  padding:7px clamp(12px,1.5vw,17px);
+  border-radius:100px;border:1.5px solid var(--border2);
+  background:var(--white);color:var(--muted);
+  cursor:pointer;white-space:nowrap;text-decoration:none;
+  transition:all .22s cubic-bezier(.25,.46,.45,.94);
 }
-.tpl-grid-header h2 { font-size: 1.1rem; font-weight: 800; color: #333; }
-.tpl-grid-header h2 span { color: #6c63ff; }
-.tpl-count { font-size: 0.8rem; color: #999; font-weight: 600; }
+.chip:hover{border-color:var(--v);color:var(--v);background:rgba(108,71,255,.05);transform:translateY(-1px);}
+.chip.active{background:var(--v);border-color:var(--v);color:#fff;box-shadow:0 4px 18px rgba(108,71,255,.38);}
+.chip-n{
+  font-size:.63rem;font-weight:800;padding:1px 6px;border-radius:20px;
+  background:rgba(255,255,255,.25);
+}
+.chip:not(.active) .chip-n{background:var(--surface2);color:var(--subtle);}
 
-.tpl-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
-  gap: 1rem;
-  padding: 0 15px;
+/* ══════════════════════════════════════════════════
+   GRID META
+══════════════════════════════════════════════════ */
+.grid-meta{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:clamp(16px,2vw,24px) clamp(12px,3vw,24px) clamp(10px,1.5vw,14px);
+  flex-wrap:wrap;gap:8px;
+}
+.grid-meta h2{
+  font-family:var(--ff-h);font-size:clamp(.95rem,1.5vw,1.15rem);
+  font-weight:600;color:var(--ink);
+}
+.grid-meta h2 em{font-style:normal;color:var(--v);}
+.back-link{
+  font-family:var(--ff-b);font-size:.8rem;font-weight:600;
+  color:var(--subtle);text-decoration:none;
+  display:inline-flex;align-items:center;gap:4px;
+  transition:color .2s;
+}
+.back-link:hover{color:var(--v);}
+
+/* ══════════════════════════════════════════════════
+   GRID SECTION
+══════════════════════════════════════════════════ */
+.mkt-section{background:var(--surface);min-height:60vh;padding-bottom:clamp(2rem,5vw,4rem);}
+
+.tpl-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr));
+  gap:clamp(14px,2vw,22px);
+  padding:0 clamp(12px,3vw,24px);
+}
+@media(min-width:1100px){.tpl-grid{grid-template-columns:repeat(3,1fr);gap:24px;}}
+@media(max-width:420px){.tpl-grid{grid-template-columns:1fr;gap:14px;}}
+
+/* ══════════════════════════════════════════════════
+   CARD
+══════════════════════════════════════════════════ */
+.tpl-card{
+  background:var(--white);border-radius:var(--r-xl);overflow:hidden;
+  border:1px solid var(--border);box-shadow:var(--sh-sm);
+  transition:transform .35s cubic-bezier(.25,.46,.45,.94),
+             box-shadow .35s ease,border-color .25s;
+  animation:cardIn .55s ease both;
+  position:relative;
+}
+.tpl-card:hover{
+  transform:translateY(-7px) scale(1.005);
+  box-shadow:0 22px 64px rgba(0,0,0,.14),0 4px 18px rgba(108,71,255,.1);
+  border-color:rgba(108,71,255,.22);
 }
 
-/* ── CARD ───────────────────────────── */
-.tpl-card {
-  background: #fff;
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.07);
-  transition: transform 0.3s, box-shadow 0.3s;
+/* PREVIEW */
+.card-preview{
+  position:relative;height:clamp(170px,22vw,215px);overflow:hidden;
+  background:#f0f0f8;
 }
-.tpl-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 14px 40px rgba(0,0,0,0.13);
-}
-.tpl-card:active { transform: scale(0.98); }
+.card-preview-bg{position:absolute;inset:0;z-index:1;}
 
-/* Preview area */
-.card-preview-area {
-  position: relative;
-  height: 190px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+/* Browser bar */
+.card-bbar{
+  position:absolute;top:0;left:0;right:0;z-index:10;height:30px;
+  background:rgba(248,248,252,.96);border-bottom:1px solid rgba(0,0,0,.07);
+  backdrop-filter:blur(8px);
+  display:flex;align-items:center;padding:0 10px;gap:6px;
 }
-.browser-mock {
-  width: 87%;
-  height: 158px;
-  border-radius: 12px;
-  box-shadow: 0 8px 30px rgba(0,0,0,0.22);
-  overflow: hidden;
-  position: relative;
-  z-index: 2;
-  background: #fff;
+.bbar-dots{display:flex;gap:4px;}
+.bbar-dot{width:8px;height:8px;border-radius:50%;}
+.bbar-dot:nth-child(1){background:#ff5f57;}
+.bbar-dot:nth-child(2){background:#febc2e;}
+.bbar-dot:nth-child(3){background:#28c840;}
+.bbar-url{
+  flex:1;background:rgba(0,0,0,.06);border-radius:6px;
+  height:18px;display:flex;align-items:center;padding:0 8px;gap:4px;overflow:hidden;
 }
-.browser-bar {
-  height: 24px;
-  display: flex;
-  align-items: center;
-  padding: 0 10px;
-  gap: 5px;
-  background: rgba(0,0,0,0.2);
+.bbar-lock{font-size:8px;opacity:.4;}
+.bbar-urltext{
+  font-family:monospace;font-size:9px;color:#777;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
-.b-dot { width: 7px; height: 7px; border-radius: 50%; }
-.b-dot:nth-child(1) { background: #ff5f56; }
-.b-dot:nth-child(2) { background: #ffbd2e; }
-.b-dot:nth-child(3) { background: #27c93f; }
-.browser-body {
-  height: calc(100% - 24px);
-  display: flex;
-  flex-direction: column;
-  padding: 8px;
-  gap: 6px;
-}
-.b-hero {
-  flex: 1;
-  border-radius: 7px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.55rem;
-  font-weight: 800;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  color: #fff;
-}
-.b-row { display: flex; gap: 5px; height: 22px; }
-.b-col { flex: 1; border-radius: 5px; opacity: 0.45; }
-.b-bar { height: 7px; border-radius: 5px; opacity: 0.35; }
 
-/* badge */
-.card-badge-label {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  z-index: 5;
-  font-size: 0.65rem;
-  font-weight: 800;
-  padding: 4px 11px;
-  border-radius: 20px;
-  letter-spacing: 0.5px;
+/* iframe scaled */
+.card-iframe-outer{position:absolute;inset:0;overflow:hidden;z-index:2;display:flex;align-items:flex-start;justify-content:center;}
+.card-iframe-scaler{
+  width:1280px;height:860px;
+  transform:scale(0.254);transform-origin:top center;
+  flex-shrink:0;position:relative;top:0;
 }
-.badge-HOT { background: #ff3b3b; color: #fff; }
-.badge-NEW { background: #00c853; color: #fff; }
-.badge-PRO { background: #6c63ff; color: #fff; }
+.card-iframe-scaler iframe{
+  width:1280px;height:860px;border:none;display:block;
+  pointer-events:none;
+}
+.iframe-shimmer{
+  position:absolute;inset:0;z-index:3;
+  background:linear-gradient(90deg,#f0f0f8 0%,#e8e8f4 50%,#f0f0f8 100%);
+  background-size:200% 100%;animation:shimmer 1.6s infinite;
+  transition:opacity .4s .25s;
+}
+.iframe-shimmer.done{opacity:0;pointer-events:none;}
+
+/* Hover overlay */
+.card-overlay{
+  position:absolute;inset:0;z-index:20;
+  background:rgba(5,5,15,0);
+  display:flex;align-items:center;justify-content:center;
+  transition:background .28s;
+}
+.tpl-card:hover .card-overlay{background:rgba(5,5,15,.58);}
+.overlay-btns{
+  display:flex;gap:8px;
+  opacity:0;transform:translateY(12px) scale(.93);
+  transition:all .3s cubic-bezier(.25,.46,.45,.94);
+}
+.tpl-card:hover .overlay-btns{opacity:1;transform:translateY(0) scale(1);}
+.ov-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  font-family:var(--ff-b);font-size:.77rem;font-weight:700;
+  padding:9px 16px;border-radius:var(--r-s);
+  text-decoration:none;border:none;cursor:pointer;
+  transition:transform .15s,box-shadow .15s;letter-spacing:.15px;
+  white-space:nowrap;
+}
+.ov-btn:active{transform:scale(.94);}
+.ov-preview{background:#fff;color:var(--ink);box-shadow:0 4px 18px rgba(0,0,0,.22);}
+.ov-preview:hover{color:var(--ink);}
+.ov-pick{
+  background:linear-gradient(135deg,var(--v),var(--v2));
+  color:#fff;box-shadow:0 4px 18px rgba(108,71,255,.5);
+}
+.ov-pick:hover{color:#fff;}
+
+/* Badge */
+.card-badge{
+  position:absolute;top:38px;right:10px;z-index:15;
+  font-family:var(--ff-b);font-size:.58rem;font-weight:800;
+  padding:4px 10px;border-radius:100px;
+  letter-spacing:.8px;text-transform:uppercase;
+  backdrop-filter:blur(8px);
+}
+.badge-HOT{background:rgba(255,50,55,.92);color:#fff;}
+.badge-NEW{background:rgba(0,196,122,.92);color:#fff;}
+.badge-PRO{background:rgba(108,71,255,.92);color:#fff;}
 
 /* Card body */
-.card-body-area { padding: 1rem 1.1rem 1.2rem; }
-.card-top-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 0.4rem;
+.card-body{padding:clamp(12px,1.8vw,18px) clamp(14px,2vw,20px) clamp(14px,2vw,20px);}
+.card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.card-cat{
+  font-family:var(--ff-b);font-size:.67rem;font-weight:800;
+  padding:4px 11px;border-radius:100px;color:#fff;
+  letter-spacing:.4px;text-transform:uppercase;
 }
-.card-cat-pill {
-  font-size: 0.7rem;
-  font-weight: 700;
-  padding: 4px 12px;
-  border-radius: 20px;
-  color: #fff;
+.card-rating{
+  display:inline-flex;align-items:center;gap:4px;
+  font-family:var(--ff-b);font-size:.8rem;font-weight:700;color:var(--v3);
 }
-.card-rating { font-size: 0.78rem; font-weight: 700; color: #ffa62b; }
-.card-name { font-size: 1.05rem; font-weight: 800; color: #1a1a2e; margin-bottom: 0.35rem; }
-.card-desc { font-size: 0.8rem; color: #888; line-height: 1.55; margin-bottom: 0.9rem; }
+.card-name{
+  font-family:var(--ff-h);font-size:clamp(1rem,1.4vw,1.15rem);
+  font-weight:600;color:var(--ink);margin-bottom:5px;letter-spacing:-.2px;
+}
+.card-desc{
+  font-family:var(--ff-b);font-size:.78rem;color:var(--muted);
+  line-height:1.65;margin-bottom:clamp(10px,1.5vw,15px);
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}
+.card-plans{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:clamp(10px,1.5vw,15px);}
+.pp{
+  display:inline-flex;align-items:center;gap:4px;
+  font-family:var(--ff-b);font-size:.66rem;font-weight:700;
+  padding:4px 10px;border-radius:var(--r-s);border:1.5px solid;
+}
+.pp-blue{color:#2b7aff;background:rgba(43,122,255,.08);border-color:rgba(43,122,255,.2);}
+.pp-green{color:#00a86b;background:rgba(0,168,107,.08);border-color:rgba(0,168,107,.2);}
+.pp-orange{color:#e06e00;background:rgba(224,110,0,.08);border-color:rgba(224,110,0,.2);}
 
-/* Mini plan pills */
-.mini-plans { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 1rem; }
-.mini-plan {
-  font-size: 0.65rem;
-  font-weight: 700;
-  padding: 4px 10px;
-  border-radius: 15px;
+.card-cta{
+  width:100%;padding:clamp(11px,1.5vw,14px);border:none;
+  border-radius:var(--r-m);font-family:var(--ff-h);
+  font-size:clamp(.82rem,1vw,.9rem);font-weight:600;color:#fff;
+  cursor:pointer;letter-spacing:.2px;position:relative;overflow:hidden;
+  transition:transform .25s,box-shadow .25s;
 }
-.mp-blue   { background: #e8f4ff; color: #2196f3; }
-.mp-green  { background: #e8fff4; color: #00a854; }
-.mp-orange { background: #fff3e0; color: #ff6b35; }
+.card-cta::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(255,255,255,.14) 0%,transparent 100%);
+}
+.card-cta:hover{transform:translateY(-2px);box-shadow:0 8px 26px rgba(0,0,0,.22);}
+.card-cta:active{transform:scale(.97);}
 
-/* CTA button */
-.card-cta-btn {
-  width: 100%;
-  padding: 13px;
-  border: none;
-  border-radius: 12px;
-  font-size: 0.88rem;
-  font-weight: 800;
-  cursor: pointer;
-  color: #fff;
-  transition: all 0.25s;
-  letter-spacing: 0.3px;
-}
-.card-cta-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.2); }
-.card-cta-btn:active { transform: scale(0.97); }
+/* ══════════════════════════════════════════════════
+   EMPTY STATE
+══════════════════════════════════════════════════ */
+.mkt-empty{text-align:center;padding:clamp(3rem,8vw,6rem) 1rem;animation:fadeIn .5s;}
+.mkt-empty-icon{font-size:3.5rem;display:block;margin-bottom:1rem;animation:bob 3s ease-in-out infinite;}
+.mkt-empty p{font-family:var(--ff-b);color:var(--subtle);font-size:.95rem;line-height:1.7;}
 
-/* preview button overlay */
-.preview-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,0);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.3s;
-  z-index: 3;
+/* ══════════════════════════════════════════════════
+   BOTTOM CTA BAND
+══════════════════════════════════════════════════ */
+.cta-band{
+  position:relative;overflow:hidden;
+  background:#050510;border-radius:var(--r-xl);
+  margin:clamp(1.5rem,3vw,2.5rem) clamp(12px,3vw,24px);
+  padding:clamp(2rem,5vw,3.5rem) clamp(1.5rem,4vw,3rem);
+  text-align:center;border:1px solid rgba(108,71,255,.2);
 }
-.card-preview-area:hover .preview-overlay { background: rgba(0,0,0,0.45); }
-.preview-btn {
-  opacity: 0;
-  transform: translateY(8px);
-  transition: all 0.3s;
-  background: #fff;
-  color: #333;
-  font-size: 0.78rem;
-  font-weight: 800;
-  padding: 10px 20px;
-  border-radius: 25px;
-  text-decoration: none;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+.cta-band::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 65% 80% at 15% 50%,rgba(108,71,255,.28) 0%,transparent 70%),
+    radial-gradient(ellipse 55% 70% at 85% 50%,rgba(255,64,129,.22) 0%,transparent 70%);
 }
-.card-preview-area:hover .preview-btn {
-  opacity: 1;
-  transform: translateY(0);
+.cta-band-grid{
+  position:absolute;inset:0;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
+  background-size:42px 42px;
+  mask-image:radial-gradient(ellipse 80% 80% at center,#000 30%,transparent 100%);
+}
+.cta-inner{position:relative;z-index:2;}
+.cta-icon{font-size:clamp(2rem,3vw,2.8rem);display:block;margin-bottom:12px;animation:bob 3s ease-in-out infinite;}
+.cta-title{
+  font-family:var(--ff-h);font-size:clamp(1.3rem,3vw,2rem);
+  font-weight:700;color:#fff;letter-spacing:-.3px;margin-bottom:10px;
+}
+.cta-desc{
+  font-family:var(--ff-b);font-size:clamp(.85rem,1.2vw,.95rem);
+  color:rgba(255,255,255,.52);max-width:460px;margin:0 auto clamp(18px,3vw,28px);line-height:1.75;
+}
+.cta-btn{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:var(--ff-h);font-size:clamp(.85rem,1.1vw,.95rem);font-weight:600;
+  padding:clamp(12px,1.8vw,15px) clamp(22px,3vw,30px);
+  border-radius:var(--r-m);
+  background:linear-gradient(135deg,var(--v),var(--v2));
+  color:#fff;text-decoration:none;
+  box-shadow:0 6px 28px rgba(108,71,255,.48);
+  transition:all .25s;letter-spacing:.2px;
+}
+.cta-btn:hover{transform:translateY(-3px);box-shadow:0 12px 42px rgba(108,71,255,.6);color:#fff;}
+
+/* ══════════════════════════════════════════════════
+   MODAL — VIBRANT PLAN PICKER
+══════════════════════════════════════════════════ */
+.modal-bg{
+  position:fixed;inset:0;z-index:9999;
+  display:flex;align-items:flex-end;justify-content:center;
+  background:rgba(5,5,15,0);
+  pointer-events:none;
+  transition:background .35s;
+}
+@media(min-width:640px){.modal-bg{align-items:center;}}
+.modal-bg.open{
+  background:rgba(5,5,15,.72);
+  pointer-events:all;
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
 }
 
-/* ── MODAL ─────────────────────────── */
-.tpl-modal-bg {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.55);
-  z-index: 9999;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s;
+.modal-sheet{
+  background:#fff;
+  border-radius:var(--r-xl) var(--r-xl) 0 0;
+  width:100%;max-width:580px;
+  max-height:96vh;overflow-y:auto;
+  transform:translateY(110%);
+  transition:transform .48s cubic-bezier(.32,1.25,.64,1);
+  border-top:1px solid var(--border);
+  box-shadow:0 -24px 80px rgba(0,0,0,.25);
+  scrollbar-width:none;
 }
-@media(min-width:600px) { .tpl-modal-bg { align-items: center; } }
-.tpl-modal-bg.open { opacity: 1; pointer-events: all; }
+.modal-sheet::-webkit-scrollbar{display:none;}
+@media(min-width:640px){
+  .modal-sheet{
+    border-radius:var(--r-xl);
+    transform:translateY(28px) scale(.91);
+    opacity:0;
+    transition:transform .42s cubic-bezier(.32,1.25,.64,1),opacity .3s ease;
+    box-shadow:0 32px 100px rgba(0,0,0,.28);
+  }
+  .modal-bg.open .modal-sheet{transform:none;opacity:1;}
+}
+.modal-bg.open .modal-sheet{transform:none;}
 
-.tpl-modal {
-  background: #fff;
-  border-radius: 24px 24px 0 0;
-  width: 100%;
-  max-width: 520px;
-  max-height: 92vh;
-  overflow-y: auto;
-  transform: translateY(100%);
-  transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+/* Modal hero gradient strip */
+.modal-hero-strip{
+  position:relative;overflow:hidden;
+  border-radius:var(--r-xl) var(--r-xl) 0 0;
+  padding:clamp(22px,3vw,30px) clamp(18px,3vw,26px) clamp(18px,2.5vw,26px);
+  background:linear-gradient(135deg,#0f0820 0%,#1a0a35 50%,#0d1230 100%);
 }
-@media(min-width:600px) {
-  .tpl-modal { border-radius: 24px; transform: scale(0.85); }
-  .tpl-modal-bg.open .tpl-modal { transform: scale(1); }
+.modal-strip-orb{
+  position:absolute;pointer-events:none;border-radius:50%;filter:blur(55px);
 }
-.tpl-modal-bg.open .tpl-modal { transform: translateY(0); }
+.mso-a{
+  width:260px;height:260px;
+  background:radial-gradient(circle,rgba(108,71,255,.55) 0%,transparent 70%);
+  top:-80px;left:-60px;
+}
+.mso-b{
+  width:220px;height:220px;
+  background:radial-gradient(circle,rgba(255,64,129,.45) 0%,transparent 70%);
+  top:-60px;right:-40px;
+}
+.mso-c{
+  width:180px;height:180px;
+  background:radial-gradient(circle,rgba(6,214,255,.3) 0%,transparent 70%);
+  bottom:-50px;left:50%;transform:translateX(-50%);
+}
+.modal-strip-grid{
+  position:absolute;inset:0;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);
+  background-size:36px 36px;
+}
+.modal-header-inner{
+  position:relative;z-index:2;
+  display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
+}
+.modal-pill-bar{
+  width:36px;height:4px;border-radius:4px;
+  background:rgba(255,255,255,.2);margin:0 auto 16px;
+}
+@media(min-width:640px){.modal-pill-bar{display:none;}}
+.modal-tpl-eyebrow{
+  font-family:var(--ff-b);font-size:.68rem;font-weight:700;
+  color:rgba(180,160,255,.8);letter-spacing:1.5px;text-transform:uppercase;
+  margin-bottom:6px;
+}
+.modal-tpl-name{
+  font-family:var(--ff-h);font-size:clamp(1.4rem,2.5vw,1.8rem);
+  font-weight:700;color:#fff;letter-spacing:-.4px;
+}
+.modal-tpl-cat{
+  font-family:var(--ff-b);font-size:.75rem;font-weight:500;
+  color:rgba(255,255,255,.45);margin-top:5px;
+}
+.modal-close-btn{
+  width:36px;height:36px;border-radius:50%;
+  background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);
+  color:rgba(255,255,255,.7);font-size:.9rem;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;transition:all .2s;
+}
+.modal-close-btn:hover{background:rgba(255,255,255,.2);color:#fff;}
 
-.modal-drag-handle {
-  width: 40px; height: 4px;
-  background: #e0e0e0;
-  border-radius: 4px;
-  margin: 12px auto 0;
+/* Rating row inside hero strip */
+.modal-meta-row{
+  position:relative;z-index:2;
+  display:flex;align-items:center;gap:10px;margin-top:14px;
+  flex-wrap:wrap;
 }
-@media(min-width:600px) { .modal-drag-handle { display: none; } }
+.modal-star-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  background:rgba(255,159,28,.12);border:1px solid rgba(255,159,28,.3);
+  border-radius:100px;padding:4px 12px;
+  font-family:var(--ff-b);font-size:.72rem;font-weight:700;color:#ffc14d;
+}
+.modal-plans-count{
+  font-family:var(--ff-b);font-size:.72rem;font-weight:600;
+  color:rgba(255,255,255,.4);
+}
 
-.modal-top {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  padding: 1.2rem 1.3rem 0;
-  gap: 1rem;
+/* Modal body */
+.modal-body{padding:clamp(16px,2.5vw,24px) clamp(16px,3vw,26px) clamp(20px,3vw,28px);}
+.modal-desc{
+  font-family:var(--ff-b);font-size:.84rem;color:var(--muted);
+  line-height:1.72;margin-bottom:clamp(16px,2.5vw,22px);
 }
-.modal-close-x {
-  width: 34px; height: 34px;
-  border-radius: 50%;
-  background: #f0f0f0;
-  border: none;
-  font-size: 1rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  transition: background 0.2s;
+.modal-sec-label{
+  font-family:var(--ff-b);font-size:.67rem;font-weight:800;
+  letter-spacing:1.6px;text-transform:uppercase;color:var(--subtle);
+  margin-bottom:clamp(10px,1.5vw,14px);
+  display:flex;align-items:center;gap:8px;
 }
-.modal-close-x:hover { background: #ddd; }
-.modal-tpl-name { font-size: 1.4rem; font-weight: 900; color: #1a1a2e; }
-.modal-tpl-cat  { font-size: 0.8rem; color: #999; margin-top: 3px; }
+.modal-sec-label::after{content:'';flex:1;height:1px;background:var(--border2);}
 
-.modal-body-area { padding: 1.1rem 1.3rem 1.5rem; }
-.modal-tpl-desc { font-size: 0.85rem; color: #666; line-height: 1.6; margin-bottom: 1.3rem; }
-.modal-plan-label { font-size: 0.75rem; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: #aaa; margin-bottom: 0.75rem; }
+/* PLAN CARDS */
+.modal-plans{display:flex;flex-direction:column;gap:clamp(8px,1.2vw,12px);margin-bottom:clamp(16px,2.5vw,22px);}
 
-.plan-options { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.3rem; }
-.plan-opt-card {
-  border: 2px solid #eee;
-  border-radius: 16px;
-  padding: 1rem 1.1rem;
-  cursor: pointer;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  gap: 0.9rem;
+.plan-card{
+  position:relative;overflow:hidden;
+  border:2px solid var(--border);
+  border-radius:var(--r-l);
+  padding:clamp(14px,2vw,18px) clamp(14px,2vw,18px);
+  cursor:pointer;
+  transition:all .25s cubic-bezier(.25,.46,.45,.94);
+  display:flex;align-items:center;gap:clamp(12px,1.8vw,16px);
+  background:#fff;
 }
-.plan-opt-card:hover { border-color: #6c63ff; background: #fafafe; }
-.plan-opt-card.selected { border-color: #6c63ff; background: #f0eeff; }
-.plan-icon-box {
-  width: 46px; height: 46px;
-  border-radius: 12px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1.4rem;
-  flex-shrink: 0;
-}
-.pib-blue   { background: #e8f4ff; }
-.pib-green  { background: #e8fff4; }
-.pib-orange { background: #fff3e0; }
-.plan-opt-info { flex: 1; }
-.plan-opt-name { font-weight: 800; font-size: 0.92rem; color: #1a1a2e; }
-.plan-opt-sub  { font-size: 0.75rem; color: #888; margin-top: 3px; line-height: 1.4; }
-.plan-opt-price { text-align: right; font-weight: 800; font-size: 0.88rem; white-space: nowrap; }
-.plan-opt-price small { display: block; font-size: 0.6rem; color: #bbb; font-weight: 600; margin-top: 2px; }
-.pop-blue   { color: #2196f3; }
-.pop-green  { color: #00a854; }
-.pop-orange { color: #ff6b35; }
+.plan-card:hover{transform:translateY(-2px);}
+.plan-card.selected{border-width:2.5px;}
 
-.modal-whatsapp-btn {
-  width: 100%;
-  padding: 15px;
-  border: none;
-  border-radius: 14px;
-  background: linear-gradient(135deg, #6c63ff, #ff6584);
-  color: #fff;
-  font-size: 0.95rem;
-  font-weight: 800;
-  cursor: pointer;
-  transition: all 0.25s;
-  box-shadow: 0 4px 20px rgba(108,99,255,0.35);
-  letter-spacing: 0.3px;
+/* Plan A — Hosted — Indigo/Blue gradient theme */
+.plan-card.plan-hosted:hover{
+  border-color:rgba(99,102,241,.4);
+  box-shadow:0 8px 32px rgba(99,102,241,.14);
+  background:rgba(99,102,241,.03);
 }
-.modal-whatsapp-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(108,99,255,0.45); }
-.modal-whatsapp-btn:active { transform: scale(0.97); }
+.plan-card.plan-hosted.selected{
+  border-color:#6366f1;
+  background:linear-gradient(135deg,rgba(99,102,241,.07) 0%,rgba(139,92,246,.05) 100%);
+  box-shadow:0 8px 32px rgba(99,102,241,.18);
+}
 
-/* ── EMPTY STATE ────────────────────── */
-.tpl-empty {
-  text-align: center;
-  padding: 4rem 1rem;
-  color: #aaa;
+/* Plan B — Build — Emerald/Teal gradient theme */
+.plan-card.plan-build:hover{
+  border-color:rgba(16,185,129,.4);
+  box-shadow:0 8px 32px rgba(16,185,129,.14);
+  background:rgba(16,185,129,.03);
 }
-.tpl-empty-emoji { font-size: 3rem; display: block; margin-bottom: 1rem; }
+.plan-card.plan-build.selected{
+  border-color:#10b981;
+  background:linear-gradient(135deg,rgba(16,185,129,.07) 0%,rgba(6,214,255,.05) 100%);
+  box-shadow:0 8px 32px rgba(16,185,129,.18);
+}
 
-/* ── BOTTOM CTA ─────────────────────── */
-.tpl-bottom-cta {
-  background: linear-gradient(135deg, #6c63ff, #ff6584);
-  border-radius: 20px;
-  margin: 2rem 15px;
-  padding: 2.5rem 1.5rem;
-  text-align: center;
-  color: #fff;
+/* Plan C — Source — Amber/Orange gradient theme */
+.plan-card.plan-source:hover{
+  border-color:rgba(245,158,11,.4);
+  box-shadow:0 8px 32px rgba(245,158,11,.14);
+  background:rgba(245,158,11,.03);
 }
-.tpl-bottom-cta h2 { font-size: 1.5rem; font-weight: 900; margin-bottom: 0.6rem; }
-.tpl-bottom-cta p { font-size: 0.9rem; opacity: 0.9; margin-bottom: 1.5rem; line-height: 1.6; }
-.tpl-bottom-cta a {
-  display: inline-block;
-  background: #fff;
-  color: #6c63ff;
-  font-weight: 800;
-  font-size: 0.9rem;
-  padding: 13px 28px;
-  border-radius: 12px;
-  text-decoration: none;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-  transition: transform 0.2s;
+.plan-card.plan-source.selected{
+  border-color:#f59e0b;
+  background:linear-gradient(135deg,rgba(245,158,11,.07) 0%,rgba(251,113,133,.05) 100%);
+  box-shadow:0 8px 32px rgba(245,158,11,.18);
 }
-.tpl-bottom-cta a:hover { transform: translateY(-2px); }
 
-@media(max-width:576px) {
-  .tpl-grid { grid-template-columns: 1fr; }
+/* Plan icon */
+.plan-icon{
+  width:clamp(44px,5.5vw,52px);height:clamp(44px,5.5vw,52px);
+  border-radius:var(--r-m);
+  display:flex;align-items:center;justify-content:center;
+  font-size:clamp(1.2rem,1.6vw,1.5rem);flex-shrink:0;
+  transition:transform .25s;
+}
+.plan-card:hover .plan-icon,.plan-card.selected .plan-icon{transform:scale(1.08) rotate(-4deg);}
+.pi-indigo{background:linear-gradient(135deg,#e0e7ff,#c7d2fe);}
+.pi-emerald{background:linear-gradient(135deg,#d1fae5,#a7f3d0);}
+.pi-amber{background:linear-gradient(135deg,#fef3c7,#fde68a);}
+
+.plan-info{flex:1;min-width:0;}
+.plan-name{
+  font-family:var(--ff-h);font-size:clamp(.88rem,1.2vw,.98rem);
+  font-weight:600;color:var(--ink);margin-bottom:4px;
+}
+.plan-desc{
+  font-family:var(--ff-b);font-size:clamp(.68rem,.9vw,.75rem);
+  color:var(--muted);line-height:1.5;
+}
+
+.plan-price-box{text-align:right;flex-shrink:0;}
+.plan-price-val{
+  font-family:var(--ff-h);font-size:clamp(.85rem,1.2vw,.98rem);font-weight:700;
+  white-space:nowrap;
+}
+.pv-indigo{color:#6366f1;}
+.pv-emerald{color:#10b981;}
+.pv-amber{color:#f59e0b;}
+.plan-price-sub{
+  font-family:var(--ff-b);font-size:.6rem;color:var(--subtle);
+  margin-top:2px;display:block;
+}
+
+/* Check indicator */
+.plan-check{
+  position:absolute;top:12px;right:12px;
+  width:22px;height:22px;border-radius:50%;
+  border:2px solid #ddd;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .22s;font-size:.65rem;color:transparent;
+}
+.plan-card.plan-hosted.selected .plan-check{background:#6366f1;border-color:#6366f1;color:#fff;animation:tick .3s ease;}
+.plan-card.plan-build.selected .plan-check{background:#10b981;border-color:#10b981;color:#fff;animation:tick .3s ease;}
+.plan-card.plan-source.selected .plan-check{background:#f59e0b;border-color:#f59e0b;color:#fff;animation:tick .3s ease;}
+
+/* Shimmer decoration on selected */
+.plan-card.selected::before{
+  content:'';position:absolute;top:0;right:0;
+  width:140px;height:100%;
+  background:linear-gradient(270deg,rgba(255,255,255,.06) 0%,transparent 100%);
+  pointer-events:none;
+}
+
+/* WA button */
+.modal-wa-cta{
+  width:100%;
+  padding:clamp(13px,2vw,16px);
+  border:none;border-radius:var(--r-m);
+  font-family:var(--ff-h);font-size:clamp(.88rem,1.1vw,.98rem);font-weight:600;
+  color:#fff;cursor:pointer;letter-spacing:.2px;
+  display:flex;align-items:center;justify-content:center;gap:9px;
+  position:relative;overflow:hidden;
+  background:linear-gradient(135deg,#128c7e 0%,#25d366 60%,#1da851 100%);
+  box-shadow:0 6px 28px rgba(37,211,102,.4);
+  transition:transform .25s,box-shadow .25s;
+}
+.modal-wa-cta::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(255,255,255,.16) 0%,transparent 100%);
+}
+.modal-wa-cta:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(37,211,102,.52);}
+.modal-wa-cta:active{transform:scale(.97);}
+.wa-icon{width:20px;height:20px;flex-shrink:0;position:relative;z-index:1;}
+.wa-label{position:relative;z-index:1;}
+
+/* Plan required hint */
+.plan-hint{
+  font-family:var(--ff-b);font-size:.74rem;font-weight:600;
+  color:#e06e00;text-align:center;margin-top:10px;
+  opacity:0;transition:opacity .3s;
+  display:flex;align-items:center;justify-content:center;gap:5px;
+}
+.plan-hint.show{opacity:1;}
+.shake{animation:shake .38s ease;}
+
+/* ══════════════════════════════════════════════════
+   RESPONSIVE TWEAKS
+══════════════════════════════════════════════════ */
+@media(max-width:380px){
+  .hero h1{font-size:1.75rem;}
+  .h-chip{padding:7px 12px;font-size:.7rem;}
+  .modal-tpl-name{font-size:1.25rem;}
+}
+@media(min-width:640px){
+  .filter-bar-inner{padding:12px 24px;}
+}
+@media(min-width:1200px){
+  .tpl-grid{gap:28px;padding:0 32px;}
+  .grid-meta{padding:28px 32px 16px;}
 }
 </style>
 {% endblock %}
 
 {% block content %}
 
-<!-- HERO -->
-<div class="tpl-hero">
-  <span class="tpl-hero-emoji">🚀</span>
-  <h1>Website Templates<br>za Biashara Yako!</h1>
-  <p>Chagua template, chagua plan yako — tunaanza haraka. Kila template ina plan 3 za kukufaa.</p>
-  <div class="hero-badges">
-    <span class="hero-badge">🌐 Hosted 30K/mo</span>
-    <span class="hero-badge">🛠️ Full Build</span>
-    <span class="hero-badge">💻 Source Code</span>
+<!-- ══════════════════════════════════════════════════
+     HERO
+══════════════════════════════════════════════════ -->
+<div class="hero">
+  <div class="hero-bg-grid"></div>
+  <div class="hero-scan"></div>
+  <div class="hero-orb orb-a"></div>
+  <div class="hero-orb orb-b"></div>
+  <div class="hero-orb orb-c"></div>
+
+  <div class="hero-inner">
+    <div class="container">
+      <div class="hero-eyebrow">
+        <span class="eyebrow-dot"></span>
+        Templates Marketplace
+      </div>
+
+      <h1>
+        Professional Websites<br>
+        <span class="grd">Built for Your Business</span>
+      </h1>
+
+      <p class="hero-sub">
+        Browse our collection of handcrafted website templates.<br>
+        Pick a plan that works for you — we launch fast.
+      </p>
+
+      <div class="hero-chips">
+        <span class="h-chip"><strong>{{ total_count }}+</strong> Templates</span>
+        <span class="h-chip">🌐 Hosted from <strong>30K</strong> TSh/mo</span>
+        <span class="h-chip">🛠️ <strong>Full Build</strong> Available</span>
+        <span class="h-chip">💻 <strong>Source Code</strong> Included</span>
+      </div>
+    </div>
   </div>
 </div>
 
-<!-- WAVE -->
-<div class="tpl-wave">
-  <svg viewBox="0 0 1440 50" xmlns="http://www.w3.org/2000/svg">
-    <path fill="#f5f5fa" d="M0,30 C360,60 1080,0 1440,30 L1440,0 L0,0 Z"/>
+<div class="hero-wave">
+  <svg viewBox="0 0 1440 60" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+    <path fill="#f5f5fa" d="M0,38 C240,68 520,12 760,38 C1000,64 1240,8 1440,38 L1440,0 L0,0 Z"/>
   </svg>
 </div>
 
-<!-- FILTERS -->
-<div class="tpl-filter-section">
-  <div class="filter-scroll-wrap">
-    <a href="?category=all" class="filter-chip {% if selected_category == 'all' %}active{% endif %}">🌟 Zote ({{ total_count }})</a>
-    {% if 'restaurant' in categories_used %}<a href="?category=restaurant" class="filter-chip {% if selected_category == 'restaurant' %}active{% endif %}">🍽️ Restaurant</a>{% endif %}
-    {% if 'salon' in categories_used %}<a href="?category=salon" class="filter-chip {% if selected_category == 'salon' %}active{% endif %}">💅 Salon</a>{% endif %}
-    {% if 'hotel' in categories_used %}<a href="?category=hotel" class="filter-chip {% if selected_category == 'hotel' %}active{% endif %}">🏨 Hotel</a>{% endif %}
-    {% if 'shop' in categories_used %}<a href="?category=shop" class="filter-chip {% if selected_category == 'shop' %}active{% endif %}">🛒 Duka</a>{% endif %}
-    {% if 'clinic' in categories_used %}<a href="?category=clinic" class="filter-chip {% if selected_category == 'clinic' %}active{% endif %}">🏥 Clinic</a>{% endif %}
-    {% if 'church' in categories_used %}<a href="?category=church" class="filter-chip {% if selected_category == 'church' %}active{% endif %}">⛪ Church</a>{% endif %}
-    {% if 'school' in categories_used %}<a href="?category=school" class="filter-chip {% if selected_category == 'school' %}active{% endif %}">🎓 School</a>{% endif %}
-    {% if 'portfolio' in categories_used %}<a href="?category=portfolio" class="filter-chip {% if selected_category == 'portfolio' %}active{% endif %}">🎨 Portfolio</a>{% endif %}
-    {% if 'other' in categories_used %}<a href="?category=other" class="filter-chip {% if selected_category == 'other' %}active{% endif %}">🌐 Nyingine</a>{% endif %}
+<!-- ══════════════════════════════════════════════════
+     STICKY FILTER BAR
+══════════════════════════════════════════════════ -->
+<div class="filter-bar" id="filterBar">
+  <div class="filter-bar-inner">
+    <span class="filter-lbl">Filter</span>
+    <div class="filter-sep"></div>
+    <div class="chip-row">
+      <a href="?category=all" class="chip {% if selected_category == 'all' %}active{% endif %}">
+        🌟 All <span class="chip-n">{{ total_count }}</span>
+      </a>
+      {% if 'restaurant' in categories_used %}<a href="?category=restaurant" class="chip {% if selected_category == 'restaurant' %}active{% endif %}">🍽️ Restaurant</a>{% endif %}
+      {% if 'salon' in categories_used %}<a href="?category=salon" class="chip {% if selected_category == 'salon' %}active{% endif %}">💅 Salon</a>{% endif %}
+      {% if 'hotel' in categories_used %}<a href="?category=hotel" class="chip {% if selected_category == 'hotel' %}active{% endif %}">🏨 Hotel</a>{% endif %}
+      {% if 'shop' in categories_used %}<a href="?category=shop" class="chip {% if selected_category == 'shop' %}active{% endif %}">🛒 Shop</a>{% endif %}
+      {% if 'clinic' in categories_used %}<a href="?category=clinic" class="chip {% if selected_category == 'clinic' %}active{% endif %}">🏥 Clinic</a>{% endif %}
+      {% if 'church' in categories_used %}<a href="?category=church" class="chip {% if selected_category == 'church' %}active{% endif %}">⛪ Church</a>{% endif %}
+      {% if 'school' in categories_used %}<a href="?category=school" class="chip {% if selected_category == 'school' %}active{% endif %}">🎓 School</a>{% endif %}
+      {% if 'portfolio' in categories_used %}<a href="?category=portfolio" class="chip {% if selected_category == 'portfolio' %}active{% endif %}">🎨 Portfolio</a>{% endif %}
+      {% if 'other' in categories_used %}<a href="?category=other" class="chip {% if selected_category == 'other' %}active{% endif %}">🌐 Other</a>{% endif %}
+    </div>
   </div>
 </div>
 
-<!-- GRID -->
-<div class="tpl-grid-section">
-  <div class="tpl-grid-header">
-    <h2>Templates <span>{{ filtered_count }}</span> Zinapatikana</h2>
-    {% if selected_category != 'all' %}<a href="?category=all" class="tpl-count">← Onyesha zote</a>{% endif %}
-  </div>
+<!-- ══════════════════════════════════════════════════
+     MAIN GRID
+══════════════════════════════════════════════════ -->
+<div class="mkt-section">
+  <div class="container">
 
-  {% if templates %}
-  <div class="tpl-grid">
-    {% for tpl in templates %}
-    <div class="tpl-card">
-      <!-- Preview area with browser mockup -->
-      <div class="card-preview-area" style="background: {{ tpl.gradient_css }};">
-        <div class="browser-mock">
-          <div class="browser-bar">
-            <div class="b-dot"></div><div class="b-dot"></div><div class="b-dot"></div>
-          </div>
-          <div class="browser-body">
-            <div class="b-hero" style="background: {{ tpl.gradient_css }};">
-              {{ tpl.name|upper }}
+    <div class="grid-meta">
+      <h2><em>{{ filtered_count }}</em> Templates Available</h2>
+      {% if selected_category != 'all' %}
+      <a href="?category=all" class="back-link">← Show all</a>
+      {% endif %}
+    </div>
+
+    {% if templates %}
+    <div class="tpl-grid">
+      {% for tpl in templates %}
+      <div class="tpl-card" style="animation-delay:{{ forloop.counter0 }}00ms">
+
+        <!-- Preview -->
+        <div class="card-preview">
+          <div class="card-preview-bg" style="background:{{ tpl.gradient_css }};"></div>
+
+          <div class="card-bbar">
+            <div class="bbar-dots">
+              <div class="bbar-dot"></div><div class="bbar-dot"></div><div class="bbar-dot"></div>
             </div>
-            <div class="b-row">
-              <div class="b-col" style="background: {{ tpl.gradient_start }};"></div>
-              <div class="b-col" style="background: {{ tpl.gradient_end }};"></div>
-              <div class="b-col" style="background: {{ tpl.gradient_start }};"></div>
+            <div class="bbar-url">
+              <span class="bbar-lock">🔒</span>
+              <span class="bbar-urltext">jamiitek.com/preview/{{ tpl.pk }}/</span>
             </div>
-            <div class="b-bar" style="background: {{ tpl.gradient_start }}; width: 70%;"></div>
-            <div class="b-bar" style="background: {{ tpl.gradient_end }}; width: 45%;"></div>
           </div>
+
+          <div class="card-iframe-outer">
+            <div class="card-iframe-scaler">
+              <div class="iframe-shimmer" id="shimmer-{{ tpl.pk }}"></div>
+              <iframe
+                data-src="{% url 'template_preview_raw' tpl.pk %}"
+                id="frame-{{ tpl.pk }}"
+                title="{{ tpl.name }} preview"
+                scrolling="no"
+                loading="lazy"
+                onload="frameLoaded('{{ tpl.pk }}')"
+                tabindex="-1"
+                aria-hidden="true">
+              </iframe>
+            </div>
+          </div>
+
+          <div class="card-overlay">
+            <div class="overlay-btns">
+              <a href="{% url 'template_preview' tpl.pk %}" target="_blank" class="ov-btn ov-preview">
+                👁️ Live Preview
+              </a>
+              <button class="ov-btn ov-pick"
+                onclick="openModal('{{ tpl.name|escapejs }}','{{ tpl.get_category_display|escapejs }}','{{ tpl.description|escapejs }}','{{ tpl.price_hosted_formatted|escapejs }}','{{ tpl.price_source_formatted|escapejs }}','{{ tpl.rating|escapejs }}')">
+                🚀 Select
+              </button>
+            </div>
+          </div>
+
+          {% if tpl.badge %}
+          <span class="card-badge badge-{{ tpl.badge }}">
+            {% if tpl.badge == 'HOT' %}🔥{% elif tpl.badge == 'NEW' %}✨{% else %}⭐{% endif %} {{ tpl.badge }}
+          </span>
+          {% endif %}
         </div>
-        <!-- Hover overlay to preview -->
-        <div class="preview-overlay">
-          <a href="{% url 'template_preview' tpl.pk %}" target="_blank" class="preview-btn">👁️ Live Preview</a>
+
+        <!-- Body -->
+        <div class="card-body">
+          <div class="card-top">
+            <span class="card-cat" style="background:{{ tpl.gradient_css }};">{{ tpl.get_category_display }}</span>
+            <span class="card-rating">⭐ {{ tpl.rating }}</span>
+          </div>
+          <div class="card-name">{{ tpl.name }}</div>
+          <div class="card-desc">{{ tpl.description }}</div>
+          <div class="card-plans">
+            <span class="pp pp-blue">🌐 {{ tpl.price_hosted_formatted }} TSh/mo</span>
+            <span class="pp pp-green">🛠️ Full Build</span>
+            <span class="pp pp-orange">💻 {{ tpl.price_source_formatted }} TSh</span>
+          </div>
+          <button class="card-cta"
+            style="background:{{ tpl.gradient_css }};"
+            onclick="openModal('{{ tpl.name|escapejs }}','{{ tpl.get_category_display|escapejs }}','{{ tpl.description|escapejs }}','{{ tpl.price_hosted_formatted|escapejs }}','{{ tpl.price_source_formatted|escapejs }}','{{ tpl.rating|escapejs }}')">
+            Choose This Template →
+          </button>
         </div>
-        {% if tpl.badge %}
-        <span class="card-badge-label badge-{{ tpl.badge }}">
-          {% if tpl.badge == 'HOT' %}🔥{% elif tpl.badge == 'NEW' %}✨{% else %}⭐{% endif %} {{ tpl.badge }}
-        </span>
-        {% endif %}
+
       </div>
+      {% endfor %}
+    </div>
 
-      <!-- Card body -->
-      <div class="card-body-area">
-        <div class="card-top-row">
-          <span class="card-cat-pill" style="background: {{ tpl.gradient_css }};">{{ tpl.get_category_display }}</span>
-          <span class="card-rating">⭐ {{ tpl.rating }}</span>
-        </div>
-        <div class="card-name">{{ tpl.name }}</div>
-        <div class="card-desc">{{ tpl.description }}</div>
-        <div class="mini-plans">
-          <span class="mini-plan mp-blue">🌐 {{ tpl.price_hosted_formatted }} TSh/mo</span>
-          <span class="mini-plan mp-green">🛠️ Full Build</span>
-          <span class="mini-plan mp-orange">💻 {{ tpl.price_source_formatted }} TSh</span>
-        </div>
-        <button class="card-cta-btn"
-          style="background: {{ tpl.gradient_css }};"
-          onclick="openTplModal(
-            '{{ tpl.name|escapejs }}',
-            '{{ tpl.get_category_display|escapejs }}',
-            '{{ tpl.description|escapejs }}',
-            '{{ tpl.price_hosted_formatted|escapejs }}',
-            '{{ tpl.price_source_formatted|escapejs }}'
-          )">
-          Chagua Template Hii 🚀
-        </button>
+    {% else %}
+    <div class="mkt-empty">
+      <span class="mkt-empty-icon">😔</span>
+      <p>No templates in this category yet.<br>Check back soon — we add new designs every week!</p>
+      <a href="?category=all" class="chip active" style="margin-top:1.5rem;display:inline-flex;">← Show all templates</a>
+    </div>
+    {% endif %}
+
+    <!-- Bottom CTA -->
+    <div class="cta-band">
+      <div class="cta-band-grid"></div>
+      <div class="cta-inner">
+        <span class="cta-icon">🤔</span>
+        <h2 class="cta-title">Can't Find What You Need?</h2>
+        <p class="cta-desc">Tell us your vision — we'll design a custom template specifically for your business, fast and at a great price.</p>
+        <a href="{% url 'select_website' %}" class="cta-btn">✉️ Request a Custom Template</a>
       </div>
     </div>
-    {% endfor %}
-  </div>
 
-  {% else %}
-  <div class="tpl-empty">
-    <span class="tpl-empty-emoji">😔</span>
-    <p>Hakuna templates katika category hii kwa sasa.<br>Rudi hivi karibuni!</p>
-    <a href="?category=all" class="filter-chip active" style="margin-top:1rem;display:inline-block;">← Onyesha zote</a>
-  </div>
-  {% endif %}
-
-  <!-- BOTTOM CTA -->
-  <div class="tpl-bottom-cta">
-    <h2>🤔 Haupati Unaotaka?</h2>
-    <p>Tuambie unahitaji nini — tutatengeneza template mpya specifically kwa biashara yako, haraka na bei nzuri!</p>
-    <a href="{% url 'select_website' %}">✉️ Omba Custom Template</a>
   </div>
 </div>
 
-<!-- MODAL -->
-<div class="tpl-modal-bg" id="tplModal" onclick="closeTplOutside(event)">
-  <div class="tpl-modal">
-    <div class="modal-drag-handle"></div>
-    <div class="modal-top">
-      <div>
-        <div class="modal-tpl-name" id="mName">Template</div>
-        <div class="modal-tpl-cat" id="mCat">Category</div>
+<!-- ══════════════════════════════════════════════════
+     MODAL — VIBRANT PLAN PICKER
+══════════════════════════════════════════════════ -->
+<div class="modal-bg" id="planModal" onclick="closeModalBg(event)">
+  <div class="modal-sheet" role="dialog" aria-modal="true" aria-labelledby="mModalName">
+
+    <!-- Gradient hero strip -->
+    <div class="modal-hero-strip">
+      <div class="modal-strip-orb mso-a"></div>
+      <div class="modal-strip-orb mso-b"></div>
+      <div class="modal-strip-orb mso-c"></div>
+      <div class="modal-strip-grid"></div>
+
+      <div class="modal-pill-bar"></div>
+
+      <div class="modal-header-inner">
+        <div>
+          <div class="modal-tpl-eyebrow">Template</div>
+          <div class="modal-tpl-name" id="mModalName">—</div>
+          <div class="modal-tpl-cat" id="mModalCat">—</div>
+        </div>
+        <button class="modal-close-btn" onclick="closeModal()" aria-label="Close">✕</button>
       </div>
-      <button class="modal-close-x" onclick="closeTplModal()">✕</button>
+
+      <div class="modal-meta-row">
+        <span class="modal-star-badge">⭐ <span id="mModalRating">—</span> Rating</span>
+        <span class="modal-plans-count">3 plans available</span>
+      </div>
     </div>
-    <div class="modal-body-area">
-      <p class="modal-tpl-desc" id="mDesc"></p>
-      <div class="modal-plan-label">Chagua Plan Yako 👇</div>
-      <div class="plan-options">
-        <!-- Plan 1 -->
-        <div class="plan-opt-card" onclick="selectTplPlan(this,'hosted')">
-          <div class="plan-icon-box pib-blue">🌐</div>
-          <div class="plan-opt-info">
-            <div class="plan-opt-name">Hosted Plan</div>
-            <div class="plan-opt-sub">Domain fee + kila mwezi — sisi tunashughulikia hosting, updates na security yote</div>
+
+    <!-- Body -->
+    <div class="modal-body">
+      <p class="modal-desc" id="mModalDesc"></p>
+
+      <div class="modal-sec-label">Choose Your Plan</div>
+
+      <div class="modal-plans" id="modalPlans">
+
+        <!-- Plan: Hosted -->
+        <div class="plan-card plan-hosted" onclick="selectPlan(this,'hosted')">
+          <div class="plan-icon pi-indigo">🌐</div>
+          <div class="plan-info">
+            <div class="plan-name">Hosted Plan</div>
+            <div class="plan-desc">Domain fee + monthly — we handle hosting, updates &amp; security for you</div>
           </div>
-          <div class="plan-opt-price pop-blue">
-            <span id="mPriceHosted">30,000</span> TSh
-            <small>/month + domain</small>
+          <div class="plan-price-box">
+            <div class="plan-price-val pv-indigo"><span id="mPriceHosted">30,000</span> TSh</div>
+            <span class="plan-price-sub">/month + domain</span>
           </div>
+          <div class="plan-check">✓</div>
         </div>
-        <!-- Plan 2 -->
-        <div class="plan-opt-card" onclick="selectTplPlan(this,'build')">
-          <div class="plan-icon-box pib-green">🛠️</div>
-          <div class="plan-opt-info">
-            <div class="plan-opt-name">Full Build</div>
-            <div class="plan-opt-sub">Tunabuild website yako yote from scratch — custom kabisa kulingana na brand yako</div>
+
+        <!-- Plan: Full Build -->
+        <div class="plan-card plan-build" onclick="selectPlan(this,'build')">
+          <div class="plan-icon pi-emerald">🛠️</div>
+          <div class="plan-info">
+            <div class="plan-name">Full Build</div>
+            <div class="plan-desc">We build your entire website from scratch — fully custom to match your brand</div>
           </div>
-          <div class="plan-opt-price pop-green">
-            Custom<small>tunawasiliana nawe</small>
+          <div class="plan-price-box">
+            <div class="plan-price-val pv-emerald">Custom</div>
+            <span class="plan-price-sub">we'll quote you</span>
           </div>
+          <div class="plan-check">✓</div>
         </div>
-        <!-- Plan 3 -->
-        <div class="plan-opt-card" onclick="selectTplPlan(this,'source')">
-          <div class="plan-icon-box pib-orange">💻</div>
-          <div class="plan-opt-info">
-            <div class="plan-opt-name">Source Code</div>
-            <div class="plan-opt-sub">Unapata code — unabadili mwenyewe. ⚠️ Footer ya JamiiTek.com lazima ibaki</div>
+
+        <!-- Plan: Source Code -->
+        <div class="plan-card plan-source" onclick="selectPlan(this,'source')">
+          <div class="plan-icon pi-amber">💻</div>
+          <div class="plan-info">
+            <div class="plan-name">Source Code</div>
+            <div class="plan-desc">Get the full code — modify it yourself. ⚠️ JamiiTek.com footer must remain</div>
           </div>
-          <div class="plan-opt-price pop-orange">
-            <span id="mPriceSource">150,000</span> TSh
-            <small>one-time · licensed</small>
+          <div class="plan-price-box">
+            <div class="plan-price-val pv-amber"><span id="mPriceSource">150,000</span> TSh</div>
+            <span class="plan-price-sub">one-time · licensed</span>
           </div>
+          <div class="plan-check">✓</div>
         </div>
+
       </div>
-      <button class="modal-whatsapp-btn" onclick="goToWhatsApp()">
-        💬 Endelea kwa WhatsApp
+
+      <button class="modal-wa-cta" onclick="goWhatsApp()">
+        <svg class="wa-icon" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/>
+        </svg>
+        <span class="wa-label">Continue on WhatsApp</span>
       </button>
+
+      <div class="plan-hint" id="planHint">⚠️ Please select a plan first</div>
     </div>
+
   </div>
 </div>
 
@@ -615,49 +982,100 @@
 
 {% block extra_js %}
 <script>
-  let selectedTplPlan = null;
-  let currentTplName  = '';
-
-  function openTplModal(name, cat, desc, priceHosted, priceSource) {
-    currentTplName = name;
-    document.getElementById('mName').textContent = name;
-    document.getElementById('mCat').textContent  = cat;
-    document.getElementById('mDesc').textContent = desc;
-    document.getElementById('mPriceHosted').textContent = priceHosted;
-    document.getElementById('mPriceSource').textContent = priceSource;
-    selectedTplPlan = null;
-    document.querySelectorAll('.plan-opt-card').forEach(c => c.classList.remove('selected'));
-    document.getElementById('tplModal').classList.add('open');
-    document.body.style.overflow = 'hidden';
+/* ── IFRAME LAZY LOAD ── */
+(function(){
+  if(!('IntersectionObserver' in window)){
+    document.querySelectorAll('iframe[data-src]').forEach(function(f){f.src=f.dataset.src;});
+    return;
   }
+  var io=new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){
+        var fr=e.target;
+        if(fr.dataset.src&&!fr.src) fr.src=fr.dataset.src;
+        io.unobserve(fr);
+      }
+    });
+  },{rootMargin:'240px 0px',threshold:0});
+  document.querySelectorAll('iframe[data-src]').forEach(function(f){io.observe(f);});
+})();
 
-  function closeTplModal() {
-    document.getElementById('tplModal').classList.remove('open');
-    document.body.style.overflow = '';
-  }
+function frameLoaded(id){
+  var s=document.getElementById('shimmer-'+id);
+  if(s) s.classList.add('done');
+}
 
-  function closeTplOutside(e) {
-    if (e.target.id === 'tplModal') closeTplModal();
-  }
+/* ── STICKY BAR SHADOW ── */
+(function(){
+  var bar=document.getElementById('filterBar');
+  if(!bar)return;
+  window.addEventListener('scroll',function(){
+    bar.classList.toggle('shadowed',window.scrollY>50);
+  },{passive:true});
+})();
 
-  function selectTplPlan(el, plan) {
-    document.querySelectorAll('.plan-opt-card').forEach(c => c.classList.remove('selected'));
-    el.classList.add('selected');
-    selectedTplPlan = plan;
-  }
+/* ── MODAL STATE ── */
+var _plan=null, _tplName='';
 
-  function goToWhatsApp() {
-    if (!selectedTplPlan) {
-      alert('⚠️ Tafadhali chagua plan kwanza!');
-      return;
-    }
-    const planNames = {
-      hosted: 'Hosted Plan (30,000 TSh/month + domain)',
-      build:  'Full Build (Custom Quote)',
-      source: 'Source Code (One-Time Payment)'
-    };
-    const msg = `Habari JamiiTek! 👋\n\nNataka template ya *${currentTplName}*.\n\nPlan niliyochagua: *${planNames[selectedTplPlan]}*\n\nNaomba maelezo zaidi na jinsi ya kuendelea. Asante!`;
-    window.open(`https://wa.me/255629712678?text=${encodeURIComponent(msg)}`, '_blank');
+function openModal(name,cat,desc,priceHosted,priceSource,rating){
+  _tplName=name;_plan=null;
+  document.getElementById('mModalName').textContent=name;
+  document.getElementById('mModalCat').textContent=cat;
+  document.getElementById('mModalDesc').textContent=desc;
+  document.getElementById('mPriceHosted').textContent=priceHosted;
+  document.getElementById('mPriceSource').textContent=priceSource;
+  document.getElementById('mModalRating').textContent=rating||'5.0';
+  document.querySelectorAll('.plan-card').forEach(function(c){c.classList.remove('selected');});
+  document.getElementById('planHint').classList.remove('show');
+  var modal=document.getElementById('planModal');
+  modal.classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
+function closeModal(){
+  document.getElementById('planModal').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+function closeModalBg(e){
+  if(e.target.id==='planModal') closeModal();
+}
+
+function selectPlan(el,plan){
+  document.querySelectorAll('.plan-card').forEach(function(c){c.classList.remove('selected');});
+  el.classList.add('selected');
+  _plan=plan;
+  document.getElementById('planHint').classList.remove('show');
+}
+
+function goWhatsApp(){
+  if(!_plan){
+    var plans=document.getElementById('modalPlans');
+    plans.classList.add('shake');
+    setTimeout(function(){plans.classList.remove('shake');},400);
+    document.getElementById('planHint').classList.add('show');
+    return;
   }
+  var names={
+    hosted:'Hosted Plan (30,000 TSh/month + domain)',
+    build:'Full Build (Custom Quote)',
+    source:'Source Code (One-Time Payment)'
+  };
+  var msg='Hello JamiiTek! 👋\n\nI am interested in the *'+_tplName+'* template.\n\nSelected plan: *'+names[_plan]+'*\n\nPlease share more details on how to proceed. Thank you! 🙏';
+  window.open('https://wa.me/255629712678?text='+encodeURIComponent(msg),'_blank');
+}
+
+document.addEventListener('keydown',function(e){if(e.key==='Escape') closeModal();});
+
+/* ── CARD ENTRANCE ── */
+(function(){
+  if(!('IntersectionObserver' in window)) return;
+  var io=new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){io.unobserve(e.target);}
+    });
+  },{threshold:.08});
+  document.querySelectorAll('.tpl-card').forEach(function(c){io.observe(c);});
+})();
 </script>
 {% endblock %}

@@ -465,17 +465,77 @@
   .bot-stats-row{ grid-template-columns:repeat(3,1fr); gap:10px; }
   .bot-stat-n{ font-size:22px; }
 }
+
+
+
+<style>
+.tpl-announce {
+  position:relative; overflow:hidden; z-index:10;
+  background:linear-gradient(135deg,rgba(8,5,28,.98),rgba(5,4,18,.98));
+  border-bottom:1px solid rgba(108,99,255,.2);
+}
+.tpl-announce::before {
+  content:''; position:absolute; inset:0; pointer-events:none;
+  background:
+    radial-gradient(ellipse 55% 100% at 75% 50%,rgba(108,99,255,.08),transparent 65%),
+    radial-gradient(ellipse 35% 100% at 20% 50%,rgba(250,109,158,.05),transparent 65%);
+}
+.tpl-announce-inner {
+  display:flex; align-items:center; gap:18px; padding:15px 24px;
+  position:relative; z-index:2; flex-wrap:wrap;
+}
+.ta-badge {
+  display:inline-flex; align-items:center; gap:7px;
+  background:rgba(108,99,255,.12); border:1px solid rgba(108,99,255,.3);
+  border-radius:100px; padding:4px 13px;
+  font-family:var(--ff-mono); font-size:10px; font-weight:700;
+  color:#a78bfa; letter-spacing:1.5px; text-transform:uppercase;
+  white-space:nowrap; flex-shrink:0;
+}
+.ta-badge .dot {
+  width:6px; height:6px; border-radius:50%; background:#a78bfa;
+  animation:pulse2 2s infinite; flex-shrink:0;
+}
+.ta-text { flex:1; min-width:180px; }
+.ta-text strong { font-family:var(--ff-display); font-size:13px; color:#fff; font-weight:700; letter-spacing:.3px; }
+.ta-text span { font-family:var(--ff-mono); font-size:11px; color:rgba(255,255,255,.32); margin-left:8px; }
+.ta-btns { display:flex; gap:8px; flex-wrap:wrap; flex-shrink:0; }
+.ta-btn-main {
+  display:inline-flex; align-items:center; gap:7px; padding:8px 18px;
+  border-radius:9px; background:linear-gradient(135deg,#6c63ff,#fa6d9e);
+  color:#fff; font-family:var(--ff-display); font-size:11px; font-weight:800;
+  text-decoration:none; transition:all .2s; white-space:nowrap;
+  letter-spacing:.5px; box-shadow:0 3px 14px rgba(108,99,255,.3);
+}
+.ta-btn-main:hover { color:#fff; transform:translateY(-2px); box-shadow:0 7px 24px rgba(108,99,255,.5); }
+.ta-btn-ghost {
+  display:inline-flex; align-items:center; gap:6px; padding:8px 16px;
+  border-radius:9px; background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.1); color:rgba(255,255,255,.5);
+  font-family:var(--ff-mono); font-size:11px; text-decoration:none;
+  transition:all .2s; white-space:nowrap;
+}
+.ta-btn-ghost:hover { border-color:rgba(108,99,255,.4); color:#a78bfa; }
+.ta-close {
+  background:none; border:none; color:rgba(255,255,255,.2);
+  font-size:15px; cursor:pointer; padding:4px; flex-shrink:0; transition:color .2s;
+}
+.ta-close:hover { color:rgba(255,255,255,.6); }
+@media(max-width:540px) {
+  .ta-text span { display:none; }
+  .ta-btn-ghost { display:none; }
+  .tpl-announce-inner { gap:12px; padding:13px 16px; }
+}
+</style>
+
 </style>
 {% endblock %}
 
 {% block content %}
 
-<!-- ══════════════════════════════════════════════════════════
 
 
-<!-- ══════════════════════════════════════════════════════════
-     HERO
-══════════════════════════════════════════════════════════ -->
+<!-- ══════════════════════════════════════════════════════════ --> 
 <section class="hero">
   <canvas class="hero-bg-canvas" id="heroCanvas"></canvas>
   <div class="hero-nebula"></div>
@@ -485,8 +545,7 @@
     <div class="row align-items-center g-4 g-lg-5">
       <div class="col-lg-6">
 
-        <!-- WEB pill -->
-        <div class="h-pill"><span class="live"></span> System Online — Accepting New Projects</div>
+        <!-- <div class="h-pill"><span class="live"></span> System Online — Accepting New Projects</div> -->
 
         <!-- BOT pill -->
         <a href="/bot/" class="h-bot-strip d-block" style="display:inline-flex!important">
@@ -564,6 +623,34 @@
     </div>
   </div>
 </section>
+
+
+<div class="tpl-announce" id="tplAnnounce">
+  <div class="tpl-announce-inner container">
+ 
+    <div class="ta-badge">
+      <span class="dot"></span>
+      Templates
+    </div>
+ 
+    <div class="ta-text">
+      <strong>Ready-made website templates — launch in hours, not weeks.</strong>
+      <span>// e-commerce · restaurant · business · portfolio · starting from TSh 15,000/mo</span>
+    </div>
+ 
+    <div class="ta-btns">
+      <a href="/templates/" class="ta-btn-main">
+        <i class="fas fa-th-large" style="font-size:11px"></i>
+        Browse Templates
+      </a>
+      <a href="/templates/" class="ta-btn-ghost">
+        See Pricing <i class="fas fa-arrow-right" style="font-size:10px"></i>
+      </a>
+    </div>
+ 
+    <button class="ta-close" id="taClose" aria-label="Close">✕</button>
+  </div>
+</div>
 
 <!-- ══════════════════════════════════════════════════════════
      STRIP
@@ -973,5 +1060,15 @@
   },{threshold:.3});
   document.querySelectorAll('.counter').forEach(el=>io.observe(el));
 })();
+
+
+(function(){
+  try { if(localStorage.getItem('jt_tpl_ann')==='0'){ document.getElementById('tplAnnounce').style.display='none'; } } catch(e){}
+  document.getElementById('taClose').addEventListener('click',function(){
+    document.getElementById('tplAnnounce').style.display='none';
+    try{ localStorage.setItem('jt_tpl_ann','0'); }catch(e){}
+  });
+})();
+
 </script>
 {% endblock %}
