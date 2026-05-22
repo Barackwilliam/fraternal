@@ -800,6 +800,15 @@ class WebsiteTemplate(models.Model):
         ('church',     '⛪ Church & Religion'),
         ('school',     '🎓 School & Education'),
         ('portfolio',  '🎨 Portfolio & Personal'),
+        ('Tourism',  '🎨 Safari & Travel website'),
+        ('Real Estate',  '🎨 Real Estate'),
+        ('Technology',  '🎨 Technology'),
+        ('admin',  '🎨 Admin & Dashboard'),
+        ('Booking',  '🎨 Booking system'),
+        ('Real Estate',  '🎨 Real Estate'),
+        ('Landing',  '🎨 Landing Page'),
+        ('niche',  '🎨 Special Premium niche'),
+        ('Media',  '🎨 Media & News'),
         ('other',      '🌐 Other'),
     ]
 
