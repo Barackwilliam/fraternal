@@ -23,8 +23,8 @@ def ussd_callback(request):
     if text == '':
         return respond(
             "CON Karibu! Chagua huduma:\n"
-            "1. 🌾 Kilimo\n"
-            "2. 🏥 Afya\n"
+            "1. Kilimo\n"
+            "2. Afya\n"
             "0. Toka"
         )
 
