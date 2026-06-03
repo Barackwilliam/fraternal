@@ -942,7 +942,7 @@ def ussd_callback(request):
         return respond(
             "END Asante kutumia huduma yetu!\n"
             "Shamba bora, afya bora - maisha bora! 🌾🏥\n"
-            "Powered by JamiiTek"
+    
         )
 
     # ── Catch-all ─────────────────────────────
