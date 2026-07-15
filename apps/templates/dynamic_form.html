@@ -21,6 +21,17 @@
     <!-- Form Body -->
     <form method="post" novalidate id="proposalForm">
         {% csrf_token %}
+        {% if ref_template %}
+        <input type="hidden" name="reference_template" value="{{ ref_template.pk }}">
+        <div style="display:flex;gap:12px;align-items:center;margin:14px 0 4px;padding:13px 16px;border-radius:12px;
+             background:rgba(108,99,255,.1);border:1px solid rgba(108,99,255,.35)">
+          <span style="font-size:22px">🖼️</span>
+          <span style="font-size:13.5px;color:#555">
+            <b style="display:block;color:#222">Reference design: {{ ref_template.name }}</b>
+            This proposal will be based on this template — our team will customize it for you.
+          </span>
+        </div>
+        {% endif %}
 
         <!-- Client Info Section -->
         <section class="form-section">

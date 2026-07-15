@@ -1,0 +1,60 @@
+{
+ "label": "E-Commerce / Online Shop",
+ "pages": [
+  {
+   "slug": "home",
+   "title": "Home",
+   "order": 0,
+   "starter_html": "<section style=\"min-height:82vh;display:flex;align-items:center;justify-content:center;text-align:center;background:linear-gradient(155deg,#1c1230,#2b1f3d 60%,#3d1f33);color:#fff;padding:80px 22px;position:relative;overflow:hidden\"><div style=\"position:relative;z-index:1;max-width:760px\"><p style=\"letter-spacing:5px;text-transform:uppercase;color:var(--accent);font-size:13px;font-weight:800;margin-bottom:14px\">[[site:name]] Store</p><h1 style=\"font-size:clamp(36px,6vw,62px);line-height:1.08;margin:0 0 18px;letter-spacing:-.02em\">Quality Products,<br>Honest Prices</h1><p style=\"font-size:clamp(15px,2vw,19px);opacity:.88;margin:0 auto 32px;max-width:580px\">[[site:tagline]] — Order today, we deliver wherever you are.</p><a href=\"/p/shop/\" style=\"display:inline-block;background:var(--accent);color:#1c1508;padding:16px 40px;border-radius:14px;font-weight:800;text-decoration:none;font-size:16px;box-shadow:0 10px 30px rgba(0,0,0,.3)\">Shop Now 🛍️</a></div><div style=\"position:absolute;inset:0;background:radial-gradient(700px 340px at 80% 0%,color-mix(in srgb,var(--accent) 28%,transparent),transparent 65%)\"></div></section><section style=\"padding:46px 20px;background:rgba(255,255,255,.6);backdrop-filter:blur(10px)\"><div style=\"max-width:960px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px\"><div style=\"text-align:center;padding:10px\"><div style=\"font-size:38px;font-weight:900;color:var(--accent);filter:brightness(.8) saturate(1.3)\">1000+</div><div style=\"font-size:13px;color:#6b7268;font-weight:700;letter-spacing:1px;text-transform:uppercase\">Bidhaa</div></div><div style=\"text-align:center;padding:10px\"><div style=\"font-size:38px;font-weight:900;color:var(--accent);filter:brightness(.8) saturate(1.3)\">24hrs</div><div style=\"font-size:13px;color:#6b7268;font-weight:700;letter-spacing:1px;text-transform:uppercase\">Delivery Dar</div></div><div style=\"text-align:center;padding:10px\"><div style=\"font-size:38px;font-weight:900;color:var(--accent);filter:brightness(.8) saturate(1.3)\">4.8★</div><div style=\"font-size:13px;color:#6b7268;font-weight:700;letter-spacing:1px;text-transform:uppercase\">Rating</div></div><div style=\"text-align:center;padding:10px\"><div style=\"font-size:38px;font-weight:900;color:var(--accent);filter:brightness(.8) saturate(1.3)\">M-Pesa</div><div style=\"font-size:13px;color:#6b7268;font-weight:700;letter-spacing:1px;text-transform:uppercase\">Secure Payments</div></div></div></section><section style=\"padding:76px 20px;\"><div style=\"max-width:1100px;margin:0 auto\"><h2 style=\"text-align:center;font-size:clamp(28px,4vw,40px);margin-bottom:8px;letter-spacing:-.01em\">New Arrivals</h2><p style=\"text-align:center;color:#6b7268;margin:0 auto 10px;max-width:520px\">Arrived this week.</p>[[collection:products]]</div></section><section style=\"padding:76px 20px\"><div style=\"max-width:1080px;margin:0 auto\"><h2 style=\"text-align:center;font-size:clamp(28px,4vw,40px);margin-bottom:38px;letter-spacing:-.01em\">Kwa Nini Sisi</h2><div style=\"display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px\"><div class=\"jt-reveal\" data-d=\"1\" style=\"background:rgba(255,255,255,.7);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.6);border-radius:18px;padding:30px 26px;box-shadow:0 4px 20px rgba(10,25,18,.08)\"><div style=\"font-size:36px;margin-bottom:12px\">🚚</div><h3 style=\"margin:0 0 8px;font-size:19px\">Fast Delivery</h3><p style=\"margin:0;color:#5a635a;font-size:14.5px\">We deliver within 24 hours in Dar es Salaam.</p></div><div class=\"jt-reveal\" data-d=\"2\" style=\"background:rgba(255,255,255,.7);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.6);border-radius:18px;padding:30px 26px;box-shadow:0 4px 20px rgba(10,25,18,.08)\"><div style=\"font-size:36px;margin-bottom:12px\">🔒</div><h3 style=\"margin:0 0 8px;font-size:19px\">Secure Payments</h3><p style=\"margin:0;color:#5a635a;font-size:14.5px\">M-Pesa, Tigo Pesa, Airtel Money — pay your way.</p></div><div class=\"jt-reveal\" data-d=\"3\" style=\"background:rgba(255,255,255,.7);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.6);border-radius:18px;padding:30px 26px;box-shadow:0 4px 20px rgba(10,25,18,.08)\"><div style=\"font-size:36px;margin-bottom:12px\">↩️</div><h3 style=\"margin:0 0 8px;font-size:19px\">Easy Returns</h3><p style=\"margin:0;color:#5a635a;font-size:14.5px\">If a product has an issue, we replace it hassle-free.</p></div></div></div></section><section style=\"padding:70px 22px\"><div style=\"max-width:860px;margin:0 auto;text-align:center;background:linear-gradient(140deg,#12271e,#1c3a2b);color:#fff;border-radius:26px;padding:56px 34px;position:relative;overflow:hidden\"><div style=\"position:absolute;inset:0;background:radial-gradient(420px 200px at 15% 0%,color-mix(in srgb,var(--accent) 30%,transparent),transparent 70%)\"></div><div style=\"position:relative;z-index:1\"><h2 style=\"font-size:clamp(26px,4vw,38px);margin:0 0 12px\">Have a Question About a Product?</h2><p style=\"opacity:.85;margin:0 0 26px\">Message Us on WhatsApp — tunajibu ndani ya dakika.</p><a href=\"[[site:whatsapp]]\" style=\"display:inline-block;background:var(--accent);color:#1c1508;padding:15px 38px;border-radius:13px;font-weight:800;text-decoration:none\">💬 Ask Now</a></div></div></section>"
+  },
+  {
+   "slug": "shop",
+   "title": "Shop",
+   "order": 1,
+   "starter_html": "<section style=\"padding:60px 20px;max-width:1100px;margin:0 auto;\"><h1 style=\"text-align:center;\">Our Products</h1>[[collection:products]]</section>"
+  },
+  {
+   "slug": "contact",
+   "title": "Contact",
+   "order": 2,
+   "starter_html": "<section style=\"padding:60px 20px;max-width:700px;margin:0 auto;text-align:center;\"><h1>Contact Us</h1><p style=\"font-size:18px;\">Phone: [[site:phone]]<br>WhatsApp: [[site:phone]]<br>Email: [[site:email]]</p><a href=\"[[site:whatsapp]]\" style=\"display:inline-block;margin-top:16px;background:#25d366;color:#fff;padding:12px 28px;border-radius:6px;text-decoration:none;font-weight:700;\">Order via WhatsApp</a></section>"
+  }
+ ],
+ "collections": [
+  {
+   "slug": "products",
+   "name": "Products",
+   "singular": "Product",
+   "icon": "🛍️",
+   "fields": [
+    {
+     "key": "description",
+     "label": "Product Description",
+     "type": "textarea",
+     "required": true
+    },
+    {
+     "key": "price",
+     "label": "Price (TZS)",
+     "type": "price",
+     "required": true
+    },
+    {
+     "key": "old_price",
+     "label": "Old Price (for discounts)",
+     "type": "price"
+    },
+    {
+     "key": "category",
+     "label": "Product Category",
+     "type": "text"
+    },
+    {
+     "key": "stock",
+     "label": "Stock Quantity",
+     "type": "number"
+    }
+   ]
+  }
+ ]
+}

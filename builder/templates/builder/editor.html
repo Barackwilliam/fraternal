@@ -1,0 +1,686 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#050b18">
+<title>Editor · {{ page.title }} · {{ site.site_name }}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/grapesjs@0.21.13/dist/css/grapes.min.css">
+<script src="https://unpkg.com/grapesjs@0.21.13"></script>
+<script src="https://unpkg.com/grapesjs-preset-webpage@1.0.3"></script>
+<script src="https://unpkg.com/grapesjs-blocks-basic@1.0.2"></script>
+<style>
+:root{
+  --bg:#050b18; --panel:#0a1424; --panel-2:#0d1a30; --line:rgba(120,180,255,.12);
+  --ink:#e8f0f6; --muted:#7d8ca0; --dim:#46526b;
+  --cyan:#00d4ff; --violet:#6c63ff; --green:#25d366; --red:#ff5470; --amber:#f0b03f;
+  --ff-d:'Space Grotesk',sans-serif; --ff-m:'JetBrains Mono',monospace;
+  --ease:cubic-bezier(.22,.9,.3,1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',-apple-system,sans-serif;height:100vh;height:100dvh;display:flex;flex-direction:column;
+  overflow:hidden;background:var(--bg);color:var(--ink)}
+
+/* ══ TOPBAR ══ */
+.ed-top{display:flex;align-items:center;gap:10px;padding:9px 14px;position:relative;z-index:20;
+  background:linear-gradient(180deg,#081127,#060d1e);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.ed-top::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--cyan),var(--violet),var(--cyan));background-size:200% 100%;
+  animation:flow 6s linear infinite}
+@keyframes flow{to{background-position:200% 0}}
+.ed-back{display:flex;align-items:center;gap:7px;color:var(--muted);text-decoration:none;font-size:13px;
+  padding:8px 12px;border-radius:9px;border:1px solid transparent;transition:all .2s}
+.ed-back:hover{color:var(--ink);border-color:var(--line);background:rgba(255,255,255,.03)}
+.ed-name{font-family:var(--ff-d);font-weight:700;font-size:14.5px;color:#fff;display:flex;align-items:center;gap:8px}
+.ed-name .pg{font-family:var(--ff-m);font-size:10px;color:var(--cyan);background:rgba(0,212,255,.08);
+  border:1px solid rgba(0,212,255,.25);padding:3px 9px;border-radius:14px;letter-spacing:1px}
+#save-state{font-family:var(--ff-m);font-size:10.5px;color:var(--dim);letter-spacing:.5px;display:flex;align-items:center;gap:6px}
+#save-state.saving{color:var(--amber)}
+#save-state.saved{color:var(--green)}
+.grow{flex:1}
+
+.devs{display:flex;gap:2px;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:10px;padding:3px}
+.devs button{background:none;border:none;color:var(--dim);font-size:15px;padding:6px 12px;border-radius:8px;cursor:pointer;
+  transition:all .18s;min-height:34px}
+.devs button:hover{color:var(--ink)}
+.devs button.on{background:linear-gradient(135deg,rgba(0,212,255,.18),rgba(108,99,255,.18));color:var(--cyan);
+  box-shadow:0 0 12px rgba(0,212,255,.15)}
+
+.ed-btn{display:inline-flex;align-items:center;gap:7px;min-height:38px;padding:8px 16px;border-radius:10px;
+  font-weight:600;font-size:13.5px;cursor:pointer;text-decoration:none;font-family:'Inter',sans-serif;
+  transition:transform .18s var(--ease),box-shadow .22s;border:1px solid var(--line);
+  background:rgba(255,255,255,.04);color:var(--ink)}
+.ed-btn:hover{transform:translateY(-1.5px);border-color:var(--cyan);color:var(--cyan);box-shadow:0 6px 18px rgba(0,212,255,.15)}
+.ed-btn.primary{background:linear-gradient(135deg,var(--cyan),var(--violet));color:#fff;border:none;font-weight:700}
+.ed-btn.primary:hover{color:#fff;box-shadow:0 8px 24px rgba(0,212,255,.35)}
+.ed-btn.ai{background:linear-gradient(135deg,rgba(108,99,255,.2),rgba(0,212,255,.12));border-color:rgba(108,99,255,.4);color:#b9b4ff}
+.ed-btn.ai:hover{color:#d4d1ff;border-color:var(--violet);box-shadow:0 6px 20px rgba(108,99,255,.3)}
+.ed-btn.sm{min-height:36px;padding:7px 13px;font-size:12.5px}
+
+/* ══ GRAPESJS DARK THEME ══ */
+#gjs{flex:1;overflow:hidden;border:none}
+.gjs-one-bg{background-color:var(--panel)!important}
+.gjs-two-color{color:var(--ink)!important}
+.gjs-three-bg{background:linear-gradient(135deg,var(--cyan),var(--violet))!important;color:#fff!important}
+.gjs-four-color,.gjs-four-color-h:hover{color:var(--cyan)!important}
+.gjs-pn-panel{background-color:var(--panel)!important;border-color:var(--line)!important}
+.gjs-pn-views,.gjs-pn-views-container{border-color:var(--line)!important;box-shadow:none!important}
+.gjs-pn-views-container{background-color:var(--panel)!important}
+.gjs-cv-canvas{background:radial-gradient(700px 400px at 60% 0%,rgba(0,212,255,.05),transparent 60%),#0b1222}
+.gjs-block{background:var(--panel-2)!important;border:1px solid var(--line)!important;border-radius:11px!important;
+  color:var(--muted)!important;transition:all .2s var(--ease)!important;box-shadow:none!important}
+.gjs-block:hover{border-color:var(--cyan)!important;color:var(--cyan)!important;transform:translateY(-2px);
+  box-shadow:0 6px 18px rgba(0,212,255,.15)!important}
+.gjs-block-category .gjs-title,.gjs-sm-sector .gjs-sm-sector-title,.gjs-layer-title,.gjs-clm-tags #gjs-clm-title,
+.gjs-traits-label{background-color:var(--panel-2)!important;border-color:var(--line)!important;color:var(--ink)!important;
+  font-family:var(--ff-m)!important;font-size:10.5px!important;letter-spacing:1.2px!important;text-transform:uppercase!important}
+.gjs-field,.gjs-clm-select,.gjs-clm-field{background-color:rgba(255,255,255,.05)!important;color:var(--ink)!important;
+  border:1px solid var(--line)!important;border-radius:8px!important}
+.gjs-field input,.gjs-field select{color:var(--ink)!important}
+.gjs-btn-prim{background:linear-gradient(135deg,var(--cyan),var(--violet))!important;border-radius:9px!important;color:#fff!important}
+.gjs-sm-sector,.gjs-trt-traits,.gjs-clm-tags{border-color:var(--line)!important}
+.gjs-toolbar{background:linear-gradient(135deg,var(--cyan),var(--violet))!important;border-radius:8px!important}
+.gjs-badge{background:linear-gradient(135deg,var(--cyan),var(--violet))!important;border-radius:7px!important}
+.gjs-selected{outline:2px solid var(--cyan)!important;outline-offset:-1px}
+.gjs-pn-btn{color:var(--muted)!important;border-radius:8px!important;transition:all .18s!important}
+.gjs-pn-btn:hover{color:var(--ink)!important}
+.gjs-pn-btn.gjs-pn-active{background:rgba(0,212,255,.12)!important;color:var(--cyan)!important;box-shadow:none!important}
+.gjs-layer{background:var(--panel)!important;border-color:var(--line)!important;color:var(--muted)!important}
+.gjs-layer.gjs-selected .gjs-layer-title,.gjs-layer:hover .gjs-layer-title{background:rgba(0,212,255,.08)!important;color:var(--cyan)!important}
+.gjs-rte-toolbar{background:var(--panel-2)!important;border:1px solid var(--line)!important;border-radius:10px!important}
+.gjs-rte-action{color:var(--ink)!important;border-color:var(--line)!important}
+.gjs-rte-active{background:rgba(0,212,255,.15)!important;color:var(--cyan)!important}
+
+/* ══ CODE VIEWER — modern IDE ══ */
+.gjs-mdl-dialog{background:#070d1c!important;border:1px solid var(--line)!important;border-radius:16px!important;
+  box-shadow:0 30px 80px rgba(0,0,0,.7)!important;overflow:hidden!important;
+  animation:mdlIn .3s var(--ease) both}
+@keyframes mdlIn{from{opacity:0;transform:translateY(20px) scale(.97)}to{opacity:1;transform:none}}
+.gjs-mdl-header{background:linear-gradient(180deg,#0c1730,#081126)!important;border-bottom:1px solid var(--line)!important;
+  padding:14px 18px 14px 78px!important;position:relative!important}
+.gjs-mdl-header::before{content:'';position:absolute;left:18px;top:50%;transform:translateY(-50%);
+  width:12px;height:12px;border-radius:50%;background:#ff5f57;
+  box-shadow:20px 0 0 #febc2e, 40px 0 0 #28c840}
+.gjs-mdl-title{font-family:var(--ff-m)!important;font-size:11px!important;color:var(--muted)!important;
+  letter-spacing:1.6px!important;text-transform:uppercase!important;font-weight:700!important}
+.gjs-mdl-btn-close{color:var(--muted)!important;font-size:22px!important;top:8px!important}
+.gjs-mdl-content{background:#070d1c!important;padding:14px!important}
+.gjs-export-dl{color:var(--muted)!important}
+.CodeMirror{background:#060b18!important;color:#dbe7ff!important;font-family:var(--ff-m)!important;
+  font-size:13px!important;line-height:1.7!important;border:1px solid var(--line)!important;border-radius:12px!important;
+  padding:8px 0!important;height:auto!important;max-height:52vh}
+.CodeMirror-gutters{background:#060b18!important;border-right:1px solid rgba(120,180,255,.08)!important}
+.CodeMirror-linenumber{color:#2e3a54!important;font-size:11px!important}
+.CodeMirror-cursor{border-color:var(--cyan)!important}
+.CodeMirror-selected{background:rgba(0,212,255,.14)!important}
+.cm-tag{color:#7db9ff!important}
+.cm-attribute{color:#c792ea!important}
+.cm-string{color:#8ee6b8!important}
+.cm-property{color:#82d8ff!important}
+.cm-number{color:#f0b03f!important}
+.cm-keyword{color:#ff7ab8!important}
+.cm-comment{color:#4a5870!important;font-style:italic}
+.cm-qualifier{color:#8ee6b8!important}
+.cm-builtin{color:#c792ea!important}
+.cm-s-hopscotch.CodeMirror{background:#060b18!important}
+
+/* ══ AI PANEL ══ */
+#ai-panel{position:fixed;right:-400px;top:0;bottom:0;width:min(395px,100vw);z-index:100;display:flex;flex-direction:column;
+  background:linear-gradient(180deg,#0a1226,#070e1e);border-left:1px solid rgba(108,99,255,.3);
+  box-shadow:-16px 0 50px rgba(0,0,0,.5);transition:right .32s var(--ease)}
+#ai-panel.open{right:0}
+#ai-panel .hd{padding:16px 18px;display:flex;justify-content:space-between;align-items:center;
+  background:linear-gradient(135deg,rgba(108,99,255,.18),rgba(0,212,255,.1));border-bottom:1px solid var(--line)}
+#ai-panel .hd strong{font-family:var(--ff-d);font-size:15px;color:#fff}
+#ai-panel .bd{flex:1;padding:18px;overflow-y:auto}
+#ai-panel p.lead{font-size:13px;color:var(--muted);margin-bottom:12px;line-height:1.6}
+#ai-panel textarea{width:100%;min-height:110px;padding:13px;border:1px solid var(--line);border-radius:12px;
+  font-size:14px;font-family:inherit;resize:vertical;background:rgba(255,255,255,.04);color:var(--ink)}
+#ai-panel textarea:focus{outline:none;border-color:var(--violet);box-shadow:0 0 0 3px rgba(108,99,255,.18)}
+#ai-panel .quick{display:flex;flex-wrap:wrap;gap:7px;margin:13px 0}
+#ai-panel .quick button{background:rgba(255,255,255,.04);border:1px solid var(--line);color:var(--muted);
+  padding:8px 13px;border-radius:18px;font-size:12px;cursor:pointer;min-height:36px;transition:all .18s}
+#ai-panel .quick button:hover{border-color:var(--violet);color:#c9c5ff}
+#ai-result{margin-top:14px;border:1px solid var(--line);border-radius:12px;padding:13px;font-size:13px;
+  max-height:270px;overflow:auto;display:none;background:rgba(255,255,255,.03);color:var(--ink)}
+#ai-result *{max-width:100%}
+.spin{display:inline-block;width:15px;height:15px;border:2px solid #fff;border-top-color:transparent;border-radius:50%;
+  animation:sp .7s linear infinite;vertical-align:middle}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* ══ GUIDED TOUR ══ */
+#tour-ov{position:fixed;inset:0;z-index:300;display:none}
+#tour-ov.on{display:block}
+#tour-hole{position:absolute;border-radius:14px;box-shadow:0 0 0 9999px rgba(3,7,16,.82);
+  border:2px solid var(--cyan);transition:all .4s var(--ease);pointer-events:none;
+  animation:holePulse 2s infinite}
+@keyframes holePulse{0%,100%{box-shadow:0 0 0 9999px rgba(3,7,16,.82),0 0 0 0 rgba(0,212,255,.5)}
+  50%{box-shadow:0 0 0 9999px rgba(3,7,16,.82),0 0 0 10px rgba(0,212,255,0)}}
+#tour-tip{position:absolute;width:min(330px,calc(100vw - 30px));background:linear-gradient(165deg,#0e1a33,#0a1426);
+  border:1px solid rgba(0,212,255,.35);border-radius:16px;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,.6);
+  transition:all .4s var(--ease)}
+#tour-tip .step{font-family:var(--ff-m);font-size:10px;color:var(--cyan);letter-spacing:2px;margin-bottom:8px}
+#tour-tip h3{font-family:var(--ff-d);font-size:17px;color:#fff;margin-bottom:7px}
+#tour-tip p{font-size:13.5px;color:var(--muted);line-height:1.65;margin-bottom:16px}
+#tour-tip .row{display:flex;gap:9px;justify-content:space-between;align-items:center}
+#tour-tip .dots{display:flex;gap:5px}
+#tour-tip .dots i{width:7px;height:7px;border-radius:50%;background:var(--dim)}
+#tour-tip .dots i.on{background:var(--cyan);box-shadow:0 0 8px var(--cyan)}
+
+/* ══ MOBILE DEVICE WARNING MODAL ══ */
+#mw-ov{position:fixed;inset:0;z-index:400;display:none;align-items:center;justify-content:center;padding:18px}
+#mw-ov.on{display:flex}
+.mw-backdrop{position:absolute;inset:0;background:rgba(3,6,14,.78);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  animation:mwFade .35s var(--ease) both}
+@keyframes mwFade{from{opacity:0}to{opacity:1}}
+.mw-card{position:relative;width:min(420px,100%);max-height:92vh;overflow:auto;
+  background:linear-gradient(165deg,#0d1830,#0a1222);border-radius:24px;padding:32px 26px 26px;
+  box-shadow:0 40px 100px rgba(0,0,0,.6),0 0 0 1px rgba(120,180,255,.1);
+  animation:mwIn .5s cubic-bezier(.2,1.1,.3,1) both;perspective:800px}
+@keyframes mwIn{from{opacity:0;transform:translateY(40px) scale(.9) rotateX(8deg)}to{opacity:1;transform:none}}
+.mw-card::before{content:'';position:absolute;inset:0;border-radius:24px;padding:1.5px;z-index:0;
+  background:conic-gradient(from var(--ang,0deg),var(--green),var(--cyan),var(--violet),var(--green));
+  -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;animation:mwSpin 5s linear infinite}
+@keyframes mwSpin{to{--ang:360deg}}
+@property --ang{syntax:'<angle>';inherits:false;initial-value:0deg}
+.mw-glow{position:absolute;top:-60px;left:50%;transform:translateX(-50%);width:240px;height:180px;
+  background:radial-gradient(circle,rgba(0,212,255,.35),transparent 70%);filter:blur(30px);
+  animation:mwPulse 3s ease-in-out infinite;pointer-events:none;z-index:0}
+@keyframes mwPulse{0%,100%{opacity:.5;transform:translateX(-50%) scale(1)}50%{opacity:.9;transform:translateX(-50%) scale(1.15)}}
+.mw-stage{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:16px;
+  margin-bottom:20px;perspective:600px}
+.mw-device{width:74px;height:74px;border-radius:20px;display:flex;align-items:center;justify-content:center;
+  font-size:32px;position:relative;background:linear-gradient(160deg,var(--panel-2),var(--panel));
+  border:1px solid var(--line);box-shadow:0 14px 30px rgba(0,0,0,.4);
+  animation:mwFloat 3s ease-in-out infinite;transform-style:preserve-3d}
+.mw-phone{animation-delay:0s}
+.mw-laptop{animation-delay:.4s;box-shadow:0 14px 34px rgba(37,211,102,.25),0 0 0 1px rgba(37,211,102,.25)}
+@keyframes mwFloat{0%,100%{transform:translateY(0) rotateY(-8deg)}50%{transform:translateY(-9px) rotateY(8deg)}}
+.mw-device .badge{position:absolute;bottom:-6px;right:-6px;width:24px;height:24px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;border:2px solid var(--bg)}
+.mw-phone .badge{background:linear-gradient(135deg,#ff5470,#ff8ba0);color:#3a0510}
+.mw-laptop .badge{background:linear-gradient(135deg,var(--green),var(--green-2));color:#04120a}
+.mw-arrow{font-size:20px;color:var(--dim);animation:mwArrow 1.6s ease-in-out infinite}
+@keyframes mwArrow{0%,100%{transform:translateX(0);opacity:.5}50%{transform:translateX(6px);opacity:1}}
+.mw-card h2{position:relative;z-index:1;font-family:var(--ff-d);font-size:21px;color:#fff;text-align:center;
+  margin-bottom:10px;letter-spacing:-.01em}
+.mw-lead{position:relative;z-index:1;font-size:14px;color:var(--muted);text-align:center;line-height:1.7;margin-bottom:20px}
+.mw-lead b{color:var(--ink)}
+.mw-feats{position:relative;z-index:1;list-style:none;margin-bottom:24px;display:flex;flex-direction:column;gap:10px}
+.mw-feats li{display:flex;align-items:center;gap:11px;font-size:13.5px;color:var(--ink);
+  background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:12px;padding:10px 14px;
+  animation:mwLi .5s var(--ease) both}
+.mw-feats li:nth-child(1){animation-delay:.1s}.mw-feats li:nth-child(2){animation-delay:.18s}.mw-feats li:nth-child(3){animation-delay:.26s}
+@keyframes mwLi{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:none}}
+.mw-feats .ic{font-size:17px;flex-shrink:0}
+.mw-actions{position:relative;z-index:1;display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
+.mw-btn{display:flex;align-items:center;justify-content:center;gap:8px;min-height:50px;border-radius:13px;
+  font-weight:700;font-size:14.5px;text-decoration:none;cursor:pointer;border:none;font-family:'Inter',sans-serif;
+  transition:transform .18s var(--ease),box-shadow .25s}
+.mw-primary{background:linear-gradient(135deg,var(--green),#12b767);color:#031208;
+  box-shadow:0 10px 28px rgba(37,211,102,.3)}
+.mw-primary:hover{transform:translateY(-2px);box-shadow:0 14px 34px rgba(37,211,102,.45)}
+.mw-ghost{background:rgba(255,255,255,.04);color:var(--muted);border:1px solid var(--line)}
+.mw-ghost:hover{color:var(--ink);border-color:rgba(255,255,255,.2)}
+.mw-check-row{position:relative;z-index:1;display:flex;align-items:center;gap:8px;justify-content:center;
+  font-size:12px;color:var(--dim);cursor:pointer;user-select:none}
+.mw-check-row input{width:15px;height:15px;accent-color:var(--green);cursor:pointer;min-height:auto}
+@media(max-width:420px){
+  .mw-card{padding:26px 18px 20px;border-radius:18px}
+  .mw-device{width:60px;height:60px;font-size:26px;border-radius:16px}
+  .mw-card h2{font-size:18px}
+}
+@media(prefers-reduced-motion:reduce){
+  .mw-card,.mw-backdrop,.mw-glow,.mw-device,.mw-arrow,.mw-feats li{animation:none!important}
+}
+
+/* ══ MOBILE ══ */
+@media(max-width:820px){
+  .ed-top{gap:7px;padding:8px 10px}
+  .ed-name .full{display:none}
+  #save-state .txt{display:none}
+  .ed-btn{padding:8px 12px;font-size:12.5px}
+  .ed-btn .lbl{display:none}
+  .devs button{padding:6px 9px}
+
+  /* GrapesJS ships its own top toolbar (device select, undo/redo, code view,
+     fullscreen, preview...) which duplicates and visually collides with our
+     custom .ed-top bar. We hide it entirely on mobile and expose Undo/Redo
+     via our own toolbar instead (see #btn-undo/#btn-redo below). */
+  .gjs-pn-options{display:none!important}
+
+  /* The tab strip that switches between Blocks / Style / Layers / Settings
+     becomes a fixed bottom tab bar instead of a squeezed corner widget. */
+  .gjs-pn-views{
+    position:fixed!important;left:0!important;right:0!important;bottom:0!important;top:auto!important;
+    width:100%!important;display:flex!important;justify-content:space-around!important;gap:4px;
+    background:linear-gradient(0deg,#081127,#0a1526)!important;
+    border-top:1px solid var(--line)!important;border-left:none!important;
+    padding:6px 6px calc(6px + env(safe-area-inset-bottom))!important;
+    z-index:210;box-shadow:0 -10px 26px rgba(0,0,0,.35)
+  }
+  .gjs-pn-views .gjs-pn-btn{flex:1;margin:0!important;border-radius:10px!important;min-height:40px}
+
+  /* The panel content itself (Blocks grid / Style Manager / Layer Manager /
+     Settings) becomes a slide-up bottom sheet instead of a permanent sidebar
+     that fights the canvas for width. */
+  .gjs-pn-views-container{
+    position:fixed!important;left:0!important;right:0!important;bottom:0!important;top:auto!important;
+    width:100%!important;max-width:100%!important;height:64vh!important;border-left:none!important;
+    border-radius:20px 20px 0 0!important;box-shadow:0 -22px 55px rgba(0,0,0,.5)!important;
+    transform:translateY(100%);transition:transform .32s var(--ease);z-index:200;
+    padding-bottom:calc(58px + env(safe-area-inset-bottom))!important;overflow-y:auto!important
+  }
+  .gjs-pn-views-container.gjs-mobile-open{transform:translateY(0)}
+  #gjs-mobile-backdrop{position:fixed;inset:0;background:rgba(3,7,16,.55);z-index:190;display:none}
+  #gjs-mobile-backdrop.on{display:block}
+  #gjs-panel-close{position:sticky;top:0;left:0;right:0;width:100%;display:flex;align-items:center;
+    justify-content:center;gap:6px;padding:11px;margin-bottom:6px;
+    background:linear-gradient(180deg,#101d38,rgba(16,29,56,.85));color:var(--muted);
+    font-size:12.5px;font-weight:700;border:none;border-bottom:1px solid var(--line);cursor:pointer;z-index:2}
+  .gjs-cv-canvas{width:100%!important;padding-bottom:58px!important}
+}
+@media(max-width:420px){
+  .ed-top{gap:5px;padding:6px 8px}
+  .ed-name{font-size:12.5px;gap:5px}
+  .ed-name .pg{font-size:9px;padding:2px 7px}
+  .ed-btn{padding:7px 9px;min-height:34px}
+  .devs button{padding:5px 7px;font-size:13px;min-height:30px}
+  #ai-panel .bd{padding:14px}
+  #ai-panel .quick button{padding:7px 11px;font-size:11.5px}
+  #tour-tip{padding:16px}
+  .gjs-pn-views-container{height:68vh}
+}
+@media(max-height:480px) and (orientation:landscape){
+  .ed-top{padding:5px 10px}
+  #ai-panel textarea{min-height:70px}
+  #tour-tip{padding:14px}
+  #tour-tip p{margin-bottom:10px}
+}
+</style>
+</head>
+<body>
+
+<div class="ed-top" id="ed-top">
+  <a href="{% url 'builder:site_dashboard' site.id %}" class="ed-back">⬅ <span class="lbl">Dashboard</span></a>
+  <span class="ed-name"><span class="full">✏️</span> {{ site.site_name }} <span class="pg">/{{ page.slug }}</span></span>
+  <span id="save-state"><span>●</span><span class="txt"> Ready</span></span>
+  <div class="grow"></div>
+  <div class="devs" id="tour-devices">
+    <button data-dev="Desktop" class="on" title="Desktop">🖥️</button>
+    <button data-dev="Tablet" title="Tablet">💻</button>
+    <button data-dev="Mobile" title="Mobile">📱</button>
+  </div>
+  <button class="ed-btn" id="btn-code" onclick="openCode()" title="View HTML/CSS">&lt;/&gt;<span class="lbl"> Code</span></button>
+  <button class="ed-btn" id="btn-undo" title="Undo (Ctrl+Z)">↺<span class="lbl"> Undo</span></button>
+  <button class="ed-btn" id="btn-redo" title="Redo (Ctrl+Shift+Z)">↻<span class="lbl"> Redo</span></button>
+  <button class="ed-btn ai" id="tour-ai" onclick="toggleAI()">✨<span class="lbl"> AI Assistant</span></button>
+  <a class="ed-btn" id="tour-preview" target="_blank"
+     href="{{ site.public_url }}{% if page.slug != 'home' %}/p/{{ page.slug }}{% endif %}">👁<span class="lbl"> Preview</span></a>
+  <button class="ed-btn" onclick="startTour(true)" title="Editor tutorial">🎓</button>
+  <button class="ed-btn primary" onclick="savePage()">💾<span class="lbl"> Save</span></button>
+</div>
+
+<!-- Mobile device warning -->
+<div id="mw-ov">
+  <div class="mw-backdrop" onclick="mwClose()"></div>
+  <div class="mw-card">
+    <div class="mw-glow"></div>
+    <div class="mw-stage">
+      <div class="mw-device mw-phone">📱<span class="badge">✕</span></div>
+      <span class="mw-arrow">➜</span>
+      <div class="mw-device mw-laptop">💻<span class="badge">✓</span></div>
+    </div>
+    <h2>For the Best Experience, Use a Computer 💡</h2>
+    <p class="mw-lead">This <b>drag & drop</b> editor needs more screen space and precise mouse control — it works much better on a <b>Laptop or Desktop</b> than on a phone.</p>
+    <ul class="mw-feats">
+      <li><span class="ic">🖱️</span> More precise control than a finger on touch</li>
+      <li><span class="ic">🖥️</span> Bigger screen — see your whole design at once</li>
+      <li><span class="ic">⚡</span> Drag and arrange blocks much faster</li>
+    </ul>
+    <div class="mw-actions">
+      <a class="mw-btn mw-primary" href="{% url 'builder:site_dashboard' site.id %}">🖥️ Okay, I'll Open on a Computer Later</a>
+      <button class="mw-btn mw-ghost" onclick="mwClose()">Continue Anyway on My Phone →</button>
+    </div>
+    <label class="mw-check-row"><input type="checkbox" id="mw-dontshow"> Don't remind me again on this device</label>
+  </div>
+</div>
+
+<div id="gjs"></div>
+
+<!-- AI Assistant -->
+<div id="ai-panel">
+  <div class="hd">
+    <strong>✨ AI Assistant</strong>
+    <button onclick="toggleAI()" style="background:none;border:none;color:#fff;font-size:22px;cursor:pointer">×</button>
+  </div>
+  <div class="bd">
+    <p class="lead">Describe what you need — the AI will create a section or text, then click <b style="color:var(--ink)">Insert into Page</b>.</p>
+    <textarea id="ai-prompt" placeholder="e.g. Create a 'Why Choose Us' section with 3 reasons"></textarea>
+    <div class="quick">
+      <button onclick="quickPrompt('Write a short, engaging About Us for my business')">About Us</button>
+      <button onclick="quickPrompt('Create a section with 3 customer testimonials')">Testimonials</button>
+      <button onclick="quickPrompt('Create a Why Choose Us section with 3 reasons')">Why Choose Us</button>
+      <button onclick="quickPrompt('Create a call-to-action section inviting customers to contact us')">Call to Action</button>
+    </div>
+    <button class="ed-btn primary" style="width:100%;justify-content:center" id="ai-go" onclick="askAI()">⚡ Generate</button>
+    <div id="ai-result"></div>
+    <button class="ed-btn" style="width:100%;justify-content:center;margin-top:10px;display:none;border-color:var(--green);color:var(--green)"
+            id="ai-insert" onclick="insertAI()">⬇ Insert into Page</button>
+    <p id="ai-remaining" style="font-family:var(--ff-m);font-size:10.5px;color:var(--dim);margin-top:12px;letter-spacing:.5px"></p>
+  </div>
+</div>
+
+<!-- Guided tour -->
+<div id="tour-ov">
+  <div id="tour-hole"></div>
+  <div id="tour-tip">
+    <div class="step" id="tour-step">STEP 1/5</div>
+    <h3 id="tour-title"></h3>
+    <p id="tour-text"></p>
+    <div class="row">
+      <div class="dots" id="tour-dots"></div>
+      <div style="display:flex;gap:8px">
+        <button class="ed-btn sm" onclick="endTour()">Skip</button>
+        <button class="ed-btn primary sm" id="tour-next" onclick="tourNext()">Next →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Uploadcare -->
+<script type="module">
+  import * as UC from "https://cdn.jsdelivr.net/npm/@uploadcare/file-uploader@v1/web/file-uploader.min.js";
+  UC.defineComponents(UC);
+</script>
+<uc-config ctx-name="jt-uploader" pubkey="{{ uploadcare_public_key }}" img-only="true"
+           max-local-file-size-bytes="8388608" source-list="local, camera, url"></uc-config>
+<uc-file-uploader-regular ctx-name="jt-uploader" style="display:none"></uc-file-uploader-regular>
+<uc-upload-ctx-provider ctx-name="jt-uploader" id="uc-ctx"></uc-upload-ctx-provider>
+
+<script>
+const CSRF = '{{ csrf_token }}';
+const SAVE_URL = "{% url 'builder:page_save' site.id page.id %}";
+const LOAD_URL = "{% url 'builder:page_load' site.id page.id %}";
+const AI_URL = "{% url 'builder:ai_assist' %}";
+const ASSET_SAVE_URL = "{% url 'builder:asset_save' site.id %}";
+const SITE_ID = {{ site.id }};
+</script>
+
+<!-- Mobile device warning logic -->
+<script>
+(function(){
+  const MW_KEY = 'jt_mw_dismissed';
+  function isSmallDevice(){
+    return window.matchMedia('(max-width: 820px)').matches;
+  }
+  function mwShow(){
+    document.getElementById('mw-ov').classList.add('on');
+  }
+  window.mwClose = function(){
+    document.getElementById('mw-ov').classList.remove('on');
+    if (document.getElementById('mw-dontshow').checked){
+      try { localStorage.setItem(MW_KEY, '1'); } catch(e){}
+    }
+  };
+  if (isSmallDevice() && localStorage.getItem(MW_KEY) !== '1'){
+    mwShow();
+  }
+  // If the user rotates their phone or resizes the window down to a small
+  // size, show it once more this session (even if not permanently dismissed)
+  let mwShownThisSession = isSmallDevice();
+  window.addEventListener('resize', ()=>{
+    const small = isSmallDevice();
+    if (small && !mwShownThisSession && localStorage.getItem(MW_KEY) !== '1'){
+      mwShownThisSession = true;
+      mwShow();
+    }
+  });
+})();
+</script>
+{{ page.html_cache|json_script:"starter-html" }}
+{{ page.css_cache|json_script:"starter-css" }}
+<script>
+const starterHtml = JSON.parse(document.getElementById('starter-html').textContent || '""');
+const starterCss = JSON.parse(document.getElementById('starter-css').textContent || '""');
+
+const editor = grapesjs.init({
+  container: '#gjs',
+  height: '100%',
+  fromElement: false,
+  plugins: ['gjs-preset-webpage', 'gjs-blocks-basic'],
+  pluginsOpts: { 'gjs-preset-webpage': { modalImportButton: false } },
+  deviceManager: { devices: [
+    { name: 'Desktop', width: '' },
+    { name: 'Tablet', width: '768px', widthMedia: '992px' },
+    { name: 'Mobile', width: '375px', widthMedia: '575px' },
+  ]},
+  storageManager: {
+    type: 'remote', autosave: true, autoload: true,
+    stepsBeforeSave: 5,
+    options: { remote: {
+      urlLoad: LOAD_URL,
+      urlStore: SAVE_URL,
+      fetchOptions: opts => (opts.method === 'POST' ? { headers: {'X-CSRFToken': CSRF} } : {}),
+      onStore: (data, ed) => ({ project: data, html: ed.getHtml(), css: ed.getCss() }),
+      onLoad: result => (result && Object.keys(result).length ? result
+        : { pages: [{ component: starterHtml }], styles: starterCss }),
+    }},
+  },
+  assetManager: { custom: true },
+});
+
+// Device switcher
+document.querySelectorAll('.devs button').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    document.querySelectorAll('.devs button').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on');
+    editor.setDevice(b.dataset.dev);
+  });
+});
+
+// Undo / Redo — our own buttons, since GrapesJS's default toolbar (which
+// normally has these) is hidden on mobile to avoid duplicate/overflowing UI
+document.getElementById('btn-undo').addEventListener('click', ()=> editor.UndoManager.undo());
+document.getElementById('btn-redo').addEventListener('click', ()=> editor.UndoManager.redo());
+
+// ══ MOBILE PANEL DRAWER ══
+// On phones, GrapesJS's Blocks/Style/Layers/Settings panel becomes a
+// slide-up bottom sheet (via CSS) instead of a permanent sidebar that
+// fights the canvas for width. This wires the open/close behavior.
+(function(){
+  function isMobileUI(){ return window.matchMedia('(max-width: 820px)').matches; }
+  const viewsContainer = document.querySelector('.gjs-pn-views-container');
+  const viewsTabs = document.querySelector('.gjs-pn-views');
+  if (!viewsContainer || !viewsTabs) return;
+
+  const backdrop = document.createElement('div');
+  backdrop.id = 'gjs-mobile-backdrop';
+  document.body.appendChild(backdrop);
+
+  const closeBtn = document.createElement('button');
+  closeBtn.id = 'gjs-panel-close';
+  closeBtn.type = 'button';
+  closeBtn.innerHTML = '▾ Close';
+  viewsContainer.insertAdjacentElement('afterbegin', closeBtn);
+
+  function openDrawer(){ viewsContainer.classList.add('gjs-mobile-open'); backdrop.classList.add('on'); }
+  function closeDrawer(){ viewsContainer.classList.remove('gjs-mobile-open'); backdrop.classList.remove('on'); }
+
+  viewsTabs.addEventListener('click', e=>{
+    if (isMobileUI() && e.target.closest('.gjs-pn-btn')) openDrawer();
+  });
+  closeBtn.addEventListener('click', closeDrawer);
+  backdrop.addEventListener('click', closeDrawer);
+  // Ukibofya/kuchagua kipengele kwenye canvas, fungua drawer moja kwa moja
+  // ili uone Style Manager yake papo hapo (kama ilivyo desktop)
+  editor.on('component:selected', ()=>{ if (isMobileUI()) openDrawer(); });
+})();
+
+// Blocks za JamiiTek
+const bm = editor.BlockManager;
+const jtCat = '⭐ JamiiTek — Your Content';
+bm.add('jt-site-contact', {
+  label: '📞 My Contact Info', category: jtCat,
+  content: `<section style="padding:50px 20px;text-align:center;max-width:700px;margin:0 auto">
+    <h2>Contact Us</h2>
+    <p style="font-size:17px">Phone: [[site:phone]]<br>Email: [[site:email]]<br>Address: [[site:address]]</p>
+    <a href="[[site:whatsapp]]" style="display:inline-block;margin-top:14px;background:#25d366;color:#fff;padding:12px 26px;border-radius:6px;text-decoration:none;font-weight:700">WhatsApp</a>
+  </section>`,
+});
+bm.add('jt-site-name', { label: '🏷️ Business Name', category: jtCat,
+  content: '<h2 style="text-align:center">[[site:name]]</h2>' });
+{% for c in collections %}
+bm.add('jt-col-{{ c.slug }}', {
+  label: '{{ c.icon }} {{ c.name }} Grid', category: jtCat,
+  content: `<section style="padding:50px 20px;max-width:1100px;margin:0 auto">
+    <h2 style="text-align:center">{{ c.name }}</h2>
+    <div data-jt-collection="{{ c.slug }}" style="padding:24px;border:2px dashed #7db9ff;border-radius:12px;text-align:center;background:#f0f6ff;color:#3a5a8a">
+      {{ c.icon }} <b>{{ c.name }}</b> will appear here automatically.<br>
+      <small>Add or edit them under Dashboard → {{ c.name }}.</small>
+    </div>
+  </section>`,
+});
+{% endfor %}
+
+// Placeholder → shortcode wakati wa kuhifadhi
+const origGetHtml = editor.getHtml.bind(editor);
+editor.getHtml = function(){
+  let html = origGetHtml();
+  html = html.replace(/<div[^>]*data-jt-collection="([a-z0-9_-]+)"[\s\S]*?<\/div>/g,
+                      (m, slug) => `[[collection:${slug}]]`);
+  return html;
+};
+
+// Save state
+const stateEl = document.getElementById('save-state');
+editor.on('storage:start:store', () => { stateEl.className='saving';
+  stateEl.innerHTML='<span class="spin" style="width:10px;height:10px;border-color:var(--amber);border-top-color:transparent"></span><span class="txt"> Saving…</span>'; });
+editor.on('storage:end:store', () => { stateEl.className='saved';
+  stateEl.innerHTML='● <span class="txt">Saved ' + new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) + '</span>'; });
+editor.on('storage:error', () => { stateEl.className='';
+  stateEl.innerHTML='⚠ <span class="txt">Save failed</span>'; });
+function savePage(){ editor.store(); }
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 's'){ e.preventDefault(); savePage(); }
+});
+
+// Code viewer (IDE style kupitia CSS overrides)
+function openCode(){ editor.runCommand('export-template'); }
+
+// Uploadcare kama Asset Manager
+const ucCtx = document.getElementById('uc-ctx');
+let amProps = null;
+editor.on('asset:custom', props => { amProps = props; ucCtx.initFlow(); });
+ucCtx.addEventListener('file-upload-success', e => {
+  const cdnUrl = e.detail.cdnUrl;
+  fetch(ASSET_SAVE_URL, { method:'POST',
+    headers:{'Content-Type':'application/json','X-CSRFToken':CSRF},
+    body: JSON.stringify({cdn_url: cdnUrl, name: e.detail.name || ''}) });
+  if (amProps){ amProps.select({ src: cdnUrl + '-/resize/1200x/' }); }
+  else {
+    const sel = editor.getSelected();
+    if (sel && sel.is('image')) sel.set('src', cdnUrl + '-/resize/1200x/');
+  }
+});
+
+// AI
+let lastAI = null;
+function toggleAI(){ document.getElementById('ai-panel').classList.toggle('open'); }
+function quickPrompt(t){ document.getElementById('ai-prompt').value = t; }
+async function askAI(){
+  const prompt = document.getElementById('ai-prompt').value.trim();
+  if (!prompt) return;
+  const btn = document.getElementById('ai-go');
+  btn.innerHTML = '<span class="spin"></span> Inatengeneza…'; btn.disabled = true;
+  try {
+    const res = await fetch(AI_URL, { method:'POST',
+      headers:{'Content-Type':'application/json','X-CSRFToken':CSRF},
+      body: JSON.stringify({prompt, website_id: SITE_ID}) });
+    const data = await res.json();
+    const box = document.getElementById('ai-result');
+    box.style.display = 'block';
+    if (!res.ok){ box.textContent = data.error || 'Something went wrong.'; lastAI = null; }
+    else {
+      lastAI = data;
+      box.innerHTML = data.is_html ? data.result
+        : '<pre style="white-space:pre-wrap;font-family:inherit">' + data.result.replace(/</g,'&lt;') + '</pre>';
+      document.getElementById('ai-insert').style.display = 'flex';
+      if (data.remaining !== undefined)
+        document.getElementById('ai-remaining').textContent = 'REQUESTS LEFT TODAY: ' + data.remaining;
+    }
+  } catch { const b=document.getElementById('ai-result'); b.style.display='block'; b.textContent='Network error. Please try again.'; }
+  btn.innerHTML = '⚡ Generate'; btn.disabled = false;
+}
+function insertAI(){
+  if (!lastAI) return;
+  const content = lastAI.is_html ? lastAI.result
+    : '<section style="padding:40px 20px;max-width:900px;margin:0 auto"><p>' + lastAI.result + '</p></section>';
+  editor.addComponents(content);
+  toggleAI();
+}
+
+// ══ GUIDED TOUR ══
+const TOUR = [
+  { sel: '.gjs-pn-views-container, .gjs-pn-views', pos:'left',
+    title:'🧱 Blocks & Styles',
+    text:'Here are your BLOCKS — sections, text, images, buttons. Drag any block and drop it onto your page. When you select an element, this same panel lets you change colors, sizes and spacing.' },
+  { sel: '.gjs-cv-canvas', pos:'right',
+    title:'🖥️ Canvas — Your Page',
+    text:'This is your actual page. Click any text to edit it directly. Click any element to select it, then move it, delete it or style it.' },
+  { sel: '#tour-devices', pos:'bottom',
+    title:'📱 Check the Mobile View',
+    text:'Switch between Desktop, Tablet and Mobile to see exactly how your site looks on each. More than half your visitors will be on mobile — make sure it looks great!' },
+  { sel: '#tour-ai', pos:'bottom',
+    title:'✨ AI Assistant',
+    text:'Out of words? Ask the AI to create content or a whole section in English or Swahili — then insert it into your page with one click.' },
+  { sel: '#tour-preview', pos:'bottom',
+    title:'👁 Preview & Save',
+    text:'Everything saves AUTOMATICALLY. Click Preview to see the real website. When you are happy, go back to the Dashboard and hit Publish — and you are live! 🚀' },
+];
+let tourI = 0;
+function startTour(force){
+  if (!force && localStorage.getItem('jt_tour_done')) return;
+  tourI = 0;
+  document.getElementById('tour-ov').classList.add('on');
+  const dots = document.getElementById('tour-dots');
+  dots.innerHTML = TOUR.map((_,i)=>'<i'+(i===0?' class="on"':'')+'></i>').join('');
+  showTour();
+}
+function showTour(){
+  const step = TOUR[tourI];
+  const el = document.querySelector(step.sel);
+  const hole = document.getElementById('tour-hole');
+  const tip = document.getElementById('tour-tip');
+  const r = el ? el.getBoundingClientRect() : {top:innerHeight/2-60,left:innerWidth/2-100,width:200,height:120,bottom:innerHeight/2+60};
+  hole.style.top = (r.top-7)+'px'; hole.style.left = (r.left-7)+'px';
+  hole.style.width = (r.width+14)+'px'; hole.style.height = (r.height+14)+'px';
+  document.getElementById('tour-step').textContent = `STEP ${tourI+1}/${TOUR.length}`;
+  document.getElementById('tour-title').textContent = step.title;
+  document.getElementById('tour-text').textContent = step.text;
+  document.getElementById('tour-next').textContent = tourI === TOUR.length-1 ? 'Finish ✓' : 'Next →';
+  document.querySelectorAll('#tour-dots i').forEach((d,i)=>d.classList.toggle('on', i<=tourI));
+  const tw = Math.min(330, innerWidth-30), th = 200;
+  let top, left;
+  if (step.pos==='left'){ top = Math.max(14, r.top); left = r.left - tw - 22; }
+  else if (step.pos==='right'){ top = Math.max(14, r.top + 40); left = r.left + r.width/2 - tw/2; }
+  else { top = (r.bottom||r.top+r.height) + 18; left = r.left + r.width/2 - tw/2; }
+  left = Math.min(Math.max(14, left), innerWidth - tw - 14);
+  if (top + th > innerHeight - 14) top = innerHeight - th - 14;
+  tip.style.top = top+'px'; tip.style.left = left+'px';
+}
+function tourNext(){
+  if (tourI >= TOUR.length-1) return endTour();
+  tourI++; showTour();
+}
+function endTour(){
+  document.getElementById('tour-ov').classList.remove('on');
+  localStorage.setItem('jt_tour_done', '1');
+}
+editor.on('load', ()=> setTimeout(()=>startTour(false), 900));
+</script>
+</body>
+</html>

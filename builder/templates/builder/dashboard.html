@@ -1,0 +1,194 @@
+{% extends 'builder/base_panel.html' %}
+{% block title %}{{ site.site_name }} — Panel{% endblock %}
+
+{% block mobnav %}
+<a href="{% url 'builder:my_sites' %}"><span class="ic">⬅</span>Sites</a>
+<a href="{% url 'builder:site_dashboard' site.id %}" class="active"><span class="ic">📊</span>Dash</a>
+{% for c in collections %}
+<a href="{% url 'builder:collection_items' site.id c.id %}"><span class="ic">{{ c.icon }}</span>{{ c.name_singular }}</a>
+{% endfor %}
+<a href="{% url 'builder:tutorial' %}"><span class="ic">🎓</span>Tutorial</a>
+{% endblock %}
+
+{% block sidenav %}
+<a href="{% url 'builder:my_sites' %}">⬅ My Websites</a>
+<a href="{% url 'builder:site_dashboard' site.id %}" class="active">📊 Dashboard</a>
+{% for c in collections %}
+<a href="{% url 'builder:collection_items' site.id c.id %}">{{ c.icon }} {{ c.name }}</a>
+{% endfor %}
+<a href="{% url 'builder:tutorial' %}">🎓 How to Use</a>
+{% endblock %}
+
+{% block content %}
+<div class="topbar">
+  <div>
+    <div class="crumb"><a href="{% url 'builder:my_sites' %}">My Websites</a> / {{ site.site_name }}</div>
+    <h1>{{ site.site_name }}</h1>
+    <p class="hint" style="font-size:14px">
+      <a href="{{ site.public_url }}" target="_blank" style="color:var(--amber-ink);font-weight:700">{{ site.subdomain }}.jamiitek.com ↗</a>
+      · type: {{ site.website_type }}
+    </p>
+  </div>
+  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap" id="publish">
+    {% if site.is_published %}<span class="pill on">● Live</span>
+    {% else %}<span class="pill off">○ Draft — only you can see it</span>{% endif %}
+    <form method="post" action="{% url 'builder:toggle_publish' site.id %}">
+      {% csrf_token %}
+      <button class="btn {% if not site.is_published %}amber{% else %}ghost{% endif %}">
+        {% if site.is_published %}Unpublish{% else %}🚀 Publish{% endif %}
+      </button>
+    </form>
+  </div>
+</div>
+
+{% if onb_done < onb_total %}
+<div class="card onb">
+  <h2>🚀 Getting Started <span style="font-family:var(--ff-mono);font-size:11px;color:var(--muted);font-weight:500;margin-left:auto">{{ onb_done }}/{{ onb_total }} completed</span></h2>
+  <div class="onb-bar"><i style="width:{{ onb_pct }}%"></i></div>
+  {% for st in onb_steps %}
+  <a class="onb-step {% if st.done %}done{% endif %}" href="{{ st.url }}">
+    <span class="onb-tick">✓</span>
+    <span class="t">{{ st.label }}</span>
+    {% if not st.done %}<span class="go">DO IT →</span>{% endif %}
+  </a>
+  {% endfor %}
+  <p class="hint" style="margin-top:12px">New here? <a href="{% url 'builder:tutorial' %}" style="color:var(--cyan)">Read the full step-by-step guide →</a></p>
+</div>
+{% endif %}
+
+<div class="stats">
+  <div class="stat"><b>{{ pages|length }}</b><span>📄 Pages</span></div>
+  {% for c in collections %}
+  <div class="stat" style="animation-delay:{{ forloop.counter0 }}00ms"><b>{{ c.items.count }}</b><span>{{ c.icon }} {{ c.name }}</span></div>
+  {% endfor %}
+  <div class="stat"><b>{% if site.is_published %}LIVE{% else %}DRAFT{% endif %}</b><span>🌍 Website Status</span></div>
+</div>
+
+<div class="grid c2">
+  <!-- Pages -->
+  <div class="card">
+    <h2>📄 Your Pages</h2>
+    <div class="table-wrap"><table>
+      <tr><th>Page</th><th>URL</th><th></th></tr>
+      {% for p in pages %}
+      <tr>
+        <td><strong>{{ p.title }}</strong></td>
+        <td class="hint">{% if p.slug == 'home' %}/{% else %}/p/{{ p.slug }}{% endif %}</td>
+        <td style="text-align:right;white-space:nowrap">
+          <a class="btn sm amber" href="{% url 'builder:page_editor' site.id p.id %}">✏️ Edit Design</a>
+          {% if p.slug != 'home' %}
+          <form method="post" action="{% url 'builder:page_delete' site.id p.id %}" style="display:inline"
+                onsubmit="return confirm('Delete page {{ p.title }}?')">
+            {% csrf_token %}<button class="btn sm danger">Delete</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </table></div>
+    <form method="post" action="{% url 'builder:page_create' site.id %}" style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap">
+      {% csrf_token %}
+      <input type="text" name="title" placeholder="New page name (e.g. Gallery)" required style="flex:1">
+      <button class="btn">➕ Add</button>
+    </form>
+  </div>
+
+  <!-- Collections -->
+  <div class="card">
+    <h2>🗂️ Your Content</h2>
+    <p class="hint" style="margin-bottom:14px">These sections were created automatically based on your website type. Anything you add here appears wherever you placed its block in your design.</p>
+    {% for c in collections %}
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--line);gap:10px;flex-wrap:wrap">
+      <div><strong>{{ c.icon }} {{ c.name }}</strong>
+        <span class="hint">· {{ c.items.count }} added</span></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <a class="btn sm" href="{% url 'builder:collection_items' site.id c.id %}">Open</a>
+        <a class="btn sm amber" href="{% url 'builder:item_new' site.id c.id %}">➕ {{ c.name_singular }}</a>
+      </div>
+    </div>
+    {% empty %}
+    <div class="empty">This website type has no collections.</div>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- Templates -->
+{% if site_templates %}
+<div class="card">
+  <h2>🖼️ Design Template</h2>
+  <p class="hint" style="margin-bottom:14px">Choose a ready-made starting design for your website type. ⚠️ Changing the template rewrites your default pages.</p>
+  <div class="grid c3">
+    {% for t in site_templates %}
+    <div style="border:1px solid {% if site.template_key == t.key %}var(--line-2){% else %}var(--line){% endif %};border-radius:12px;padding:16px;background:rgba(255,255,255,.02)">
+      <div style="font-size:28px;margin-bottom:6px">{{ t.icon|default:'🎨' }}</div>
+      <strong style="color:#fff">{{ t.name }}</strong>
+      <p class="hint" style="margin:6px 0 12px">{{ t.description|default:'' }}</p>
+      {% if site.template_key == t.key %}
+        <span class="pill on">Active</span>
+      {% else %}
+      <form method="post" action="{% url 'builder:change_template' site.id %}"
+            onsubmit="return confirm('Changing the template will rewrite the design of your default pages. Continue?')">
+        {% csrf_token %}
+        <input type="hidden" name="template_key" value="{{ t.key }}">
+        <button class="btn sm">Use This</button>
+      </form>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<!-- Settings -->
+<div class="card" id="settings">
+  <h2>⚙️ Website Details</h2>
+  <p class="hint">These details appear automatically wherever you placed [[site:...]] in your design — change them once here, they update everywhere.</p>
+  <form method="post" action="{% url 'builder:site_settings_save' site.id %}">
+    {% csrf_token %}
+    <div class="grid c2">
+      <div>
+        <label>Website Name</label>
+        <input type="text" name="site_name" value="{{ site.site_name }}">
+        <label>Tagline / Slogan</label>
+        <input type="text" name="tagline" value="{{ site.tagline }}" placeholder="e.g. Unforgettable safaris">
+        <label>Logo (upload an image then paste its URL here)</label>
+        <input type="text" name="logo_url" value="{{ site.logo_url }}" placeholder="https://ucarecdn.com/...">
+      </div>
+      <div>
+        <label>Phone</label>
+        <input type="text" name="contact_phone" value="{{ site.contact_phone }}" placeholder="+255 7XX XXX XXX">
+        <label>WhatsApp</label>
+        <input type="text" name="whatsapp_number" value="{{ site.whatsapp_number }}" placeholder="+2557XXXXXXXX">
+        <label>Email</label>
+        <input type="email" name="contact_email" value="{{ site.contact_email }}">
+        <label>Address</label>
+        <input type="text" name="contact_address" value="{{ site.contact_address }}">
+      </div>
+    </div>
+
+    <h2 style="margin-top:26px">🎨 Website Appearance</h2>
+    <div class="grid c2">
+      <div>
+        <label>Navbar Style / Layout</label>
+        <select name="nav_style">
+          {% for val, label in site.NAV_STYLES %}
+          <option value="{{ val }}" {% if site.nav_style == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+        <p class="hint">Glass = floating blurred navbar · Side = sidebar menu (dashboard style) · Top = classic · Centered = minimal centered.</p>
+      </div>
+      <div>
+        <label>Accent Color</label>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <input type="color" name="accent_color" value="{{ site.accent_color }}">
+          <label style="display:flex;align-items:center;gap:8px;margin:0;font-weight:500">
+            <input type="checkbox" name="dark_nav" {% if site.dark_nav %}checked{% endif %}> Dark navbar
+          </label>
+        </div>
+        <p class="hint">This color is used on your navbar, buttons and highlights.</p>
+      </div>
+    </div>
+    <button class="btn" style="margin-top:18px">💾 Save Details</button>
+  </form>
+</div>
+{% endblock %}

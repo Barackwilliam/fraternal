@@ -1,0 +1,99 @@
+{% extends 'builder/base_panel.html' %}
+{% block title %}{% if item %}Edit{% else %}Add{% endif %} {{ collection.name_singular }}{% endblock %}
+
+{% block sidenav %}
+<a href="{% url 'builder:site_dashboard' site.id %}">⬅ Dashboard</a>
+<a href="{% url 'builder:collection_items' site.id collection.id %}" class="active">{{ collection.icon }} {{ collection.name }}</a>
+{% endblock %}
+
+{% block content %}
+<div style="max-width:720px">
+<div class="topbar"><div>
+  <div class="crumb"><a href="{% url 'builder:collection_items' site.id collection.id %}">{{ collection.name }}</a> / {% if item %}{{ item.title }}{% else %}New{% endif %}</div>
+  <h1>{% if item %}✏️ Edit{% else %}➕ Add{% endif %} {{ collection.name_singular }}</h1>
+</div></div>
+
+<form method="post" class="card">
+  {% csrf_token %}
+  <label>Name / Title *</label>
+  <input type="text" name="title" required value="{{ item.title|default:'' }}"
+         placeholder="e.g. Serengeti Safari — 5 Days">
+
+  <label>Main Image</label>
+  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+    <input type="text" name="image_url" id="image_url" value="{{ item.image_url|default:'' }}"
+           placeholder="https://ucarecdn.com/..." style="flex:1;min-width:200px">
+    <button type="button" class="btn sm" onclick="document.getElementById('uc-ctx').initFlow()">📤 Upload Image</button>
+  </div>
+  <img id="img-preview" src="{% if item.image_url %}{{ item.image_url }}-/resize/400x/{% endif %}"
+       style="margin-top:10px;max-width:260px;border-radius:8px;{% if not item.image_url %}display:none{% endif %}" alt="">
+
+  {% for f in collection.fields %}
+    <label>{{ f.label }}{% if f.required %} *{% endif %}</label>
+    {% if f.type == 'textarea' %}
+      <textarea name="f_{{ f.key }}" {% if f.required %}required{% endif %}></textarea>
+    {% elif f.type == 'list' %}
+      <textarea name="f_{{ f.key }}" placeholder="Write one per line"></textarea>
+      <p class="hint">Each line = one item.</p>
+    {% elif f.type == 'number' or f.type == 'price' %}
+      <input type="number" step="any" name="f_{{ f.key }}" {% if f.required %}required{% endif %}>
+    {% elif f.type == 'date' %}
+      <input type="date" name="f_{{ f.key }}" {% if f.required %}required{% endif %}>
+    {% else %}
+      <input type="text" name="f_{{ f.key }}" {% if f.required %}required{% endif %}>
+    {% endif %}
+  {% endfor %}
+
+  <div style="display:flex;gap:16px 24px;margin-top:18px;flex-wrap:wrap">
+    <label style="display:flex;align-items:center;gap:8px;margin:0">
+      <input type="checkbox" name="is_visible" {% if not item or item.is_visible %}checked{% endif %}> Visible on website
+    </label>
+    <label style="display:flex;align-items:center;gap:8px;margin:0">
+      <input type="checkbox" name="is_featured" {% if item.is_featured %}checked{% endif %}> ⭐ Featured
+    </label>
+  </div>
+
+  <div style="display:flex;gap:10px;margin-top:24px;flex-wrap:wrap">
+    <button class="btn amber">💾 Save</button>
+    <a class="btn ghost" href="{% url 'builder:collection_items' site.id collection.id %}">Cancel</a>
+  </div>
+</form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ item.data|default:"{}"|json_script:"item-data" }}
+{{ collection.fields|json_script:"col-fields" }}
+<script type="module">
+  import * as UC from "https://cdn.jsdelivr.net/npm/@uploadcare/file-uploader@v1/web/file-uploader.min.js";
+  UC.defineComponents(UC);
+</script>
+<uc-config ctx-name="jt-item" pubkey="{{ uploadcare_public_key }}" img-only="true"
+           max-local-file-size-bytes="8388608" source-list="local, camera, url"></uc-config>
+<uc-file-uploader-regular ctx-name="jt-item" style="display:none"></uc-file-uploader-regular>
+<uc-upload-ctx-provider ctx-name="jt-item" id="uc-ctx"></uc-upload-ctx-provider>
+<script>
+// Jaza values za fields zilizopo (edit mode)
+const itemData = JSON.parse(document.getElementById('item-data').textContent);
+const colFields = JSON.parse(document.getElementById('col-fields').textContent);
+for (const f of colFields){
+  const el = document.querySelector(`[name="f_${f.key}"]`);
+  if (!el || !(f.key in itemData)) continue;
+  const v = itemData[f.key];
+  el.value = Array.isArray(v) ? v.join('\n') : (v ?? '');
+}
+// Upload ya picha
+document.getElementById('uc-ctx').addEventListener('file-upload-success', e => {
+  const url = e.detail.cdnUrl;
+  document.getElementById('image_url').value = url;
+  const img = document.getElementById('img-preview');
+  img.src = url + '-/resize/400x/';
+  img.style.display = 'block';
+  fetch("{% url 'builder:asset_save' site.id %}", {
+    method: 'POST',
+    headers: {'Content-Type':'application/json','X-CSRFToken':'{{ csrf_token }}'},
+    body: JSON.stringify({cdn_url: url, name: e.detail.name || ''}),
+  });
+});
+</script>
+{% endblock %}

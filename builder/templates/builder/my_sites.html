@@ -1,0 +1,26 @@
+{% extends 'builder/base_panel.html' %}
+{% block title %}My Websites{% endblock %}
+{% block content %}
+<div class="topbar">
+  <h1>My Websites</h1>
+  <a class="btn amber" href="{% url 'builder:create_site' %}">➕ New Website</a>
+</div>
+{% if sites %}
+<div class="grid c3">
+  {% for s in sites %}
+  <div class="card">
+    <h2>{{ s.site_name }}</h2>
+    <p class="hint">{{ s.subdomain }}.jamiitek.com · {{ s.website_type }}</p>
+    <p style="margin:10px 0">
+      {% if s.is_published %}<span class="pill on">● Live</span>
+      {% else %}<span class="pill off">○ Draft</span>{% endif %}
+    </p>
+    <a class="btn sm" href="{% url 'builder:site_dashboard' s.id %}">Open Panel</a>
+    <a class="btn sm ghost" href="{{ s.public_url }}" target="_blank">Visit ↗</a>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty">You don't have a website yet. <a href="{% url 'builder:create_site' %}">Create your first one</a>.</div>
+{% endif %}
+{% endblock %}

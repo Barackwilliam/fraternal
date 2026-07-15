@@ -9,7 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 WEBSITE_TYPES_DIR = BASE_DIR / 'apps' / 'website_types'
 
 # ── Security ──────────────────────────────────────────
-SECRET_KEY    = os.getenv('SECRET_KEY',    'django-insecure-@&r$)$xpb)f6pm=_73pupatv2#n-%0%d=(cky=kab5ww6&*tzs')
+SECRET_KEY    = 'django-insecure-@&r$)$xpb)f6pm=_73pupatv2#n-%0%d=(cky=kab5ww6&*tzs'
 DEBUG = True
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'jamiitek.com,www.jamiitek.com,jamiitek.onrender.com,127.0.0.1,localhost').split(',')
 
@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     'uploadcare',
     'cloudinary',
      'ussd',
+    'builder',
 ]
 
 MIDDLEWARE = [
@@ -39,6 +40,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
+    'builder.middleware.SubdomainMiddleware',
 ]
 
 ROOT_URLCONF = 'ebenezeri.urls'
@@ -158,8 +160,8 @@ CLOUDINARY_API_KEY    = os.getenv('CLOUDINARY_API_KEY',    '321181265585861')
 CLOUDINARY_API_SECRET = os.getenv('CLOUDINARY_API_SECRET', 'KA2L_qJUCyBBZFcyeQDGzH1kfUo')
 
 # ── Chatbot / WhatsApp ─────────────────────────────────
-GROQ_API_KEY = os.getenv('GROQ_API_KEY', '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')
-SITE_URL     = os.getenv('SITE_URL',     'https://jamiitek.com')
+GROQ_API_KEY = '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'
+SITE_URL     = 'https://jamiitek.com'
 
 WHATSAPP_MASTER_TOKEN         = os.getenv('WHATSAPP_MASTER_TOKEN',         'EAARTZCRXCM9sBRCw5ratThW8zsfNp3h8TdFqoKmh6crYm7a4OZBe0u1y5jZBHu3LkEARBFCZAZCVwF6NsqKWsi1n460VWl1IjOO1UsZC3hmjmGMfBkeHUG7ZA5ie1iVvZB9m0hQy8OLpmiMKn8JMgbhlJM7hFNwBHDvXmlC3uatpVADEZA0wLmWbzyUZBwtFTCdhHnj6je4y1gRFk5mdZARtgB5uuE7lQ7juhUAQSlaEt8m4SZBZAkQkmj6KclZAHoiKHFaKPZCfHptOy4J9ZCvmfErOFLCS')
 WHATSAPP_WEBHOOK_VERIFY_TOKEN = os.getenv('WHATSAPP_WEBHOOK_VERIFY_TOKEN', 'jamiitek_wh_2025')
@@ -171,4 +173,11 @@ CHATBOT_PAYMENT_INFO = {
     'account_number': os.getenv('NMB_ACCOUNT', '21410034200'),
     'account_name':   os.getenv('NMB_NAME',    'WILLIAM CHIPINDI'),
     'branch':         'Dar es Salaam',
+}
+
+# ── JamiiTek Website Builder ──
+BUILDER_BASE_DOMAIN = os.getenv('BUILDER_BASE_DOMAIN', 'jamiitek.com')
+BUILDER_PLATFORM_HOSTS = {
+    'jamiitek.com', 'www.jamiitek.com', 'jamiitek.onrender.com',
+    'localhost', '127.0.0.1', 'testserver',
 }

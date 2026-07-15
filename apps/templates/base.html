@@ -451,7 +451,7 @@
       <li><a href="{% url 'contact' %}" {% if 'contact' in request.path %}class="active"{% endif %}>Contact</a></li>
       <li><a href="{% url 'portal_login' %}" class="nav-portal"><i class="fas fa-shield-halved"></i> Portal</a></li>
     </ul>
-    <a href="{% url 'select_website' %}" class="nav-cta d-none d-lg-inline-flex">
+    <a href="{% url 'get_started' %}" class="nav-cta d-none d-lg-inline-flex">
       <i class="fas fa-rocket"></i><span>START PROJECT</span>
     </a>
     <button class="nav-burger" id="nav-burger" aria-label="Open menu">
@@ -467,7 +467,7 @@
   <a href="{% url 'About' %}">About</a>
   <a href="{% url 'contact' %}">Contact</a>
   <a href="{% url 'portal_login' %}">Client Portal</a>
-  <a href="{% url 'select_website' %}" class="mob-cta-btn">LAUNCH YOUR PROJECT →</a>
+  <a href="{% url 'get_started' %}" class="mob-cta-btn">LAUNCH YOUR Website →</a>
 </div>
 
 {% block content %}{% endblock %}
@@ -502,7 +502,7 @@
           <li><a href="{% url 'About' %}">About Us</a></li>
           <li><a href="{% url 'contact' %}">Contact</a></li>
           <li><a href="{% url 'portal_login' %}">Client Portal</a></li>
-          <li><a href="{% url 'select_website' %}">Start a Project</a></li>
+          <li><a href="{% url 'get_started' %}">Start a Project</a></li>
         </ul>
       </div>
       <div class="col-lg-4 col-md-6">

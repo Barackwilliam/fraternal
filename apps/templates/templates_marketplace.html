@@ -1078,4 +1078,23 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape') closeModal(
   document.querySelectorAll('.tpl-card').forEach(function(c){io.observe(c);});
 })();
 </script>
+
+<!-- ══ Other ways to get a website ══ -->
+<section style="max-width:1160px;margin:30px auto 60px;padding:0 20px">
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px">
+    <a href="{% url 'builder:signup' %}" style="display:flex;align-items:center;gap:16px;padding:22px 24px;border-radius:16px;text-decoration:none;
+       background:linear-gradient(135deg,rgba(37,211,102,.1),rgba(0,212,255,.06));border:1px solid rgba(37,211,102,.3)">
+      <span style="font-size:30px">🛠️</span>
+      <span><strong style="display:block;color:#fff;font-size:15.5px;margin-bottom:3px">Prefer to build it yourself?</strong>
+      <span style="color:rgba(255,255,255,.55);font-size:13px">Use the free JamiiTek Builder — drag & drop, AI assistant, live in minutes →</span></span>
+    </a>
+    <a href="/proposals/" style="display:flex;align-items:center;gap:16px;padding:22px 24px;border-radius:16px;text-decoration:none;
+       background:linear-gradient(135deg,rgba(108,99,255,.12),rgba(0,212,255,.05));border:1px solid rgba(108,99,255,.35)">
+      <span style="font-size:30px">📋</span>
+      <span><strong style="display:block;color:#fff;font-size:15.5px;margin-bottom:3px">Want something fully custom?</strong>
+      <span style="color:rgba(255,255,255,.55);font-size:13px">Request a proposal — we design & build everything for you →</span></span>
+    </a>
+  </div>
+</section>
+
 {% endblock %}

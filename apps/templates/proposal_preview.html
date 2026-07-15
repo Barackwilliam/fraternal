@@ -96,6 +96,12 @@
                                     <h5 class="text-primary fw-bold mb-3">📁 Project Details</h5>
                                     <ul class="list-unstyled mb-0">
                                         <li><strong>Website Type:</strong> {{ proposal.website_type.name }}</li>
+                                        {% if proposal.requirements.reference_template %}
+                                        <li><strong>Reference Design:</strong>
+                                          <a href="{{ proposal.requirements.reference_template.preview_url }}" target="_blank">
+                                            {{ proposal.requirements.reference_template.name }}</a>
+                                          ({{ proposal.requirements.reference_template.category }})</li>
+                                        {% endif %}
                                         <li><strong>Created:</strong> {{ proposal.created_at|date:"F j, Y" }}</li>
                                     </ul>
                                 </div>
@@ -115,7 +121,7 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {% for key, value in proposal.requirements.items %}
+                                        {% for key, value in proposal.requirements.items %}{% if key != 'reference_template' %}
                                             {% if key|slice:":7" != "client_" %}
                                             <tr>
                                                 <td><strong>{{ key|title }}</strong></td>
@@ -132,6 +138,7 @@
                                                 </td>
                                             </tr>
                                             {% endif %}
+                                        {% endif %}
                                         {% endfor %}
                                     </tbody>
                                 </table>

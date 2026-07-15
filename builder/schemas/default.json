@@ -1,0 +1,44 @@
+{
+ "label": "General Website",
+ "pages": [
+  {
+   "slug": "home",
+   "title": "Home",
+   "order": 0,
+   "starter_html": "<section style=\"min-height:82vh;display:flex;align-items:center;justify-content:center;text-align:center;background:linear-gradient(155deg,#12271e,#1c3a2b);color:#fff;padding:80px 22px;position:relative;overflow:hidden\"><div style=\"position:relative;z-index:1;max-width:760px\"><p style=\"letter-spacing:5px;text-transform:uppercase;color:var(--accent);font-size:13px;font-weight:800;margin-bottom:14px\">Welcome</p><h1 style=\"font-size:clamp(36px,6vw,62px);line-height:1.08;margin:0 0 18px;letter-spacing:-.02em\">[[site:name]]</h1><p style=\"font-size:clamp(15px,2vw,19px);opacity:.88;margin:0 auto 32px;max-width:580px\">[[site:tagline]]</p><a href=\"/p/contact/\" style=\"display:inline-block;background:var(--accent);color:#1c1508;padding:16px 40px;border-radius:14px;font-weight:800;text-decoration:none;font-size:16px;box-shadow:0 10px 30px rgba(0,0,0,.3)\">Contact Us</a></div><div style=\"position:absolute;inset:0;background:radial-gradient(700px 340px at 80% 0%,color-mix(in srgb,var(--accent) 28%,transparent),transparent 65%)\"></div></section><section style=\"padding:46px 20px;background:rgba(255,255,255,.6);backdrop-filter:blur(10px)\"><div style=\"max-width:960px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px\"><div style=\"text-align:center;padding:10px\"><div style=\"font-size:38px;font-weight:900;color:var(--accent);filter:brightness(.8) saturate(1.3)\">100%</div><div style=\"font-size:13px;color:#6b7268;font-weight:700;letter-spacing:1px;text-transform:uppercase\">Quality</div></div><div style=\"text-align:center;padding:10px\"><div style=\"font-size:38px;font-weight:900;color:var(--accent);filter:brightness(.8) saturate(1.3)\">24/7</div><div style=\"font-size:13px;color:#6b7268;font-weight:700;letter-spacing:1px;text-transform:uppercase\">Available</div></div><div style=\"text-align:center;padding:10px\"><div style=\"font-size:38px;font-weight:900;color:var(--accent);filter:brightness(.8) saturate(1.3)\">★★★★★</div><div style=\"font-size:13px;color:#6b7268;font-weight:700;letter-spacing:1px;text-transform:uppercase\">Service</div></div><div style=\"text-align:center;padding:10px\"><div style=\"font-size:38px;font-weight:900;color:var(--accent);filter:brightness(.8) saturate(1.3)\">Welcome</div><div style=\"font-size:13px;color:#6b7268;font-weight:700;letter-spacing:1px;text-transform:uppercase\">!</div></div></div></section><section style=\"padding:76px 20px;\"><div style=\"max-width:1100px;margin:0 auto\"><h2 style=\"text-align:center;font-size:clamp(28px,4vw,40px);margin-bottom:8px;letter-spacing:-.01em\">Our Services</h2><p style=\"text-align:center;color:#6b7268;margin:0 auto 10px;max-width:520px\">What we offer you.</p>[[collection:services]]</div></section><section style=\"padding:76px 20px\"><div style=\"max-width:1080px;margin:0 auto\"><h2 style=\"text-align:center;font-size:clamp(28px,4vw,40px);margin-bottom:38px;letter-spacing:-.01em\">Kwa Nini Sisi</h2><div style=\"display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px\"><div class=\"jt-reveal\" data-d=\"1\" style=\"background:rgba(255,255,255,.7);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.6);border-radius:18px;padding:30px 26px;box-shadow:0 4px 20px rgba(10,25,18,.08)\"><div style=\"font-size:36px;margin-bottom:12px\">✨</div><h3 style=\"margin:0 0 8px;font-size:19px\">Service Bora</h3><p style=\"margin:0;color:#5a635a;font-size:14.5px\">We put our customers first in everything.</p></div><div class=\"jt-reveal\" data-d=\"2\" style=\"background:rgba(255,255,255,.7);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.6);border-radius:18px;padding:30px 26px;box-shadow:0 4px 20px rgba(10,25,18,.08)\"><div style=\"font-size:36px;margin-bottom:12px\">⚡</div><h3 style=\"margin:0 0 8px;font-size:19px\">Speed</h3><p style=\"margin:0;color:#5a635a;font-size:14.5px\">Timely responses and service.</p></div><div class=\"jt-reveal\" data-d=\"3\" style=\"background:rgba(255,255,255,.7);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.6);border-radius:18px;padding:30px 26px;box-shadow:0 4px 20px rgba(10,25,18,.08)\"><div style=\"font-size:36px;margin-bottom:12px\">🤝</div><h3 style=\"margin:0 0 8px;font-size:19px\">Reliability</h3><p style=\"margin:0;color:#5a635a;font-size:14.5px\">We deliver what we promise.</p></div></div></div></section><section style=\"padding:70px 22px\"><div style=\"max-width:860px;margin:0 auto;text-align:center;background:linear-gradient(140deg,#12271e,#1c3a2b);color:#fff;border-radius:26px;padding:56px 34px;position:relative;overflow:hidden\"><div style=\"position:absolute;inset:0;background:radial-gradient(420px 200px at 15% 0%,color-mix(in srgb,var(--accent) 30%,transparent),transparent 70%)\"></div><div style=\"position:relative;z-index:1\"><h2 style=\"font-size:clamp(26px,4vw,38px);margin:0 0 12px\">Let's Talk</h2><p style=\"opacity:.85;margin:0 0 26px\">Message us today — we reply fast.</p><a href=\"/p/contact/\" style=\"display:inline-block;background:var(--accent);color:#1c1508;padding:15px 38px;border-radius:13px;font-weight:800;text-decoration:none\">Contact Us →</a></div></div></section>"
+  },
+  {
+   "slug": "about",
+   "title": "About",
+   "order": 1,
+   "starter_html": "<section style=\"padding:60px 20px;max-width:900px;margin:0 auto;\"><h1>About Us</h1><p>Tell your business story here.</p></section>"
+  },
+  {
+   "slug": "contact",
+   "title": "Contact",
+   "order": 2,
+   "starter_html": "<section style=\"padding:60px 20px;max-width:700px;margin:0 auto;text-align:center;\"><h1>Contact Us</h1><p style=\"font-size:18px;\">Phone: [[site:phone]]<br>Email: [[site:email]]<br>Address: [[site:address]]</p></section>"
+  }
+ ],
+ "collections": [
+  {
+   "slug": "services",
+   "name": "Services",
+   "singular": "Service",
+   "icon": "🛠️",
+   "fields": [
+    {
+     "key": "description",
+     "label": "Description",
+     "type": "textarea",
+     "required": true
+    },
+    {
+     "key": "price",
+     "label": "Price (optional)",
+     "type": "price"
+    }
+   ]
+  }
+ ]
+}

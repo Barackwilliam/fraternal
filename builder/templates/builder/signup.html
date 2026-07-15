@@ -1,0 +1,39 @@
+{% extends 'builder/base_panel.html' %}
+{% block title %}Start Your Website — JamiiTek{% endblock %}
+{% block content %}
+<div style="max-width:560px;margin:0 auto">
+  <div class="topbar"><div>
+    <h1>Start Your Website 🚀</h1>
+    <p class="hint" style="font-size:14px">One step only — account + website. Free to start.</p>
+  </div></div>
+  {% if error %}<div class="msg error">{{ error }}</div>{% endif %}
+  {% if form.errors %}<div class="msg error">{{ form.errors }}</div>{% endif %}
+  <form method="post" class="card">
+    {% csrf_token %}
+    <h2>1 · Your Account</h2>
+    <label>Username</label>{{ form.username }}
+    <label>Password</label>{{ form.password1 }}
+    <label>Confirm Password</label>{{ form.password2 }}
+
+    <h2 style="margin-top:26px">2 · Your Website</h2>
+    <label>Business / Website Name</label>
+    <input type="text" name="site_name" required placeholder="mfano: Kili Adventures">
+    <label>Subdomain (your website address)</label>
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <input type="text" name="subdomain" required placeholder="kiliadventures"
+             pattern="[a-z0-9]([a-z0-9-]{1,48}[a-z0-9])?" style="flex:1;min-width:160px">
+      <span style="font-weight:700;color:var(--muted);white-space:nowrap">.jamiitek.com</span>
+    </div>
+    <p class="hint">Lowercase letters, numbers and "-" only.</p>
+    <label>Website Type</label>
+    <select name="website_type">
+      {% for t in website_types %}<option value="{{ t.key }}">{{ t.label }}</option>{% endfor %}
+    </select>
+    <p class="hint">Pages and content sections will be created automatically based on the type.</p>
+    <button class="btn amber" style="margin-top:22px;width:100%;justify-content:center">Create My Website</button>
+    <p class="hint" style="text-align:center;margin-top:16px">Prefer we do it for you?
+      <a href="/proposals/" style="color:var(--violet, #6c63ff)">Order a custom website →</a> ·
+      <a href="/templates/" style="color:var(--cyan)">Buy a ready design →</a></p>
+  </form>
+</div>
+{% endblock %}

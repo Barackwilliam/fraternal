@@ -123,8 +123,15 @@ from .utils.pdf_generator import generate_proposal_pdf
 
 def select_website_type(request):
     website_types = WebsiteType.objects.all()
+    # "Order This" kutoka /templates/preview/<pk>/ inabeba ?template=<pk>
+    ref_template = None
+    tpl_id = request.GET.get('template')
+    if tpl_id:
+        ref_template = WebsiteTemplate.objects.filter(
+            pk=tpl_id, is_active=True).first()
     return render(request, 'select_website.html', {
         'website_types': website_types,
+        'ref_template': ref_template,
         'title': 'Select Website Type'
     })
 
@@ -145,11 +152,23 @@ def dynamic_form(request, website_type_id):
                 }
             )
             
-            # Create proposal
+            # Create proposal — na reference template kama ilichaguliwa
+            requirements = dict(form.cleaned_data)
+            tpl_id = request.POST.get('reference_template')
+            if tpl_id:
+                ref = WebsiteTemplate.objects.filter(
+                    pk=tpl_id, is_active=True).first()
+                if ref:
+                    requirements['reference_template'] = {
+                        'id': ref.pk,
+                        'name': ref.name,
+                        'category': ref.get_category_display(),
+                        'preview_url': f'/templates/preview/{ref.pk}/',
+                    }
             proposal = ProjectProposal.objects.create(
                 client=client,
                 website_type=website_type,
-                requirements=form.cleaned_data
+                requirements=requirements
             )
             
             return redirect('proposal_preview', proposal_id=proposal.id)
@@ -175,11 +194,18 @@ def dynamic_form(request, website_type_id):
         else:
             project_fields.append(field)
     
+    ref_template = None
+    tpl_id = request.GET.get('template') or request.POST.get('reference_template')
+    if tpl_id:
+        ref_template = WebsiteTemplate.objects.filter(
+            pk=tpl_id, is_active=True).first()
+
     context = {
         'form': form,
         'website_type': website_type,
         'client_fields': client_fields,
         'project_fields': project_fields,
+        'ref_template': ref_template,
         'title': f'{website_type.name} Requirements'
     }
     

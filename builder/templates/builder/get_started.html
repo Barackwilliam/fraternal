@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#040918">
+<title>Get Your Website — JamiiTek</title>
+<meta name="description" content="Three ways to get your website with JamiiTek: build it yourself for free, buy a ready-made design, or order a fully custom website.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#040918;--panel:#0a1424;--panel-2:#0e1a30;--line:rgba(120,180,255,.1);
+  --ink:#e8f0f6;--muted:#7d8ca0;--dim:#4a5870;
+  --green:#25d366;--green-2:#00ff88;--cyan:#00d4ff;--violet:#6c63ff;
+  --ff-d:'Space Grotesk',sans-serif;--ff-m:'JetBrains Mono',monospace;
+  --ease:cubic-bezier(.22,.9,.3,1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+img{max-width:100%;height:auto}
+body{font-family:'Inter',-apple-system,sans-serif;color:var(--ink);min-height:100vh;
+  background:
+    radial-gradient(900px 480px at 80% -10%,rgba(37,211,102,.08),transparent 60%),
+    radial-gradient(800px 560px at -10% 110%,rgba(108,99,255,.08),transparent 55%),
+    var(--bg)}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;opacity:.5;
+  background:linear-gradient(rgba(120,180,255,.03) 1px,transparent 1px),
+             linear-gradient(90deg,rgba(120,180,255,.03) 1px,transparent 1px);
+  background-size:44px 44px;
+  mask-image:radial-gradient(ellipse 90% 70% at 50% 0%,#000 30%,transparent 100%);
+  -webkit-mask-image:radial-gradient(ellipse 90% 70% at 50% 0%,#000 30%,transparent 100%)}
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:18px clamp(16px,4vw,44px);
+  border-bottom:1px solid var(--line);position:relative;z-index:2}
+.brand{font-family:var(--ff-d);font-size:21px;font-weight:700;color:#fff;text-decoration:none}
+.brand span{color:var(--green)}
+.top a.home{color:var(--muted);text-decoration:none;font-size:14px;padding:9px 16px;border:1px solid var(--line);
+  border-radius:10px;transition:all .2s}
+.top a.home:hover{color:var(--cyan);border-color:var(--cyan)}
+
+.wrap{max-width:1160px;margin:0 auto;padding:clamp(40px,7vh,80px) 20px 80px;position:relative;z-index:2}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--ff-m);font-size:10.5px;
+  letter-spacing:2px;text-transform:uppercase;color:var(--cyan);background:rgba(0,212,255,.08);
+  border:1px solid rgba(0,212,255,.28);border-radius:100px;padding:7px 16px;margin-bottom:18px}
+.eyebrow i{width:6px;height:6px;border-radius:50%;background:var(--cyan);
+  animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(0,212,255,.5)}55%{box-shadow:0 0 0 7px rgba(0,212,255,0)}}
+h1{font-family:var(--ff-d);font-size:clamp(30px,5.4vw,52px);line-height:1.1;letter-spacing:-.02em;color:#fff;
+  max-width:760px}
+h1 em{font-style:normal;background:linear-gradient(90deg,var(--green),var(--cyan));
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.sub{color:var(--muted);font-size:clamp(15px,2vw,17px);margin:16px 0 46px;max-width:620px;line-height:1.7}
+
+.paths{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:22px}
+.path{position:relative;display:flex;flex-direction:column;background:linear-gradient(165deg,var(--panel),var(--panel-2));
+  border:1px solid var(--line);border-radius:20px;padding:30px 28px;text-decoration:none;color:var(--ink);
+  transition:transform .28s var(--ease),box-shadow .3s,border-color .25s;overflow:hidden;
+  animation:up .6s var(--ease) both}
+.path:nth-child(2){animation-delay:.1s}.path:nth-child(3){animation-delay:.2s}
+@keyframes up{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+.path::after{content:'';position:absolute;top:0;left:0;right:0;height:2.5px;opacity:.85}
+.path.diy::after{background:linear-gradient(90deg,var(--green),var(--green-2))}
+.path.buy::after{background:linear-gradient(90deg,var(--cyan),#7db9ff)}
+.path.order::after{background:linear-gradient(90deg,var(--violet),#a78bfa)}
+.path:hover{transform:translateY(-7px);box-shadow:0 22px 54px rgba(0,0,0,.45)}
+.path.diy:hover{border-color:rgba(37,211,102,.5)}
+.path.buy:hover{border-color:rgba(0,212,255,.5)}
+.path.order:hover{border-color:rgba(108,99,255,.5)}
+.p-ico{width:58px;height:58px;border-radius:16px;display:flex;align-items:center;justify-content:center;
+  font-size:27px;margin-bottom:18px;border:1px solid var(--line)}
+.diy .p-ico{background:rgba(37,211,102,.1)}
+.buy .p-ico{background:rgba(0,212,255,.1)}
+.order .p-ico{background:rgba(108,99,255,.1)}
+.p-tag{position:absolute;top:22px;right:22px;font-family:var(--ff-m);font-size:9.5px;font-weight:700;
+  letter-spacing:1.5px;text-transform:uppercase;padding:5px 12px;border-radius:20px}
+.diy .p-tag{background:rgba(37,211,102,.12);color:var(--green-2);border:1px solid rgba(37,211,102,.3)}
+.buy .p-tag{background:rgba(0,212,255,.1);color:var(--cyan);border:1px solid rgba(0,212,255,.3)}
+.order .p-tag{background:rgba(108,99,255,.12);color:#b9b4ff;border:1px solid rgba(108,99,255,.3)}
+.path h2{font-family:var(--ff-d);font-size:21px;color:#fff;margin-bottom:9px}
+.path p{font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:18px}
+.p-feats{list-style:none;margin-bottom:24px;flex:1}
+.p-feats li{font-size:13.5px;color:var(--ink);padding:6px 0;display:flex;gap:9px;align-items:flex-start}
+.p-feats li::before{content:'✓';font-weight:900;flex-shrink:0}
+.diy .p-feats li::before{color:var(--green)}
+.buy .p-feats li::before{color:var(--cyan)}
+.order .p-feats li::before{color:var(--violet)}
+.p-cta{display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;border-radius:12px;
+  font-weight:700;font-size:14.5px;transition:all .2s var(--ease)}
+.diy .p-cta{background:linear-gradient(135deg,var(--green),#12b767);color:#031208}
+.buy .p-cta{background:linear-gradient(135deg,var(--cyan),#0891c9);color:#04121c}
+.order .p-cta{background:linear-gradient(135deg,var(--violet),#5348e8);color:#fff}
+.path:hover .p-cta{transform:translateY(-2px);box-shadow:0 10px 26px rgba(0,0,0,.4)}
+
+.help{margin-top:52px;text-align:center;color:var(--dim);font-size:14px}
+.help a{color:var(--cyan);text-decoration:none}
+.help a:hover{text-decoration:underline}
+@media(max-width:640px){
+  .wrap{padding-top:34px}
+  .p-tag{position:static;display:inline-block;margin-bottom:12px;width:fit-content}
+}
+@media(max-width:400px){
+  .top a.home{padding:7px 12px;font-size:13px}
+  .path{padding:24px 20px}
+  .p-ico{width:48px;height:48px;font-size:22px;margin-bottom:14px}
+  .path h2{font-size:19px}
+  .p-cta{font-size:13.5px;min-height:44px}
+}
+</style>
+</head>
+<body>
+<div class="top">
+  <a class="brand" href="/">Jamii<span>Tek</span></a>
+  <a class="home" href="/">← Back to Home</a>
+</div>
+
+<div class="wrap">
+  <span class="eyebrow"><i></i>GET YOUR WEBSITE</span>
+  <h1>Three ways to get online.<br><em>Pick what suits you.</em></h1>
+  <p class="sub">Whether you want full control, a ready-made professional design, or a team that builds everything for you — JamiiTek has a path for you.</p>
+
+  <div class="paths">
+    <!-- 1. Build it yourself -->
+    <a class="path diy" href="{% url 'builder:signup' %}">
+      <span class="p-tag">FREE · MOST POPULAR</span>
+      <span class="p-ico">🛠️</span>
+      <h2>Build It Yourself</h2>
+      <p>Use the JamiiTek Builder — no coding needed. Pick your website type and the structure creates itself.</p>
+      <ul class="p-feats">
+        <li>Drag & drop editor + AI content assistant</li>
+        <li>Free subdomain: yourname.jamiitek.com</li>
+        <li>Tourism, shop, restaurant, events & more</li>
+        <li>Live in as little as 10 minutes</li>
+      </ul>
+      <span class="p-cta">🚀 Start Building — Free</span>
+    </a>
+
+    <!-- 2. Buy ready-made -->
+    <a class="path buy" href="/templates/">
+      <span class="p-tag">READY-MADE</span>
+      <span class="p-ico">🛒</span>
+      <h2>Buy a Ready Website</h2>
+      <p>Browse our library of professionally designed websites. Preview any of them live, pick one, and we set it up with your brand.</p>
+      <ul class="p-feats">
+        <li>Professional designs for every industry</li>
+        <li>Live preview on mobile, tablet & desktop</li>
+        <li>Delivered fast with your content & branding</li>
+        <li>Cheaper than a fully custom build</li>
+      </ul>
+      <span class="p-cta">🛒 Browse Templates</span>
+    </a>
+
+    <!-- 3. Order custom -->
+    <a class="path order" href="/proposals/">
+      <span class="p-tag">CUSTOM · FULL SERVICE</span>
+      <span class="p-ico">📋</span>
+      <h2>Order a Custom Website</h2>
+      <p>Tell us exactly what you need. You'll get an instant proposal with pricing, and our team builds everything for you.</p>
+      <ul class="p-feats">
+        <li>Answer a short questionnaire — get a quote instantly</li>
+        <li>Unique design built around your business</li>
+        <li>Advanced features, integrations & systems</li>
+        <li>Full support from the JamiiTek team</li>
+      </ul>
+      <span class="p-cta">📋 Request a Proposal</span>
+    </a>
+  </div>
+
+  <p class="help">Not sure which to choose? <a href="https://wa.me/{{ whatsapp|default:'255000000000' }}?text=Hello%20JamiiTek,%20I%20need%20help%20choosing%20how%20to%20get%20my%20website" rel="noopener">Chat with us on WhatsApp</a> and we'll advise you for free.</p>
+</div>
+</body>
+</html>

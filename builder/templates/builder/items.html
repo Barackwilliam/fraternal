@@ -1,0 +1,60 @@
+{% extends 'builder/base_panel.html' %}
+{% block title %}{{ collection.name }} — {{ site.site_name }}{% endblock %}
+
+{% block mobnav %}
+<a href="{% url 'builder:site_dashboard' site.id %}"><span class="ic">📊</span>Dash</a>
+{% for c in site.collections.all %}
+<a href="{% url 'builder:collection_items' site.id c.id %}" {% if c.id == collection.id %}class="active"{% endif %}><span class="ic">{{ c.icon }}</span>{{ c.name_singular }}</a>
+{% endfor %}
+{% endblock %}
+
+{% block sidenav %}
+<a href="{% url 'builder:my_sites' %}">⬅ My Websites</a>
+<a href="{% url 'builder:site_dashboard' site.id %}">📊 Dashboard</a>
+{% for c in site.collections.all %}
+<a href="{% url 'builder:collection_items' site.id c.id %}"
+   {% if c.id == collection.id %}class="active"{% endif %}>{{ c.icon }} {{ c.name }}</a>
+{% endfor %}
+{% endblock %}
+
+{% block content %}
+<div class="topbar">
+  <div>
+    <div class="crumb"><a href="{% url 'builder:site_dashboard' site.id %}">{{ site.site_name }}</a> / {{ collection.name }}</div>
+    <h1>{{ collection.icon }} {{ collection.name }}</h1>
+  </div>
+  <a class="btn amber" href="{% url 'builder:item_new' site.id collection.id %}">➕ Add {{ collection.name_singular }}</a>
+</div>
+
+{% if items %}
+<div class="card">
+  <div class="table-wrap"><table>
+    <tr><th>Image</th><th>Name</th><th>Status</th><th></th></tr>
+    {% for item in items %}
+    <tr>
+      <td>{% if item.image_url %}
+        <img src="{{ item.image_url }}-/resize/100x/" style="width:56px;height:42px;object-fit:cover;border-radius:6px" alt="">
+        {% else %}<span class="hint">—</span>{% endif %}</td>
+      <td><strong>{{ item.title }}</strong>
+        {% if item.is_featured %}<span class="pill on">⭐</span>{% endif %}</td>
+      <td>{% if item.is_visible %}<span class="pill on">Visible</span>
+        {% else %}<span class="pill off">Hidden</span>{% endif %}</td>
+      <td style="text-align:right;white-space:nowrap">
+        <a class="btn sm" href="{% url 'builder:item_edit' site.id collection.id item.id %}">✏️ Edit</a>
+        <form method="post" style="display:inline"
+              action="{% url 'builder:item_delete' site.id collection.id item.id %}"
+              onsubmit="return confirm('Delete {{ item.title }}?')">
+          {% csrf_token %}<button class="btn sm danger">Delete</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </table></div>
+</div>
+{% else %}
+<div class="empty">
+  No {{ collection.name }} yet.<br><br>
+  <a class="btn amber" href="{% url 'builder:item_new' site.id collection.id %}">➕ Add Your First One</a>
+</div>
+{% endif %}
+{% endblock %}

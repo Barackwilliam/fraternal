@@ -12,10 +12,13 @@ from apps.chatbot.manage_views import (
 from apps.seo.sitemaps import sitemaps
 from apps.seo.views import robots_txt
 from apps.seo.manifest import web_manifest
+from builder import views as builder_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('apps.urls')),
+    path('builder/', include('builder.urls')),
+    path('get-started/', builder_views.get_started, name='get_started'),
     path('chatbot/', include('apps.chatbot.urls')),
 
     # ── SEO ──────────────────────────────────────────────
