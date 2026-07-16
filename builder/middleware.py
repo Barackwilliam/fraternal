@@ -26,14 +26,47 @@ class SubdomainMiddleware:
         if host in PLATFORM_HOSTS:
             return self.get_response(request)
 
+        # ── Custom domain ya premium (mfano www.dukalangu.co.tz) ──
+        from .models import ClientWebsite
+        custom = (
+            ClientWebsite.objects
+            .filter(custom_domain=host, is_premium=True)
+            .select_related('owner')
+            .first()
+        )
+        if custom is None:
+            # Fallback pande zote: aliyeingia na www wakati domain imehifadhiwa
+            # bila www — au kinyume chake
+            alt = host[4:] if host.startswith('www.') else f'www.{host}'
+            custom = (
+                ClientWebsite.objects
+                .filter(custom_domain=alt, is_premium=True)
+                .select_related('owner')
+                .first()
+            )
+        if custom is not None:
+            if custom.is_suspended:
+                return render(request, 'builder/public/site_suspended.html',
+                              {'site': custom}, status=403)
+            request.client_site = custom
+            request.subdomain = custom.subdomain
+            request.urlconf = 'builder.public_urls'
+            return self.get_response(request)
+
         subdomain = None
         if host.endswith('.' + BASE_DOMAIN):
             subdomain = host[: -(len(BASE_DOMAIN) + 1)]
-        elif host.endswith('.localhost'):          # kwa testing: duka.localhost:8000
-            subdomain = host[: -len('.localhost')]
+        elif host.endswith('.localhost') or host == 'localhost':
+            if host != 'localhost':                # duka.localhost:8000
+                subdomain = host[: -len('.localhost')]
+        else:
+            # Host ngeni kabisa (si platform, si subdomain yetu, si custom domain
+            # iliyosajiliwa) — USIONYESHE platform juu yake. Hii inaruhusu
+            # ALLOWED_HOSTS='*' kwa usalama: middleware ndiyo whitelist.
+            return render(request, 'builder/public/site_not_found.html',
+                          {'subdomain': host}, status=404)
 
         if subdomain and '.' not in subdomain and subdomain != 'www':
-            from .models import ClientWebsite
             site = (
                 ClientWebsite.objects
                 .filter(subdomain=subdomain)

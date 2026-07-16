@@ -97,3 +97,54 @@ zibaki env variables tu.
 - **Editor mpya (dark tech, cyan/violet)**: GrapesJS panels zote zime-theme, device switcher (Desktop/Tablet/Simu), na **guided tour ya hatua 5** inayojianzisha kwa mgeni wa kwanza (🎓 button inairudisha).
 - **Code viewer ya kisasa (</> button)**: window ya macOS dots, dark editor, syntax highlighting, JetBrains Mono.
 - **Homepage ya jamiitek.com**: sliding ads strip (matangazo 5 yanayojibadilisha + dots) na CTA button "🚀 Unda Website Yako" inayoenda `/builder/signup/` moja kwa moja.
+
+
+## Toleo la 5 (Full Release — kila kitu)
+
+### 📥 Booking / Inquiry System
+- Kila item page (package, product, dish...) ina **booking form** built-in — jina, simu, email, tarehe, idadi ya watu, ujumbe.
+- Block mpya kwenye editor: **"📥 Inquiry / Booking Form"** — mteja anaiweka page yoyote (shortcode `[[form:inquiry]]`).
+- Submissions zote zinaenda **Dashboard → 📥 Inquiries**: status flow (New → Contacted → Closed), button ya "Reply on WhatsApp" yenye ujumbe tayari, na filter tabs.
+- Kinga: honeypot ya bots + rate limit ya inquiries 30/saa kwa site.
+
+### 🏫 Schemas mpya 3
+- **School & Education** (programs, news/events, staff, admissions form)
+- **Real Estate** (properties zenye bedrooms/bathrooms/location/features)
+- **NGO & Charity** (projects, events, volunteer form)
+
+### 🌐 Custom Domains (Premium)
+- Field mpya: `is_premium` + `custom_domain` kwenye ClientWebsite (admin ana-mark premium kutoka Django admin).
+- Mteja premium anaweka domain yake Dashboard → Website Appearance → Custom Domain.
+- Middleware ina-route custom domain (na/bila www) kwenda site yake.
+- **Hatua za admin (wewe)** kwa kila custom domain: (1) mteja aweke CNAME → jamiitek.onrender.com, (2) ongeza domain yake Render → Custom Domains (SSL automatic), (3) ongeza domain kwenye `ALLOWED_HOSTS` env var Render (comma-separated).
+
+### ⚡ Redis Cache (production)
+- Weka `REDIS_URL` kwenye Render env (Render ina Redis add-on, au tumia Upstash free tier) — mfumo unaanza kutumia Redis automatic. Bila hiyo, LocMem inaendelea (sawa kwa dev).
+
+### Migration
+`python manage.py migrate` — inaleta 0004 (custom_domain, is_premium, SiteInquiry).
+
+
+## Toleo la 5.1 — Auto Custom Domains (bila Render dashboard)
+
+Sasa custom domain ya mteja premium inasajiliwa Render **automatic** wakati
+anapoihifadhi kwenye dashboard yake. Hatua za mkono zimebaki MOJA tu
+(CNAME ya mteja kwa registrar wake).
+
+### Setup ya mara moja (wewe, Render → Environment):
+| Key | Value |
+|---|---|
+| `RENDER_API_KEY` | Render → Account Settings → API Keys → Create |
+| `RENDER_SERVICE_ID` | ID ya service (srv-...) — ipo kwenye URL ya dashboard |
+| `ALLOWED_HOSTS` | `*` — sasa ni SALAMA: middleware ndiyo whitelist halisi; host yoyote isiyosajiliwa inapata 404, si platform |
+
+### Flow ya mteja premium:
+1. Dashboard → Website Appearance → Custom Domain → anaandika domain → Save
+2. Mfumo: unaisajili Render kupitia API (SSL automatic), una-remove ya zamani
+   kama alibadilisha, na una-run **DNS check** — anaambiwa papo hapo kama
+   CNAME yake tayari inaelekea kwetu au bado
+3. Mteja anaweka CNAME → jamiitek.onrender.com kwa registrar — DAKIKA chache
+   baadaye domain iko live na SSL
+
+Bila API keys, kila kitu kingine kinaendelea (routing, database) — unapata
+message ya kuongeza domain kwa mkono.

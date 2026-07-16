@@ -242,10 +242,15 @@ def generate_proposal_pdf(proposal):
             except (ValueError, TypeError):
                 continue
 
+    # Reference design (kama proposal ilianzia /templates/preview/) — itolewe
+    # kwenye requirements loop na ionekane kama section yake kwenye PDF
+    ref_template = requirements.pop('reference_template', None)
+
     context = {
         'proposal': proposal,
         'requirements': requirements,
-        'total_cost': total_cost
+        'total_cost': total_cost,
+        'ref_template': ref_template,
     }
 
     html = render_to_string(template_path, context)

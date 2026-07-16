@@ -15,7 +15,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_POST
 
 from .models import (
-    ClientWebsite, SitePage, SiteCollection, SiteItem, SiteAsset,
+    ClientWebsite, SitePage, SiteCollection, SiteItem, SiteAsset, SiteInquiry,
     available_website_types, validate_subdomain,
 )
 from .site_templates import all_templates, apply_template
@@ -156,6 +156,7 @@ def site_dashboard(request, site_id):
         'onb_done': done_count,
         'onb_total': len(steps),
         'onb_pct': int(done_count / len(steps) * 100),
+        'new_inquiries': site.inquiries.filter(status='new').count(),
     })
 
 
@@ -178,9 +179,38 @@ def site_settings_save(request, site_id):
         if field in request.POST:
             setattr(site, field, request.POST[field].strip())
     site.dark_nav = request.POST.get('dark_nav') == 'on'
+
+    domain_changed = False
+    old_domain = site.custom_domain
+    if site.is_premium and 'custom_domain' in request.POST:
+        new_domain = (request.POST['custom_domain'].strip().lower()
+                      .replace('https://', '').replace('http://', '')
+                      .rstrip('/')) or None
+        if new_domain != old_domain:
+            site.custom_domain = new_domain
+            domain_changed = True
+
     site.save()
     site.bump_version()
     messages.success(request, 'Website details saved.')
+
+    # ── Auto-registration ya custom domain kwenye Render (bila dashboard) ──
+    if domain_changed:
+        from . import render_api
+        if old_domain:
+            render_api.remove_custom_domain(old_domain)
+        if site.custom_domain:
+            ok, msg = render_api.add_custom_domain(site.custom_domain)
+            (messages.success if ok else messages.warning)(request, msg)
+            if render_api.check_dns(site.custom_domain):
+                messages.success(request,
+                    f'DNS check: "{site.custom_domain}" is already pointing to our '
+                    'servers — your domain should be live within minutes. ✅')
+            else:
+                messages.info(request,
+                    f'DNS check: "{site.custom_domain}" is not pointing to us yet. '
+                    'Add a CNAME record at your registrar: '
+                    f'{site.custom_domain} → jamiitek.onrender.com')
     return redirect('builder:site_dashboard', site_id=site.id)
 
 
@@ -333,6 +363,40 @@ def item_delete(request, site_id, collection_id, item_id):
     item.delete()
     messages.success(request, f'"{item.title}" has been deleted.')
     return redirect('builder:collection_items', site_id=site.id, collection_id=collection.id)
+
+
+# ── Inquiries / Bookings ────────────────────────────────
+
+@login_required
+def inquiries_list(request, site_id):
+    site = _my_site(request, site_id)
+    status = request.GET.get('status', 'all')
+    qs = site.inquiries.select_related('item').all()
+    if status in ('new', 'contacted', 'closed'):
+        qs = qs.filter(status=status)
+    return render(request, 'builder/inquiries.html', {
+        'site': site,
+        'inquiries': qs[:200],
+        'status': status,
+        'counts': {
+            'all': site.inquiries.count(),
+            'new': site.inquiries.filter(status='new').count(),
+            'contacted': site.inquiries.filter(status='contacted').count(),
+            'closed': site.inquiries.filter(status='closed').count(),
+        },
+    })
+
+
+@login_required
+@require_POST
+def inquiry_status(request, site_id, inquiry_id):
+    site = _my_site(request, site_id)
+    inq = get_object_or_404(SiteInquiry, id=inquiry_id, website=site)
+    new_status = request.POST.get('status')
+    if new_status in ('new', 'contacted', 'closed'):
+        inq.status = new_status
+        inq.save(update_fields=['status'])
+    return redirect(f"/builder/site/{site.id}/inquiries/?status={request.POST.get('back', 'all')}")
 
 
 # ── Assets (Uploadcare) ─────────────────────────────────

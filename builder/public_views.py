@@ -3,10 +3,12 @@ Public site rendering — views hizi zinatumika TU wakati request imekuja
 kupitia subdomain ya mteja (SubdomainMiddleware ime-set request.client_site
 na request.urlconf = 'builder.public_urls').
 """
-from django.http import Http404
+from django.http import Http404, JsonResponse, HttpResponseBadRequest
 from django.shortcuts import render, get_object_or_404
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 
-from .rendering import render_page_html, render_shortcodes
+from .rendering import render_page_html, render_shortcodes, render_inquiry_form
 
 
 def _get_site(request):
@@ -108,4 +110,51 @@ def item_detail(request, col_slug, item_slug):
         'item': item,
         'display_fields': display_fields,
         'wa_link': wa_link,
+        'booking_form': render_inquiry_form(site, item),
     }))
+
+
+@csrf_exempt
+@require_POST
+def submit_inquiry(request):
+    """Public booking/inquiry POST kutoka website ya mteja."""
+    site = _get_site(request)
+    # Honeypot — bots hujaza field iliyofichwa
+    if request.POST.get('website_url'):
+        return JsonResponse({'status': 'ok'})
+
+    name = (request.POST.get('name') or '').strip()[:120]
+    phone = (request.POST.get('phone') or '').strip()[:40]
+    if not name or not phone:
+        return HttpResponseBadRequest('name and phone required')
+
+    from .models import SiteInquiry, SiteItem
+    item = None
+    item_id = request.POST.get('item_id')
+    if item_id:
+        item = SiteItem.objects.filter(
+            id=item_id, collection__website=site).first()
+
+    # Kinga ya spam: max inquiries 30 kwa saa kwa site
+    from django.utils import timezone
+    from datetime import timedelta
+    recent = SiteInquiry.objects.filter(
+        website=site, created_at__gte=timezone.now() - timedelta(hours=1)
+    ).count()
+    if recent >= 30:
+        return JsonResponse({'status': 'ok'})  # kimya — usiwape bots taarifa
+
+    preferred = (request.POST.get('preferred_date') or '').strip() or None
+    people = request.POST.get('people_count') or None
+    try:
+        people = int(people) if people else None
+    except ValueError:
+        people = None
+
+    SiteInquiry.objects.create(
+        website=site, item=item, name=name, phone=phone,
+        email=(request.POST.get('email') or '').strip()[:120],
+        message=(request.POST.get('message') or '').strip()[:3000],
+        preferred_date=preferred, people_count=people,
+    )
+    return JsonResponse({'status': 'ok'})

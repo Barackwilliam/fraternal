@@ -26,6 +26,9 @@ urlpatterns = [
     path('site/<int:site_id>/collections/<int:collection_id>/<int:item_id>/', views.item_form, name='item_edit'),
     path('site/<int:site_id>/collections/<int:collection_id>/<int:item_id>/delete/', views.item_delete, name='item_delete'),
 
+    path('site/<int:site_id>/inquiries/', views.inquiries_list, name='inquiries_list'),
+    path('site/<int:site_id>/inquiries/<int:inquiry_id>/status/', views.inquiry_status, name='inquiry_status'),
+
     path('site/<int:site_id>/assets/save/', views.asset_save, name='asset_save'),
     path('site/<int:site_id>/assets/', views.asset_list, name='asset_list'),
 

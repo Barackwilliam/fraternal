@@ -16,7 +16,7 @@ import html as html_lib
 
 from django.core.cache import cache
 
-SHORTCODE_RE = re.compile(r'\[\[(collection|site):([a-z0-9_-]+)\]\]')
+SHORTCODE_RE = re.compile(r'\[\[(collection|site|form):([a-z0-9_-]+)\]\]')
 
 CARD_CSS = """
 <style>
@@ -112,6 +112,74 @@ def render_collection(site, slug):
     return CARD_CSS + f'<div class="jt-grid">{"".join(cards)}</div>'
 
 
+FORM_CSS = """
+<style>
+.jt-form{max-width:560px;margin:26px auto;background:rgba(255,255,255,.85);border:1px solid rgba(0,0,0,.08);
+  border-radius:16px;padding:26px;box-shadow:0 6px 26px rgba(10,25,18,.1);}
+.jt-form h3{margin:0 0 6px;font-size:21px;}
+.jt-form p.jt-sub{margin:0 0 16px;color:#6b7268;font-size:14px;}
+.jt-form label{display:block;font-size:13px;font-weight:700;margin:12px 0 5px;color:#333;}
+.jt-form input,.jt-form textarea{width:100%;padding:11px 13px;border:1.5px solid #ddd;border-radius:10px;
+  font-size:15px;font-family:inherit;box-sizing:border-box;}
+.jt-form input:focus,.jt-form textarea:focus{outline:none;border-color:var(--accent,#e8a13c);}
+.jt-form textarea{min-height:90px;resize:vertical;}
+.jt-form .jt-row{display:flex;gap:12px;flex-wrap:wrap;}
+.jt-form .jt-row>div{flex:1;min-width:140px;}
+.jt-form button{width:100%;margin-top:18px;padding:14px;border:none;border-radius:11px;font-size:15.5px;
+  font-weight:800;cursor:pointer;background:var(--accent,#e8a13c);color:#1c1508;}
+.jt-form .jt-hp{position:absolute;left:-9999px;opacity:0;height:0;overflow:hidden;}
+.jt-form .jt-ok{background:#dff0e2;color:#1c6b34;border:1px solid #a9dcb5;border-radius:10px;
+  padding:12px 15px;margin-bottom:14px;font-size:14px;display:none;}
+</style>
+"""
+
+
+def render_inquiry_form(site, item=None):
+    """Booking/inquiry form inayopost /inquiry/ ya website husika."""
+    item_field = (f'<input type="hidden" name="item_id" value="{item.id}">'
+                  if item is not None else '')
+    title = f'Book: {_esc(item.title)}' if item is not None else 'Send an Inquiry'
+    return FORM_CSS + f"""
+<div class="jt-form" id="jt-inquiry">
+  <div class="jt-ok" id="jt-ok">✅ Thank you! Your inquiry has been received — we will contact you shortly.</div>
+  <h3>{title}</h3>
+  <p class="jt-sub">Fill in the form and we will get back to you as soon as possible.</p>
+  <form method="post" action="/inquiry/" onsubmit="return jtSend(this)">
+    {item_field}
+    <input class="jt-hp" type="text" name="website_url" tabindex="-1" autocomplete="off">
+    <label>Your Name *</label>
+    <input type="text" name="name" required maxlength="120">
+    <div class="jt-row">
+      <div><label>Phone / WhatsApp *</label>
+      <input type="tel" name="phone" required maxlength="40" placeholder="+255 ..."></div>
+      <div><label>Email</label>
+      <input type="email" name="email" maxlength="120"></div>
+    </div>
+    <div class="jt-row">
+      <div><label>Preferred Date</label>
+      <input type="date" name="preferred_date"></div>
+      <div><label>Number of People</label>
+      <input type="number" name="people_count" min="1" max="10000"></div>
+    </div>
+    <label>Message</label>
+    <textarea name="message" maxlength="3000" placeholder="Tell us what you need..."></textarea>
+    <button type="submit">Send Inquiry ✉️</button>
+  </form>
+</div>
+<script>
+async function jtSend(f){{
+  const btn = f.querySelector('button'); btn.disabled = true; btn.textContent = 'Sending…';
+  try {{
+    const res = await fetch('/inquiry/', {{method:'POST', body:new FormData(f)}});
+    if (res.ok) {{ f.style.display='none'; document.getElementById('jt-ok').style.display='block';
+      document.getElementById('jt-inquiry').scrollIntoView({{behavior:'smooth'}}); }}
+    else {{ btn.disabled=false; btn.textContent='Send Inquiry ✉️'; alert('Something went wrong. Please try again.'); }}
+  }} catch(e) {{ btn.disabled=false; btn.textContent='Send Inquiry ✉️'; alert('Network error. Please try again.'); }}
+  return false;
+}}
+</script>"""
+
+
 def _site_value(site, key):
     wa = (site.whatsapp_number or site.contact_phone or '').replace('+', '').replace(' ', '')
     mapping = {
@@ -132,6 +200,8 @@ def render_shortcodes(site, html):
         kind, key = match.group(1), match.group(2)
         if kind == 'site':
             return _site_value(site, key)
+        if kind == 'form':
+            return render_inquiry_form(site)
         return render_collection(site, key)
     return SHORTCODE_RE.sub(replacer, html or '')
 

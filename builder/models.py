@@ -92,6 +92,13 @@ class ClientWebsite(models.Model):
     dark_nav = models.BooleanField(default=True)
     # inaongezeka kila content (pages/items/settings) inapobadilika — kwa cache invalidation
     content_version = models.PositiveIntegerField(default=1)
+
+    # ── Premium: custom domain (mfano dukalangu.co.tz) ──
+    is_premium = models.BooleanField(
+        default=False, help_text='Premium sites can connect a custom domain.')
+    custom_domain = models.CharField(
+        max_length=120, unique=True, null=True, blank=True,
+        help_text='e.g. www.mybusiness.co.tz — bila http://')
     template_key = models.CharField(max_length=50, default='clean_start')
     nav_layout = models.CharField(
         max_length=10, default='topnav',
@@ -115,6 +122,10 @@ class ClientWebsite(models.Model):
 
     def save(self, *args, **kwargs):
         self.subdomain = self.subdomain.lower().strip()
+        if self.custom_domain:
+            self.custom_domain = (self.custom_domain.lower().strip()
+                                  .replace('https://', '').replace('http://', '')
+                                  .rstrip('/')) or None
         if self.pk and not kwargs.get('update_fields'):
             # Usirudishe nyuma content_version ya zamani iliyo kwenye memory —
             # inabadilishwa na bump_version() (F expression) tu.
@@ -274,6 +285,35 @@ class SiteAsset(models.Model):
 
     def __str__(self):
         return self.file_name or self.uploadcare_url
+
+
+class SiteInquiry(models.Model):
+    """Booking / inquiry kutoka kwa mgeni wa website ya mteja."""
+    STATUS_CHOICES = [
+        ('new', 'New'),
+        ('contacted', 'Contacted'),
+        ('closed', 'Closed'),
+    ]
+    website = models.ForeignKey(
+        ClientWebsite, on_delete=models.CASCADE, related_name='inquiries')
+    item = models.ForeignKey(
+        SiteItem, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='inquiries')  # package/product/dish iliyoulizwa
+    name = models.CharField(max_length=120)
+    phone = models.CharField(max_length=40)
+    email = models.EmailField(blank=True)
+    message = models.TextField(blank=True)
+    preferred_date = models.DateField(null=True, blank=True)
+    people_count = models.PositiveIntegerField(null=True, blank=True)
+    status = models.CharField(max_length=12, choices=STATUS_CHOICES, default='new')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name_plural = 'Site inquiries'
+
+    def __str__(self):
+        return f'{self.name} → {self.website.subdomain}'
 
 
 class AiUsageLog(models.Model):

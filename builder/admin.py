@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import ClientWebsite, SitePage, SiteCollection, SiteItem, SiteAsset, AiUsageLog
+from .models import ClientWebsite, SitePage, SiteCollection, SiteItem, SiteAsset, AiUsageLog, SiteInquiry
 
 
 @admin.register(ClientWebsite)
@@ -38,3 +38,10 @@ class SiteItemAdmin(admin.ModelAdmin):
 
 admin.site.register(SiteAsset)
 admin.site.register(AiUsageLog)
+
+
+@admin.register(SiteInquiry)
+class SiteInquiryAdmin(admin.ModelAdmin):
+    list_display = ('name', 'phone', 'website', 'item', 'status', 'created_at')
+    list_filter = ('status', 'created_at')
+    search_fields = ('name', 'phone', 'email', 'website__subdomain')

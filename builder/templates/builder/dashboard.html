@@ -4,6 +4,7 @@
 {% block mobnav %}
 <a href="{% url 'builder:my_sites' %}"><span class="ic">⬅</span>Sites</a>
 <a href="{% url 'builder:site_dashboard' site.id %}" class="active"><span class="ic">📊</span>Dash</a>
+<a href="{% url 'builder:inquiries_list' site.id %}"><span class="ic">📥</span>Inquiries</a>
 {% for c in collections %}
 <a href="{% url 'builder:collection_items' site.id c.id %}"><span class="ic">{{ c.icon }}</span>{{ c.name_singular }}</a>
 {% endfor %}
@@ -13,6 +14,7 @@
 {% block sidenav %}
 <a href="{% url 'builder:my_sites' %}">⬅ My Websites</a>
 <a href="{% url 'builder:site_dashboard' site.id %}" class="active">📊 Dashboard</a>
+<a href="{% url 'builder:inquiries_list' site.id %}">📥 Inquiries{% if new_inquiries %} ({{ new_inquiries }}){% endif %}</a>
 {% for c in collections %}
 <a href="{% url 'builder:collection_items' site.id c.id %}">{{ c.icon }} {{ c.name }}</a>
 {% endfor %}
@@ -61,6 +63,7 @@
   {% for c in collections %}
   <div class="stat" style="animation-delay:{{ forloop.counter0 }}00ms"><b>{{ c.items.count }}</b><span>{{ c.icon }} {{ c.name }}</span></div>
   {% endfor %}
+  <div class="stat"><b>{{ new_inquiries }}</b><span>📥 New Inquiries</span></div>
   <div class="stat"><b>{% if site.is_published %}LIVE{% else %}DRAFT{% endif %}</b><span>🌍 Website Status</span></div>
 </div>
 
@@ -188,6 +191,25 @@
         <p class="hint">This color is used on your navbar, buttons and highlights.</p>
       </div>
     </div>
+
+    <h2 style="margin-top:26px">🌐 Custom Domain <span class="pill {% if site.is_premium %}on{% else %}off{% endif %}" style="margin-left:6px">{% if site.is_premium %}PREMIUM ACTIVE{% else %}PREMIUM ONLY{% endif %}</span></h2>
+    {% if site.is_premium %}
+    <div class="grid c2">
+      <div>
+        <label>Your Domain (without http://)</label>
+        <input type="text" name="custom_domain" value="{{ site.custom_domain|default:'' }}" placeholder="www.mybusiness.co.tz">
+        <p class="hint">After saving, your domain is <b>registered automatically</b> on our servers —
+        you only need ONE thing at your domain registrar: add a CNAME record pointing
+        <b>{{ site.custom_domain|default:'your domain' }}</b> → <b>jamiitek.onrender.com</b>.
+        SSL activates by itself once DNS is detected. Your site stays reachable at
+        {{ site.subdomain }}.jamiitek.com too.</p>
+      </div>
+    </div>
+    {% else %}
+    <p class="hint">Connect your own domain (e.g. <b>www.mybusiness.co.tz</b>) with a Premium plan.
+    <a href="https://wa.me/255000000000?text=Hello%20JamiiTek,%20I%20want%20to%20upgrade%20{{ site.subdomain }}.jamiitek.com%20to%20Premium%20for%20a%20custom%20domain"
+       target="_blank" rel="noopener" style="color:var(--green-2)">Upgrade via WhatsApp →</a></p>
+    {% endif %}
     <button class="btn" style="margin-top:18px">💾 Save Details</button>
   </form>
 </div>

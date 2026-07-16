@@ -11,7 +11,13 @@ WEBSITE_TYPES_DIR = BASE_DIR / 'apps' / 'website_types'
 # ── Security ──────────────────────────────────────────
 SECRET_KEY    = 'django-insecure-@&r$)$xpb)f6pm=_73pupatv2#n-%0%d=(cky=kab5ww6&*tzs'
 DEBUG = True
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'jamiitek.com,www.jamiitek.com,jamiitek.onrender.com,127.0.0.1,localhost').split(',')
+# MUHIMU: dot ya mwanzo (.jamiitek.com / .localhost) inaruhusu SUBDOMAINS ZOTE.
+# 'localhost' pekee HAIRUHUSU duka.localhost — lazima '.localhost' iwepo.
+ALLOWED_HOSTS = ['*']
+
+# Kwa DEV tu: ruhusu host yoyote (inarahisisha kutest custom domains kwa hosts file)
+# if DEBUG:
+#     ALLOWED_HOSTS.append('*')
 
 INSTALLED_APPS = [
     'jazzmin',
@@ -181,3 +187,21 @@ BUILDER_PLATFORM_HOSTS = {
     'jamiitek.com', 'www.jamiitek.com', 'jamiitek.onrender.com',
     'localhost', '127.0.0.1', 'testserver',
 }
+
+REDIS_URL= 'rediss://default:gQAAAAAAApSyAAIgcDFjYTA4ZDg1MjlhNTA0MzM4OTU3NWQ0MDlmYzVhNTAzZA@evolving-jay-169138.upstash.io:6379'
+# ── Cache: Redis kwa production (weka REDIS_URL kwenye Render env), LocMem kwa dev ──
+if ('REDIS_URL'):
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+            'LOCATION': 'REDIS_URL',
+            'TIMEOUT': 3600,
+        }
+    }
+else:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'jamiitek-builder',
+        }
+    }
