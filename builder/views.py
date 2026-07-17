@@ -21,6 +21,30 @@ from .models import (
 from .site_templates import all_templates, apply_template
 
 
+def _register_subdomain(site):
+    """
+    IMEZIMWA by default — subdomains zinaishi kwenye database tu na
+    middleware inazi-route. Wildcard *.jamiitek.com kwenye Render + CNAME
+    moja ya Cloudflare vinatosheleza subdomains ZOTE bila kusajili chochote.
+
+    Washa TU kama dharura (wildcard ikizuiwa) kwa env var:
+        BUILDER_AUTO_REGISTER_SUBDOMAINS=1
+    (kumbuka: kila domain ya ziada Render ina gharama — haifai kwa wingi)
+    """
+    import os
+    if os.getenv('BUILDER_AUTO_REGISTER_SUBDOMAINS') != '1':
+        return
+    try:
+        from django.conf import settings as dj_settings
+        from . import render_api
+        if render_api.is_configured():
+            base = getattr(dj_settings, 'BUILDER_BASE_DOMAIN', 'jamiitek.com')
+            render_api.add_custom_domain(f'{site.subdomain}.{base}')
+    except Exception:
+        import logging
+        logging.getLogger(__name__).exception('subdomain auto-register failed')
+
+
 def _my_site(request, site_id):
     return get_object_or_404(ClientWebsite, id=site_id, owner=request.user)
 
@@ -53,6 +77,7 @@ def signup(request):
                 )
                 site.bootstrap_from_schema()
                 apply_template(site, request.POST.get('template_key', 'clean_start'))
+            _register_subdomain(site)
             login(request, user)
             messages.success(request, f'Congratulations! Your website {site.subdomain}.jamiitek.com has been created.')
             return redirect('builder:site_dashboard', site_id=site.id)
@@ -94,6 +119,7 @@ def create_site(request):
             )
             site.bootstrap_from_schema()
             apply_template(site, request.POST.get('template_key', 'clean_start'))
+            _register_subdomain(site)
             return redirect('builder:site_dashboard', site_id=site.id)
         except ValidationError as e:
             error = ' '.join(e.messages)
