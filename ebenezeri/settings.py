@@ -188,13 +188,14 @@ BUILDER_PLATFORM_HOSTS = {
     'localhost', '127.0.0.1', 'testserver',
 }
 
-REDIS_URL= 'rediss://default:gQAAAAAAApSyAAIgcDFjYTA4ZDg1MjlhNTA0MzM4OTU3NWQ0MDlmYzVhNTAzZA@evolving-jay-169138.upstash.io:6379'
-# ── Cache: Redis kwa production (weka REDIS_URL kwenye Render env), LocMem kwa dev ──
-if ('REDIS_URL'):
+
+# ── Cache: Redis kwa production, LocMem kwa dev ──
+REDIS_URL = os.getenv('REDIS_URL', '')
+if REDIS_URL:
     CACHES = {
         'default': {
             'BACKEND': 'django.core.cache.backends.redis.RedisCache',
-            'LOCATION': 'REDIS_URL',
+            'LOCATION': REDIS_URL,          # ← bila quotes: variable halisi
             'TIMEOUT': 3600,
         }
     }
