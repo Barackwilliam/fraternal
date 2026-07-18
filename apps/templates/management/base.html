@@ -471,6 +471,11 @@
       <i class="fas fa-gauge"></i> Dashboard
     </a>
 
+    <div class="sb-section">Builder SaaS</div>
+    <a href="{% url 'manage_builder' %}" class="sb-link {% if 'manage_builder' in request.resolver_match.url_name %}active{% endif %}">
+      <i class="fas fa-shield-halved"></i> Builder Sites
+    </a>
+
     <div class="sb-section">Websites</div>
     <a href="{% url 'website_list' %}" class="sb-link {% if 'website' in request.resolver_match.url_name %}active{% endif %}">
       <i class="fas fa-globe"></i> All Websites

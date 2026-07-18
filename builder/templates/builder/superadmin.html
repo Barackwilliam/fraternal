@@ -2,7 +2,8 @@
 {% block title %}Super Admin — JamiiTek Builder{% endblock %}
 
 {% block sidenav %}
-<a href="{% url 'builder:superadmin' %}" class="active">🛡️ Super Admin</a>
+<a href="/manage/" style="border-bottom:1px solid var(--line);margin-bottom:8px;padding-bottom:14px">⬅ Management Center</a>
+<a href="{% url 'builder:superadmin' %}" class="active">🛡️ Builder Sites</a>
 <a href="{% url 'builder:my_sites' %}">🏠 My Websites</a>
 <a href="/admin/" target="_blank">⚙️ Django Admin ↗</a>
 {% endblock %}

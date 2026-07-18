@@ -219,7 +219,6 @@ table tr:hover td{background:rgba(255,255,255,.02)}
     <a href="{% url 'builder:my_sites' %}">🏠 My Websites</a>
     <a href="{% url 'builder:create_site' %}">➕ New Website</a>
     <a href="{% url 'builder:tutorial' %}">🎓 How to Use</a>
-{% if user.is_staff %}<a href="{% url 'builder:superadmin' %}" style="border-top:1px solid var(--line);margin-top:8px;padding-top:14px">🛡️ Super Admin</a>{% endif %}
     {% endblock %}
   </nav>
   <div class="foot">JamiiTek · Tanzania<br><a href="https://jamiitek.com">jamiitek.com</a></div>

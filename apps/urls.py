@@ -6,6 +6,7 @@ from .views import select_website_type, dynamic_form, proposal_preview, generate
 from .views import templates_marketplace, template_preview, template_preview_raw
 from . import management_views
 from . import client_portal_views as portal
+from builder import views as builder_views
 
 urlpatterns = [
     # ── PUBLIC SITE ───────────────────────────────────────
@@ -29,6 +30,7 @@ urlpatterns = [
     path('manage/login/', management_views.management_login, name='management_login'),
     path('manage/logout/', management_views.management_logout, name='management_logout'),
     path('manage/', management_views.management_dashboard, name='management_dashboard'),
+    path('manage/builder/', builder_views.superadmin, name='manage_builder'),
     path('manage/websites/', management_views.website_list, name='website_list'),
     path('manage/websites/add/', management_views.website_add, name='website_add'),
     path('manage/websites/<int:pk>/', management_views.website_detail, name='website_detail'),
