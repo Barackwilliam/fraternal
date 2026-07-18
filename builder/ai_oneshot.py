@@ -112,7 +112,7 @@ def _call(client, system, user, temperature=0.7):
     resp = client.chat.completions.create(
         model=MODEL,
         temperature=temperature,
-        max_tokens=4000,
+        max_tokens=3200,
         response_format={"type": "json_object"},
         messages=[
             {"role": "system", "content": system},
@@ -146,6 +146,8 @@ def generate_website_plan(business_description: str):
               f"{json.dumps(JSON_SCHEMA_HINT, indent=2, ensure_ascii=False)}")
 
     # ── Pass 1: initial draft ────────────────────────────────
+    import time
+    t0 = time.time()
     try:
         draft = _call(client, PASS1_SYSTEM, prompt, temperature=0.8)
     except json.JSONDecodeError:
@@ -156,18 +158,25 @@ def generate_website_plan(business_description: str):
         return False, f'The AI is temporarily unavailable ({type(e).__name__}). Please try again shortly.'
 
     # ── Pass 2: senior-editor critique + rewrite ─────────────
-    try:
-        critique_prompt = (
-            "Here is the first-draft website JSON. Improve every weak part "
-            "to professional international standards, then return the improved JSON "
-            "with the SAME keys.\n\n"
-            f"Original business description:\n\"\"\"{business_description.strip()}\"\"\"\n\n"
-            f"First draft:\n{json.dumps(draft, ensure_ascii=False)}"
-        )
-        final = _call(client, PASS2_SYSTEM, critique_prompt, temperature=0.6)
-    except Exception:
-        logger.exception('Pass 2 failed — falling back to draft')
-        final = draft  # graceful: mteja bado anapata output ya heshima
+    # Kama Pass 1 imechukua muda mrefu (mtandao slow), ruka Pass 2 ili
+    # jibu lisizidi timeout za proxy (Cloudflare ~100s) — draft inatosha.
+    pass1_elapsed = time.time() - t0
+    if pass1_elapsed > 25:
+        logger.warning('Pass 1 took %.1fs — skipping critique pass', pass1_elapsed)
+        final = draft
+    else:
+      try:
+          critique_prompt = (
+              "Here is the first-draft website JSON. Improve every weak part "
+              "to professional international standards, then return the improved JSON "
+              "with the SAME keys.\n\n"
+              f"Original business description:\n\"\"\"{business_description.strip()}\"\"\"\n\n"
+              f"First draft:\n{json.dumps(draft, ensure_ascii=False)}"
+          )
+          final = _call(client, PASS2_SYSTEM, critique_prompt, temperature=0.6)
+      except Exception:
+          logger.exception('Pass 2 failed — falling back to draft')
+          final = draft  # graceful: mteja bado anapata output ya heshima
 
     # ── Validation na cleanup ────────────────────────────────
     if not isinstance(final, dict):

@@ -2,6 +2,7 @@
 Dashboard ya mteja ("cPanel" ya JamiiTek Builder) — inafanya kazi kwenye
 platform kuu (jamiitek.com/builder/...).
 """
+import os
 import json
 
 from django.contrib import messages
@@ -179,7 +180,14 @@ def ai_generate_website(request):
     from . import ai_oneshot
     description = (request.POST.get('description') or '').strip()
 
-    ok, result = ai_oneshot.generate_website_plan(description)
+    try:
+        ok, result = ai_oneshot.generate_website_plan(description)
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).exception('ai_generate_website crashed')
+        return JsonResponse({'ok': False,
+            'error': f'Server error while generating ({type(e).__name__}). '
+                     'Check /builder/ai/status/ for diagnostics.'}, status=500)
     if not ok:
         return JsonResponse({'ok': False, 'error': result}, status=400)
 
@@ -623,6 +631,68 @@ def item_delete(request, site_id, collection_id, item_id):
     return redirect('builder:collection_items', site_id=site.id, collection_id=collection.id)
 
 
+@login_required
+def ai_status(request):
+    """
+    Diagnostic ya AI — inaonyesha hasa kipi kimekwama:
+    package, API key, mtandao kwenda Groq, cache. Staff/owner yeyote.
+    """
+    import time
+    checks = {}
+
+    # 1. groq package
+    try:
+        import groq  # noqa
+        checks['groq_package'] = {'ok': True, 'detail': f'installed (v{getattr(groq, "__version__", "?")})'}
+    except ImportError:
+        checks['groq_package'] = {'ok': False, 'detail': 'NOT installed — run: pip install groq'}
+
+    # 2. API key
+    key = os.getenv('GROQ_API_KEY', '')
+    checks['api_key'] = {'ok': bool(key),
+        'detail': f'present ({key[:7]}…)' if key else 'MISSING — add GROQ_API_KEY to .env / Render env'}
+
+    # 3. Mtandao kwenda Groq (models list — nyepesi, haitumii tokens)
+    if checks['groq_package']['ok'] and key:
+        try:
+            from groq import Groq
+            t0 = time.time()
+            client = Groq(api_key=key)
+            models = client.models.list()
+            ms = int((time.time() - t0) * 1000)
+            names = [m.id for m in models.data][:3]
+            checks['groq_reachable'] = {'ok': True,
+                'detail': f'reachable in {ms}ms · models e.g. {names}'}
+        except Exception as e:
+            checks['groq_reachable'] = {'ok': False,
+                'detail': f'{type(e).__name__}: {str(e)[:180]} — check internet/VPN/firewall on the SERVER side'}
+    else:
+        checks['groq_reachable'] = {'ok': False, 'detail': 'skipped (fix package/key first)'}
+
+    # 4. Model configured
+    from .ai import GROQ_MODEL
+    checks['model'] = {'ok': True, 'detail': GROQ_MODEL}
+
+    # 5. Cache backend
+    from django.core.cache import cache
+    try:
+        cache.set('jt_diag', 'ok', 10)
+        backend = type(cache).__name__
+        checks['cache'] = {'ok': cache.get('jt_diag') == 'ok', 'detail': backend}
+    except Exception as e:
+        checks['cache'] = {'ok': False, 'detail': f'{type(e).__name__}: {str(e)[:120]}'}
+
+    # 6. Rate limit yako
+    from .ai import _check_rate_limit, AI_DAILY_LIMIT
+    ok_rate, remaining = _check_rate_limit(request.user)
+    checks['your_rate_limit'] = {'ok': ok_rate,
+        'detail': f'{remaining}/{AI_DAILY_LIMIT} requests left today'}
+
+    all_ok = all(c['ok'] for c in checks.values())
+    return JsonResponse({'all_ok': all_ok, 'checks': checks},
+                        json_dumps_params={'indent': 2})
+
+
 # ═══════════════════════════════════════════════════════════
 # SUPER-ADMIN — udhibiti wa platform nzima (staff only)
 # ═══════════════════════════════════════════════════════════
@@ -765,7 +835,14 @@ def ai_field(request):
         except (ValueError, TypeError):
             pass
 
-    ok, result = ai_field_mod.generate_field(field_type, site, ctx, hint)
+    try:
+        ok, result = ai_field_mod.generate_field(field_type, site, ctx, hint)
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).exception('ai_field crashed')
+        return JsonResponse({'ok': False,
+            'error': f'Server error ({type(e).__name__}). '
+                     'Check /builder/ai/status/ for diagnostics.'}, status=500)
     if not ok:
         return JsonResponse({'ok': False, 'error': result}, status=400)
 

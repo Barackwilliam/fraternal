@@ -17,6 +17,17 @@ from .models import AiUsageLog, ClientWebsite
 
 logger = logging.getLogger(__name__)
 
+
+def _groq_client():
+    key = os.getenv('GROQ_API_KEY')
+    if not key:
+        return None, 'GROQ_API_KEY is not configured on the server.'
+    try:
+        from groq import Groq
+    except ImportError:
+        return None, 'The groq package is not installed (pip install groq).'
+    return Groq(api_key=key), None
+
 GROQ_MODEL = os.getenv('GROQ_MODEL', 'llama-3.3-70b-versatile')
 AI_DAILY_LIMIT = int(os.getenv('BUILDER_AI_DAILY_LIMIT', '25'))
 
@@ -69,8 +80,9 @@ def ai_assist(request):
                    f'tagline: "{website.tagline}".')
 
     try:
-        from groq import Groq
-        client = Groq(api_key=os.environ['GROQ_API_KEY'])
+        client, client_err = _groq_client()
+        if client is None:
+            return JsonResponse({'error': client_err}, status=500)
         completion = client.chat.completions.create(
             model=GROQ_MODEL,
             messages=[

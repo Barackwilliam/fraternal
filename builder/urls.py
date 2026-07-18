@@ -15,6 +15,7 @@ urlpatterns = [
     path('ai/generate/', views.ai_generate_website, name='ai_generate'),
     path('ai/apply/', views.ai_apply, name='ai_apply'),
     path('ai/field/', views.ai_field, name='ai_field'),
+    path('ai/status/', views.ai_status, name='ai_status'),
 
     # Super-admin (staff only)
     path('superadmin/', views.superadmin, name='superadmin'),

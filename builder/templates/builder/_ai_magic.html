@@ -143,15 +143,23 @@ automatic kwenye input/textarea zote zilizo na data-ai. Wakati wa kubonyeza:
     if (field.value.trim()) fd.append('hint', field.value.trim());
 
     try {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 60000);
       const res = await fetch(AI_URL, {
         method: 'POST',
         headers: {'X-CSRFToken': CSRF},
         body: fd,
+        signal: ctrl.signal,
       });
-      const data = await res.json();
-      if (!res.ok || !data.ok){
+      clearTimeout(timer);
+      let data = null;
+      try { data = await res.json(); } catch (_) {}
+      if (!res.ok || !data || !data.ok){
         btn.classList.add('err');
-        makeToast(data.error || 'AI unavailable — please try again', true);
+        const msg = (data && data.error)
+          ? data.error
+          : `Server error (${res.status}) — open /builder/ai/status/ to diagnose`;
+        makeToast(msg, true);
         return;
       }
       await typeInto(field, data.text);
@@ -159,7 +167,9 @@ automatic kwenye input/textarea zote zilizo na data-ai. Wakati wa kubonyeza:
       makeToast('✨ Generated' + left);
     } catch (e){
       btn.classList.add('err');
-      makeToast('Network error — please try again', true);
+      makeToast(e.name === 'AbortError'
+        ? 'AI took too long (60s) — the server may be unable to reach Groq. Open /builder/ai/status/'
+        : 'Cannot reach YOUR server — is it running? (' + e.message + ')', true);
     } finally {
       setTimeout(() => btn.classList.remove('busy', 'err'), 500);
     }
