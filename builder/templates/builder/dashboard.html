@@ -1,6 +1,10 @@
 {% extends 'builder/base_panel.html' %}
 {% block title %}{{ site.site_name }} — Panel{% endblock %}
 
+{% block scripts %}
+{% include 'builder/_ai_magic.html' %}
+{% endblock %}
+
 {% block mobnav %}
 <a href="{% url 'builder:my_sites' %}"><span class="ic">⬅</span>Sites</a>
 <a href="{% url 'builder:site_dashboard' site.id %}" class="active"><span class="ic">📊</span>Dash</a>
@@ -69,7 +73,35 @@
 
 <div class="grid c2">
   <!-- Pages -->
-  <div class="card">
+  {% if insights %}
+<div class="card" style="border-color:rgba(108,99,255,.3);background:linear-gradient(165deg,rgba(108,99,255,.06),rgba(13,23,48,.4))">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+    <span style="font-size:22px">💡</span>
+    <h2 style="margin:0">AI Coach</h2>
+    <span class="pill" style="background:rgba(108,99,255,.12);color:#b9b4ff;border:1px solid rgba(108,99,255,.35);font-size:9.5px">SMART TIPS</span>
+  </div>
+  {% for ins in insights %}
+  <div style="display:flex;gap:14px;align-items:flex-start;padding:13px 0;{% if not forloop.last %}border-bottom:1px solid var(--line){% endif %}">
+    <span style="font-size:22px;flex-shrink:0">{{ ins.icon }}</span>
+    <div style="flex:1;min-width:200px">
+      <strong style="display:block;color:#fff;font-size:14.5px;margin-bottom:3px">{{ ins.title }}</strong>
+      <span style="font-size:13px;color:var(--muted);line-height:1.6">{{ ins.text }}</span>
+    </div>
+    {% if ins.ai_suggest and ins.collection_id %}
+    <form method="post" action="{% url 'builder:ai_suggest_items' site.id ins.collection_id %}" style="flex-shrink:0">
+      {% csrf_token %}
+      <button class="btn sm" style="border-color:rgba(108,99,255,.5);color:#c9c5ff"
+              onclick="this.innerHTML='✨ Generating…';this.disabled=true;this.form.submit()">{{ ins.action_label }}</button>
+    </form>
+    {% else %}
+    <a class="btn sm ghost" style="flex-shrink:0" href="{{ ins.action_url }}">{{ ins.action_label }} →</a>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<div class="card">
     <h2>📄 Your Pages</h2>
     <div class="table-wrap"><table>
       <tr><th>Page</th><th>URL</th><th></th></tr>
@@ -153,7 +185,7 @@
         <label>Website Name</label>
         <input type="text" name="site_name" value="{{ site.site_name }}">
         <label>Tagline / Slogan</label>
-        <input type="text" name="tagline" value="{{ site.tagline }}" placeholder="e.g. Unforgettable safaris">
+        <input type="text" name="tagline" value="{{ site.tagline }}" data-ai="tagline" placeholder="e.g. Unforgettable safaris">
         <label>Logo (upload an image then paste its URL here)</label>
         <input type="text" name="logo_url" value="{{ site.logo_url }}" placeholder="https://ucarecdn.com/...">
       </div>

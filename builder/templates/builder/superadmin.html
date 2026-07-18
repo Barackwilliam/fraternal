@@ -1,0 +1,93 @@
+{% extends 'builder/base_panel.html' %}
+{% block title %}Super Admin — JamiiTek Builder{% endblock %}
+
+{% block sidenav %}
+<a href="{% url 'builder:superadmin' %}" class="active">🛡️ Super Admin</a>
+<a href="{% url 'builder:my_sites' %}">🏠 My Websites</a>
+<a href="/admin/" target="_blank">⚙️ Django Admin ↗</a>
+{% endblock %}
+
+{% block mobnav %}
+<a href="{% url 'builder:superadmin' %}" class="active"><span class="ic">🛡️</span>Admin</a>
+<a href="{% url 'builder:my_sites' %}"><span class="ic">🏠</span>Sites</a>
+{% endblock %}
+
+{% block content %}
+<div class="topbar"><div>
+  <div class="crumb">JamiiTek Builder / Super Admin</div>
+  <h1>🛡️ Platform Control</h1>
+  <p class="hint" style="font-size:14px">Every website on the platform — stats, search, and one-tap actions.</p>
+</div></div>
+
+<!-- ═══ STATS ═══ -->
+<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px">
+  <div class="stat"><b>{{ stats.total_sites }}</b><span>🌍 Total Sites</span></div>
+  <div class="stat"><b>{{ stats.published }}</b><span>🟢 Live</span></div>
+  <div class="stat"><b>{{ stats.premium }}</b><span>⭐ Premium</span></div>
+  <div class="stat"><b>{{ stats.total_users }}</b><span>👥 Users</span></div>
+  <div class="stat"><b>+{{ stats.new_week }}</b><span>📈 New (7d)</span></div>
+  <div class="stat"><b>+{{ stats.new_month }}</b><span>📅 New (30d)</span></div>
+  <div class="stat"><b>{{ stats.inquiries_week }}</b><span>📥 Inquiries (7d)</span></div>
+  <div class="stat"><b>{{ stats.ai_calls_week }}</b><span>✨ AI Calls (7d)</span></div>
+  {% if stats.suspended %}<div class="stat" style="border-color:rgba(255,84,112,.4)"><b style="color:#ff8ba0">{{ stats.suspended }}</b><span>🚫 Suspended</span></div>{% endif %}
+</div>
+
+<!-- ═══ SEARCH + FILTERS ═══ -->
+<div class="card" style="padding:16px 20px">
+  <form method="get" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+    <input type="text" name="q" value="{{ q }}" placeholder="Search subdomain, name, owner, domain…"
+           style="flex:1;min-width:220px;margin:0">
+    <input type="hidden" name="f" value="{{ flt }}">
+    <button class="btn sm amber">🔍 Search</button>
+  </form>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+    <a class="btn sm {% if flt == 'all' %}amber{% else %}ghost{% endif %}" href="?f=all&q={{ q }}">All</a>
+    <a class="btn sm {% if flt == 'published' %}amber{% else %}ghost{% endif %}" href="?f=published&q={{ q }}">🟢 Live</a>
+    <a class="btn sm {% if flt == 'draft' %}amber{% else %}ghost{% endif %}" href="?f=draft&q={{ q }}">○ Draft</a>
+    <a class="btn sm {% if flt == 'premium' %}amber{% else %}ghost{% endif %}" href="?f=premium&q={{ q }}">⭐ Premium</a>
+    <a class="btn sm {% if flt == 'suspended' %}amber{% else %}ghost{% endif %}" href="?f=suspended&q={{ q }}">🚫 Suspended</a>
+  </div>
+</div>
+
+<!-- ═══ SITES ═══ -->
+{% for s in sites %}
+<div class="card" style="padding:16px 20px">
+  <div style="display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap">
+    <div style="flex:1;min-width:240px">
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:5px">
+        <strong style="color:#fff;font-size:15.5px">{{ s.site_name }}</strong>
+        {% if s.is_published %}<span class="pill on">LIVE</span>{% else %}<span class="pill off">DRAFT</span>{% endif %}
+        {% if s.is_premium %}<span class="pill" style="background:rgba(240,176,63,.12);color:#f0c46a;border:1px solid rgba(240,176,63,.35)">⭐ PREMIUM</span>{% endif %}
+        {% if s.is_suspended %}<span class="pill" style="background:rgba(255,84,112,.12);color:#ff8ba0;border:1px solid rgba(255,84,112,.35)">🚫 SUSPENDED</span>{% endif %}
+      </div>
+      <div style="font-family:var(--ff-mono);font-size:12px;color:var(--cyan)">
+        <a href="{{ s.public_url }}" target="_blank" style="color:var(--cyan);text-decoration:none">{{ s.subdomain }}.jamiitek.com ↗</a>
+        {% if s.custom_domain %} · <a href="https://{{ s.custom_domain }}" target="_blank" style="color:#b9b4ff;text-decoration:none">{{ s.custom_domain }} ↗</a>{% endif %}
+      </div>
+      <div style="font-size:12.5px;color:var(--muted);margin-top:5px">
+        👤 {{ s.owner.username }} · {{ s.website_type }} · {{ s.items_count }} items · {{ s.inq_count }} inquiries
+        · created {{ s.created_at|date:"d M Y" }}
+      </div>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+      <a class="btn sm ghost" href="{% url 'builder:site_dashboard' s.id %}" title="Open owner dashboard">Open</a>
+      <form method="post" action="{% url 'builder:superadmin_action' s.id %}" style="display:inline">
+        {% csrf_token %}<input type="hidden" name="action" value="toggle_premium">
+        <input type="hidden" name="back" value="f={{ flt }}&q={{ q }}">
+        <button class="btn sm ghost" style="{% if s.is_premium %}border-color:rgba(240,176,63,.5);color:#f0c46a{% endif %}">
+          ⭐ {% if s.is_premium %}Unset{% else %}Premium{% endif %}</button>
+      </form>
+      <form method="post" action="{% url 'builder:superadmin_action' s.id %}" style="display:inline">
+        {% csrf_token %}<input type="hidden" name="action" value="toggle_suspend">
+        <input type="hidden" name="back" value="f={{ flt }}&q={{ q }}">
+        <button class="btn sm ghost" style="{% if s.is_suspended %}border-color:var(--green);color:var(--green-2){% else %}border-color:rgba(255,84,112,.4);color:#ff8ba0{% endif %}"
+                onclick="return confirm('{% if s.is_suspended %}Reactivate{% else %}SUSPEND{% endif %} {{ s.subdomain }}?')">
+          {% if s.is_suspended %}✓ Reactivate{% else %}🚫 Suspend{% endif %}</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% empty %}
+<div class="empty">🔍 No sites match this filter.</div>
+{% endfor %}
+{% endblock %}

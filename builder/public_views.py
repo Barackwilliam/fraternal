@@ -18,12 +18,33 @@ def _get_site(request):
     return site
 
 
+def _strip_html(text, limit=160):
+    """Meta description safi kutoka HTML/text."""
+    import re
+    clean = re.sub(r'<[^>]+>', ' ', str(text or ''))
+    clean = re.sub(r'\[\[[^\]]+\]\]', ' ', clean)   # ondoa shortcodes
+    clean = re.sub(r'\s+', ' ', clean).strip()
+    return (clean[:limit - 1] + '…') if len(clean) > limit else clean
+
+
+def _base_url(site):
+    if site.is_premium and site.custom_domain:
+        return f'https://{site.custom_domain}'
+    return site.public_url
+
+
 def _ctx(site, extra=None):
     ctx = {
         'site': site,
         'nav_pages': site.pages.filter(show_in_nav=True).only(
             'slug', 'title', 'sort_order'
         ),
+        # ── SEO defaults (views zina-override kwa page husika) ──
+        'meta_title': site.site_name,
+        'meta_description': _strip_html(site.tagline or site.site_name),
+        'meta_image': (site.logo_url + '-/resize/1200x/') if site.logo_url else '',
+        'meta_url': _base_url(site),
+        'base_url': _base_url(site),
     }
     if extra:
         ctx.update(extra)
@@ -65,6 +86,9 @@ def page_view(request, slug):
     return render(request, 'builder/public/page.html', _ctx(site, {
         'page': page,
         'page_html': render_page_html(site, page),
+        'meta_title': f'{page.title} · {site.site_name}',
+        'meta_description': _strip_html(page.html_cache) or _strip_html(site.tagline or site.site_name),
+        'meta_url': f'{_base_url(site)}/p/{page.slug}/',
     }))
 
 
@@ -78,6 +102,8 @@ def collection_list(request, col_slug):
     return render(request, 'builder/public/collection.html', _ctx(site, {
         'collection': collection,
         'body': body,
+        'meta_title': f'{collection.name} · {site.site_name}',
+        'meta_url': f'{_base_url(site)}/c/{collection.slug}/',
     }))
 
 
@@ -105,12 +131,19 @@ def item_detail(request, col_slug, item_slug):
     if wa:
         msg = f'Hello, I would like to enquire about: {item.title}'
         wa_link = f'https://wa.me/{wa}?text={msg.replace(" ", "%20")}'
+    item_desc = ''
+    if isinstance(item.data, dict):
+        item_desc = item.data.get('description', '')
     return render(request, 'builder/public/item_detail.html', _ctx(site, {
         'collection': collection,
         'item': item,
         'display_fields': display_fields,
         'wa_link': wa_link,
         'booking_form': render_inquiry_form(site, item),
+        'meta_title': f'{item.title} · {site.site_name}',
+        'meta_description': _strip_html(item_desc) or _strip_html(site.tagline or site.site_name),
+        'meta_image': (item.image_url + '-/resize/1200x/') if item.image_url else ((site.logo_url + '-/resize/1200x/') if site.logo_url else ''),
+        'meta_url': f'{_base_url(site)}/c/{collection.slug}/{item.slug}/',
     }))
 
 
@@ -158,3 +191,39 @@ def submit_inquiry(request):
         preferred_date=preferred, people_count=people,
     )
     return JsonResponse({'status': 'ok'})
+
+
+def sitemap_xml(request):
+    """Sitemap ya website ya mteja — pages + collections + items."""
+    from django.http import HttpResponse
+    site = _get_site(request)
+    if not site.is_published:
+        return HttpResponse(status=404)
+
+    base = _base_url(site)
+    urls = [f'{base}/']
+    for p in site.pages.exclude(slug='home').only('slug'):
+        urls.append(f'{base}/p/{p.slug}/')
+    for c in site.collections.only('slug'):
+        urls.append(f'{base}/c/{c.slug}/')
+        for it in c.items.filter(is_visible=True).only('slug'):
+            urls.append(f'{base}/c/{c.slug}/{it.slug}/')
+
+    xml = ['<?xml version="1.0" encoding="UTF-8"?>',
+           '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
+    for u in urls:
+        xml.append(f'  <url><loc>{u}</loc></url>')
+    xml.append('</urlset>')
+    return HttpResponse('\n'.join(xml), content_type='application/xml')
+
+
+def robots_txt(request):
+    """Robots ya website ya mteja — draft sites zinazuiliwa kabisa."""
+    from django.http import HttpResponse
+    site = _get_site(request)
+    if site.is_published:
+        body = (f'User-agent: *\nAllow: /\n\n'
+                f'Sitemap: {_base_url(site)}/sitemap.xml\n')
+    else:
+        body = 'User-agent: *\nDisallow: /\n'
+    return HttpResponse(body, content_type='text/plain')

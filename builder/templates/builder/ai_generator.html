@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#040918">
+<title>Describe Your Business — AI Website Generator · JamiiTek</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#040918;--panel:#0a1424;--panel-2:#0e1a30;--line:rgba(120,180,255,.1);
+  --ink:#e8f0f6;--muted:#7d8ca0;--dim:#4a5870;
+  --green:#25d366;--green-2:#00ff88;--cyan:#00d4ff;--violet:#6c63ff;
+  --ff-d:'Space Grotesk',sans-serif;--ff-m:'JetBrains Mono',monospace;
+  --ease:cubic-bezier(.22,.9,.3,1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',-apple-system,sans-serif;color:var(--ink);min-height:100vh;
+  background:
+    radial-gradient(900px 480px at 80% -10%,rgba(108,99,255,.10),transparent 60%),
+    radial-gradient(800px 560px at -10% 110%,rgba(0,212,255,.08),transparent 55%),
+    var(--bg)}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;opacity:.5;
+  background:linear-gradient(rgba(120,180,255,.03) 1px,transparent 1px),
+             linear-gradient(90deg,rgba(120,180,255,.03) 1px,transparent 1px);
+  background-size:44px 44px;
+  mask-image:radial-gradient(ellipse 90% 70% at 50% 0%,#000 30%,transparent 100%);
+  -webkit-mask-image:radial-gradient(ellipse 90% 70% at 50% 0%,#000 30%,transparent 100%)}
+.top{display:flex;align-items:center;justify-content:space-between;padding:18px clamp(16px,4vw,44px);
+  border-bottom:1px solid var(--line);position:relative;z-index:2}
+.brand{font-family:var(--ff-d);font-size:21px;font-weight:700;color:#fff;text-decoration:none}
+.brand span{color:var(--green)}
+.top a.home{color:var(--muted);text-decoration:none;font-size:14px;padding:9px 16px;border:1px solid var(--line);
+  border-radius:10px;transition:all .2s}
+.top a.home:hover{color:var(--cyan);border-color:var(--cyan)}
+
+.wrap{max-width:800px;margin:0 auto;padding:clamp(36px,7vh,72px) 20px 60px;position:relative;z-index:2}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--ff-m);font-size:10.5px;
+  letter-spacing:2px;text-transform:uppercase;color:var(--violet);background:rgba(108,99,255,.1);
+  border:1px solid rgba(108,99,255,.32);border-radius:100px;padding:7px 16px;margin-bottom:18px}
+.eyebrow i{width:6px;height:6px;border-radius:50%;background:var(--violet);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(108,99,255,.5)}55%{box-shadow:0 0 0 7px rgba(108,99,255,0)}}
+h1{font-family:var(--ff-d);font-size:clamp(30px,5.4vw,52px);line-height:1.1;letter-spacing:-.02em;color:#fff}
+h1 em{font-style:normal;background:linear-gradient(90deg,var(--violet),var(--cyan));
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.sub{color:var(--muted);font-size:clamp(15px,2vw,17px);margin:14px 0 34px;max-width:640px;line-height:1.7}
+
+.gen{background:linear-gradient(165deg,var(--panel),var(--panel-2));border:1px solid var(--line);
+  border-radius:20px;padding:clamp(22px,3vw,32px);position:relative;overflow:hidden;
+  animation:up .5s var(--ease) both}
+.gen::after{content:'';position:absolute;top:0;left:0;right:0;height:2.5px;
+  background:linear-gradient(90deg,var(--violet),var(--cyan))}
+@keyframes up{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+label{display:block;font-family:var(--ff-m);font-size:10.5px;letter-spacing:1.6px;text-transform:uppercase;
+  color:var(--cyan);margin-bottom:10px}
+textarea{width:100%;min-height:170px;padding:18px;border:1.5px solid var(--line);border-radius:14px;
+  font-size:16px;font-family:'Inter',sans-serif;background:rgba(255,255,255,.03);color:var(--ink);
+  resize:vertical;line-height:1.6}
+textarea:focus{outline:none;border-color:var(--violet);box-shadow:0 0 0 4px rgba(108,99,255,.15)}
+textarea::placeholder{color:var(--dim)}
+.hint{font-size:12.5px;color:var(--muted);margin-top:10px}
+
+.examples{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 22px}
+.examples b{width:100%;font-size:11.5px;color:var(--dim);font-family:var(--ff-m);letter-spacing:1.5px;
+  text-transform:uppercase;margin-bottom:4px}
+.chip{background:rgba(255,255,255,.03);border:1px solid var(--line);color:var(--muted);
+  padding:8px 14px;border-radius:100px;font-size:13px;cursor:pointer;transition:all .18s;min-height:38px}
+.chip:hover{border-color:var(--cyan);color:var(--cyan);background:rgba(0,212,255,.05)}
+
+.go{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:56px;
+  border:none;border-radius:14px;font-family:'Inter',sans-serif;font-weight:700;font-size:16.5px;cursor:pointer;
+  background:linear-gradient(135deg,var(--violet),var(--cyan));color:#fff;position:relative;overflow:hidden;
+  transition:transform .18s var(--ease),box-shadow .22s}
+.go:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 12px 32px rgba(108,99,255,.4)}
+.go:disabled{opacity:.7;cursor:wait}
+.go::after{content:'';position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.25) 50%,transparent 70%);
+  transform:translateX(-130%);animation:sh 3.2s ease infinite}
+@keyframes sh{0%,55%{transform:translateX(-130%)}85%,100%{transform:translateX(130%)}}
+
+/* ── Progress ── */
+.progress{display:none;margin-top:24px;padding:22px;background:rgba(108,99,255,.06);
+  border:1px solid rgba(108,99,255,.25);border-radius:14px}
+.progress.on{display:block;animation:up .35s var(--ease) both}
+.step{display:flex;align-items:center;gap:12px;padding:9px 0;font-size:14px;color:var(--muted);transition:color .3s}
+.step .dot{width:22px;height:22px;border-radius:50%;border:2px solid var(--line);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;transition:all .3s}
+.step.on{color:var(--ink)}
+.step.on .dot{border-color:var(--violet);background:rgba(108,99,255,.15);color:var(--violet)}
+.step.done{color:var(--green-2)}
+.step.done .dot{border-color:var(--green);background:var(--green);color:#04120a}
+.step.done .dot::after{content:'✓'}
+.step.done .dot i{display:none}
+.step .spin{width:12px;height:12px;border:2px solid var(--violet);border-top-color:transparent;
+  border-radius:50%;animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+.err{display:none;margin-top:18px;padding:14px 18px;background:rgba(255,84,112,.1);border:1px solid rgba(255,84,112,.3);
+  border-radius:12px;color:#ffb0be;font-size:14px}
+.err.on{display:block}
+
+.bottom{text-align:center;margin-top:36px;color:var(--dim);font-size:14px}
+.bottom a{color:var(--cyan);text-decoration:none}
+.bottom a:hover{text-decoration:underline}
+
+@media(max-width:520px){textarea{min-height:140px}}
+</style>
+</head>
+<body>
+<div class="top">
+  <a class="brand" href="/">Jamii<span>Tek</span></a>
+  <a class="home" href="{% url 'get_started' %}">← Other ways to start</a>
+</div>
+
+<div class="wrap">
+  <span class="eyebrow"><i></i>AI-POWERED · BETA</span>
+  <h1>Describe your business.<br><em>We'll build the whole website.</em></h1>
+  <p class="sub">One sentence, one paragraph, English or Swahili — however you'd explain your business to a friend. Our AI generates a complete, professional website: brand name, tagline, About Us, services/products with descriptions and prices, and a design that fits your industry. Then you polish it in the editor.</p>
+
+  <div class="gen">
+    <label>Tell us about your business</label>
+    <textarea id="desc" maxlength="2000" placeholder="e.g. I run a small tour company in Arusha. We do 3-7 day safaris to Serengeti, Ngorongoro and Kilimanjaro. Our specialty is small groups with expert guides. Prices from $1,200 per person."></textarea>
+    <p class="hint" id="counter">0 / 2000 characters · Tip: mention what you sell, where you are, and one thing that makes you different.</p>
+
+    <div class="examples">
+      <b>Try one of these →</b>
+      <span class="chip" data-ex="I own a small restaurant in Dar es Salaam serving traditional Tanzanian food — nyama choma, pilau, ugali. We do dine-in and delivery via WhatsApp. Prices from 8,000 TZS.">Restaurant</span>
+      <span class="chip" data-ex="I sell handmade African print fabrics and ready-to-wear kitenge outfits from a small shop in Kariakoo. I deliver anywhere in Tanzania. Bulk orders welcome.">Fabric shop</span>
+      <span class="chip" data-ex="Nauza vitambaa vya kiafrika Kariakoo, ninatuma popote Tanzania kwa boda. Nafanya na sherehe za harusi kwa bei nzuri.">Kwa Kiswahili</span>
+      <span class="chip" data-ex="I run a private primary school in Mwanza with 240 students. We focus on English medium instruction, small class sizes, and computer literacy from Grade 1.">Private school</span>
+      <span class="chip" data-ex="We're a real estate agency in Arusha listing houses, apartments and plots for sale and rent. We focus on the middle-income market.">Real estate</span>
+      <span class="chip" data-ex="I run an NGO in Iringa focused on girls' education — providing sanitary pads, mentorship and scholarships to 500+ girls across 12 schools.">NGO</span>
+    </div>
+
+    <button class="go" id="go">✨ Generate My Website</button>
+
+    <div class="progress" id="progress">
+      <div class="step" data-s="0"><span class="dot"><i class="spin"></i></span><span>Understanding your business…</span></div>
+      <div class="step" data-s="1"><span class="dot"><i class="spin"></i></span><span>Writing professional copy…</span></div>
+      <div class="step" data-s="2"><span class="dot"><i class="spin"></i></span><span>Reviewing quality (self-critique)…</span></div>
+      <div class="step" data-s="3"><span class="dot"><i class="spin"></i></span><span>Preparing your dashboard…</span></div>
+    </div>
+
+    <div class="err" id="err"></div>
+  </div>
+
+  <p class="bottom">Prefer more control? <a href="{% url 'builder:signup' %}">Start from scratch →</a> · <a href="{% url 'get_started' %}">Or see all options</a></p>
+</div>
+
+<script>
+const desc = document.getElementById('desc');
+const counter = document.getElementById('counter');
+const go = document.getElementById('go');
+const err = document.getElementById('err');
+const progress = document.getElementById('progress');
+const steps = document.querySelectorAll('.step');
+
+// Character counter + chip fill
+desc.addEventListener('input', () => {
+  counter.textContent = `${desc.value.length} / 2000 characters · Tip: mention what you sell, where you are, and one thing that makes you different.`;
+});
+document.querySelectorAll('.chip').forEach(c => {
+  c.addEventListener('click', () => {
+    desc.value = c.dataset.ex;
+    desc.focus();
+    desc.dispatchEvent(new Event('input'));
+  });
+});
+
+// Fake progress animation — inatolewa hatua hatua kama AI inavyofanya
+let stepInterval = null;
+function startProgress(){
+  progress.classList.add('on');
+  err.classList.remove('on');
+  let i = 0;
+  steps[0].classList.add('on');
+  stepInterval = setInterval(() => {
+    // Sogeza hadi hatua ya 2 (self-critique) — hatua 3 inasubiri jibu la server
+    if (i < 2) {
+      steps[i].classList.remove('on');
+      steps[i].classList.add('done');
+      i++;
+      steps[i].classList.add('on');
+    }
+  }, 4200);
+}
+function finishProgress(){
+  clearInterval(stepInterval);
+  steps.forEach(s => { s.classList.remove('on'); s.classList.add('done'); });
+}
+function stopProgress(){
+  clearInterval(stepInterval);
+  progress.classList.remove('on');
+  steps.forEach(s => s.classList.remove('on','done'));
+}
+
+// Submit
+go.addEventListener('click', async () => {
+  const text = desc.value.trim();
+  if (text.length < 8) {
+    err.textContent = 'Please describe your business in at least a sentence.';
+    err.classList.add('on');
+    return;
+  }
+  go.disabled = true;
+  go.innerHTML = 'Generating your website…';
+  startProgress();
+
+  const csrf = '{{ csrf_token }}';
+  const fd = new FormData();
+  fd.append('description', text);
+
+  try {
+    const res = await fetch("{% url 'builder:ai_generate' %}", {
+      method: 'POST',
+      headers: { 'X-CSRFToken': csrf },
+      body: fd,
+    });
+    const data = await res.json();
+    if (!res.ok || !data.ok) {
+      stopProgress();
+      err.textContent = data.error || 'Something went wrong. Please try again.';
+      err.classList.add('on');
+      go.disabled = false;
+      go.innerHTML = '✨ Generate My Website';
+      return;
+    }
+    finishProgress();
+    setTimeout(() => { window.location.href = data.next; }, 700);
+  } catch (e) {
+    stopProgress();
+    err.textContent = 'Network error. Please check your connection and try again.';
+    err.classList.add('on');
+    go.disabled = false;
+    go.innerHTML = '✨ Generate My Website';
+  }
+});
+</script>
+</body>
+</html>

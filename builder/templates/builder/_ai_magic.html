@@ -1,0 +1,209 @@
+{% comment %}
+JAMIITEK MAGIC BUTTON — reusable AI helper kwa fields za forms
+
+Kutumia:
+  {% include 'builder/_ai_magic.html' %}
+kisha kwenye HTML yako:
+  <input name="tagline" data-ai="tagline" placeholder="...">
+  <textarea name="about" data-ai="about_us"></textarea>
+
+Attribute `data-ai` inaonyesha field_type ya AI. Magic button (✨) itaongezwa
+automatic kwenye input/textarea zote zilizo na data-ai. Wakati wa kubonyeza:
+  1. Inasoma value zote za form karibu (fields nyingine) kama context
+  2. Inaonyesha spinner
+  3. Ina-POST /builder/ai/field/ na kupokea text
+  4. Ina-fill field polepole (typing animation) kama vile AI ina-type
+{% endcomment %}
+
+<style>
+/* ── Wrapper inayowekwa around field yenye data-ai ── */
+.ai-field-wrap{position:relative}
+.ai-field-wrap>.ai-magic{
+  position:absolute;top:6px;right:6px;z-index:2;
+  display:inline-flex;align-items:center;gap:5px;
+  background:linear-gradient(135deg,rgba(108,99,255,.14),rgba(0,212,255,.1));
+  border:1px solid rgba(108,99,255,.35);color:#c9c5ff;
+  padding:5px 10px;border-radius:100px;font-size:11px;font-weight:700;
+  font-family:'JetBrains Mono',monospace;letter-spacing:.5px;
+  cursor:pointer;user-select:none;transition:all .18s var(--ease,ease);
+  min-height:26px
+}
+.ai-field-wrap>.ai-magic:hover{
+  background:linear-gradient(135deg,rgba(108,99,255,.25),rgba(0,212,255,.18));
+  border-color:rgba(108,99,255,.6);color:#e8e5ff;
+  transform:translateY(-1px);
+  box-shadow:0 4px 12px rgba(108,99,255,.25)
+}
+.ai-field-wrap>.ai-magic .spark{
+  animation:aispk 2.4s ease infinite
+}
+@keyframes aispk{0%,100%{transform:rotate(0) scale(1);opacity:1}
+  50%{transform:rotate(15deg) scale(1.15);opacity:.8}}
+.ai-field-wrap>.ai-magic.busy{
+  pointer-events:none;opacity:.85
+}
+.ai-field-wrap>.ai-magic.busy .spark{display:none}
+.ai-field-wrap>.ai-magic.busy::before{
+  content:'';width:11px;height:11px;
+  border:2px solid rgba(108,99,255,.9);border-top-color:transparent;
+  border-radius:50%;animation:aisp .7s linear infinite
+}
+@keyframes aisp{to{transform:rotate(360deg)}}
+.ai-field-wrap>.ai-magic.err{
+  background:rgba(255,84,112,.15);border-color:rgba(255,84,112,.5);color:#ff8ba0
+}
+
+/* Field yenyewe inapata top-padding ndogo kupisha button */
+.ai-field-wrap>input[data-ai],
+.ai-field-wrap>textarea[data-ai]{padding-top:32px!important}
+.ai-field-wrap>input[data-ai]{padding-top:14px!important;padding-right:88px!important}
+.ai-field-wrap>textarea[data-ai]{padding-right:14px!important}
+
+/* Typing animation */
+.ai-typing{animation:aityp .6s ease}
+@keyframes aityp{from{background:rgba(108,99,255,.08)}to{background:transparent}}
+
+/* Toast ya feedback */
+.ai-toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:linear-gradient(135deg,#1a1830,#0d1730);
+  border:1px solid rgba(108,99,255,.4);border-radius:12px;
+  padding:12px 20px;color:#e8e5ff;font-size:13.5px;font-weight:600;
+  box-shadow:0 12px 32px rgba(0,0,0,.4);z-index:9999;
+  opacity:0;pointer-events:none;transition:all .3s var(--ease,ease)
+}
+.ai-toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.ai-toast.err{border-color:rgba(255,84,112,.5);color:#ffb0be}
+
+/* Mobile: buttons kidogo lakini bado zinafanya */
+@media(max-width:520px){
+  .ai-field-wrap>.ai-magic{padding:4px 8px;font-size:10px}
+  .ai-field-wrap>.ai-magic .lbl{display:none}
+}
+</style>
+
+<script>
+(function(){
+  const CSRF = '{{ csrf_token }}';
+  const AI_URL = "{% url 'builder:ai_field' %}";
+  const SITE_ID = '{{ site.id|default:"" }}';
+
+  function makeToast(msg, isErr){
+    const t = document.createElement('div');
+    t.className = 'ai-toast' + (isErr ? ' err' : '');
+    t.textContent = msg;
+    document.body.appendChild(t);
+    requestAnimationFrame(() => t.classList.add('on'));
+    setTimeout(() => {
+      t.classList.remove('on');
+      setTimeout(() => t.remove(), 400);
+    }, isErr ? 4200 : 2600);
+  }
+
+  function collectContext(field){
+    // Soma form nzima ili AI ijue muktadha
+    const form = field.closest('form');
+    const ctx = {};
+    if (!form) return ctx;
+    for (const el of form.querySelectorAll('input, textarea, select')){
+      if (el === field || !el.name) continue;
+      if (el.type === 'password' || el.type === 'file' || el.type === 'hidden') continue;
+      const v = el.value?.trim();
+      if (v) ctx[el.name] = v;
+    }
+    return ctx;
+  }
+
+  async function typeInto(field, text){
+    // Typing animation — polepole kama AI ina-type
+    field.value = '';
+    field.classList.add('ai-typing');
+    const chunks = text.match(/.{1,3}/g) || [text];
+    for (const chunk of chunks){
+      field.value += chunk;
+      field.dispatchEvent(new Event('input', {bubbles:true}));
+      await new Promise(r => setTimeout(r, 14));
+    }
+    field.classList.remove('ai-typing');
+    field.focus();
+  }
+
+  async function runMagic(field, btn){
+    const fieldType = field.dataset.ai;
+    if (!fieldType) return;
+
+    btn.classList.remove('err');
+    btn.classList.add('busy');
+
+    const fd = new FormData();
+    fd.append('field_type', fieldType);
+    if (SITE_ID) fd.append('site_id', SITE_ID);
+    fd.append('context', JSON.stringify(collectContext(field)));
+    // hint = value ya sasa (kama mtu ameshaanza kuandika, AI iiboreshe kutoka pale)
+    if (field.value.trim()) fd.append('hint', field.value.trim());
+
+    try {
+      const res = await fetch(AI_URL, {
+        method: 'POST',
+        headers: {'X-CSRFToken': CSRF},
+        body: fd,
+      });
+      const data = await res.json();
+      if (!res.ok || !data.ok){
+        btn.classList.add('err');
+        makeToast(data.error || 'AI unavailable — please try again', true);
+        return;
+      }
+      await typeInto(field, data.text);
+      const left = data.remaining !== undefined ? ` · ${data.remaining} left today` : '';
+      makeToast('✨ Generated' + left);
+    } catch (e){
+      btn.classList.add('err');
+      makeToast('Network error — please try again', true);
+    } finally {
+      setTimeout(() => btn.classList.remove('busy', 'err'), 500);
+    }
+  }
+
+  function wrapField(field){
+    if (field.closest('.ai-field-wrap')) return;
+    const wrap = document.createElement('div');
+    wrap.className = 'ai-field-wrap';
+    field.parentNode.insertBefore(wrap, field);
+    wrap.appendChild(field);
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'ai-magic';
+    btn.title = 'Let AI write this for me';
+    btn.innerHTML = '<span class="spark">✨</span><span class="lbl">AI</span>';
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      runMagic(field, btn);
+    });
+    wrap.appendChild(btn);
+  }
+
+  function init(){
+    document.querySelectorAll('input[data-ai], textarea[data-ai]').forEach(wrapField);
+  }
+
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+  // Kama kuna fields zinazoongezwa dynamically (mfano JS ya editor), zi-detect
+  const mo = new MutationObserver(muts => {
+    for (const m of muts){
+      for (const n of m.addedNodes){
+        if (n.nodeType !== 1) continue;
+        if (n.matches?.('input[data-ai], textarea[data-ai]')) wrapField(n);
+        n.querySelectorAll?.('input[data-ai], textarea[data-ai]').forEach(wrapField);
+      }
+    }
+  });
+  mo.observe(document.body, {childList: true, subtree: true});
+})();
+</script>

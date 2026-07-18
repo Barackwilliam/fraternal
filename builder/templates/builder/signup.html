@@ -10,14 +10,26 @@
   {% if form.errors %}<div class="msg error">{{ form.errors }}</div>{% endif %}
   <form method="post" class="card">
     {% csrf_token %}
-    <h2>1 · Your Account</h2>
+    {% if from_ai %}
+<div style="background:linear-gradient(135deg,rgba(108,99,255,.14),rgba(0,212,255,.08));
+     border:1px solid rgba(108,99,255,.4);border-radius:14px;padding:16px 20px;margin-bottom:20px;
+     display:flex;gap:14px;align-items:center;flex-wrap:wrap">
+  <span style="font-size:26px">✨</span>
+  <div style="flex:1;min-width:200px">
+    <strong style="display:block;color:#fff;font-size:15px;margin-bottom:2px">Your AI-generated website is ready</strong>
+    <span style="color:#c9c5ff;font-size:13px">Create your account below and we'll apply
+      <b style="color:#fff">{{ ai_prefill.site_name }}</b> ({{ ai_prefill.website_type }}) automatically.</span>
+  </div>
+</div>
+{% endif %}
+<h2>1 · Your Account</h2>
     <label>Username</label>{{ form.username }}
     <label>Password</label>{{ form.password1 }}
     <label>Confirm Password</label>{{ form.password2 }}
 
     <h2 style="margin-top:26px">2 · Your Website</h2>
     <label>Business / Website Name</label>
-    <input type="text" name="site_name" required placeholder="mfano: Kili Adventures">
+    <input type="text" name="site_name" value="{{ ai_prefill.site_name|default:'' }}" required placeholder="mfano: Kili Adventures">
     <label>Subdomain (your website address)</label>
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
       <input type="text" name="subdomain" required placeholder="kiliadventures"

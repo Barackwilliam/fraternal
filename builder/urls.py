@@ -10,6 +10,18 @@ urlpatterns = [
     path('new/', views.create_site, name='create_site'),
     path('tutorial/', views.tutorial, name='tutorial'),
 
+    # One-Shot AI generator
+    path('ai/', views.ai_generator, name='ai_generator'),
+    path('ai/generate/', views.ai_generate_website, name='ai_generate'),
+    path('ai/apply/', views.ai_apply, name='ai_apply'),
+    path('ai/field/', views.ai_field, name='ai_field'),
+
+    # Super-admin (staff only)
+    path('superadmin/', views.superadmin, name='superadmin'),
+    path('superadmin/<int:site_id>/action/', views.superadmin_action, name='superadmin_action'),
+    path('site/<int:site_id>/collections/<int:collection_id>/ai-suggest/',
+         views.ai_suggest_items, name='ai_suggest_items'),
+
     path('site/<int:site_id>/', views.site_dashboard, name='site_dashboard'),
     path('site/<int:site_id>/settings/', views.site_settings_save, name='site_settings_save'),
     path('site/<int:site_id>/publish/', views.toggle_publish, name='toggle_publish'),

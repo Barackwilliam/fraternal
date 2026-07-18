@@ -7,18 +7,21 @@ import json
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.http import JsonResponse, Http404
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from django.views.decorators.http import require_POST
 
 from .models import (
-    ClientWebsite, SitePage, SiteCollection, SiteItem, SiteAsset, SiteInquiry,
+    ClientWebsite, SitePage, SiteCollection, SiteItem, SiteAsset, SiteInquiry, AiUsageLog,
     available_website_types, validate_subdomain,
 )
 from .site_templates import all_templates, apply_template
+from .insights import get_insights
 
 
 def _register_subdomain(site):
@@ -59,6 +62,15 @@ def signup(request):
     form = UserCreationForm(request.POST or None)
     error = None
 
+    ai_draft = request.session.get('ai_draft')
+    ai_prefill = {}
+    if ai_draft and ai_draft.get('plan') and request.GET.get('from') == 'ai':
+        plan = ai_draft['plan']
+        ai_prefill = {
+            'site_name': plan.get('site_name', ''),
+            'website_type': plan.get('website_type', 'default'),
+        }
+
     if request.method == 'POST' and form.is_valid():
         subdomain = (request.POST.get('subdomain') or '').lower().strip()
         site_name = (request.POST.get('site_name') or '').strip()
@@ -77,6 +89,13 @@ def signup(request):
                 )
                 site.bootstrap_from_schema()
                 apply_template(site, request.POST.get('template_key', 'clean_start'))
+
+                # AI draft ipo? Iweke kwenye site (juu ya template)
+                ai_draft = request.session.get('ai_draft')
+                if ai_draft and ai_draft.get('plan'):
+                    _apply_ai_plan(site, ai_draft['plan'])
+                    del request.session['ai_draft']
+                    request.session.modified = True
             _register_subdomain(site)
             login(request, user)
             messages.success(request, f'Congratulations! Your website {site.subdomain}.jamiitek.com has been created.')
@@ -88,6 +107,8 @@ def signup(request):
         'form': form, 'error': error,
         'website_types': available_website_types(),
         'site_templates': all_templates(),
+        'ai_prefill': ai_prefill,
+        'from_ai': bool(ai_prefill),
     })
 
 
@@ -134,6 +155,216 @@ def create_site(request):
 def get_started(request):
     """Public chooser: order a website, buy one, or build it yourself."""
     return render(request, 'builder/get_started.html')
+
+
+
+# ═══════════════════════════════════════════════════════════
+# ONE-SHOT AI WEBSITE GENERATOR
+# Kutoka sentensi moja ya biashara → website nzima tayari.
+# ═══════════════════════════════════════════════════════════
+
+def ai_generator(request):
+    """Public page yenye textarea moja: 'Describe your business'."""
+    return render(request, 'builder/ai_generator.html', {})
+
+
+@require_POST
+def ai_generate_website(request):
+    """
+    Endpoint ya AJAX inayoitwa na ai_generator.html.
+    Inarudisha JSON — kama sio-authenticated, ina-store draft kwenye session
+    kisha ina-redirect mteja kwa signup. Baada ya signup, apply_ai_draft()
+    inaingia otomatiki.
+    """
+    from . import ai_oneshot
+    description = (request.POST.get('description') or '').strip()
+
+    ok, result = ai_oneshot.generate_website_plan(description)
+    if not ok:
+        return JsonResponse({'ok': False, 'error': result}, status=400)
+
+    # Store kwenye session — italetwa kwenye signup au apply mara moja
+    request.session['ai_draft'] = {
+        'description': description,
+        'plan': result,
+    }
+    request.session.modified = True
+
+    if request.user.is_authenticated:
+        return JsonResponse({
+            'ok': True,
+            'next': reverse('builder:ai_apply'),
+            'preview': {
+                'site_name': result['site_name'],
+                'tagline': result['tagline'],
+                'website_type': result['website_type'],
+                'items_count': len(result.get('items', [])),
+            },
+        })
+    return JsonResponse({
+        'ok': True,
+        'next': reverse('builder:signup') + '?from=ai',
+        'preview': {
+            'site_name': result['site_name'],
+            'tagline': result['tagline'],
+            'website_type': result['website_type'],
+            'items_count': len(result.get('items', [])),
+        },
+    })
+
+
+def _apply_ai_plan(site, plan):
+    """Weka AI-generated content kwenye ClientWebsite + collections zake."""
+    from . import ai_oneshot
+
+    # 1. Update field za site
+    site.tagline = plan.get('tagline', '')[:200] or site.tagline
+    site.accent_color = plan.get('accent_color', site.accent_color)
+    site.nav_layout = plan.get('nav_layout', site.nav_layout)
+    site.save(update_fields=['tagline', 'accent_color', 'nav_layout'])
+
+    # 2. Ongeza items kwenye primary collection (packages/products/services/...)
+    primary_slug = ai_oneshot.PRIMARY_COLLECTION.get(site.website_type, 'services')
+    col = site.collections.filter(slug=primary_slug).first()
+    if col is not None:
+        # Futa items-mfano za default ili tuweke za AI
+        col.items.all().delete()
+        for it in plan.get('items', [])[:8]:
+            title = str(it.get('title', ''))[:200].strip()
+            if not title:
+                continue
+            data = {
+                'description': str(it.get('description', ''))[:2000],
+                'price': str(it.get('price', ''))[:80],
+            }
+            # Extra fields zenye maana (kama AI imezirudisha)
+            extra = it.get('extra') or {}
+            if isinstance(extra, dict):
+                for k, v in extra.items():
+                    if isinstance(v, (str, int, float)) and str(v).strip():
+                        data[str(k)[:40]] = str(v)[:600]
+            SiteItem.objects.create(
+                collection=col, title=title, data=data, is_visible=True,
+            )
+
+    # 3. Boresha Home page ya default kwa hero + about + why choose us kwa AI
+    home = site.pages.filter(slug='home').first()
+    if home is not None:
+        headline = plan.get('hero_headline', site.site_name)
+        subline = plan.get('hero_subline', plan.get('tagline', ''))
+        about = plan.get('about_us', '')
+        why = plan.get('why_choose_us', [])[:3]
+
+        why_html = ''
+        if why:
+            cards = ''
+            for w in why:
+                if isinstance(w, dict):
+                    t = str(w.get('title', ''))[:80]
+                    d = str(w.get('description', ''))[:300]
+                    if t or d:
+                        cards += (
+                            f'<div style="flex:1;min-width:240px;padding:26px;'
+                            f'background:rgba(255,255,255,.7);border-radius:14px;'
+                            f'border:1px solid rgba(0,0,0,.06)">'
+                            f'<h3 style="margin:0 0 8px;font-size:20px">{t}</h3>'
+                            f'<p style="margin:0;color:#555;line-height:1.7">{d}</p></div>'
+                        )
+            if cards:
+                why_html = (
+                    f'<section style="padding:70px 20px"><div style="max-width:1100px;'
+                    f'margin:0 auto"><h2 style="text-align:center;font-size:clamp(27px,4vw,38px);'
+                    f'margin-bottom:36px">Why Choose Us</h2>'
+                    f'<div style="display:flex;flex-wrap:wrap;gap:20px">{cards}</div></div></section>'
+                )
+
+        primary_col = site.collections.filter(slug=primary_slug).first()
+        col_section = ''
+        if primary_col is not None:
+            col_section = (
+                f'<section style="padding:70px 20px;background:rgba(255,255,255,.5)">'
+                f'<div style="max-width:1100px;margin:0 auto">'
+                f'<h2 style="text-align:center;font-size:clamp(27px,4vw,38px);margin-bottom:8px">'
+                f'{primary_col.name}</h2>'
+                f'<p style="text-align:center;color:#6b7268;margin:0 auto 30px;max-width:520px">'
+                f'{plan.get("tagline", "")}</p>'
+                f'[[collection:{primary_slug}]]</div></section>'
+            )
+
+        about_section = ''
+        if about:
+            about_section = (
+                f'<section style="padding:70px 20px"><div style="max-width:820px;margin:0 auto;text-align:center">'
+                f'<h2 style="font-size:clamp(27px,4vw,38px);margin-bottom:18px">About Us</h2>'
+                f'<p style="font-size:17px;color:#4a5060;line-height:1.85">{about}</p></div></section>'
+            )
+
+        hero = (
+            f'<section style="min-height:78vh;display:flex;align-items:center;justify-content:center;'
+            f'text-align:center;background:linear-gradient(155deg,#0f2030,#1a3550 60%,#14402f);'
+            f'color:#fff;padding:80px 22px;position:relative;overflow:hidden">'
+            f'<div style="position:relative;z-index:1;max-width:820px">'
+            f'<p style="letter-spacing:5px;text-transform:uppercase;color:var(--accent);'
+            f'font-size:13px;font-weight:800;margin-bottom:14px">Welcome to [[site:name]]</p>'
+            f'<h1 style="font-size:clamp(34px,6vw,58px);line-height:1.1;margin:0 0 18px">{headline}</h1>'
+            f'<p style="font-size:clamp(15px,2vw,18px);opacity:.88;margin:0 auto 32px;max-width:640px">{subline}</p>'
+            f'<a href="[[site:whatsapp]]" style="display:inline-block;background:var(--accent);color:#1c1508;'
+            f'padding:15px 38px;border-radius:13px;font-weight:800;text-decoration:none;font-size:15.5px">'
+            f'Get in Touch on WhatsApp</a></div></section>'
+        )
+
+        home.html_cache = hero + col_section + why_html + about_section + '[[form:inquiry]]'
+        home.save()
+
+    site.bump_version()
+
+
+@login_required
+def ai_apply(request):
+    """Chukua draft kutoka session, unda ClientWebsite mpya, weka content."""
+    draft = request.session.get('ai_draft')
+    if not draft:
+        messages.error(request, 'The AI draft has expired — please try again.')
+        return redirect('builder:ai_generator')
+
+    plan = draft['plan']
+    website_type = plan.get('website_type', 'default')
+
+    # Chagua subdomain automatic kutoka jina la biashara
+    import re
+    base = re.sub(r'[^a-z0-9]+', '-', plan.get('site_name', 'site').lower()).strip('-')[:40]
+    if not base:
+        base = 'site'
+    subdomain = base
+    n = 2
+    while ClientWebsite.objects.filter(subdomain=subdomain).exists():
+        subdomain = f'{base}-{n}'
+        n += 1
+        if n > 999:
+            subdomain = f'{base}-{request.user.id}'
+            break
+
+    try:
+        with transaction.atomic():
+            site = ClientWebsite.objects.create(
+                owner=request.user,
+                subdomain=subdomain,
+                site_name=plan.get('site_name', 'My Website')[:120],
+                website_type=website_type,
+            )
+            site.bootstrap_from_schema()
+            _apply_ai_plan(site, plan)
+    except ValidationError as e:
+        messages.error(request, ' '.join(e.messages))
+        return redirect('builder:ai_generator')
+
+    del request.session['ai_draft']
+    request.session.modified = True
+
+    messages.success(request,
+        f'✨ Your website is ready! "{site.site_name}" has been created — '
+        'review the content and hit Publish when you are happy.')
+    return redirect('builder:site_dashboard', site_id=site.id)
 
 
 @login_required
@@ -183,6 +414,7 @@ def site_dashboard(request, site_id):
         'onb_total': len(steps),
         'onb_pct': int(done_count / len(steps) * 100),
         'new_inquiries': site.inquiries.filter(status='new').count(),
+        'insights': get_insights(site)[:3],
     })
 
 
@@ -389,6 +621,203 @@ def item_delete(request, site_id, collection_id, item_id):
     item.delete()
     messages.success(request, f'"{item.title}" has been deleted.')
     return redirect('builder:collection_items', site_id=site.id, collection_id=collection.id)
+
+
+# ═══════════════════════════════════════════════════════════
+# SUPER-ADMIN — udhibiti wa platform nzima (staff only)
+# ═══════════════════════════════════════════════════════════
+
+def _staff_only(user):
+    return user.is_authenticated and user.is_staff
+
+
+@login_required
+def superadmin(request):
+    """Dashboard ya wewe (staff): sites zote, stats, na actions."""
+    if not request.user.is_staff:
+        return redirect('builder:my_sites')
+
+    from django.db.models import Count, Q
+    from django.utils import timezone
+    from datetime import timedelta
+
+    now = timezone.now()
+    week_ago = now - timedelta(days=7)
+    month_ago = now - timedelta(days=30)
+
+    all_sites = ClientWebsite.objects.select_related('owner')
+
+    stats = {
+        'total_sites': all_sites.count(),
+        'published': all_sites.filter(is_published=True).count(),
+        'premium': all_sites.filter(is_premium=True).count(),
+        'suspended': all_sites.filter(is_suspended=True).count(),
+        'new_week': all_sites.filter(created_at__gte=week_ago).count(),
+        'new_month': all_sites.filter(created_at__gte=month_ago).count(),
+        'total_users': User.objects.count(),
+        'inquiries_total': SiteInquiry.objects.count(),
+        'inquiries_week': SiteInquiry.objects.filter(created_at__gte=week_ago).count(),
+        'ai_calls_week': AiUsageLog.objects.filter(created_at__gte=week_ago).count(),
+    }
+
+    # Filters + search
+    q = (request.GET.get('q') or '').strip()
+    flt = request.GET.get('f', 'all')
+    sites = all_sites.annotate(
+        items_count=Count('collections__items', distinct=True),
+        inq_count=Count('inquiries', distinct=True),
+    ).order_by('-created_at')
+
+    if q:
+        sites = sites.filter(
+            Q(subdomain__icontains=q) | Q(site_name__icontains=q) |
+            Q(owner__username__icontains=q) | Q(custom_domain__icontains=q))
+    if flt == 'published':
+        sites = sites.filter(is_published=True)
+    elif flt == 'draft':
+        sites = sites.filter(is_published=False)
+    elif flt == 'premium':
+        sites = sites.filter(is_premium=True)
+    elif flt == 'suspended':
+        sites = sites.filter(is_suspended=True)
+
+    return render(request, 'builder/superadmin.html', {
+        'stats': stats,
+        'sites': sites[:200],
+        'q': q,
+        'flt': flt,
+    })
+
+
+@login_required
+@require_POST
+def superadmin_action(request, site_id):
+    """Actions: toggle premium / suspend / publish."""
+    if not request.user.is_staff:
+        return redirect('builder:my_sites')
+    site = get_object_or_404(ClientWebsite, id=site_id)
+    action = request.POST.get('action')
+
+    if action == 'toggle_premium':
+        site.is_premium = not site.is_premium
+        site.save(update_fields=['is_premium'])
+        messages.success(request,
+            f'{site.subdomain}: premium {"ON ⭐" if site.is_premium else "OFF"}')
+    elif action == 'toggle_suspend':
+        site.is_suspended = not site.is_suspended
+        site.save(update_fields=['is_suspended'])
+        site.bump_version()
+        messages.success(request,
+            f'{site.subdomain}: {"SUSPENDED 🚫" if site.is_suspended else "reactivated ✓"}')
+    elif action == 'toggle_publish':
+        site.is_published = not site.is_published
+        site.save(update_fields=['is_published'])
+        site.bump_version()
+        messages.success(request,
+            f'{site.subdomain}: {"published" if site.is_published else "unpublished"}')
+
+    back = request.POST.get('back', '')
+    return redirect(f"/builder/superadmin/?{back}")
+
+
+# ── AI Field Helper (magic buttons) ────────────────────
+
+@login_required
+@require_POST
+def ai_field(request):
+    """
+    Endpoint ya AJAX inayoitwa na kila magic ✨ button kwenye forms.
+    POST fields:
+        field_type — moja ya keys za FIELD_PROMPTS (site_name, tagline, ...)
+        site_id    — hiari; ClientWebsite ambayo mtu anahariri
+        context    — JSON (hiari) ya fields nyingine za form
+        hint       — user note (hiari)
+    """
+    from . import ai_field as ai_field_mod
+
+    # Rate limit share ile ile ya ai_assist
+    from .ai import _check_rate_limit
+    ok_rate, remaining = _check_rate_limit(request.user)
+    if not ok_rate:
+        from .ai import AI_DAILY_LIMIT
+        return JsonResponse({'ok': False,
+            'error': f'Daily AI limit reached ({AI_DAILY_LIMIT}). Try again tomorrow.'},
+            status=429)
+
+    field_type = (request.POST.get('field_type') or '').strip()
+    hint = (request.POST.get('hint') or '').strip()
+
+    site = None
+    site_id = request.POST.get('site_id')
+    if site_id:
+        try:
+            site = ClientWebsite.objects.get(id=site_id, owner=request.user)
+        except (ClientWebsite.DoesNotExist, ValueError):
+            pass
+
+    ctx = {}
+    ctx_raw = request.POST.get('context')
+    if ctx_raw:
+        try:
+            parsed = json.loads(ctx_raw)
+            if isinstance(parsed, dict):
+                ctx = {k: v for k, v in parsed.items() if isinstance(v, (str, int, float))}
+        except (ValueError, TypeError):
+            pass
+
+    ok, result = ai_field_mod.generate_field(field_type, site, ctx, hint)
+    if not ok:
+        return JsonResponse({'ok': False, 'error': result}, status=400)
+
+    # Log usage kwa ajili ya rate limit
+    AiUsageLog.objects.create(user=request.user)
+    return JsonResponse({'ok': True, 'text': result, 'remaining': remaining - 1})
+
+
+@login_required
+@require_POST
+def ai_suggest_items(request, site_id, collection_id):
+    """
+    AI Coach action: generate items 4-6 mpya, ziingie kama HIDDEN drafts
+    ili mtu azipitie kabla hazijaonekana kwenye website.
+    """
+    site = _my_site(request, site_id)
+    collection = get_object_or_404(SiteCollection, id=collection_id, website=site)
+
+    from .ai import _check_rate_limit, AI_DAILY_LIMIT
+    ok_rate, remaining = _check_rate_limit(request.user)
+    if not ok_rate:
+        messages.error(request,
+            f'Daily AI limit reached ({AI_DAILY_LIMIT}). Try again tomorrow.')
+        return redirect('builder:collection_items', site_id=site.id,
+                        collection_id=collection.id)
+
+    from . import ai_oneshot
+    ok, result = ai_oneshot.suggest_items(site, collection, count=5)
+    if not ok:
+        messages.error(request, result)
+        return redirect('builder:collection_items', site_id=site.id,
+                        collection_id=collection.id)
+
+    created = 0
+    for it in result:
+        data = {'description': it['description'], 'price': it['price']}
+        for k, v in (it.get('extra') or {}).items():
+            if isinstance(v, (str, int, float)) and str(v).strip():
+                data[str(k)[:40]] = str(v)[:600]
+        SiteItem.objects.create(
+            collection=collection, title=it['title'], data=data,
+            is_visible=False,  # HIDDEN draft — mtu ana-review kwanza
+        )
+        created += 1
+
+    AiUsageLog.objects.create(user=request.user)
+    site.bump_version()
+    messages.success(request,
+        f'✨ AI added {created} suggestions as HIDDEN drafts — review each one, '
+        f'add photos, then tick "Visible on website" to publish the ones you like.')
+    return redirect('builder:collection_items', site_id=site.id,
+                    collection_id=collection.id)
 
 
 # ── Inquiries / Bookings ────────────────────────────────

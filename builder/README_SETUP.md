@@ -148,3 +148,106 @@ anapoihifadhi kwenye dashboard yake. Hatua za mkono zimebaki MOJA tu
 
 Bila API keys, kila kitu kingine kinaendelea (routing, database) — unapata
 message ya kuongeza domain kwa mkono.
+
+
+## Toleo la 6 — AI One-Shot Website Generator ✨
+
+Kutoka sentensi moja ya biashara → website nzima tayari kwa sekunde 30.
+
+### Flow ya mteja
+1. Anafungua `/builder/ai/` (au anachagua kadi mpya kwenye Get Started)
+2. Anaandika sentensi 1-3 kuhusu biashara yake — English au Swahili
+3. Mfumo unafanya:
+   - **Pass 1**: AI ina-generate JSON kamili (jina, tagline, About Us, items 4-6 zenye descriptions na bei, Why Choose Us, hero copy, accent color, nav layout)
+   - **Pass 2**: AI nyingine kama senior editor ina-review Pass 1 na kuiboresha kuwa international quality
+   - Total: **API calls 2 tu kwa website nzima**
+4. Ana-signup (kama ni mgeni) — banner ya AI inaonyesha jina la biashara pre-filled
+5. Baada ya signup, apply ina-sogeza content yote kwenye ClientWebsite + primary collection (packages/products/menu...)
+6. Anafika dashboard yenye website tayari ~90% — anapaki maelezo machache na Publish
+
+### Files mpya
+- `builder/ai_oneshot.py` — generator + self-critique logic
+- `builder/templates/builder/ai_generator.html` — page ya mtumiaji
+- Views: `ai_generator`, `ai_generate_website`, `ai_apply`, `_apply_ai_plan`
+- URLs: `/builder/ai/`, `/builder/ai/generate/`, `/builder/ai/apply/`
+
+### UI updates
+- **Get Started**: kadi mpya "🪄 Let AI Build It for You" juu kabisa (grid-column: 1/-1)
+- **Signup**: banner ya violet inaonyesha kama flow imeanzia AI, na jina la biashara pre-filled
+- **Homepage**: slide mpya ya AI kwenye sliding ads
+
+
+## Toleo la 6.1 — AI Magic Buttons (Level 2) ✨
+
+Kila field muhimu sasa ina button ya ✨ AI inayojaza field hiyo kwa content
+ya kiwango cha juu — kwa muktadha kamili wa biashara.
+
+### Jinsi inavyofanya kazi
+1. Mtu anabonyeza ✨ karibu na field (mfano "Package Description")
+2. JS inasoma FORM NZIMA (title, price, fields nyingine) kama context
+3. POST /builder/ai/field/ na field_type + site_id + context + hint
+   (hint = alichokiandika tayari — AI inaboresha kutoka pale)
+4. AI ina-generate kwa prompt maalum ya field hiyo + self-check ndani ya prompt
+5. Text ina-type polepole kwenye field (typing animation) + toast ya feedback
+
+### Field types zinazopatikana (builder/ai_field.py)
+site_name, tagline, about_us, hero_headline, hero_subline,
+description, features_list, why_choose_us
+
+### Zimewekwa wapi
+- Item forms (packages, products, menu...): description + list fields
+- Dashboard → Website Details: tagline
+- Create site: tagline
+- Kuongeza field mpya popote: weka tu `data-ai="field_type"` kwenye
+  input/textarea na u-include `builder/_ai_magic.html` — button inajitokeza yenyewe
+
+### Rate limiting
+Inashare limit ile ile ya AI (BUILDER_AI_DAILY_LIMIT, default 25/siku)
+na kila matumizi yanalogwa AiUsageLog.
+
+
+## Toleo la 6.2 — AI Coach + AI Suggest + Caching (Levels 4 & 5) 💡
+
+### AI Coach (dashboard)
+Card mpya ya "💡 AI Coach" kwenye dashboard — ushauri 1-3 wenye maana ZAIDI
+kwa hali halisi ya website, kila mmoja na action button ya moja kwa moja:
+- Inquiries mpya zinasubiri → Reply now (P1)
+- Website haiko hewani → Publish (P1/P2)
+- Hakuna mawasiliano → Add contact (P1)
+- Content chache → ✨ AI Suggest (P2)
+- Hakuna tagline/logo, items bila picha, design haijaguswa (P3-P4)
+Rule-based — HAKUNA API calls, bure na instant. (builder/insights.py)
+
+### ✨ AI Suggest (bulk items)
+Button kwenye kila collection: AI ina-generate items 5 mpya kwa muktadha
+wa biashara + zilizopo (haizirudi), zinaingia kama **HIDDEN drafts** —
+mtu ana-review, anaweka picha, kisha ana-tick "Visible" kwa anazozipenda.
+
+### Caching ya AI (Level 5)
+Field responses zina-cache dakika 30 (Redis/LocMem) — maombi yanayofanana
+hayarudii API. Env: BUILDER_AI_CACHE_TTL (sekunde, default 1800).
+
+
+## Toleo la 7 — SEO za Client Sites + Super-Admin Dashboard 🛡️
+
+### SEO (kila website ya mteja, automatic)
+- **Meta tags kamili kila page**: title ("Item · Site Name"), description
+  (kutoka tagline/content ya page/item, HTML na shortcodes zimeondolewa), canonical URL
+- **Open Graph + Twitter Cards**: mtu aki-share link WhatsApp/Facebook inaonekana
+  na picha — item pages zinatumia PICHA YA ITEM yenyewe kama og:image (1200px)
+- **JSON-LD LocalBusiness**: jina, simu, anwani, logo — Google inaielewa biashara
+- **sitemap.xml** kwa kila site: home + pages + collections + items zote visible
+- **robots.txt**: site iliyo live = Allow + sitemap link; DRAFT = Disallow (Google
+  haioni kabla mteja haja-publish); sitemap ya draft inarudisha 404
+- Custom domain za premium zinatumika kwenye URLs zote za SEO automatic
+
+### Super-Admin Dashboard (/builder/superadmin/ — staff only)
+- **Stats za platform**: total sites, live, premium, users, ukuaji (7d/30d),
+  inquiries za wiki, AI calls za wiki, suspended
+- **Search**: subdomain, jina, owner, custom domain
+- **Filters**: All / Live / Draft / Premium / Suspended
+- **Actions kwa click moja**: ⭐ Premium ON/OFF (inafungua custom domains kwa
+  mteja), 🚫 Suspend/Reactivate (public inaonyesha 403 mara moja), Open dashboard
+  ya mteja
+- Link ya "🛡️ Super Admin" inaonekana sidenav kwa STAFF TU
+- Kuwa staff: Django admin → Users → tick "Staff status"

@@ -58,10 +58,12 @@ h1 em{font-style:normal;background:linear-gradient(90deg,var(--green),var(--cyan
 .path:nth-child(2){animation-delay:.1s}.path:nth-child(3){animation-delay:.2s}
 @keyframes up{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
 .path::after{content:'';position:absolute;top:0;left:0;right:0;height:2.5px;opacity:.85}
+.path.ai::after{background:linear-gradient(90deg,var(--violet),var(--cyan))}
 .path.diy::after{background:linear-gradient(90deg,var(--green),var(--green-2))}
 .path.buy::after{background:linear-gradient(90deg,var(--cyan),#7db9ff)}
 .path.order::after{background:linear-gradient(90deg,var(--violet),#a78bfa)}
 .path:hover{transform:translateY(-7px);box-shadow:0 22px 54px rgba(0,0,0,.45)}
+.path.ai:hover{border-color:rgba(108,99,255,.6);transform:translateY(-5px)}
 .path.diy:hover{border-color:rgba(37,211,102,.5)}
 .path.buy:hover{border-color:rgba(0,212,255,.5)}
 .path.order:hover{border-color:rgba(108,99,255,.5)}
@@ -118,6 +120,20 @@ h1 em{font-style:normal;background:linear-gradient(90deg,var(--green),var(--cyan
   <p class="sub">Whether you want full control, a ready-made professional design, or a team that builds everything for you — JamiiTek has a path for you.</p>
 
   <div class="paths">
+    <!-- 0. AI One-Shot -->
+    <a class="path ai" href="{% url 'builder:ai_generator' %}" style="grid-column:1/-1;background:linear-gradient(165deg,#151030,#0d1730);border:1.5px solid rgba(108,99,255,.35)">
+      <span class="p-tag" style="background:rgba(108,99,255,.15);color:#c9c5ff;border:1px solid rgba(108,99,255,.4)">✨ NEW · AI-POWERED</span>
+      <span class="p-ico" style="background:rgba(108,99,255,.14);border-color:rgba(108,99,255,.35)">🪄</span>
+      <h2 style="font-size:24px">Let AI Build It for You</h2>
+      <p style="font-size:14.5px">Just describe your business in one sentence — our AI generates the entire website: brand name, tagline, About Us, products/services with prices, and a design that fits your industry. In under 30 seconds.</p>
+      <ul class="p-feats" style="max-width:640px">
+        <li style="color:#c9c5ff">No prompts to write — just describe what you do</li>
+        <li style="color:#c9c5ff">Works in English or Swahili — automatic detection</li>
+        <li style="color:#c9c5ff">Advanced content quality — every draft is reviewed and improved by a second AI pass</li>
+      </ul>
+      <span class="p-cta" style="background:linear-gradient(135deg,#6c63ff,#00d4ff);color:#fff;max-width:400px;margin:0 auto">✨ Describe My Business</span>
+    </a>
+
     <!-- 1. Build it yourself -->
     <a class="path diy" href="{% url 'builder:signup' %}">
       <span class="p-tag">FREE · MOST POPULAR</span>

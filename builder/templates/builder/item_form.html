@@ -31,9 +31,9 @@
   {% for f in collection.fields %}
     <label>{{ f.label }}{% if f.required %} *{% endif %}</label>
     {% if f.type == 'textarea' %}
-      <textarea name="f_{{ f.key }}" {% if f.required %}required{% endif %}></textarea>
+      <textarea name="f_{{ f.key }}" data-ai="description" {% if f.required %}required{% endif %}></textarea>
     {% elif f.type == 'list' %}
-      <textarea name="f_{{ f.key }}" placeholder="Write one per line"></textarea>
+      <textarea name="f_{{ f.key }}" data-ai="features_list" placeholder="Write one per line"></textarea>
       <p class="hint">Each line = one item.</p>
     {% elif f.type == 'number' or f.type == 'price' %}
       <input type="number" step="any" name="f_{{ f.key }}" {% if f.required %}required{% endif %}>
@@ -62,6 +62,7 @@
 {% endblock %}
 
 {% block scripts %}
+{% include 'builder/_ai_magic.html' %}
 {{ item.data|default:"{}"|json_script:"item-data" }}
 {{ collection.fields|json_script:"col-fields" }}
 <script type="module">
