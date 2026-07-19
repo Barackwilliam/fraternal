@@ -1,0 +1,185 @@
+{% extends 'builder/base_panel.html' %}
+{% block title %}Navbar & Footer — {{ site.site_name }}{% endblock %}
+
+{% block sidenav %}
+<a href="{% url 'builder:site_dashboard' site.id %}">⬅ Dashboard</a>
+{% endblock %}
+
+{% block content %}
+<div class="topbar"><div>
+  <div class="crumb">{{ site.site_name }} / Navbar & Footer</div>
+  <h1>🧭 Navbar & Footer</h1>
+  <p class="hint" style="font-size:14px">Choose a ready-made style, or write your own HTML for full control. Changes apply to every page.</p>
+</div></div>
+
+<div class="card">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+    <h2 style="margin:0">Navbar</h2>
+    <span class="pill" style="background:rgba(108,99,255,.12);color:#b9b4ff;border:1px solid rgba(108,99,255,.3)">SITE-WIDE</span>
+  </div>
+
+  <div class="seg" style="margin:14px 0">
+    <button class="seg-b active" data-tab="nav-presets" onclick="navTab('nav-presets',this)">🎨 Presets</button>
+    <button class="seg-b" data-tab="nav-custom" onclick="navTab('nav-custom',this)">💻 Custom HTML</button>
+  </div>
+
+  <!-- Presets -->
+  <div id="nav-presets" class="tabpane">
+    <div class="preset-grid">
+      <div class="preset-card {% if not site.nav_preset and not site.custom_nav_html %}sel{% endif %}" onclick="navPreset('default',this)">
+        <div class="preset-prev">
+          <div class="pv-nav pv-glass"><span class="pv-logo"></span><span class="pv-links"><i></i><i></i><i></i></span></div>
+        </div>
+        <b>Default (Glass)</b><span>The standard JamiiTek nav</span>
+      </div>
+      {% for p in catalog.nav %}
+      <div class="preset-card {% if site.nav_preset == p.key %}sel{% endif %}" onclick="navPreset('{{ p.key }}',this)">
+        <div class="preset-prev">
+          <div class="pv-nav pv-{{ p.key }}"><span class="pv-logo"></span><span class="pv-links"><i></i><i></i><i></i></span></div>
+        </div>
+        <b>{{ p.name }}</b><span>{{ p.desc }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Custom HTML -->
+  <div id="nav-custom" class="tabpane" style="display:none">
+    <p class="hint" style="margin-bottom:10px">Write your own navbar HTML. Use these placeholders and they'll be filled automatically:</p>
+    <div class="ph-list">{% verbatim %}
+      <code onclick="insNav('{{logo}}')">{{logo}}</code>
+      <code onclick="insNav('{{site_name}}')">{{site_name}}</code>
+      <code onclick="insNav('{{nav_links}}')">{{nav_links}}</code>
+      <code onclick="insNav('{{whatsapp}}')">{{whatsapp}}</code>
+      <code onclick="insNav('{{phone}}')">{{phone}}</code>
+    {% endverbatim %}</div>
+    <textarea id="nav-html" class="code-area" spellcheck="false" placeholder="Write your navbar HTML here — use {{logo}}, {{site_name}}, {{nav_links}} placeholders. Include a &lt;style&gt; block for CSS.">{{ site.custom_nav_html }}</textarea>
+    <p class="hint" style="margin-top:8px">💡 Include your <code>&lt;style&gt;</code> inside the HTML. Tip: keep <code>id="jt-links"</code> on your menu container so the mobile menu button keeps working.</p>
+    <button class="btn amber" onclick="saveNavCustom()" style="margin-top:12px">💾 Save Custom Navbar</button>
+  </div>
+  <div class="save-status" id="nav-status"></div>
+</div>
+
+<div class="card">
+  <h2 style="margin:0 0 8px">Footer</h2>
+  <div class="seg" style="margin:14px 0">
+    <button class="seg-b active" data-tab="foot-presets" onclick="navTab('foot-presets',this)">🎨 Presets</button>
+    <button class="seg-b" data-tab="foot-custom" onclick="navTab('foot-custom',this)">💻 Custom HTML</button>
+  </div>
+
+  <div id="foot-presets" class="tabpane">
+    <div class="preset-grid">
+      <div class="preset-card {% if not site.custom_footer_html %}sel{% endif %}" onclick="footPreset('default',this)">
+        <div class="preset-prev"><div class="pv-foot"><span></span><span></span></div></div>
+        <b>Default</b><span>Standard footer</span>
+      </div>
+      {% for p in catalog.footer %}
+      <div class="preset-card" onclick="footPreset('{{ p.key }}',this)">
+        <div class="preset-prev"><div class="pv-foot pv-f-{{ p.key }}"><span></span><span></span></div></div>
+        <b>{{ p.name }}</b><span>{{ p.desc }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div id="foot-custom" class="tabpane" style="display:none">
+    <p class="hint" style="margin-bottom:10px">Same placeholders work here: {% verbatim %}{{site_name}}, {{nav_links}}, {{phone_line}}, {{email_line}}, {{year}}, {{tagline_line}}{% endverbatim %}</p>
+    <textarea id="foot-html" class="code-area" spellcheck="false" placeholder="Write your footer HTML here — placeholders and a &lt;style&gt; block both work.">{{ site.custom_footer_html }}</textarea>
+    <button class="btn amber" onclick="saveFootCustom()" style="margin-top:12px">💾 Save Custom Footer</button>
+  </div>
+  <div class="save-status" id="foot-status"></div>
+</div>
+
+<div class="card" style="background:rgba(0,212,255,.04);border-color:rgba(0,212,255,.2)">
+  <p style="margin:0;font-size:14px;color:var(--muted)">👀 <b style="color:var(--ink)">Preview your changes:</b>
+  open <a href="{{ site.public_url }}" target="_blank" style="color:var(--cyan)">{{ site.subdomain }}.jamiitek.com ↗</a> after saving.
+  Remember to <b style="color:var(--ink)">Publish</b> from the dashboard to make it live for visitors.</p>
+</div>
+
+<style>
+.seg{display:inline-flex;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:11px;padding:4px;gap:4px}
+.seg-b{background:none;border:none;color:var(--muted);padding:9px 18px;border-radius:8px;cursor:pointer;font-weight:700;font-size:13.5px;transition:.18s}
+.seg-b.active{background:var(--accent,#25d366);color:#04120a}
+.preset-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
+.preset-card{border:1.5px solid var(--line);border-radius:14px;padding:12px;cursor:pointer;transition:.18s;background:rgba(255,255,255,.02)}
+.preset-card:hover{border-color:var(--cyan);transform:translateY(-2px)}
+.preset-card.sel{border-color:var(--green,#25d366);box-shadow:0 0 0 2px rgba(37,211,102,.25)}
+.preset-card b{display:block;color:#fff;font-size:14px;margin:10px 0 2px}
+.preset-card span{font-size:12px;color:var(--muted)}
+.preset-prev{height:70px;background:linear-gradient(135deg,#0e1a30,#0a1220);border-radius:9px;padding:10px;display:flex;align-items:flex-start;overflow:hidden}
+.pv-nav{width:100%;display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.9);border-radius:5px;padding:7px 9px}
+.pv-nav .pv-logo{width:26px;height:9px;background:var(--accent,#25d366);border-radius:3px}
+.pv-nav .pv-links{display:flex;gap:5px}
+.pv-nav .pv-links i{width:14px;height:6px;background:#c3ccd6;border-radius:2px}
+.pv-centered{flex-direction:column;gap:6px;text-align:center}
+.pv-centered .pv-links{order:2}.pv-centered .pv-logo{order:1;width:34px}
+.pv-pill{border-radius:100px}
+.pv-minimal{background:transparent!important}
+.pv-minimal .pv-logo{background:#e8eef5}.pv-minimal .pv-links i{background:#5a6570}
+.pv-foot{width:100%;height:100%;background:#101a14;border-radius:6px;display:flex;align-items:center;justify-content:space-between;padding:10px 12px}
+.pv-foot span{height:7px;background:rgba(255,255,255,.35);border-radius:2px}
+.pv-foot span:first-child{width:40px}.pv-foot span:last-child{width:24px}
+.pv-f-columns{align-items:flex-start;gap:8px}.pv-f-columns span{width:22px!important;height:20px!important}
+.pv-f-centered{flex-direction:column;justify-content:center;gap:5px}.pv-f-centered span{width:40px!important}
+.code-area{width:100%;min-height:220px;padding:14px;border:1.5px solid var(--line);border-radius:12px;
+  background:#0a0e18;color:#a9c7e8;font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.6;resize:vertical}
+.code-area:focus{outline:none;border-color:var(--cyan)}
+.ph-list{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px}
+.ph-list code{background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.25);color:var(--cyan);
+  padding:5px 11px;border-radius:7px;font-size:12px;cursor:pointer;font-family:'JetBrains Mono',monospace}
+.ph-list code:hover{background:rgba(0,212,255,.16)}
+.save-status{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);margin-top:12px;min-height:16px}
+.save-status.ok{color:var(--green-2,#00ff88)}
+</style>
+
+<script>
+const SID = {{ site.id }};
+const CSRF = '{{ csrf_token }}';
+
+function navTab(id, btn){
+  const parent = btn.closest('.card');
+  parent.querySelectorAll('.tabpane').forEach(p => p.style.display = 'none');
+  parent.querySelectorAll('.seg-b').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).style.display = '';
+  btn.classList.add('active');
+}
+
+async function post(url, data){
+  const fd = new FormData();
+  for (const k in data) fd.append(k, data[k]);
+  const r = await fetch(url, {method:'POST', headers:{'X-CSRFToken':CSRF}, body:fd});
+  return r.json();
+}
+
+function status(id, msg){ const e = document.getElementById(id); e.textContent = msg; e.className = 'save-status ok'; }
+
+async function navPreset(key, card){
+  document.querySelectorAll('#nav-presets .preset-card').forEach(c => c.classList.remove('sel'));
+  card.classList.add('sel');
+  await post(`/builder/site/${SID}/nav/save/`, key === 'default' ? {mode:'default'} : {mode:'preset', preset:key});
+  status('nav-status', '✓ Navbar saved · open your site to preview');
+}
+async function saveNavCustom(){
+  const html = document.getElementById('nav-html').value;
+  await post(`/builder/site/${SID}/nav/save/`, {mode:'custom', html});
+  status('nav-status', '✓ Custom navbar saved · open your site to preview');
+}
+async function footPreset(key, card){
+  document.querySelectorAll('#foot-presets .preset-card').forEach(c => c.classList.remove('sel'));
+  card.classList.add('sel');
+  await post(`/builder/site/${SID}/footer/save/`, key === 'default' ? {mode:'default'} : {mode:'preset', preset:key});
+  status('foot-status', '✓ Footer saved · open your site to preview');
+}
+async function saveFootCustom(){
+  const html = document.getElementById('foot-html').value;
+  await post(`/builder/site/${SID}/footer/save/`, {mode:'custom', html});
+  status('foot-status', '✓ Custom footer saved · open your site to preview');
+}
+function insNav(ph){
+  const ta = document.getElementById('nav-html');
+  const s = ta.selectionStart;
+  ta.value = ta.value.slice(0,s) + ph + ta.value.slice(ta.selectionEnd);
+  ta.focus(); ta.selectionStart = ta.selectionEnd = s + ph.length;
+}
+</script>
+{% endblock %}

@@ -19,6 +19,9 @@ urlpatterns = [
     path('site/<int:site_id>/global-css/save/', views.save_global_css, name='save_global_css'),
     path('site/<int:site_id>/global-css/', views.get_global_css, name='get_global_css'),
     path('site/<int:site_id>/ai-theme/', views.ai_theme, name='ai_theme'),
+    path('site/<int:site_id>/nav/', views.nav_editor, name='nav_editor'),
+    path('site/<int:site_id>/nav/save/', views.nav_save, name='nav_save'),
+    path('site/<int:site_id>/footer/save/', views.footer_save, name='footer_save'),
 
     # Super-admin (staff only)
     path('superadmin/', views.superadmin, name='superadmin'),

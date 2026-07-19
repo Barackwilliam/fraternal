@@ -744,6 +744,67 @@ def superadmin_action(request, site_id):
     return redirect(f"/builder/superadmin/?{back}")
 
 
+# ── Navbar / Footer customization ──
+
+@login_required
+def nav_editor(request, site_id):
+    """Ukurasa wa kuhariri navbar/footer: presets + custom HTML."""
+    site = _my_site(request, site_id)
+    from .nav_presets import get_preset_catalog, NAV_PRESETS, FOOTER_PRESETS
+    return render(request, 'builder/nav_editor.html', {
+        'site': site,
+        'catalog': get_preset_catalog(),
+        'nav_presets_json': json.dumps({k: v['html'] for k, v in NAV_PRESETS.items()}),
+        'footer_presets_json': json.dumps({k: {'html': v['html'], 'css': v['css']}
+                                           for k, v in FOOTER_PRESETS.items()}),
+    })
+
+
+@login_required
+@require_POST
+def nav_save(request, site_id):
+    """Hifadhi navbar. mode=preset (jina) au mode=custom (HTML)."""
+    site = _my_site(request, site_id)
+    mode = request.POST.get('mode')
+    from .nav_presets import NAV_PRESETS
+    if mode == 'custom':
+        site.custom_nav_html = (request.POST.get('html') or '')[:40000]
+        site.nav_preset = ''
+    elif mode == 'preset':
+        key = request.POST.get('preset', '')
+        if key in NAV_PRESETS:
+            site.nav_preset = key
+            site.custom_nav_html = ''
+    elif mode == 'default':
+        site.nav_preset = ''
+        site.custom_nav_html = ''
+    site.save(update_fields=['custom_nav_html', 'nav_preset'])
+    site.bump_version()
+    return JsonResponse({'ok': True})
+
+
+@login_required
+@require_POST
+def footer_save(request, site_id):
+    """Hifadhi footer. mode=preset/custom/default."""
+    site = _my_site(request, site_id)
+    mode = request.POST.get('mode')
+    from .nav_presets import FOOTER_PRESETS
+    if mode == 'custom':
+        site.custom_footer_html = (request.POST.get('html') or '')[:40000]
+    elif mode == 'preset':
+        key = request.POST.get('preset', '')
+        if key in FOOTER_PRESETS:
+            # Footer preset: tunahifadhi HTML+CSS pamoja ndani ya custom_footer_html
+            preset = FOOTER_PRESETS[key]
+            site.custom_footer_html = f"<style>{preset['css']}</style>\n{preset['html']}"
+    elif mode == 'default':
+        site.custom_footer_html = ''
+    site.save(update_fields=['custom_footer_html'])
+    site.bump_version()
+    return JsonResponse({'ok': True})
+
+
 # ── Global CSS + AI Theme (customization ya website nzima) ──
 
 @login_required

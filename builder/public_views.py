@@ -46,6 +46,16 @@ def _ctx(site, extra=None):
         'meta_url': _base_url(site),
         'base_url': _base_url(site),
     }
+    # Custom navbar/footer (au preset) — page_slug kwa 'on' highlighting
+    from .nav_presets import render_nav, render_footer
+    _pslug = (extra or {}).get('page').slug if extra and extra.get('page') else None
+    nav_html, nav_css = render_nav(site, _pslug)
+    foot_html, foot_css = render_footer(site, _pslug)
+    ctx['custom_nav_html'] = nav_html
+    ctx['custom_nav_css'] = nav_css
+    ctx['custom_footer_html'] = foot_html
+    ctx['custom_footer_css'] = foot_css
+
     if extra:
         ctx.update(extra)
     return ctx

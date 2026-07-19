@@ -150,6 +150,16 @@
 <!-- Templates -->
 {% if site_templates %}
 <div class="card">
+  <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+    <div style="flex:1;min-width:220px">
+      <h2 style="margin:0 0 6px">🧭 Navbar &amp; Footer</h2>
+      <p class="hint" style="margin:0">Change your navbar and footer style — pick a preset or write your own HTML. Applies to every page.</p>
+    </div>
+    <a class="btn amber" href="{% url 'builder:nav_editor' site.id %}">Customize Nav &amp; Footer →</a>
+  </div>
+</div>
+
+<div class="card">
   <h2>🖼️ Design Template</h2>
   <p class="hint" style="margin-bottom:14px">Choose a ready-made starting design for your website type. ⚠️ Changing the template rewrites your default pages.</p>
   <div class="grid c3">

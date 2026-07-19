@@ -142,6 +142,11 @@ body.has-side .jt-body{margin-left:250px;flex:1;min-width:0}
 <body class="has-{{ site.nav_style|default:'glass' }}">
 <div id="jt-load"></div>
 
+{% if custom_nav_css %}<style>{{ custom_nav_css|safe }}</style>{% endif %}
+{% if custom_footer_css %}<style>{{ custom_footer_css|safe }}</style>{% endif %}
+{% if custom_nav_html %}
+{{ custom_nav_html|safe }}
+{% else %}
 {% with nav=site.nav_style|default:'glass' %}
 <nav class="nav-{{ nav }}">
   <a class="jt-logo" href="/">
@@ -158,10 +163,14 @@ body.has-side .jt-body{margin-left:250px;flex:1;min-width:0}
   </div>
 </nav>
 {% endwith %}
+{% endif %}
 
 <div class="jt-body">
 {% block body %}{% endblock %}
 
+{% if custom_footer_html %}
+{{ custom_footer_html|safe }}
+{% else %}
 <footer class="jt-footer">
   <div class="wrap">
     <div>
@@ -175,6 +184,7 @@ body.has-side .jt-body{margin-left:250px;flex:1;min-width:0}
     <div class="badge">Built with <a href="https://jamiitek.com" rel="noopener">JamiiTek</a></div>
   </div>
 </footer>
+{% endif %}
 </div>
 
 <script>
