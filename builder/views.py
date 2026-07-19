@@ -762,6 +762,40 @@ def nav_editor(request, site_id):
 
 @login_required
 @require_POST
+def ai_nav_generate(request, site_id):
+    """AI ina-generate navbar au footer HTML kutoka maneno."""
+    site = _my_site(request, site_id)
+    from .ai import _check_rate_limit, AI_DAILY_LIMIT
+    ok_rate, remaining = _check_rate_limit(request.user)
+    if not ok_rate:
+        return JsonResponse({'ok': False,
+            'error': f'Daily AI limit reached ({AI_DAILY_LIMIT}). Try again tomorrow.'}, status=429)
+
+    brief = (request.POST.get('brief') or '').strip()
+    target = request.POST.get('target', 'nav')  # 'nav' au 'footer'
+    if len(brief) < 3:
+        return JsonResponse({'ok': False, 'error': 'Please describe what you want.'}, status=400)
+
+    try:
+        from . import ai_nav
+        if target == 'footer':
+            ok, html = ai_nav.generate_footer(site, brief)
+        else:
+            ok, html = ai_nav.generate_navbar(site, brief)
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).exception('ai_nav crashed')
+        return JsonResponse({'ok': False,
+            'error': f'Server error ({type(e).__name__}). Check /builder/ai/status/.'}, status=500)
+
+    if not ok:
+        return JsonResponse({'ok': False, 'error': html}, status=400)
+    AiUsageLog.objects.create(user=request.user)
+    return JsonResponse({'ok': True, 'html': html, 'remaining': remaining - 1})
+
+
+@login_required
+@require_POST
 def nav_save(request, site_id):
     """Hifadhi navbar. mode=preset (jina) au mode=custom (HTML)."""
     site = _my_site(request, site_id)

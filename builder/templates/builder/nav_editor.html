@@ -45,7 +45,18 @@
 
   <!-- Custom HTML -->
   <div id="nav-custom" class="tabpane" style="display:none">
-    <p class="hint" style="margin-bottom:10px">Write your own navbar HTML. Use these placeholders and they'll be filled automatically:</p>
+    <div class="ai-box">
+      <div class="ai-box-t">✨ Let AI build your navbar</div>
+      <textarea id="nav-ai-brief" class="ai-brief" maxlength="800" placeholder="e.g. Modern navbar with logo on the left, links in the center, and a green WhatsApp button on the right"></textarea>
+      <div class="ai-chips">
+        <span onclick="aiChip('nav-ai-brief','Centered logo with links split on both sides, clean and minimal')">Centered logo</span>
+        <span onclick="aiChip('nav-ai-brief','Floating rounded navbar with a WhatsApp call-to-action button')">Floating + CTA</span>
+        <span onclick="aiChip('nav-ai-brief','Bold dark navbar with the logo left and uppercase menu links')">Bold dark</span>
+      </div>
+      <button class="btn ai-go" id="nav-ai-go" onclick="aiGen('nav')">✨ Generate Navbar</button>
+      <div class="ai-status" id="nav-ai-status"></div>
+    </div>
+    <p class="hint" style="margin-bottom:10px">Or write your own navbar HTML. Use these placeholders and they'll be filled automatically:</p>
     <div class="ph-list">{% verbatim %}
       <code onclick="insNav('{{logo}}')">{{logo}}</code>
       <code onclick="insNav('{{site_name}}')">{{site_name}}</code>
@@ -83,6 +94,17 @@
   </div>
 
   <div id="foot-custom" class="tabpane" style="display:none">
+    <div class="ai-box">
+      <div class="ai-box-t">✨ Let AI build your footer</div>
+      <textarea id="foot-ai-brief" class="ai-brief" maxlength="800" placeholder="e.g. Multi-column footer with the business name, quick links, contact details and social feel"></textarea>
+      <div class="ai-chips">
+        <span onclick="aiChip('foot-ai-brief','Multi-column footer with brand, page links and contact info')">Multi-column</span>
+        <span onclick="aiChip('foot-ai-brief','Simple centered footer with a warm friendly feel')">Centered</span>
+        <span onclick="aiChip('foot-ai-brief','Dark modern footer with big brand name and social links')">Dark modern</span>
+      </div>
+      <button class="btn ai-go" id="foot-ai-go" onclick="aiGen('footer')">✨ Generate Footer</button>
+      <div class="ai-status" id="foot-ai-status"></div>
+    </div>
     <p class="hint" style="margin-bottom:10px">Same placeholders work here: {% verbatim %}{{site_name}}, {{nav_links}}, {{phone_line}}, {{email_line}}, {{year}}, {{tagline_line}}{% endverbatim %}</p>
     <textarea id="foot-html" class="code-area" spellcheck="false" placeholder="Write your footer HTML here — placeholders and a &lt;style&gt; block both work.">{{ site.custom_footer_html }}</textarea>
     <button class="btn amber" onclick="saveFootCustom()" style="margin-top:12px">💾 Save Custom Footer</button>
@@ -121,6 +143,21 @@
 .pv-foot span:first-child{width:40px}.pv-foot span:last-child{width:24px}
 .pv-f-columns{align-items:flex-start;gap:8px}.pv-f-columns span{width:22px!important;height:20px!important}
 .pv-f-centered{flex-direction:column;justify-content:center;gap:5px}.pv-f-centered span{width:40px!important}
+.ai-box{background:linear-gradient(165deg,rgba(108,99,255,.08),rgba(0,212,255,.04));
+  border:1px solid rgba(108,99,255,.3);border-radius:14px;padding:16px;margin-bottom:16px}
+.ai-box-t{font-size:13px;font-weight:800;color:#c9c5ff;margin-bottom:10px}
+.ai-brief{width:100%;min-height:64px;padding:12px;border:1.5px solid var(--line);border-radius:10px;
+  background:rgba(255,255,255,.03);color:var(--ink);font-family:'Inter',sans-serif;font-size:14px;resize:vertical;line-height:1.5}
+.ai-brief:focus{outline:none;border-color:var(--violet)}
+.ai-chips{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0}
+.ai-chips span{background:rgba(255,255,255,.04);border:1px solid var(--line);color:var(--muted);
+  padding:6px 12px;border-radius:100px;font-size:12px;cursor:pointer;transition:.16s}
+.ai-chips span:hover{border-color:var(--cyan);color:var(--cyan)}
+.ai-go{background:linear-gradient(135deg,var(--violet),var(--cyan))!important;color:#fff!important;border:none!important;width:100%;margin-top:4px}
+.ai-go:disabled{opacity:.7;cursor:wait}
+.ai-status{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--muted);margin-top:9px;min-height:15px}
+.ai-status.ok{color:var(--green-2,#00ff88)}
+.ai-status.er{color:#ff8ba0}
 .code-area{width:100%;min-height:220px;padding:14px;border:1.5px solid var(--line);border-radius:12px;
   background:#0a0e18;color:#a9c7e8;font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.6;resize:vertical}
 .code-area:focus{outline:none;border-color:var(--cyan)}
@@ -175,6 +212,42 @@ async function saveFootCustom(){
   await post(`/builder/site/${SID}/footer/save/`, {mode:'custom', html});
   status('foot-status', '✓ Custom footer saved · open your site to preview');
 }
+function aiChip(id, t){ const e = document.getElementById(id); e.value = t; e.focus(); }
+
+async function aiGen(target){
+  const briefId = target === 'footer' ? 'foot-ai-brief' : 'nav-ai-brief';
+  const goId = target === 'footer' ? 'foot-ai-go' : 'nav-ai-go';
+  const statusId = target === 'footer' ? 'foot-ai-status' : 'nav-ai-status';
+  const targetTa = target === 'footer' ? 'foot-html' : 'nav-html';
+  const brief = document.getElementById(briefId).value.trim();
+  if (brief.length < 3){ setStat(statusId, 'Please describe what you want.', 'er'); return; }
+  const go = document.getElementById(goId);
+  go.disabled = true; go.textContent = '✨ Designing…';
+  setStat(statusId, 'AI is building your ' + target + '…', '');
+  try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 60000);
+    const fd = new FormData(); fd.append('brief', brief); fd.append('target', target);
+    const res = await fetch(`/builder/site/${SID}/nav/ai/`, {
+      method:'POST', headers:{'X-CSRFToken':CSRF}, body:fd, signal:ctrl.signal,
+    });
+    clearTimeout(timer);
+    let data = null; try { data = await res.json(); } catch(_){}
+    if (!res.ok || !data || !data.ok){
+      setStat(statusId, (data && data.error) ? data.error : `Server error (${res.status}) — see /builder/ai/status/`, 'er');
+      return;
+    }
+    document.getElementById(targetTa).value = data.html;
+    const left = data.remaining !== undefined ? ` · ${data.remaining} AI credits left` : '';
+    setStat(statusId, '✨ Generated! Review the code below, then Save' + left, 'ok');
+  } catch(e){
+    setStat(statusId, e.name === 'AbortError' ? 'AI took too long — try again' : 'Cannot reach server', 'er');
+  } finally {
+    go.disabled = false; go.textContent = target === 'footer' ? '✨ Generate Footer' : '✨ Generate Navbar';
+  }
+}
+function setStat(id, msg, cls){ const e = document.getElementById(id); e.textContent = msg; e.className = 'ai-status ' + (cls||''); }
+
 function insNav(ph){
   const ta = document.getElementById('nav-html');
   const s = ta.selectionStart;

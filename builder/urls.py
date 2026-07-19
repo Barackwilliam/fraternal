@@ -21,6 +21,7 @@ urlpatterns = [
     path('site/<int:site_id>/ai-theme/', views.ai_theme, name='ai_theme'),
     path('site/<int:site_id>/nav/', views.nav_editor, name='nav_editor'),
     path('site/<int:site_id>/nav/save/', views.nav_save, name='nav_save'),
+    path('site/<int:site_id>/nav/ai/', views.ai_nav_generate, name='ai_nav_generate'),
     path('site/<int:site_id>/footer/save/', views.footer_save, name='footer_save'),
 
     # Super-admin (staff only)
