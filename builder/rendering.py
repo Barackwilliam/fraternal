@@ -144,7 +144,7 @@ def render_inquiry_form(site, item=None):
   <div class="jt-ok" id="jt-ok">✅ Thank you! Your inquiry has been received — we will contact you shortly.</div>
   <h3>{title}</h3>
   <p class="jt-sub">Fill in the form and we will get back to you as soon as possible.</p>
-  <form method="post" action="/inquiry/" onsubmit="return jtSend(this)">
+  <form method="post" action="/inquiry/" onsubmit="jtSend(this); return false;">
     {item_field}
     <input class="jt-hp" type="text" name="website_url" tabindex="-1" autocomplete="off">
     <label>Your Name *</label>

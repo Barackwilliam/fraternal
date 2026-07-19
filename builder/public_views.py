@@ -190,6 +190,12 @@ def submit_inquiry(request):
         message=(request.POST.get('message') or '').strip()[:3000],
         preferred_date=preferred, people_count=people,
     )
+
+    # Browser navigation ya kawaida (JS imezimwa/imefeli) → page ya asante,
+    # AJAX fetch (Accept: */*) → JSON kama kawaida
+    if 'text/html' in (request.headers.get('Accept') or ''):
+        return render(request, 'builder/public/inquiry_thanks.html',
+                      {'site': site, 'name': name})
     return JsonResponse({'status': 'ok'})
 
 

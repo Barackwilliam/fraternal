@@ -224,18 +224,19 @@ def ai_generate_website(request):
 def _apply_ai_plan(site, plan):
     """Weka AI-generated content kwenye ClientWebsite + collections zake."""
     from . import ai_oneshot
+    from .ai_designs import render_home
 
     # 1. Update field za site
     site.tagline = plan.get('tagline', '')[:200] or site.tagline
-    site.accent_color = plan.get('accent_color', site.accent_color)
+    site.accent_color = plan.get('palette', {}).get('primary',
+                        plan.get('accent_color', site.accent_color))
     site.nav_layout = plan.get('nav_layout', site.nav_layout)
     site.save(update_fields=['tagline', 'accent_color', 'nav_layout'])
 
-    # 2. Ongeza items kwenye primary collection (packages/products/services/...)
+    # 2. Ongeza items kwenye primary collection
     primary_slug = ai_oneshot.PRIMARY_COLLECTION.get(site.website_type, 'services')
     col = site.collections.filter(slug=primary_slug).first()
     if col is not None:
-        # Futa items-mfano za default ili tuweke za AI
         col.items.all().delete()
         for it in plan.get('items', [])[:8]:
             title = str(it.get('title', ''))[:200].strip()
@@ -245,7 +246,6 @@ def _apply_ai_plan(site, plan):
                 'description': str(it.get('description', ''))[:2000],
                 'price': str(it.get('price', ''))[:80],
             }
-            # Extra fields zenye maana (kama AI imezirudisha)
             extra = it.get('extra') or {}
             if isinstance(extra, dict):
                 for k, v in extra.items():
@@ -255,73 +255,15 @@ def _apply_ai_plan(site, plan):
                 collection=col, title=title, data=data, is_visible=True,
             )
 
-    # 3. Boresha Home page ya default kwa hero + about + why choose us kwa AI
+    # 3. Home page — DESIGN TOFAUTI kulingana na style AI iliyochagua
     home = site.pages.filter(slug='home').first()
     if home is not None:
-        headline = plan.get('hero_headline', site.site_name)
-        subline = plan.get('hero_subline', plan.get('tagline', ''))
-        about = plan.get('about_us', '')
-        why = plan.get('why_choose_us', [])[:3]
-
-        why_html = ''
-        if why:
-            cards = ''
-            for w in why:
-                if isinstance(w, dict):
-                    t = str(w.get('title', ''))[:80]
-                    d = str(w.get('description', ''))[:300]
-                    if t or d:
-                        cards += (
-                            f'<div style="flex:1;min-width:240px;padding:26px;'
-                            f'background:rgba(255,255,255,.7);border-radius:14px;'
-                            f'border:1px solid rgba(0,0,0,.06)">'
-                            f'<h3 style="margin:0 0 8px;font-size:20px">{t}</h3>'
-                            f'<p style="margin:0;color:#555;line-height:1.7">{d}</p></div>'
-                        )
-            if cards:
-                why_html = (
-                    f'<section style="padding:70px 20px"><div style="max-width:1100px;'
-                    f'margin:0 auto"><h2 style="text-align:center;font-size:clamp(27px,4vw,38px);'
-                    f'margin-bottom:36px">Why Choose Us</h2>'
-                    f'<div style="display:flex;flex-wrap:wrap;gap:20px">{cards}</div></div></section>'
-                )
-
-        primary_col = site.collections.filter(slug=primary_slug).first()
-        col_section = ''
-        if primary_col is not None:
-            col_section = (
-                f'<section style="padding:70px 20px;background:rgba(255,255,255,.5)">'
-                f'<div style="max-width:1100px;margin:0 auto">'
-                f'<h2 style="text-align:center;font-size:clamp(27px,4vw,38px);margin-bottom:8px">'
-                f'{primary_col.name}</h2>'
-                f'<p style="text-align:center;color:#6b7268;margin:0 auto 30px;max-width:520px">'
-                f'{plan.get("tagline", "")}</p>'
-                f'[[collection:{primary_slug}]]</div></section>'
-            )
-
-        about_section = ''
-        if about:
-            about_section = (
-                f'<section style="padding:70px 20px"><div style="max-width:820px;margin:0 auto;text-align:center">'
-                f'<h2 style="font-size:clamp(27px,4vw,38px);margin-bottom:18px">About Us</h2>'
-                f'<p style="font-size:17px;color:#4a5060;line-height:1.85">{about}</p></div></section>'
-            )
-
-        hero = (
-            f'<section style="min-height:78vh;display:flex;align-items:center;justify-content:center;'
-            f'text-align:center;background:linear-gradient(155deg,#0f2030,#1a3550 60%,#14402f);'
-            f'color:#fff;padding:80px 22px;position:relative;overflow:hidden">'
-            f'<div style="position:relative;z-index:1;max-width:820px">'
-            f'<p style="letter-spacing:5px;text-transform:uppercase;color:var(--accent);'
-            f'font-size:13px;font-weight:800;margin-bottom:14px">Welcome to [[site:name]]</p>'
-            f'<h1 style="font-size:clamp(34px,6vw,58px);line-height:1.1;margin:0 0 18px">{headline}</h1>'
-            f'<p style="font-size:clamp(15px,2vw,18px);opacity:.88;margin:0 auto 32px;max-width:640px">{subline}</p>'
-            f'<a href="[[site:whatsapp]]" style="display:inline-block;background:var(--accent);color:#1c1508;'
-            f'padding:15px 38px;border-radius:13px;font-weight:800;text-decoration:none;font-size:15.5px">'
-            f'Get in Touch on WhatsApp</a></div></section>'
+        home.html_cache = render_home(
+            plan.get('design_style', 'sunset_bold'),
+            plan.get('palette', {}),
+            plan,
+            col,
         )
-
-        home.html_cache = hero + col_section + why_html + about_section + '[[form:inquiry]]'
         home.save()
 
     site.bump_version()
@@ -673,14 +615,26 @@ def ai_status(request):
     from .ai import GROQ_MODEL
     checks['model'] = {'ok': True, 'detail': GROQ_MODEL}
 
-    # 5. Cache backend
+    # 5. Cache backend (+ REDIS_URL forensics — prefix tu, password haionyeshwi)
     from django.core.cache import cache
+    redis_url = os.getenv('REDIS_URL', '')
+    url_info = ''
+    if redis_url:
+        prefix = redis_url[:14]
+        url_info = (f' · REDIS_URL starts with: {prefix!r} '
+                    f'(len={len(redis_url)}, '
+                    f'leading_space={redis_url != redis_url.lstrip()}, '
+                    f'has_quotes={redis_url[0] in chr(34) + chr(39)})')
+    else:
+        url_info = ' · REDIS_URL is EMPTY/absent (LocMem in use)'
     try:
         cache.set('jt_diag', 'ok', 10)
         backend = type(cache).__name__
-        checks['cache'] = {'ok': cache.get('jt_diag') == 'ok', 'detail': backend}
+        checks['cache'] = {'ok': cache.get('jt_diag') == 'ok',
+                           'detail': backend + url_info}
     except Exception as e:
-        checks['cache'] = {'ok': False, 'detail': f'{type(e).__name__}: {str(e)[:120]}'}
+        checks['cache'] = {'ok': False,
+                           'detail': f'{type(e).__name__}: {str(e)[:120]}{url_info}'}
 
     # 6. Rate limit yako
     from .ai import _check_rate_limit, AI_DAILY_LIMIT

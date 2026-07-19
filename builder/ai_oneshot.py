@@ -53,6 +53,8 @@ JSON_SCHEMA_HINT = {
     ],
     "accent_color": "hex color that matches the brand mood (#RRGGBB)",
     "nav_layout": "one of: top, glass, side, center",
+    "design_style": "pick ONE that fits the brand mood: sunset_bold (warm, energetic, consumer brands), clean_minimal (calm, professional, modern services), dark_luxury (premium, high-end, exclusive), fresh_split (friendly, tech-savvy, youthful)",
+    "palette": {"primary": "vibrant hex for buttons/accents", "deep": "dark hex for backgrounds — both must fit the brand mood and work together"},
 }
 
 
@@ -211,6 +213,19 @@ def generate_website_plan(business_description: str):
         final['nav_layout'] = 'top'
     else:
         final['nav_layout'] = nav
+
+    # Design style + palette
+    from .ai_designs import STYLES
+    style = str(final.get('design_style', '')).lower().strip()
+    final['design_style'] = style if style in STYLES else 'sunset_bold'
+    pal = final.get('palette') if isinstance(final.get('palette'), dict) else {}
+    def _hex(v, fallback):
+        v = str(v or '').strip()
+        return v if (v.startswith('#') and len(v) in (4, 7)) else fallback
+    final['palette'] = {
+        'primary': _hex(pal.get('primary'), final['accent_color']),
+        'deep': _hex(pal.get('deep'), '#1a1428'),
+    }
 
     return True, final
 
