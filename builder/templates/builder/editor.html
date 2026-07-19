@@ -126,32 +126,62 @@ body{font-family:'Inter',-apple-system,sans-serif;height:100vh;height:100dvh;dis
 .cm-builtin{color:#c792ea!important}
 .cm-s-hopscotch.CodeMirror{background:#060b18!important}
 
-/* ══ LIVE CODE EDITOR ══ */
-.jt-code-wrap{display:flex;flex-direction:column;gap:12px;min-width:min(920px,86vw)}
-.jt-code-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.jt-code-bar .sp{flex:1}
-.jt-live{display:inline-flex;align-items:center;gap:8px;font-family:var(--ff-m);font-size:11px;
+/* ══ FULL-SCREEN LIVE CODE IDE ══ */
+#jt-ide{position:fixed;inset:0;z-index:400;display:none;flex-direction:column;
+  background:#05080f;animation:ideIn .25s var(--ease)}
+#jt-ide.on{display:flex}
+@keyframes ideIn{from{opacity:0;transform:scale(.985)}to{opacity:1;transform:none}}
+.ide-top{display:flex;align-items:center;gap:12px;padding:10px 16px;flex-wrap:wrap;
+  background:linear-gradient(180deg,#0c1730,#081126);border-bottom:1px solid var(--line)}
+.ide-dots{display:flex;gap:7px;margin-right:4px}
+.ide-dots i{width:12px;height:12px;border-radius:50%}
+.ide-dots i:nth-child(1){background:#ff5f57}.ide-dots i:nth-child(2){background:#febc2e}
+.ide-dots i:nth-child(3){background:#28c840}
+.ide-title{font-family:var(--ff-m);font-size:10.5px;letter-spacing:2px;color:var(--muted);text-transform:uppercase}
+.ide-sp{flex:1}
+.ide-live{display:inline-flex;align-items:center;gap:8px;font-family:var(--ff-m);font-size:10.5px;
   letter-spacing:1px;color:var(--muted);cursor:pointer;user-select:none;
-  background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:100px;padding:8px 14px}
-.jt-live input{accent-color:var(--green);width:15px;height:15px;cursor:pointer}
-.jt-live.on{border-color:rgba(37,211,102,.45);color:var(--green-2)}
-.jt-code-btn{display:inline-flex;align-items:center;gap:7px;min-height:38px;padding:8px 18px;
-  border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;border:1px solid var(--line);
+  background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:100px;padding:7px 14px;transition:all .2s}
+.ide-live input{accent-color:var(--green);width:15px;height:15px;cursor:pointer}
+.ide-live.on{border-color:rgba(37,211,102,.5);color:var(--green-2);box-shadow:0 0 14px rgba(37,211,102,.12)}
+.ide-btn{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:7px 15px;border-radius:9px;
+  font-weight:700;font-size:12.5px;cursor:pointer;border:1px solid var(--line);
   background:rgba(255,255,255,.05);color:var(--ink);font-family:'Inter',sans-serif;transition:all .18s}
-.jt-code-btn:hover{border-color:var(--cyan);color:var(--cyan)}
-.jt-code-btn.primary{background:linear-gradient(135deg,var(--cyan),var(--violet));color:#fff;border:none}
-.jt-code-btn.primary:hover{color:#fff;box-shadow:0 6px 20px rgba(0,212,255,.3)}
-.jt-panes{display:flex;gap:12px;flex-wrap:wrap}
-.jt-pane{flex:1;min-width:min(400px,80vw)}
-.jt-pane-label{font-family:var(--ff-m);font-size:10px;letter-spacing:2px;color:var(--cyan);
-  margin-bottom:7px;display:flex;align-items:center;gap:8px}
-.jt-pane-label::before{content:'';width:7px;height:7px;border-radius:2px;background:var(--cyan)}
-.jt-pane.css .jt-pane-label{color:#c792ea}
-.jt-pane.css .jt-pane-label::before{background:#c792ea}
-.jt-pane .CodeMirror{height:46vh!important;max-height:46vh}
-.jt-code-status{font-family:var(--ff-m);font-size:10.5px;color:var(--dim);min-height:16px}
-.jt-code-status.ok{color:var(--green-2)}
-@media(max-width:900px){.jt-pane .CodeMirror{height:30vh!important}}
+.ide-btn:hover{border-color:var(--cyan);color:var(--cyan);transform:translateY(-1px)}
+.ide-btn.primary{background:linear-gradient(135deg,var(--cyan),var(--violet));color:#fff;border:none}
+.ide-btn.primary:hover{color:#fff;box-shadow:0 6px 20px rgba(0,212,255,.35)}
+.ide-btn.danger:hover{border-color:var(--red);color:var(--red)}
+.ide-status{font-family:var(--ff-m);font-size:10.5px;color:var(--dim);padding:5px 16px;min-height:24px;
+  border-bottom:1px solid var(--line);background:#070c16;display:flex;align-items:center;gap:14px}
+.ide-status .ok{color:var(--green-2)}
+.ide-status .er{color:#ff8ba0}
+.ide-status .kbd{background:rgba(0,212,255,.08);color:var(--cyan);border:1px solid rgba(0,212,255,.2);
+  padding:1px 7px;border-radius:5px;font-size:9.5px}
+.ide-body{flex:1;display:flex;min-height:0}
+.ide-pane{display:flex;flex-direction:column;min-width:0;flex:1}
+.ide-pane-hd{font-family:var(--ff-m);font-size:10px;letter-spacing:2px;padding:8px 14px;
+  display:flex;align-items:center;gap:8px;background:#070c16;border-bottom:1px solid var(--line)}
+.ide-pane-hd::before{content:'';width:7px;height:7px;border-radius:2px}
+.ide-pane.html .ide-pane-hd{color:var(--cyan)}
+.ide-pane.html .ide-pane-hd::before{background:var(--cyan)}
+.ide-pane.csss .ide-pane-hd{color:#c792ea}
+.ide-pane.csss .ide-pane-hd::before{background:#c792ea}
+.ide-pane-cm{flex:1;min-height:0;overflow:hidden}
+.ide-pane-cm .CodeMirror{height:100%!important;max-height:none!important;border:none!important;border-radius:0!important}
+.ide-div{width:5px;cursor:col-resize;background:var(--line);flex-shrink:0;transition:background .2s;position:relative}
+.ide-div:hover,.ide-div.drag{background:var(--cyan)}
+.ide-div::after{content:'⋮';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  color:var(--dim);font-size:14px}
+@media(max-width:900px){
+  .ide-body{flex-direction:column}
+  .ide-div{width:auto;height:5px;cursor:row-resize}
+  .ide-pane{flex:1!important}
+  .ide-btn .lbl2{display:none}
+}
+.CodeMirror-dialog{background:#0c1730!important;color:var(--ink)!important;border-color:var(--line)!important;
+  font-family:var(--ff-m)!important;font-size:12px!important}
+.CodeMirror-dialog input{background:rgba(255,255,255,.06)!important;color:var(--ink)!important;
+  border:1px solid var(--line)!important;border-radius:6px;padding:3px 8px}
 
 /* ══ AI PANEL ══ */
 #ai-panel{position:fixed;right:-400px;top:0;bottom:0;width:min(395px,100vw);z-index:100;display:flex;flex-direction:column;
@@ -377,6 +407,38 @@ body{font-family:'Inter',-apple-system,sans-serif;height:100vh;height:100dvh;dis
 </div>
 
 <div id="gjs"></div>
+
+<!-- LIVE CODE IDE -->
+<div id="jt-ide">
+  <div class="ide-top">
+    <span class="ide-dots"><i></i><i></i><i></i></span>
+    <span class="ide-title">Code Editor — Live</span>
+    <span class="ide-sp"></span>
+    <label class="ide-live on" id="ide-live-lb">
+      <input type="checkbox" id="ide-live-cb" checked> LIVE
+    </label>
+    <button class="ide-btn" onclick="jtBeautify()" title="Format code">✨ <span class="lbl2">Format</span></button>
+    <button class="ide-btn" onclick="jtReloadFromCanvas()" title="Reload code from canvas">⟲ <span class="lbl2">Reload</span></button>
+    <button class="ide-btn" onclick="jtApplyCode(false)" title="Apply to canvas">▶ <span class="lbl2">Apply</span></button>
+    <button class="ide-btn primary" onclick="jtApplyCode(true)">💾 <span class="lbl2">Apply & Save</span></button>
+    <button class="ide-btn danger" onclick="jtCloseIDE()" title="Close (Esc)">✕</button>
+  </div>
+  <div class="ide-status" id="ide-status">
+    <span>Ready</span>
+    <span><span class="kbd">Ctrl+F</span> search · <span class="kbd">Ctrl+S</span> apply & save · <span class="kbd">Esc</span> close</span>
+  </div>
+  <div class="ide-body" id="ide-body">
+    <div class="ide-pane html" id="ide-pane-html" style="flex:0 0 55%">
+      <div class="ide-pane-hd">HTML</div>
+      <div class="ide-pane-cm" id="ide-cm-html"></div>
+    </div>
+    <div class="ide-div" id="ide-div"></div>
+    <div class="ide-pane csss">
+      <div class="ide-pane-hd">CSS</div>
+      <div class="ide-pane-cm" id="ide-cm-css"></div>
+    </div>
+  </div>
+</div>
 
 <!-- AI Assistant -->
 <div id="ai-panel">
@@ -607,85 +669,149 @@ document.addEventListener('keydown', e => {
 });
 
 // Code viewer (IDE style kupitia CSS overrides)
-// ══ LIVE CODE EDITOR — edit HTML/CSS, effect papo hapo kwenye canvas ══
-let jtHtmlViewer = null, jtCssViewer = null, jtLiveTimer = null;
+// ══ FULL-SCREEN LIVE CODE IDE — CodeMirror kutoka CDN ══
+const CM_BASE = 'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16';
+const BEAUTIFY_BASE = 'https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.15.1';
+let cmHtml = null, cmCss = null, cmLoaded = false, jtLiveTimer = null;
 
-function jtMakeViewer(mode){
-  const v = editor.CodeManager.createViewer({
-    codeName: mode, readOnly: 0, theme: 'hopscotch',
-    autoBeautify: true, autoCloseTags: true, autoCloseBrackets: true,
-    lineWrapping: true, styleActiveLine: true, smartIndent: true, lineNumbers: true,
-  });
-  return v;
+function loadCSS(href){ return new Promise(res => {
+  const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = href;
+  l.onload = res; l.onerror = res; document.head.appendChild(l); }); }
+function loadJS(src){ return new Promise((res, rej) => {
+  const sc = document.createElement('script'); sc.src = src;
+  sc.onload = res; sc.onerror = () => rej(new Error('load fail: ' + src));
+  document.head.appendChild(sc); }); }
+
+async function jtLoadCM(){
+  if (cmLoaded) return;
+  jtStatus('Loading code engine…');
+  await loadCSS(`${CM_BASE}/codemirror.min.css`);
+  await loadCSS(`${CM_BASE}/addon/dialog/dialog.min.css`);
+  await loadJS(`${CM_BASE}/codemirror.min.js`);
+  await Promise.all([
+    loadJS(`${CM_BASE}/mode/xml/xml.min.js`),
+    loadJS(`${CM_BASE}/mode/css/css.min.js`),
+    loadJS(`${CM_BASE}/mode/javascript/javascript.min.js`),
+  ]);
+  await Promise.all([
+    loadJS(`${CM_BASE}/mode/htmlmixed/htmlmixed.min.js`),
+    loadJS(`${CM_BASE}/addon/edit/closetag.min.js`),
+    loadJS(`${CM_BASE}/addon/edit/closebrackets.min.js`),
+    loadJS(`${CM_BASE}/addon/selection/active-line.min.js`),
+    loadJS(`${CM_BASE}/addon/search/searchcursor.min.js`),
+    loadJS(`${CM_BASE}/addon/dialog/dialog.min.js`),
+    loadJS(`${BEAUTIFY_BASE}/beautify-html.min.js`),
+    loadJS(`${BEAUTIFY_BASE}/beautify-css.min.js`),
+  ]);
+  await loadJS(`${CM_BASE}/addon/search/search.min.js`);
+  cmLoaded = true;
+}
+
+function jtStatus(msg, cls){
+  const st = document.getElementById('ide-status');
+  st.innerHTML = `<span class="${cls || ''}">${msg}</span>
+    <span><span class="kbd">Ctrl+F</span> search · <span class="kbd">Ctrl+S</span> apply & save · <span class="kbd">Esc</span> close</span>`;
 }
 
 function jtApplyCode(save){
-  if (!jtHtmlViewer || !jtCssViewer) return;
-  const html = jtHtmlViewer.editor.getValue();
-  const css = jtCssViewer.editor.getValue();
+  if (!cmHtml || !cmCss) return;
   try {
-    editor.setComponents(html);
-    editor.setStyle(css);
-    const st = document.getElementById('jt-code-status');
-    if (st){ st.textContent = '✓ Applied to canvas ' + new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-      st.className = 'jt-code-status ok'; }
-    if (save) savePage();
+    editor.setComponents(cmHtml.getValue());
+    editor.setStyle(cmCss.getValue());
+    const t = new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    jtStatus(`✓ Applied to canvas ${t}${save ? ' — saving…' : ''}`, 'ok');
+    if (save){ savePage(); setTimeout(()=>jtStatus('✓ Applied & saved', 'ok'), 900); }
   } catch(e){
-    const st = document.getElementById('jt-code-status');
-    if (st){ st.textContent = '⚠ ' + e.message; st.className = 'jt-code-status'; }
+    jtStatus('⚠ ' + e.message, 'er');
   }
 }
 
 function jtScheduleLive(){
-  const live = document.getElementById('jt-live-cb');
-  if (!live || !live.checked) return;
+  const cb = document.getElementById('ide-live-cb');
+  if (!cb || !cb.checked) return;
   clearTimeout(jtLiveTimer);
-  jtLiveTimer = setTimeout(() => jtApplyCode(false), 800);
+  jtLiveTimer = setTimeout(() => jtApplyCode(false), 700);
 }
 
-function openCode(){
-  const modal = editor.Modal;
-  const wrap = document.createElement('div');
-  wrap.className = 'jt-code-wrap';
-  wrap.innerHTML = `
-    <div class="jt-code-bar">
-      <label class="jt-live on" id="jt-live-lb">
-        <input type="checkbox" id="jt-live-cb" checked> LIVE UPDATE
-      </label>
-      <span class="jt-code-status" id="jt-code-status"></span>
-      <span class="sp"></span>
-      <button class="jt-code-btn" onclick="jtApplyCode(false)">▶ Apply</button>
-      <button class="jt-code-btn primary" onclick="jtApplyCode(true)">💾 Apply & Save</button>
-    </div>
-    <div class="jt-panes">
-      <div class="jt-pane"><div class="jt-pane-label">HTML</div><div id="jt-html-pane"></div></div>
-      <div class="jt-pane css"><div class="jt-pane-label">CSS</div><div id="jt-css-pane"></div></div>
-    </div>`;
+function jtBeautify(){
+  if (!cmHtml || !cmCss) return;
+  try {
+    if (window.html_beautify) cmHtml.setValue(html_beautify(cmHtml.getValue(),
+      {indent_size: 2, wrap_line_length: 120}));
+    if (window.css_beautify) cmCss.setValue(css_beautify(cmCss.getValue(), {indent_size: 2}));
+    jtStatus('✨ Formatted', 'ok');
+  } catch(e){ jtStatus('⚠ ' + e.message, 'er'); }
+}
 
-  modal.open({ title: 'CODE EDITOR — changes apply live', content: wrap });
+function jtReloadFromCanvas(){
+  if (!cmHtml || !cmCss) return;
+  cmHtml.setValue(origGetHtml());
+  cmCss.setValue(editor.getCss());
+  jtStatus('⟲ Reloaded from canvas', 'ok');
+}
 
-  // Viewers — tumia HTML GHAFI ya canvas (placeholders za blocks zibaki)
-  jtHtmlViewer = jtMakeViewer('htmlmixed');
-  jtCssViewer = jtMakeViewer('css');
-  const htmlEl = document.createElement('div');
-  const cssEl = document.createElement('div');
-  wrap.querySelector('#jt-html-pane').appendChild(htmlEl);
-  wrap.querySelector('#jt-css-pane').appendChild(cssEl);
-  jtHtmlViewer.init(htmlEl);
-  jtCssViewer.init(cssEl);
-  jtHtmlViewer.setContent(origGetHtml());
-  jtCssViewer.setContent(editor.getCss());
+function jtCloseIDE(){
+  document.getElementById('jt-ide').classList.remove('on');
+}
 
-  // Live typing → debounce 800ms → apply
-  jtHtmlViewer.editor.on('change', jtScheduleLive);
-  jtCssViewer.editor.on('change', jtScheduleLive);
-  const cb = document.getElementById('jt-live-cb');
-  cb.addEventListener('change', () => {
-    document.getElementById('jt-live-lb').classList.toggle('on', cb.checked);
-    if (cb.checked) jtScheduleLive();
+async function openCode(){
+  const ide = document.getElementById('jt-ide');
+  ide.classList.add('on');
+  try { await jtLoadCM(); }
+  catch(e){ jtStatus('⚠ Could not load code engine — check internet. ' + e.message, 'er'); return; }
+
+  const opts = mode => ({
+    mode, lineNumbers: true, lineWrapping: true, styleActiveLine: true,
+    autoCloseBrackets: true, tabSize: 2, indentUnit: 2,
+    extraKeys: {
+      'Ctrl-S': () => jtApplyCode(true), 'Cmd-S': () => jtApplyCode(true),
+      'Esc': jtCloseIDE,
+    },
   });
-  setTimeout(() => { jtHtmlViewer.editor.refresh(); jtCssViewer.editor.refresh(); }, 60);
+  if (!cmHtml){
+    cmHtml = CodeMirror(document.getElementById('ide-cm-html'),
+      Object.assign(opts('htmlmixed'), {autoCloseTags: true}));
+    cmCss = CodeMirror(document.getElementById('ide-cm-css'), opts('css'));
+    cmHtml.on('change', (cm, ch) => { if (ch.origin !== 'setValue') jtScheduleLive(); });
+    cmCss.on('change', (cm, ch) => { if (ch.origin !== 'setValue') jtScheduleLive(); });
+    const cb = document.getElementById('ide-live-cb');
+    cb.addEventListener('change', () => {
+      document.getElementById('ide-live-lb').classList.toggle('on', cb.checked);
+      if (cb.checked) jtScheduleLive();
+    });
+    // Divider ya ku-resize panes (mouse + touch)
+    const div = document.getElementById('ide-div');
+    const paneH = document.getElementById('ide-pane-html');
+    const body = document.getElementById('ide-body');
+    let dragging = false;
+    const move = e => {
+      if (!dragging) return;
+      const x = (e.touches ? e.touches[0].clientX : e.clientX);
+      const y = (e.touches ? e.touches[0].clientY : e.clientY);
+      const r = body.getBoundingClientRect();
+      if (window.innerWidth > 900){
+        const pct = Math.min(80, Math.max(20, ((x - r.left) / r.width) * 100));
+        paneH.style.flex = `0 0 ${pct}%`;
+      }
+      cmHtml.refresh(); cmCss.refresh();
+    };
+    const stop = () => { dragging = false; div.classList.remove('drag'); };
+    div.addEventListener('mousedown', () => { dragging = true; div.classList.add('drag'); });
+    div.addEventListener('touchstart', () => { dragging = true; div.classList.add('drag'); }, {passive: true});
+    window.addEventListener('mousemove', move);
+    window.addEventListener('touchmove', move, {passive: true});
+    window.addEventListener('mouseup', stop);
+    window.addEventListener('touchend', stop);
+  }
+  jtReloadFromCanvas();
+  jtStatus('Ready — type and watch the canvas update live', 'ok');
+  setTimeout(() => { cmHtml.refresh(); cmCss.refresh(); cmHtml.focus(); }, 80);
 }
+
+// Esc popote ndani ya IDE
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && document.getElementById('jt-ide').classList.contains('on')) jtCloseIDE();
+});
 
 // Uploadcare kama Asset Manager
 const ucCtx = document.getElementById('uc-ctx');
