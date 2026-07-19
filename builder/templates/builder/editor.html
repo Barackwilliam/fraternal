@@ -168,6 +168,19 @@ body{font-family:'Inter',-apple-system,sans-serif;height:100vh;height:100dvh;dis
 .ide-pane.csss .ide-pane-hd::before{background:#c792ea}
 .ide-pane-cm{flex:1;min-height:0;overflow:hidden}
 .ide-pane-cm .CodeMirror{height:100%!important;max-height:none!important;border:none!important;border-radius:0!important}
+.ide-pane-cm .CodeMirror{font-family:'JetBrains Mono','Fira Code',monospace!important;
+  font-size:13px!important;line-height:1.65!important;background:#0d1117!important}
+.ide-pane-cm .CodeMirror-gutters{background:#0a0e14!important;border-right:1px solid rgba(120,180,255,.08)!important}
+.ide-pane-cm .CodeMirror-linenumber{color:#3a4658!important}
+.ide-pane-cm .CodeMirror-cursor{border-left:2px solid var(--cyan)!important}
+.ide-pane-cm .CodeMirror-activeline-background{background:rgba(120,180,255,.04)!important}
+.ide-pane-cm .CodeMirror-selected{background:rgba(0,212,255,.14)!important}
+.ide-pane-cm .CodeMirror-matchingbracket{color:var(--green-2)!important;font-weight:700;
+  border-bottom:1px solid var(--green-2)}
+.ide-pane-cm .CodeMirror-foldmarker{color:var(--cyan);text-shadow:none;background:rgba(0,212,255,.12);
+  border-radius:4px;padding:0 5px;font-family:var(--ff-m)}
+.ide-pane-cm .CodeMirror-foldgutter-open:after{color:#4a5870}
+.ide-pane-cm .CodeMirror-foldgutter-folded:after{color:var(--cyan)}
 .ide-div{width:5px;cursor:col-resize;background:var(--line);flex-shrink:0;transition:background .2s;position:relative}
 .ide-div:hover,.ide-div.drag{background:var(--cyan)}
 .ide-div::after{content:'⋮';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
@@ -686,7 +699,9 @@ async function jtLoadCM(){
   if (cmLoaded) return;
   jtStatus('Loading code engine…');
   await loadCSS(`${CM_BASE}/codemirror.min.css`);
+  await loadCSS(`${CM_BASE}/theme/material-darker.min.css`);
   await loadCSS(`${CM_BASE}/addon/dialog/dialog.min.css`);
+  await loadCSS(`${CM_BASE}/addon/fold/foldgutter.min.css`);
   await loadJS(`${CM_BASE}/codemirror.min.js`);
   await Promise.all([
     loadJS(`${CM_BASE}/mode/xml/xml.min.js`),
@@ -700,10 +715,18 @@ async function jtLoadCM(){
     loadJS(`${CM_BASE}/addon/selection/active-line.min.js`),
     loadJS(`${CM_BASE}/addon/search/searchcursor.min.js`),
     loadJS(`${CM_BASE}/addon/dialog/dialog.min.js`),
+    loadJS(`${CM_BASE}/addon/edit/matchbrackets.min.js`),
+    loadJS(`${CM_BASE}/addon/edit/matchtags.min.js`),
+    loadJS(`${CM_BASE}/addon/fold/foldcode.min.js`),
+    loadJS(`${CM_BASE}/addon/fold/foldgutter.min.js`),
+    loadJS(`${CM_BASE}/addon/fold/xml-fold.min.js`),
+    loadJS(`${CM_BASE}/addon/fold/indent-fold.min.js`),
+    loadJS(`${CM_BASE}/addon/fold/brace-fold.min.js`),
     loadJS(`${BEAUTIFY_BASE}/beautify-html.min.js`),
     loadJS(`${BEAUTIFY_BASE}/beautify-css.min.js`),
   ]);
   await loadJS(`${CM_BASE}/addon/search/search.min.js`);
+  await loadJS(`${CM_BASE}/addon/comment/comment.min.js`);
   cmLoaded = true;
 }
 
@@ -761,10 +784,14 @@ async function openCode(){
   catch(e){ jtStatus('⚠ Could not load code engine — check internet. ' + e.message, 'er'); return; }
 
   const opts = mode => ({
-    mode, lineNumbers: true, lineWrapping: true, styleActiveLine: true,
-    autoCloseBrackets: true, tabSize: 2, indentUnit: 2,
+    mode, theme: 'material-darker',
+    lineNumbers: true, lineWrapping: true, styleActiveLine: true,
+    autoCloseBrackets: true, matchBrackets: true, matchTags: {bothTags: true},
+    tabSize: 2, indentUnit: 2, smartIndent: true,
+    foldGutter: true, gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter'],
     extraKeys: {
       'Ctrl-S': () => jtApplyCode(true), 'Cmd-S': () => jtApplyCode(true),
+      'Ctrl-/': 'toggleComment', 'Cmd-/': 'toggleComment',
       'Esc': jtCloseIDE,
     },
   });
@@ -804,8 +831,10 @@ async function openCode(){
     window.addEventListener('touchend', stop);
   }
   jtReloadFromCanvas();
+  // Auto-format mara moja ili code ikae nadhifu kama VS Code (si mstari mmoja)
+  setTimeout(() => { jtBeautify(); }, 30);
   jtStatus('Ready — type and watch the canvas update live', 'ok');
-  setTimeout(() => { cmHtml.refresh(); cmCss.refresh(); cmHtml.focus(); }, 80);
+  setTimeout(() => { cmHtml.refresh(); cmCss.refresh(); cmHtml.focus(); }, 90);
 }
 
 // Esc popote ndani ya IDE
