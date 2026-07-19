@@ -94,7 +94,7 @@ body{font-family:'Inter',-apple-system,sans-serif;height:100vh;height:100dvh;dis
 .gjs-rte-active{background:rgba(0,212,255,.15)!important;color:var(--cyan)!important}
 
 /* ══ CODE VIEWER — modern IDE ══ */
-.gjs-mdl-dialog{background:#070d1c!important;border:1px solid var(--line)!important;border-radius:16px!important;
+.gjs-mdl-dialog{max-width:96vw!important;width:auto!important;background:#070d1c!important;border:1px solid var(--line)!important;border-radius:16px!important;
   box-shadow:0 30px 80px rgba(0,0,0,.7)!important;overflow:hidden!important;
   animation:mdlIn .3s var(--ease) both}
 @keyframes mdlIn{from{opacity:0;transform:translateY(20px) scale(.97)}to{opacity:1;transform:none}}
@@ -125,6 +125,33 @@ body{font-family:'Inter',-apple-system,sans-serif;height:100vh;height:100dvh;dis
 .cm-qualifier{color:#8ee6b8!important}
 .cm-builtin{color:#c792ea!important}
 .cm-s-hopscotch.CodeMirror{background:#060b18!important}
+
+/* ══ LIVE CODE EDITOR ══ */
+.jt-code-wrap{display:flex;flex-direction:column;gap:12px;min-width:min(920px,86vw)}
+.jt-code-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.jt-code-bar .sp{flex:1}
+.jt-live{display:inline-flex;align-items:center;gap:8px;font-family:var(--ff-m);font-size:11px;
+  letter-spacing:1px;color:var(--muted);cursor:pointer;user-select:none;
+  background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:100px;padding:8px 14px}
+.jt-live input{accent-color:var(--green);width:15px;height:15px;cursor:pointer}
+.jt-live.on{border-color:rgba(37,211,102,.45);color:var(--green-2)}
+.jt-code-btn{display:inline-flex;align-items:center;gap:7px;min-height:38px;padding:8px 18px;
+  border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;border:1px solid var(--line);
+  background:rgba(255,255,255,.05);color:var(--ink);font-family:'Inter',sans-serif;transition:all .18s}
+.jt-code-btn:hover{border-color:var(--cyan);color:var(--cyan)}
+.jt-code-btn.primary{background:linear-gradient(135deg,var(--cyan),var(--violet));color:#fff;border:none}
+.jt-code-btn.primary:hover{color:#fff;box-shadow:0 6px 20px rgba(0,212,255,.3)}
+.jt-panes{display:flex;gap:12px;flex-wrap:wrap}
+.jt-pane{flex:1;min-width:min(400px,80vw)}
+.jt-pane-label{font-family:var(--ff-m);font-size:10px;letter-spacing:2px;color:var(--cyan);
+  margin-bottom:7px;display:flex;align-items:center;gap:8px}
+.jt-pane-label::before{content:'';width:7px;height:7px;border-radius:2px;background:var(--cyan)}
+.jt-pane.css .jt-pane-label{color:#c792ea}
+.jt-pane.css .jt-pane-label::before{background:#c792ea}
+.jt-pane .CodeMirror{height:46vh!important;max-height:46vh}
+.jt-code-status{font-family:var(--ff-m);font-size:10.5px;color:var(--dim);min-height:16px}
+.jt-code-status.ok{color:var(--green-2)}
+@media(max-width:900px){.jt-pane .CodeMirror{height:30vh!important}}
 
 /* ══ AI PANEL ══ */
 #ai-panel{position:fixed;right:-400px;top:0;bottom:0;width:min(395px,100vw);z-index:100;display:flex;flex-direction:column;
@@ -314,7 +341,7 @@ body{font-family:'Inter',-apple-system,sans-serif;height:100vh;height:100dvh;dis
     <button data-dev="Tablet" title="Tablet">💻</button>
     <button data-dev="Mobile" title="Mobile">📱</button>
   </div>
-  <button class="ed-btn" id="btn-code" onclick="openCode()" title="View HTML/CSS">&lt;/&gt;<span class="lbl"> Code</span></button>
+  <button class="ed-btn" id="btn-code" onclick="openCode()" title="Edit HTML/CSS — live">&lt;/&gt;<span class="lbl"> Code</span></button>
   <button class="ed-btn" id="btn-undo" title="Undo (Ctrl+Z)">↺<span class="lbl"> Undo</span></button>
   <button class="ed-btn" id="btn-redo" title="Redo (Ctrl+Shift+Z)">↻<span class="lbl"> Redo</span></button>
   <button class="ed-btn ai" id="tour-ai" onclick="toggleAI()">✨<span class="lbl"> AI Assistant</span></button>
@@ -580,7 +607,85 @@ document.addEventListener('keydown', e => {
 });
 
 // Code viewer (IDE style kupitia CSS overrides)
-function openCode(){ editor.runCommand('export-template'); }
+// ══ LIVE CODE EDITOR — edit HTML/CSS, effect papo hapo kwenye canvas ══
+let jtHtmlViewer = null, jtCssViewer = null, jtLiveTimer = null;
+
+function jtMakeViewer(mode){
+  const v = editor.CodeManager.createViewer({
+    codeName: mode, readOnly: 0, theme: 'hopscotch',
+    autoBeautify: true, autoCloseTags: true, autoCloseBrackets: true,
+    lineWrapping: true, styleActiveLine: true, smartIndent: true, lineNumbers: true,
+  });
+  return v;
+}
+
+function jtApplyCode(save){
+  if (!jtHtmlViewer || !jtCssViewer) return;
+  const html = jtHtmlViewer.editor.getValue();
+  const css = jtCssViewer.editor.getValue();
+  try {
+    editor.setComponents(html);
+    editor.setStyle(css);
+    const st = document.getElementById('jt-code-status');
+    if (st){ st.textContent = '✓ Applied to canvas ' + new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+      st.className = 'jt-code-status ok'; }
+    if (save) savePage();
+  } catch(e){
+    const st = document.getElementById('jt-code-status');
+    if (st){ st.textContent = '⚠ ' + e.message; st.className = 'jt-code-status'; }
+  }
+}
+
+function jtScheduleLive(){
+  const live = document.getElementById('jt-live-cb');
+  if (!live || !live.checked) return;
+  clearTimeout(jtLiveTimer);
+  jtLiveTimer = setTimeout(() => jtApplyCode(false), 800);
+}
+
+function openCode(){
+  const modal = editor.Modal;
+  const wrap = document.createElement('div');
+  wrap.className = 'jt-code-wrap';
+  wrap.innerHTML = `
+    <div class="jt-code-bar">
+      <label class="jt-live on" id="jt-live-lb">
+        <input type="checkbox" id="jt-live-cb" checked> LIVE UPDATE
+      </label>
+      <span class="jt-code-status" id="jt-code-status"></span>
+      <span class="sp"></span>
+      <button class="jt-code-btn" onclick="jtApplyCode(false)">▶ Apply</button>
+      <button class="jt-code-btn primary" onclick="jtApplyCode(true)">💾 Apply & Save</button>
+    </div>
+    <div class="jt-panes">
+      <div class="jt-pane"><div class="jt-pane-label">HTML</div><div id="jt-html-pane"></div></div>
+      <div class="jt-pane css"><div class="jt-pane-label">CSS</div><div id="jt-css-pane"></div></div>
+    </div>`;
+
+  modal.open({ title: 'CODE EDITOR — changes apply live', content: wrap });
+
+  // Viewers — tumia HTML GHAFI ya canvas (placeholders za blocks zibaki)
+  jtHtmlViewer = jtMakeViewer('htmlmixed');
+  jtCssViewer = jtMakeViewer('css');
+  const htmlEl = document.createElement('div');
+  const cssEl = document.createElement('div');
+  wrap.querySelector('#jt-html-pane').appendChild(htmlEl);
+  wrap.querySelector('#jt-css-pane').appendChild(cssEl);
+  jtHtmlViewer.init(htmlEl);
+  jtCssViewer.init(cssEl);
+  jtHtmlViewer.setContent(origGetHtml());
+  jtCssViewer.setContent(editor.getCss());
+
+  // Live typing → debounce 800ms → apply
+  jtHtmlViewer.editor.on('change', jtScheduleLive);
+  jtCssViewer.editor.on('change', jtScheduleLive);
+  const cb = document.getElementById('jt-live-cb');
+  cb.addEventListener('change', () => {
+    document.getElementById('jt-live-lb').classList.toggle('on', cb.checked);
+    if (cb.checked) jtScheduleLive();
+  });
+  setTimeout(() => { jtHtmlViewer.editor.refresh(); jtCssViewer.editor.refresh(); }, 60);
+}
 
 // Uploadcare kama Asset Manager
 const ucCtx = document.getElementById('uc-ctx');
