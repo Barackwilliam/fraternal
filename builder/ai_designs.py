@@ -12,7 +12,7 @@ Styles:
   fresh_split   — hero ya columns mbili (maandishi + panel ya rangi), rounded
 """
 
-STYLES = ('sunset_bold', 'clean_minimal', 'dark_luxury', 'fresh_split')
+STYLES = ('sunset_bold', 'clean_minimal', 'dark_luxury', 'fresh_split', 'sci_fi')
 
 
 def _esc(t):
@@ -130,6 +130,50 @@ def render_home(style, palette, plan, primary_col):
             f'<section style="padding:80px 24px;background:#f7f9fb"><div style="max-width:780px;margin:0 auto;text-align:center">'
             f'<h2 style="font-size:clamp(26px,3.8vw,38px);margin:0 0 16px;color:#17202a;font-weight:800">About Us</h2>'
             f'<p style="font-size:16.5px;color:#66707c;line-height:1.85">{about}</p></div></section>'
+            f'[[form:inquiry]]'
+        )
+
+    if style == 'sci_fi':
+        return (
+            f'<section class="sfx-hero" style="position:relative;min-height:88vh;display:flex;align-items:center;'
+            f'justify-content:center;text-align:center;overflow:hidden;'
+            f'background:radial-gradient(1000px 600px at 50% -10%,{p1}22,transparent 60%),#04060f;color:#e8f0f6;padding:90px 22px">'
+            f'<canvas class="sfx-canvas" style="position:absolute;inset:0;z-index:0;opacity:0;transition:opacity 1.4s"></canvas>'
+            f'<div class="sfx-grid" style="position:absolute;inset:0;z-index:0;'
+            f'background:linear-gradient(rgba(0,212,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,.06) 1px,transparent 1px);'
+            f'background-size:52px 52px;mask-image:radial-gradient(ellipse 80% 70% at 50% 30%,#000 20%,transparent 90%);'
+            f'-webkit-mask-image:radial-gradient(ellipse 80% 70% at 50% 30%,#000 20%,transparent 90%)"></div>'
+            f'<div style="position:relative;z-index:2;max-width:820px">'
+            f'<p style="display:inline-flex;align-items:center;gap:8px;letter-spacing:4px;text-transform:uppercase;'
+            f'color:{p1};font-family:monospace;font-size:12px;font-weight:700;border:1px solid {p1}55;border-radius:100px;'
+            f'padding:7px 16px;margin-bottom:22px">◉ [[site:name]]</p>'
+            f'<h1 style="font-size:clamp(38px,6.5vw,66px);line-height:1.05;margin:0 0 20px;font-weight:800;'
+            f'letter-spacing:-.02em;text-shadow:0 0 40px {p1}66">{headline}</h1>'
+            f'<p style="font-size:clamp(15px,2vw,18px);color:#9fb0c4;line-height:1.75;max-width:600px;margin:0 auto 34px">{subline}</p>'
+            f'<a href="[[site:whatsapp]]" style="display:inline-block;background:linear-gradient(135deg,{p1},#00d4ff);'
+            f'color:#04120a;padding:16px 42px;border-radius:12px;font-weight:800;text-decoration:none;font-size:16px;'
+            f'box-shadow:0 8px 34px {p1}55">Get in Touch →</a></div>'
+            f'<span style="position:absolute;top:16px;left:16px;width:24px;height:24px;border-top:2px solid {p1};border-left:2px solid {p1};opacity:.5;z-index:2"></span>'
+            f'<span style="position:absolute;top:16px;right:16px;width:24px;height:24px;border-top:2px solid {p1};border-right:2px solid {p1};opacity:.5;z-index:2"></span>'
+            f'<span style="position:absolute;bottom:16px;left:16px;width:24px;height:24px;border-bottom:2px solid {p1};border-left:2px solid {p1};opacity:.5;z-index:2"></span>'
+            f'<span style="position:absolute;bottom:16px;right:16px;width:24px;height:24px;border-bottom:2px solid {p1};border-right:2px solid {p1};opacity:.5;z-index:2"></span>'
+            f'</section>'
+            f'<section style="padding:80px 24px;background:#060a16;color:#e8f0f6"><div style="max-width:1100px;margin:0 auto;text-align:center">'
+            f'<h2 style="font-size:clamp(28px,4vw,42px);margin:0 0 8px;font-weight:800;text-shadow:0 0 30px {p1}44">{col_name}</h2>'
+            f'<p style="color:#7d8ca0;margin:0 auto 12px;font-family:monospace;font-size:13px">{tagline}</p>'
+            f'[[collection:{col_slug}]]</div></section>'
+            f'<section style="padding:80px 24px;background:#04060f;color:#e8f0f6"><div style="max-width:1100px;margin:0 auto">'
+            f'<h2 style="text-align:center;font-size:clamp(28px,4vw,42px);margin:0 0 44px;font-weight:800">System Capabilities</h2>'
+            f'<div style="display:flex;flex-wrap:wrap;gap:20px">'
+            + _why_cards(why,
+                f'flex:1;min-width:240px;padding:30px;background:linear-gradient(160deg,rgba(14,26,48,.6),rgba(8,16,32,.4));'
+                f'border:1px solid {p1}33;border-radius:16px;backdrop-filter:blur(12px);border-top:2px solid {p1}',
+                f'margin:0 0 8px;font-size:19px;color:#fff;font-weight:800',
+                'margin:0;color:#9fb0c4;line-height:1.7;font-size:14.5px')
+            + f'</div></div></section>'
+            f'<section style="padding:80px 24px;background:#060a16;color:#e8f0f6"><div style="max-width:780px;margin:0 auto;text-align:center">'
+            f'<h2 style="font-size:clamp(28px,4vw,42px);margin:0 0 18px;font-weight:800">About</h2>'
+            f'<p style="font-size:16.5px;color:#9fb0c4;line-height:1.9">{about}</p></div></section>'
             f'[[form:inquiry]]'
         )
 

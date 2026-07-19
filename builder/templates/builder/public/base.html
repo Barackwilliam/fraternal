@@ -213,5 +213,67 @@ document.querySelectorAll('.jt-body section, .jt-card, .jt-reveal').forEach((el,
 // Lazy images
 document.querySelectorAll('.jt-body img:not([loading])').forEach(img=>img.loading='lazy');
 </script>
+<script>
+/* Sci-fi hero WebGL (huanza tu kama .sfx-canvas ipo kwenye page) */
+(function(){
+  const canvas = document.querySelector('.sfx-canvas');
+  if (!canvas) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if (navigator.deviceMemory && navigator.deviceMemory < 4) return;
+  if (navigator.hardwareConcurrency && navigator.hardwareConcurrency < 4) return;
+  if (Math.min(screen.width, screen.height) < 380) return;
+  try { const c=document.createElement('canvas');
+    if(!(c.getContext('webgl')||c.getContext('experimental-webgl'))) return;
+  } catch(e){ return; }
+
+  const s = document.createElement('script');
+  s.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+  s.onload = init; document.head.appendChild(s);
+
+  function init(){
+    if (!window.THREE) return;
+    const hero = canvas.closest('.sfx-hero');
+    const W = hero.offsetWidth, H = hero.offsetHeight;
+    const renderer = new THREE.WebGLRenderer({canvas, alpha:true, antialias:true});
+    renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
+    renderer.setSize(W, H);
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x04060f, 0.06);
+    const cam = new THREE.PerspectiveCamera(60, W/H, 0.1, 100);
+    cam.position.set(0,0,10);
+
+    const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#00d4ff';
+    let col = 0x00d4ff;
+    try { col = new THREE.Color(accent).getHex(); } catch(e){}
+
+    const knot = new THREE.Mesh(
+      new THREE.TorusKnotGeometry(2.2,0.5,110,16),
+      new THREE.MeshBasicMaterial({color:col, wireframe:true, transparent:true, opacity:0.25}));
+    knot.position.set(3,0.4,-2); scene.add(knot);
+
+    const pc = Math.min(600, Math.floor((W*H)/2600));
+    const pg = new THREE.BufferGeometry(); const pos = new Float32Array(pc*3);
+    for(let i=0;i<pc*3;i+=3){pos[i]=(Math.random()-0.5)*28;pos[i+1]=(Math.random()-0.5)*18;pos[i+2]=(Math.random()-0.5)*14-4;}
+    pg.setAttribute('position', new THREE.BufferAttribute(pos,3));
+    const pts = new THREE.Points(pg, new THREE.PointsMaterial({color:col,size:0.05,transparent:true,opacity:0.6}));
+    scene.add(pts);
+
+    let mx=0,my=0,run=true,last=0,low=0,raf;
+    function loop(t){
+      if(!run) return; raf=requestAnimationFrame(loop);
+      const dt=t-last; last=t;
+      if(dt>34){low++; if(low>180){run=false;cancelAnimationFrame(raf);return;}} else low=Math.max(0,low-1);
+      const tm=t*0.0004;
+      knot.rotation.x=tm*1.2; knot.rotation.y=tm*1.5; pts.rotation.y=tm*0.3;
+      cam.position.x+=(mx*1.2-cam.position.x)*0.04; cam.position.y+=(-my*0.8-cam.position.y)*0.04;
+      cam.lookAt(2,0,-2); renderer.render(scene,cam);
+    }
+    canvas.style.opacity='1'; last=performance.now(); raf=requestAnimationFrame(loop);
+    addEventListener('resize',()=>{const w=hero.offsetWidth,h=hero.offsetHeight;renderer.setSize(w,h);cam.aspect=w/h;cam.updateProjectionMatrix();});
+    addEventListener('mousemove',e=>{mx=(e.clientX/innerWidth-0.5);my=(e.clientY/innerHeight-0.5);});
+    document.addEventListener('visibilitychange',()=>{if(document.hidden){run=false;cancelAnimationFrame(raf);}else{run=true;last=performance.now();raf=requestAnimationFrame(loop);}});
+  }
+})();
+</script>
 </body>
 </html>

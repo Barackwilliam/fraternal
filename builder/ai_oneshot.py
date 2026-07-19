@@ -53,7 +53,7 @@ JSON_SCHEMA_HINT = {
     ],
     "accent_color": "hex color that matches the brand mood (#RRGGBB)",
     "nav_layout": "one of: top, glass, side, center",
-    "design_style": "pick ONE that fits the brand mood: sunset_bold (warm, energetic, consumer brands), clean_minimal (calm, professional, modern services), dark_luxury (premium, high-end, exclusive), fresh_split (friendly, tech-savvy, youthful)",
+    "design_style": "pick ONE that fits the brand mood: sunset_bold (warm, energetic, consumer brands), clean_minimal (calm, professional, modern services), dark_luxury (premium, high-end, exclusive), fresh_split (friendly, tech-savvy, youthful), sci_fi (futuristic, high-tech, bold — great for tech, gaming, crypto, innovative or youth brands that want a 2090 feel)",
     "palette": {"primary": "vibrant hex for buttons/accents", "deep": "dark hex for backgrounds — both must fit the brand mood and work together"},
 }
 
