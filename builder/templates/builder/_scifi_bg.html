@@ -1,0 +1,238 @@
+{% comment %}
+JAMIITEK SCI-FI BACKGROUND — WebGL layer ya "system ya 2090"
+─────────────────────────────────────────────────────────────
+Kutumia: {% include 'builder/_scifi_bg.html' %} popote ndani ya <body>.
+
+Ina-render:
+  - Canvas ya Three.js nyuma ya content (z-index -2): grid ya perspective
+    inayotoweka mbali (TRON-style) + particles zinazoelea + mstari wa neon
+  - Faux-3D CSS overlays: scanlines, vignette, corner brackets
+  - Toggle button (kona ya chini) ya kuzima 3D (inahifadhi kwenye memory ya session)
+
+USALAMA WA PERFORMANCE (muhimu kwa simu za TZ):
+  - Haipakii Three.js kabisa kama: prefers-reduced-motion, screen ndogo sana,
+    deviceMemory < 4GB, au hardwareConcurrency < 4 (simu dhaifu)
+  - FPS monitor: ikishuka chini ya 30fps kwa sekunde 3 → inajizima yenyewe
+  - Inasitisha render loop tab isipoonekana (Page Visibility)
+  - DPR imefungwa max 1.5 (haitumii retina full — inaokoa GPU)
+{% endcomment %}
+
+<style>
+#scifi-canvas{position:fixed;inset:0;z-index:-2;pointer-events:none;
+  opacity:0;transition:opacity 1.2s ease}
+#scifi-canvas.ready{opacity:1}
+/* Faux-3D overlays — hizi zinabaki hata kama WebGL imezimwa */
+#scifi-fx{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+#scifi-fx .scan{position:absolute;inset:0;
+  background:repeating-linear-gradient(0deg,transparent 0 2px,rgba(0,212,255,.014) 2px 4px);
+  animation:scanmove 8s linear infinite}
+@keyframes scanmove{to{transform:translateY(4px)}}
+#scifi-fx .vig{position:absolute;inset:0;
+  background:radial-gradient(ellipse 80% 70% at 50% 40%,transparent 40%,rgba(2,6,16,.55) 100%)}
+#scifi-fx .grid-glow{position:absolute;inset:0;
+  background:radial-gradient(700px 400px at 50% 0%,rgba(0,212,255,.06),transparent 60%),
+             radial-gradient(600px 400px at 90% 100%,rgba(108,99,255,.06),transparent 55%)}
+/* Corner brackets za "HUD" */
+.scifi-corner{position:fixed;width:26px;height:26px;z-index:1;pointer-events:none;opacity:.4;
+  border-color:var(--cyan,#00d4ff)}
+.scifi-corner.tl{top:14px;left:14px;border-top:2px solid;border-left:2px solid}
+.scifi-corner.tr{top:14px;right:14px;border-top:2px solid;border-right:2px solid}
+.scifi-corner.bl{bottom:14px;left:14px;border-bottom:2px solid;border-left:2px solid}
+.scifi-corner.br{bottom:14px;right:14px;border-bottom:2px solid;border-right:2px solid}
+/* Toggle */
+#scifi-toggle{position:fixed;bottom:16px;right:16px;z-index:50;
+  width:42px;height:42px;border-radius:12px;cursor:pointer;
+  background:rgba(10,20,36,.8);border:1px solid rgba(0,212,255,.35);
+  color:var(--cyan,#00d4ff);font-size:17px;display:flex;align-items:center;justify-content:center;
+  backdrop-filter:blur(10px);transition:all .2s;font-family:monospace}
+#scifi-toggle:hover{border-color:var(--cyan,#00d4ff);box-shadow:0 0 16px rgba(0,212,255,.3);transform:translateY(-2px)}
+#scifi-toggle.off{opacity:.5;color:#6b7688;border-color:rgba(120,150,180,.25)}
+@media(max-width:640px){.scifi-corner{display:none}#scifi-toggle{bottom:80px;width:38px;height:38px}}
+</style>
+
+<canvas id="scifi-canvas"></canvas>
+<div id="scifi-fx">
+  <div class="grid-glow"></div>
+  <div class="scan"></div>
+  <div class="vig"></div>
+</div>
+<span class="scifi-corner tl"></span><span class="scifi-corner tr"></span>
+<span class="scifi-corner bl"></span><span class="scifi-corner br"></span>
+<button id="scifi-toggle" title="Toggle 3D background">◉</button>
+
+<script>
+(function(){
+  const KEY = 'jt_scifi_off';
+  const toggle = document.getElementById('scifi-toggle');
+  const canvas = document.getElementById('scifi-canvas');
+  let running = false, threeLoaded = false, renderer, scene, camera, rafId, engineStarted = false;
+
+  // ── Device capability check (simu dhaifu haziruhusiwi WebGL) ──
+  function deviceCapable(){
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return false;
+    if (navigator.deviceMemory && navigator.deviceMemory < 4) return false;
+    if (navigator.hardwareConcurrency && navigator.hardwareConcurrency < 4) return false;
+    if (Math.min(screen.width, screen.height) < 380) return false;
+    // WebGL support?
+    try {
+      const c = document.createElement('canvas');
+      if (!(c.getContext('webgl') || c.getContext('experimental-webgl'))) return false;
+    } catch(e){ return false; }
+    return true;
+  }
+
+  const userOff = sessionStorage.getItem(KEY) === '1';
+  const capable = deviceCapable();
+
+  function setToggleState(on){
+    toggle.classList.toggle('off', !on);
+    toggle.textContent = on ? '◉' : '○';
+    toggle.title = on ? 'Disable 3D background' : 'Enable 3D background';
+  }
+
+  // ── Three.js scene: perspective grid + floating particles ──
+  async function loadThree(){
+    if (threeLoaded) return true;
+    try {
+      await new Promise((res, rej) => {
+        const s = document.createElement('script');
+        s.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+        s.onload = res; s.onerror = rej; document.head.appendChild(s);
+      });
+      threeLoaded = true; return true;
+    } catch(e){ return false; }
+  }
+
+  function buildScene(){
+    const W = window.innerWidth, H = window.innerHeight;
+    renderer = new THREE.WebGLRenderer({canvas, alpha:true, antialias:false});
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+    renderer.setSize(W, H);
+    scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x030814, 0.055);
+    camera = new THREE.PerspectiveCamera(70, W/H, 0.1, 100);
+    camera.position.set(0, 2.2, 8);
+    camera.lookAt(0, 0, -6);
+
+    // Perspective grid (TRON floor)
+    const grid = new THREE.GridHelper(60, 60, 0x00d4ff, 0x143a55);
+    grid.material.transparent = true; grid.material.opacity = 0.35;
+    grid.position.y = -2;
+    scene.add(grid);
+    const grid2 = new THREE.GridHelper(60, 60, 0x6c63ff, 0x241a55);
+    grid2.material.transparent = true; grid2.material.opacity = 0.14;
+    grid2.position.y = 6; grid2.position.z = -10;
+    scene.add(grid2);
+
+    // Floating particles (nebula ya data)
+    const pcount = Math.min(600, Math.floor((W*H)/2600));
+    const geo = new THREE.BufferGeometry();
+    const pos = new Float32Array(pcount*3);
+    for (let i=0;i<pcount*3;i+=3){
+      pos[i]   = (Math.random()-0.5)*40;
+      pos[i+1] = (Math.random()-0.5)*18 + 2;
+      pos[i+2] = (Math.random()-0.5)*30 - 5;
+    }
+    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    const pmat = new THREE.PointsMaterial({color:0x00d4ff, size:0.06, transparent:true, opacity:0.8});
+    const points = new THREE.Points(geo, pmat);
+    scene.add(points);
+
+    // Neon accent line sweeping
+    const glowGeo = new THREE.BufferGeometry();
+    const glowPos = new Float32Array([-30,0,-8, 30,0,-8]);
+    glowGeo.setAttribute('position', new THREE.BufferAttribute(glowPos,3));
+    const glowMat = new THREE.LineBasicMaterial({color:0x00ff88, transparent:true, opacity:0.5});
+    const line = new THREE.Line(glowGeo, glowMat);
+    line.position.y = -1.98;
+    scene.add(line);
+
+    return {grid, grid2, points, line};
+  }
+
+  let objs, mouseX = 0, mouseY = 0, lastT = 0, lowFrames = 0;
+  function animate(t){
+    if (!running) return;
+    rafId = requestAnimationFrame(animate);
+    const dt = t - lastT; lastT = t;
+    // FPS guard: ikizidi kuwa polepole, jizime
+    if (dt > 33){ lowFrames++; if (lowFrames > 180){ selfDisable(); return; } }
+    else lowFrames = Math.max(0, lowFrames - 1);
+
+    const time = t * 0.0002;
+    if (objs){
+      objs.grid.position.z = (time*4) % 4;      // floor inasogea mbele (motion)
+      objs.grid2.position.z = -10 + (time*2)%4;
+      objs.points.rotation.y = time*0.4;
+      objs.line.position.x = Math.sin(time*2)*10;
+    }
+    // Parallax kidogo kwa mouse
+    camera.position.x += (mouseX*1.5 - camera.position.x)*0.03;
+    camera.position.y += (2.2 - mouseY*1.0 - camera.position.y)*0.03;
+    camera.lookAt(0, 0, -6);
+    renderer.render(scene, camera);
+  }
+
+  function onResize(){
+    if (!renderer) return;
+    const W = window.innerWidth, H = window.innerHeight;
+    renderer.setSize(W, H); camera.aspect = W/H; camera.updateProjectionMatrix();
+  }
+
+  async function startEngine(){
+    if (engineStarted) return;
+    engineStarted = true;
+    const ok = await loadThree();
+    if (!ok || !window.THREE){ engineStarted = false; return; }
+    objs = buildScene();
+    running = true; lastT = performance.now();
+    canvas.classList.add('ready');
+    rafId = requestAnimationFrame(animate);
+    window.addEventListener('resize', onResize);
+    window.addEventListener('mousemove', e => {
+      mouseX = (e.clientX/window.innerWidth - 0.5);
+      mouseY = (e.clientY/window.innerHeight - 0.5);
+    });
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden){ running = false; cancelAnimationFrame(rafId); }
+      else if (!toggle.classList.contains('off') && objs){ running = true; lastT = performance.now(); rafId = requestAnimationFrame(animate); }
+    });
+  }
+
+  function stopEngine(){
+    running = false; cancelAnimationFrame(rafId);
+    canvas.classList.remove('ready');
+  }
+
+  function selfDisable(){
+    // Performance mbaya → zima kimya, weka faux-CSS tu
+    stopEngine();
+    setToggleState(false);
+  }
+
+  function enable(){ sessionStorage.removeItem(KEY); setToggleState(true);
+    if (!engineStarted) startEngine(); else { running = true; lastT = performance.now(); canvas.classList.add('ready'); rafId = requestAnimationFrame(animate); } }
+  function disable(){ sessionStorage.setItem(KEY, '1'); setToggleState(false); stopEngine(); }
+
+  toggle.addEventListener('click', () => {
+    if (toggle.classList.contains('off')) enable(); else disable();
+  });
+
+  // ── Init ──
+  if (!capable){
+    // Simu dhaifu: faux-CSS tu, toggle inaonyesha lakini haiwashi WebGL
+    setToggleState(false);
+    toggle.title = 'Your device uses the lightweight visual mode';
+    toggle.addEventListener('click', () => {
+      alert('3D mode is turned off automatically to keep things fast on this device. The neon theme is still active.');
+    }, {once:false});
+  } else if (userOff){
+    setToggleState(false);
+  } else {
+    setToggleState(true);
+    // Anza baada ya page ku-load (usichelewe first paint)
+    if (document.readyState === 'complete') setTimeout(startEngine, 400);
+    else window.addEventListener('load', () => setTimeout(startEngine, 400));
+  }
+})();
+</script>

@@ -58,6 +58,51 @@ h1 em{font-style:normal;background:linear-gradient(90deg,var(--green),var(--cyan
 .path:nth-child(2){animation-delay:.1s}.path:nth-child(3){animation-delay:.2s}
 @keyframes up{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
 .path::after{content:'';position:absolute;top:0;left:0;right:0;height:2.5px;opacity:.85}
+
+/* ══ 3D HERO (2090) ══ */
+#hero-canvas{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0;transition:opacity 1.4s ease}
+#hero-canvas.ready{opacity:1}
+.hero-3d{position:relative;z-index:2;min-height:min(72vh,620px);display:flex;flex-direction:column;
+  justify-content:center;padding-bottom:20px}
+.hero-3d .eyebrow{animation:heroFade .8s var(--ease) both}
+/* Headline: kila neno linaingia staggered */
+.hero-3d h1{position:relative}
+.hero-3d h1 .w{display:inline-block;opacity:0;transform:translateY(30px) rotateX(-40deg);
+  animation:wordIn .7s var(--ease) forwards;transform-origin:bottom}
+@keyframes wordIn{to{opacity:1;transform:none}}
+@keyframes heroFade{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.hero-3d .sub{animation:heroFade .8s var(--ease) .5s both}
+.hero-3d .hero-cta{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;animation:heroFade .8s var(--ease) .7s both}
+.hero-cta .h-btn{display:inline-flex;align-items:center;gap:9px;padding:15px 30px;border-radius:14px;
+  font-weight:800;font-size:15.5px;text-decoration:none;transition:transform .2s var(--ease),box-shadow .3s;position:relative;overflow:hidden}
+.hero-cta .h-btn.primary{background:linear-gradient(135deg,var(--green),var(--cyan));color:#04120a;
+  box-shadow:0 8px 30px rgba(37,211,102,.3)}
+.hero-cta .h-btn.primary:hover{transform:translateY(-3px);box-shadow:0 14px 40px rgba(37,211,102,.45)}
+.hero-cta .h-btn.ghost{border:1px solid var(--line);color:var(--ink);background:rgba(255,255,255,.03)}
+.hero-cta .h-btn.ghost:hover{border-color:var(--cyan);color:var(--cyan);transform:translateY(-3px)}
+.hero-cta .h-btn.primary::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.3) 50%,transparent 70%);
+  transform:translateX(-130%);animation:btnShine 3.5s ease infinite}
+@keyframes btnShine{0%,60%{transform:translateX(-130%)}90%,100%{transform:translateX(130%)}}
+/* Floating stat badges (HUD) */
+.hero-badges{display:flex;gap:20px;flex-wrap:wrap;margin-top:38px;animation:heroFade .8s var(--ease) .9s both}
+.hero-badge{display:flex;flex-direction:column;gap:2px}
+.hero-badge b{font-family:var(--ff-m);font-size:clamp(22px,3.5vw,32px);color:#fff;
+  text-shadow:0 0 24px rgba(0,212,255,.4);line-height:1}
+.hero-badge span{font-size:12px;color:var(--muted);letter-spacing:.5px}
+.hero-badge .bar{height:2px;width:38px;margin-top:5px;background:linear-gradient(90deg,var(--green),var(--cyan))}
+/* Scroll cue */
+.scroll-cue{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);z-index:2;
+  color:var(--dim);font-family:var(--ff-m);font-size:10px;letter-spacing:2px;text-transform:uppercase;
+  display:flex;flex-direction:column;align-items:center;gap:6px;animation:heroFade 1s var(--ease) 1.2s both}
+.scroll-cue .arrow{width:18px;height:18px;border-right:2px solid var(--cyan);border-bottom:2px solid var(--cyan);
+  transform:rotate(45deg);animation:cueBounce 1.8s ease infinite}
+@keyframes cueBounce{0%,100%{transform:rotate(45deg) translate(0,0);opacity:.4}50%{transform:rotate(45deg) translate(4px,4px);opacity:1}}
+@media(max-width:640px){.hero-3d{min-height:auto;padding-top:20px}.scroll-cue{display:none}}
+@media(prefers-reduced-motion:reduce){
+  .hero-3d h1 .w,.hero-3d .eyebrow,.hero-3d .sub,.hero-3d .hero-cta,.hero-badges,.scroll-cue{
+    animation:none!important;opacity:1!important;transform:none!important}
+}
 .path.ai::after{background:linear-gradient(90deg,var(--violet),var(--cyan))}
 .path.diy::after{background:linear-gradient(90deg,var(--green),var(--green-2))}
 .path.buy::after{background:linear-gradient(90deg,var(--cyan),#7db9ff)}
@@ -109,15 +154,28 @@ h1 em{font-style:normal;background:linear-gradient(90deg,var(--green),var(--cyan
 </style>
 </head>
 <body>
+<canvas id="hero-canvas"></canvas>
 <div class="top">
   <a class="brand" href="/">Jamii<span>Tek</span></a>
   <a class="home" href="/">← Back to Home</a>
 </div>
 
 <div class="wrap">
-  <span class="eyebrow"><i></i>GET YOUR WEBSITE</span>
-  <h1>Three ways to get online.<br><em>Pick what suits you.</em></h1>
-  <p class="sub">Whether you want full control, a ready-made professional design, or a team that builds everything for you — JamiiTek has a path for you.</p>
+  <div class="hero-3d">
+    <span class="eyebrow"><i></i>JAMIITEK · WEBSITE BUILDER</span>
+    <h1 id="hero-h1"><em>Your website,</em> built for the future.</h1>
+    <p class="sub">Whether you want full control, an AI to build it in seconds, a ready-made professional design, or a team that does everything for you — JamiiTek has a path for you. Free subdomain, instant publishing, no code needed.</p>
+    <div class="hero-cta">
+      <a class="h-btn primary" href="{% url 'builder:ai_generator' %}">✨ Let AI build it</a>
+      <a class="h-btn ghost" href="{% url 'builder:signup' %}">Start building free →</a>
+    </div>
+    <div class="hero-badges">
+      <div class="hero-badge"><b data-count="30">30s</b><span>To a live website</span><div class="bar"></div></div>
+      <div class="hero-badge"><b data-count="0">Free</b><span>Subdomain included</span><div class="bar"></div></div>
+      <div class="hero-badge"><b data-count="4">4</b><span>Ways to get started</span><div class="bar"></div></div>
+    </div>
+  </div>
+  <div class="scroll-cue"><span>Explore</span><div class="arrow"></div></div>
 
   <div class="paths">
     <!-- 0. AI One-Shot -->
@@ -182,5 +240,147 @@ h1 em{font-style:normal;background:linear-gradient(90deg,var(--green),var(--cyan
 
   <p class="help">Not sure which to choose? <a href="https://wa.me/{{ whatsapp|default:'255000000000' }}?text=Hello%20JamiiTek,%20I%20need%20help%20choosing%20how%20to%20get%20my%20website" rel="noopener">Chat with us on WhatsApp</a> and we'll advise you for free.</p>
 </div>
+<script>
+/* ══ GET-STARTED 3D HERO ENGINE ══ */
+(function(){
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // 1. Split headline into animated words (staggered rise)
+  const h1 = document.getElementById('hero-h1');
+  if (h1 && !reduced){
+    const walk = (node) => {
+      const kids = Array.from(node.childNodes);
+      kids.forEach(n => {
+        if (n.nodeType === 3){ // text node
+          const frag = document.createDocumentFragment();
+          n.textContent.split(/(\s+)/).forEach(word => {
+            if (word.trim()){
+              const span = document.createElement('span');
+              span.className = 'w'; span.textContent = word;
+              frag.appendChild(span);
+            } else frag.appendChild(document.createTextNode(word));
+          });
+          node.replaceChild(frag, n);
+        } else if (n.nodeType === 1){ walk(n); }
+      });
+    };
+    walk(h1);
+    document.querySelectorAll('#hero-h1 .w').forEach((w, i) => {
+      w.style.animationDelay = (0.15 + i * 0.08) + 's';
+    });
+  }
+
+  // 2. Count-up badges
+  function countBadges(){
+    document.querySelectorAll('.hero-badge b[data-count]').forEach(el => {
+      const target = parseInt(el.dataset.count, 10);
+      if (!target || reduced) return;
+      const suffix = el.textContent.replace(/[\d]/g,'');
+      const dur = 1100, start = performance.now();
+      function step(now){
+        const p = Math.min(1,(now-start)/dur), e = 1-Math.pow(1-p,3);
+        el.textContent = Math.floor(e*target) + suffix;
+        if (p<1) requestAnimationFrame(step); else el.textContent = target + suffix;
+      }
+      setTimeout(() => requestAnimationFrame(step), 900);
+    });
+  }
+  countBadges();
+
+  // 3. WebGL background — device guard (kama builder engine)
+  function capable(){
+    if (reduced) return false;
+    if (navigator.deviceMemory && navigator.deviceMemory < 4) return false;
+    if (navigator.hardwareConcurrency && navigator.hardwareConcurrency < 4) return false;
+    if (Math.min(screen.width, screen.height) < 380) return false;
+    try { const c=document.createElement('canvas');
+      if(!(c.getContext('webgl')||c.getContext('experimental-webgl'))) return false;
+    } catch(e){ return false; }
+    return true;
+  }
+  if (!capable()) return;
+
+  const canvas = document.getElementById('hero-canvas');
+  let renderer, scene, camera, rafId, running = false, torus, particles, ring;
+
+  async function loadThree(){
+    return new Promise((res, rej) => {
+      const sc = document.createElement('script');
+      sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+      sc.onload = res; sc.onerror = rej; document.head.appendChild(sc);
+    });
+  }
+
+  function build(){
+    const W = innerWidth, H = innerHeight;
+    renderer = new THREE.WebGLRenderer({canvas, alpha:true, antialias:true});
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
+    renderer.setSize(W, H);
+    scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x040918, 0.05);
+    camera = new THREE.PerspectiveCamera(60, W/H, 0.1, 100);
+    camera.position.set(0, 0, 10);
+
+    // Wireframe torus knot inayozunguka — "core" ya 2090
+    const geo = new THREE.TorusKnotGeometry(2.4, 0.55, 120, 16);
+    const mat = new THREE.MeshBasicMaterial({color:0x00d4ff, wireframe:true, transparent:true, opacity:0.28});
+    torus = new THREE.Mesh(geo, mat);
+    torus.position.set(3.2, 0.5, -2);
+    scene.add(torus);
+
+    // Glowing ring
+    const ringGeo = new THREE.RingGeometry(3.6, 3.68, 64);
+    const ringMat = new THREE.MeshBasicMaterial({color:0x25d366, transparent:true, opacity:0.35, side:THREE.DoubleSide});
+    ring = new THREE.Mesh(ringGeo, ringMat);
+    ring.position.set(3.2, 0.5, -2);
+    scene.add(ring);
+
+    // Particle field
+    const pc = Math.min(700, Math.floor((W*H)/2400));
+    const pg = new THREE.BufferGeometry();
+    const pos = new Float32Array(pc*3);
+    for (let i=0;i<pc*3;i+=3){
+      pos[i]=(Math.random()-0.5)*30; pos[i+1]=(Math.random()-0.5)*20; pos[i+2]=(Math.random()-0.5)*16-4;
+    }
+    pg.setAttribute('position', new THREE.BufferAttribute(pos,3));
+    particles = new THREE.Points(pg, new THREE.PointsMaterial({color:0x6c63ff,size:0.05,transparent:true,opacity:0.7}));
+    scene.add(particles);
+  }
+
+  let mx=0, my=0, lastT=0, low=0;
+  function animate(t){
+    if (!running) return;
+    rafId = requestAnimationFrame(animate);
+    const dt = t-lastT; lastT=t;
+    if (dt>34){ low++; if(low>180){ stop(); return; } } else low=Math.max(0,low-1);
+    const tm = t*0.0004;
+    torus.rotation.x = tm*1.2; torus.rotation.y = tm*1.6;
+    ring.rotation.z = tm*0.8;
+    particles.rotation.y = tm*0.3;
+    camera.position.x += (mx*1.2 - camera.position.x)*0.04;
+    camera.position.y += (-my*0.8 - camera.position.y)*0.04;
+    camera.lookAt(2, 0, -2);
+    renderer.render(scene, camera);
+  }
+  function stop(){ running=false; cancelAnimationFrame(rafId); }
+
+  function onResize(){ if(!renderer) return;
+    renderer.setSize(innerWidth,innerHeight);
+    camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); }
+
+  loadThree().then(() => {
+    if (!window.THREE) return;
+    build(); running=true; lastT=performance.now();
+    canvas.classList.add('ready');
+    rafId = requestAnimationFrame(animate);
+    addEventListener('resize', onResize);
+    addEventListener('mousemove', e => { mx=(e.clientX/innerWidth-0.5); my=(e.clientY/innerHeight-0.5); });
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) stop();
+      else { running=true; lastT=performance.now(); rafId=requestAnimationFrame(animate); }
+    });
+  }).catch(()=>{});
+})();
+</script>
 </body>
 </html>

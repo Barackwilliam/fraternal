@@ -201,13 +201,135 @@ table tr:hover td{background:rgba(255,255,255,.02)}
   .mob-nav a{min-width:64px;font-size:9.5px}
   .mob-nav a .ic{font-size:17px}
 }
+
+/* ══ SCI-FI 3D ENHANCEMENTS (2090 mode) ══ */
+body.scifi .card{
+  background:linear-gradient(160deg,rgba(14,26,48,.7),rgba(8,16,32,.55));
+  border:1px solid rgba(0,212,255,.14);
+  backdrop-filter:blur(14px);
+  box-shadow:0 8px 40px rgba(0,0,0,.4),inset 0 1px 0 rgba(120,180,255,.06);
+  transform-style:preserve-3d;transition:transform .35s cubic-bezier(.2,.9,.3,1),box-shadow .35s,border-color .35s;
+  position:relative;overflow:hidden}
+body.scifi .card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(0,212,255,.6),transparent);
+  animation:scifiSweep 4s ease-in-out infinite}
+@keyframes scifiSweep{0%,100%{opacity:.3;transform:translateX(-30%)}50%{opacity:1;transform:translateX(30%)}}
+body.scifi .card:hover{
+  transform:perspective(1000px) rotateX(1.5deg) translateY(-4px);
+  border-color:rgba(0,212,255,.4);
+  box-shadow:0 20px 60px rgba(0,120,180,.25),0 0 30px rgba(0,212,255,.1),inset 0 1px 0 rgba(120,180,255,.1)}
+body.scifi .stat{
+  background:linear-gradient(160deg,rgba(14,26,48,.6),rgba(8,16,32,.4));
+  border:1px solid rgba(0,212,255,.16);backdrop-filter:blur(12px);
+  transition:transform .3s var(--ease,ease),box-shadow .3s;position:relative}
+body.scifi .stat:hover{transform:translateY(-3px) scale(1.02);
+  box-shadow:0 12px 34px rgba(0,120,180,.22),0 0 20px rgba(0,212,255,.12);border-color:rgba(0,212,255,.4)}
+body.scifi .stat b{text-shadow:0 0 18px rgba(0,212,255,.4)}
+body.scifi .btn.amber,body.scifi .btn.primary{
+  box-shadow:0 0 20px rgba(37,211,102,.25);position:relative;overflow:hidden}
+body.scifi .btn.amber::after,body.scifi .btn.primary::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.15) 50%,transparent 70%);
+  transform:translateX(-130%);transition:transform .6s}
+body.scifi .btn.amber:hover::after,body.scifi .btn.primary:hover::after{transform:translateX(130%)}
+body.scifi .side{background:linear-gradient(180deg,rgba(6,13,31,.85),rgba(5,11,24,.8));backdrop-filter:blur(16px)}
+body.scifi h1{text-shadow:0 0 30px rgba(0,212,255,.3)}
+body.scifi .b-name{text-shadow:0 0 20px rgba(37,211,102,.4)}
+body.scifi .crumb{color:var(--cyan);letter-spacing:2px;font-family:'JetBrains Mono',monospace;font-size:10px}
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
+  body.scifi .card::before{display:none}
+}
+
+/* ══ CONTENT AUTO-ADJUST (fluid & responsive) ══ */
+html{scroll-behavior:smooth}
+body.scifi h1{font-size:clamp(20px,3.2vw,30px)}
+body.scifi .topbar .crumb{font-size:clamp(9px,1.4vw,11px)}
+body.scifi .stat b{font-size:clamp(19px,3vw,26px)}
+/* Cards zinajipanga zenyewe kwa nafasi iliyopo — auto-fit smart */
+body.scifi .grid.c2{grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr))}
+body.scifi .grid.c3{grid-template-columns:repeat(auto-fill,minmax(min(100%,240px),1fr))}
+body.scifi .stats{grid-template-columns:repeat(auto-fit,minmax(min(100%,138px),1fr))}
+/* Content ndani ya card inajipanga (flex-wrap kila mahali) */
+body.scifi .card>div[style*="display:flex"]{flex-wrap:wrap}
+/* Long text hai-overflow */
+body.scifi .card,body.scifi td,body.scifi .stat{overflow-wrap:anywhere}
+/* Tables zinaweza scroll horizontal kwenye simu bila kuvunja layout */
+body.scifi .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:12px}
+
+/* ══ SCI-FI ENTRANCE + MOTION ══ */
+/* Staggered entrance ya sci-fi: clip + blur + rise */
+body.scifi .card{animation:scifiRise .6s cubic-bezier(.2,.9,.3,1) both}
+body.scifi .card:nth-child(1){animation-delay:.04s}
+body.scifi .card:nth-child(2){animation-delay:.1s}
+body.scifi .card:nth-child(3){animation-delay:.16s}
+body.scifi .card:nth-child(4){animation-delay:.22s}
+body.scifi .card:nth-child(5){animation-delay:.28s}
+body.scifi .card:nth-child(6){animation-delay:.34s}
+body.scifi .card:nth-child(n+7){animation-delay:.4s}
+@keyframes scifiRise{
+  0%{opacity:0;transform:translateY(26px) scale(.98);filter:blur(6px)}
+  60%{filter:blur(0)}
+  100%{opacity:1;transform:none;filter:blur(0)}}
+body.scifi .stat{animation:scifiPop .55s cubic-bezier(.2,1.2,.3,1) both}
+body.scifi .stat:nth-child(1){animation-delay:.05s}
+body.scifi .stat:nth-child(2){animation-delay:.11s}
+body.scifi .stat:nth-child(3){animation-delay:.17s}
+body.scifi .stat:nth-child(4){animation-delay:.23s}
+body.scifi .stat:nth-child(5){animation-delay:.29s}
+body.scifi .stat:nth-child(6){animation-delay:.35s}
+body.scifi .stat:nth-child(n+7){animation-delay:.4s}
+@keyframes scifiPop{0%{opacity:0;transform:translateY(18px) scale(.9)}100%{opacity:1;transform:none}}
+body.scifi h1{animation:scifiGlitch .7s var(--ease) both}
+@keyframes scifiGlitch{
+  0%{opacity:0;transform:translateX(-8px);clip-path:inset(0 100% 0 0)}
+  50%{clip-path:inset(0 0 0 0)}
+  100%{opacity:1;transform:none;clip-path:inset(0 0 0 0)}}
+body.scifi .side nav a{animation:slideInLeft .5s var(--ease) both}
+body.scifi .side nav a:nth-child(1){animation-delay:.15s}
+body.scifi .side nav a:nth-child(2){animation-delay:.22s}
+body.scifi .side nav a:nth-child(3){animation-delay:.29s}
+body.scifi .side nav a:nth-child(4){animation-delay:.36s}
+body.scifi .side nav a:nth-child(n+5){animation-delay:.42s}
+@keyframes slideInLeft{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:none}}
+
+/* Scroll-reveal: elements zenye .reveal zinaonekana zikiingia viewport */
+.reveal{opacity:0;transform:translateY(24px);
+  transition:opacity .6s var(--ease),transform .6s var(--ease)}
+.reveal.seen{opacity:1;transform:none}
+
+/* Buttons: micro-interaction ya kubonyeza */
+body.scifi .btn{transition:transform .15s var(--ease),box-shadow .25s,border-color .2s,background .2s}
+body.scifi .btn:active{transform:scale(.96)}
+
+/* Smooth transitions kwa vitu vyote vinavyobadilika */
+body.scifi a,body.scifi .pill,body.scifi input,body.scifi textarea,body.scifi select{
+  transition:all .2s var(--ease)}
+body.scifi input:focus,body.scifi textarea:focus,body.scifi select:focus{
+  box-shadow:0 0 0 3px rgba(0,212,255,.15),0 0 20px rgba(0,212,255,.1)}
+
+/* Count-up: number inayohesabu inapoonekana */
+.countup{font-variant-numeric:tabular-nums}
+
+/* Page transition ya kutoka (link click) */
+body.scifi.leaving .main{opacity:.3;transform:translateY(-8px);transition:.25s var(--ease)}
+
+/* Ripple effect kwa card hover — glow inayofuata mouse */
+body.scifi .card{--mx:50%;--my:50%}
+body.scifi .card::after{content:'';position:absolute;inset:0;pointer-events:none;opacity:0;
+  background:radial-gradient(320px circle at var(--mx) var(--my),rgba(0,212,255,.08),transparent 60%);
+  transition:opacity .35s}
+body.scifi .card:hover::after{opacity:1}
+
+@media(prefers-reduced-motion:reduce){
+  body.scifi .card,body.scifi .stat,body.scifi h1,body.scifi .side nav a,.reveal{
+    animation:none!important;opacity:1!important;transform:none!important;filter:none!important}
+  .reveal{transition:none}
 }
 </style>
 {% block head %}{% endblock %}
 </head>
-<body>
+<body class="scifi">
+{% include 'builder/_scifi_bg.html' %}
 <div id="jt-progress"></div>
 <aside class="side">
   <div class="brand">
@@ -249,6 +371,91 @@ table tr:hover td{background:rgba(255,255,255,.02)}
   document.addEventListener('submit', start);
   window.addEventListener('pageshow', ()=>{ bar.style.width='100%';
     setTimeout(()=>{bar.style.opacity='0'; bar.style.width='0';}, 320); });
+})();
+</script>
+<script>
+/* ══ SCI-FI MOTION ENGINE ══ */
+(function(){
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduced) return;
+
+  // 1. Scroll-reveal: auto-tag content, reveal ikiingia viewport
+  function tagReveal(){
+    // Cards zilizo chini ya fold + sections zote zinapata .reveal
+    const cards = document.querySelectorAll('.main .card, .main .stats, .main table');
+    cards.forEach((el, i) => {
+      const rect = el.getBoundingClientRect();
+      if (rect.top > window.innerHeight * 0.9) el.classList.add('reveal');
+    });
+  }
+  let io;
+  function initReveal(){
+    if (!('IntersectionObserver' in window)) {
+      document.querySelectorAll('.reveal').forEach(e => e.classList.add('seen'));
+      return;
+    }
+    io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting){ e.target.classList.add('seen'); io.unobserve(e.target); }
+      });
+    }, {threshold: 0.12, rootMargin: '0px 0px -40px 0px'});
+    document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+  }
+
+  // 2. Count-up: namba za .stat b zinahesabu kutoka 0
+  function countUp(){
+    document.querySelectorAll('.stat b').forEach(el => {
+      const raw = el.textContent.trim();
+      const m = raw.match(/^([+£$]?)(\d[\d,]*)(.*)$/);
+      if (!m) return;
+      const prefix = m[1], target = parseInt(m[2].replace(/,/g,''),10), suffix = m[3];
+      if (isNaN(target) || target === 0) return;
+      el.classList.add('countup');
+      const dur = 900, start = performance.now();
+      function step(now){
+        const p = Math.min(1, (now - start)/dur);
+        const eased = 1 - Math.pow(1-p, 3);
+        const val = Math.floor(eased * target);
+        el.textContent = prefix + val.toLocaleString() + suffix;
+        if (p < 1) requestAnimationFrame(step);
+        else el.textContent = prefix + target.toLocaleString() + suffix;
+      }
+      requestAnimationFrame(step);
+    });
+  }
+
+  // 3. Card ripple: glow inafuata mouse
+  function initRipple(){
+    document.querySelectorAll('.card').forEach(card => {
+      card.addEventListener('mousemove', e => {
+        const r = card.getBoundingClientRect();
+        card.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+        card.style.setProperty('--my', (e.clientY - r.top) + 'px');
+      });
+    });
+  }
+
+  // 4. Page transition ya kutoka (link click → fade)
+  function initPageOut(){
+    document.addEventListener('click', e => {
+      const a = e.target.closest('a[href]');
+      if (a && !a.target && a.origin === location.origin &&
+          !a.href.includes('#') && !a.hasAttribute('download')){
+        document.body.classList.add('leaving');
+      }
+    });
+    window.addEventListener('pageshow', () => document.body.classList.remove('leaving'));
+  }
+
+  function boot(){
+    tagReveal();
+    initReveal();
+    setTimeout(countUp, 300);   // baada ya entrance ya stats
+    initRipple();
+    initPageOut();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
 })();
 </script>
 {% block scripts %}{% endblock %}
