@@ -126,6 +126,57 @@ body{font-family:'Inter',-apple-system,sans-serif;height:100vh;height:100dvh;dis
 .cm-builtin{color:#c792ea!important}
 .cm-s-hopscotch.CodeMirror{background:#060b18!important}
 
+/* ══ AI CUSTOMIZE PANEL (website-wide design) ══ */
+#jt-cz{position:fixed;top:0;right:0;bottom:0;width:min(440px,92vw);z-index:390;display:none;
+  flex-direction:column;background:linear-gradient(180deg,#0a1428,#070d1c);
+  border-left:1px solid var(--line);box-shadow:-20px 0 60px rgba(0,0,0,.5);animation:czIn .3s var(--ease)}
+#jt-cz.on{display:flex}
+@keyframes czIn{from{transform:translateX(30px);opacity:0}to{transform:none;opacity:1}}
+.cz-hd{display:flex;align-items:center;gap:10px;padding:16px 18px;border-bottom:1px solid var(--line)}
+.cz-hd h3{margin:0;font-size:15px;color:#fff;display:flex;align-items:center;gap:8px}
+.cz-hd .sp{flex:1}
+.cz-x{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;padding:4px 8px;border-radius:8px}
+.cz-x:hover{background:rgba(255,255,255,.06);color:#fff}
+.cz-body{flex:1;overflow-y:auto;padding:18px}
+.cz-tag{display:inline-flex;align-items:center;gap:7px;font-family:var(--ff-m);font-size:9.5px;
+  letter-spacing:1.5px;text-transform:uppercase;color:#b9b4ff;background:rgba(108,99,255,.1);
+  border:1px solid rgba(108,99,255,.3);border-radius:100px;padding:6px 13px;margin-bottom:14px}
+.cz-sec-t{font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:1px;
+  margin:22px 0 10px}
+.cz-sec-t:first-child{margin-top:0}
+.cz-brief{width:100%;min-height:80px;padding:13px;border:1.5px solid var(--line);border-radius:12px;
+  background:rgba(255,255,255,.03);color:var(--ink);font-family:'Inter',sans-serif;font-size:14px;resize:vertical;line-height:1.5}
+.cz-brief:focus{outline:none;border-color:var(--violet);box-shadow:0 0 0 3px rgba(108,99,255,.15)}
+.cz-chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+.cz-chip{background:rgba(255,255,255,.04);border:1px solid var(--line);color:var(--muted);
+  padding:7px 13px;border-radius:100px;font-size:12.5px;cursor:pointer;transition:all .16s;min-height:34px}
+.cz-chip:hover{border-color:var(--cyan);color:var(--cyan)}
+.cz-go{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;min-height:50px;margin-top:14px;
+  border:none;border-radius:12px;font-weight:800;font-size:15px;cursor:pointer;
+  background:linear-gradient(135deg,var(--violet),var(--cyan));color:#fff;transition:all .2s}
+.cz-go:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 10px 28px rgba(108,99,255,.4)}
+.cz-go:disabled{opacity:.7;cursor:wait}
+.cz-preset{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--line);
+  border-radius:12px;cursor:pointer;transition:all .18s;margin-bottom:9px;background:rgba(255,255,255,.02)}
+.cz-preset:hover{border-color:var(--cyan);background:rgba(0,212,255,.04);transform:translateX(3px)}
+.cz-preset .sw{width:44px;height:44px;border-radius:10px;flex-shrink:0}
+.cz-preset b{display:block;color:#fff;font-size:14px;margin-bottom:2px}
+.cz-preset span{font-size:12px;color:var(--muted)}
+.cz-css-wrap{margin-top:8px}
+.cz-css{width:100%;min-height:180px;padding:13px;border:1.5px solid var(--line);border-radius:12px;
+  background:#0a0e18;color:#a9c7e8;font-family:var(--ff-m);font-size:12px;resize:vertical;line-height:1.6}
+.cz-css:focus{outline:none;border-color:var(--cyan)}
+.cz-row{display:flex;gap:9px;margin-top:12px}
+.cz-btn{flex:1;min-height:44px;border-radius:11px;font-weight:700;font-size:13.5px;cursor:pointer;
+  border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--ink);transition:all .18s}
+.cz-btn:hover{border-color:var(--cyan);color:var(--cyan)}
+.cz-btn.primary{background:linear-gradient(135deg,var(--green),var(--green-2));color:#04120a;border:none}
+.cz-note{font-size:12px;color:var(--dim);line-height:1.6;margin-top:10px;padding:11px 13px;
+  background:rgba(0,212,255,.05);border:1px solid rgba(0,212,255,.15);border-radius:10px}
+.cz-status{font-family:var(--ff-m);font-size:11px;color:var(--muted);margin-top:10px;min-height:16px}
+.cz-status.ok{color:var(--green-2)}
+.cz-status.er{color:#ff8ba0}
+
 /* ══ FULL-SCREEN LIVE CODE IDE ══ */
 #jt-ide{position:fixed;inset:0;z-index:400;display:none;flex-direction:column;
   background:#05080f;animation:ideIn .25s var(--ease)}
@@ -388,6 +439,7 @@ body{font-family:'Inter',-apple-system,sans-serif;height:100vh;height:100dvh;dis
   <button class="ed-btn" id="btn-undo" title="Undo (Ctrl+Z)">↺<span class="lbl"> Undo</span></button>
   <button class="ed-btn" id="btn-redo" title="Redo (Ctrl+Shift+Z)">↻<span class="lbl"> Redo</span></button>
   <button class="ed-btn ai" id="tour-ai" onclick="toggleAI()">✨<span class="lbl"> AI Assistant</span></button>
+  <button class="ed-btn ai" id="btn-customize" onclick="openCustomize()" title="Customize the whole website design">🎨<span class="lbl"> Customize</span></button>
   <a class="ed-btn" id="tour-preview" target="_blank"
      href="{{ site.public_url }}{% if page.slug != 'home' %}/p/{{ page.slug }}{% endif %}">👁<span class="lbl"> Preview</span></a>
   <button class="ed-btn" onclick="startTour(true)" title="Editor tutorial">🎓</button>
@@ -420,6 +472,41 @@ body{font-family:'Inter',-apple-system,sans-serif;height:100vh;height:100dvh;dis
 </div>
 
 <div id="gjs"></div>
+
+<!-- AI CUSTOMIZE PANEL (website-wide) -->
+<div id="jt-cz">
+  <div class="cz-hd">
+    <h3>🎨 Customize Website</h3>
+    <span class="sp"></span>
+    <button class="cz-x" onclick="closeCustomize()">✕</button>
+  </div>
+  <div class="cz-body">
+    <span class="cz-tag">✨ APPLIES TO YOUR WHOLE WEBSITE</span>
+
+    <div class="cz-sec-t">Describe the look you want</div>
+    <textarea class="cz-brief" id="cz-brief" maxlength="800"
+      placeholder="e.g. Make it modern and premium with deep ocean blues and gold accents, rounded corners, and elegant fonts"></textarea>
+    <div class="cz-chips">
+      <span class="cz-chip" onclick="czFill('Modern and minimal with lots of whitespace, clean sans-serif fonts, subtle grey tones')">Modern minimal</span>
+      <span class="cz-chip" onclick="czFill('Warm and vibrant African style with earthy oranges, browns and bold headings')">Warm African</span>
+      <span class="cz-chip" onclick="czFill('Luxury and premium with deep dark backgrounds, gold accents and elegant serif fonts')">Dark luxury</span>
+      <span class="cz-chip" onclick="czFill('Fresh and youthful with bright colors, big rounded buttons and playful feel')">Fresh & playful</span>
+      <span class="cz-chip" onclick="czFill('Professional corporate with navy blue, clean lines and trustworthy feel')">Corporate</span>
+    </div>
+    <button class="cz-go" id="cz-go" onclick="czGenerate()">✨ Generate New Design</button>
+    <div class="cz-status" id="cz-status"></div>
+
+    <div class="cz-sec-t">Or edit the site-wide CSS directly</div>
+    <div class="cz-css-wrap">
+      <textarea class="cz-css" id="cz-css" placeholder="/* This CSS applies to every page of your website */" spellcheck="false"></textarea>
+    </div>
+    <div class="cz-row">
+      <button class="cz-btn" onclick="czApplyPreview()">▶ Preview here</button>
+      <button class="cz-btn primary" onclick="czSave()">💾 Apply to Website</button>
+    </div>
+    <div class="cz-note">💡 This design applies to <b>every page</b> of your website — Home, About, and all others. It saves to your live site when you click "Apply to Website".</div>
+  </div>
+</div>
 
 <!-- LIVE CODE IDE -->
 <div id="jt-ide">
@@ -682,6 +769,84 @@ document.addEventListener('keydown', e => {
 });
 
 // Code viewer (IDE style kupitia CSS overrides)
+// ══ AI CUSTOMIZE — website-wide design (Global CSS) ══
+let czStyleEl = null;
+
+function czFill(t){ document.getElementById('cz-brief').value = t; document.getElementById('cz-brief').focus(); }
+function czStatus(msg, cls){ const e = document.getElementById('cz-status'); e.textContent = msg; e.className = 'cz-status ' + (cls||''); }
+
+async function openCustomize(){
+  document.getElementById('jt-cz').classList.add('on');
+  // Pakia global CSS ya sasa
+  try {
+    const res = await fetch(`/builder/site/${SITE_ID}/global-css/`, {headers:{'X-CSRFToken':CSRF}});
+    const data = await res.json();
+    if (data.ok) document.getElementById('cz-css').value = data.global_css || '';
+  } catch(e){}
+}
+function closeCustomize(){ document.getElementById('jt-cz').classList.remove('on'); }
+
+// Preview kwenye canvas ya editor (bila ku-save) — inaingiza <style> kwenye iframe
+function czApplyPreview(){
+  const css = document.getElementById('cz-css').value;
+  try {
+    const doc = editor.Canvas.getDocument();
+    if (!czStyleEl){
+      czStyleEl = doc.createElement('style');
+      czStyleEl.id = 'jt-global-preview';
+      doc.head.appendChild(czStyleEl);
+    }
+    czStyleEl.textContent = css;
+    czStatus('▶ Previewing on canvas (not saved yet)', 'ok');
+  } catch(e){ czStatus('⚠ ' + e.message, 'er'); }
+}
+
+async function czGenerate(){
+  const brief = document.getElementById('cz-brief').value.trim();
+  if (brief.length < 3){ czStatus('Please describe the look you want.', 'er'); return; }
+  const btn = document.getElementById('cz-go');
+  btn.disabled = true; btn.textContent = '✨ Designing your website…';
+  czStatus('AI is designing… this takes a few seconds', '');
+  try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 60000);
+    const fd = new FormData(); fd.append('brief', brief);
+    const res = await fetch(`/builder/site/${SITE_ID}/ai-theme/`, {
+      method:'POST', headers:{'X-CSRFToken':CSRF}, body:fd, signal:ctrl.signal,
+    });
+    clearTimeout(timer);
+    let data = null; try { data = await res.json(); } catch(_){}
+    if (!res.ok || !data || !data.ok){
+      czStatus((data && data.error) ? data.error : `Server error (${res.status}) — see /builder/ai/status/`, 'er');
+      return;
+    }
+    document.getElementById('cz-css').value = data.css;
+    czApplyPreview();
+    const left = data.remaining !== undefined ? ` · ${data.remaining} AI credits left today` : '';
+    czStatus('✨ New design ready & previewed! Click "Apply to Website" to keep it' + left, 'ok');
+  } catch(e){
+    czStatus(e.name === 'AbortError' ? 'AI took too long — try again' : 'Cannot reach server — is it running?', 'er');
+  } finally {
+    btn.disabled = false; btn.textContent = '✨ Generate New Design';
+  }
+}
+
+async function czSave(){
+  const css = document.getElementById('cz-css').value;
+  czStatus('Saving to your website…', '');
+  try {
+    const fd = new FormData(); fd.append('global_css', css);
+    const res = await fetch(`/builder/site/${SITE_ID}/global-css/save/`, {
+      method:'POST', headers:{'X-CSRFToken':CSRF}, body:fd,
+    });
+    const data = await res.json();
+    if (data.ok){
+      czApplyPreview();
+      czStatus('✓ Applied to your whole website! Publish to make it live.', 'ok');
+    } else czStatus('⚠ Could not save — try again', 'er');
+  } catch(e){ czStatus('⚠ ' + e.message, 'er'); }
+}
+
 // ══ FULL-SCREEN LIVE CODE IDE — CodeMirror kutoka CDN ══
 const CM_BASE = 'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16';
 const BEAUTIFY_BASE = 'https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.15.1';

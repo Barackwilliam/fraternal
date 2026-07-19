@@ -16,6 +16,9 @@ urlpatterns = [
     path('ai/apply/', views.ai_apply, name='ai_apply'),
     path('ai/field/', views.ai_field, name='ai_field'),
     path('ai/status/', views.ai_status, name='ai_status'),
+    path('site/<int:site_id>/global-css/save/', views.save_global_css, name='save_global_css'),
+    path('site/<int:site_id>/global-css/', views.get_global_css, name='get_global_css'),
+    path('site/<int:site_id>/ai-theme/', views.ai_theme, name='ai_theme'),
 
     # Super-admin (staff only)
     path('superadmin/', views.superadmin, name='superadmin'),

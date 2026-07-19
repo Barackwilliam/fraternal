@@ -744,6 +744,63 @@ def superadmin_action(request, site_id):
     return redirect(f"/builder/superadmin/?{back}")
 
 
+# ── Global CSS + AI Theme (customization ya website nzima) ──
+
+@login_required
+@require_POST
+def save_global_css(request, site_id):
+    """Hifadhi Global CSS — inatumika pages ZOTE za site + public."""
+    site = _my_site(request, site_id)
+    css = (request.POST.get('global_css') or '')[:60000]
+    site.global_css = css
+    site.save(update_fields=['global_css'])
+    site.bump_version()
+    return JsonResponse({'ok': True, 'saved': True})
+
+
+@login_required
+def get_global_css(request, site_id):
+    """Rudisha Global CSS ya sasa (kwa editor kuipakia)."""
+    site = _my_site(request, site_id)
+    return JsonResponse({'ok': True, 'global_css': site.global_css or ''})
+
+
+@login_required
+@require_POST
+def ai_theme(request, site_id):
+    """
+    AI Theme: mtu anaandika 'nataka iwe ya kisasa, rangi za bahari' →
+    AI ina-generate Global CSS block inayobadilisha look ya website nzima.
+    """
+    site = _my_site(request, site_id)
+
+    from .ai import _check_rate_limit, AI_DAILY_LIMIT
+    ok_rate, remaining = _check_rate_limit(request.user)
+    if not ok_rate:
+        return JsonResponse({'ok': False,
+            'error': f'Daily AI limit reached ({AI_DAILY_LIMIT}). Try again tomorrow.'},
+            status=429)
+
+    brief = (request.POST.get('brief') or '').strip()
+    if len(brief) < 3:
+        return JsonResponse({'ok': False, 'error': 'Please describe the look you want.'}, status=400)
+
+    try:
+        from . import ai_theme as ai_theme_mod
+        ok, css = ai_theme_mod.generate_theme_css(site, brief)
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).exception('ai_theme crashed')
+        return JsonResponse({'ok': False,
+            'error': f'Server error ({type(e).__name__}). Check /builder/ai/status/.'}, status=500)
+
+    if not ok:
+        return JsonResponse({'ok': False, 'error': css}, status=400)
+
+    AiUsageLog.objects.create(user=request.user)
+    return JsonResponse({'ok': True, 'css': css, 'remaining': remaining - 1})
+
+
 # ── AI Field Helper (magic buttons) ────────────────────
 
 @login_required
