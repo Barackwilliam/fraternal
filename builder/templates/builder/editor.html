@@ -23,17 +23,19 @@
 body{font-family:'Inter',-apple-system,sans-serif;height:100vh;height:100dvh;display:flex;flex-direction:column;
   overflow:hidden;background:var(--bg);color:var(--ink)}
 /* ══ SCI-FI EDITOR ENHANCEMENTS ══ */
-body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.5;
-  background:linear-gradient(rgba(0,212,255,.025) 1px,transparent 1px),
-             linear-gradient(90deg,rgba(0,212,255,.025) 1px,transparent 1px);
-  background-size:46px 46px;
-  mask-image:radial-gradient(ellipse 100% 60% at 50% 0%,#000 20%,transparent 90%);
-  -webkit-mask-image:radial-gradient(ellipse 100% 60% at 50% 0%,#000 20%,transparent 90%)}
-body>*{position:relative;z-index:1}
+/* Grid ya sci-fi kwenye canvas ya GrapesJS (mahali inaonekana) */
+.gjs-cv-canvas{
+  background:
+    linear-gradient(rgba(0,212,255,.035) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,212,255,.035) 1px,transparent 1px),
+    radial-gradient(700px 400px at 60% 0%,rgba(0,212,255,.06),transparent 60%),
+    radial-gradient(600px 400px at 10% 100%,rgba(108,99,255,.05),transparent 55%),
+    #0b1222 !important;
+  background-size:46px 46px,46px 46px,100% 100%,100% 100%,100% 100% !important}
 /* Entrance ya editor */
 .ed-top{animation:edSlideDown .5s cubic-bezier(.2,.9,.3,1) both}
 @keyframes edSlideDown{from{opacity:0;transform:translateY(-14px)}to{opacity:1;transform:none}}
-.ed-main{animation:edFadeIn .6s var(--ease,ease) .15s both}
+#gjs{animation:edFadeIn .6s var(--ease,ease) .2s both}
 @keyframes edFadeIn{from{opacity:0}to{opacity:1}}
 /* Buttons: glass + neon glow + press */
 .ed-btn{position:relative;overflow:hidden;transition:transform .15s var(--ease,ease),border-color .2s,box-shadow .25s,color .2s}
@@ -53,8 +55,7 @@ body>*{position:relative;z-index:1}
 .devs button.on{box-shadow:0 0 16px rgba(0,212,255,.2)}
 /* Save button extra life */
 @media(prefers-reduced-motion:reduce){
-  .ed-top,.ed-main,.ed-name .pg,.ed-btn.primary::after{animation:none!important}
-  body::before{display:none}
+  .ed-top,#gjs,.ed-name .pg,.ed-btn.primary::after{animation:none!important}
 }
 
 /* ══ TOPBAR ══ */
@@ -102,7 +103,7 @@ body>*{position:relative;z-index:1}
 .gjs-pn-panel{background-color:var(--panel)!important;border-color:var(--line)!important}
 .gjs-pn-views,.gjs-pn-views-container{border-color:var(--line)!important;box-shadow:none!important}
 .gjs-pn-views-container{background-color:var(--panel)!important}
-.gjs-cv-canvas{background:radial-gradient(700px 400px at 60% 0%,rgba(0,212,255,.05),transparent 60%),#0b1222}
+.gjs-cv-canvas{background:transparent}
 .gjs-block{background:var(--panel-2)!important;border:1px solid var(--line)!important;border-radius:11px!important;
   color:var(--muted)!important;transition:all .2s var(--ease)!important;box-shadow:none!important}
 .gjs-block:hover{border-color:var(--cyan)!important;color:var(--cyan)!important;transform:translateY(-2px);
@@ -769,12 +770,12 @@ bm.add('jt-inquiry-form', {
 });
 {% for c in collections %}
 bm.add('jt-col-{{ c.slug }}', {
-  label: '{{ c.icon }} {{ c.name }} Grid', category: jtCat,
+  label: '{{ c.icon }} {{ c.name|escapejs }} Grid', category: jtCat,
   content: `<section style="padding:50px 20px;max-width:1100px;margin:0 auto">
-    <h2 style="text-align:center">{{ c.name }}</h2>
+    <h2 style="text-align:center">{{ c.name|escapejs }}</h2>
     <div data-jt-collection="{{ c.slug }}" style="padding:24px;border:2px dashed #7db9ff;border-radius:12px;text-align:center;background:#f0f6ff;color:#3a5a8a">
-      {{ c.icon }} <b>{{ c.name }}</b> will appear here automatically.<br>
-      <small>Add or edit them under Dashboard → {{ c.name }}.</small>
+      {{ c.icon }} <b>{{ c.name|escapejs }}</b> will appear here automatically.<br>
+      <small>Add or edit them under Dashboard → {{ c.name|escapejs }}.</small>
     </div>
   </section>`,
 });

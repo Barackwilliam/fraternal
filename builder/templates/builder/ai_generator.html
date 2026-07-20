@@ -41,6 +41,39 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;opacity:.5;
   border:1px solid rgba(108,99,255,.32);border-radius:100px;padding:7px 16px;margin-bottom:18px}
 .eyebrow i{width:6px;height:6px;border-radius:50%;background:var(--violet);animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(108,99,255,.5)}55%{box-shadow:0 0 0 7px rgba(108,99,255,0)}}
+
+/* ══ AI 2090 — NEURAL NETWORK 3D ══ */
+#ai-canvas{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0;transition:opacity 1.6s ease}
+#ai-canvas.ready{opacity:1}
+.top,.wrap{position:relative;z-index:2}
+/* AI core orb — glowing sphere kwenye kona */
+.ai-orb{position:fixed;top:12%;right:-80px;width:340px;height:340px;z-index:1;pointer-events:none;
+  border-radius:50%;background:radial-gradient(circle at 40% 35%,rgba(108,99,255,.25),rgba(0,212,255,.08) 45%,transparent 70%);
+  filter:blur(20px);animation:orbFloat 8s ease-in-out infinite}
+@keyframes orbFloat{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-24px) scale(1.06)}}
+/* Headline yenye AI feel */
+.hero-ai{position:relative;z-index:2}
+.hero-ai .eyebrow{animation:aiFadeUp .7s var(--ease) both}
+.hero-ai h1{animation:aiFadeUp .8s var(--ease) .1s both}
+.hero-ai .sub{animation:aiFadeUp .8s var(--ease) .25s both}
+@keyframes aiFadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+/* Cursor ya AI inayoblink baada ya headline */
+.ai-cursor{display:inline-block;width:3px;height:.9em;background:var(--cyan);margin-left:4px;
+  vertical-align:text-bottom;animation:blink 1.1s step-end infinite;box-shadow:0 0 12px var(--cyan)}
+@keyframes blink{0%,50%{opacity:1}51%,100%{opacity:0}}
+/* Status line ya "AI online" */
+.ai-status-bar{display:inline-flex;align-items:center;gap:14px;margin-top:20px;padding:8px 16px;
+  background:rgba(0,255,136,.06);border:1px solid rgba(0,255,136,.25);border-radius:100px;
+  font-family:var(--ff-m);font-size:11px;color:var(--green-2);animation:aiFadeUp .8s var(--ease) .4s both}
+.ai-status-bar .dot{width:7px;height:7px;border-radius:50%;background:var(--green-2);
+  box-shadow:0 0 10px var(--green-2);animation:statPulse 1.6s ease infinite}
+@keyframes statPulse{0%,100%{opacity:.4;transform:scale(1)}50%{opacity:1;transform:scale(1.3)}}
+.ai-status-bar .sep{width:1px;height:12px;background:rgba(0,255,136,.25)}
+
+@media(prefers-reduced-motion:reduce){
+  .ai-orb,.ai-cursor,.hero-ai .eyebrow,.hero-ai h1,.hero-ai .sub,.ai-status-bar{
+    animation:none!important;opacity:1!important;transform:none!important}
+}
 h1{font-family:var(--ff-d);font-size:clamp(30px,5.4vw,52px);line-height:1.1;letter-spacing:-.02em;color:#fff}
 h1 em{font-style:normal;background:linear-gradient(90deg,var(--violet),var(--cyan));
   -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
@@ -95,6 +128,34 @@ textarea::placeholder{color:var(--dim)}
   border-radius:50%;animation:sp .8s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
 
+/* ══ AI SOUND-WAVE VISUALIZER (inaonyesha AI "inasikiliza") ══ */
+.ai-wave{display:flex;align-items:center;gap:3px;height:24px;margin-left:auto}
+.ai-wave span{width:3px;background:linear-gradient(180deg,var(--cyan),var(--violet));border-radius:3px;
+  animation:wave 1.2s ease-in-out infinite}
+.ai-wave span:nth-child(1){height:8px;animation-delay:0s}
+.ai-wave span:nth-child(2){height:16px;animation-delay:.1s}
+.ai-wave span:nth-child(3){height:24px;animation-delay:.2s}
+.ai-wave span:nth-child(4){height:14px;animation-delay:.3s}
+.ai-wave span:nth-child(5){height:20px;animation-delay:.4s}
+.ai-wave span:nth-child(6){height:10px;animation-delay:.5s}
+.ai-wave span:nth-child(7){height:18px;animation-delay:.6s}
+@keyframes wave{0%,100%{transform:scaleY(.4);opacity:.5}50%{transform:scaleY(1);opacity:1}}
+.gen.thinking .ai-wave span{animation-duration:.5s}
+/* Gen box: glow inayowaka wakati wa focus/thinking */
+.gen{transition:border-color .4s,box-shadow .4s}
+.gen.focused{border-color:rgba(108,99,255,.5);box-shadow:0 0 0 1px rgba(108,99,255,.3),0 0 40px rgba(108,99,255,.12)}
+.gen.thinking{border-color:rgba(0,212,255,.5);
+  box-shadow:0 0 0 1px rgba(0,212,255,.4),0 0 60px rgba(0,212,255,.18);
+  animation:thinkPulse 2s ease-in-out infinite}
+@keyframes thinkPulse{0%,100%{box-shadow:0 0 0 1px rgba(0,212,255,.4),0 0 40px rgba(0,212,255,.12)}
+  50%{box-shadow:0 0 0 1px rgba(0,212,255,.6),0 0 70px rgba(0,212,255,.25)}}
+/* Label ina wave */
+.gen-label-row{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.gen-label-row label{margin:0}
+/* Chip ripple on click */
+.chip{position:relative;overflow:hidden}
+.chip.picked{border-color:var(--cyan);color:var(--cyan);background:rgba(0,212,255,.08)}
+
 .err{display:none;margin-top:18px;padding:14px 18px;background:rgba(255,84,112,.1);border:1px solid rgba(255,84,112,.3);
   border-radius:12px;color:#ffb0be;font-size:14px}
 .err.on{display:block}
@@ -107,18 +168,30 @@ textarea::placeholder{color:var(--dim)}
 </style>
 </head>
 <body>
+<canvas id="ai-canvas"></canvas>
+<div class="ai-orb"></div>
 <div class="top">
   <a class="brand" href="/">Jamii<span>Tek</span></a>
   <a class="home" href="{% url 'get_started' %}">← Other ways to start</a>
 </div>
 
 <div class="wrap">
-  <span class="eyebrow"><i></i>AI-POWERED · BETA</span>
-  <h1>Describe your business.<br><em>We'll build the whole website.</em></h1>
-  <p class="sub">One sentence, one paragraph, English or Swahili — however you'd explain your business to a friend. Our AI generates a complete, professional website: brand name, tagline, About Us, services/products with descriptions and prices, and a design that fits your industry. Then you polish it in the editor.</p>
+  <div class="hero-ai">
+    <span class="eyebrow"><i></i>JAMIITEK AI · NEURAL ENGINE</span>
+    <h1>Describe your business.<br><em id="ai-typed">We'll build the whole website.</em><span class="ai-cursor"></span></h1>
+    <p class="sub">One sentence, one paragraph, English or Swahili — however you'd explain your business to a friend. Our AI generates a complete, professional website: brand name, tagline, About Us, services/products with descriptions and prices, and a design that fits your industry. Then you polish it in the editor.</p>
+    <div class="ai-status-bar">
+      <span class="dot"></span> AI ONLINE
+      <span class="sep"></span> llama-3.3-70b
+      <span class="sep"></span> <span id="ai-latency">~30s to full site</span>
+    </div>
+  </div>
 
   <div class="gen">
-    <label>Tell us about your business</label>
+    <div class="gen-label-row">
+      <label>Tell us about your business</label>
+      <div class="ai-wave"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+    </div>
     <textarea id="desc" maxlength="2000" placeholder="e.g. I run a small tour company in Arusha. We do 3-7 day safaris to Serengeti, Ngorongoro and Kilimanjaro. Our specialty is small groups with expert guides. Prices from $1,200 per person."></textarea>
     <p class="hint" id="counter">0 / 2000 characters · Tip: mention what you sell, where you are, and one thing that makes you different.</p>
 
@@ -155,12 +228,64 @@ const err = document.getElementById('err');
 const progress = document.getElementById('progress');
 const steps = document.querySelectorAll('.step');
 
+/* ── AI TYPING EFFECT: headline inarotate misemo ya AI ── */
+(function(){
+  const typed = document.getElementById('ai-typed');
+  const cursor = document.querySelector('.ai-cursor');
+  if (!typed || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const phrases = [
+    "We'll build the whole website.",
+    "In under 30 seconds.",
+    "English or Swahili — we understand.",
+    "Brand name, copy, design — done.",
+    "Just describe. AI does the rest.",
+  ];
+  let pi = 0, ci = 0, deleting = false;
+  function tick(){
+    const full = phrases[pi];
+    if (!deleting){
+      typed.textContent = full.slice(0, ci++);
+      if (ci > full.length){ deleting = true; setTimeout(tick, 2200); return; }
+    } else {
+      typed.textContent = full.slice(0, ci--);
+      if (ci < 0){ deleting = false; pi = (pi+1) % phrases.length; ci = 0; setTimeout(tick, 300); return; }
+    }
+    setTimeout(tick, deleting ? 28 : 55);
+  }
+  setTimeout(tick, 2600); // baada ya entrance
+})();
+
+/* ── Rotating placeholder kwenye textarea ── */
+(function(){
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const examples = [
+    "e.g. I run a small tour company in Arusha. We do 3-7 day safaris to Serengeti, Ngorongoro and Kilimanjaro. Prices from $1,200 per person.",
+    "e.g. Nauza mitumba ya nguo za watoto Mwenge, Dar. Bei nafuu, natuma mikoani kwa basi.",
+    "e.g. We're a modern dental clinic in Mwanza offering cleaning, whitening and braces. Friendly staff, evening appointments available.",
+    "e.g. I bake custom cakes for weddings and birthdays in Dodoma. Delivery included. Order 3 days ahead.",
+  ];
+  let i = 0;
+  setInterval(() => {
+    if (document.activeElement === desc || desc.value) return; // usisumbue akiandika
+    i = (i+1) % examples.length;
+    desc.style.transition = 'opacity .3s'; desc.style.opacity = '.4';
+    setTimeout(() => { desc.setAttribute('placeholder', examples[i]); desc.style.opacity = '1'; }, 300);
+  }, 4000);
+})();
+
+/* ── Focus glow + wave activation ── */
+const genBox = document.querySelector('.gen');
+desc.addEventListener('focus', () => genBox.classList.add('focused'));
+desc.addEventListener('blur', () => genBox.classList.remove('focused'));
+
 // Character counter + chip fill
 desc.addEventListener('input', () => {
   counter.textContent = `${desc.value.length} / 2000 characters · Tip: mention what you sell, where you are, and one thing that makes you different.`;
 });
 document.querySelectorAll('.chip').forEach(c => {
   c.addEventListener('click', () => {
+    document.querySelectorAll('.chip').forEach(x => x.classList.remove('picked'));
+    c.classList.add('picked');
     desc.value = c.dataset.ex;
     desc.focus();
     desc.dispatchEvent(new Event('input'));
@@ -171,6 +296,7 @@ document.querySelectorAll('.chip').forEach(c => {
 let stepInterval = null;
 function startProgress(){
   progress.classList.add('on');
+  document.querySelector('.gen').classList.add('thinking');
   err.classList.remove('on');
   let i = 0;
   steps[0].classList.add('on');
@@ -190,6 +316,7 @@ function finishProgress(){
 }
 function stopProgress(){
   clearInterval(stepInterval);
+  document.querySelector('.gen').classList.remove('thinking');
   progress.classList.remove('on');
   steps.forEach(s => s.classList.remove('on','done'));
 }
@@ -244,6 +371,122 @@ go.addEventListener('click', async () => {
     go.innerHTML = '✨ Generate My Website';
   }
 });
+</script>
+<script>
+/* ══ AI 2090 — NEURAL NETWORK WebGL ══ */
+(function(){
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduced) return;
+  if (navigator.deviceMemory && navigator.deviceMemory < 4) return;
+  if (navigator.hardwareConcurrency && navigator.hardwareConcurrency < 4) return;
+  if (Math.min(screen.width, screen.height) < 380) return;
+  try { const c=document.createElement('canvas');
+    if(!(c.getContext('webgl')||c.getContext('experimental-webgl'))) return;
+  } catch(e){ return; }
+
+  const canvas = document.getElementById('ai-canvas');
+  const s = document.createElement('script');
+  s.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+  s.onload = init; document.head.appendChild(s);
+
+  function init(){
+    if (!window.THREE) return;
+    const W = innerWidth, H = innerHeight;
+    const renderer = new THREE.WebGLRenderer({canvas, alpha:true, antialias:true});
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
+    renderer.setSize(W, H);
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x040918, 0.04);
+    const cam = new THREE.PerspectiveCamera(65, W/H, 0.1, 100);
+    cam.position.set(0, 0, 14);
+
+    // ── NEURAL NETWORK: nodes + connections (ubongo wa AI) ──
+    const N = Math.min(90, Math.floor((W*H)/22000));
+    const nodes = [];
+    const nodeGeo = new THREE.SphereGeometry(0.07, 8, 8);
+    const cyanMat = new THREE.MeshBasicMaterial({color:0x00d4ff, transparent:true, opacity:0.9});
+    const violetMat = new THREE.MeshBasicMaterial({color:0x6c63ff, transparent:true, opacity:0.9});
+    const group = new THREE.Group();
+    for (let i=0;i<N;i++){
+      const m = new THREE.Mesh(nodeGeo, i%3===0 ? violetMat : cyanMat);
+      m.position.set((Math.random()-0.5)*22, (Math.random()-0.5)*14, (Math.random()-0.5)*10);
+      m.userData.vel = new THREE.Vector3((Math.random()-0.5)*0.006,(Math.random()-0.5)*0.006,(Math.random()-0.5)*0.004);
+      nodes.push(m); group.add(m);
+    }
+    scene.add(group);
+
+    // Connection lines (synapses) — zinaonekana kati ya nodes za karibu
+    const lineMat = new THREE.LineBasicMaterial({color:0x00d4ff, transparent:true, opacity:0.14});
+    const lineGeo = new THREE.BufferGeometry();
+    const maxLines = N*4;
+    const linePos = new Float32Array(maxLines*6);
+    lineGeo.setAttribute('position', new THREE.BufferAttribute(linePos, 3));
+    const lines = new THREE.LineSegments(lineGeo, lineMat);
+    scene.add(lines);
+
+    // Data pulses zinazopita kwenye network (particles)
+    const pulseGeo = new THREE.BufferGeometry();
+    const PC = 120;
+    const ppos = new Float32Array(PC*3);
+    for(let i=0;i<PC*3;i+=3){ ppos[i]=(Math.random()-0.5)*24;ppos[i+1]=(Math.random()-0.5)*16;ppos[i+2]=(Math.random()-0.5)*12; }
+    pulseGeo.setAttribute('position', new THREE.BufferAttribute(ppos,3));
+    const pulses = new THREE.Points(pulseGeo, new THREE.PointsMaterial({color:0x00ff88,size:0.08,transparent:true,opacity:0.8}));
+    scene.add(pulses);
+
+    let mx=0, my=0, run=true, last=0, low=0, raf;
+    const CONNECT_DIST = 3.4;
+
+    function animate(t){
+      if (!run) return;
+      raf = requestAnimationFrame(animate);
+      const dt = t-last; last=t;
+      if (dt>34){ low++; if(low>180){ run=false; cancelAnimationFrame(raf); return; } } else low=Math.max(0,low-1);
+
+      // Sogeza nodes
+      for (const n of nodes){
+        n.position.add(n.userData.vel);
+        if (Math.abs(n.position.x)>11) n.userData.vel.x*=-1;
+        if (Math.abs(n.position.y)>7) n.userData.vel.y*=-1;
+        if (Math.abs(n.position.z)>5) n.userData.vel.z*=-1;
+      }
+      // Jenga connections kati ya nodes za karibu
+      let li = 0;
+      for (let i=0;i<nodes.length && li<maxLines*6-6;i++){
+        for (let j=i+1;j<nodes.length;j++){
+          const d = nodes[i].position.distanceTo(nodes[j].position);
+          if (d < CONNECT_DIST){
+            linePos[li++]=nodes[i].position.x; linePos[li++]=nodes[i].position.y; linePos[li++]=nodes[i].position.z;
+            linePos[li++]=nodes[j].position.x; linePos[li++]=nodes[j].position.y; linePos[li++]=nodes[j].position.z;
+            if (li>=maxLines*6-6) break;
+          }
+        }
+      }
+      for (let k=li;k<linePos.length;k++) linePos[k]=0;
+      lines.geometry.attributes.position.needsUpdate = true;
+      lines.geometry.setDrawRange(0, li/3);
+
+      const tm = t*0.0001;
+      group.rotation.y = tm*0.5;
+      lines.rotation.y = tm*0.5;
+      pulses.rotation.y = tm*0.5;
+      pulses.rotation.x = tm*0.2;
+
+      cam.position.x += (mx*2.5 - cam.position.x)*0.035;
+      cam.position.y += (-my*1.8 - cam.position.y)*0.035;
+      cam.lookAt(0,0,0);
+      renderer.render(scene, cam);
+    }
+    canvas.classList.add('ready');
+    last = performance.now();
+    raf = requestAnimationFrame(animate);
+    addEventListener('resize', () => { renderer.setSize(innerWidth,innerHeight); cam.aspect=innerWidth/innerHeight; cam.updateProjectionMatrix(); });
+    addEventListener('mousemove', e => { mx=(e.clientX/innerWidth-0.5); my=(e.clientY/innerHeight-0.5); });
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden){ run=false; cancelAnimationFrame(raf); }
+      else { run=true; last=performance.now(); raf=requestAnimationFrame(animate); }
+    });
+  }
+})();
 </script>
 </body>
 </html>
