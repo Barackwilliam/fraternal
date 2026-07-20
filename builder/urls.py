@@ -12,6 +12,7 @@ urlpatterns = [
 
     # One-Shot AI generator
     path('ai/', views.ai_generator, name='ai_generator'),
+    path('ai/ticker/', views.ai_ticker, name='ai_ticker'),
     path('ai/generate/', views.ai_generate_website, name='ai_generate'),
     path('ai/apply/', views.ai_apply, name='ai_apply'),
     path('ai/field/', views.ai_field, name='ai_field'),

@@ -165,6 +165,57 @@ textarea::placeholder{color:var(--dim)}
 .bottom a:hover{text-decoration:underline}
 
 @media(max-width:520px){textarea{min-height:140px}}
+
+/* ══ VOICE INPUT ══ */
+.desc-wrap{position:relative}
+.voice-btn{position:absolute;bottom:14px;right:14px;width:46px;height:46px;border-radius:50%;
+  border:1px solid rgba(0,212,255,.35);background:rgba(0,212,255,.08);color:var(--cyan);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:20px;
+  transition:all .2s;z-index:3}
+.voice-btn:hover{background:rgba(0,212,255,.16);border-color:var(--cyan);transform:scale(1.06)}
+.voice-btn.listening{background:rgba(255,84,112,.15);border-color:var(--red,#ff5470);color:#ff5470;
+  animation:micPulse 1.4s ease infinite}
+@keyframes micPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,84,112,.5)}50%{box-shadow:0 0 0 12px rgba(255,84,112,0)}}
+.voice-lang{position:absolute;bottom:14px;right:70px;z-index:3;display:flex;gap:4px}
+.voice-lang button{padding:6px 11px;border-radius:8px;border:1px solid var(--line);
+  background:rgba(255,255,255,.03);color:var(--muted);font-size:11px;font-weight:700;cursor:pointer;
+  font-family:var(--ff-m);transition:all .15s}
+.voice-lang button.on{background:rgba(0,212,255,.14);color:var(--cyan);border-color:rgba(0,212,255,.4)}
+.voice-hint{font-size:12px;color:var(--cyan);margin-top:8px;display:none;align-items:center;gap:7px}
+.voice-hint.on{display:flex}
+.voice-hint .rec{width:8px;height:8px;border-radius:50%;background:var(--red,#ff5470);animation:blink 1s infinite}
+
+/* ══ QUALITY METER ══ */
+.qmeter{margin-top:12px}
+.qmeter-bar{height:5px;border-radius:3px;background:rgba(255,255,255,.06);overflow:hidden;margin-bottom:8px}
+.qmeter-fill{height:100%;width:0;border-radius:3px;transition:width .5s var(--ease),background .5s;
+  background:linear-gradient(90deg,var(--violet),var(--cyan))}
+.qmeter-tips{display:flex;flex-wrap:wrap;gap:7px}
+.qtip{font-size:11px;font-family:var(--ff-m);padding:4px 10px;border-radius:100px;
+  border:1px solid var(--line);color:var(--dim);transition:all .3s}
+.qtip.met{border-color:rgba(0,255,136,.4);color:var(--green-2);background:rgba(0,255,136,.06)}
+.qtip.met::before{content:'✓ '}
+
+/* ══ LIVE TICKER ══ */
+.ticker{margin-top:26px;overflow:hidden;position:relative;height:34px;
+  border:1px solid var(--line);border-radius:100px;background:rgba(10,20,36,.5);backdrop-filter:blur(8px)}
+.ticker::before,.ticker::after{content:'';position:absolute;top:0;bottom:0;width:40px;z-index:2;pointer-events:none}
+.ticker::before{left:0;background:linear-gradient(90deg,var(--bg),transparent)}
+.ticker::after{right:0;background:linear-gradient(-90deg,var(--bg),transparent)}
+.ticker-track{display:flex;align-items:center;gap:36px;white-space:nowrap;position:absolute;
+  height:100%;animation:tickerMove 60s linear infinite;padding-left:100%}
+.ticker-item{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted)}
+.ticker-item b{color:var(--ink);font-weight:600}
+.ticker-item .spark{color:var(--green-2)}
+.ticker-static{display:flex;align-items:center;justify-content:center;height:100%;
+  font-size:12.5px;color:var(--muted);gap:6px}
+@keyframes tickerMove{to{transform:translateX(-50%)}}
+.ticker:hover .ticker-track{animation-play-state:paused}
+
+@media(prefers-reduced-motion:reduce){
+  .voice-btn.listening,.ticker-track,.voice-hint .rec{animation:none!important}
+  .ticker-track{position:static;padding-left:0;animation:none}
+}
 </style>
 </head>
 <body>
@@ -192,8 +243,27 @@ textarea::placeholder{color:var(--dim)}
       <label>Tell us about your business</label>
       <div class="ai-wave"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
     </div>
-    <textarea id="desc" maxlength="2000" placeholder="e.g. I run a small tour company in Arusha. We do 3-7 day safaris to Serengeti, Ngorongoro and Kilimanjaro. Our specialty is small groups with expert guides. Prices from $1,200 per person."></textarea>
+    <div class="desc-wrap">
+      <textarea id="desc" maxlength="2000" placeholder="e.g. I run a small tour company in Arusha. We do 3-7 day safaris to Serengeti, Ngorongoro and Kilimanjaro. Our specialty is small groups with expert guides. Prices from $1,200 per person."></textarea>
+      <div class="voice-lang" id="voice-lang" style="display:none">
+        <button data-lang="sw-TZ" class="on">SW</button>
+        <button data-lang="en-US">EN</button>
+      </div>
+      <button class="voice-btn" id="voice-btn" type="button" title="Speak instead of typing">🎤</button>
+    </div>
+    <div class="voice-hint" id="voice-hint"><span class="rec"></span> Listening… speak now (English or Swahili)</div>
     <p class="hint" id="counter">0 / 2000 characters · Tip: mention what you sell, where you are, and one thing that makes you different.</p>
+
+    <div class="qmeter">
+      <div class="qmeter-bar"><div class="qmeter-fill" id="qfill"></div></div>
+      <div class="qmeter-tips">
+        <span class="qtip" data-q="length">Enough detail</span>
+        <span class="qtip" data-q="place">Location</span>
+        <span class="qtip" data-q="offer">What you sell</span>
+        <span class="qtip" data-q="price">Prices</span>
+        <span class="qtip" data-q="unique">What makes you different</span>
+      </div>
+    </div>
 
     <div class="examples">
       <b>Try one of these →</b>
@@ -216,6 +286,8 @@ textarea::placeholder{color:var(--dim)}
 
     <div class="err" id="err"></div>
   </div>
+
+  <div class="ticker" id="ticker"><div class="ticker-track" id="ticker-track"></div></div>
 
   <p class="bottom">Prefer more control? <a href="{% url 'builder:signup' %}">Start from scratch →</a> · <a href="{% url 'get_started' %}">Or see all options</a></p>
 </div>
@@ -277,6 +349,128 @@ const steps = document.querySelectorAll('.step');
 const genBox = document.querySelector('.gen');
 desc.addEventListener('focus', () => genBox.classList.add('focused'));
 desc.addEventListener('blur', () => genBox.classList.remove('focused'));
+
+/* ── VOICE INPUT (Web Speech API) ── */
+(function(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const btn = document.getElementById('voice-btn');
+  const hint = document.getElementById('voice-hint');
+  const langWrap = document.getElementById('voice-lang');
+  if (!SR){ btn.style.display = 'none'; return; }  // browser haisapoti
+
+  langWrap.style.display = 'flex';
+  let lang = 'sw-TZ', rec = null, listening = false, baseText = '';
+
+  langWrap.querySelectorAll('button').forEach(b => {
+    b.addEventListener('click', () => {
+      langWrap.querySelectorAll('button').forEach(x => x.classList.remove('on'));
+      b.classList.add('on'); lang = b.dataset.lang;
+      if (listening){ stop(); setTimeout(start, 200); }
+    });
+  });
+
+  function start(){
+    rec = new SR();
+    rec.lang = lang; rec.continuous = true; rec.interimResults = true;
+    baseText = desc.value ? desc.value.trim() + ' ' : '';
+    rec.onresult = (e) => {
+      let final = '', interim = '';
+      for (let i = e.resultIndex; i < e.results.length; i++){
+        const t = e.results[i][0].transcript;
+        if (e.results[i].isFinal) final += t + ' '; else interim += t;
+      }
+      if (final) baseText += final;
+      desc.value = (baseText + interim).slice(0, 2000);
+      desc.dispatchEvent(new Event('input'));
+    };
+    rec.onerror = (e) => { if (e.error === 'not-allowed') hint.innerHTML = '🎤 Please allow microphone access'; stop(); };
+    rec.onend = () => { if (listening) rec.start(); };  // continuous
+    try { rec.start(); } catch(e){}
+    listening = true;
+    btn.classList.add('listening'); btn.textContent = '⏹';
+    hint.classList.add('on');
+    genBox.classList.add('focused');
+  }
+  function stop(){
+    listening = false;
+    if (rec){ rec.onend = null; try { rec.stop(); } catch(e){} }
+    btn.classList.remove('listening'); btn.textContent = '🎤';
+    hint.classList.remove('on');
+  }
+  btn.addEventListener('click', () => listening ? stop() : start());
+})();
+
+/* ── QUALITY METER: inapima ubora wa prompt ── */
+(function(){
+  const fill = document.getElementById('qfill');
+  const tips = document.querySelectorAll('.qtip');
+  const priceRe = /\b(tsh|tzs|ksh|\$|usd|shilingi|bei|price|from|kuanzia|elfu|,000|\d{3,})\b/i;
+  const placeRe = /\b(dar|arusha|mwanza|dodoma|mbeya|morogoro|tanga|zanzibar|kariakoo|mwenge|iringa|moshi|kilimanjaro|mikoani|tanzania|street|mtaa|road|barabara|near|karibu)\b/i;
+  const offerRe = /\b(sell|nauza|offer|service|provide|make|bake|build|do|huduma|bidhaa|products?|nafanya|natoa|restaurant|shop|duka|clinic|school|safari|tour)\b/i;
+  const uniqueRe = /\b(best|only|specialt?y|expert|fast|quality|affordable|nafuu|bora|premium|unique|award|certified|years|experience|uzoefu|trusted|guarantee)\b/i;
+
+  function score(){
+    const t = desc.value.trim();
+    const checks = {
+      length: t.length >= 80,
+      place: placeRe.test(t),
+      offer: offerRe.test(t),
+      price: priceRe.test(t),
+      unique: uniqueRe.test(t),
+    };
+    let met = 0;
+    tips.forEach(tip => {
+      const ok = checks[tip.dataset.q];
+      tip.classList.toggle('met', ok);
+      if (ok) met++;
+    });
+    const pct = (met / 5) * 100;
+    fill.style.width = pct + '%';
+    // rangi: nyekundu→njano→kijani
+    if (pct < 40) fill.style.background = 'linear-gradient(90deg,#ff5470,#ff8b5e)';
+    else if (pct < 80) fill.style.background = 'linear-gradient(90deg,#ffb020,var(--cyan))';
+    else fill.style.background = 'linear-gradient(90deg,var(--green),var(--green-2))';
+  }
+  desc.addEventListener('input', score);
+  score();
+})();
+
+/* ── LIVE TICKER: data HALISI kutoka database ── */
+(function(){
+  const track = document.getElementById('ticker-track');
+  const ticker = document.getElementById('ticker');
+  if (!track || !ticker) return;
+
+  async function load(){
+    try {
+      const res = await fetch('/builder/ai/ticker/');
+      const data = await res.json();
+      if (!data.ok) throw new Error();
+      const items = data.items || [];
+      if (items.length < 4){
+        // Websites bado ni chache — usibuni. Onyesha ujumbe wa kweli (early adopter).
+        const c = data.count || 0;
+        ticker.innerHTML = '<div class="ticker-static">✨ ' +
+          (c > 0 ? c + ' website' + (c>1?'s':'') + ' built with JamiiTek · ' : '') +
+          'Be one of the first businesses to go live →</div>';
+        return;
+      }
+      const html = items.map(it => {
+        const place = it.city ? ' · ' + it.city : '';
+        return `<span class="ticker-item"><span class="spark">✨</span> <b>${esc(it.name)}</b>${esc(place)} · built ${esc(it.ago)}</span>`;
+      });
+      // Rudia mara mbili kwa loop laini (translateX -50%)
+      track.innerHTML = html.join('') + html.join('');
+    } catch(e){
+      // Kama endpoint imeshindwa, ficha ticker kabisa (bora kuliko uongo)
+      ticker.style.display = 'none';
+    }
+  }
+  function esc(s){ const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+  load();
+  // Refresh kila dakika 2 — muda unasasishwa, websites mpya zinajitokeza
+  setInterval(load, 120000);
+})();
 
 // Character counter + chip fill
 desc.addEventListener('input', () => {

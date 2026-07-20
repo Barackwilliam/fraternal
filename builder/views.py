@@ -169,6 +169,57 @@ def ai_generator(request):
     return render(request, 'builder/ai_generator.html', {})
 
 
+def ai_ticker(request):
+    """
+    Rudisha websites HALISI zilizochapishwa hivi karibuni kwa ticker.
+    Jina la biashara + mji (kutoka contact_address) + muda halisi.
+    Kwa faragha: jina + mji tu — hakuna simu/anwani kamili.
+    """
+    from django.utils import timezone
+    import re as _re
+
+    def _city(addr):
+        if not addr:
+            return ''
+        # Miji mikuu ya TZ — tafuta kwenye anwani
+        cities = ['Dar es Salaam', 'Dar', 'Arusha', 'Mwanza', 'Dodoma', 'Mbeya',
+                  'Morogoro', 'Tanga', 'Zanzibar', 'Iringa', 'Moshi', 'Tabora',
+                  'Kigoma', 'Mtwara', 'Musoma', 'Songea', 'Kariakoo', 'Mwenge']
+        for c in cities:
+            if _re.search(r'\b' + _re.escape(c) + r'\b', addr, _re.I):
+                return 'Dar' if c in ('Dar es Salaam', 'Kariakoo', 'Mwenge') else c
+        # Vinginevyo, sehemu ya mwisho ya anwani (mara nyingi ni mji)
+        parts = [x.strip() for x in addr.split(',') if x.strip()]
+        return parts[-1][:20] if parts else ''
+
+    sites = (ClientWebsite.objects
+             .filter(is_published=True, is_suspended=False)
+             .order_by('-created_at')[:12])
+    now = timezone.now()
+    items = []
+    for s in sites:
+        delta = now - s.created_at
+        secs = int(delta.total_seconds())
+        if secs < 90:
+            ago = 'just now'
+        elif secs < 3600:
+            ago = f'{secs // 60} min ago'
+        elif secs < 86400:
+            h = secs // 3600
+            ago = f'{h} hour{"s" if h > 1 else ""} ago'
+        elif secs < 604800:
+            d = secs // 86400
+            ago = f'{d} day{"s" if d > 1 else ""} ago'
+        else:
+            ago = s.created_at.strftime('%b %Y')
+        items.append({
+            'name': s.site_name[:40],
+            'city': _city(s.contact_address),
+            'ago': ago,
+        })
+    return JsonResponse({'ok': True, 'items': items, 'count': ClientWebsite.objects.filter(is_published=True).count()})
+
+
 @require_POST
 def ai_generate_website(request):
     """
