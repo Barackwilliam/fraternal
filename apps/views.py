@@ -1,6 +1,6 @@
 # app/view.py
 from django.shortcuts import render
-from .models import Question,Service,Team
+from .models import Question,Service,Team,BlogPost
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.models import User, auth
@@ -37,6 +37,7 @@ def home(request):
     context = {
         'team': team,
         'schema_markup': schema_html,
+        'latest_posts': BlogPost.objects.filter(status='published')[:3],
         'page_title': 'JamiiTek — Web Development & AI WhatsApp Bot Tanzania',
         'page_desc': (
             "JamiiTek: Tanzania's leading web developer. We build websites, AI WhatsApp bots "

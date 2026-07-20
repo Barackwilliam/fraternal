@@ -861,3 +861,67 @@ class WebsiteTemplate(models.Model):
         verbose_name = 'Website Template'
         verbose_name_plural = 'Website Templates'
         ordering = ['order', '-created_at']
+
+
+# ============================================================
+# BLOG (SEO + social sharing)
+# ============================================================
+
+class BlogCategory(models.Model):
+    name = models.CharField(max_length=80)
+    slug = models.SlugField(max_length=90, unique=True)
+
+    class Meta:
+        verbose_name_plural = 'Blog categories'
+
+    def __str__(self):
+        return self.name
+
+
+class BlogPost(models.Model):
+    STATUS = [('draft', 'Draft'), ('published', 'Published')]
+
+    title = models.CharField(max_length=200)
+    slug = models.SlugField(max_length=220, unique=True,
+                            help_text='URL-friendly version, e.g. how-to-build-website-tanzania')
+    category = models.ForeignKey(BlogCategory, on_delete=models.SET_NULL,
+                                 null=True, blank=True, related_name='posts')
+    excerpt = models.TextField(max_length=320,
+                               help_text='Short summary (shows on blog list + social shares + Google). 150-300 chars ideal.')
+    body = models.TextField(help_text='Full article. Supports HTML. Write 800-1500 words for best SEO.')
+    cover_image = models.URLField(blank=True,
+                                  help_text='Cover image URL (Uploadcare/Cloudinary). 1200x630 ideal for social sharing.')
+
+    # SEO
+    meta_title = models.CharField(max_length=70, blank=True,
+                                  help_text='Custom <title> (defaults to post title). Keep under 60 chars.')
+    meta_description = models.CharField(max_length=170, blank=True,
+                                        help_text='Custom meta description (defaults to excerpt). 150-160 chars ideal.')
+    focus_keyword = models.CharField(max_length=100, blank=True,
+                                     help_text='Main keyword this post targets, e.g. "website builder Tanzania"')
+
+    author_name = models.CharField(max_length=80, default='JamiiTek')
+    status = models.CharField(max_length=10, choices=STATUS, default='draft')
+    is_featured = models.BooleanField(default=False, help_text='Show at top of blog')
+
+    views = models.PositiveIntegerField(default=0)
+    published_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-published_at', '-created_at']
+
+    def __str__(self):
+        return self.title
+
+    def save(self, *args, **kwargs):
+        # Auto-set published_at wakati inapo-publish kwa mara ya kwanza
+        if self.status == 'published' and self.published_at is None:
+            self.published_at = timezone.now()
+        super().save(*args, **kwargs)
+
+    @property
+    def read_minutes(self):
+        words = len(self.body.split())
+        return max(1, round(words / 200))

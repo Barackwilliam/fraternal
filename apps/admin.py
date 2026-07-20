@@ -412,3 +412,91 @@ class WebsiteTemplateAdmin(admin.ModelAdmin):
             'style': 'font-family: monospace; font-size: 12px; background: #1e1e1e; color: #d4d4d4; padding: 10px;'
         })
         return form
+
+
+# ============================================================
+# BLOG ADMIN
+# ============================================================
+from .models import BlogPost, BlogCategory
+
+
+@admin.register(BlogCategory)
+class BlogCategoryAdmin(admin.ModelAdmin):
+    list_display = ('name', 'slug')
+    prepopulated_fields = {'slug': ('name',)}
+
+
+@admin.register(BlogPost)
+class BlogPostAdmin(admin.ModelAdmin):
+    list_display = ('title', 'status', 'category', 'is_featured', 'views', 'published_at')
+    list_filter = ('status', 'is_featured', 'category')
+    search_fields = ('title', 'excerpt', 'body', 'focus_keyword')
+    prepopulated_fields = {'slug': ('title',)}
+    list_editable = ('status', 'is_featured')
+    readonly_fields = ('views', 'created_at', 'updated_at', 'read_minutes')
+    change_list_template = 'admin/blog_changelist.html'
+    fieldsets = (
+        ('Content', {
+            'fields': ('title', 'slug', 'category', 'excerpt', 'body', 'cover_image')
+        }),
+        ('SEO', {
+            'fields': ('meta_title', 'meta_description', 'focus_keyword'),
+            'description': 'Leave meta fields blank to auto-use the title and excerpt.'
+        }),
+        ('Publishing', {
+            'fields': ('author_name', 'status', 'is_featured', 'published_at')
+        }),
+        ('Stats', {
+            'fields': ('views', 'read_minutes', 'created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+
+    def get_urls(self):
+        from django.urls import path
+        urls = super().get_urls()
+        custom = [
+            path('ai-write/', self.admin_site.admin_view(self.ai_write_view),
+                 name='blog_ai_write'),
+        ]
+        return custom + urls
+
+    def ai_write_view(self, request):
+        """Button ya admin: AI inaandika rasimu papo hapo."""
+        from django.shortcuts import redirect
+        from django.contrib import messages
+        from apps.models import BlogPost, BlogCategory
+        from apps import blog_ai
+
+        existing = list(BlogPost.objects.values_list('title', flat=True))
+        try:
+            ok, result = blog_ai.generate_draft(existing_titles=existing)
+        except Exception as e:
+            messages.error(request, f'AI imeshindwa: {type(e).__name__}')
+            return redirect('admin:apps_blogpost_changelist')
+
+        if not ok:
+            messages.error(request, f'AI imeshindwa: {result}')
+            return redirect('admin:apps_blogpost_changelist')
+
+        base_slug = result['slug']
+        slug = base_slug
+        n = 2
+        while BlogPost.objects.filter(slug=slug).exists():
+            slug = f'{base_slug}-{n}'
+            n += 1
+
+        cat, _ = BlogCategory.objects.get_or_create(
+            slug='web-development', defaults={'name': 'Web Development'})
+
+        post = BlogPost.objects.create(
+            title=result['title'], slug=slug, category=cat,
+            excerpt=result['excerpt'], body=result['body'],
+            meta_description=result['meta_description'],
+            focus_keyword=result['focus_keyword'],
+            author_name='JamiiTek', status='draft', is_featured=False,
+        )
+        messages.success(request,
+            f'✓ AI imeandika rasimu: "{post.title}" ({result["language"].upper()}). '
+            f'Kagua na uweke Published ukiridhika.')
+        return redirect('admin:apps_blogpost_change', post.pk)

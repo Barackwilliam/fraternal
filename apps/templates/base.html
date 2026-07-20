@@ -447,6 +447,7 @@
       <li><a href="{% url 'home' %}" {% if request.resolver_match.url_name == 'index' %}class="active"{% endif %}>Home</a></li>
       <li><a href="{% url 'service' %}" {% if 'service' in request.path %}class="active"{% endif %}>Services</a></li>
       <li><a href="{% url 'templates_marketplace' %}" {% if 'templates' in request.path %}class="active"{% endif %}>Templates</a></li>
+      <li><a href="{% url 'blog_list' %}" {% if '/blog' in request.path %}class="active"{% endif %}>Blog</a></li>
       <li><a href="{% url 'About' %}" {% if 'about' in request.path %}class="active"{% endif %}>About</a></li>
       <li><a href="{% url 'contact' %}" {% if 'contact' in request.path %}class="active"{% endif %}>Contact</a></li>
       <li><a href="{% url 'portal_login' %}" class="nav-portal"><i class="fas fa-shield-halved"></i> Portal</a></li>
@@ -464,6 +465,7 @@
   <a href="{% url 'home' %}">Home</a>
   <a href="{% url 'service' %}">Services</a>
   <a href="{% url 'templates_marketplace' %}">Templates</a>
+  <a href="{% url 'blog_list' %}">Blog</a>
   <a href="{% url 'About' %}">About</a>
   <a href="{% url 'contact' %}">Contact</a>
   <a href="{% url 'portal_login' %}">Client Portal</a>
@@ -500,6 +502,7 @@
         <div class="footer-heading">Company</div>
         <ul class="footer-links">
           <li><a href="{% url 'About' %}">About Us</a></li>
+          <li><a href="{% url 'blog_list' %}">Blog</a></li>
           <li><a href="{% url 'contact' %}">Contact</a></li>
           <li><a href="{% url 'portal_login' %}">Client Portal</a></li>
           <li><a href="{% url 'get_started' %}">Start a Project</a></li>

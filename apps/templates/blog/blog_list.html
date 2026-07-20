@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% block title %}Blog — Web Development, WhatsApp Bots & Digital Tips | JamiiTek{% endblock %}
+{% block meta_desc %}JamiiTek blog: guides on building websites in Tanzania, WhatsApp bots for business, SEO, and going digital. Tips in English and Swahili for Tanzanian businesses.{% endblock %}
+{% block canonical %}https://jamiitek.com/blog/{% endblock %}
+{% block og_title %}JamiiTek Blog — Digital Tips for Tanzanian Businesses{% endblock %}
+{% block og_desc %}Guides on websites, WhatsApp bots, SEO and going digital — for businesses across Tanzania.{% endblock %}
+{% block og_url %}https://jamiitek.com/blog/{% endblock %}
+
+{% block extra_css %}
+<style>
+.blog-wrap{max-width:1160px;margin:0 auto;padding:120px 22px 80px}
+.blog-head{text-align:center;margin-bottom:50px}
+.blog-head .eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;
+  font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#00d4ff;
+  border:1px solid rgba(0,212,255,.3);border-radius:100px;padding:7px 16px;margin-bottom:20px}
+.blog-head h1{font-size:clamp(32px,5vw,52px);font-weight:800;margin:0 0 14px;color:#fff;letter-spacing:-.02em}
+.blog-head p{font-size:17px;color:#9fb0c4;max-width:600px;margin:0 auto;line-height:1.6}
+.blog-cats{display:flex;flex-wrap:wrap;gap:9px;justify-content:center;margin:30px 0 10px}
+.blog-cats a{padding:8px 18px;border-radius:100px;font-size:13.5px;font-weight:600;text-decoration:none;
+  border:1px solid rgba(255,255,255,.12);color:#9fb0c4;transition:all .2s;background:rgba(255,255,255,.03)}
+.blog-cats a:hover,.blog-cats a.on{border-color:#00d4ff;color:#00d4ff;background:rgba(0,212,255,.08)}
+/* Featured */
+.feat{display:grid;grid-template-columns:1.1fr 1fr;gap:0;border-radius:22px;overflow:hidden;
+  border:1px solid rgba(0,212,255,.18);margin-bottom:44px;background:linear-gradient(160deg,rgba(14,26,48,.6),rgba(8,16,32,.4));
+  backdrop-filter:blur(12px)}
+.feat-img{background-size:cover;background-position:center;min-height:320px;position:relative}
+.feat-img::after{content:'FEATURED';position:absolute;top:16px;left:16px;font-family:'JetBrains Mono',monospace;
+  font-size:10px;letter-spacing:2px;background:rgba(0,212,255,.9);color:#04120a;padding:5px 12px;border-radius:100px;font-weight:700}
+.feat-body{padding:40px;display:flex;flex-direction:column;justify-content:center}
+.feat-body .cat{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;color:#00d4ff;text-transform:uppercase;margin-bottom:12px}
+.feat-body h2{font-size:clamp(23px,3vw,32px);margin:0 0 14px;color:#fff;line-height:1.2}
+.feat-body p{color:#9fb0c4;line-height:1.7;margin:0 0 22px;font-size:15px}
+.feat-body a.read{color:#00d4ff;font-weight:700;text-decoration:none;font-size:15px}
+.meta-row{display:flex;gap:16px;font-size:12.5px;color:#7d8ca0;margin-bottom:16px;font-family:'JetBrains Mono',monospace}
+/* Grid */
+.blog-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));gap:26px}
+.pcard{border-radius:18px;overflow:hidden;border:1px solid rgba(255,255,255,.1);
+  background:linear-gradient(160deg,rgba(14,26,48,.5),rgba(8,16,32,.35));transition:transform .3s,border-color .3s,box-shadow .3s;
+  display:flex;flex-direction:column}
+.pcard:hover{transform:translateY(-5px);border-color:rgba(0,212,255,.35);box-shadow:0 16px 44px rgba(0,120,180,.18)}
+.pcard-img{height:190px;background-size:cover;background-position:center;background-color:#0a1220}
+.pcard-body{padding:22px;flex:1;display:flex;flex-direction:column}
+.pcard .cat{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;color:#00d4ff;text-transform:uppercase;margin-bottom:10px}
+.pcard h3{font-size:18.5px;margin:0 0 10px;color:#fff;line-height:1.3}
+.pcard h3 a{color:inherit;text-decoration:none}
+.pcard p{color:#9fb0c4;font-size:14px;line-height:1.6;margin:0 0 16px;flex:1}
+.pcard .foot{display:flex;justify-content:space-between;align-items:center;font-size:12px;
+  color:#7d8ca0;font-family:'JetBrains Mono',monospace;padding-top:14px;border-top:1px solid rgba(255,255,255,.07)}
+.blog-empty{text-align:center;padding:80px 20px;color:#7d8ca0}
+.blog-empty h3{color:#fff;font-size:22px;margin-bottom:10px}
+@media(max-width:760px){.feat{grid-template-columns:1fr}.feat-img{min-height:200px}.feat-body{padding:28px}}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="blog-wrap">
+  <div class="blog-head">
+    <span class="eyebrow">◉ JAMIITEK BLOG</span>
+    <h1>Insights for Tanzanian Businesses</h1>
+    <p>Practical guides on websites, WhatsApp bots, SEO and going digital — in English and Swahili.</p>
+    {% if categories %}
+    <div class="blog-cats">
+      <a href="{% url 'blog_list' %}" class="{% if not active_cat %}on{% endif %}">All</a>
+      {% for c in categories %}
+        <a href="?category={{ c.slug }}" class="{% if active_cat.slug == c.slug %}on{% endif %}">{{ c.name }}</a>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+
+  {% if featured %}
+  <article class="feat">
+    <div class="feat-img" style="background-image:url('{{ featured.cover_image|default:'' }}')"></div>
+    <div class="feat-body">
+      {% if featured.category %}<span class="cat">{{ featured.category.name }}</span>{% endif %}
+      <h2>{{ featured.title }}</h2>
+      <div class="meta-row">
+        <span>{{ featured.published_at|date:'M j, Y' }}</span>
+        <span>{{ featured.read_minutes }} min read</span>
+      </div>
+      <p>{{ featured.excerpt }}</p>
+      <a class="read" href="{% url 'blog_detail' featured.slug %}">Read article →</a>
+    </div>
+  </article>
+  {% endif %}
+
+  {% if posts %}
+  <div class="blog-grid">
+    {% for post in posts %}
+    <article class="pcard">
+      <a href="{% url 'blog_detail' post.slug %}">
+        <div class="pcard-img" style="background-image:url('{{ post.cover_image|default:'' }}')"></div>
+      </a>
+      <div class="pcard-body">
+        {% if post.category %}<span class="cat">{{ post.category.name }}</span>{% endif %}
+        <h3><a href="{% url 'blog_detail' post.slug %}">{{ post.title }}</a></h3>
+        <p>{{ post.excerpt|truncatewords:22 }}</p>
+        <div class="foot">
+          <span>{{ post.published_at|date:'M j, Y' }}</span>
+          <span>{{ post.read_minutes }} min</span>
+        </div>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+  {% elif not featured %}
+  <div class="blog-empty">
+    <h3>Articles coming soon</h3>
+    <p>We're working on helpful guides for your business. Check back shortly.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

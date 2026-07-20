@@ -526,6 +526,32 @@
   .ta-btn-ghost { display:none; }
   .tpl-announce-inner { gap:12px; padding:13px 16px; }
 }
+
+/* ── BLOG SECTION ── */
+.sf-blog { padding:90px 0; position:relative; }
+.sf-blog-card { display:flex; flex-direction:column; height:100%; border-radius:16px; overflow:hidden;
+  background:rgba(255,255,255,.02); border:1px solid rgba(255,255,255,.08); text-decoration:none;
+  transition:transform .3s, border-color .3s, box-shadow .3s; }
+.sf-blog-card:hover { transform:translateY(-6px); border-color:rgba(0,200,255,.35);
+  box-shadow:0 18px 46px rgba(0,120,180,.18); }
+.sf-blog-img { height:180px; background-size:cover; background-position:center;
+  background-color:#0a1220; display:flex; align-items:center; justify-content:center; position:relative; }
+.sf-blog-img::after { content:''; position:absolute; inset:0;
+  background:linear-gradient(160deg, rgba(0,200,255,.08), rgba(108,99,255,.05)); }
+.sf-blog-ph { font-family:var(--ff-display); font-size:22px; font-weight:900;
+  color:rgba(0,200,255,.3); letter-spacing:1px; position:relative; z-index:1; }
+.sf-blog-body { padding:22px; flex:1; display:flex; flex-direction:column; }
+.sf-blog-cat { font-family:var(--ff-mono); font-size:10px; letter-spacing:2px; text-transform:uppercase;
+  color:var(--cyan); margin-bottom:10px; }
+.sf-blog-title { font-family:var(--ff-display); font-size:18px; font-weight:700; color:#fff;
+  line-height:1.3; margin-bottom:10px; }
+.sf-blog-exc { font-size:13.5px; color:rgba(255,255,255,.4); line-height:1.6; margin-bottom:16px; flex:1; }
+.sf-blog-meta { display:flex; justify-content:space-between; font-family:var(--ff-mono); font-size:11px;
+  color:rgba(255,255,255,.3); padding-top:14px; border-top:1px solid rgba(255,255,255,.07); }
+.sf-blog-all { display:inline-flex; align-items:center; gap:9px; padding:13px 30px; border-radius:11px;
+  background:rgba(0,200,255,.1); border:1px solid rgba(0,200,255,.3); color:var(--cyan);
+  font-family:var(--ff-display); font-weight:700; font-size:14px; text-decoration:none; transition:all .2s; }
+.sf-blog-all:hover { background:rgba(0,200,255,.18); transform:translateY(-2px); }
 </style>
 
 </style>
@@ -1029,6 +1055,46 @@
     </div>
   </div>
 </section>
+
+{% if latest_posts %}
+<!-- ══════════════════════════════════════════════════════════
+     BLOG — Latest articles
+══════════════════════════════════════════════════════════ -->
+<section class="sf-blog">
+  <div class="container position-relative" style="z-index:2">
+    <div class="row justify-content-center text-center mb-5">
+      <div class="col-lg-7 reveal">
+        <div class="sf-eye">From Our Blog</div>
+        <h2 style="font-family:var(--ff-display);font-size:clamp(24px,4vw,46px);font-weight:900;color:#fff;letter-spacing:-1px;line-height:1.1;margin-bottom:12px">Insights for Tanzanian<br>Businesses</h2>
+        <p style="color:rgba(255,255,255,.35);font-size:14px;line-height:1.8;font-family:var(--ff-mono)">Guides on websites, WhatsApp bots, SEO and going digital — in English and Swahili.</p>
+      </div>
+    </div>
+    <div class="row g-3 g-md-4">
+      {% for post in latest_posts %}
+      <div class="col-md-4 reveal">
+        <a href="{% url 'blog_detail' post.slug %}" class="sf-blog-card">
+          <div class="sf-blog-img" style="background-image:url('{{ post.cover_image|default:'' }}')">
+            {% if not post.cover_image %}<span class="sf-blog-ph">JamiiTek</span>{% endif %}
+          </div>
+          <div class="sf-blog-body">
+            {% if post.category %}<span class="sf-blog-cat">{{ post.category.name }}</span>{% endif %}
+            <h3 class="sf-blog-title">{{ post.title }}</h3>
+            <p class="sf-blog-exc">{{ post.excerpt|truncatewords:18 }}</p>
+            <div class="sf-blog-meta">
+              <span>{{ post.published_at|date:'M j, Y' }}</span>
+              <span>{{ post.read_minutes }} min read</span>
+            </div>
+          </div>
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="text-center mt-5 reveal">
+      <a href="{% url 'blog_list' %}" class="sf-blog-all">Read all articles <i class="fas fa-arrow-right"></i></a>
+    </div>
+  </div>
+</section>
+{% endif %}
 
 <!-- ══════════════════════════════════════════════════════════
      FINAL CTA

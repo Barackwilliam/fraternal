@@ -2,6 +2,7 @@
 
 from django.urls import path
 from . import views
+from . import blog_views
 from .views import select_website_type, dynamic_form, proposal_preview, generate_pdf
 from .views import templates_marketplace, template_preview, template_preview_raw
 from . import management_views
@@ -9,6 +10,10 @@ from . import client_portal_views as portal
 from builder import views as builder_views
 
 urlpatterns = [
+    # ── BLOG ──────────────────────────────────────────────
+    path('blog/', blog_views.blog_list, name='blog_list'),
+    path('blog/<slug:slug>/', blog_views.blog_detail, name='blog_detail'),
+
     # ── PUBLIC SITE ───────────────────────────────────────
     path('', views.home, name='home'),
     path('service/', views.service, name='service'),
