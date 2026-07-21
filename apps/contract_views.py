@@ -1,11 +1,13 @@
 """Contract views — mteja anafikia kwa link, anachagua lugha, anasaini/anadownload."""
+import json
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse, JsonResponse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_protect
 
-from .models import Contract
+from .models import Contract, Client
+from .management_views import staff_member_required
 
 
 def _client_ip(request):
@@ -127,9 +129,138 @@ def contract_pdf(request, token):
             raise Exception('PDF generation error')
         buffer.seek(0)
         resp = HttpResponse(buffer.getvalue(), content_type='application/pdf')
-        fname = f"contract-{contract.client.name}-{lang}.pdf".replace(' ', '_')
+        fname = f"contract-{contract.display_client}-{lang}.pdf".replace(' ', '_')
         resp['Content-Disposition'] = f'attachment; filename="{fname}"'
         return resp
     except Exception:
         # Fallback: HTML yenye print dialog (mteja anaweza Ctrl+P → Save as PDF)
         return HttpResponse(html)
+
+
+# ============================================================
+# CONTRACT BUILDER — form maalum (staff only, nje ya admin)
+# ============================================================
+
+@staff_member_required
+def contract_builder_list(request):
+    """Orodha ya mikataba — dashboard ya staff."""
+    contracts = Contract.objects.all().select_related('client')[:100]
+    return render(request, 'contracts/builder_list.html', {'contracts': contracts})
+
+
+@staff_member_required
+def contract_builder_new(request):
+    """Tengeneza mkataba mpya (fomu tupu) → peleka kwenye editor."""
+    contract = Contract.objects.create(
+        title='New Service Agreement',
+        provider_rep=request.user.get_full_name() or request.user.username,
+    )
+    return redirect('contract_builder_edit', pk=contract.pk)
+
+
+@staff_member_required
+def contract_builder_edit(request, pk):
+    """Editor kamili: client info, sections, line items, custom fields, AI kila mahali."""
+    contract = get_object_or_404(Contract, pk=pk)
+    if request.method == 'POST':
+        _save_builder_form(request, contract)
+        return redirect('contract_builder_edit', pk=contract.pk)
+    return render(request, 'contracts/builder_edit.html', {
+        'contract': contract,
+        'sections_json': json.dumps(contract.sections),
+        'line_items_json': json.dumps(contract.line_items),
+        'custom_fields_json': json.dumps(contract.custom_fields),
+    })
+
+
+def _save_builder_form(request, contract):
+    """Hifadhi data zote kutoka builder form (POST)."""
+    p = request.POST
+
+    # Client (moja kwa moja, hakuna DB requirement)
+    contract.client_name = p.get('client_name', '').strip()
+    contract.client_email = p.get('client_email', '').strip()
+    contract.client_company = p.get('client_company', '').strip()
+    contract.client_phone = p.get('client_phone', '').strip()
+    contract.client_address = p.get('client_address', '').strip()
+
+    # Meta
+    contract.title = p.get('title', contract.title).strip() or contract.title
+    contract.project_name = p.get('project_name', '').strip()
+    contract.provider_name = p.get('provider_name', 'JamiiTek').strip() or 'JamiiTek'
+    contract.provider_rep = p.get('provider_rep', '').strip()
+    contract.accent_color = p.get('accent_color', '#25d366').strip() or '#25d366'
+    contract.logo_url = p.get('logo_url', '').strip()
+
+    # Terms summary
+    amt = p.get('total_amount', '').strip()
+    contract.total_amount = amt if amt else None
+    contract.currency = p.get('currency', 'TZS').strip() or 'TZS'
+    contract.payment_terms = p.get('payment_terms', '').strip()
+    contract.timeline = p.get('timeline', '').strip()
+
+    # Body (fallback ya jadi, hiari kama sections zinatumika)
+    contract.body_en = p.get('body_en', '')
+    contract.body_sw = p.get('body_sw', '')
+
+    # Dynamic JSON (zinatumwa kama hidden input JSON strings)
+    for field, default in (('sections', []), ('line_items', []), ('custom_fields', [])):
+        raw = p.get(field, '')
+        try:
+            setattr(contract, field, json.loads(raw) if raw else default)
+        except (json.JSONDecodeError, TypeError):
+            pass  # acha thamani ya awali kama JSON imeharibika
+
+    status = p.get('status')
+    if status in dict(Contract.STATUS):
+        if status == 'sent' and contract.status != 'sent' and not contract.sent_at:
+            contract.sent_at = timezone.now()
+        contract.status = status
+
+    contract.save()
+
+
+@staff_member_required
+@require_POST
+def contract_builder_ai_assist(request):
+    """AI ndogo: pendekezo la maandishi kwa field moja (JSON endpoint)."""
+    from apps import contract_ai
+    field_type = request.POST.get('field_type', 'scope')
+    context = request.POST.get('context', '')
+    language = request.POST.get('language', 'en')
+
+    ok, result = contract_ai.assist_field(field_type, context, language)
+    if not ok:
+        return JsonResponse({'ok': False, 'error': result}, status=400)
+    return JsonResponse({'ok': True, 'text': result})
+
+
+@staff_member_required
+@require_POST
+def contract_builder_ai_full(request, pk):
+    """AI kubwa: andaa mkataba mzima (EN+SW) kutoka info ya sasa."""
+    from apps import contract_ai
+    contract = get_object_or_404(Contract, pk=pk)
+
+    info = {
+        'client_name': contract.display_client,
+        'company': contract.display_company,
+        'project_name': contract.project_name,
+        'title': contract.title,
+        'total_amount': contract.total_amount or contract.computed_total,
+        'currency': contract.currency,
+        'payment_terms': contract.payment_terms,
+        'timeline': contract.timeline,
+        'scope': contract.project_name or contract.title,
+        'provider_rep': contract.provider_rep,
+    }
+    ok, result = contract_ai.generate_contract(info)
+    if not ok:
+        return JsonResponse({'ok': False, 'error': result}, status=400)
+
+    contract.title = result['title'] or contract.title
+    contract.body_en = result['body_en']
+    contract.body_sw = result['body_sw']
+    contract.save(update_fields=['title', 'body_en', 'body_sw'])
+    return JsonResponse({'ok': True, 'title': contract.title,
+                          'body_en': contract.body_en, 'body_sw': contract.body_sw})

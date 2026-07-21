@@ -117,7 +117,7 @@
   @media print{.cbar,.sign-sect,.actions,.foot,.banner{display:none}.paper{box-shadow:none;border:none}}
 </style>
 </head>
-<body>
+<body style="--accent:{{ contract.accent_color|default:'#25d366' }}">
 
 <div class="cbar">
   <div class="brand">{{ contract.provider_name }}<span>.</span></div>
@@ -143,26 +143,64 @@
 
   <div class="paper">
     <div class="paper-head">
+      {% if contract.logo_url %}<img src="{{ contract.logo_url }}" alt="{{ contract.provider_name }}" style="max-height:44px;margin-bottom:10px">{% endif %}
       <div class="logo">{{ contract.provider_name }}<span>.</span></div>
       <h1>{{ contract.title }}</h1>
       {% if contract.project_name %}<div class="sub">{{ contract.project_name }}</div>{% endif %}
       <div class="ref-row">
         <span>{% if lang == 'sw' %}Kati ya{% else %}Between{% endif %}: <b>{{ contract.provider_name }}</b></span>
-        <span>{% if lang == 'sw' %}na{% else %}and{% endif %}: <b>{{ contract.client.name }}{% if contract.client.company %} ({{ contract.client.company }}){% endif %}</b></span>
+        <span>{% if lang == 'sw' %}na{% else %}and{% endif %}: <b>{{ contract.display_client }}{% if contract.display_company %} ({{ contract.display_company }}){% endif %}</b></span>
         <span>{% if lang == 'sw' %}Tarehe{% else %}Date{% endif %}: <b>{{ contract.created_at|date:'M j, Y' }}</b></span>
       </div>
     </div>
 
-    {% if contract.total_amount or contract.timeline or contract.payment_terms %}
+    {% if contract.total_amount or contract.timeline or contract.payment_terms or contract.custom_fields %}
     <div class="summary">
       {% if contract.total_amount %}<div class="item"><div class="k">{% if lang == 'sw' %}Jumla{% else %}Total Amount{% endif %}</div><div class="v">{{ contract.currency }} {{ contract.total_amount|floatformat:0 }}</div></div>{% endif %}
       {% if contract.timeline %}<div class="item"><div class="k">{% if lang == 'sw' %}Muda{% else %}Timeline{% endif %}</div><div class="v">{{ contract.timeline }}</div></div>{% endif %}
       {% if contract.payment_terms %}<div class="item"><div class="k">{% if lang == 'sw' %}Malipo{% else %}Payment Terms{% endif %}</div><div class="v">{{ contract.payment_terms }}</div></div>{% endif %}
       {% if contract.project_name %}<div class="item"><div class="k">{% if lang == 'sw' %}Mradi{% else %}Project{% endif %}</div><div class="v">{{ contract.project_name }}</div></div>{% endif %}
+      {% for cf in contract.custom_fields %}
+      <div class="item"><div class="k">{{ cf.label }}</div><div class="v">{{ cf.value }}</div></div>
+      {% endfor %}
     </div>
     {% endif %}
 
+    {% if contract.line_items %}
+    <div style="margin:0 48px 28px">
+      <table style="width:100%;border-collapse:collapse">
+        <tr style="border-bottom:2px solid var(--brand)">
+          <th style="text-align:left;padding:9px 6px;font-size:12px;color:var(--muted);text-transform:uppercase">{% if lang == 'sw' %}Maelezo{% else %}Description{% endif %}</th>
+          <th style="text-align:center;padding:9px 6px;font-size:12px;color:var(--muted);text-transform:uppercase">{% if lang == 'sw' %}Idadi{% else %}Qty{% endif %}</th>
+          <th style="text-align:right;padding:9px 6px;font-size:12px;color:var(--muted);text-transform:uppercase">{% if lang == 'sw' %}Bei{% else %}Unit Price{% endif %}</th>
+          <th style="text-align:right;padding:9px 6px;font-size:12px;color:var(--muted);text-transform:uppercase">{% if lang == 'sw' %}Jumla{% else %}Amount{% endif %}</th>
+        </tr>
+        {% for it in contract.line_items %}
+        <tr style="border-bottom:1px solid var(--line)">
+          <td style="padding:10px 6px;font-size:14px">{{ it.desc }}</td>
+          <td style="padding:10px 6px;font-size:14px;text-align:center">{{ it.qty }}</td>
+          <td style="padding:10px 6px;font-size:14px;text-align:right">{{ it.unit_price|floatformat:0 }}</td>
+          <td style="padding:10px 6px;font-size:14px;text-align:right;font-weight:600">{{ it.amount|floatformat:0 }}</td>
+        </tr>
+        {% endfor %}
+        <tr>
+          <td colspan="3" style="padding:12px 6px;text-align:right;font-weight:700">{% if lang == 'sw' %}JUMLA KUU{% else %}GRAND TOTAL{% endif %}</td>
+          <td style="padding:12px 6px;text-align:right;font-weight:800;font-size:16px;color:var(--brand)">{{ contract.currency }} {{ contract.computed_total|floatformat:0 }}</td>
+        </tr>
+      </table>
+    </div>
+    {% endif %}
+
+    {% if contract.sections %}
+    <div class="body">
+      {% for s in contract.sections %}
+      <h2>{{ forloop.counter }}. {% if lang == 'sw' %}{{ s.heading_sw|default:s.heading_en }}{% else %}{{ s.heading_en|default:s.heading_sw }}{% endif %}</h2>
+      <p>{% if lang == 'sw' %}{{ s.body_sw|default:s.body_en|linebreaksbr }}{% else %}{{ s.body_en|default:s.body_sw|linebreaksbr }}{% endif %}</p>
+      {% endfor %}
+    </div>
+    {% elif body %}
     <div class="body">{{ body|safe }}</div>
+    {% endif %}
 
     {% if is_signed %}
     <div class="signed-proof">
@@ -203,7 +241,7 @@
 
     <div class="agree">
       <input type="checkbox" id="sig-agree">
-      <label for="sig-agree">{% if lang == 'sw' %}Nimesoma na ninakubali masharti yote ya mkataba huu, na ninathibitisha kuwa mimi ndiye {{ contract.client.name }} (au mwakilishi halali).{% else %}I have read and agree to all the terms of this agreement, and I confirm I am {{ contract.client.name }} (or an authorized representative).{% endif %}</label>
+      <label for="sig-agree">{% if lang == 'sw' %}Nimesoma na ninakubali masharti yote ya mkataba huu, na ninathibitisha kuwa mimi ndiye {{ contract.display_client }} (au mwakilishi halali).{% else %}I have read and agree to all the terms of this agreement, and I confirm I am {{ contract.display_client }} (or an authorized representative).{% endif %}</label>
     </div>
 
     <div class="actions">

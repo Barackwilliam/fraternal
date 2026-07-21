@@ -512,23 +512,36 @@ from .models import Contract
 @admin.register(Contract)
 class ContractAdmin(admin.ModelAdmin):
     save_on_top = True
-    list_display = ('title', 'client', 'status', 'total_amount', 'currency',
-                    'signed_name', 'created_at', 'share_link')
+    list_display = ('title', 'client_col', 'status', 'amount_col', 'currency',
+                    'signed_name', 'created_at', 'builder_link')
     list_filter = ('status', 'currency', 'created_at')
-    search_fields = ('title', 'project_name', 'client__name', 'signed_name')
+    search_fields = ('title', 'project_name', 'client_name', 'client__name', 'signed_name')
     readonly_fields = ('token', 'share_link', 'signed_name', 'signed_email', 'signed_at',
                        'signed_ip', 'signed_language', 'viewed_at', 'sent_at',
                        'created_at', 'updated_at')
     fieldsets = (
-        ('Client & Project', {
-            'fields': ('client', 'title', 'project_name')
+        ('✨ New: Use the Contract Builder for dynamic sections, line items & AI on every field', {
+            'fields': (),
+            'description': 'This admin form still works, but for sections/line-items/custom-fields '
+                           'and per-field AI, use <a href="/contracts/" target="_blank">the Contract Builder</a> instead.'
+        }),
+        ('Client (optional — registered client OR type details directly below)', {
+            'fields': ('client', 'client_name', 'client_email', 'client_company', 'client_phone', 'client_address')
+        }),
+        ('Project', {
+            'fields': ('title', 'project_name')
         }),
         ('Terms Summary (shows at top of contract)', {
             'fields': ('total_amount', 'currency', 'payment_terms', 'timeline')
         }),
         ('Contract Text — use "AI: Draft contract" button, then edit here', {
             'fields': ('body_en', 'body_sw'),
-            'description': 'You can draft with AI (button top-right of the list), then refine before sending.'
+            'description': 'You can draft with AI (button top-right of the list), then refine before sending. '
+                           'For dynamic sections instead of one long text, use the Contract Builder.'
+        }),
+        ('Branding', {
+            'fields': ('accent_color', 'logo_url'),
+            'classes': ('collapse',)
         }),
         ('Provider (JamiiTek)', {
             'fields': ('provider_name', 'provider_rep')
@@ -546,6 +559,19 @@ class ContractAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
     )
+
+    def client_col(self, obj):
+        return obj.display_client
+    client_col.short_description = 'Client'
+
+    def amount_col(self, obj):
+        return obj.computed_total or obj.total_amount or '—'
+    amount_col.short_description = 'Amount'
+
+    def builder_link(self, obj):
+        from django.utils.safestring import mark_safe
+        return mark_safe(f'<a href="/contracts/{obj.pk}/edit/" target="_blank">Open in Builder →</a>')
+    builder_link.short_description = 'Builder'
 
     def share_link(self, obj):
         from django.utils.safestring import mark_safe

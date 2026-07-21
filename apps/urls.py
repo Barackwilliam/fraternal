@@ -11,6 +11,13 @@ from . import client_portal_views as portal
 from builder import views as builder_views
 
 urlpatterns = [
+    # ── CONTRACT BUILDER (staff-only, nje ya admin) ────────
+    path('contracts/', contract_views.contract_builder_list, name='contract_builder_list'),
+    path('contracts/new/', contract_views.contract_builder_new, name='contract_builder_new'),
+    path('contracts/<int:pk>/edit/', contract_views.contract_builder_edit, name='contract_builder_edit'),
+    path('contracts/<int:pk>/ai-full/', contract_views.contract_builder_ai_full, name='contract_builder_ai_full'),
+    path('contracts/ai-assist/', contract_views.contract_builder_ai_assist, name='contract_builder_ai_assist'),
+
     # ── CONTRACTS (mteja anafikia kwa link) ───────────────
     path('contract/<str:token>/', contract_views.contract_view, name='contract_view'),
     path('contract/<str:token>/sign/', contract_views.contract_sign, name='contract_sign'),

@@ -944,13 +944,32 @@ class Contract(models.Model):
     # Kitambulisho cha link ya kipekee (mteja anafikia kwa hii)
     token = models.CharField(max_length=48, unique=True, editable=False, db_index=True)
 
-    # Nani
-    client = models.ForeignKey('Client', on_delete=models.CASCADE, related_name='contracts')
+    # Nani — client ni HIARI sasa (huhitaji kusajili mteja database)
+    client = models.ForeignKey('Client', on_delete=models.SET_NULL, null=True, blank=True, related_name='contracts')
+
+    # Client details moja kwa moja (kama huna Client object)
+    client_name = models.CharField(max_length=160, blank=True)
+    client_email = models.EmailField(blank=True)
+    client_company = models.CharField(max_length=160, blank=True)
+    client_phone = models.CharField(max_length=40, blank=True)
+    client_address = models.CharField(max_length=300, blank=True)
 
     # Maelezo ya mkataba
     title = models.CharField(max_length=200, default='Service Agreement',
                              help_text='e.g. Website Development Agreement')
     project_name = models.CharField(max_length=200, blank=True)
+
+    # ── DYNAMIC CONTENT (JSON) ──
+    # Sections: [{"id","heading_en","heading_sw","body_en","body_sw"}, ...]
+    sections = models.JSONField(default=list, blank=True)
+    # Line items: [{"desc","qty","unit_price","amount"}, ...]
+    line_items = models.JSONField(default=list, blank=True)
+    # Custom fields za summary: [{"label","value"}, ...]
+    custom_fields = models.JSONField(default=list, blank=True)
+
+    # Branding
+    accent_color = models.CharField(max_length=9, default='#25d366')
+    logo_url = models.URLField(blank=True)
 
     # Maudhui — mbili: Kiingereza + Kiswahili (mteja anachagua)
     body_en = models.TextField(blank=True,
@@ -994,12 +1013,47 @@ class Contract(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return f'{self.title} — {self.client.name} ({self.get_status_display()})'
+        return f'{self.title} — {self.display_client} ({self.get_status_display()})'
 
     def save(self, *args, **kwargs):
         if not self.token:
             self.token = secrets.token_urlsafe(24)
         super().save(*args, **kwargs)
+
+    @property
+    def display_client(self):
+        """Jina la mteja — kutoka field au Client object."""
+        if self.client_name:
+            return self.client_name
+        if self.client:
+            return self.client.name
+        return 'Client'
+
+    @property
+    def display_company(self):
+        if self.client_company:
+            return self.client_company
+        if self.client:
+            return self.client.company
+        return ''
+
+    @property
+    def display_email(self):
+        if self.client_email:
+            return self.client_email
+        if self.client:
+            return self.client.email
+        return ''
+
+    @property
+    def computed_total(self):
+        """Jumla kutoka line items (kama zipo), vinginevyo total_amount."""
+        if self.line_items:
+            try:
+                return sum(float(it.get('amount', 0) or 0) for it in self.line_items)
+            except (ValueError, TypeError):
+                pass
+        return float(self.total_amount) if self.total_amount else 0
 
     @property
     def is_signed(self):

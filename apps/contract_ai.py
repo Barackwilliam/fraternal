@@ -151,3 +151,56 @@ def _clean_html(html):
     html = re.sub(r'\son\w+="[^"]*"', '', html, flags=re.I)
     html = re.sub(r'\sstyle="[^"]*"', '', html, flags=re.I)
     return html.strip()
+
+
+# ── AI ndogo: msaada kwa field moja ──
+
+FIELD_PROMPTS = {
+    'scope': "Write a clear, professional 'Scope of Work' description for a web development project. 2-4 sentences describing what will be delivered.",
+    'payment_terms': "Suggest professional payment terms for a web development project (e.g. deposit split, milestones). One concise line.",
+    'timeline': "Suggest a realistic project timeline phrase for a web development project (e.g. '3-4 weeks from deposit'). One short line.",
+    'title': "Suggest a professional contract title for this project. Just the title, max 8 words.",
+    'section': "Write a professional contract section (heading + 1-2 short paragraphs) on the given topic. Return as: HEADING||BODY",
+    'deliverable': "Write a concise, professional deliverable line item description for a web project. One short phrase.",
+}
+
+
+def assist_field(field_type, context='', language='en'):
+    """
+    AI ndogo: inapendekeza maandishi kwa field moja.
+    field_type: scope|payment_terms|timeline|title|section|deliverable
+    context: maelezo ya ziada (mfano jina la project)
+    Rudisha (ok, text_or_error).
+    """
+    client = _client()
+    if client is None:
+        return False, 'AI not configured.'
+
+    base = FIELD_PROMPTS.get(field_type, "Write professional contract text for the following.")
+    lang_note = 'Respond in Swahili (natural Tanzanian business Swahili).' if language == 'sw' else 'Respond in English.'
+
+    system = (
+        "You are a professional contract writing assistant for JamiiTek, a web "
+        "development company in Tanzania. You write concise, professional text. "
+        "Output ONLY the requested text, no preamble, no quotes, no markdown."
+    )
+    user = f"{base}\n{lang_note}\n\nProject context: {context or 'Website development project'}\n\nWrite it now:"
+
+    try:
+        resp = client.chat.completions.create(
+            model=MODEL, temperature=0.6, max_tokens=400,
+            messages=[{"role": "system", "content": system},
+                      {"role": "user", "content": user}],
+            timeout=40,
+        )
+        text = resp.choices[0].message.content.strip()
+    except Exception as e:
+        logger.exception('assist_field failed')
+        return False, f'AI error ({type(e).__name__})'
+
+    # Safisha quotes/fences
+    text = text.strip().strip('"').strip("'")
+    if text.startswith('```'):
+        text = re.sub(r'^```[a-z]*\n?', '', text)
+        text = re.sub(r'\n?```$', '', text).strip()
+    return True, text[:2000]
