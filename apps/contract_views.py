@@ -144,8 +144,16 @@ def contract_pdf(request, token):
 @staff_member_required
 def contract_builder_list(request):
     """Orodha ya mikataba — dashboard ya staff."""
-    contracts = Contract.objects.all().select_related('client')[:100]
-    return render(request, 'contracts/builder_list.html', {'contracts': contracts})
+    contracts = Contract.objects.all().select_related('client')[:200]
+    sent_count = sum(1 for c in contracts if c.status in ('sent', 'viewed'))
+    signed_count = sum(1 for c in contracts if c.status == 'signed')
+    total_value = sum(c.computed_total for c in contracts if c.status == 'signed')
+    return render(request, 'contracts/builder_list.html', {
+        'contracts': contracts,
+        'sent_count': sent_count,
+        'signed_count': signed_count,
+        'total_value': total_value,
+    })
 
 
 @staff_member_required

@@ -523,7 +523,7 @@ class ContractAdmin(admin.ModelAdmin):
         ('✨ New: Use the Contract Builder for dynamic sections, line items & AI on every field', {
             'fields': (),
             'description': 'This admin form still works, but for sections/line-items/custom-fields '
-                           'and per-field AI, use <a href="/contracts/" target="_blank">the Contract Builder</a> instead.'
+                           'and per-field AI, use <a href="/manage/contracts/" target="_blank">the Contract Builder</a> instead.'
         }),
         ('Client (optional — registered client OR type details directly below)', {
             'fields': ('client', 'client_name', 'client_email', 'client_company', 'client_phone', 'client_address')
@@ -570,7 +570,7 @@ class ContractAdmin(admin.ModelAdmin):
 
     def builder_link(self, obj):
         from django.utils.safestring import mark_safe
-        return mark_safe(f'<a href="/contracts/{obj.pk}/edit/" target="_blank">Open in Builder →</a>')
+        return mark_safe(f'<a href="/manage/contracts/{obj.pk}/edit/" target="_blank">Open in Builder →</a>')
     builder_link.short_description = 'Builder'
 
     def share_link(self, obj):

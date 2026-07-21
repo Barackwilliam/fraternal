@@ -1,232 +1,227 @@
-{% load static %}<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Edit Contract — {{ contract.title }}</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+{% extends 'management/base.html' %}
+{% block title %}{{ contract.title }}{% endblock %}
+{% block extra_css %}
 <style>
-  :root{--brand:#0a1628;--accent:#25d366;--cyan:#00a8cc;--bg:#f4f6fb;--ink:#1a2332;--muted:#5a6b82;
-    --line:#e2e8f0;--ai:#6c63ff;--danger:#dc3545;--paper:#fff}
-  *{margin:0;padding:0;box-sizing:border-box}
-  body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--ink);padding-bottom:100px}
+  .cb-topline{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:20px;flex-wrap:wrap}
+  .cb-back{font-family:var(--mono);font-size:12px;color:var(--text-3);text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+  .cb-back:hover{color:var(--cyan)}
+  .cb-title{font-family:var(--head);font-size:20px;font-weight:800;color:var(--text);margin-top:4px}
+  .cb-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  select.status-sel{background:var(--card-s);color:var(--text);border:1px solid var(--border);padding:9px 13px;
+    border-radius:var(--r);font-size:13px;font-family:var(--mono);cursor:pointer}
+  select.status-sel:focus{outline:none;border-color:var(--border-s)}
 
-  .bar{background:var(--brand);color:#fff;padding:16px 26px;display:flex;justify-content:space-between;
-    align-items:center;position:sticky;top:0;z-index:100;flex-wrap:wrap;gap:12px}
-  .bar .left{display:flex;align-items:center;gap:16px}
-  .bar a.back{color:rgba(255,255,255,.6);text-decoration:none;font-size:13px}
-  .bar .logo{font-weight:800;font-size:17px}.bar .logo span{color:var(--accent)}
-  .bar .right{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-  .status-pill{padding:6px 14px;border-radius:100px;font-size:12px;font-weight:700;background:rgba(255,255,255,.1)}
-  select.status-sel{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2);
-    padding:8px 12px;border-radius:9px;font-size:13px;font-family:inherit}
-  .btn{padding:10px 18px;border-radius:10px;font-weight:700;font-size:13.5px;cursor:pointer;border:none;
-    font-family:inherit;transition:.2s;display:inline-flex;align-items:center;gap:7px;text-decoration:none}
-  .btn-ai{background:var(--ai);color:#fff}
-  .btn-ai:hover{background:#5a52e0;transform:translateY(-1px)}
-  .btn-save{background:linear-gradient(135deg,var(--accent),var(--cyan));color:#04120a}
-  .btn-save:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(37,211,102,.3)}
-  .btn-link{background:transparent;border:1px solid rgba(255,255,255,.25);color:#fff}
+  .share-box{background:var(--green-d);border:1px solid rgba(0,255,136,.25);border-radius:var(--r-lg);
+    padding:14px 18px;margin-bottom:22px;font-size:13px;font-family:var(--mono)}
+  .share-box a{color:var(--green);font-weight:700;word-break:break-all;text-decoration:none}
+  .share-box a:hover{text-decoration:underline}
+  .share-box .sub{color:var(--text-3);margin-top:4px;font-size:11px}
 
-  .wrap{max-width:900px;margin:0 auto;padding:24px 20px}
-  .card{background:var(--paper);border-radius:16px;padding:28px;margin-bottom:22px;
-    box-shadow:0 2px 20px rgba(20,40,80,.06);border:1px solid var(--line)}
-  .card h2{font-size:16px;color:var(--brand);margin-bottom:18px;display:flex;align-items:center;gap:9px}
-  .card h2 .n{width:26px;height:26px;border-radius:8px;background:var(--brand);color:#fff;
-    display:inline-flex;align-items:center;justify-content:center;font-size:13px}
+  .cb-section{margin-bottom:20px}
+  .cb-section .sh{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+  .cb-section .sh .n{width:26px;height:26px;border-radius:8px;background:var(--cyan-d);color:var(--cyan);
+    display:inline-flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:800;
+    font-family:var(--mono);border:1px solid rgba(0,212,255,.25)}
+  .cb-section .sh h2{font-family:var(--head);font-size:15px;font-weight:700;color:var(--text)}
+  .cb-section .sh .hint{font-family:var(--mono);font-size:11px;color:var(--text-3);font-weight:400}
 
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
   .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
   .fld{margin-bottom:14px}
-  .fld label{display:block;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px;
-    text-transform:uppercase;letter-spacing:.4px}
   .fld-row{display:flex;gap:8px;align-items:flex-end}
   .fld-row .fld{flex:1;margin-bottom:0}
-  input[type=text],input[type=email],input[type=number],input[type=url],input[type=color],textarea,select{
-    width:100%;padding:11px 13px;border:1.5px solid var(--line);border-radius:9px;font-size:14px;
-    font-family:inherit;color:var(--ink);background:#fff}
-  input:focus,textarea:focus,select:focus{outline:none;border-color:var(--cyan)}
-  textarea{resize:vertical;min-height:70px}
-  input[type=color]{padding:4px;height:42px;cursor:pointer}
 
-  .ai-btn{background:linear-gradient(135deg,var(--ai),#8b7fff);color:#fff;border:none;border-radius:8px;
-    padding:9px 11px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;
-    display:inline-flex;align-items:center;gap:5px;transition:.2s}
-  .ai-btn:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(108,99,255,.35)}
-  .ai-btn:disabled{opacity:.5;cursor:wait}
-  .ai-btn.small{padding:6px 9px;font-size:11px}
+  /* AI button — purple, distinct from actions */
+  .ai-btn{background:var(--purple-d);color:var(--purple);border:1px solid rgba(139,92,246,.3);border-radius:9px;
+    padding:10px 13px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;
+    font-family:var(--mono);display:inline-flex;align-items:center;gap:6px;transition:.2s}
+  .ai-btn:hover{background:var(--purple);color:#fff;box-shadow:0 0 16px rgba(139,92,246,.35);transform:translateY(-1px)}
+  .ai-btn:disabled{opacity:.5;cursor:wait;transform:none}
+  .ai-btn.small{padding:7px 10px;font-size:11px}
 
   /* Sections (dynamic) */
-  .sect-item{border:1.5px solid var(--line);border-radius:12px;padding:18px;margin-bottom:14px;background:#fbfcfe}
-  .sect-item .sect-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-  .sect-item .sect-num{font-weight:700;color:var(--muted);font-size:13px}
+  .sect-item{border:1px solid var(--border);border-radius:var(--r-lg);padding:18px;margin-bottom:14px;
+    background:var(--card);transition:border-color .2s}
+  .sect-item:hover{border-color:var(--border-s)}
+  .sect-item .sect-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+  .sect-item .sect-num{font-family:var(--mono);font-weight:700;color:var(--text-3);font-size:12px;text-transform:uppercase;letter-spacing:1px}
   .sect-actions{display:flex;gap:6px}
-  .icon-btn{background:#fff;border:1px solid var(--line);border-radius:7px;width:30px;height:30px;
-    cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:13px;color:var(--muted)}
-  .icon-btn:hover{border-color:var(--cyan);color:var(--cyan)}
-  .icon-btn.del:hover{border-color:var(--danger);color:var(--danger)}
-  .add-btn{background:#fff;border:1.5px dashed var(--line);border-radius:10px;padding:13px;width:100%;
-    cursor:pointer;color:var(--muted);font-weight:700;font-size:13.5px;transition:.2s}
-  .add-btn:hover{border-color:var(--cyan);color:var(--cyan);background:#f8fdff}
+  .icon-btn{background:var(--card-s);border:1px solid var(--border);border-radius:7px;width:30px;height:30px;
+    cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:12px;color:var(--text-3)}
+  .icon-btn:hover{border-color:var(--border-s);color:var(--cyan)}
+  .icon-btn.del:hover{border-color:rgba(255,59,92,.4);color:var(--red)}
+
+  .add-btn{background:transparent;border:1.5px dashed var(--border);border-radius:var(--r-lg);padding:14px;
+    width:100%;cursor:pointer;color:var(--text-3);font-weight:700;font-size:13px;font-family:var(--mono);transition:.2s}
+  .add-btn:hover{border-color:var(--border-s);color:var(--cyan);background:var(--cyan-d)}
 
   /* Line items table */
   .li-table{width:100%;border-collapse:collapse}
-  .li-table th{text-align:left;font-size:11px;text-transform:uppercase;color:var(--muted);padding:6px 8px;
-    border-bottom:1.5px solid var(--line)}
-  .li-table td{padding:7px 8px}
-  .li-table input{padding:8px 10px;font-size:13.5px}
-  .li-total-row{font-weight:700;font-size:15px;text-align:right;padding-top:14px;color:var(--brand)}
+  .li-table th{text-align:left;font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;
+    color:var(--text-3);padding:8px;border-bottom:1px solid var(--border)}
+  .li-table td{padding:8px}
+  .li-table input{padding:9px 11px;font-size:13px}
+  .li-total-row{font-family:var(--head);font-weight:800;font-size:16px;text-align:right;padding-top:14px;color:var(--green)}
 
   /* Custom fields */
   .cf-item{display:flex;gap:8px;margin-bottom:10px;align-items:center}
   .cf-item input{flex:1}
 
-  .save-bar{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);
-    padding:14px 20px;display:flex;justify-content:center;gap:12px;box-shadow:0 -4px 20px rgba(0,0,0,.05);z-index:90}
-  .save-bar .btn{padding:13px 34px;font-size:14.5px}
+  .cb-savebar{position:fixed;bottom:0;left:var(--sb);right:0;background:var(--bg2);border-top:1px solid var(--border);
+    padding:14px 24px;display:flex;justify-content:center;gap:12px;box-shadow:0 -8px 30px rgba(0,0,0,.3);z-index:90}
+  @media(max-width:900px){.cb-savebar{left:0}}
+  .cb-savebar .jt-btn{padding:12px 32px;font-size:14px}
 
-  .toast{position:fixed;top:80px;right:20px;background:var(--brand);color:#fff;padding:14px 22px;
-    border-radius:10px;font-size:13.5px;box-shadow:0 8px 30px rgba(0,0,0,.2);z-index:200;
-    opacity:0;transform:translateY(-10px);transition:.3s;pointer-events:none}
+  .toast{position:fixed;top:70px;right:20px;background:var(--bg2);border:1px solid var(--border-s);color:var(--text);
+    padding:14px 22px;border-radius:var(--r-lg);font-size:13px;box-shadow:0 8px 30px rgba(0,0,0,.4);z-index:200;
+    opacity:0;transform:translateY(-10px);transition:.3s;pointer-events:none;font-family:var(--mono)}
   .toast.show{opacity:1;transform:translateY(0)}
-  .toast.err{background:var(--danger)}
+  .toast.err{border-color:rgba(255,59,92,.4);color:var(--red)}
+  .toast.ok{border-color:rgba(0,255,136,.4);color:var(--green)}
 
-  .share-box{background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:14px 16px;margin-top:8px;font-size:13px}
-  .share-box a{color:#166534;font-weight:700;word-break:break-all}
-
-  @media(max-width:640px){.grid2,.grid3{grid-template-columns:1fr}.bar{padding:14px 16px}}
+  body{padding-bottom:100px}
+  @media(max-width:640px){.grid2,.grid3{grid-template-columns:1fr}}
 </style>
-</head>
-<body>
+{% endblock %}
 
-<div class="bar">
-  <div class="left">
-    <a class="back" href="{% url 'contract_builder_list' %}">← All contracts</a>
-    <div class="logo">JamiiTek<span>.</span></div>
+{% block content %}
+<div class="cb-topline">
+  <div>
+    <a class="cb-back" href="{% url 'contract_builder_list' %}"><i class="fas fa-arrow-left"></i> All Contracts</a>
+    <div class="cb-title">{{ contract.title }}</div>
   </div>
-  <div class="right">
+  <div class="cb-actions">
     <select class="status-sel" id="statusSel">
       {% for val, label in contract.STATUS %}
       <option value="{{ val }}" {% if contract.status == val %}selected{% endif %}>{{ label }}</option>
       {% endfor %}
     </select>
-    <button class="btn btn-ai" id="bigAiBtn" onclick="draftWholeContract()">✨ AI: Draft Whole Contract</button>
-    <button class="btn btn-save" onclick="saveContract()">💾 Save</button>
+    <button type="button" class="ai-btn" id="bigAiBtn" onclick="draftWholeContract()">✨ AI: Draft Whole Contract</button>
+    <button type="button" class="jt-btn btn-cyan" onclick="saveContract()"><i class="fas fa-floppy-disk"></i> Save</button>
   </div>
 </div>
 
-<div class="wrap">
+{% if contract.pk %}
+<div class="share-box">
+  <i class="fas fa-link"></i> Client link: <a href="{{ contract.public_url }}" target="_blank">https://jamiitek.com{{ contract.public_url }}</a>
+  <div class="sub">Send this to your client — they'll choose language & sign online or download.</div>
+</div>
+{% endif %}
 
-  {% if contract.pk %}
-  <div class="share-box">
-    📎 Client link: <a href="{{ contract.public_url }}" target="_blank">https://jamiitek.com{{ contract.public_url }}</a>
-    <div style="color:#166534;opacity:.8;margin-top:4px">Send this to your client — they'll choose language & sign or download.</div>
-  </div>
-  {% endif %}
-
-  <form id="contractForm">
+<form id="contractForm">
 
   <!-- CLIENT -->
-  <div class="card">
-    <h2><span class="n">1</span> Client Details <span style="font-weight:400;color:var(--muted);font-size:12.5px">(no account needed)</span></h2>
-    <div class="grid2">
-      <div class="fld"><label>Client name *</label><input type="text" id="client_name" value="{{ contract.client_name }}" placeholder="e.g. John Mwakalinga"></div>
-      <div class="fld"><label>Company</label><input type="text" id="client_company" value="{{ contract.client_company }}" placeholder="e.g. Acme Traders Ltd"></div>
-      <div class="fld"><label>Email</label><input type="email" id="client_email" value="{{ contract.client_email }}" placeholder="client@example.com"></div>
-      <div class="fld"><label>Phone</label><input type="text" id="client_phone" value="{{ contract.client_phone }}" placeholder="+255 7XX XXX XXX"></div>
+  <div class="cb-section">
+    <div class="sh"><span class="n">1</span><h2>Client Details</h2><span class="hint">no account needed</span></div>
+    <div class="jt-card" style="padding:20px">
+      <div class="grid2">
+        <div class="fld"><label class="f-label">Client name *</label><input type="text" class="f-input" id="client_name" value="{{ contract.client_name }}" placeholder="e.g. John Mwakalinga"></div>
+        <div class="fld"><label class="f-label">Company</label><input type="text" class="f-input" id="client_company" value="{{ contract.client_company }}" placeholder="e.g. Acme Traders Ltd"></div>
+        <div class="fld"><label class="f-label">Email</label><input type="email" class="f-input" id="client_email" value="{{ contract.client_email }}" placeholder="client@example.com"></div>
+        <div class="fld"><label class="f-label">Phone</label><input type="text" class="f-input" id="client_phone" value="{{ contract.client_phone }}" placeholder="+255 7XX XXX XXX"></div>
+      </div>
+      <div class="fld"><label class="f-label">Address</label><input type="text" class="f-input" id="client_address" value="{{ contract.client_address }}" placeholder="City, Tanzania"></div>
     </div>
-    <div class="fld"><label>Address</label><input type="text" id="client_address" value="{{ contract.client_address }}" placeholder="City, Tanzania"></div>
   </div>
 
   <!-- PROJECT & TERMS -->
-  <div class="card">
-    <h2><span class="n">2</span> Project & Terms</h2>
-    <div class="fld">
-      <label>Contract title</label>
-      <div class="fld-row">
-        <input type="text" id="title" value="{{ contract.title }}">
-        <button type="button" class="ai-btn" onclick="assistField('title','title')">✨ AI</button>
-      </div>
-    </div>
-    <div class="fld"><label>Project name</label><input type="text" id="project_name" value="{{ contract.project_name }}" placeholder="e.g. Company Website Redesign"></div>
-    <div class="grid3">
-      <div class="fld"><label>Total amount</label><input type="number" id="total_amount" value="{{ contract.total_amount|default_if_none:'' }}" placeholder="1500000"></div>
-      <div class="fld"><label>Currency</label>
-        <select id="currency">
-          <option value="TZS" {% if contract.currency == 'TZS' %}selected{% endif %}>TZS</option>
-          <option value="USD" {% if contract.currency == 'USD' %}selected{% endif %}>USD</option>
-          <option value="EUR" {% if contract.currency == 'EUR' %}selected{% endif %}>EUR</option>
-          <option value="KES" {% if contract.currency == 'KES' %}selected{% endif %}>KES</option>
-          <option value="UGX" {% if contract.currency == 'UGX' %}selected{% endif %}>UGX</option>
-        </select>
-      </div>
-      <div class="fld"><label>Timeline</label>
+  <div class="cb-section">
+    <div class="sh"><span class="n">2</span><h2>Project & Terms</h2></div>
+    <div class="jt-card" style="padding:20px">
+      <div class="fld">
+        <label class="f-label">Contract title</label>
         <div class="fld-row">
-          <input type="text" id="timeline" value="{{ contract.timeline }}" placeholder="3 weeks">
-          <button type="button" class="ai-btn small" onclick="assistField('timeline','timeline')">✨</button>
+          <input type="text" class="f-input" id="title" value="{{ contract.title }}">
+          <button type="button" class="ai-btn" onclick="assistField('title','title')">✨ AI</button>
         </div>
       </div>
-    </div>
-    <div class="fld">
-      <label>Payment terms</label>
-      <div class="fld-row">
-        <input type="text" id="payment_terms" value="{{ contract.payment_terms }}" placeholder="50% deposit, 50% on completion">
-        <button type="button" class="ai-btn" onclick="assistField('payment_terms','payment_terms')">✨ AI</button>
+      <div class="fld"><label class="f-label">Project name</label><input type="text" class="f-input" id="project_name" value="{{ contract.project_name }}" placeholder="e.g. Company Website Redesign"></div>
+      <div class="grid3">
+        <div class="fld"><label class="f-label">Total amount</label><input type="number" class="f-input" id="total_amount" value="{{ contract.total_amount|default_if_none:'' }}" placeholder="1500000"></div>
+        <div class="fld"><label class="f-label">Currency</label>
+          <select class="f-input" id="currency">
+            <option value="TZS" {% if contract.currency == 'TZS' %}selected{% endif %}>TZS</option>
+            <option value="USD" {% if contract.currency == 'USD' %}selected{% endif %}>USD</option>
+            <option value="EUR" {% if contract.currency == 'EUR' %}selected{% endif %}>EUR</option>
+            <option value="KES" {% if contract.currency == 'KES' %}selected{% endif %}>KES</option>
+            <option value="UGX" {% if contract.currency == 'UGX' %}selected{% endif %}>UGX</option>
+          </select>
+        </div>
+        <div class="fld"><label class="f-label">Timeline</label>
+          <div class="fld-row">
+            <input type="text" class="f-input" id="timeline" value="{{ contract.timeline }}" placeholder="3 weeks">
+            <button type="button" class="ai-btn small" onclick="assistField('timeline','timeline')">✨</button>
+          </div>
+        </div>
+      </div>
+      <div class="fld">
+        <label class="f-label">Payment terms</label>
+        <div class="fld-row">
+          <input type="text" class="f-input" id="payment_terms" value="{{ contract.payment_terms }}" placeholder="50% deposit, 50% on completion">
+          <button type="button" class="ai-btn" onclick="assistField('payment_terms','payment_terms')">✨ AI</button>
+        </div>
       </div>
     </div>
   </div>
 
   <!-- LINE ITEMS -->
-  <div class="card">
-    <h2><span class="n">3</span> Line Items <span style="font-weight:400;color:var(--muted);font-size:12.5px">(optional — deliverables & pricing)</span></h2>
-    <table class="li-table">
-      <tr><th style="width:45%">Description</th><th style="width:12%">Qty</th><th style="width:18%">Unit Price</th><th style="width:18%">Amount</th><th></th></tr>
-      <tbody id="liBody"></tbody>
-    </table>
-    <div class="li-total-row" id="liTotal">Total: TZS 0</div>
-    <div style="margin-top:12px"><button type="button" class="add-btn" onclick="addLineItem()">+ Add line item</button></div>
+  <div class="cb-section">
+    <div class="sh"><span class="n">3</span><h2>Line Items</h2><span class="hint">optional — deliverables & pricing</span></div>
+    <div class="jt-card" style="padding:20px">
+      <table class="li-table">
+        <tr><th style="width:45%">Description</th><th style="width:12%">Qty</th><th style="width:18%">Unit Price</th><th style="width:18%">Amount</th><th></th></tr>
+        <tbody id="liBody"></tbody>
+      </table>
+      <div class="li-total-row" id="liTotal">Total: TZS 0</div>
+      <div style="margin-top:12px"><button type="button" class="add-btn" onclick="addLineItem()">+ Add line item</button></div>
+    </div>
   </div>
 
   <!-- CUSTOM FIELDS -->
-  <div class="card">
-    <h2><span class="n">4</span> Custom Summary Fields <span style="font-weight:400;color:var(--muted);font-size:12.5px">(optional — anything extra)</span></h2>
-    <div id="cfBody"></div>
-    <button type="button" class="add-btn" onclick="addCustomField()">+ Add custom field</button>
+  <div class="cb-section">
+    <div class="sh"><span class="n">4</span><h2>Custom Summary Fields</h2><span class="hint">optional — anything extra</span></div>
+    <div class="jt-card" style="padding:20px">
+      <div id="cfBody"></div>
+      <button type="button" class="add-btn" onclick="addCustomField()">+ Add custom field</button>
+    </div>
   </div>
 
   <!-- SECTIONS -->
-  <div class="card">
-    <h2><span class="n">5</span> Contract Sections</h2>
+  <div class="cb-section">
+    <div class="sh"><span class="n">5</span><h2>Contract Sections</h2></div>
     <div id="sectBody"></div>
     <button type="button" class="add-btn" onclick="addSection()">+ Add section</button>
   </div>
 
   <!-- BRANDING -->
-  <div class="card">
-    <h2><span class="n">6</span> Branding</h2>
-    <div class="grid2">
-      <div class="fld"><label>Accent color</label><input type="color" id="accent_color" value="{{ contract.accent_color }}"></div>
-      <div class="fld"><label>Logo URL (optional)</label><input type="url" id="logo_url" value="{{ contract.logo_url }}" placeholder="https://..."></div>
-    </div>
-    <div class="grid2">
-      <div class="fld"><label>Provider name</label><input type="text" id="provider_name" value="{{ contract.provider_name }}"></div>
-      <div class="fld"><label>Your name (representative)</label><input type="text" id="provider_rep" value="{{ contract.provider_rep }}"></div>
+  <div class="cb-section">
+    <div class="sh"><span class="n">6</span><h2>Branding</h2></div>
+    <div class="jt-card" style="padding:20px">
+      <div class="grid2">
+        <div class="fld"><label class="f-label">Accent color</label><input type="color" class="f-input" id="accent_color" value="{{ contract.accent_color }}" style="padding:4px;height:42px;cursor:pointer"></div>
+        <div class="fld"><label class="f-label">Logo URL (optional)</label><input type="url" class="f-input" id="logo_url" value="{{ contract.logo_url }}" placeholder="https://..."></div>
+      </div>
+      <div class="grid2">
+        <div class="fld"><label class="f-label">Provider name</label><input type="text" class="f-input" id="provider_name" value="{{ contract.provider_name }}"></div>
+        <div class="fld"><label class="f-label">Your name (representative)</label><input type="text" class="f-input" id="provider_rep" value="{{ contract.provider_rep }}"></div>
+      </div>
     </div>
   </div>
 
-  <!-- LEGACY BODY (fallback if not using sections) -->
-  <div class="card">
-    <h2><span class="n">7</span> Full Contract Text <span style="font-weight:400;color:var(--muted);font-size:12.5px">(used if you're not using Sections above — set by "AI: Draft Whole Contract")</span></h2>
-    <div class="fld"><label>English</label><textarea id="body_en" rows="6">{{ contract.body_en }}</textarea></div>
-    <div class="fld"><label>Kiswahili</label><textarea id="body_sw" rows="6">{{ contract.body_sw }}</textarea></div>
+  <!-- LEGACY BODY (fallback) -->
+  <div class="cb-section">
+    <div class="sh"><span class="n">7</span><h2>Full Contract Text</h2><span class="hint">used when not using Sections above — filled by "AI: Draft Whole Contract"</span></div>
+    <div class="jt-card" style="padding:20px">
+      <div class="fld"><label class="f-label">English</label><textarea class="f-input" id="body_en" rows="6">{{ contract.body_en }}</textarea></div>
+      <div class="fld"><label class="f-label">Kiswahili</label><textarea class="f-input" id="body_sw" rows="6">{{ contract.body_sw }}</textarea></div>
+    </div>
   </div>
 
-  </form>
-</div>
+</form>
 
-<div class="save-bar">
-  <button class="btn btn-save" onclick="saveContract()">💾 Save Contract</button>
-  {% if contract.pk %}<a class="btn btn-link" style="color:var(--ink);border-color:var(--line)" href="{{ contract.public_url }}" target="_blank">👁 Preview client view</a>{% endif %}
+<div class="cb-savebar">
+  <button type="button" class="jt-btn btn-cyan" onclick="saveContract()"><i class="fas fa-floppy-disk"></i> Save Contract</button>
+  {% if contract.pk %}<a class="jt-btn btn-ghost" href="{{ contract.public_url }}" target="_blank"><i class="fas fa-eye"></i> Preview client view</a>{% endif %}
 </div>
 
 <div class="toast" id="toast"></div>
@@ -240,10 +235,9 @@ let customFields = {{ custom_fields_json|safe }};
 let uid = 0;
 const newId = () => 'x' + (Date.now()) + (uid++);
 
-// ── TOAST ──
-function toast(msg, isErr){
+function toast(msg, type){
   const t = document.getElementById('toast');
-  t.textContent = msg; t.className = 'toast show' + (isErr ? ' err' : '');
+  t.textContent = msg; t.className = 'toast show' + (type ? ' ' + type : '');
   setTimeout(() => t.className = 'toast', 2500);
 }
 
@@ -254,10 +248,10 @@ function renderLineItems(){
   lineItems.forEach((it, i) => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td><input type="text" value="${esc(it.desc||'')}" onchange="lineItems[${i}].desc=this.value"></td>
-      <td><input type="number" value="${it.qty||1}" onchange="lineItems[${i}].qty=this.value;calcLine(${i})"></td>
-      <td><input type="number" value="${it.unit_price||0}" onchange="lineItems[${i}].unit_price=this.value;calcLine(${i})"></td>
-      <td><input type="number" value="${it.amount||0}" id="li-amt-${i}" onchange="lineItems[${i}].amount=this.value;updateTotal()"></td>
+      <td><input type="text" class="f-input" value="${esc(it.desc||'')}" onchange="lineItems[${i}].desc=this.value"></td>
+      <td><input type="number" class="f-input" value="${it.qty||1}" onchange="lineItems[${i}].qty=this.value;calcLine(${i})"></td>
+      <td><input type="number" class="f-input" value="${it.unit_price||0}" onchange="lineItems[${i}].unit_price=this.value;calcLine(${i})"></td>
+      <td><input type="number" class="f-input" value="${it.amount||0}" id="li-amt-${i}" onchange="lineItems[${i}].amount=this.value;updateTotal()"></td>
       <td><button type="button" class="icon-btn del" onclick="removeLineItem(${i})">✕</button></td>`;
     body.appendChild(tr);
   });
@@ -285,8 +279,8 @@ function renderCustomFields(){
     const div = document.createElement('div');
     div.className = 'cf-item';
     div.innerHTML = `
-      <input type="text" placeholder="Label" value="${esc(f.label||'')}" onchange="customFields[${i}].label=this.value">
-      <input type="text" placeholder="Value" value="${esc(f.value||'')}" onchange="customFields[${i}].value=this.value">
+      <input type="text" class="f-input" placeholder="Label" value="${esc(f.label||'')}" onchange="customFields[${i}].label=this.value">
+      <input type="text" class="f-input" placeholder="Value" value="${esc(f.value||'')}" onchange="customFields[${i}].value=this.value">
       <button type="button" class="icon-btn del" onclick="removeCustomField(${i})">✕</button>`;
     body.appendChild(div);
   });
@@ -306,19 +300,19 @@ function renderSections(){
       <div class="sect-head">
         <span class="sect-num">Section ${i+1}</span>
         <div class="sect-actions">
-          <button type="button" class="icon-btn" onclick="moveSection(${i},-1)" title="Move up">↑</button>
-          <button type="button" class="icon-btn" onclick="moveSection(${i},1)" title="Move down">↓</button>
+          <button type="button" class="icon-btn" onclick="moveSection(${i},-1)" title="Move up"><i class="fas fa-arrow-up"></i></button>
+          <button type="button" class="icon-btn" onclick="moveSection(${i},1)" title="Move down"><i class="fas fa-arrow-down"></i></button>
           <button type="button" class="ai-btn small" onclick="assistSection(${i})">✨ AI</button>
           <button type="button" class="icon-btn del" onclick="removeSection(${i})">✕</button>
         </div>
       </div>
       <div class="grid2">
-        <div class="fld"><label>Heading (English)</label><input type="text" value="${esc(s.heading_en||'')}" onchange="sections[${i}].heading_en=this.value"></div>
-        <div class="fld"><label>Heading (Swahili)</label><input type="text" value="${esc(s.heading_sw||'')}" onchange="sections[${i}].heading_sw=this.value"></div>
+        <div class="fld"><label class="f-label">Heading (English)</label><input type="text" class="f-input" value="${esc(s.heading_en||'')}" onchange="sections[${i}].heading_en=this.value"></div>
+        <div class="fld"><label class="f-label">Heading (Swahili)</label><input type="text" class="f-input" value="${esc(s.heading_sw||'')}" onchange="sections[${i}].heading_sw=this.value"></div>
       </div>
       <div class="grid2">
-        <div class="fld"><label>Body (English)</label><textarea onchange="sections[${i}].body_en=this.value">${esc(s.body_en||'')}</textarea></div>
-        <div class="fld"><label>Body (Swahili)</label><textarea onchange="sections[${i}].body_sw=this.value">${esc(s.body_sw||'')}</textarea></div>
+        <div class="fld"><label class="f-label">Body (English)</label><textarea class="f-input" onchange="sections[${i}].body_en=this.value">${esc(s.body_en||'')}</textarea></div>
+        <div class="fld"><label class="f-label">Body (Swahili)</label><textarea class="f-input" onchange="sections[${i}].body_sw=this.value">${esc(s.body_sw||'')}</textarea></div>
       </div>`;
     body.appendChild(div);
   });
@@ -345,9 +339,9 @@ async function assistField(fieldType, inputId){
     fd.append('field_type', fieldType); fd.append('context', context); fd.append('language', 'en');
     const res = await fetch("{% url 'contract_builder_ai_assist' %}", {method:'POST', headers:{'X-CSRFToken':CSRF}, body:fd});
     const data = await res.json();
-    if (data.ok){ document.getElementById(inputId).value = data.text; toast('AI suggestion applied ✓'); }
-    else toast(data.error || 'AI failed', true);
-  } catch(e){ toast('Network error', true); }
+    if (data.ok){ document.getElementById(inputId).value = data.text; toast('AI suggestion applied ✓', 'ok'); }
+    else toast(data.error || 'AI failed', 'err');
+  } catch(e){ toast('Network error', 'err'); }
   btn.disabled = false; btn.textContent = orig;
 }
 
@@ -365,29 +359,29 @@ async function assistSection(i){
       sections[i].heading_en = sections[i].heading_en || (parts[0]||'').trim();
       sections[i].body_en = (parts[1]||data.text).trim();
       renderSections();
-      toast('Section drafted ✓');
-    } else toast(data.error || 'AI failed', true);
-  } catch(e){ toast('Network error', true); }
+      toast('Section drafted ✓', 'ok');
+    } else toast(data.error || 'AI failed', 'err');
+  } catch(e){ toast('Network error', 'err'); }
 }
 
 // ── AI: draft whole contract ──
 async function draftWholeContract(){
-  if (!CONTRACT_PK){ toast('Save the contract first', true); return; }
+  if (!CONTRACT_PK){ toast('Save the contract first', 'err'); return; }
   if (!confirm('AI will draft the full contract text (English + Swahili) based on the client and terms info. This replaces the current text below. Continue?')) return;
   const btn = document.getElementById('bigAiBtn');
   const orig = btn.textContent;
   btn.disabled = true; btn.textContent = '✨ Drafting…';
   try {
-    await saveContract(true); // hifadhi kwanza ili AI ipate data mpya
-    const res = await fetch(`/contracts/${CONTRACT_PK}/ai-full/`, {method:'POST', headers:{'X-CSRFToken':CSRF}});
+    await saveContract(true);
+    const res = await fetch(`/manage/contracts/${CONTRACT_PK}/ai-full/`, {method:'POST', headers:{'X-CSRFToken':CSRF}});
     const data = await res.json();
     if (data.ok){
       document.getElementById('title').value = data.title;
       document.getElementById('body_en').value = data.body_en;
       document.getElementById('body_sw').value = data.body_sw;
-      toast('✓ AI drafted the full contract — review below');
-    } else toast(data.error || 'AI failed', true);
-  } catch(e){ toast('Network error', true); }
+      toast('✓ AI drafted the full contract — review below', 'ok');
+    } else toast(data.error || 'AI failed', 'err');
+  } catch(e){ toast('Network error', 'err'); }
   btn.disabled = false; btn.textContent = orig;
 }
 
@@ -403,17 +397,15 @@ async function saveContract(silent){
   fd.append('line_items', JSON.stringify(lineItems));
   fd.append('custom_fields', JSON.stringify(customFields));
 
-  const url = CONTRACT_PK ? `/contracts/${CONTRACT_PK}/edit/` : "{% url 'contract_builder_new' %}";
+  const url = CONTRACT_PK ? `/manage/contracts/${CONTRACT_PK}/edit/` : "{% url 'contract_builder_new' %}";
   try {
     const res = await fetch(url, {method:'POST', headers:{'X-CSRFToken':CSRF}, body:fd});
-    if (res.ok || res.redirected){ if(!silent) toast('✓ Saved'); }
-    else if(!silent) toast('Save failed', true);
-  } catch(e){ if(!silent) toast('Network error', true); }
+    if (res.ok || res.redirected){ if(!silent) toast('✓ Saved', 'ok'); }
+    else if(!silent) toast('Save failed', 'err');
+  } catch(e){ if(!silent) toast('Network error', 'err'); }
 }
 
-// Init
 renderLineItems(); renderCustomFields(); renderSections();
 document.getElementById('currency').addEventListener('change', updateTotal);
 </script>
-</body>
-</html>
+{% endblock %}

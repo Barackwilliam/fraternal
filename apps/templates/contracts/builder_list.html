@@ -1,62 +1,76 @@
-{% load static %}<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Contracts — JamiiTek</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+{% extends 'management/base.html' %}
+{% block title %}Contracts{% endblock %}
+{% block extra_css %}
 <style>
-  :root{--brand:#0a1628;--accent:#25d366;--cyan:#00a8cc;--bg:#f4f6fb;--ink:#1a2332;--muted:#5a6b82;--line:#e2e8f0}
-  *{margin:0;padding:0;box-sizing:border-box}
-  body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--ink)}
-  .bar{background:var(--brand);color:#fff;padding:18px 30px;display:flex;justify-content:space-between;align-items:center}
-  .bar .logo{font-weight:800;font-size:19px}.bar .logo span{color:var(--accent)}
-  .bar a.new{background:linear-gradient(135deg,var(--accent),var(--cyan));color:#04120a;padding:10px 20px;
-    border-radius:10px;text-decoration:none;font-weight:700;font-size:14px}
-  .wrap{max-width:1100px;margin:0 auto;padding:30px 20px 80px}
-  h1{font-size:24px;margin-bottom:20px}
-  table{width:100%;border-collapse:collapse;background:#fff;border-radius:14px;overflow:hidden;
-    box-shadow:0 2px 20px rgba(20,40,80,.06)}
-  th{text-align:left;padding:14px 18px;background:#f8fafd;font-size:11.5px;text-transform:uppercase;
-    letter-spacing:.5px;color:var(--muted);border-bottom:1px solid var(--line)}
-  td{padding:16px 18px;border-bottom:1px solid var(--line);font-size:14px}
-  tr:last-child td{border-bottom:none}
-  tr:hover td{background:#fafcff}
-  a.row-link{color:var(--ink);text-decoration:none;font-weight:600}
-  a.row-link:hover{color:var(--cyan)}
-  .badge{display:inline-block;padding:4px 11px;border-radius:100px;font-size:11.5px;font-weight:700}
-  .b-draft{background:#eef1f6;color:#5a6b82}
-  .b-sent{background:#fff3d6;color:#8a6300}
-  .b-viewed{background:#e0f2fe;color:#075985}
-  .b-signed{background:#dcfce7;color:#166534}
-  .b-declined{background:#fee2e2;color:#991b1b}
-  .b-cancelled{background:#f1f1f1;color:#888}
-  .empty{text-align:center;padding:60px 20px;color:var(--muted)}
+  .stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:22px}
+  .stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:18px 20px;
+    transition:border-color .2s}
+  .stat-card:hover{border-color:var(--border-s)}
+  .stat-card .sv{font-family:var(--head);font-size:26px;font-weight:800;color:var(--text);margin-bottom:2px}
+  .stat-card .sl{font-family:var(--mono);font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:1px}
+  .stat-card.c-cyan .sv{color:var(--cyan)} .stat-card.c-green .sv{color:var(--green)}
+  .stat-card.c-yellow .sv{color:var(--yellow)} .stat-card.c-purple .sv{color:var(--purple)}
+  .b-draft{background:rgba(255,255,255,.04);color:var(--text-3);border:1px solid var(--border)}
+  .b-draft::before{background:var(--text-3)}
+  .b-sent{background:var(--yellow-d);color:var(--yellow);border:1px solid rgba(255,184,0,.2)}
+  .b-sent::before{background:var(--yellow)}
+  .b-viewed{background:var(--cyan-d);color:var(--cyan);border:1px solid rgba(0,212,255,.2)}
+  .b-viewed::before{background:var(--cyan)}
+  .b-signed{background:var(--green-d);color:var(--green);border:1px solid rgba(0,255,136,.2)}
+  .b-signed::before{background:var(--green);box-shadow:0 0 6px var(--green);animation:pulse-dot 2s infinite}
+  .b-declined{background:var(--red-d);color:var(--red);border:1px solid rgba(255,59,92,.2)}
+  .b-declined::before{background:var(--red)}
+  .b-cancelled{background:rgba(255,255,255,.03);color:var(--text-3);border:1px solid var(--border)}
+  .b-cancelled::before{background:var(--text-3)}
+  .title-cell{font-weight:600;color:var(--text)}
+  .title-cell .proj{font-family:var(--mono);font-size:11px;color:var(--text-3);margin-top:2px}
 </style>
-</head>
-<body>
-<div class="bar">
-  <div class="logo">JamiiTek<span>.</span> Contracts</div>
-  <a class="new" href="{% url 'contract_builder_new' %}">+ New Contract</a>
+{% endblock %}
+{% block content %}
+<div style="display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px;flex-wrap:wrap">
+  <div>
+    <h1 style="font-family:var(--head);font-size:22px;font-weight:800;color:var(--text);margin-bottom:3px">
+      <i class="fas fa-file-signature" style="color:var(--cyan)"></i> Contracts
+    </h1>
+    <div style="font-family:var(--mono);font-size:12px;color:var(--text-3)">{{ contracts|length }} contract(s)</div>
+  </div>
+  <a href="{% url 'contract_builder_new' %}" class="jt-btn btn-cyan"><i class="fas fa-plus"></i> New Contract</a>
 </div>
-<div class="wrap">
-  <h1>Contracts</h1>
-  {% if contracts %}
-  <table>
-    <tr><th>Title</th><th>Client</th><th>Amount</th><th>Status</th><th>Created</th></tr>
-    {% for c in contracts %}
-    <tr>
-      <td><a class="row-link" href="{% url 'contract_builder_edit' c.pk %}">{{ c.title }}</a></td>
-      <td>{{ c.display_client }}</td>
-      <td>{% if c.computed_total %}{{ c.currency }} {{ c.computed_total|floatformat:0 }}{% else %}—{% endif %}</td>
-      <td><span class="badge b-{{ c.status }}">{{ c.get_status_display }}</span></td>
-      <td>{{ c.created_at|date:'M j, Y' }}</td>
-    </tr>
-    {% endfor %}
-  </table>
-  {% else %}
-  <div class="empty">No contracts yet. <a href="{% url 'contract_builder_new' %}">Create your first one →</a></div>
-  {% endif %}
+
+<div class="stat-row">
+  <div class="stat-card c-cyan"><div class="sv">{{ contracts|length }}</div><div class="sl">Total</div></div>
+  <div class="stat-card c-yellow"><div class="sv">{{ sent_count }}</div><div class="sl">Awaiting Signature</div></div>
+  <div class="stat-card c-green"><div class="sv">{{ signed_count }}</div><div class="sl">Signed</div></div>
+  <div class="stat-card c-purple"><div class="sv">{{ total_value|floatformat:0 }}</div><div class="sl">TZS Signed Value</div></div>
 </div>
-</body>
-</html>
+
+<div class="jt-card" style="padding:0">
+  <div style="overflow-x:auto">
+    <table class="jt-table">
+      <thead><tr><th>Contract</th><th>Client</th><th>Amount</th><th>Status</th><th>Created</th><th></th></tr></thead>
+      <tbody>
+        {% for c in contracts %}
+        <tr>
+          <td>
+            <div class="title-cell">{{ c.title }}</div>
+            {% if c.project_name %}<div class="proj">{{ c.project_name }}</div>{% endif %}
+          </td>
+          <td>
+            <div style="font-size:13px;color:var(--text-2)">{{ c.display_client }}</div>
+            {% if c.display_company %}<div style="font-family:var(--mono);font-size:10px;color:var(--purple)">{{ c.display_company }}</div>{% endif %}
+          </td>
+          <td style="font-family:var(--mono);font-size:12px;color:var(--text-2)">
+            {% if c.computed_total %}{{ c.currency }} {{ c.computed_total|floatformat:0 }}{% else %}—{% endif %}
+          </td>
+          <td><span class="jt-badge b-{{ c.status }}">{{ c.get_status_display }}</span></td>
+          <td style="font-family:var(--mono);font-size:12px;color:var(--text-3)">{{ c.created_at|date:'M j, Y' }}</td>
+          <td><a href="{% url 'contract_builder_edit' c.pk %}" class="jt-btn btn-ghost" style="font-size:11px;padding:6px 12px"><i class="fas fa-arrow-right"></i> Open</a></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6"><div class="jt-empty"><div class="ei">📄</div><p>No contracts yet — create your first one</p></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
