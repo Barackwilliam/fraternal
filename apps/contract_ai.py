@@ -40,6 +40,10 @@ You will draft the SAME contract in BOTH English and Swahili.
 STRICT RULES:
 1. Output ONLY valid JSON, no markdown, no preamble. Schema:
    {"title": "...", "body_en": "...", "body_sw": "..."}
+   CRITICAL: Output the JSON as a SINGLE LINE with no literal line breaks
+   inside string values. Any newline within body_en or body_sw MUST be
+   written as the two characters backslash-n (\\n), never as an actual
+   line break. This is essential for the JSON to parse correctly.
 2. "body_en" and "body_sw" are the full contract in clean HTML using ONLY:
    <h2>, <h3>, <p>, <ul>, <li>, <strong>, <ol>. NO styles, scripts, or tables.
 3. The contract MUST include these numbered sections (adapt to the project):
@@ -105,7 +109,7 @@ def generate_contract(project_info):
         resp = client.chat.completions.create(
             model=MODEL,
             temperature=0.4,   # chini — mkataba unahitaji usahihi, si ubunifu
-            max_tokens=4000,
+            max_tokens=7000,   # mkataba wa EN+SW ni mrefu — epuka kukatika katikati
             messages=[
                 {"role": "system", "content": SYSTEM},
                 {"role": "user", "content": user},
@@ -113,6 +117,7 @@ def generate_contract(project_info):
             timeout=TIMEOUT,
         )
         raw = resp.choices[0].message.content.strip()
+        finish_reason = resp.choices[0].finish_reason
     except Exception as e:
         logger.exception('AI contract generation failed')
         return False, f'AI error ({type(e).__name__})'
@@ -121,20 +126,19 @@ def generate_contract(project_info):
         raw = re.sub(r'^```[a-z]*\n?', '', raw)
         raw = re.sub(r'\n?```$', '', raw).strip()
 
-    try:
-        data = json.loads(raw)
-    except json.JSONDecodeError:
-        m = re.search(r'\{.*\}', raw, re.DOTALL)
-        if not m:
-            return False, 'AI did not return valid JSON'
-        try:
-            data = json.loads(m.group(0))
-        except json.JSONDecodeError:
-            return False, 'AI returned malformed JSON'
+    data = _parse_json_lenient(raw)
+    if data is None:
+        if finish_reason == 'length':
+            return False, ('AI response was cut off (contract too long). '
+                           'Try again — it usually succeeds on retry.')
+        return False, 'AI returned malformed JSON. Please try again.'
 
     body_en = _clean_html(data.get('body_en', ''))
     body_sw = _clean_html(data.get('body_sw', ''))
     if not body_en or not body_sw:
+        if finish_reason == 'length':
+            return False, ('AI response was cut off before finishing both languages. '
+                           'Try again — it usually succeeds on retry.')
         return False, 'AI response missing English or Swahili body'
 
     return True, {
@@ -142,6 +146,80 @@ def generate_contract(project_info):
         'body_en': body_en,
         'body_sw': body_sw,
     }
+
+
+def _parse_json_lenient(raw):
+    """
+    Jaribu kupata JSON kutoka kwenye output ya AI kwa njia kadhaa, kwa sababu
+    LLMs mara nyingi huweka newline halisi ndani ya strings (huvunja JSON
+    strict), au huongeza maandishi ya ziada kabla/baada ya JSON.
+    Rudisha dict au None.
+    """
+    # 1. Jaribu moja kwa moja, strict=False inaruhusu control characters
+    #    (newline halisi) ndani ya JSON strings — hii ndiyo sababu #1 ya
+    #    "malformed JSON" kutoka kwa AI zenye maandishi marefu ya HTML.
+    for candidate in (raw, _extract_braces(raw)):
+        if not candidate:
+            continue
+        try:
+            return json.loads(candidate, strict=False)
+        except (json.JSONDecodeError, ValueError):
+            pass
+
+    # 2. Jaribu kurekebisha makosa ya kawaida: trailing commas
+    for candidate in (raw, _extract_braces(raw)):
+        if not candidate:
+            continue
+        fixed = re.sub(r',(\s*[}\]])', r'\1', candidate)
+        try:
+            return json.loads(fixed, strict=False)
+        except (json.JSONDecodeError, ValueError):
+            pass
+
+    # 3. Njia ya mwisho: chukua kila field kwa regex moja kwa moja
+    #    (inafanya kazi hata kama JSON nzima imeharibika, mradi kila
+    #    field yenyewe iko kamili)
+    result = {}
+    for key in ('title', 'body_en', 'body_sw'):
+        m = re.search(rf'"{key}"\s*:\s*"(.*?)"\s*(?:,\s*"[a-z_]+"\s*:|}}\s*$|}}\s*,)',
+                       raw, re.DOTALL)
+        if m:
+            try:
+                # Fungua escapes za JSON (\\n, \\", n.k.) kwa string moja
+                result[key] = json.loads(f'"{m.group(1)}"', strict=False)
+            except (json.JSONDecodeError, ValueError):
+                result[key] = m.group(1)
+    return result if result.get('body_en') and result.get('body_sw') else None
+
+
+def _extract_braces(text):
+    """Toa sehemu ya kwanza ya { ... } yenye braces zilizolingana."""
+    start = text.find('{')
+    if start == -1:
+        return None
+    depth = 0
+    in_string = False
+    escape = False
+    for i in range(start, len(text)):
+        ch = text[i]
+        if escape:
+            escape = False
+            continue
+        if ch == '\\':
+            escape = True
+            continue
+        if ch == '"':
+            in_string = not in_string
+            continue
+        if in_string:
+            continue
+        if ch == '{':
+            depth += 1
+        elif ch == '}':
+            depth -= 1
+            if depth == 0:
+                return text[start:i + 1]
+    return text[start:]  # haikufunga vizuri — rudisha yote, jaribu tu
 
 
 def _clean_html(html):
