@@ -3,6 +3,7 @@
 from django.urls import path
 from . import views
 from . import blog_views
+from . import contract_views
 from .views import select_website_type, dynamic_form, proposal_preview, generate_pdf
 from .views import templates_marketplace, template_preview, template_preview_raw
 from . import management_views
@@ -10,6 +11,12 @@ from . import client_portal_views as portal
 from builder import views as builder_views
 
 urlpatterns = [
+    # ── CONTRACTS (mteja anafikia kwa link) ───────────────
+    path('contract/<str:token>/', contract_views.contract_view, name='contract_view'),
+    path('contract/<str:token>/sign/', contract_views.contract_sign, name='contract_sign'),
+    path('contract/<str:token>/decline/', contract_views.contract_decline, name='contract_decline'),
+    path('contract/<str:token>/pdf/', contract_views.contract_pdf, name='contract_pdf'),
+
     # ── BLOG ──────────────────────────────────────────────
     path('blog/', blog_views.blog_list, name='blog_list'),
     path('blog/<slug:slug>/', blog_views.blog_detail, name='blog_detail'),

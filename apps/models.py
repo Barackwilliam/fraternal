@@ -925,3 +925,86 @@ class BlogPost(models.Model):
     def read_minutes(self):
         words = len(self.body.split())
         return max(1, round(words / 200))
+
+
+# ============================================================
+# CONTRACTS (mikataba + e-signature)
+# ============================================================
+
+class Contract(models.Model):
+    STATUS = [
+        ('draft', 'Draft'),          # AI imeandaa / unahariri
+        ('sent', 'Sent to client'),  # link imetumwa
+        ('viewed', 'Viewed'),        # mteja amefungua
+        ('signed', 'Signed'),        # mteja amesaini
+        ('declined', 'Declined'),    # mteja amekataa
+        ('cancelled', 'Cancelled'),  # umeghairi
+    ]
+
+    # Kitambulisho cha link ya kipekee (mteja anafikia kwa hii)
+    token = models.CharField(max_length=48, unique=True, editable=False, db_index=True)
+
+    # Nani
+    client = models.ForeignKey('Client', on_delete=models.CASCADE, related_name='contracts')
+
+    # Maelezo ya mkataba
+    title = models.CharField(max_length=200, default='Service Agreement',
+                             help_text='e.g. Website Development Agreement')
+    project_name = models.CharField(max_length=200, blank=True)
+
+    # Maudhui — mbili: Kiingereza + Kiswahili (mteja anachagua)
+    body_en = models.TextField(blank=True,
+                               help_text='Contract text in English (HTML). AI can draft this.')
+    body_sw = models.TextField(blank=True,
+                               help_text='Contract text in Swahili (HTML). AI can draft this.')
+
+    # Fedha & muda (kwa muhtasari juu ya mkataba)
+    total_amount = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    currency = models.CharField(max_length=8, default='TZS')
+    payment_terms = models.CharField(max_length=300, blank=True,
+                                     help_text='e.g. 50% deposit, 50% on completion')
+    timeline = models.CharField(max_length=200, blank=True,
+                                help_text='e.g. 3 weeks from deposit')
+
+    status = models.CharField(max_length=12, choices=STATUS, default='draft')
+
+    # Party ya JamiiTek (provider)
+    provider_name = models.CharField(max_length=120, default='JamiiTek')
+    provider_rep = models.CharField(max_length=120, default='',
+                                    help_text='Your name as the signing representative')
+
+    # ── E-SIGNATURE (mteja anasaini) ──
+    signed_name = models.CharField(max_length=160, blank=True)      # jina alilloandika
+    signed_email = models.EmailField(blank=True)
+    signed_at = models.DateTimeField(null=True, blank=True)
+    signed_ip = models.GenericIPAddressField(null=True, blank=True)
+    signed_language = models.CharField(max_length=2, blank=True)    # 'en' au 'sw'
+    signature_data = models.TextField(blank=True)                   # drawn signature (base64 PNG)
+    agreed_to_terms = models.BooleanField(default=False)
+
+    # Tracking
+    viewed_at = models.DateTimeField(null=True, blank=True)
+    sent_at = models.DateTimeField(null=True, blank=True)
+    decline_reason = models.CharField(max_length=300, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'{self.title} — {self.client.name} ({self.get_status_display()})'
+
+    def save(self, *args, **kwargs):
+        if not self.token:
+            self.token = secrets.token_urlsafe(24)
+        super().save(*args, **kwargs)
+
+    @property
+    def is_signed(self):
+        return self.status == 'signed' and self.signed_at is not None
+
+    @property
+    def public_url(self):
+        return f'/contract/{self.token}/'
