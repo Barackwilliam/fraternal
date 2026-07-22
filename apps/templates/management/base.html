@@ -505,6 +505,14 @@
       <i class="fas fa-plus"></i> Add Plan
     </a>
 
+    <div class="sb-section">Proposals</div>
+    <a href="{% url 'proposal_builder_list' %}" class="sb-link {% if 'proposal_builder' in request.resolver_match.url_name %}active{% endif %}">
+      <i class="fas fa-file-lines"></i> All Proposals
+    </a>
+    <a href="{% url 'proposal_builder_new' %}" class="sb-link">
+      <i class="fas fa-plus"></i> New Proposal
+    </a>
+
     <div class="sb-section">Contracts</div>
     <a href="{% url 'contract_builder_list' %}" class="sb-link {% if 'contract_builder' in request.resolver_match.url_name %}active{% endif %}">
       <i class="fas fa-file-signature"></i> All Contracts

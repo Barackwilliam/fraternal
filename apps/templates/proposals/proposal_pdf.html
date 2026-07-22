@@ -1,0 +1,109 @@
+{% load static %}<!DOCTYPE html>
+<html><head><meta charset="UTF-8">
+<style>
+  @page{margin:1.6cm 1.8cm}
+  body{font-family:"Helvetica","Arial",sans-serif;color:#2a3548;font-size:12px;line-height:1.55}
+  .head{border-bottom:3px solid {{ proposal.accent_color|default:'#00d4ff' }};padding-bottom:14px;margin-bottom:20px}
+  .brand{font-size:22px;font-weight:bold;color:#0e1b2e}
+  .doctype{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:{{ proposal.accent_color|default:'#00d4ff' }};font-weight:bold;margin-top:8px}
+  h1{font-size:24px;color:#0e1b2e;margin:6px 0 4px}
+  .prepared{font-size:12px;color:#6a7787;margin-bottom:14px}
+  .metatable{width:100%;border-collapse:collapse;margin-bottom:20px;background:#f6f8fb;border-radius:6px}
+  .metatable td{padding:9px 14px;font-size:11px;border-right:1px solid #e2e8f0}
+  .metatable td:last-child{border-right:none}
+  .metatable .mk{color:#8592a6;font-size:9px;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:3px}
+  .metatable .mv{color:#0e1b2e;font-weight:bold;font-size:13px}
+  h2{font-size:16px;color:#0e1b2e;border-bottom:1px solid #e2e8f0;padding-bottom:6px;margin:22px 0 10px}
+  .lbl{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:{{ proposal.accent_color|default:'#00d4ff' }};font-weight:bold;margin-top:16px}
+  p{margin:0 0 10px;color:#3a4859}
+  h3{font-size:13px;color:#0e1b2e;margin:14px 0 6px}
+  table.price{width:100%;border-collapse:collapse;margin:8px 0}
+  table.price th{background:#0e1b2e;color:#fff;font-size:10px;text-transform:uppercase;padding:9px 12px;text-align:left}
+  table.price th.r{text-align:right}table.price th.c{text-align:center}
+  table.price td{padding:9px 12px;font-size:11.5px;border-bottom:1px solid #eef2f7;color:#3a4859}
+  table.price td.r{text-align:right}table.price td.c{text-align:center}
+  table.price tr.grand td{border-top:2px solid #0e1b2e;font-weight:bold;font-size:13px;color:#0e1b2e;background:#f6f8fb}
+  .note{font-size:10px;color:#8592a6;font-style:italic;margin-top:8px}
+  .tl{margin:8px 0}
+  .tl-row{padding:6px 0 6px 14px;border-left:2px solid {{ proposal.accent_color|default:'#00d4ff' }};margin-bottom:8px}
+  .tl-phase{font-weight:bold;color:#0e1b2e;font-size:12.5px}
+  .tl-dur{font-size:10px;color:{{ proposal.accent_color|default:'#00d4ff' }};text-transform:uppercase;font-weight:bold}
+  .tl-detail{font-size:11.5px;color:#3a4859}
+  .accepted{margin-top:20px;padding:14px 18px;background:#f0fdf5;border:1px solid #a7e0bd;border-radius:6px;font-size:11px;color:#0a6b34}
+  .foot{margin-top:26px;padding-top:12px;border-top:1px solid #e2e8f0;text-align:center;color:#a8b3c2;font-size:10px}
+</style></head>
+<body>
+  <div class="head">
+    <div class="brand">{{ proposal.provider_name }}.</div>
+    <div class="doctype">{% if lang == 'sw' %}Pendekezo la Mradi{% else %}Project Proposal{% endif %}</div>
+  </div>
+
+  <h1>{{ proposal.title }}</h1>
+  <div class="prepared">{% if lang == 'sw' %}Imeandaliwa kwa ajili ya{% else %}Prepared for{% endif %} <b>{{ proposal.display_client }}</b>{% if proposal.display_company %} · {{ proposal.display_company }}{% endif %}</div>
+
+  <table class="metatable"><tr>
+    {% if proposal.reference_number %}<td><span class="mk">{% if lang == 'sw' %}Kumbukumbu{% else %}Reference{% endif %}</span><span class="mv">{{ proposal.reference_number }}</span></td>{% endif %}
+    <td><span class="mk">{% if lang == 'sw' %}Tarehe{% else %}Date{% endif %}</span><span class="mv">{{ proposal.created_at|date:'M j, Y' }}</span></td>
+    {% if proposal.valid_until %}<td><span class="mk">{% if lang == 'sw' %}Inaisha{% else %}Valid Until{% endif %}</span><span class="mv">{{ proposal.valid_until|date:'M j, Y' }}</span></td>{% endif %}
+    {% if proposal.grand_total %}<td><span class="mk">{% if lang == 'sw' %}Uwekezaji{% else %}Investment{% endif %}</span><span class="mv">{{ proposal.currency }} {{ proposal.grand_total|floatformat:0 }}</span></td>{% endif %}
+  </tr></table>
+
+  {% if proposal.summary_en or proposal.summary_sw %}
+  <div class="lbl">{% if lang == 'sw' %}Muhtasari{% else %}Executive Summary{% endif %}</div>
+  <h2>{% if lang == 'sw' %}Utangulizi{% else %}Overview{% endif %}</h2>
+  {% if lang == 'sw' %}{% if proposal.summary_sw %}<p>{{ proposal.summary_sw|linebreaksbr }}</p>{% elif proposal.summary_en %}<p>{{ proposal.summary_en|linebreaksbr }}</p>{% endif %}{% else %}{% if proposal.summary_en %}<p>{{ proposal.summary_en|linebreaksbr }}</p>{% elif proposal.summary_sw %}<p>{{ proposal.summary_sw|linebreaksbr }}</p>{% endif %}{% endif %}
+  {% endif %}
+
+  {% if proposal.scope_en or proposal.scope_sw %}
+  <div class="lbl">{% if lang == 'sw' %}Kazi{% else %}Scope of Work{% endif %}</div>
+  <h2>{% if lang == 'sw' %}Tutakachofanya{% else %}What We'll Deliver{% endif %}</h2>
+  {% if lang == 'sw' %}{% if proposal.scope_sw %}<p>{{ proposal.scope_sw|linebreaksbr }}</p>{% elif proposal.scope_en %}<p>{{ proposal.scope_en|linebreaksbr }}</p>{% endif %}{% else %}{% if proposal.scope_en %}<p>{{ proposal.scope_en|linebreaksbr }}</p>{% elif proposal.scope_sw %}<p>{{ proposal.scope_sw|linebreaksbr }}</p>{% endif %}{% endif %}
+  {% endif %}
+
+  {% if proposal.sections %}
+  {% for s in proposal.sections %}
+    {% if lang == 'sw' %}<h3>{% if s.heading_sw %}{{ s.heading_sw }}{% elif s.heading_en %}{{ s.heading_en }}{% endif %}</h3>{% if s.body_sw %}<p>{{ s.body_sw|linebreaksbr }}</p>{% elif s.body_en %}<p>{{ s.body_en|linebreaksbr }}</p>{% endif %}
+    {% else %}<h3>{% if s.heading_en %}{{ s.heading_en }}{% elif s.heading_sw %}{{ s.heading_sw }}{% endif %}</h3>{% if s.body_en %}<p>{{ s.body_en|linebreaksbr }}</p>{% elif s.body_sw %}<p>{{ s.body_sw|linebreaksbr }}</p>{% endif %}{% endif %}
+  {% endfor %}
+  {% endif %}
+
+  {% if proposal.line_items %}
+  <div class="lbl">{% if lang == 'sw' %}Uwekezaji{% else %}Investment{% endif %}</div>
+  <h2>{% if lang == 'sw' %}Bei na Bidhaa{% else %}Pricing & Deliverables{% endif %}</h2>
+  <table class="price">
+    <tr><th>{% if lang == 'sw' %}Maelezo{% else %}Description{% endif %}</th><th class="c">{% if lang == 'sw' %}Idadi{% else %}Qty{% endif %}</th><th class="r">{% if lang == 'sw' %}Bei{% else %}Unit Price{% endif %}</th><th class="r">{% if lang == 'sw' %}Kiasi{% else %}Amount{% endif %}</th></tr>
+    {% for it in proposal.line_items %}
+    <tr><td>{{ it.desc }}</td><td class="c">{{ it.qty }}</td><td class="r">{{ it.unit_price|floatformat:0 }}</td><td class="r">{{ it.amount|floatformat:0 }}</td></tr>
+    {% endfor %}
+    {% if proposal.discount_amount %}
+    <tr><td class="r" colspan="3">{% if lang == 'sw' %}Jumla ndogo{% else %}Subtotal{% endif %}</td><td class="r">{{ proposal.currency }} {{ proposal.subtotal|floatformat:0 }}</td></tr>
+    <tr><td class="r" colspan="3">{% if lang == 'sw' %}Punguzo{% else %}Discount{% endif %}</td><td class="r">− {{ proposal.currency }} {{ proposal.discount_amount|floatformat:0 }}</td></tr>
+    {% endif %}
+    <tr class="grand"><td class="r" colspan="3">{% if lang == 'sw' %}Jumla Kuu{% else %}Total Investment{% endif %}</td><td class="r">{{ proposal.currency }} {{ proposal.grand_total|floatformat:0 }}</td></tr>
+  </table>
+  {% if proposal.pricing_note %}<div class="note">{{ proposal.pricing_note }}</div>{% endif %}
+  {% if proposal.payment_terms %}<div class="note">{% if lang == 'sw' %}Malipo{% else %}Payment{% endif %}: {{ proposal.payment_terms }}</div>{% endif %}
+  {% endif %}
+
+  {% if proposal.timeline_items %}
+  <div class="lbl">{% if lang == 'sw' %}Ratiba{% else %}Timeline{% endif %}</div>
+  <h2>{% if lang == 'sw' %}Mpango wa Utekelezaji{% else %}Project Timeline{% endif %}</h2>
+  <div class="tl">
+    {% for t in proposal.timeline_items %}
+    <div class="tl-row"><div class="tl-phase">{{ t.phase }}</div>{% if t.duration %}<div class="tl-dur">{{ t.duration }}</div>{% endif %}{% if t.detail %}<div class="tl-detail">{{ t.detail }}</div>{% endif %}</div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if proposal.about_en or proposal.about_sw %}
+  <div class="lbl">{% if lang == 'sw' %}Kuhusu Sisi{% else %}Why JamiiTek{% endif %}</div>
+  <h2>{% if lang == 'sw' %}Kwa Nini JamiiTek{% else %}Your Partner{% endif %}</h2>
+  {% if lang == 'sw' %}{% if proposal.about_sw %}<p>{{ proposal.about_sw|linebreaksbr }}</p>{% elif proposal.about_en %}<p>{{ proposal.about_en|linebreaksbr }}</p>{% endif %}{% else %}{% if proposal.about_en %}<p>{{ proposal.about_en|linebreaksbr }}</p>{% elif proposal.about_sw %}<p>{{ proposal.about_sw|linebreaksbr }}</p>{% endif %}{% endif %}
+  {% endif %}
+
+  {% if is_accepted or proposal.is_accepted %}
+  <div class="accepted"><b>✓ {% if lang == 'sw' %}PENDEKEZO LIMEKUBALIWA{% else %}PROPOSAL ACCEPTED{% endif %}</b> — {% if lang == 'sw' %}Amekubali{% else %}Accepted by{% endif %}: <b>{{ proposal.accepted_name }}</b> · {{ proposal.accepted_at|date:'M j, Y · H:i' }} (EAT){% if proposal.accepted_ip %} · IP: {{ proposal.accepted_ip }}{% endif %}</div>
+  {% endif %}
+
+  <div class="foot">{{ proposal.provider_name }} · {% if lang == 'sw' %}Imewezeshwa na{% else %}Powered by{% endif %} JamiiTek · {{ proposal.provider_rep }}</div>
+</body></html>

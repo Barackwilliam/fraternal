@@ -1,88 +1,210 @@
-{% load static %}<!DOCTYPE html>
-<html lang="{{ lang }}"><head><meta charset="UTF-8">
-<title>{{ contract.title }}</title>
+{% load static custom_filters %}<!DOCTYPE html>
+<html><head><meta charset="UTF-8">
 <style>
-  @page{size:A4;margin:2cm}
-  body{font-family:'Helvetica Neue',Arial,sans-serif;color:#1a2332;line-height:1.6;font-size:12px}
-  .head{text-align:center;border-bottom:2px solid #0a1628;padding-bottom:20px;margin-bottom:24px}
-  .logo{font-size:20px;font-weight:800;color:#0a1628}.logo span{color:#25d366}
-  h1{font-size:22px;margin:12px 0 4px}.sub{color:#5a6b82;font-size:13px}
-  .ref{font-size:11px;color:#5a6b82;margin-top:14px}.ref span{display:inline-block;margin:0 10px}
-  .ref b{color:#1a2332}
-  .summary{background:#f8fafd;border:1px solid #e2e8f0;border-radius:8px;padding:14px 18px;margin-bottom:22px}
-  .summary div{margin-bottom:5px;font-size:12px}.summary b{color:#0a1628}
-  h2{font-size:15px;color:#0a1628;margin:20px 0 8px;border-bottom:1px solid #e2e8f0;padding-bottom:5px}
-  h3{font-size:13px;margin:14px 0 6px}p{margin:0 0 10px}ul,ol{margin:0 0 12px;padding-left:22px}li{margin-bottom:5px}
-  .sign-block{margin-top:50px;width:100%}
-  .sign-box{border-top:1px solid #1a2332;padding-top:8px;font-size:11px;width:45%;display:inline-block;margin-right:6%}
-  .signed-badge{margin-top:30px;padding:16px;background:#e6f9ee;border:1px solid #7ddba0;border-radius:8px;font-size:11px}
-  .signed-badge b{color:#0a6b34}
-  .sig-img{max-height:60px;display:block;margin-top:6px}
-</style></head><body>
-  <div class="head">
-    <div class="logo">{{ contract.provider_name }}<span>.</span></div>
-    <h1>{{ contract.title }}</h1>
-    {% if contract.project_name %}<div class="sub">{{ contract.project_name }}</div>{% endif %}
-    <div class="ref">
-      <span>{% if lang == 'sw' %}Kati ya{% else %}Between{% endif %}: <b>{{ contract.provider_name }}</b> {% if lang == 'sw' %}na{% else %}and{% endif %} <b>{{ contract.display_client }}</b></span>
-      <span>{% if lang == 'sw' %}Tarehe{% else %}Date{% endif %}: <b>{{ contract.created_at|date:'M j, Y' }}</b></span>
-    </div>
-  </div>
-  {% if contract.total_amount or contract.timeline or contract.custom_fields %}
-  <div class="summary">
-    {% if contract.total_amount %}<div>{% if lang == 'sw' %}Jumla{% else %}Total{% endif %}: <b>{{ contract.currency }} {{ contract.total_amount|floatformat:0 }}</b></div>{% endif %}
-    {% if contract.payment_terms %}<div>{% if lang == 'sw' %}Malipo{% else %}Payment{% endif %}: <b>{{ contract.payment_terms }}</b></div>{% endif %}
-    {% if contract.timeline %}<div>{% if lang == 'sw' %}Muda{% else %}Timeline{% endif %}: <b>{{ contract.timeline }}</b></div>{% endif %}
-    {% for cf in contract.custom_fields %}<div>{{ cf.label }}: <b>{{ cf.value }}</b></div>{% endfor %}
-  </div>
-  {% endif %}
+  @page{margin:1.4cm 1.5cm}
+  body{font-family:"Helvetica","Arial",sans-serif;color:#1a1a1a;font-size:10.5pt;line-height:1.55}
 
-  {% if contract.line_items %}
-  <table style="width:100%;border-collapse:collapse;margin-bottom:20px">
-    <tr style="border-bottom:2px solid #0a1628">
-      <th style="text-align:left;padding:6px;font-size:11px">{% if lang == 'sw' %}Maelezo{% else %}Description{% endif %}</th>
-      <th style="text-align:center;padding:6px;font-size:11px">{% if lang == 'sw' %}Idadi{% else %}Qty{% endif %}</th>
-      <th style="text-align:right;padding:6px;font-size:11px">{% if lang == 'sw' %}Bei{% else %}Price{% endif %}</th>
-      <th style="text-align:right;padding:6px;font-size:11px">{% if lang == 'sw' %}Jumla{% else %}Amount{% endif %}</th>
-    </tr>
-    {% for it in contract.line_items %}
-    <tr style="border-bottom:1px solid #e2e8f0">
-      <td style="padding:6px;font-size:12px">{{ it.desc }}</td>
-      <td style="padding:6px;font-size:12px;text-align:center">{{ it.qty }}</td>
-      <td style="padding:6px;font-size:12px;text-align:right">{{ it.unit_price|floatformat:0 }}</td>
-      <td style="padding:6px;font-size:12px;text-align:right">{{ it.amount|floatformat:0 }}</td>
-    </tr>
-    {% endfor %}
-    <tr>
-      <td colspan="3" style="padding:8px 6px;text-align:right;font-weight:bold">{% if lang == 'sw' %}JUMLA KUU{% else %}TOTAL{% endif %}</td>
-      <td style="padding:8px 6px;text-align:right;font-weight:bold">{{ contract.currency }} {{ contract.computed_total|floatformat:0 }}</td>
-    </tr>
-  </table>
-  {% endif %}
+  /* ── HEADER BAND (kama profile) ── */
+  .hdr{width:100%;border-collapse:collapse;background-color:#1a3c6e;margin-bottom:0}
+  .hdr td{padding:11px 16px;color:#ffffff;vertical-align:middle}
+  .hdr .brand{font-size:12pt;font-weight:bold;letter-spacing:1px}
+  .hdr .tag{font-size:8pt;font-style:italic;color:#c9d8ee}
+  .hdr .right{text-align:right;font-size:8.5pt;letter-spacing:1px;color:#eaf0fa}
+  .hdr .right b{display:block;font-size:10pt;color:#ffffff;letter-spacing:2px}
 
-  {% if contract.sections %}
-  <div class="body">
-    {% for s in contract.sections %}
-    <h2>{{ forloop.counter }}. {% if lang == 'sw' %}{{ s.heading_sw|default:s.heading_en }}{% else %}{{ s.heading_en|default:s.heading_sw }}{% endif %}</h2>
-    <p>{% if lang == 'sw' %}{{ s.body_sw|default:s.body_en }}{% else %}{{ s.body_en|default:s.body_sw }}{% endif %}</p>
-    {% endfor %}
-  </div>
-  {% elif body %}
-  <div class="body">{{ body|safe }}</div>
-  {% endif %}
-  {% if contract.is_signed %}
-  <div class="signed-badge">
-    <b>✓ {% if lang == 'sw' %}IMESAINIWA{% else %}SIGNED{% endif %}</b><br>
-    {% if lang == 'sw' %}Amesaini{% else %}Signed by{% endif %}: <b>{{ contract.signed_name }}</b>
-    {% if contract.signed_email %}({{ contract.signed_email }}){% endif %}<br>
-    {% if lang == 'sw' %}Tarehe{% else %}Date{% endif %}: {{ contract.signed_at|date:'M j, Y · H:i' }} (EAT) ·
-    IP: {{ contract.signed_ip }}
-    {% if contract.signature_data %}<img class="sig-img" src="{{ contract.signature_data }}">{% endif %}
-  </div>
+  /* ── TITLE BLOCK ── */
+  .titlewrap{text-align:center;padding:26px 0 6px}
+  .doctitle{font-size:15pt;font-weight:bold;color:#1a3c6e;letter-spacing:2px}
+  .docsub{font-size:10pt;color:#666666;font-style:italic;padding-top:5px}
+  .rule{width:70px;border-bottom:2px solid #c49a28;margin:11px auto 0}
+
+  /* ── SECTION BAR (01. HEADING) ── */
+  .secbar{width:100%;border-collapse:collapse;margin:17px 0 9px}
+  .secbar td{background-color:#1a3c6e;color:#ffffff;font-size:10pt;font-weight:bold;
+    padding:7px 14px;letter-spacing:1.4px}
+
+  /* ── INFO TABLE (tint rows) ── */
+  .info{width:100%;border-collapse:collapse;margin-bottom:4px}
+  .info td{padding:8px 13px;font-size:9.5pt;border:1px solid #cccccc}
+  .info .k{background-color:#eaf0fa;color:#1a3c6e;font-weight:bold;width:22%}
+  .info .v{background-color:#f5f8fd;width:28%}
+
+  /* ── BODY / CONTRACT SECTIONS ── */
+  .body{padding:2px 0}
+  .body h2{background-color:#1a3c6e;color:#ffffff;font-size:10pt;font-weight:bold;
+    padding:7px 14px;letter-spacing:1.2px;margin:17px 0 9px}
+  .body h3{font-size:10pt;color:#1a3c6e;font-weight:bold;margin:12px 0 5px}
+  .body p{margin:0 0 9px;color:#1a1a1a;font-size:10.5pt}
+  .body ul,.body ol{margin:0 0 10px;padding-left:19px}
+  .body li{margin-bottom:5px;font-size:10.5pt}
+  .body strong{color:#1a3c6e}
+
+  /* ── LINE ITEMS ── */
+  .items{width:100%;border-collapse:collapse;margin:6px 0 4px}
+  .items th{background-color:#1a3c6e;color:#ffffff;font-size:8.5pt;text-transform:uppercase;
+    letter-spacing:1px;padding:8px 12px;text-align:left;font-weight:bold}
+  .items th.r{text-align:right}.items th.c{text-align:center}
+  .items td{padding:8px 12px;font-size:10pt;border-bottom:1px solid #e4e9f2;color:#1a1a1a}
+  .items td.r{text-align:right}.items td.c{text-align:center}
+  .items tr.alt td{background-color:#f5f8fd}
+  .items tr.total td{background-color:#eaf0fa;border-top:2px solid #1a3c6e;
+    font-weight:bold;font-size:11pt;color:#1a3c6e;padding:10px 12px}
+
+  /* ── CREAM NOTE (kama profile) ── */
+  .note{width:100%;border-collapse:collapse;margin:12px 0}
+  .note td{background-color:#fdf6e3;border-left:3px solid #c49a28;color:#8a6a00;
+    padding:11px 14px;font-size:9.5pt}
+
+  /* ── SIGNATURES ── */
+  .siglead{font-size:10pt;color:#1a1a1a;margin:6px 0 22px;line-height:1.65}
+  .sigs{width:100%;border-collapse:collapse;margin-top:6px}
+  .sigs td{width:50%;padding:0 18px 0 0;vertical-align:bottom}
+  .sigs td.r{padding:0 0 0 18px}
+  .sighand{height:30px;font-size:17pt;color:#1a3c6e;font-style:italic;font-family:"Times-Italic","Times",serif}
+  .sigline{border-top:1px solid #1a3c6e;padding-top:6px;font-size:9pt}
+  .sigline b{color:#1a3c6e;font-size:9.5pt}
+  .sigline .role{color:#666666}
+  .sigline .date{color:#1a1a1a;padding-top:3px;display:block}
+
+  .signedbox{width:100%;border-collapse:collapse;margin-top:16px}
+  .signedbox td{background-color:#eaf0fa;border-left:3px solid #1a3c6e;padding:11px 14px;
+    font-size:8.5pt;color:#1a3c6e}
+  .sigimg{max-height:38px}
+
+  /* ── FOOTER BAND ── */
+  .ftr{width:100%;border-collapse:collapse;background-color:#1a3c6e;margin-top:26px}
+  .ftr td{padding:10px 16px;color:#ffffff;font-size:8.5pt;text-align:center}
+  .ftr .tagline{color:#c9d8ee;font-style:italic;font-size:8pt;padding-top:3px}
+</style></head>
+<body>
+
+<!-- HEADER BAND -->
+<table class="hdr"><tr>
+  <td>
+    <div class="brand">{{ contract.provider_name|upper }}</div>
+    <div class="tag">{% if lang == 'sw' %}Tunajenga Mustakabali wa Kidijitali wa Tanzania{% else %}Building Tanzania's Digital Future{% endif %}</div>
+  </td>
+  <td class="right">
+    <b>{% if lang == 'sw' %}MKATABA WA HUDUMA{% else %}SERVICE AGREEMENT{% endif %}</b>
+    {{ contract.created_at|date:'Y' }}
+  </td>
+</tr></table>
+
+<!-- TITLE -->
+<div class="titlewrap">
+  <div class="doctitle">{{ contract.title|upper }}</div>
+  {% if contract.project_name %}<div class="docsub">{{ contract.project_name }}</div>{% endif %}
+  <div class="rule"></div>
+</div>
+
+<!-- PARTIES -->
+<table class="secbar"><tr><td>{% if lang == 'sw' %}01.&nbsp;&nbsp;WAHUSIKA WA MKATABA{% else %}01.&nbsp;&nbsp;PARTIES TO THIS AGREEMENT{% endif %}</td></tr></table>
+<table class="info">
+  <tr>
+    <td class="k">{% if lang == 'sw' %}Mtoa Huduma{% else %}Provider{% endif %}</td>
+    <td class="v">{{ contract.provider_name }}{% if contract.provider_rep %}<br>{{ contract.provider_rep }}{% endif %}</td>
+    <td class="k">{% if lang == 'sw' %}Mteja{% else %}Client{% endif %}</td>
+    <td class="v">{{ contract.display_client }}{% if contract.display_company %}<br>{{ contract.display_company }}{% endif %}</td>
+  </tr>
+  <tr>
+    <td class="k">{% if lang == 'sw' %}Tarehe{% else %}Date{% endif %}</td>
+    <td class="v">{{ contract.created_at|date:'F j, Y' }}</td>
+    <td class="k">{% if lang == 'sw' %}Hali{% else %}Status{% endif %}</td>
+    <td class="v">{% if contract.is_signed %}{% if lang == 'sw' %}Imesainiwa{% else %}Signed{% endif %}{% else %}{% if lang == 'sw' %}Inasubiri saini{% else %}Awaiting signature{% endif %}{% endif %}</td>
+  </tr>
+</table>
+
+<!-- TERMS SUMMARY -->
+{% if contract.total_amount or contract.timeline or contract.payment_terms or contract.custom_fields %}
+<table class="secbar"><tr><td>{% if lang == 'sw' %}02.&nbsp;&nbsp;MUHTASARI WA MASHARTI{% else %}02.&nbsp;&nbsp;SUMMARY OF TERMS{% endif %}</td></tr></table>
+<table class="info">
+  {% if contract.total_amount %}<tr><td class="k">{% if lang == 'sw' %}Jumla{% else %}Total Amount{% endif %}</td><td class="v" colspan="3">{{ contract.currency }} {{ contract.total_amount|thousands }}</td></tr>{% endif %}
+  {% if contract.payment_terms %}<tr><td class="k">{% if lang == 'sw' %}Malipo{% else %}Payment Terms{% endif %}</td><td class="v" colspan="3">{{ contract.payment_terms }}</td></tr>{% endif %}
+  {% if contract.timeline %}<tr><td class="k">{% if lang == 'sw' %}Muda{% else %}Timeline{% endif %}</td><td class="v" colspan="3">{{ contract.timeline }}</td></tr>{% endif %}
+  {% for cf in contract.custom_fields %}<tr><td class="k">{{ cf.label }}</td><td class="v" colspan="3">{{ cf.value }}</td></tr>{% endfor %}
+</table>
+{% endif %}
+
+<!-- LINE ITEMS -->
+{% if contract.line_items %}
+<table class="secbar"><tr><td>{% if lang == 'sw' %}03.&nbsp;&nbsp;BIDHAA NA HUDUMA{% else %}03.&nbsp;&nbsp;DELIVERABLES &amp; PRICING{% endif %}</td></tr></table>
+<table class="items">
+  <tr>
+    <th>{% if lang == 'sw' %}Maelezo{% else %}Description{% endif %}</th>
+    <th class="c">{% if lang == 'sw' %}Idadi{% else %}Qty{% endif %}</th>
+    <th class="r">{% if lang == 'sw' %}Bei{% else %}Unit Price{% endif %}</th>
+    <th class="r">{% if lang == 'sw' %}Kiasi{% else %}Amount{% endif %}</th>
+  </tr>
+  {% for it in contract.line_items %}
+  <tr{% if forloop.counter|divisibleby:2 %} class="alt"{% endif %}>
+    <td>{{ it.desc }}</td><td class="c">{{ it.qty }}</td>
+    <td class="r">{{ it.unit_price|thousands }}</td><td class="r">{{ it.amount|thousands }}</td>
+  </tr>
+  {% endfor %}
+  <tr class="total">
+    <td colspan="3" class="r">{% if lang == 'sw' %}JUMLA KUU{% else %}GRAND TOTAL{% endif %}</td>
+    <td class="r">{{ contract.currency }} {{ contract.computed_total|thousands }}</td>
+  </tr>
+</table>
+{% endif %}
+
+<!-- CONTRACT TERMS -->
+<table class="secbar"><tr><td>{% if contract.line_items %}04{% else %}03{% endif %}.&nbsp;&nbsp;{% if lang == 'sw' %}MASHARTI YA MKATABA{% else %}TERMS AND CONDITIONS{% endif %}</td></tr></table>
+{% if contract.sections %}
+<div class="body">
+  {% for s in contract.sections %}
+  {% if lang == 'sw' %}
+    <h2>{{ forloop.counter }}. {% if s.heading_sw %}{{ s.heading_sw }}{% elif s.heading_en %}{{ s.heading_en }}{% endif %}</h2>
+    {% if s.body_sw %}<p>{{ s.body_sw|linebreaksbr }}</p>{% elif s.body_en %}<p>{{ s.body_en|linebreaksbr }}</p>{% endif %}
   {% else %}
-  <div class="sign-block">
-    <div class="sign-box">{{ contract.provider_name }}<br>{% if lang == 'sw' %}Mtoa huduma{% else %}Provider{% endif %}</div>
-    <div class="sign-box">{{ contract.display_client }}<br>{% if lang == 'sw' %}Mteja{% else %}Client{% endif %}</div>
-  </div>
+    <h2>{{ forloop.counter }}. {% if s.heading_en %}{{ s.heading_en }}{% elif s.heading_sw %}{{ s.heading_sw }}{% endif %}</h2>
+    {% if s.body_en %}<p>{{ s.body_en|linebreaksbr }}</p>{% elif s.body_sw %}<p>{{ s.body_sw|linebreaksbr }}</p>{% endif %}
   {% endif %}
+  {% endfor %}
+</div>
+{% elif lang == 'sw' and contract.body_sw %}
+<div class="body">{{ contract.body_sw|clean_signatures|safe }}</div>
+{% elif lang == 'en' and contract.body_en %}
+<div class="body">{{ contract.body_en|clean_signatures|safe }}</div>
+{% elif body %}
+<div class="body">{{ body|clean_signatures|safe }}</div>
+{% endif %}
+
+<!-- SIGNATURES -->
+<table class="secbar"><tr><td>{% if lang == 'sw' %}SAINI ZA PANDE ZOTE MBILI{% else %}SIGNATURES{% endif %}</td></tr></table>
+<div class="siglead">
+  {% if lang == 'sw' %}{% if contract.signature_block_sw %}{{ contract.signature_block_sw|linebreaksbr }}{% else %}Mkataba huu ndio makubaliano kamili kati ya pande zote mbili na unabatilisha mazungumzo yote ya awali. Pande zote zimekubali kusaini mkataba huu kama ifuatavyo:{% endif %}{% else %}{% if contract.signature_block_en %}{{ contract.signature_block_en|linebreaksbr }}{% else %}This Agreement constitutes the entire agreement between the parties and supersedes all prior negotiations, understandings, and agreements. The parties have agreed to sign this Agreement as set out below:{% endif %}{% endif %}
+</div>
+<table class="sigs"><tr>
+  <td>
+    <div class="sighand">{% if contract.is_signed %}{{ contract.signed_name }}{% endif %}</div>
+    <div class="sigline">
+      <b>{{ contract.display_client }}</b> <span class="role">— {% if lang == 'sw' %}Mteja{% else %}Client{% endif %}</span>
+      <span class="date">{% if lang == 'sw' %}Tarehe{% else %}Date{% endif %}: {% if contract.is_signed %}{{ contract.signed_at|date:'F j, Y' }}{% else %}&nbsp;{% endif %}</span>
+    </div>
+  </td>
+  <td class="r">
+    <div class="sighand">{{ contract.provider_signature|default:contract.provider_rep }}</div>
+    <div class="sigline">
+      <b>{{ contract.provider_rep }}</b> <span class="role">— {% if lang == 'sw' %}Mtoa Huduma{% else %}Provider{% endif %}</span>
+      <span class="date">{% if lang == 'sw' %}Tarehe{% else %}Date{% endif %}: {{ contract.provider_date|date:'F j, Y' }}</span>
+    </div>
+  </td>
+</tr></table>
+
+{% if contract.is_signed %}
+<table class="signedbox"><tr><td>
+  <b>{% if lang == 'sw' %}IMESAINIWA KIDIJITALI{% else %}ELECTRONICALLY SIGNED{% endif %}</b><br>
+  {% if lang == 'sw' %}Amesaini{% else %}Signed by{% endif %}: <b>{{ contract.signed_name }}</b>{% if contract.signed_email %} ({{ contract.signed_email }}){% endif %}
+  &nbsp;·&nbsp; {{ contract.signed_at|date:'M j, Y · H:i' }} (EAT) &nbsp;·&nbsp; IP: {{ contract.signed_ip }}
+  {% if contract.signature_data %}<br><img class="sigimg" src="{{ contract.signature_data }}">{% endif %}
+</td></tr></table>
+{% endif %}
+
+<!-- FOOTER BAND -->
+<table class="ftr"><tr><td>
+  {{ contract.provider_name|upper }} &nbsp;·&nbsp; www.jamiitek.com &nbsp;·&nbsp; info@jamiitek.com
+  <div class="tagline">{% if lang == 'sw' %}Mshirika Wako wa Kidijitali Tanzania{% else %}Your Trusted Digital Partner in Tanzania{% endif %}</div>
+</td></tr></table>
+
 </body></html>

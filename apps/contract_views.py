@@ -39,11 +39,12 @@ def contract_view(request, token):
     lang = request.GET.get('lang', 'en')
     if lang not in ('en', 'sw'):
         lang = 'en'
+    # 'body' ni fallback ya jadi (kama HAKUNA sections). Usibadilishe lang
+    # kwa sababu ya body tupu — sections zina lugha zao wenyewe.
     body = contract.body_sw if lang == 'sw' else contract.body_en
-    # Kama lugha moja haipo, tumia nyingine
-    if not body:
+    if not body and not contract.sections:
+        # Hakuna sections wala body ya lugha hii — jaribu nyingine (fallback ya jadi)
         body = contract.body_en or contract.body_sw
-        lang = 'en' if contract.body_en else 'sw'
 
     return render(request, 'contracts/contract_view.html', {
         'contract': contract,
@@ -197,6 +198,16 @@ def _save_builder_form(request, contract):
     contract.project_name = p.get('project_name', '').strip()
     contract.provider_name = p.get('provider_name', 'JamiiTek').strip() or 'JamiiTek'
     contract.provider_rep = p.get('provider_rep', '').strip()
+    contract.provider_signature = p.get('provider_signature', '').strip()
+    contract.signature_block_en = p.get('signature_block_en', '')
+    contract.signature_block_sw = p.get('signature_block_sw', '')
+    psd = p.get('provider_signed_date', '').strip()
+    if psd:
+        try:
+            from datetime import datetime
+            contract.provider_signed_date = datetime.strptime(psd, '%Y-%m-%d').date()
+        except ValueError:
+            pass
     contract.accent_color = p.get('accent_color', '#25d366').strip() or '#25d366'
     contract.logo_url = p.get('logo_url', '').strip()
 

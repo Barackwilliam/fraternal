@@ -1,4 +1,4 @@
-{% load static %}<!DOCTYPE html>
+{% load static custom_filters %}<!DOCTYPE html>
 <html lang="{{ lang }}">
 <head>
 <meta charset="UTF-8">
@@ -6,347 +6,455 @@
 <title>{{ contract.title }} — {{ contract.provider_name }}</title>
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --ink:#1a2332; --muted:#5a6b82; --line:#e2e8f0; --bg:#f4f6fb;
-    --paper:#ffffff; --brand:#0a1628; --accent:#25d366; --cyan:#00a8cc;
-    --gold:#c9a227; --danger:#dc3545;
+    --navy:#1a3c6e; --navy-d:#12294c; --gold:#c49a28; --gold-t:#8a6a00;
+    --tint:#eaf0fa; --tint-l:#f5f8fd; --cream:#fdf6e3;
+    --ink:#1a1a1a; --muted:#666666; --line:#cccccc; --line-l:#e4e9f2;
+    --paper:#ffffff; --bg:#e8edf5;
+    --accent:{{ contract.accent_color|default:'#1a3c6e' }};
   }
   *{margin:0;padding:0;box-sizing:border-box}
-  body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+  html{-webkit-text-size-adjust:100%}
+  body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
 
-  /* Top bar */
-  .cbar{background:var(--brand);color:#fff;padding:14px 22px;display:flex;align-items:center;
-    justify-content:space-between;gap:16px;flex-wrap:wrap;position:sticky;top:0;z-index:50}
-  .cbar .brand{font-weight:800;font-size:19px;letter-spacing:-.01em}
-  .cbar .brand span{color:var(--accent)}
-  .cbar .lang{display:flex;gap:6px}
-  .cbar .lang a{padding:7px 15px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:700;
-    color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.2);transition:.2s}
-  .cbar .lang a.on{background:var(--accent);color:#04120a;border-color:var(--accent)}
+  /* ── TOPBAR (header band ya profile) ── */
+  .topbar{background:var(--navy);position:sticky;top:0;z-index:50;box-shadow:0 2px 12px rgba(26,60,110,.2)}
+  .topbar-in{max-width:880px;margin:0 auto;padding:12px 20px;display:flex;align-items:center;
+    justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .tb-brand{color:#fff;font-size:15px;font-weight:bold;letter-spacing:1.4px}
+  .tb-tag{color:#c9d8ee;font-size:10.5px;font-style:italic;letter-spacing:.2px;margin-top:1px}
+  .lang-switch{display:flex;background:rgba(255,255,255,.12);border-radius:3px;padding:3px;gap:3px}
+  .lang-switch a{padding:6px 15px;border-radius:2px;text-decoration:none;font-size:12px;font-weight:bold;
+    color:rgba(255,255,255,.75);transition:.2s;letter-spacing:.5px}
+  .lang-switch a.on{background:#fff;color:var(--navy)}
+  .lang-switch a:hover:not(.on){color:#fff}
 
-  .wrap{max-width:820px;margin:0 auto;padding:30px 20px 120px}
+  .wrap{max-width:880px;margin:0 auto;padding:22px 20px 120px}
 
-  /* Status banner */
-  .banner{border-radius:14px;padding:18px 22px;margin-bottom:24px;display:flex;align-items:center;gap:14px;font-size:14.5px}
-  .banner.signed{background:#e6f9ee;border:1px solid #7ddba0;color:#0a6b34}
-  .banner.pending{background:#fff8e6;border:1px solid #f0d074;color:#7a5c00}
-  .banner .ico{font-size:24px}
+  /* ── STATUS RIBBON ── */
+  .ribbon{display:flex;align-items:center;gap:12px;padding:13px 18px;margin-bottom:20px;font-size:13.5px;border-left:4px solid}
+  .ribbon svg{width:20px;height:20px;flex-shrink:0}
+  .ribbon.signed{background:#eaf7ee;border-color:#1e7b45;color:#155e33}
+  .ribbon.signed svg{fill:#1e7b45}
+  .ribbon.pending{background:var(--cream);border-color:var(--gold);color:var(--gold-t)}
+  .ribbon.pending svg{fill:var(--gold)}
+  .ribbon b{font-weight:bold}
 
-  /* Contract paper */
-  .paper{background:var(--paper);border-radius:16px;box-shadow:0 4px 30px rgba(20,40,80,.08);
-    border:1px solid var(--line);overflow:hidden}
-  .paper-head{padding:44px 48px 32px;border-bottom:2px solid var(--brand);text-align:center;position:relative}
-  .paper-head::before{content:'';position:absolute;top:0;left:0;right:0;height:5px;
-    background:linear-gradient(90deg,var(--brand),var(--accent),var(--cyan))}
-  .paper-head .logo{font-weight:800;font-size:22px;color:var(--brand);margin-bottom:8px}
-  .paper-head .logo span{color:var(--accent)}
-  .paper-head h1{font-family:'Playfair Display',serif;font-size:30px;color:var(--ink);margin:14px 0 6px;font-weight:700}
-  .paper-head .sub{color:var(--muted);font-size:14px}
-  .ref-row{display:flex;justify-content:center;gap:26px;flex-wrap:wrap;margin-top:18px;font-size:12.5px;color:var(--muted)}
-  .ref-row b{color:var(--ink)}
+  /* ── PAPER ── */
+  .paper{background:var(--paper);box-shadow:0 1px 3px rgba(26,60,110,.1),0 10px 40px rgba(26,60,110,.08)}
 
-  /* Summary box */
-  .summary{margin:0 48px;margin-top:28px;background:#f8fafd;border:1px solid var(--line);border-radius:12px;
-    padding:22px 26px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
-  .summary .item .k{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:3px}
-  .summary .item .v{font-size:15px;font-weight:600;color:var(--ink)}
+  /* Title block */
+  .titlewrap{text-align:center;padding:40px 50px 4px}
+  .doctype{font-size:10.5px;letter-spacing:3.5px;color:var(--gold-t);font-weight:bold;margin-bottom:12px}
+  .doctitle{font-size:29px;font-weight:bold;color:var(--navy);letter-spacing:1.6px;line-height:1.25}
+  .docsub{font-size:14px;color:var(--muted);font-style:italic;margin-top:7px}
+  .rule{width:70px;height:2px;background:var(--gold);margin:16px auto 0}
+  .logo-img{max-height:48px;margin-bottom:14px}
 
-  .body{padding:34px 48px 44px}
-  .body h2{font-size:19px;color:var(--brand);margin:30px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--line)}
-  .body h3{font-size:16px;color:var(--ink);margin:22px 0 10px}
-  .body p{margin:0 0 14px;color:#2c3a4f;font-size:14.5px}
-  .body ul,.body ol{margin:0 0 16px;padding-left:26px}
-  .body li{margin-bottom:8px;color:#2c3a4f;font-size:14.5px}
-  .body strong{color:var(--ink)}
+  /* Section bar (01. HEADING) */
+  .secbar{background:var(--navy);color:#fff;font-size:12.5px;font-weight:bold;letter-spacing:1.6px;
+    padding:9px 18px;margin:26px 50px 12px}
 
-  /* Signature section */
-  .sign-sect{margin:0 48px 48px;padding:32px;background:#f8fafd;border:2px dashed var(--line);border-radius:14px}
-  .sign-sect h3{font-size:18px;color:var(--brand);margin-bottom:6px}
-  .sign-sect .note{font-size:13px;color:var(--muted);margin-bottom:22px}
-  .sign-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px}
-  .fld label{display:block;font-size:12px;font-weight:700;color:var(--ink);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
-  .fld input{width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:10px;font-size:15px;font-family:inherit;color:var(--ink)}
-  .fld input:focus{outline:none;border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,168,204,.12)}
+  /* Info table */
+  .info-wrap{margin:0 50px}
+  .info{width:100%;border-collapse:collapse}
+  .info td{padding:11px 15px;font-size:13.5px;border:1px solid var(--line)}
+  .info .k{background:var(--tint);color:var(--navy);font-weight:bold;width:23%;white-space:nowrap}
+  .info .v{background:var(--tint-l);width:27%}
 
-  /* Signature pad */
-  .sigpad-wrap{margin-bottom:20px}
-  .sigpad-wrap label{display:block;font-size:12px;font-weight:700;color:var(--ink);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
-  .sigpad{border:1.5px solid var(--line);border-radius:10px;background:#fff;position:relative;touch-action:none}
-  .sigpad canvas{display:block;width:100%;height:150px;border-radius:10px;cursor:crosshair}
-  .sigpad .clear{position:absolute;top:8px;right:10px;font-size:12px;color:var(--muted);cursor:pointer;
-    background:#fff;padding:3px 10px;border-radius:6px;border:1px solid var(--line)}
-  .sigpad .hint{position:absolute;bottom:12px;left:0;right:0;text-align:center;color:#c0cad8;font-size:13px;pointer-events:none}
+  /* Items table */
+  .items-wrap{margin:0 50px}
+  .items{width:100%;border-collapse:collapse}
+  .items thead th{background:var(--navy);color:#fff;font-size:11px;text-transform:uppercase;
+    letter-spacing:1px;padding:11px 15px;text-align:left;font-weight:bold}
+  .items thead th.r{text-align:right}.items thead th.c{text-align:center}
+  .items tbody td{padding:12px 15px;font-size:13.5px;border-bottom:1px solid var(--line-l)}
+  .items tbody td.r{text-align:right;font-variant-numeric:tabular-nums}
+  .items tbody td.c{text-align:center}
+  .items tbody tr:nth-child(even) td{background:var(--tint-l)}
+  .items tfoot td{background:var(--tint);border-top:2px solid var(--navy);font-weight:bold;
+    color:var(--navy);padding:13px 15px;font-size:15px}
+  .items tfoot td.lbl{text-align:right;font-size:12px;letter-spacing:1.2px;text-transform:uppercase}
+  .items tfoot td.r{text-align:right;font-variant-numeric:tabular-nums;font-size:17px}
 
-  .agree{display:flex;align-items:flex-start;gap:11px;margin-bottom:22px;padding:14px;background:#fff;border-radius:10px;border:1px solid var(--line)}
-  .agree input{width:20px;height:20px;margin-top:2px;flex-shrink:0;cursor:pointer;accent-color:var(--accent)}
-  .agree label{font-size:14px;color:var(--ink);line-height:1.5;cursor:pointer}
+  /* Body / sections */
+  .doc-body{padding:4px 50px 10px}
+  .doc-body h2{background:var(--navy);color:#fff;font-size:12.5px;font-weight:bold;letter-spacing:1.4px;
+    padding:9px 18px;margin:22px 0 12px}
+  .doc-body h2:first-child{margin-top:6px}
+  .doc-body h3{font-size:14.5px;font-weight:bold;color:var(--navy);margin:18px 0 6px}
+  .doc-body p{margin:0 0 12px;font-size:14px;color:var(--ink)}
+  .doc-body ul,.doc-body ol{margin:0 0 14px;padding-left:22px}
+  .doc-body li{margin-bottom:7px;font-size:14px}
+  .doc-body strong{color:var(--navy);font-weight:bold}
+  .lang-missing{color:#9aa5b4;font-style:italic}
 
-  .actions{display:flex;gap:12px;flex-wrap:wrap}
-  .btn{padding:15px 30px;border-radius:12px;font-weight:700;font-size:15px;cursor:pointer;border:none;
-    font-family:inherit;transition:transform .15s,box-shadow .25s;display:inline-flex;align-items:center;gap:9px;text-decoration:none}
-  .btn.sign{background:linear-gradient(135deg,var(--accent),var(--cyan));color:#04120a;flex:1;justify-content:center;min-width:200px}
-  .btn.sign:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 10px 28px rgba(37,211,102,.35)}
-  .btn.sign:disabled{opacity:.55;cursor:not-allowed}
-  .btn.download{background:#fff;border:1.5px solid var(--line);color:var(--ink)}
-  .btn.download:hover{border-color:var(--cyan);color:var(--cyan)}
-  .btn.decline{background:transparent;color:var(--muted);border:1px solid var(--line);font-size:13px;padding:12px 20px}
-  .btn.decline:hover{border-color:var(--danger);color:var(--danger)}
+  /* Cream note */
+  .note{margin:14px 50px;background:var(--cream);border-left:4px solid var(--gold);
+    padding:13px 17px;font-size:13px;color:var(--gold-t)}
 
-  .sig-status{margin-top:14px;font-size:13px;min-height:18px}
-  .sig-status.err{color:var(--danger)}
+  /* ── SIGNATURES ── */
+  .siglead{margin:0 50px 30px;font-size:14px;color:var(--ink);line-height:1.75}
+  .sig-grid{display:flex;gap:44px;flex-wrap:wrap;margin:0 50px}
+  .sig-col{flex:1;min-width:230px}
+  .sig-line{border-bottom:1.5px solid var(--navy);height:54px;display:flex;align-items:flex-end;padding-bottom:5px}
+  .sig-hand{font-family:'Dancing Script',cursive;font-size:31px;color:var(--navy);line-height:1;padding-left:6px}
+  .sig-drawn{max-height:50px;padding-left:3px}
+  .sig-name{font-size:13.5px;font-weight:bold;color:var(--navy);margin-top:8px}
+  .sig-role{font-weight:normal;color:var(--muted)}
+  .sig-date{margin-top:12px;font-size:12.5px;color:var(--muted)}
+  .sig-date b{color:var(--ink);font-weight:bold}
+  .sig-pending{color:#9aa5b4;font-style:italic}
 
   /* Signed proof */
-  .signed-proof{margin:0 48px 44px;padding:28px;background:#e6f9ee;border:1px solid #7ddba0;border-radius:14px}
-  .signed-proof h3{color:#0a6b34;margin-bottom:14px;font-size:17px}
-  .signed-proof .prow{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(10,107,52,.12);font-size:14px}
-  .signed-proof .prow:last-child{border:none}
-  .signed-proof .prow .k{color:#0a6b34;font-weight:600}
-  .signed-sig-img{max-height:80px;margin-top:10px;border-bottom:2px solid #0a6b34;padding-bottom:6px}
+  .proof{margin:26px 50px 0;background:var(--tint);border-left:4px solid var(--navy);padding:18px 20px}
+  .proof-head{display:flex;align-items:center;gap:9px;color:var(--navy);font-weight:bold;font-size:13px;
+    letter-spacing:1.2px;text-transform:uppercase;margin-bottom:12px}
+  .proof-head svg{width:17px;height:17px;fill:var(--navy)}
+  .proof-row{display:flex;justify-content:space-between;gap:16px;padding:5px 0;font-size:13px;
+    border-bottom:1px solid rgba(26,60,110,.1)}
+  .proof-row:last-child{border-bottom:none}
+  .proof-row .k{color:var(--navy);font-weight:bold}
+  .proof-row .v{color:var(--ink);text-align:right}
 
-  .foot{text-align:center;padding:30px 20px;color:var(--muted);font-size:13px}
-  .foot a{color:var(--cyan);text-decoration:none}
+  /* Footer band */
+  .doc-foot{background:var(--navy);color:#fff;text-align:center;padding:16px;margin-top:34px;font-size:12px;letter-spacing:.4px}
+  .doc-foot a{color:#c9d8ee;text-decoration:none}
+  .doc-foot .tagline{color:#c9d8ee;font-style:italic;font-size:11px;margin-top:3px}
 
-  @media(max-width:640px){
-    .paper-head,.body{padding-left:24px;padding-right:24px}
-    .summary,.sign-sect,.signed-proof{margin-left:16px;margin-right:16px}
-    .summary,.sign-grid{grid-template-columns:1fr}
-    .sign-sect{padding:22px}
+  /* ── ACTION BAR ── */
+  .actionbar{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:2px solid var(--navy);
+    padding:14px 20px;z-index:60;box-shadow:0 -4px 20px rgba(26,60,110,.12)}
+  .actionbar-in{max-width:880px;margin:0 auto;display:flex;gap:11px;align-items:center;justify-content:flex-end;flex-wrap:wrap}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:13px 26px;font-weight:bold;font-size:14px;
+    cursor:pointer;border:none;font-family:inherit;transition:.2s;text-decoration:none;letter-spacing:.4px}
+  .btn svg{width:17px;height:17px}
+  .btn-primary{background:var(--navy);color:#fff}
+  .btn-primary:hover{background:var(--navy-d)}
+  .btn-primary svg{fill:#fff}
+  .btn-ghost{background:#fff;border:1.5px solid var(--navy);color:var(--navy)}
+  .btn-ghost:hover{background:var(--tint)}
+  .btn-ghost svg{fill:var(--navy)}
+  .btn-text{background:none;color:var(--muted);font-size:12.5px;font-weight:bold;padding:13px 10px}
+  .btn-text:hover{color:#b02a37}
+
+  /* ── MODAL ── */
+  .modal-bg{position:fixed;inset:0;background:rgba(18,41,76,.6);z-index:100;display:none;
+    align-items:center;justify-content:center;padding:20px}
+  .modal-bg.show{display:flex}
+  .modal{background:#fff;max-width:510px;width:100%;max-height:92vh;overflow-y:auto;
+    box-shadow:0 24px 70px rgba(0,0,0,.4);border-top:4px solid var(--gold)}
+  .modal-head{background:var(--navy);color:#fff;padding:20px 28px}
+  .modal-head h3{font-size:18px;font-weight:bold;letter-spacing:1px}
+  .modal-head p{color:#c9d8ee;font-size:12.5px;margin-top:4px}
+  .modal-body{padding:22px 28px}
+  .m-fld{margin-bottom:16px}
+  .m-fld label{display:block;font-size:11.5px;font-weight:bold;color:var(--navy);margin-bottom:6px;
+    letter-spacing:.8px;text-transform:uppercase}
+  .m-fld input{width:100%;padding:12px 14px;border:1.5px solid var(--line);font-size:14.5px;
+    font-family:inherit;color:var(--ink)}
+  .m-fld input:focus{outline:none;border-color:var(--navy);background:var(--tint-l)}
+  .sigpad-box{position:relative;border:1.5px solid var(--line);background:var(--tint-l);overflow:hidden}
+  .sigpad-box canvas{display:block;width:100%;height:150px;cursor:crosshair;touch-action:none}
+  .sigpad-box .clr{position:absolute;top:8px;right:9px;font-size:11px;color:var(--navy);cursor:pointer;
+    background:#fff;padding:4px 10px;border:1px solid var(--line);font-weight:bold}
+  .sigpad-box .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    color:#b6c1d0;font-family:'Dancing Script',cursive;font-size:23px;pointer-events:none}
+  .m-agree{display:flex;gap:11px;align-items:flex-start;padding:14px;background:var(--tint);
+    border-left:3px solid var(--navy);margin-bottom:6px}
+  .m-agree input{width:19px;height:19px;margin-top:2px;flex-shrink:0;accent-color:var(--navy);cursor:pointer}
+  .m-agree label{font-size:13px;color:var(--ink);line-height:1.5;cursor:pointer}
+  .modal-foot{padding:0 28px 24px;display:flex;gap:11px}
+  .modal-foot .btn{flex:1;justify-content:center}
+  .m-status{font-size:12.5px;padding:0 28px;min-height:19px;margin-bottom:9px;color:var(--navy)}
+  .m-status.err{color:#b02a37}
+
+  @media(max-width:680px){
+    .titlewrap,.doc-body{padding-left:22px;padding-right:22px}
+    .secbar,.info-wrap,.items-wrap,.siglead,.sig-grid,.proof,.note{margin-left:16px;margin-right:16px}
+    .doctitle{font-size:22px}
+    .sig-grid{flex-direction:column;gap:26px}
+    .info .k{width:34%}
   }
-  @media print{.cbar,.sign-sect,.actions,.foot,.banner{display:none}.paper{box-shadow:none;border:none}}
+  @media print{
+    .topbar,.actionbar,.ribbon{display:none!important}
+    body{background:#fff}.paper{box-shadow:none}.wrap{padding:0}
+  }
 </style>
 </head>
-<body style="--accent:{{ contract.accent_color|default:'#25d366' }}">
+<body>
 
-<div class="cbar">
-  <div class="brand">{{ contract.provider_name }}<span>.</span></div>
-  <div class="lang">
-    <a href="?lang=en" class="{% if lang == 'en' %}on{% endif %}">English</a>
-    <a href="?lang=sw" class="{% if lang == 'sw' %}on{% endif %}">Kiswahili</a>
+<div class="topbar">
+  <div class="topbar-in">
+    <div>
+      <div class="tb-brand">{{ contract.provider_name|upper }}</div>
+      <div class="tb-tag">{% if lang == 'sw' %}Tunajenga Mustakabali wa Kidijitali wa Tanzania{% else %}Building Tanzania's Digital Future{% endif %}</div>
+    </div>
+    <div class="lang-switch">
+      <a href="?lang=en" class="{% if lang == 'en' %}on{% endif %}">EN</a>
+      <a href="?lang=sw" class="{% if lang == 'sw' %}on{% endif %}">SW</a>
+    </div>
   </div>
 </div>
 
 <div class="wrap">
 
   {% if is_signed %}
-  <div class="banner signed">
-    <span class="ico">✅</span>
-    <div>{% if lang == 'sw' %}<strong>Mkataba huu umesainiwa.</strong> Asante. Nakala imehifadhiwa.{% else %}<strong>This contract has been signed.</strong> Thank you. A copy has been recorded.{% endif %}</div>
+  <div class="ribbon signed">
+    <svg viewBox="0 0 24 24"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>
+    <div>{% if lang == 'sw' %}<b>Mkataba huu umesainiwa.</b> Asante — nakala imehifadhiwa kwa usalama.{% else %}<b>This agreement has been signed.</b> Thank you — a copy has been securely recorded.{% endif %}</div>
   </div>
   {% else %}
-  <div class="banner pending">
-    <span class="ico">📄</span>
-    <div>{% if lang == 'sw' %}Tafadhali soma mkataba huu kwa makini. Ukikubali, saini chini au pakua nakala.{% else %}Please review this agreement carefully. If you agree, sign below or download a copy.{% endif %}</div>
+  <div class="ribbon pending">
+    <svg viewBox="0 0 24 24"><path d="M12 2 4 5v6c0 5 3.4 9.7 8 11 4.6-1.3 8-6 8-11V5zm0 6a2 2 0 0 1 2 2c0 .7-.4 1.3-1 1.7V14h-2v-2.3c-.6-.4-1-1-1-1.7a2 2 0 0 1 2-2z"/></svg>
+    <div>{% if lang == 'sw' %}Tafadhali soma mkataba huu kwa makini. Ukikubali, bonyeza <b>Saini Mkataba</b> chini.{% else %}Please review this agreement carefully. When ready, click <b>Sign Agreement</b> below.{% endif %}</div>
   </div>
   {% endif %}
 
   <div class="paper">
-    <div class="paper-head">
-      {% if contract.logo_url %}<img src="{{ contract.logo_url }}" alt="{{ contract.provider_name }}" style="max-height:44px;margin-bottom:10px">{% endif %}
-      <div class="logo">{{ contract.provider_name }}<span>.</span></div>
-      <h1>{{ contract.title }}</h1>
-      {% if contract.project_name %}<div class="sub">{{ contract.project_name }}</div>{% endif %}
-      <div class="ref-row">
-        <span>{% if lang == 'sw' %}Kati ya{% else %}Between{% endif %}: <b>{{ contract.provider_name }}</b></span>
-        <span>{% if lang == 'sw' %}na{% else %}and{% endif %}: <b>{{ contract.display_client }}{% if contract.display_company %} ({{ contract.display_company }}){% endif %}</b></span>
-        <span>{% if lang == 'sw' %}Tarehe{% else %}Date{% endif %}: <b>{{ contract.created_at|date:'M j, Y' }}</b></span>
-      </div>
+
+    <!-- TITLE -->
+    <div class="titlewrap">
+      {% if contract.logo_url %}<img class="logo-img" src="{{ contract.logo_url }}" alt="{{ contract.provider_name }}">{% endif %}
+      <div class="doctype">{% if lang == 'sw' %}MKATABA WA HUDUMA{% else %}SERVICE AGREEMENT{% endif %}</div>
+      <h1 class="doctitle">{{ contract.title|upper }}</h1>
+      {% if contract.project_name %}<div class="docsub">{{ contract.project_name }}</div>{% endif %}
+      <div class="rule"></div>
     </div>
 
-    {% if contract.total_amount or contract.timeline or contract.payment_terms or contract.custom_fields %}
-    <div class="summary">
-      {% if contract.total_amount %}<div class="item"><div class="k">{% if lang == 'sw' %}Jumla{% else %}Total Amount{% endif %}</div><div class="v">{{ contract.currency }} {{ contract.total_amount|floatformat:0 }}</div></div>{% endif %}
-      {% if contract.timeline %}<div class="item"><div class="k">{% if lang == 'sw' %}Muda{% else %}Timeline{% endif %}</div><div class="v">{{ contract.timeline }}</div></div>{% endif %}
-      {% if contract.payment_terms %}<div class="item"><div class="k">{% if lang == 'sw' %}Malipo{% else %}Payment Terms{% endif %}</div><div class="v">{{ contract.payment_terms }}</div></div>{% endif %}
-      {% if contract.project_name %}<div class="item"><div class="k">{% if lang == 'sw' %}Mradi{% else %}Project{% endif %}</div><div class="v">{{ contract.project_name }}</div></div>{% endif %}
-      {% for cf in contract.custom_fields %}
-      <div class="item"><div class="k">{{ cf.label }}</div><div class="v">{{ cf.value }}</div></div>
-      {% endfor %}
-    </div>
-    {% endif %}
-
-    {% if contract.line_items %}
-    <div style="margin:0 48px 28px">
-      <table style="width:100%;border-collapse:collapse">
-        <tr style="border-bottom:2px solid var(--brand)">
-          <th style="text-align:left;padding:9px 6px;font-size:12px;color:var(--muted);text-transform:uppercase">{% if lang == 'sw' %}Maelezo{% else %}Description{% endif %}</th>
-          <th style="text-align:center;padding:9px 6px;font-size:12px;color:var(--muted);text-transform:uppercase">{% if lang == 'sw' %}Idadi{% else %}Qty{% endif %}</th>
-          <th style="text-align:right;padding:9px 6px;font-size:12px;color:var(--muted);text-transform:uppercase">{% if lang == 'sw' %}Bei{% else %}Unit Price{% endif %}</th>
-          <th style="text-align:right;padding:9px 6px;font-size:12px;color:var(--muted);text-transform:uppercase">{% if lang == 'sw' %}Jumla{% else %}Amount{% endif %}</th>
-        </tr>
-        {% for it in contract.line_items %}
-        <tr style="border-bottom:1px solid var(--line)">
-          <td style="padding:10px 6px;font-size:14px">{{ it.desc }}</td>
-          <td style="padding:10px 6px;font-size:14px;text-align:center">{{ it.qty }}</td>
-          <td style="padding:10px 6px;font-size:14px;text-align:right">{{ it.unit_price|floatformat:0 }}</td>
-          <td style="padding:10px 6px;font-size:14px;text-align:right;font-weight:600">{{ it.amount|floatformat:0 }}</td>
-        </tr>
-        {% endfor %}
+    <!-- 01. PARTIES -->
+    <div class="secbar">{% if lang == 'sw' %}01.&nbsp;&nbsp;WAHUSIKA WA MKATABA{% else %}01.&nbsp;&nbsp;PARTIES TO THIS AGREEMENT{% endif %}</div>
+    <div class="info-wrap">
+      <table class="info">
         <tr>
-          <td colspan="3" style="padding:12px 6px;text-align:right;font-weight:700">{% if lang == 'sw' %}JUMLA KUU{% else %}GRAND TOTAL{% endif %}</td>
-          <td style="padding:12px 6px;text-align:right;font-weight:800;font-size:16px;color:var(--brand)">{{ contract.currency }} {{ contract.computed_total|floatformat:0 }}</td>
+          <td class="k">{% if lang == 'sw' %}Mtoa Huduma{% else %}Provider{% endif %}</td>
+          <td class="v">{{ contract.provider_name }}{% if contract.provider_rep %}<br>{{ contract.provider_rep }}{% endif %}</td>
+          <td class="k">{% if lang == 'sw' %}Mteja{% else %}Client{% endif %}</td>
+          <td class="v">{{ contract.display_client }}{% if contract.display_company %}<br>{{ contract.display_company }}{% endif %}</td>
         </tr>
+        <tr>
+          <td class="k">{% if lang == 'sw' %}Tarehe{% else %}Date{% endif %}</td>
+          <td class="v">{{ contract.created_at|date:'F j, Y' }}</td>
+          <td class="k">{% if lang == 'sw' %}Hali{% else %}Status{% endif %}</td>
+          <td class="v">{% if is_signed %}{% if lang == 'sw' %}Imesainiwa{% else %}Signed{% endif %}{% else %}{% if lang == 'sw' %}Inasubiri saini{% else %}Awaiting signature{% endif %}{% endif %}</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- 02. TERMS SUMMARY -->
+    {% if contract.total_amount or contract.timeline or contract.payment_terms or contract.custom_fields %}
+    <div class="secbar">{% if lang == 'sw' %}02.&nbsp;&nbsp;MUHTASARI WA MASHARTI{% else %}02.&nbsp;&nbsp;SUMMARY OF TERMS{% endif %}</div>
+    <div class="info-wrap">
+      <table class="info">
+        {% if contract.total_amount %}<tr><td class="k">{% if lang == 'sw' %}Jumla{% else %}Total Amount{% endif %}</td><td class="v" colspan="3">{{ contract.currency }} {{ contract.total_amount|thousands }}</td></tr>{% endif %}
+        {% if contract.payment_terms %}<tr><td class="k">{% if lang == 'sw' %}Malipo{% else %}Payment Terms{% endif %}</td><td class="v" colspan="3">{{ contract.payment_terms }}</td></tr>{% endif %}
+        {% if contract.timeline %}<tr><td class="k">{% if lang == 'sw' %}Muda{% else %}Timeline{% endif %}</td><td class="v" colspan="3">{{ contract.timeline }}</td></tr>{% endif %}
+        {% for cf in contract.custom_fields %}<tr><td class="k">{{ cf.label }}</td><td class="v" colspan="3">{{ cf.value }}</td></tr>{% endfor %}
       </table>
     </div>
     {% endif %}
 
-    {% if contract.sections %}
-    <div class="body">
-      {% for s in contract.sections %}
-      <h2>{{ forloop.counter }}. {% if lang == 'sw' %}{{ s.heading_sw|default:s.heading_en }}{% else %}{{ s.heading_en|default:s.heading_sw }}{% endif %}</h2>
-      <p>{% if lang == 'sw' %}{{ s.body_sw|default:s.body_en|linebreaksbr }}{% else %}{{ s.body_en|default:s.body_sw|linebreaksbr }}{% endif %}</p>
-      {% endfor %}
+    <!-- 03. LINE ITEMS -->
+    {% if contract.line_items %}
+    <div class="secbar">{% if lang == 'sw' %}03.&nbsp;&nbsp;BIDHAA NA HUDUMA{% else %}03.&nbsp;&nbsp;DELIVERABLES &amp; PRICING{% endif %}</div>
+    <div class="items-wrap">
+      <table class="items">
+        <thead><tr>
+          <th>{% if lang == 'sw' %}Maelezo{% else %}Description{% endif %}</th>
+          <th class="c">{% if lang == 'sw' %}Idadi{% else %}Qty{% endif %}</th>
+          <th class="r">{% if lang == 'sw' %}Bei{% else %}Unit Price{% endif %}</th>
+          <th class="r">{% if lang == 'sw' %}Kiasi{% else %}Amount{% endif %}</th>
+        </tr></thead>
+        <tbody>
+          {% for it in contract.line_items %}
+          <tr><td>{{ it.desc }}</td><td class="c">{{ it.qty }}</td><td class="r">{{ it.unit_price|thousands }}</td><td class="r">{{ it.amount|thousands }}</td></tr>
+          {% endfor %}
+        </tbody>
+        <tfoot><tr>
+          <td colspan="3" class="lbl">{% if lang == 'sw' %}Jumla Kuu{% else %}Grand Total{% endif %}</td>
+          <td class="r">{{ contract.currency }} {{ contract.computed_total|thousands }}</td>
+        </tr></tfoot>
+      </table>
     </div>
-    {% elif body %}
-    <div class="body">{{ body|safe }}</div>
     {% endif %}
+
+    <!-- TERMS AND CONDITIONS -->
+    <div class="secbar">{% if contract.line_items %}04{% else %}03{% endif %}.&nbsp;&nbsp;{% if lang == 'sw' %}MASHARTI YA MKATABA{% else %}TERMS AND CONDITIONS{% endif %}</div>
+    <div class="doc-body">
+      {% if contract.sections %}
+        {% for s in contract.sections %}
+          {% if lang == 'sw' %}
+            <h2>{{ forloop.counter }}. {% if s.heading_sw %}{{ s.heading_sw }}{% elif s.heading_en %}{{ s.heading_en }}{% endif %}</h2>
+            {% if s.body_sw %}<p>{{ s.body_sw|linebreaksbr }}</p>{% elif s.body_en %}<p class="lang-missing">{{ s.body_en|linebreaksbr }}</p>{% endif %}
+          {% else %}
+            <h2>{{ forloop.counter }}. {% if s.heading_en %}{{ s.heading_en }}{% elif s.heading_sw %}{{ s.heading_sw }}{% endif %}</h2>
+            {% if s.body_en %}<p>{{ s.body_en|linebreaksbr }}</p>{% elif s.body_sw %}<p class="lang-missing">{{ s.body_sw|linebreaksbr }}</p>{% endif %}
+          {% endif %}
+        {% endfor %}
+      {% elif lang == 'sw' and contract.body_sw %}
+        {{ contract.body_sw|clean_signatures|safe }}
+      {% elif lang == 'en' and contract.body_en %}
+        {{ contract.body_en|clean_signatures|safe }}
+      {% elif body %}
+        {{ body|clean_signatures|safe }}
+      {% endif %}
+    </div>
+
+    <!-- SIGNATURES -->
+    <div class="secbar">{% if lang == 'sw' %}SAINI ZA PANDE ZOTE MBILI{% else %}SIGNATURES{% endif %}</div>
+    <div class="siglead">
+      {% if lang == 'sw' %}{% if contract.signature_block_sw %}{{ contract.signature_block_sw|linebreaksbr }}{% else %}Mkataba huu ndio makubaliano kamili kati ya pande zote mbili na unabatilisha mazungumzo yote ya awali. Pande zote zimekubali kusaini mkataba huu kama ifuatavyo:{% endif %}{% else %}{% if contract.signature_block_en %}{{ contract.signature_block_en|linebreaksbr }}{% else %}This Agreement constitutes the entire agreement between the parties and supersedes all prior negotiations, understandings, and agreements. The parties have agreed to sign this Agreement as set out below:{% endif %}{% endif %}
+    </div>
+    <div class="sig-grid">
+      <div class="sig-col">
+        <div class="sig-line">
+          {% if is_signed %}{% if contract.signature_data %}<img class="sig-drawn" src="{{ contract.signature_data }}" alt="signature">{% else %}<span class="sig-hand">{{ contract.signed_name }}</span>{% endif %}{% endif %}
+        </div>
+        <div class="sig-name">{{ contract.display_client }} <span class="sig-role">— {% if lang == 'sw' %}Mteja{% else %}Client{% endif %}</span></div>
+        <div class="sig-date">{% if lang == 'sw' %}Tarehe{% else %}Date{% endif %}: {% if is_signed %}<b>{{ contract.signed_at|date:'F j, Y' }}</b>{% else %}<span class="sig-pending">{% if lang == 'sw' %}Inasubiri saini{% else %}Awaiting signature{% endif %}</span>{% endif %}</div>
+      </div>
+      <div class="sig-col">
+        <div class="sig-line"><span class="sig-hand">{{ contract.provider_signature|default:contract.provider_rep }}</span></div>
+        <div class="sig-name">{{ contract.provider_rep }} <span class="sig-role">— {% if lang == 'sw' %}Mtoa Huduma{% else %}Provider{% endif %}</span></div>
+        <div class="sig-date">{% if lang == 'sw' %}Tarehe{% else %}Date{% endif %}: <b>{{ contract.provider_date|date:'F j, Y' }}</b></div>
+      </div>
+    </div>
 
     {% if is_signed %}
-    <div class="signed-proof">
-      <h3>✅ {% if lang == 'sw' %}Uthibitisho wa Saini{% else %}Signature Confirmation{% endif %}</h3>
-      <div class="prow"><span class="k">{% if lang == 'sw' %}Amesaini{% else %}Signed by{% endif %}</span><span>{{ contract.signed_name }}</span></div>
-      {% if contract.signed_email %}<div class="prow"><span class="k">Email</span><span>{{ contract.signed_email }}</span></div>{% endif %}
-      <div class="prow"><span class="k">{% if lang == 'sw' %}Tarehe na saa{% else %}Date & time{% endif %}</span><span>{{ contract.signed_at|date:'M j, Y · H:i' }} (EAT)</span></div>
-      <div class="prow"><span class="k">{% if lang == 'sw' %}Anwani ya IP{% else %}IP address{% endif %}</span><span>{{ contract.signed_ip }}</span></div>
-      {% if contract.signature_data %}<div style="padding-top:12px"><img class="signed-sig-img" src="{{ contract.signature_data }}" alt="signature"></div>{% endif %}
+    <div class="proof">
+      <div class="proof-head"><svg viewBox="0 0 24 24"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>{% if lang == 'sw' %}Uthibitisho wa Saini ya Kidijitali{% else %}Electronic Signature Confirmation{% endif %}</div>
+      <div class="proof-row"><span class="k">{% if lang == 'sw' %}Amesaini{% else %}Signed by{% endif %}</span><span class="v">{{ contract.signed_name }}</span></div>
+      {% if contract.signed_email %}<div class="proof-row"><span class="k">Email</span><span class="v">{{ contract.signed_email }}</span></div>{% endif %}
+      <div class="proof-row"><span class="k">{% if lang == 'sw' %}Tarehe na saa{% else %}Date &amp; time{% endif %}</span><span class="v">{{ contract.signed_at|date:'M j, Y · H:i' }} (EAT)</span></div>
+      <div class="proof-row"><span class="k">{% if lang == 'sw' %}Anwani ya IP{% else %}IP address{% endif %}</span><span class="v">{{ contract.signed_ip }}</span></div>
     </div>
     {% endif %}
-  </div>
 
-  {% if not is_signed %}
-  <div class="sign-sect" id="signSect">
-    <h3>{% if lang == 'sw' %}✍️ Saini Mkataba{% else %}✍️ Sign this Agreement{% endif %}</h3>
-    <p class="note">{% if lang == 'sw' %}Kwa kusaini, unakubali masharti yote yaliyo hapo juu. Saini yako ya kidijitali ni halali.{% else %}By signing, you agree to all the terms above. Your electronic signature is legally binding.{% endif %}</p>
-
-    <div class="sign-grid">
-      <div class="fld">
-        <label>{% if lang == 'sw' %}Jina kamili{% else %}Full name{% endif %} *</label>
-        <input type="text" id="sig-name" placeholder="{% if lang == 'sw' %}Andika jina lako kamili{% else %}Type your full name{% endif %}">
-      </div>
-      <div class="fld">
-        <label>Email</label>
-        <input type="email" id="sig-email" placeholder="you@example.com">
-      </div>
+    <div class="doc-foot">
+      {{ contract.provider_name|upper }} &nbsp;·&nbsp; <a href="https://jamiitek.com">www.jamiitek.com</a> &nbsp;·&nbsp; info@jamiitek.com
+      <div class="tagline">{% if lang == 'sw' %}Mshirika Wako wa Kidijitali Tanzania{% else %}Your Trusted Digital Partner in Tanzania{% endif %}</div>
     </div>
-
-    <div class="sigpad-wrap">
-      <label>{% if lang == 'sw' %}Chora saini yako (hiari){% else %}Draw your signature (optional){% endif %}</label>
-      <div class="sigpad">
-        <canvas id="sigCanvas"></canvas>
-        <span class="clear" onclick="clearSig()">{% if lang == 'sw' %}Futa{% else %}Clear{% endif %}</span>
-        <span class="hint" id="sigHint">{% if lang == 'sw' %}Chora hapa kwa kidole au mouse{% else %}Draw here with finger or mouse{% endif %}</span>
-      </div>
-    </div>
-
-    <div class="agree">
-      <input type="checkbox" id="sig-agree">
-      <label for="sig-agree">{% if lang == 'sw' %}Nimesoma na ninakubali masharti yote ya mkataba huu, na ninathibitisha kuwa mimi ndiye {{ contract.display_client }} (au mwakilishi halali).{% else %}I have read and agree to all the terms of this agreement, and I confirm I am {{ contract.display_client }} (or an authorized representative).{% endif %}</label>
-    </div>
-
-    <div class="actions">
-      <button class="btn sign" id="signBtn" onclick="signContract()">{% if lang == 'sw' %}✍️ Saini Sasa{% else %}✍️ Sign Now{% endif %}</button>
-      <a class="btn download" href="{% url 'contract_pdf' contract.token %}?lang={{ lang }}">⬇ {% if lang == 'sw' %}Pakua PDF{% else %}Download PDF{% endif %}</a>
-    </div>
-    <div class="sig-status" id="sigStatus"></div>
-
-    <div style="margin-top:18px;text-align:center">
-      <button class="btn decline" onclick="declineContract()">{% if lang == 'sw' %}Sikubaliani na mkataba huu{% else %}I don't agree to this contract{% endif %}</button>
-    </div>
-  </div>
-  {% else %}
-  <div style="text-align:center;margin-top:24px">
-    <a class="btn download" href="{% url 'contract_pdf' contract.token %}?lang={{ lang }}">⬇ {% if lang == 'sw' %}Pakua nakala ya PDF{% else %}Download signed PDF{% endif %}</a>
-  </div>
-  {% endif %}
-
-  <div class="foot">
-    {{ contract.provider_name }} · {% if lang == 'sw' %}Imetengenezwa na{% else %}Powered by{% endif %} <a href="https://jamiitek.com">JamiiTek</a>
   </div>
 </div>
+
+{% if not is_signed %}
+<div class="actionbar">
+  <div class="actionbar-in">
+    <button class="btn btn-text" onclick="declineContract()">{% if lang == 'sw' %}Sikubaliani{% else %}I don't agree{% endif %}</button>
+    <a class="btn btn-ghost" href="{% url 'contract_pdf' contract.token %}?lang={{ lang }}">
+      <svg viewBox="0 0 24 24"><path d="M12 16 6 10l1.4-1.4 3.6 3.6V4h2v8.2l3.6-3.6L18 10zM4 18h16v2H4z"/></svg>
+      {% if lang == 'sw' %}Pakua PDF{% else %}Download PDF{% endif %}
+    </a>
+    <button class="btn btn-primary" onclick="openSignModal()">
+      <svg viewBox="0 0 24 24"><path d="M18.4 2.6a2 2 0 0 0-2.8 0l-1 1L18 7l1-1a2 2 0 0 0 0-2.8zM3 17.2V21h3.8L16.7 11 13 7.3z"/></svg>
+      {% if lang == 'sw' %}Saini Mkataba{% else %}Sign Agreement{% endif %}
+    </button>
+  </div>
+</div>
+{% else %}
+<div class="actionbar">
+  <div class="actionbar-in">
+    <a class="btn btn-primary" href="{% url 'contract_pdf' contract.token %}?lang={{ lang }}">
+      <svg viewBox="0 0 24 24"><path d="M12 16 6 10l1.4-1.4 3.6 3.6V4h2v8.2l3.6-3.6L18 10zM4 18h16v2H4z"/></svg>
+      {% if lang == 'sw' %}Pakua Nakala ya PDF{% else %}Download Signed PDF{% endif %}
+    </a>
+  </div>
+</div>
+{% endif %}
+
+{% if not is_signed %}
+<div class="modal-bg" id="signModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>{% if lang == 'sw' %}SAINI MKATABA{% else %}SIGN THE AGREEMENT{% endif %}</h3>
+      <p>{% if lang == 'sw' %}Saini yako ya kidijitali ni halali kisheria.{% else %}Your electronic signature is legally binding.{% endif %}</p>
+    </div>
+    <div class="modal-body">
+      <div class="m-fld">
+        <label>{% if lang == 'sw' %}Jina kamili{% else %}Full name{% endif %} *</label>
+        <input type="text" id="sig-name" value="{{ contract.display_client }}" placeholder="{% if lang == 'sw' %}Jina lako kamili{% else %}Your full name{% endif %}">
+      </div>
+      <div class="m-fld">
+        <label>Email</label>
+        <input type="email" id="sig-email" value="{{ contract.display_email }}" placeholder="you@example.com">
+      </div>
+      <div class="m-fld">
+        <label>{% if lang == 'sw' %}Chora saini yako{% else %}Draw your signature{% endif %}</label>
+        <div class="sigpad-box">
+          <canvas id="sigCanvas"></canvas>
+          <span class="clr" onclick="clearSig()">{% if lang == 'sw' %}Futa{% else %}Clear{% endif %}</span>
+          <span class="ph" id="sigPh">{% if lang == 'sw' %}Saini hapa{% else %}Sign here{% endif %}</span>
+        </div>
+      </div>
+      <div class="m-agree">
+        <input type="checkbox" id="sig-agree">
+        <label for="sig-agree">{% if lang == 'sw' %}Nimesoma na ninakubali masharti yote ya mkataba huu.{% else %}I have read and agree to all the terms of this agreement.{% endif %}</label>
+      </div>
+    </div>
+    <div class="m-status" id="mStatus"></div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeSignModal()" style="flex:.55">{% if lang == 'sw' %}Ghairi{% else %}Cancel{% endif %}</button>
+      <button class="btn btn-primary" id="doSignBtn" onclick="signContract()">{% if lang == 'sw' %}Saini Sasa{% else %}Sign Now{% endif %}</button>
+    </div>
+  </div>
+</div>
+{% endif %}
 
 <script>
 const TOKEN = "{{ contract.token }}";
 const LANG = "{{ lang }}";
 const CSRF = "{{ csrf_token }}";
-
-// ── Signature pad (canvas) ──
-let sigCanvas, sigCtx, drawing = false, hasDrawn = false;
+function openSignModal(){ document.getElementById('signModal').classList.add('show'); setTimeout(initSigPad, 100); }
+function closeSignModal(){ document.getElementById('signModal').classList.remove('show'); }
+let sigCanvas, sigCtx, drawing=false, hasDrawn=false, sigInit=false;
 function initSigPad(){
+  if (sigInit) return;
   sigCanvas = document.getElementById('sigCanvas');
   if (!sigCanvas) return;
   const rect = sigCanvas.getBoundingClientRect();
-  sigCanvas.width = rect.width * 2; sigCanvas.height = 150 * 2;
-  sigCtx = sigCanvas.getContext('2d');
-  sigCtx.scale(2, 2);
-  sigCtx.strokeStyle = '#1a2332'; sigCtx.lineWidth = 2;
-  sigCtx.lineCap = 'round'; sigCtx.lineJoin = 'round';
-
-  const pos = (e) => {
-    const r = sigCanvas.getBoundingClientRect();
-    const t = e.touches ? e.touches[0] : e;
-    return { x: t.clientX - r.left, y: t.clientY - r.top };
-  };
-  const start = (e) => { drawing = true; const p = pos(e); sigCtx.beginPath(); sigCtx.moveTo(p.x, p.y);
-    document.getElementById('sigHint').style.display = 'none'; e.preventDefault(); };
-  const move = (e) => { if (!drawing) return; const p = pos(e); sigCtx.lineTo(p.x, p.y); sigCtx.stroke();
-    hasDrawn = true; e.preventDefault(); };
-  const end = () => { drawing = false; };
-
-  sigCanvas.addEventListener('mousedown', start); sigCanvas.addEventListener('mousemove', move);
-  window.addEventListener('mouseup', end);
-  sigCanvas.addEventListener('touchstart', start); sigCanvas.addEventListener('touchmove', move);
-  sigCanvas.addEventListener('touchend', end);
+  sigCanvas.width = rect.width*2; sigCanvas.height = 150*2;
+  sigCtx = sigCanvas.getContext('2d'); sigCtx.scale(2,2);
+  sigCtx.strokeStyle='#1a3c6e'; sigCtx.lineWidth=2.2; sigCtx.lineCap='round'; sigCtx.lineJoin='round';
+  const pos=(e)=>{const r=sigCanvas.getBoundingClientRect();const t=e.touches?e.touches[0]:e;return{x:t.clientX-r.left,y:t.clientY-r.top};};
+  const start=(e)=>{drawing=true;const p=pos(e);sigCtx.beginPath();sigCtx.moveTo(p.x,p.y);document.getElementById('sigPh').style.display='none';e.preventDefault();};
+  const move=(e)=>{if(!drawing)return;const p=pos(e);sigCtx.lineTo(p.x,p.y);sigCtx.stroke();hasDrawn=true;e.preventDefault();};
+  const end=()=>{drawing=false;};
+  sigCanvas.addEventListener('mousedown',start);sigCanvas.addEventListener('mousemove',move);window.addEventListener('mouseup',end);
+  sigCanvas.addEventListener('touchstart',start);sigCanvas.addEventListener('touchmove',move);sigCanvas.addEventListener('touchend',end);
+  sigInit=true;
 }
-function clearSig(){ if(sigCtx){ sigCtx.clearRect(0,0,sigCanvas.width,sigCanvas.height); hasDrawn=false;
-  document.getElementById('sigHint').style.display='block'; } }
-if (document.getElementById('sigCanvas')) initSigPad();
-
-function status(msg, isErr){ const e=document.getElementById('sigStatus'); e.textContent=msg; e.className='sig-status'+(isErr?' err':''); }
-
+function clearSig(){if(sigCtx){sigCtx.clearRect(0,0,sigCanvas.width,sigCanvas.height);hasDrawn=false;document.getElementById('sigPh').style.display='flex';}}
+function status(msg,err){const e=document.getElementById('mStatus');e.textContent=msg;e.className='m-status'+(err?' err':'');}
 async function signContract(){
-  const name = document.getElementById('sig-name').value.trim();
-  const email = document.getElementById('sig-email').value.trim();
-  const agreed = document.getElementById('sig-agree').checked;
-  if (name.length < 3){ status(LANG==='sw'?'Tafadhali andika jina lako kamili.':'Please type your full name.', true); return; }
-  if (!agreed){ status(LANG==='sw'?'Lazima ukubali masharti kwanza.':'You must agree to the terms first.', true); return; }
-
-  const btn = document.getElementById('signBtn');
-  btn.disabled = true; btn.textContent = LANG==='sw'?'Inasaini…':'Signing…';
+  const name=document.getElementById('sig-name').value.trim();
+  const email=document.getElementById('sig-email').value.trim();
+  const agreed=document.getElementById('sig-agree').checked;
+  if(name.length<3){status(LANG==='sw'?'Tafadhali andika jina lako kamili.':'Please type your full name.',true);return;}
+  if(!agreed){status(LANG==='sw'?'Lazima ukubali masharti kwanza.':'You must agree to the terms first.',true);return;}
+  const btn=document.getElementById('doSignBtn');btn.disabled=true;btn.textContent=LANG==='sw'?'Inasaini…':'Signing…';
   status(LANG==='sw'?'Inahifadhi saini yako…':'Recording your signature…');
-
-  let sigData = '';
-  if (hasDrawn && sigCanvas){ sigData = sigCanvas.toDataURL('image/png'); }
-
-  const fd = new FormData();
-  fd.append('name', name); fd.append('email', email);
-  fd.append('agreed', 'true'); fd.append('lang', LANG);
-  fd.append('signature_data', sigData);
-
-  try {
-    const res = await fetch(`/contract/${TOKEN}/sign/`, {
-      method:'POST', headers:{'X-CSRFToken':CSRF}, body:fd,
-    });
-    const data = await res.json();
-    if (data.ok){ window.location.href = data.redirect; }
-    else { status(data.error || 'Error', true); btn.disabled=false; btn.textContent=LANG==='sw'?'✍️ Saini Sasa':'✍️ Sign Now'; }
-  } catch(e){
-    status(LANG==='sw'?'Hitilafu ya mtandao. Jaribu tena.':'Network error. Try again.', true);
-    btn.disabled=false; btn.textContent=LANG==='sw'?'✍️ Saini Sasa':'✍️ Sign Now';
-  }
+  let sigData='';if(hasDrawn&&sigCanvas){sigData=sigCanvas.toDataURL('image/png');}
+  const fd=new FormData();fd.append('name',name);fd.append('email',email);fd.append('agreed','true');fd.append('lang',LANG);fd.append('signature_data',sigData);
+  try{
+    const res=await fetch(`/contract/${TOKEN}/sign/`,{method:'POST',headers:{'X-CSRFToken':CSRF},body:fd});
+    const data=await res.json();
+    if(data.ok){window.location.href=data.redirect;}
+    else{status(data.error||'Error',true);btn.disabled=false;btn.textContent=LANG==='sw'?'Saini Sasa':'Sign Now';}
+  }catch(e){status(LANG==='sw'?'Hitilafu ya mtandao.':'Network error.',true);btn.disabled=false;btn.textContent=LANG==='sw'?'Saini Sasa':'Sign Now';}
 }
-
 async function declineContract(){
-  const msg = LANG==='sw'?'Una uhakika hukubaliani na mkataba huu?':'Are you sure you do not agree to this contract?';
-  if (!confirm(msg)) return;
-  const reason = prompt(LANG==='sw'?'Sababu (hiari):':'Reason (optional):') || '';
-  const fd = new FormData(); fd.append('reason', reason);
-  try {
-    await fetch(`/contract/${TOKEN}/decline/`, {method:'POST', headers:{'X-CSRFToken':CSRF}, body:fd});
-    alert(LANG==='sw'?'Tumepokea jibu lako. Asante.':'We have received your response. Thank you.');
-    location.reload();
-  } catch(e){}
+  const msg=LANG==='sw'?'Una uhakika hukubaliani na mkataba huu?':'Are you sure you do not agree to this contract?';
+  if(!confirm(msg))return;
+  const reason=prompt(LANG==='sw'?'Sababu (hiari):':'Reason (optional):')||'';
+  const fd=new FormData();fd.append('reason',reason);
+  try{await fetch(`/contract/${TOKEN}/decline/`,{method:'POST',headers:{'X-CSRFToken':CSRF},body:fd});
+    alert(LANG==='sw'?'Tumepokea jibu lako. Asante.':'We have received your response. Thank you.');location.reload();
+  }catch(e){}
 }
+document.getElementById('signModal')?.addEventListener('click',(e)=>{if(e.target.id==='signModal')closeSignModal();});
 </script>
 </body>
 </html>

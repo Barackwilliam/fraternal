@@ -1,6 +1,7 @@
 {% extends 'management/base.html' %}
 {% block title %}{{ contract.title }}{% endblock %}
 {% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&display=swap" rel="stylesheet">
 <style>
   .cb-topline{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:20px;flex-wrap:wrap}
   .cb-back{font-family:var(--mono);font-size:12px;color:var(--text-3);text-decoration:none;display:inline-flex;align-items:center;gap:6px}
@@ -195,7 +196,7 @@
 
   <!-- BRANDING -->
   <div class="cb-section">
-    <div class="sh"><span class="n">6</span><h2>Branding</h2></div>
+    <div class="sh"><span class="n">6</span><h2>Branding & Signatures</h2></div>
     <div class="jt-card" style="padding:20px">
       <div class="grid2">
         <div class="fld"><label class="f-label">Accent color</label><input type="color" class="f-input" id="accent_color" value="{{ contract.accent_color }}" style="padding:4px;height:42px;cursor:pointer"></div>
@@ -205,12 +206,31 @@
         <div class="fld"><label class="f-label">Provider name</label><input type="text" class="f-input" id="provider_name" value="{{ contract.provider_name }}"></div>
         <div class="fld"><label class="f-label">Your name (representative)</label><input type="text" class="f-input" id="provider_rep" value="{{ contract.provider_rep }}"></div>
       </div>
+      <div class="grid2">
+        <div class="fld"><label class="f-label">Your signature (handwritten style)</label><input type="text" class="f-input" id="provider_signature" value="{{ contract.provider_signature }}" placeholder="W. Chipindi" style="font-family:'Dancing Script',cursive;font-size:20px"></div>
+        <div class="fld"><label class="f-label">Signing date <span style="color:var(--text-3);font-weight:400">(blank = creation date)</span></label><input type="date" class="f-input" id="provider_signed_date" value="{{ contract.provider_signed_date|date:'Y-m-d' }}"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIGNATURE BLOCK TEXT (editable section 14) -->
+  <div class="cb-section">
+    <div class="sh"><span class="n">7</span><h2>Signatures Section Text</h2><span class="hint">the "Entire Agreement / Signatures" intro — blank uses professional default</span></div>
+    <div class="jt-card" style="padding:20px">
+      <div class="fld">
+        <label class="f-label">English</label>
+        <div class="fld-row">
+          <textarea class="f-input" id="signature_block_en" rows="3" placeholder="Leave blank for professional default...">{{ contract.signature_block_en }}</textarea>
+          <button type="button" class="ai-btn small" onclick="assistField('section','signature_block_en')">✨</button>
+        </div>
+      </div>
+      <div class="fld"><label class="f-label">Kiswahili</label><textarea class="f-input" id="signature_block_sw" rows="3" placeholder="Acha wazi kutumia maandishi ya kawaida...">{{ contract.signature_block_sw }}</textarea></div>
     </div>
   </div>
 
   <!-- LEGACY BODY (fallback) -->
   <div class="cb-section">
-    <div class="sh"><span class="n">7</span><h2>Full Contract Text</h2><span class="hint">used when not using Sections above — filled by "AI: Draft Whole Contract"</span></div>
+    <div class="sh"><span class="n">8</span><h2>Full Contract Text</h2><span class="hint">used when not using Sections above — filled by "AI: Draft Whole Contract"</span></div>
     <div class="jt-card" style="padding:20px">
       <div class="fld"><label class="f-label">English</label><textarea class="f-input" id="body_en" rows="6">{{ contract.body_en }}</textarea></div>
       <div class="fld"><label class="f-label">Kiswahili</label><textarea class="f-input" id="body_sw" rows="6">{{ contract.body_sw }}</textarea></div>
@@ -390,7 +410,8 @@ async function saveContract(silent){
   const fd = new FormData();
   const ids = ['client_name','client_email','client_company','client_phone','client_address',
     'title','project_name','total_amount','currency','payment_terms','timeline',
-    'provider_name','provider_rep','accent_color','logo_url','body_en','body_sw'];
+    'provider_name','provider_rep','provider_signature','provider_signed_date',
+    'signature_block_en','signature_block_sw','accent_color','logo_url','body_en','body_sw'];
   ids.forEach(id => fd.append(id, document.getElementById(id).value));
   fd.append('status', document.getElementById('statusSel').value);
   fd.append('sections', JSON.stringify(sections));

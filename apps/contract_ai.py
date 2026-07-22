@@ -60,7 +60,7 @@ STRICT RULES:
    11. Termination
    12. Limitation of Liability
    13. Governing Law (laws of the United Republic of Tanzania)
-   14. Entire Agreement / Signatures
+   14. Entire Agreement
 4. Be professional, clear, and fair to both parties. Use real contract
    language, not casual text. Avoid making up specific facts not provided —
    use clear placeholders like [describe deliverable] only if truly needed,
@@ -70,8 +70,12 @@ STRICT RULES:
 6. Do NOT include a title heading inside the body (the title is separate).
    Start body with <h2>1. Parties</h2> style sections.
 7. Reference the payment amount, currency, timeline, and payment terms given.
-8. End each version with a signature section stating both parties will sign,
-   with lines for names, dates (the actual signing is handled by the app).
+8. CRITICAL — DO NOT write a signatures section, signature blocks, signature
+   lines, name/date blanks, or ANY underscores (_____) or dashes (-----) used
+   as fill-in lines. The application renders a professional signature block
+   automatically after your text. Section 14 must ONLY state that this is the
+   entire agreement — nothing about signing lines. End the body after that
+   clause.
 """
 
 
@@ -223,11 +227,56 @@ def _extract_braces(text):
 
 
 def _clean_html(html):
-    """Ruhusu tags salama tu."""
+    """Ruhusu tags salama tu, na ondoa signature lines za AI."""
     html = re.sub(r'<(script|style|iframe|head|html|body)[^>]*>.*?</\1>', '', html, flags=re.DOTALL | re.I)
     html = re.sub(r'</?(?:html|head|body|script|style|iframe)[^>]*>', '', html, flags=re.I)
     html = re.sub(r'\son\w+="[^"]*"', '', html, flags=re.I)
     html = re.sub(r'\sstyle="[^"]*"', '', html, flags=re.I)
+    html = strip_signature_lines(html)
+    return html.strip()
+
+
+# Maneno ya vichwa vya sehemu za saini (EN + SW)
+_SIG_HEADING_WORDS = (
+    'signature', 'signatures', 'signed by', 'in witness whereof',
+    'saini', 'sahihi', 'kuandikisha', 'kusaini', 'kutia saini',
+)
+
+
+def strip_signature_lines(html):
+    """
+    Ondoa mistari ya kujaza (____ au ----) na sehemu nzima ya saini kutoka
+    kwenye maandishi ya AI. App inaweka signature block yake ya kitaalamu,
+    kwa hiyo ya AI ni marudio yasiyopendeza.
+    """
+    if not html:
+        return html
+
+    # 1. Ondoa aya/mistari yenye underscores/dashes za kujaza (3+ mfululizo)
+    fill_line = r'(?:_{3,}|-{5,}|\.{6,})'
+    # Ondoa <p> au <li> nzima kama ina fill-line
+    html = re.sub(rf'<(p|li)[^>]*>(?:(?!</\1>).)*?{fill_line}(?:(?!</\1>).)*?</\1>',
+                  '', html, flags=re.DOTALL | re.I)
+    # Ondoa fill-lines zilizobaki popote
+    html = re.sub(fill_line, '', html)
+
+    # 2. Ondoa sehemu nzima kama kichwa chake ni cha saini
+    #    (kutoka <h2>/<h3> ya saini mpaka kichwa kinachofuata au mwisho)
+    pattern = re.compile(
+        r'<h([23])[^>]*>(?P<head>(?:(?!</h\1>).)*)</h\1>(?P<body>.*?)(?=<h[23][^>]*>|$)',
+        flags=re.DOTALL | re.I)
+
+    def _drop_if_signature(m):
+        heading = re.sub(r'<[^>]+>', '', m.group('head')).lower()
+        if any(w in heading for w in _SIG_HEADING_WORDS):
+            return ''
+        return m.group(0)
+
+    html = pattern.sub(_drop_if_signature, html)
+
+    # 3. Safisha aya tupu zilizobaki
+    html = re.sub(r'<(p|li)[^>]*>\s*(?:&nbsp;|\s)*</\1>', '', html, flags=re.I)
+    html = re.sub(r'\n{3,}', '\n\n', html)
     return html.strip()
 
 

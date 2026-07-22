@@ -1,0 +1,59 @@
+{% extends 'management/base.html' %}
+{% block title %}Proposals{% endblock %}
+{% block extra_css %}
+<style>
+  .stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:22px}
+  .stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:18px 20px;transition:border-color .2s}
+  .stat-card:hover{border-color:var(--border-s)}
+  .stat-card .sv{font-family:var(--head);font-size:26px;font-weight:800;color:var(--text);margin-bottom:2px}
+  .stat-card .sl{font-family:var(--mono);font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:1px}
+  .stat-card.c-cyan .sv{color:var(--cyan)} .stat-card.c-green .sv{color:var(--green)}
+  .stat-card.c-yellow .sv{color:var(--yellow)} .stat-card.c-purple .sv{color:var(--purple)}
+  .b-draft{background:rgba(255,255,255,.04);color:var(--text-3);border:1px solid var(--border)}.b-draft::before{background:var(--text-3)}
+  .b-sent{background:var(--yellow-d);color:var(--yellow);border:1px solid rgba(255,184,0,.2)}.b-sent::before{background:var(--yellow)}
+  .b-viewed{background:var(--cyan-d);color:var(--cyan);border:1px solid rgba(0,212,255,.2)}.b-viewed::before{background:var(--cyan)}
+  .b-accepted{background:var(--green-d);color:var(--green);border:1px solid rgba(0,255,136,.2)}.b-accepted::before{background:var(--green);box-shadow:0 0 6px var(--green);animation:pulse-dot 2s infinite}
+  .b-declined{background:var(--red-d);color:var(--red);border:1px solid rgba(255,59,92,.2)}.b-declined::before{background:var(--red)}
+  .b-expired{background:rgba(255,255,255,.03);color:var(--text-3);border:1px solid var(--border)}.b-expired::before{background:var(--text-3)}
+  .title-cell{font-weight:600;color:var(--text)}
+  .title-cell .ref{font-family:var(--mono);font-size:11px;color:var(--text-3);margin-top:2px}
+</style>
+{% endblock %}
+{% block content %}
+<div style="display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px;flex-wrap:wrap">
+  <div>
+    <h1 style="font-family:var(--head);font-size:22px;font-weight:800;color:var(--text);margin-bottom:3px">
+      <i class="fas fa-file-lines" style="color:var(--cyan)"></i> Proposals
+    </h1>
+    <div style="font-family:var(--mono);font-size:12px;color:var(--text-3)">{{ proposals|length }} proposal(s)</div>
+  </div>
+  <a href="{% url 'proposal_builder_new' %}" class="jt-btn btn-cyan"><i class="fas fa-plus"></i> New Proposal</a>
+</div>
+<div class="stat-row">
+  <div class="stat-card c-cyan"><div class="sv">{{ proposals|length }}</div><div class="sl">Total</div></div>
+  <div class="stat-card c-yellow"><div class="sv">{{ sent_count }}</div><div class="sl">Awaiting Response</div></div>
+  <div class="stat-card c-green"><div class="sv">{{ accepted_count }}</div><div class="sl">Accepted</div></div>
+  <div class="stat-card c-purple"><div class="sv">{{ total_value|floatformat:0 }}</div><div class="sl">TZS Accepted Value</div></div>
+</div>
+<div class="jt-card" style="padding:0">
+  <div style="overflow-x:auto">
+    <table class="jt-table">
+      <thead><tr><th>Proposal</th><th>Client</th><th>Value</th><th>Status</th><th>Created</th><th></th></tr></thead>
+      <tbody>
+        {% for p in proposals %}
+        <tr>
+          <td><div class="title-cell">{{ p.title }}</div>{% if p.reference_number %}<div class="ref">{{ p.reference_number }}</div>{% endif %}</td>
+          <td><div style="font-size:13px;color:var(--text-2)">{{ p.display_client }}</div>{% if p.display_company %}<div style="font-family:var(--mono);font-size:10px;color:var(--purple)">{{ p.display_company }}</div>{% endif %}</td>
+          <td style="font-family:var(--mono);font-size:12px;color:var(--text-2)">{% if p.grand_total %}{{ p.currency }} {{ p.grand_total|floatformat:0 }}{% else %}—{% endif %}</td>
+          <td><span class="jt-badge b-{{ p.status }}">{{ p.get_status_display }}</span></td>
+          <td style="font-family:var(--mono);font-size:12px;color:var(--text-3)">{{ p.created_at|date:'M j, Y' }}</td>
+          <td><a href="{% url 'proposal_builder_edit' p.pk %}" class="jt-btn btn-ghost" style="font-size:11px;padding:6px 12px"><i class="fas fa-arrow-right"></i> Open</a></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6"><div class="jt-empty"><div class="ei">📋</div><p>No proposals yet — create your first one</p></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

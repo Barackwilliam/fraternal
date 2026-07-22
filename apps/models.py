@@ -989,8 +989,19 @@ class Contract(models.Model):
 
     # Party ya JamiiTek (provider)
     provider_name = models.CharField(max_length=120, default='JamiiTek')
-    provider_rep = models.CharField(max_length=120, default='',
+    provider_rep = models.CharField(max_length=120, default='W. Chipindi',
                                     help_text='Your name as the signing representative')
+    # Sahihi yako (admin) — imesainiwa mapema, inaonekana kwenye mkataba
+    provider_signature = models.CharField(max_length=120, default='W. Chipindi',
+                                          blank=True,
+                                          help_text='Your handwritten-style signature text (e.g. W. Chipindi)')
+    provider_signed_date = models.DateField(null=True, blank=True,
+                                            help_text='Date you signed (defaults to creation date)')
+    # Maandishi ya sehemu ya 14 (signatures) — editable
+    signature_block_en = models.TextField(blank=True,
+                                          help_text='Signatures section intro (English). Leave blank for default.')
+    signature_block_sw = models.TextField(blank=True,
+                                          help_text='Signatures section intro (Swahili). Leave blank for default.')
 
     # ── E-SIGNATURE (mteja anasaini) ──
     signed_name = models.CharField(max_length=160, blank=True)      # jina alilloandika
@@ -1062,3 +1073,152 @@ class Contract(models.Model):
     @property
     def public_url(self):
         return f'/contract/{self.token}/'
+
+    @property
+    def provider_date(self):
+        """Tarehe ya provider (sahihi yako) — default tarehe ya kuundwa."""
+        return self.provider_signed_date or (self.created_at.date() if self.created_at else None)
+
+
+# ============================================================
+# PROPOSALS (mapendekezo ya kitaalamu — link + e-accept)
+# ============================================================
+
+class Proposal(models.Model):
+    STATUS = [
+        ('draft', 'Draft'),
+        ('sent', 'Sent to client'),
+        ('viewed', 'Viewed'),
+        ('accepted', 'Accepted'),
+        ('declined', 'Declined'),
+        ('expired', 'Expired'),
+    ]
+
+    token = models.CharField(max_length=48, unique=True, editable=False, db_index=True)
+
+    # Client (hiari — kama contract)
+    client = models.ForeignKey('Client', on_delete=models.SET_NULL, null=True, blank=True, related_name='proposals')
+    client_name = models.CharField(max_length=160, blank=True)
+    client_email = models.EmailField(blank=True)
+    client_company = models.CharField(max_length=160, blank=True)
+    client_phone = models.CharField(max_length=40, blank=True)
+
+    # Meta
+    title = models.CharField(max_length=200, default='Project Proposal')
+    project_name = models.CharField(max_length=200, blank=True)
+    reference_number = models.CharField(max_length=40, blank=True,
+                                        help_text='e.g. JT-2026-001 (auto if blank)')
+    valid_until = models.DateField(null=True, blank=True,
+                                   help_text='Proposal expiry date')
+
+    # ── CONTENT SECTIONS (EN + SW) ──
+    # Executive summary / intro
+    summary_en = models.TextField(blank=True)
+    summary_sw = models.TextField(blank=True)
+    # Scope / approach
+    scope_en = models.TextField(blank=True)
+    scope_sw = models.TextField(blank=True)
+    # Why us / about
+    about_en = models.TextField(blank=True)
+    about_sw = models.TextField(blank=True)
+    # Extra custom sections: [{"id","heading_en","heading_sw","body_en","body_sw"}]
+    sections = models.JSONField(default=list, blank=True)
+
+    # ── DELIVERABLES / PRICING (line items) ──
+    # [{"desc","qty","unit_price","amount"}]
+    line_items = models.JSONField(default=list, blank=True)
+    currency = models.CharField(max_length=8, default='TZS')
+    # Discount / notes
+    discount_amount = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    pricing_note = models.CharField(max_length=300, blank=True,
+                                    help_text='e.g. Prices valid for 30 days. VAT exclusive.')
+
+    # Timeline: [{"phase","duration","detail"}]
+    timeline_items = models.JSONField(default=list, blank=True)
+
+    # Terms / payment
+    payment_terms = models.CharField(max_length=300, blank=True)
+
+    status = models.CharField(max_length=12, choices=STATUS, default='draft')
+
+    # Branding
+    accent_color = models.CharField(max_length=9, default='#00d4ff')
+    logo_url = models.URLField(blank=True)
+    provider_name = models.CharField(max_length=120, default='JamiiTek')
+    provider_rep = models.CharField(max_length=120, default='W. Chipindi')
+
+    # ── CLIENT RESPONSE ──
+    accepted_name = models.CharField(max_length=160, blank=True)
+    accepted_email = models.EmailField(blank=True)
+    accepted_at = models.DateTimeField(null=True, blank=True)
+    accepted_ip = models.GenericIPAddressField(null=True, blank=True)
+    decline_reason = models.CharField(max_length=300, blank=True)
+
+    viewed_at = models.DateTimeField(null=True, blank=True)
+    sent_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'{self.title} — {self.display_client} ({self.get_status_display()})'
+
+    def save(self, *args, **kwargs):
+        if not self.token:
+            self.token = secrets.token_urlsafe(24)
+        super().save(*args, **kwargs)
+        # Auto reference number baada ya kupata pk
+        if not self.reference_number and self.pk:
+            ref = f'JT-{self.created_at.year if self.created_at else 2026}-{self.pk:04d}'
+            Proposal.objects.filter(pk=self.pk).update(reference_number=ref)
+            self.reference_number = ref
+
+    @property
+    def display_client(self):
+        if self.client_name:
+            return self.client_name
+        if self.client:
+            return self.client.name
+        return 'Client'
+
+    @property
+    def display_company(self):
+        if self.client_company:
+            return self.client_company
+        if self.client:
+            return self.client.company
+        return ''
+
+    @property
+    def display_email(self):
+        if self.client_email:
+            return self.client_email
+        if self.client:
+            return self.client.email
+        return ''
+
+    @property
+    def subtotal(self):
+        if self.line_items:
+            try:
+                return sum(float(it.get('amount', 0) or 0) for it in self.line_items)
+            except (ValueError, TypeError):
+                pass
+        return 0
+
+    @property
+    def grand_total(self):
+        total = self.subtotal
+        if self.discount_amount:
+            total -= float(self.discount_amount)
+        return max(0, total)
+
+    @property
+    def is_accepted(self):
+        return self.status == 'accepted' and self.accepted_at is not None
+
+    @property
+    def public_url(self):
+        return f'/proposal/{self.token}/'

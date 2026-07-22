@@ -4,6 +4,7 @@ from django.urls import path
 from . import views
 from . import blog_views
 from . import contract_views
+from . import proposal_views
 from .views import select_website_type, dynamic_form, proposal_preview, generate_pdf
 from .views import templates_marketplace, template_preview, template_preview_raw
 from . import management_views
@@ -11,6 +12,19 @@ from . import client_portal_views as portal
 from builder import views as builder_views
 
 urlpatterns = [
+    # ── PROPOSAL BUILDER (ndani ya /manage/, staff-only) ────
+    path('manage/proposals/', proposal_views.proposal_builder_list, name='proposal_builder_list'),
+    path('manage/proposals/new/', proposal_views.proposal_builder_new, name='proposal_builder_new'),
+    path('manage/proposals/<int:pk>/edit/', proposal_views.proposal_builder_edit, name='proposal_builder_edit'),
+    path('manage/proposals/<int:pk>/ai-full/', proposal_views.proposal_ai_full, name='proposal_ai_full'),
+    path('manage/proposals/ai-assist/', proposal_views.proposal_ai_assist, name='proposal_ai_assist'),
+    path('manage/proposals/from-lead/<int:lead_id>/', proposal_views.proposal_from_lead, name='proposal_from_lead'),
+    # Proposal (mteja anafikia kwa link)
+    path('proposal/<str:token>/', proposal_views.proposal_view, name='proposal_view'),
+    path('proposal/<str:token>/accept/', proposal_views.proposal_accept, name='proposal_accept'),
+    path('proposal/<str:token>/decline/', proposal_views.proposal_decline, name='proposal_decline'),
+    path('proposal/<str:token>/pdf/', proposal_views.proposal_pdf, name='proposal_pdf'),
+
     # ── CONTRACT BUILDER (ndani ya /manage/, staff-only) ────
     path('manage/contracts/', contract_views.contract_builder_list, name='contract_builder_list'),
     path('manage/contracts/new/', contract_views.contract_builder_new, name='contract_builder_new'),

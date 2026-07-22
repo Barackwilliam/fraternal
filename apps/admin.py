@@ -101,9 +101,19 @@ class ClientAdmin(admin.ModelAdmin):
 
 @admin.register(ProjectProposal)
 class ProjectProposalAdmin(admin.ModelAdmin):
-    list_display = ("client", "website_type", "created_at", "updated_at")
+    list_display = ("client", "website_type", "created_at", "updated_at", "convert_link")
     list_filter = ("website_type", "created_at")
     search_fields = ("client__name", "website_type__name")
+
+    def convert_link(self, obj):
+        from django.utils.safestring import mark_safe
+        return mark_safe(
+            f'<a href="/manage/proposals/from-lead/{obj.pk}/" '
+            f'style="background:#25d366;color:#04120a;padding:5px 11px;border-radius:6px;'
+            f'font-weight:700;text-decoration:none;white-space:nowrap">'
+            f'→ Premium Proposal</a>'
+        )
+    convert_link.short_description = 'Convert'
 
 
 # ============================================================
@@ -539,8 +549,9 @@ class ContractAdmin(admin.ModelAdmin):
             'description': 'You can draft with AI (button top-right of the list), then refine before sending. '
                            'For dynamic sections instead of one long text, use the Contract Builder.'
         }),
-        ('Branding', {
-            'fields': ('accent_color', 'logo_url'),
+        ('Branding & Signatures', {
+            'fields': ('accent_color', 'logo_url', 'provider_signature',
+                       'provider_signed_date', 'signature_block_en', 'signature_block_sw'),
             'classes': ('collapse',)
         }),
         ('Provider (JamiiTek)', {
@@ -635,3 +646,69 @@ class ContractAdmin(admin.ModelAdmin):
         return redirect('admin:apps_contract_change', pk)
 
     change_form_template = 'admin/contract_change_form.html'
+
+
+# ── PROPOSAL ADMIN ──
+from .models import Proposal
+from django.utils.safestring import mark_safe
+
+
+@admin.register(Proposal)
+class ProposalAdmin(admin.ModelAdmin):
+    save_on_top = True
+    list_display = ('title', 'client_col', 'status', 'value_col', 'currency',
+                    'reference_number', 'created_at', 'builder_link')
+    list_filter = ('status', 'currency', 'created_at')
+    search_fields = ('title', 'project_name', 'client_name', 'reference_number', 'accepted_name')
+    readonly_fields = ('token', 'reference_number', 'accepted_name', 'accepted_email',
+                       'accepted_at', 'accepted_ip', 'viewed_at', 'sent_at',
+                       'created_at', 'updated_at')
+    fieldsets = (
+        ('✨ Use the Proposal Builder for the full experience', {
+            'fields': (),
+            'description': 'This admin form works, but for the premium builder with AI on '
+                           'every field, line items, and timeline, use '
+                           '<a href="/manage/proposals/" target="_blank">the Proposal Builder</a>.'
+        }),
+        ('Client (optional)', {
+            'fields': ('client', 'client_name', 'client_email', 'client_company', 'client_phone')
+        }),
+        ('Proposal', {
+            'fields': ('title', 'project_name', 'reference_number', 'valid_until', 'status')
+        }),
+        ('Content (English)', {
+            'fields': ('summary_en', 'scope_en', 'about_en'),
+            'classes': ('collapse',)
+        }),
+        ('Content (Swahili)', {
+            'fields': ('summary_sw', 'scope_sw', 'about_sw'),
+            'classes': ('collapse',)
+        }),
+        ('Pricing & Terms', {
+            'fields': ('currency', 'discount_amount', 'pricing_note', 'payment_terms')
+        }),
+        ('Branding', {
+            'fields': ('accent_color', 'logo_url', 'provider_name', 'provider_rep'),
+            'classes': ('collapse',)
+        }),
+        ('Response (filled when client accepts)', {
+            'fields': ('accepted_name', 'accepted_email', 'accepted_at', 'accepted_ip', 'decline_reason'),
+            'classes': ('collapse',)
+        }),
+        ('Sharing & Tracking', {
+            'fields': ('token', 'viewed_at', 'sent_at', 'created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+
+    def client_col(self, obj):
+        return obj.display_client
+    client_col.short_description = 'Client'
+
+    def value_col(self, obj):
+        return obj.grand_total or '—'
+    value_col.short_description = 'Value'
+
+    def builder_link(self, obj):
+        return mark_safe(f'<a href="/manage/proposals/{obj.pk}/edit/" target="_blank">Open in Builder →</a>')
+    builder_link.short_description = 'Builder'

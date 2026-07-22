@@ -105,3 +105,29 @@ def tojson(value):
     """Convert value to JSON string for use in JavaScript"""
     import json
     return json.dumps(value)
+
+
+@register.filter
+def thousands(value):
+    """Weka comma kama separator ya maelfu: 500000 -> 500,000"""
+    try:
+        num = float(value)
+        if num == int(num):
+            return f'{int(num):,}'
+        return f'{num:,.2f}'
+    except (ValueError, TypeError):
+        return value
+
+
+@register.filter
+def clean_signatures(html):
+    """
+    Ondoa signature lines (____ ) na sehemu za saini zilizoandikwa na AI
+    ndani ya body ya mkataba. App ina signature block yake ya kitaalamu,
+    kwa hiyo hizi ni marudio. Inafanya kazi kwa mikataba ya zamani pia.
+    """
+    try:
+        from apps.contract_ai import strip_signature_lines
+        return strip_signature_lines(html or '')
+    except Exception:
+        return html
