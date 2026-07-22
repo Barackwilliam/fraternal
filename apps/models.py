@@ -1222,3 +1222,227 @@ class Proposal(models.Model):
     @property
     def public_url(self):
         return f'/proposal/{self.token}/'
+
+
+# ============================================================
+# COMPANY PROFILE (dynamic — link ya umma + PDF)
+# ============================================================
+
+class CompanyProfile(models.Model):
+    """Company profile inayohaririwa — inaonekana kwenye link + PDF."""
+    company_name = models.CharField(max_length=140, default='JamiiTek Digital Agency')
+    short_name = models.CharField(max_length=60, default='JamiiTek')
+    tagline_en = models.CharField(max_length=200, default="Building Tanzania's Digital Future")
+    tagline_sw = models.CharField(max_length=200, default='Tunajenga Mustakabali wa Kidijitali wa Tanzania')
+    subtitle_en = models.CharField(max_length=200, default='Your Trusted Digital Partner in Tanzania')
+    subtitle_sw = models.CharField(max_length=200, default='Mshirika Wako wa Kidijitali Tanzania')
+    period = models.CharField(max_length=40, blank=True, help_text='e.g. 2025 — 2026')
+
+    # Sehemu kuu (EN + SW)
+    about_en = models.TextField(blank=True)
+    about_sw = models.TextField(blank=True)
+    mission_en = models.TextField(blank=True)
+    mission_sw = models.TextField(blank=True)
+    vision_en = models.TextField(blank=True)
+    vision_sw = models.TextField(blank=True)
+
+    # Orodha za dynamic
+    # services: [{"name_en","name_sw","desc_en","desc_sw"}]
+    services = models.JSONField(default=list, blank=True)
+    # why_us: [{"text_en","text_sw"}]
+    why_us = models.JSONField(default=list, blank=True)
+    # projects: [{"name","type","tech"}]
+    projects = models.JSONField(default=list, blank=True)
+    # facts: [{"label_en","label_sw","value"}]
+    facts = models.JSONField(default=list, blank=True)
+    # sections za ziada: [{"heading_en","heading_sw","body_en","body_sw"}]
+    sections = models.JSONField(default=list, blank=True)
+
+    pricing_note_en = models.TextField(blank=True)
+    pricing_note_sw = models.TextField(blank=True)
+
+    # Mawasiliano
+    email = models.EmailField(default='info@jamiitek.com')
+    phone = models.CharField(max_length=40, blank=True)
+    website = models.CharField(max_length=120, default='www.jamiitek.com')
+    address = models.CharField(max_length=200, default='Dar es Salaam, Tanzania')
+
+    logo_url = models.URLField(blank=True)
+    is_active = models.BooleanField(default=True,
+                                    help_text='Only the active profile is shown publicly')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-is_active', '-updated_at']
+
+    def __str__(self):
+        return f'{self.company_name}{" (active)" if self.is_active else ""}'
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if self.is_active:
+            CompanyProfile.objects.exclude(pk=self.pk).update(is_active=False)
+
+    @property
+    def public_url(self):
+        return '/company-profile/'
+
+
+# ============================================================
+# INVOICES (dynamic — kila aina ya malipo)
+# ============================================================
+
+class Invoice(models.Model):
+    TYPES = [
+        ('standard', 'Standard Invoice'),
+        ('proforma', 'Proforma Invoice'),
+        ('deposit', 'Deposit / Advance'),
+        ('balance', 'Balance / Final'),
+        ('recurring', 'Recurring (hosting, retainer)'),
+        ('credit', 'Credit Note'),
+    ]
+    STATUS = [
+        ('draft', 'Draft'),
+        ('sent', 'Sent to client'),
+        ('viewed', 'Viewed'),
+        ('partial', 'Partially paid'),
+        ('paid', 'Paid'),
+        ('overdue', 'Overdue'),
+        ('cancelled', 'Cancelled'),
+    ]
+
+    token = models.CharField(max_length=48, unique=True, editable=False, db_index=True)
+    invoice_number = models.CharField(max_length=40, blank=True,
+                                      help_text='Auto: INV-YYYY-NNNN if blank')
+    invoice_type = models.CharField(max_length=12, choices=TYPES, default='standard')
+
+    # Client (hiari kama contract/proposal)
+    client = models.ForeignKey('Client', on_delete=models.SET_NULL, null=True, blank=True,
+                               related_name='invoices')
+    client_name = models.CharField(max_length=160, blank=True)
+    client_email = models.EmailField(blank=True)
+    client_company = models.CharField(max_length=160, blank=True)
+    client_phone = models.CharField(max_length=40, blank=True)
+    client_address = models.CharField(max_length=240, blank=True)
+
+    title = models.CharField(max_length=200, default='Invoice')
+    project_name = models.CharField(max_length=200, blank=True)
+    issue_date = models.DateField(null=True, blank=True)
+    due_date = models.DateField(null=True, blank=True)
+
+    # Line items: [{"desc","qty","unit_price","amount"}]
+    line_items = models.JSONField(default=list, blank=True)
+    currency = models.CharField(max_length=8, default='TZS')
+    tax_percent = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True,
+                                      help_text='e.g. 18 for 18% VAT. Leave blank for none.')
+    discount_amount = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    amount_paid = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True,
+                                      help_text='For partial payments')
+
+    # Maelezo ya malipo: [{"method","details"}] mfano M-Pesa / Bank
+    payment_methods = models.JSONField(default=list, blank=True)
+    payment_terms = models.CharField(max_length=300, blank=True)
+    notes_en = models.TextField(blank=True)
+    notes_sw = models.TextField(blank=True)
+
+    status = models.CharField(max_length=12, choices=STATUS, default='draft')
+
+    # Branding
+    logo_url = models.URLField(blank=True)
+    provider_name = models.CharField(max_length=120, default='JamiiTek')
+    provider_rep = models.CharField(max_length=120, default='W. Chipindi')
+
+    paid_at = models.DateTimeField(null=True, blank=True)
+    paid_reference = models.CharField(max_length=120, blank=True,
+                                      help_text='M-Pesa / bank reference')
+    viewed_at = models.DateTimeField(null=True, blank=True)
+    sent_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'{self.invoice_number or "Invoice"} — {self.display_client} ({self.get_status_display()})'
+
+    def save(self, *args, **kwargs):
+        if not self.token:
+            self.token = secrets.token_urlsafe(24)
+        super().save(*args, **kwargs)
+        if not self.invoice_number and self.pk:
+            year = self.created_at.year if self.created_at else 2026
+            num = f'INV-{year}-{self.pk:04d}'
+            Invoice.objects.filter(pk=self.pk).update(invoice_number=num)
+            self.invoice_number = num
+
+    @property
+    def display_client(self):
+        if self.client_name:
+            return self.client_name
+        if self.client:
+            return self.client.name
+        return 'Client'
+
+    @property
+    def display_company(self):
+        if self.client_company:
+            return self.client_company
+        if self.client:
+            return self.client.company
+        return ''
+
+    @property
+    def display_email(self):
+        if self.client_email:
+            return self.client_email
+        if self.client:
+            return self.client.email
+        return ''
+
+    @property
+    def subtotal(self):
+        if self.line_items:
+            try:
+                return sum(float(it.get('amount', 0) or 0) for it in self.line_items)
+            except (ValueError, TypeError):
+                pass
+        return 0
+
+    @property
+    def discounted_subtotal(self):
+        total = self.subtotal
+        if self.discount_amount:
+            total -= float(self.discount_amount)
+        return max(0, total)
+
+    @property
+    def tax_amount(self):
+        if not self.tax_percent:
+            return 0
+        return self.discounted_subtotal * float(self.tax_percent) / 100
+
+    @property
+    def grand_total(self):
+        return self.discounted_subtotal + self.tax_amount
+
+    @property
+    def balance_due(self):
+        paid = float(self.amount_paid) if self.amount_paid else 0
+        return max(0, self.grand_total - paid)
+
+    @property
+    def is_paid(self):
+        return self.status == 'paid' or (self.grand_total > 0 and self.balance_due <= 0)
+
+    @property
+    def is_overdue(self):
+        from django.utils import timezone as _tz
+        if self.is_paid or not self.due_date:
+            return False
+        return self.due_date < _tz.now().date()
+
+    @property
+    def public_url(self):
+        return f'/invoice/{self.token}/'

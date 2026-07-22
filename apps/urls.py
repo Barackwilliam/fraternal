@@ -5,6 +5,7 @@ from . import views
 from . import blog_views
 from . import contract_views
 from . import proposal_views
+from . import docs_views
 from .views import select_website_type, dynamic_form, proposal_preview, generate_pdf
 from .views import templates_marketplace, template_preview, template_preview_raw
 from . import management_views
@@ -12,6 +13,22 @@ from . import client_portal_views as portal
 from builder import views as builder_views
 
 urlpatterns = [
+    # ── COMPANY PROFILE ─────────────────────────────────────
+    path('company-profile/', docs_views.company_profile_view, name='company_profile_view'),
+    path('company-profile/pdf/', docs_views.company_profile_pdf, name='company_profile_pdf'),
+    path('manage/profile/', docs_views.profile_builder, name='profile_builder'),
+    path('manage/profile/ai-full/', docs_views.profile_ai_full, name='profile_ai_full'),
+    path('manage/profile/ai-assist/', docs_views.profile_ai_assist, name='profile_ai_assist'),
+
+    # ── INVOICES ────────────────────────────────────────────
+    path('manage/invoices/', docs_views.invoice_list, name='invoice_list'),
+    path('manage/invoices/new/', docs_views.invoice_new, name='invoice_new'),
+    path('manage/invoices/<int:pk>/edit/', docs_views.invoice_edit, name='invoice_edit'),
+    path('manage/invoices/<int:pk>/mark-paid/', docs_views.invoice_mark_paid, name='invoice_mark_paid'),
+    path('manage/invoices/ai-assist/', docs_views.invoice_ai_assist, name='invoice_ai_assist'),
+    path('invoice/<str:token>/', docs_views.invoice_view, name='invoice_view'),
+    path('invoice/<str:token>/pdf/', docs_views.invoice_pdf, name='invoice_pdf'),
+
     # ── PROPOSAL BUILDER (ndani ya /manage/, staff-only) ────
     path('manage/proposals/', proposal_views.proposal_builder_list, name='proposal_builder_list'),
     path('manage/proposals/new/', proposal_views.proposal_builder_new, name='proposal_builder_new'),
@@ -19,6 +36,7 @@ urlpatterns = [
     path('manage/proposals/<int:pk>/ai-full/', proposal_views.proposal_ai_full, name='proposal_ai_full'),
     path('manage/proposals/ai-assist/', proposal_views.proposal_ai_assist, name='proposal_ai_assist'),
     path('manage/proposals/from-lead/<int:lead_id>/', proposal_views.proposal_from_lead, name='proposal_from_lead'),
+    path('manage/leads/', proposal_views.lead_list, name='lead_list'),
     # Proposal (mteja anafikia kwa link)
     path('proposal/<str:token>/', proposal_views.proposal_view, name='proposal_view'),
     path('proposal/<str:token>/accept/', proposal_views.proposal_accept, name='proposal_accept'),

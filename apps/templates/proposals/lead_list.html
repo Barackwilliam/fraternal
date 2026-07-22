@@ -1,0 +1,121 @@
+{% extends 'management/base.html' %}
+{% block title %}Client Requests{% endblock %}
+{% block extra_css %}
+<style>
+  .stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:22px}
+  .stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:18px 20px}
+  .stat-card:hover{border-color:var(--border-s)}
+  .stat-card .sv{font-family:var(--head);font-size:26px;font-weight:800;color:var(--text);margin-bottom:2px}
+  .stat-card .sl{font-family:var(--mono);font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:1px}
+  .stat-card.c-cyan .sv{color:var(--cyan)}
+  .stat-card.c-yellow .sv{color:var(--yellow)}
+  .stat-card.c-green .sv{color:var(--green)}
+
+  .lead{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);
+    margin-bottom:12px;transition:border-color .2s}
+  .lead:hover{border-color:var(--border-s)}
+  .lead-head{display:flex;align-items:center;gap:16px;padding:16px 20px;flex-wrap:wrap}
+  .lead-who{flex:1;min-width:200px}
+  .lead-name{font-weight:700;color:var(--text);font-size:14.5px}
+  .lead-meta{font-family:var(--mono);font-size:11px;color:var(--text-3);margin-top:3px}
+  .lead-meta a{color:var(--cyan);text-decoration:none}
+  .lead-type{font-family:var(--mono);font-size:11.5px;color:var(--purple);
+    background:var(--purple-d);border:1px solid rgba(139,92,246,.25);border-radius:100px;
+    padding:5px 13px;white-space:nowrap}
+  .lead-date{font-family:var(--mono);font-size:11.5px;color:var(--text-3);white-space:nowrap}
+  .lead-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .toggle{background:var(--card-s);border:1px solid var(--border);border-radius:8px;
+    padding:8px 13px;font-size:11.5px;font-family:var(--mono);color:var(--text-3);cursor:pointer}
+  .toggle:hover{border-color:var(--border-s);color:var(--cyan)}
+  .conv{background:linear-gradient(135deg,var(--green),#00c46a);color:#04120a;border:none;border-radius:8px;
+    padding:9px 15px;font-size:11.5px;font-weight:700;font-family:var(--mono);text-decoration:none;
+    display:inline-flex;align-items:center;gap:6px;transition:.2s;white-space:nowrap}
+  .conv:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(0,255,136,.28)}
+  .done{background:var(--green-d);color:var(--green);border:1px solid rgba(0,255,136,.25);
+    border-radius:100px;padding:5px 13px;font-size:11px;font-family:var(--mono);white-space:nowrap}
+
+  .lead-body{display:none;border-top:1px solid var(--border);padding:16px 20px;background:var(--card-s)}
+  .lead-body.open{display:block}
+  .dgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+  .ditem{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 13px}
+  .ditem .dk{font-family:var(--mono);font-size:10px;color:var(--text-3);text-transform:uppercase;
+    letter-spacing:.8px;margin-bottom:3px}
+  .ditem .dv{font-size:13px;color:var(--text-2);word-break:break-word}
+  .nodetail{font-family:var(--mono);font-size:12px;color:var(--text-3)}
+</style>
+{% endblock %}
+{% block content %}
+<div style="display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px;flex-wrap:wrap">
+  <div>
+    <h1 style="font-family:var(--head);font-size:22px;font-weight:800;color:var(--text);margin-bottom:3px">
+      <i class="fas fa-inbox" style="color:var(--cyan)"></i> Client Requests
+    </h1>
+    <div style="font-family:var(--mono);font-size:12px;color:var(--text-3)">
+      From the public "Start Your Project" form on jamiitek.com
+    </div>
+  </div>
+  <a href="/proposals/" target="_blank" class="jt-btn btn-ghost" style="font-size:12px">
+    <i class="fas fa-arrow-up-right-from-square"></i> View public form
+  </a>
+</div>
+
+<div class="stat-row">
+  <div class="stat-card c-cyan"><div class="sv">{{ total }}</div><div class="sl">Total Requests</div></div>
+  <div class="stat-card c-yellow"><div class="sv">{{ new_count }}</div><div class="sl">Not Yet Converted</div></div>
+  <div class="stat-card c-green"><div class="sv">{{ converted_count }}</div><div class="sl">Converted</div></div>
+</div>
+
+{% for r in rows %}
+<div class="lead">
+  <div class="lead-head">
+    <div class="lead-who">
+      <div class="lead-name">{{ r.name }}{% if r.company %} <span style="font-weight:400;color:var(--text-3)">· {{ r.company }}</span>{% endif %}</div>
+      <div class="lead-meta">
+        {% if r.email %}<a href="mailto:{{ r.email }}">{{ r.email }}</a>{% endif %}
+        {% if r.phone %} · {% if r.wa %}<a href="{{ r.wa }}" target="_blank">{{ r.phone }}</a>{% else %}{{ r.phone }}{% endif %}{% endif %}
+      </div>
+    </div>
+    <div class="lead-type">{{ r.website_type }}</div>
+    <div class="lead-date">{{ r.lead.created_at|date:'M j, Y' }}</div>
+    <div class="lead-actions">
+      {% if r.details %}
+      <button class="toggle" onclick="toggleLead({{ r.lead.pk }})" id="tg-{{ r.lead.pk }}">
+        <i class="fas fa-chevron-down"></i> {{ r.details|length }} details
+      </button>
+      {% endif %}
+      {% if r.converted %}
+      <span class="done"><i class="fas fa-check"></i> Converted</span>
+      {% endif %}
+      <a class="conv" href="{% url 'proposal_from_lead' r.lead.pk %}">
+        <i class="fas fa-wand-magic-sparkles"></i> {% if r.converted %}Convert again{% else %}Premium Proposal{% endif %}
+      </a>
+    </div>
+  </div>
+  {% if r.details %}
+  <div class="lead-body" id="lb-{{ r.lead.pk }}">
+    <div class="dgrid">
+      {% for d in r.details %}
+      <div class="ditem"><div class="dk">{{ d.label }}</div><div class="dv">{{ d.value }}</div></div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% empty %}
+<div class="jt-card" style="padding:0">
+  <div class="jt-empty"><div class="ei">📥</div>
+    <p>No client requests yet — they'll appear here when someone fills the "Start Your Project" form</p>
+  </div>
+</div>
+{% endfor %}
+
+<script>
+function toggleLead(pk){
+  const body=document.getElementById('lb-'+pk);
+  const btn=document.getElementById('tg-'+pk);
+  if(!body)return;
+  const open=body.classList.toggle('open');
+  btn.querySelector('i').className = open ? 'fas fa-chevron-up' : 'fas fa-chevron-down';
+}
+</script>
+{% endblock %}

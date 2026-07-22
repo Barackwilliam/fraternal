@@ -1,5 +1,6 @@
 """Proposal views — builder (staff), public link (client), accept/decline, PDF, AI."""
 import json
+import re
 from datetime import datetime
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse, JsonResponse
@@ -309,3 +310,98 @@ def proposal_from_lead(request, lead_id):
         }]
     proposal.save()
     return redirect('proposal_builder_edit', pk=proposal.pk)
+
+
+def _wa_link(phone):
+    """
+    Tengeneza wa.me link kutoka namba ya Tanzania.
+    0750910158 -> 255750910158 ; +255750... -> 255750... ; 255... -> 255...
+    Rudisha '' kama namba haifai.
+    """
+    if not phone:
+        return ''
+    digits = re.sub(r'\D', '', str(phone))
+    if not digits:
+        return ''
+    if digits.startswith('255'):
+        pass
+    elif digits.startswith('0'):
+        digits = '255' + digits[1:]
+    elif len(digits) == 9:          # 750910158
+        digits = '255' + digits
+    if len(digits) < 11:            # si namba kamili — usitengeneze link
+        return ''
+    return f'https://wa.me/{digits}'
+
+
+# ── LEADS (wateja waliojaza form ya "Start Your Project") ──
+
+@staff_member_required
+def lead_list(request):
+    """
+    Orodha ya leads — wateja waliojaza form ya umma (/proposals/).
+    Kila lead ina button ya kubadilisha kuwa Premium Proposal.
+    """
+    from .models import ProjectProposal
+    leads = (ProjectProposal.objects
+             .select_related('client', 'website_type')
+             .order_by('-created_at')[:200])
+
+    # Ni lead zipi tayari zimebadilishwa kuwa proposal?
+    converted_emails = set(
+        Proposal.objects.exclude(client_email='')
+        .values_list('client_email', flat=True)
+    )
+
+    rows = []
+    for lead in leads:
+        req = lead.requirements
+        if isinstance(req, str):
+            try:
+                req = json.loads(req)
+            except (json.JSONDecodeError, TypeError):
+                req = {}
+        if not isinstance(req, dict):
+            req = {}
+
+        email = (req.get('client_email') or
+                 getattr(lead.client, 'email', '') or '')
+
+        details = []
+        for key, value in req.items():
+            if key in _SKIP_KEYS or value in (None, '', [], {}):
+                continue
+            if isinstance(value, (list, tuple)):
+                value = ', '.join(str(v) for v in value)
+            elif isinstance(value, dict):
+                value = value.get('name') or str(value)
+            details.append({'label': _humanize_key(key), 'value': value})
+
+        # Reference design aliyochagua mteja (iko kwenye _SKIP_KEYS, lakini ni muhimu hapa)
+        ref = req.get('reference_template')
+        if isinstance(ref, dict) and ref.get('name'):
+            details.append({'label': 'Reference Design', 'value': ref['name']})
+        elif isinstance(ref, str) and ref.strip():
+            details.append({'label': 'Reference Design', 'value': ref})
+
+        phone = (req.get('client_phone') or
+                 getattr(lead.client, 'phone', '') or '')
+
+        rows.append({
+            'lead': lead,
+            'name': req.get('client_name') or getattr(lead.client, 'name', '') or '—',
+            'email': email,
+            'phone': phone,
+            'wa': _wa_link(phone),
+            'company': req.get('client_company') or getattr(lead.client, 'company', '') or '',
+            'website_type': getattr(lead.website_type, 'name', '—'),
+            'details': details,
+            'converted': bool(email) and email in converted_emails,
+        })
+
+    return render(request, 'proposals/lead_list.html', {
+        'rows': rows,
+        'total': len(rows),
+        'converted_count': sum(1 for r in rows if r['converted']),
+        'new_count': sum(1 for r in rows if not r['converted']),
+    })

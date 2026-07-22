@@ -712,3 +712,74 @@ class ProposalAdmin(admin.ModelAdmin):
     def builder_link(self, obj):
         return mark_safe(f'<a href="/manage/proposals/{obj.pk}/edit/" target="_blank">Open in Builder →</a>')
     builder_link.short_description = 'Builder'
+
+
+# ── COMPANY PROFILE + INVOICE ADMIN ──
+from .models import CompanyProfile, Invoice
+
+
+@admin.register(CompanyProfile)
+class CompanyProfileAdmin(admin.ModelAdmin):
+    save_on_top = True
+    list_display = ('company_name', 'is_active', 'updated_at', 'builder_link')
+    fieldsets = (
+        ('✨ Use the Company Profile builder', {
+            'fields': (),
+            'description': 'For the full editor with AI, use '
+                           '<a href="/manage/profile/" target="_blank">the Company Profile builder</a>.'
+        }),
+        ('Identity', {'fields': ('company_name', 'short_name', 'tagline_en', 'tagline_sw',
+                                 'subtitle_en', 'subtitle_sw', 'period', 'logo_url', 'is_active')}),
+        ('Content (English)', {'fields': ('about_en', 'mission_en', 'vision_en', 'pricing_note_en'),
+                               'classes': ('collapse',)}),
+        ('Content (Swahili)', {'fields': ('about_sw', 'mission_sw', 'vision_sw', 'pricing_note_sw'),
+                               'classes': ('collapse',)}),
+        ('Contact', {'fields': ('email', 'phone', 'website', 'address')}),
+    )
+
+    def builder_link(self, obj):
+        return mark_safe('<a href="/manage/profile/" target="_blank">Open builder →</a>')
+    builder_link.short_description = 'Builder'
+
+
+@admin.register(Invoice)
+class InvoiceAdmin(admin.ModelAdmin):
+    save_on_top = True
+    list_display = ('invoice_number', 'client_col', 'invoice_type', 'total_col',
+                    'balance_col', 'status', 'due_date', 'builder_link')
+    list_filter = ('status', 'invoice_type', 'currency', 'created_at')
+    search_fields = ('invoice_number', 'title', 'client_name', 'project_name', 'paid_reference')
+    readonly_fields = ('token', 'viewed_at', 'sent_at', 'created_at', 'updated_at')
+    fieldsets = (
+        ('✨ Use the Invoice builder', {
+            'fields': (),
+            'description': 'For live totals, VAT, payment methods and AI, use '
+                           '<a href="/manage/invoices/" target="_blank">the Invoice builder</a>.'
+        }),
+        ('Client (optional)', {'fields': ('client', 'client_name', 'client_email',
+                                          'client_company', 'client_phone', 'client_address')}),
+        ('Invoice', {'fields': ('invoice_number', 'invoice_type', 'title', 'project_name',
+                                'issue_date', 'due_date', 'status')}),
+        ('Amounts', {'fields': ('currency', 'tax_percent', 'discount_amount', 'amount_paid',
+                                'payment_terms', 'paid_reference', 'paid_at')}),
+        ('Notes', {'fields': ('notes_en', 'notes_sw'), 'classes': ('collapse',)}),
+        ('Branding', {'fields': ('provider_name', 'provider_rep', 'logo_url'), 'classes': ('collapse',)}),
+        ('Tracking', {'fields': ('token', 'viewed_at', 'sent_at', 'created_at', 'updated_at'),
+                      'classes': ('collapse',)}),
+    )
+
+    def client_col(self, obj):
+        return obj.display_client
+    client_col.short_description = 'Client'
+
+    def total_col(self, obj):
+        return f'{obj.currency} {obj.grand_total:,.0f}'
+    total_col.short_description = 'Total'
+
+    def balance_col(self, obj):
+        return '—' if obj.is_paid else f'{obj.balance_due:,.0f}'
+    balance_col.short_description = 'Balance'
+
+    def builder_link(self, obj):
+        return mark_safe(f'<a href="/manage/invoices/{obj.pk}/edit/" target="_blank">Open in Builder →</a>')
+    builder_link.short_description = 'Builder'
