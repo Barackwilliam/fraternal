@@ -123,6 +123,7 @@ urlpatterns = [
     path('portal/websites/<int:pk>/', portal.portal_website_detail, name='portal_website_detail'),
     path('portal/billing/', portal.portal_billing, name='portal_billing'),
     path('portal/billing/submit/', portal.portal_submit_payment, name='portal_submit_payment'),
+    path('portal/billing/invoice/', portal.portal_request_invoice, name='portal_request_invoice'),
     path('portal/notifications/', portal.portal_notifications, name='portal_notifications'),
     path('portal/profile/', portal.portal_profile, name='portal_profile'),
     path('portal/support/', portal.portal_support, name='portal_support'),

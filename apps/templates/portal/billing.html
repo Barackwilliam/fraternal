@@ -91,6 +91,27 @@
 
 @media(max-width:992px){.bill-stats{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:576px){.bill-stats{grid-template-columns:repeat(2,1fr)}.countdown-ring{display:none}}
+
+/* ── DURATION CARDS (1/3/6/12 miezi) ── */
+.dur-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:11px;margin-bottom:6px}
+.dur-empty{grid-column:1/-1;font-family:var(--mono);font-size:12px;color:var(--text-3);padding:16px;text-align:center;border:1.5px dashed var(--border);border-radius:var(--r-lg)}
+.dur{position:relative;border:1.5px solid var(--border);border-radius:var(--r-lg);padding:15px 13px;cursor:pointer;background:var(--card);transition:.18s;text-align:center}
+.dur:hover{border-color:var(--border-s);transform:translateY(-1px)}
+.dur.on{border-color:var(--cyan);background:var(--cyan-d);box-shadow:0 0 0 3px rgba(0,212,255,.10)}
+.dur .d-lbl{font-family:var(--mono);font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.dur.on .d-lbl{color:var(--cyan)}
+.dur .d-price{font-family:var(--head);font-size:19px;font-weight:800;color:var(--text);line-height:1.15}
+.dur .d-per{font-family:var(--mono);font-size:10.5px;color:var(--text-3);margin-top:3px}
+.dur .d-save{display:inline-block;margin-top:8px;font-family:var(--mono);font-size:10px;font-weight:700;background:var(--green-d);color:var(--green);border:1px solid rgba(0,255,136,.25);border-radius:100px;padding:3px 9px}
+.dur .d-best{position:absolute;top:-8px;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:9px;font-weight:700;background:var(--cyan);color:#04121e;padding:2px 9px;border-radius:100px;letter-spacing:.5px;white-space:nowrap}
+.amt-hint{font-family:var(--mono);font-size:11px;color:var(--text-3);margin-top:5px;min-height:15px}
+.amt-hint.ok{color:var(--green)}
+
+.inv-cta{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:10px;padding:11px 14px;background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg)}
+.inv-note{font-family:var(--mono);font-size:11.5px;color:var(--text-3)}
+.inv-btn{background:var(--purple-d);color:var(--purple);border:1px solid rgba(139,92,246,.3);border-radius:8px;padding:9px 14px;font-size:12px;font-weight:700;font-family:var(--mono);cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:.2s}
+.inv-btn:hover{background:var(--purple);color:#fff;box-shadow:0 0 16px rgba(139,92,246,.3)}
+.amt-hint.warn{color:var(--yellow)}
 </style>
 
 <div class="pg-head f0">
@@ -215,7 +236,7 @@
                 <label class="f-label">Which website is this payment for? *</label>
                 <select name="website" class="f-input" required>
                   <option value="">— Select website —</option>
-                  {% for w in websites %}<option value="{{ w.pk }}">{{ w.name }} — TZS {{ w.monthly_cost|floatformat:0 }}/mo</option>{% endfor %}
+                  {% for p in billing_plans %}<option value="{{ p.website.pk }}" data-opts="{% for o in p.options %}{{ o.months }}:{{ o.total|floatformat:0 }}:{{ o.per_month|floatformat:0 }}:{{ o.saving|floatformat:0 }}:{{ o.discount_pct|floatformat:0 }}{% if not forloop.last %},{% endif %}{% endfor %}">{{ p.website.name }} — TZS {{ p.website.monthly_cost|floatformat:0 }}/mo</option>{% endfor %}
                 </select>
               </div>
             </div>
@@ -223,18 +244,23 @@
           <div class="f-section">
             <div class="f-section-title">Payment Details</div>
             <div class="row g-3">
-              <div class="col-md-6">
-                <label class="f-label">Amount Paid (TZS) *</label>
-                <input type="number" name="amount" class="f-input" placeholder="e.g. 50000" required>
+              <div class="col-12">
+                <label class="f-label">Choose how long to pay for *</label>
+                <div class="dur-grid" id="durGrid">
+                  <div class="dur-empty">Select a website above to see prices</div>
+                </div>
+                <input type="hidden" name="months_covered" id="monthsInput" value="1">
+                <div class="inv-cta" id="invCta" style="display:none">
+                  <span class="inv-note">Need an invoice for your records?</span>
+                  <button type="button" class="inv-btn" onclick="requestInvoice()">
+                    <i class="fas fa-file-invoice"></i> Get invoice for this period
+                  </button>
+                </div>
               </div>
               <div class="col-md-6">
-                <label class="f-label">Months to Cover</label>
-                <select name="months_covered" class="f-input">
-                  <option value="1">1 Month</option>
-                  <option value="3">3 Months (save more)</option>
-                  <option value="6">6 Months</option>
-                  <option value="12">12 Months (best value)</option>
-                </select>
+                <label class="f-label">Amount Paid (TZS) *</label>
+                <input type="number" name="amount" id="amountInput" class="f-input" placeholder="e.g. 50000" required>
+                <div class="amt-hint" id="amtHint"></div>
               </div>
               <div class="col-md-6">
                 <label class="f-label">Payment Method</label>
@@ -379,4 +405,88 @@ function copyAcc(btn){
 }
 setTimeout(()=>{document.getElementById('bf1').style.width='100%'},400);
 </script>
+
+<script>
+(function(){
+  const sel = document.querySelector('select[name="website"]');
+  const grid = document.getElementById('durGrid');
+  const monthsInput = document.getElementById('monthsInput');
+  const amountInput = document.getElementById('amountInput');
+  const hint = document.getElementById('amtHint');
+  if(!sel || !grid) return;
+
+  const LABELS = {1:'1 Month', 3:'3 Months', 6:'6 Months', 12:'12 Months'};
+  let current = [];
+
+  const fmt = n => Number(n).toLocaleString();
+
+  function renderOptions(){
+    const opt = sel.options[sel.selectedIndex];
+    const raw = opt ? opt.getAttribute('data-opts') : null;
+    if(!raw){
+      grid.innerHTML = '<div class="dur-empty">Select a website above to see prices</div>';
+      current = []; hint.textContent = ''; return;
+    }
+    current = raw.split(',').map(part => {
+      const [months,total,per,saving,pct] = part.split(':').map(Number);
+      return {months,total,per,saving,pct};
+    });
+    grid.innerHTML = current.map(o => `
+      <div class="dur" data-months="${o.months}" onclick="selectDuration(${o.months})">
+        ${o.months===12 ? '<span class="d-best">BEST VALUE</span>' : ''}
+        <div class="d-lbl">${LABELS[o.months]||o.months+' Months'}</div>
+        <div class="d-price">TZS ${fmt(o.total)}</div>
+        <div class="d-per">TZS ${fmt(o.per)} / month</div>
+        ${o.saving>0 ? `<div class="d-save">Save ${fmt(o.saving)} (${o.pct}%)</div>` : ''}
+      </div>`).join('');
+    selectDuration(Number(monthsInput.value) || 1);
+  }
+
+  window.selectDuration = function(months){
+    const chosen = current.find(o => o.months === months) || current[0];
+    if(!chosen) return;
+    monthsInput.value = chosen.months;
+    amountInput.value = chosen.total;
+    grid.querySelectorAll('.dur').forEach(el =>
+      el.classList.toggle('on', Number(el.dataset.months) === chosen.months));
+    document.getElementById('invCta').style.display = 'flex';
+    hint.className = 'amt-hint ok';
+    hint.textContent = chosen.saving > 0
+      ? `Covers ${chosen.months} months — you save TZS ${fmt(chosen.saving)}`
+      : `Covers ${chosen.months} month${chosen.months>1?'s':''}`;
+  };
+
+  amountInput?.addEventListener('input', function(){
+    const chosen = current.find(o => o.months === Number(monthsInput.value));
+    if(!chosen) return;
+    const v = Number(this.value)||0;
+    if(v === chosen.total){ hint.className='amt-hint ok';
+      hint.textContent = `Covers ${chosen.months} months`; }
+    else if(v < chosen.total){ hint.className='amt-hint warn';
+      hint.textContent = `TZS ${fmt(chosen.total - v)} less than the ${chosen.months}-month price`; }
+    else { hint.className='amt-hint warn';
+      hint.textContent = `TZS ${fmt(v - chosen.total)} more than the ${chosen.months}-month price`; }
+  });
+
+
+  window.requestInvoice = function(){
+    const wid = sel.value;
+    if(!wid){ alert('Please select a website first.'); return; }
+    document.getElementById('invWebsite').value = wid;
+    document.getElementById('invMonths').value = monthsInput.value || 1;
+    document.getElementById('invForm').submit();
+  };
+
+  sel.addEventListener('change', renderOptions);
+  renderOptions();
+})();
+</script>
+
+
+<form method="post" action="{% url 'portal_request_invoice' %}" id="invForm" style="display:none">
+  {% csrf_token %}
+  <input type="hidden" name="website" id="invWebsite">
+  <input type="hidden" name="months" id="invMonths">
+</form>
+
 {% endblock %}

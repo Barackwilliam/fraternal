@@ -398,7 +398,14 @@
           </div>
           <div class="col-6">
             <label class="f-label">Months Covered</label>
-            <input type="number" name="months_covered" class="f-input" value="1" min="1" max="24">
+            <select name="months_covered" class="f-input" id="mgMonths">
+              {% for o in website.billing_options %}
+              <option value="{{ o.months }}" data-total="{{ o.total|floatformat:0 }}">
+                {{ o.label_en }} — TZS {{ o.total|floatformat:0 }}{% if o.saving %} (save {{ o.saving|floatformat:0 }}){% endif %}
+              </option>
+              {% endfor %}
+              <option value="24">Custom / other</option>
+            </select>
           </div>
           <div class="col-6">
             <label class="f-label">Payment Method</label>
@@ -546,4 +553,19 @@ function updateActionFields() {
 }
 updateActionFields();
 </script>
+
+<script>
+(function(){
+  const sel=document.getElementById('mgMonths');
+  if(!sel)return;
+  const amt=sel.closest('form')?.querySelector('input[name="amount"]');
+  if(!amt)return;
+  function fill(){
+    const t=sel.options[sel.selectedIndex]?.getAttribute('data-total');
+    if(t) amt.value=t;
+  }
+  sel.addEventListener('change',fill);
+})();
+</script>
+
 {% endblock %}

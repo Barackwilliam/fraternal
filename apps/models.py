@@ -191,6 +191,22 @@ class ManagedWebsite(models.Model):
         decimal_places=2
     )
 
+    # ── PUNGUZO KWA MALIPO YA MUDA MREFU ──
+    # Mteja akilipa miezi mingi kwa mkupuo, anapata punguzo.
+    # Hii inapunguza usumbufu wa malipo ya kila mwezi.
+    discount_3m = models.DecimalField(
+        max_digits=5, decimal_places=2, default=5,
+        verbose_name='3-month discount (%)',
+        help_text='Percent off when paying for 3 months at once')
+    discount_6m = models.DecimalField(
+        max_digits=5, decimal_places=2, default=10,
+        verbose_name='6-month discount (%)',
+        help_text='Percent off when paying for 6 months at once')
+    discount_12m = models.DecimalField(
+        max_digits=5, decimal_places=2, default=20,
+        verbose_name='12-month discount (%)',
+        help_text='Percent off when paying for 12 months at once')
+
     # Notification Settings
     auto_suspend_on_expiry = models.BooleanField(default=True)
     send_expiry_warnings = models.BooleanField(default=True)
@@ -231,6 +247,51 @@ class ManagedWebsite(models.Model):
     @property
     def total_paid(self):
         return sum(p.amount for p in self.payments.all())
+
+    # ── BEI ZA MUDA (1 / 3 / 6 / 12 miezi) ──
+
+    def discount_for(self, months):
+        """Punguzo (%) kwa idadi ya miezi."""
+        return {3: self.discount_3m, 6: self.discount_6m,
+                12: self.discount_12m}.get(int(months), 0) or 0
+
+    def price_for(self, months):
+        """
+        Bei ya jumla kwa idadi ya miezi, punguzo likishawekwa.
+        Rudisha dict: base, discount_pct, discount_amount, total, per_month, saving.
+        """
+        months = int(months)
+        monthly = float(self.monthly_cost or 0)
+        base = monthly * months
+        pct = float(self.discount_for(months))
+        discount = base * pct / 100
+        total = base - discount
+        return {
+            'months': months,
+            'base': base,
+            'discount_pct': pct,
+            'discount_amount': discount,
+            'total': total,
+            'per_month': (total / months) if months else 0,
+            'saving': discount,
+        }
+
+    @property
+    def billing_options(self):
+        """Chaguo zote za malipo — kwa ajili ya portal na management form."""
+        labels = {
+            1: ('1 Month', 'Mwezi 1'),
+            3: ('3 Months', 'Miezi 3'),
+            6: ('6 Months', 'Miezi 6'),
+            12: ('12 Months', 'Mwaka 1'),
+        }
+        options = []
+        for m in (1, 3, 6, 12):
+            opt = self.price_for(m)
+            opt['label_en'], opt['label_sw'] = labels[m]
+            opt['is_best'] = (m == 12)
+            options.append(opt)
+        return options
 
     def __str__(self):
         return f"{self.name} ({self.client.name})"

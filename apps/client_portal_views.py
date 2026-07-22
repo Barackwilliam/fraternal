@@ -347,6 +347,12 @@ def portal_billing(request):
         if w.is_overdue or (w.days_until_expiry is not None and w.days_until_expiry <= 14)
     ])
 
+    # Chaguo za muda (1/3/6/12) kwa kila tovuti — na bei halisi + punguzo
+    billing_plans = [
+        {'website': w, 'options': w.billing_options}
+        for w in websites
+    ]
+
     # NMB payment details from settings or hardcoded
     payment_info = {
         'bank': 'NMB Bank',
@@ -364,6 +370,7 @@ def portal_billing(request):
         'total_paid': total_paid,
         'total_due': total_due,
         'payment_info': payment_info,
+        'billing_plans': billing_plans,
     })
 
 
@@ -607,3 +614,88 @@ def portal_dns_manager(request, pk):
         'domain':  domain,
         'records': records,
     })
+
+# ── ANKARA YA KUONGEZA HOSTING (mteja anaomba mwenyewe) ────────────
+
+@client_required
+@require_POST
+def portal_request_invoice(request):
+    """
+    Mteja anachagua muda (1/3/6/12 miezi) na kuomba ankara.
+    Inaunda Invoice yenye bei sahihi + punguzo + njia za kulipa,
+    kisha inampeleka kwenye ankara moja kwa moja.
+    """
+    from .models import Invoice
+    client = request.client_profile
+
+    website_pk = request.POST.get('website')
+    try:
+        months = int(request.POST.get('months', 1))
+    except (TypeError, ValueError):
+        months = 1
+    if months not in (1, 3, 6, 12):
+        months = 1
+
+    try:
+        website = ManagedWebsite.objects.get(pk=website_pk, client=client)
+    except ManagedWebsite.DoesNotExist:
+        messages.error(request, 'Website not found.')
+        return redirect('portal_billing')
+
+    pricing = website.price_for(months)
+    if not pricing['total']:
+        messages.error(request, 'No hosting price is set for this website. Please contact us.')
+        return redirect('portal_billing')
+
+    label = {1: '1 month', 3: '3 months', 6: '6 months', 12: '12 months'}[months]
+
+    # Muda mpya utakaoanzia (kutoka mwisho wa sasa, au leo kama umeshapita)
+    start = website.hosting_end_date if (website.hosting_end_date and
+                                         website.hosting_end_date >= date.today()) else date.today()
+    try:
+        from dateutil.relativedelta import relativedelta
+        new_end = start + relativedelta(months=months)
+    except ImportError:
+        new_end = start + timedelta(days=30 * months)
+
+    desc = f'Hosting renewal — {website.name} ({label}: {start:%d %b %Y} → {new_end:%d %b %Y})'
+
+    invoice = Invoice.objects.create(
+        client=client,
+        client_name=client.name,
+        client_email=client.email or '',
+        client_company=getattr(client, 'company', '') or '',
+        client_phone=getattr(client, 'phone', '') or '',
+        title=f'Hosting Renewal — {website.name}',
+        project_name=website.name,
+        invoice_type='recurring',
+        status='sent',
+        issue_date=date.today(),
+        due_date=date.today() + timedelta(days=7),
+        currency='TZS',
+        line_items=[{
+            'desc': desc,
+            'qty': 1,
+            'unit_price': round(pricing['total']),
+            'amount': round(pricing['total']),
+        }],
+        payment_methods=[
+            {'method': 'NMB Bank', 'details': f"{getattr(settings, 'NMB_ACCOUNT', '21410034200')} — JamiiTek Technologies"},
+            {'method': 'M-Pesa', 'details': getattr(settings, 'MPESA_NUMBER', '0750910158') + ' — JamiiTek'},
+        ],
+        payment_terms='Please pay by the due date to avoid service interruption.',
+        notes_en=(f'This invoice covers {label} of hosting for {website.name}. '
+                  f'You save TZS {pricing["saving"]:,.0f} by paying for {label} at once.'
+                  if pricing['saving'] else
+                  f'This invoice covers {label} of hosting for {website.name}.'),
+        notes_sw=(f'Ankara hii ni kwa ajili ya hosting ya {website.name} kwa {label}. '
+                  f'Unaokoa TZS {pricing["saving"]:,.0f} kwa kulipa kwa mkupuo.'
+                  if pricing['saving'] else
+                  f'Ankara hii ni kwa ajili ya hosting ya {website.name} kwa {label}.'),
+        sent_at=timezone.now(),
+    )
+
+    messages.success(request,
+                     f'Invoice {invoice.invoice_number} created for {label}. '
+                     f'You can download it or pay using the details shown.')
+    return redirect(invoice.public_url)
