@@ -163,7 +163,7 @@
     <div class="sec f2">
       <div class="sec-head">
         <div class="sec-title"><i class="fas fa-receipt" style="color:var(--green)"></i> Payment History</div>
-        <span style="font-family:var(--mono);font-size:11px;color:var(--green)">TZS {{ total_paid|floatformat:0 }} paid</span>
+        <span style="font-family:var(--mono);font-size:11px;color:var(--green)">{{ months_paid }} month{{ months_paid|pluralize }} covered</span>
       </div>
       {% if payments %}
       <div style="overflow-x:auto">

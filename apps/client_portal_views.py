@@ -203,8 +203,9 @@ def portal_dashboard(request):
     email_plans = EmailHostingPlan.objects.filter(client=client)
     today       = date.today()
 
-    total_paid = HostingPayment.objects.filter(
-        website__client=client).aggregate(total=Sum('amount'))['total'] or 0
+    # Hakuna jumla ya pesa — mteja anaona AWAMU na mwenendo badala yake
+    from . import payment_history as ph_service
+    history = ph_service.build_history(client, websites)
     notifications = ClientNotification.objects.filter(
         client=client).order_by('-sent_at')[:5]
 
@@ -237,20 +238,13 @@ def portal_dashboard(request):
 
     # Payment chart - last 6 months
     try:
-        from dateutil.relativedelta import relativedelta
-        payments_qs = HostingPayment.objects.filter(website__client=client).order_by('payment_date')
-        months_data = {}
-        for p in payments_qs:
-            key = p.payment_date.strftime('%b %Y')
-            months_data[key] = months_data.get(key, 0) + float(p.amount)
-        chart_labels, chart_values = [], []
-        for i in range(5, -1, -1):
-            m = today - relativedelta(months=i)
-            chart_labels.append(m.strftime('%b'))
-            chart_values.append(months_data.get(m.strftime('%b %Y'), 0))
+        # Chart inaonyesha SIKU ZA KUCHELEWA kwa kila awamu — si pesa
+        chart_labels = history['chart']['labels']
+        chart_values = history['chart']['values']
+        chart_colors = history['chart']['colors']
+        chart_names  = history['chart']['names']
     except Exception:
-        chart_labels = ['Jan','Feb','Mar','Apr','May','Jun']
-        chart_values = [0,0,0,0,0,0]
+        chart_labels, chart_values, chart_colors, chart_names = [], [], [], []
 
     # Hosting expiry timeline
     expiry_data = []
@@ -283,12 +277,15 @@ def portal_dashboard(request):
         'websites':      websites,
         'domains':       domains,
         'email_plans':   email_plans,
-        'total_paid':    total_paid,
+        'history':       history,
+        'pay_stats':     history['stats'],
         'notifications': notifications,
         'alerts':        alerts,
         'today':         today,
         'chart_labels':  _json.dumps(chart_labels),
         'chart_values':  _json.dumps(chart_values),
+        'chart_colors':  _json.dumps(chart_colors),
+        'chart_names':   _json.dumps(chart_names),
         'expiry_data':   _json.dumps(expiry_data),
         'health':        health,
         'bot_client':    bot_client,
@@ -317,8 +314,10 @@ def portal_website_detail(request, pk):
     notifications = ClientNotification.objects.filter(website=website).order_by('-sent_at')[:20]
     features = WebsiteFeature.objects.filter(website=website)
 
-    total_paid = payments.aggregate(total=Sum('amount'))['total'] or 0
     months_paid = payments.aggregate(total=Sum('months_covered'))['total'] or 0
+    from . import payment_history as ph_service
+    phases = list(reversed(ph_service.website_phases(website)))
+    coverage = ph_service.coverage_bar(website)
 
     return render(request, 'portal/website_detail.html', {
         'title': website.name,
@@ -327,7 +326,8 @@ def portal_website_detail(request, pk):
         'payments': payments,
         'notifications': notifications,
         'features': features,
-        'total_paid': total_paid,
+        'phases': phases,
+        'coverage': coverage,
         'months_paid': months_paid,
     })
 
@@ -341,7 +341,9 @@ def portal_billing(request):
     payments = HostingPayment.objects.filter(
         website__client=client).order_by('-payment_date').select_related('website')
 
-    total_paid = payments.aggregate(total=Sum('amount'))['total'] or 0
+    # Hakuna jumla ya pesa — awamu na mwenendo badala yake
+    from . import payment_history as ph_service
+    history = ph_service.build_history(client, websites)
     total_due = sum([
         w.monthly_cost for w in websites
         if w.is_overdue or (w.days_until_expiry is not None and w.days_until_expiry <= 14)
@@ -367,7 +369,8 @@ def portal_billing(request):
         'client': client,
         'websites': websites,
         'payments': payments,
-        'total_paid': total_paid,
+        'history': history,
+        'pay_stats': history['stats'],
         'total_due': total_due,
         'payment_info': payment_info,
         'billing_plans': billing_plans,
@@ -563,7 +566,7 @@ def portal_email_hosting(request):
     email_plans = EmailHostingPlan.objects.filter(client=client).select_related('website')
     payments    = EmailHostingPayment.objects.filter(
         plan__client=client).select_related('plan').order_by('-payment_date')
-    total_paid  = sum(p.amount for p in payments)
+    months_paid = sum(getattr(p, 'months_covered', 0) or 0 for p in payments)
     payment_info = {
         'bank':           'NMB Bank',
         'account_name':   'JamiiTek Technologies',
@@ -574,7 +577,7 @@ def portal_email_hosting(request):
         'client': client,
         'email_plans': email_plans,
         'payments': payments,
-        'total_paid': total_paid,
+        'pay_stats': history['stats'],
         'payment_info': payment_info,
     })
 

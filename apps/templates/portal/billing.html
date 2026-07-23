@@ -112,6 +112,18 @@
 .inv-btn{background:var(--purple-d);color:var(--purple);border:1px solid rgba(139,92,246,.3);border-radius:8px;padding:9px 14px;font-size:12px;font-weight:700;font-family:var(--mono);cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:.2s}
 .inv-btn:hover{background:var(--purple);color:#fff;box-shadow:0 0 16px rgba(139,92,246,.3)}
 .amt-hint.warn{color:var(--yellow)}
+.ph-row2{display:flex;align-items:center;gap:13px;padding:12px 15px;border-bottom:1px solid var(--border)}
+.ph-row2:last-child{border-bottom:none}
+.ph-idx{width:26px;height:26px;border-radius:50%;background:var(--cyan-d);color:var(--cyan);
+  display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;
+  font-weight:700;flex-shrink:0;border:1px solid rgba(0,212,255,.2)}
+.ph-body{flex:1;min-width:0}
+.ph-body b{display:block;font-size:13.5px;color:var(--text)}
+.ph-body span{font-family:var(--mono);font-size:10.5px;color:var(--text-3)}
+.ph-badge{font-family:var(--mono);font-size:10px;padding:5px 11px;border-radius:100px;white-space:nowrap}
+.ph-badge.ok{background:var(--green-d);color:var(--green);border:1px solid rgba(0,255,136,.2)}
+.ph-badge.bad{background:var(--red-d);color:var(--red);border:1px solid rgba(255,59,92,.2)}
+
 </style>
 
 <div class="pg-head f0">
@@ -126,11 +138,11 @@
 <div class="bill-stats">
   <div class="bsc f0" style="--ac:var(--green)">
     <div class="bsc-top">
-      <div class="bsc-ico" style="background:var(--green-d);color:var(--green)"><i class="fas fa-coins"></i></div>
-      <span class="bsc-badge" style="background:rgba(0,255,136,.08);color:var(--green);border:1px solid rgba(0,255,136,.2)">LIFETIME</span>
+      <div class="bsc-ico" style="background:var(--green-d);color:var(--green)"><i class="fas fa-calendar-check"></i></div>
+      <span class="bsc-badge" style="background:rgba(0,255,136,.08);color:var(--green);border:1px solid rgba(0,255,136,.2)">{{ pay_stats.total_phases }} PHASE{{ pay_stats.total_phases|pluralize|upper }}</span>
     </div>
-    <div class="bsc-val" style="color:var(--green)">{{ total_paid|floatformat:0 }}</div>
-    <div class="bsc-label">Total Paid (TZS)</div>
+    <div class="bsc-val" style="color:var(--green)">{{ pay_stats.on_time_pct }}%</div>
+    <div class="bsc-label">Paid On Time</div>
     <div class="bsc-bar"><div class="bsc-fill" id="bf1" style="background:linear-gradient(90deg,#00ff88,#00d4ff);width:0"></div></div>
   </div>
   <div class="bsc f1" style="--ac:var(--red)">
@@ -369,7 +381,7 @@
     <div class="sec f3">
       <div class="sec-head">
         <div class="sec-title"><i class="fas fa-clock-rotate-left" style="color:var(--green)"></i> Recent Payments</div>
-        <span style="font-family:var(--mono);font-size:11px;color:var(--green)">TZS {{ total_paid|floatformat:0 }}</span>
+        <span style="font-family:var(--mono);font-size:11px;color:var(--green)">{{ pay_stats.months_covered }} month{{ pay_stats.months_covered|pluralize }} covered</span>
       </div>
       {% for p in payments|slice:":6" %}
       <div class="pay-row">
@@ -488,5 +500,36 @@ setTimeout(()=>{document.getElementById('bf1').style.width='100%'},400);
   <input type="hidden" name="website" id="invWebsite">
   <input type="hidden" name="months" id="invMonths">
 </form>
+
+
+    <!-- PAYMENT PHASES (full) -->
+    <div class="sec f3" style="margin-top:18px">
+      <div class="sec-head">
+        <div class="sec-title"><i class="fas fa-layer-group" style="color:var(--cyan)"></i> All Payment Phases</div>
+        <span style="font-family:var(--mono);font-size:11px;color:var(--text-3)">
+          {{ pay_stats.on_time }} on time · {{ pay_stats.late }} late
+        </span>
+      </div>
+      {% if history.phases %}
+        {% for ph in history.phases %}
+        <div class="ph-row2">
+          <span class="ph-idx">{{ ph.index }}</span>
+          <div class="ph-body">
+            <b>{{ ph.website_name }} — {{ ph.months }} month{{ ph.months|pluralize }}</b>
+            <span>Covered {{ ph.period_start|date:'d M Y' }} → {{ ph.period_end|date:'d M Y' }} · paid {{ ph.paid_on|date:'d M Y' }}</span>
+          </div>
+          <span class="ph-badge {% if ph.status == 'late' %}bad{% else %}ok{% endif %}">
+            {% if ph.status == 'early' %}{{ ph.days_late|cut:"-" }}d early
+            {% elif ph.status == 'on_time' %}on time
+            {% else %}{{ ph.days_late }}d late{% endif %}
+          </span>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div style="text-align:center;padding:26px;color:var(--text-3);font-family:var(--mono);font-size:12px">
+          No payment phases yet
+        </div>
+      {% endif %}
+    </div>
 
 {% endblock %}

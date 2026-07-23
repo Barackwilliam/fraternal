@@ -25,6 +25,35 @@
 .chart-card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:18px}
 .chart-card-head{padding:16px 20px 0;display:flex;align-items:center;justify-content:space-between}
 .chart-title{font-family:var(--head);font-size:15px;font-weight:700;color:var(--text)}
+/* ── PAYMENT RECORD ── */
+.rec-row{display:flex;gap:10px;margin-top:14px}
+.rec-item{flex:1;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);
+  border-radius:10px;padding:9px 6px;text-align:center}
+.rec-item b{display:block;font-family:var(--head);font-size:19px;font-weight:800;line-height:1.1}
+.rec-item span{font-family:var(--mono);font-size:9.5px;color:rgba(240,242,255,.4);
+  text-transform:uppercase;letter-spacing:.6px}
+.trend-chip{margin-top:12px;font-family:var(--mono);font-size:10.5px;padding:7px 11px;
+  border-radius:8px;display:flex;align-items:center;gap:7px}
+.trend-chip.up{background:rgba(0,255,136,.08);color:#00ff88;border:1px solid rgba(0,255,136,.18)}
+.trend-chip.down{background:rgba(255,59,92,.08);color:#ff3b5c;border:1px solid rgba(255,59,92,.18)}
+.trend-chip.flat{background:rgba(255,255,255,.03);color:rgba(240,242,255,.45);border:1px solid rgba(255,255,255,.07)}
+/* ── PHASES ── */
+.ph-row{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:10px;
+  background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);margin-bottom:8px}
+.ph-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.ph-dot.ok{background:#00ff88;box-shadow:0 0 7px rgba(0,255,136,.5)}
+.ph-dot.bad{background:#ff3b5c;box-shadow:0 0 7px rgba(255,59,92,.5)}
+.ph-main{flex:1;min-width:0}
+.ph-main b{font-size:13px;color:var(--text);display:block}
+.ph-main span{font-family:var(--mono);font-size:10.5px;color:rgba(240,242,255,.4)}
+.ph-tag{font-family:var(--mono);font-size:10px;padding:4px 10px;border-radius:100px;white-space:nowrap}
+.ph-tag.ok{background:rgba(0,255,136,.09);color:#00ff88}
+.ph-tag.bad{background:rgba(255,59,92,.09);color:#ff3b5c}
+.gap-row{display:flex;align-items:center;gap:11px;padding:10px 13px;border-radius:9px;
+  background:rgba(255,59,92,.05);border-left:3px solid rgba(255,59,92,.4);margin-bottom:7px;
+  font-family:var(--mono);font-size:11px;color:rgba(240,242,255,.6)}
+.gap-row b{color:#ff3b5c}
+
 .chart-sub{font-family:var(--mono);font-size:10px;color:var(--text-3);letter-spacing:1px;text-transform:uppercase}
 .chart-body{padding:14px 16px 18px}
 
@@ -128,11 +157,11 @@
   </div>
   <div class="dsc fade-up-3">
     <div class="dsc-top">
-      <div class="dsc-ico" style="background:rgba(0,255,136,.1);color:var(--green)"><i class="fas fa-coins"></i></div>
-      <span class="dsc-trend" style="background:rgba(0,255,136,.08);color:var(--green)">TZS</span>
+      <div class="dsc-ico" style="background:rgba(0,255,136,.1);color:var(--green)"><i class="fas fa-calendar-check"></i></div>
+      <span class="dsc-trend" style="background:rgba(0,255,136,.08);color:var(--green)">{{ pay_stats.total_phases }} phase{{ pay_stats.total_phases|pluralize }}</span>
     </div>
-    <div class="dsc-val" style="color:var(--green);font-size:20px">{{ total_paid|floatformat:0 }}</div>
-    <div class="dsc-label">Total Payments</div>
+    <div class="dsc-val" style="color:var(--green);font-size:20px">{{ pay_stats.on_time_pct }}%</div>
+    <div class="dsc-label">Paid On Time</div>
     <div class="dsc-bar"><div class="dsc-bar-fill" id="b4" style="background:linear-gradient(90deg,#00ff88,#00d4ff);width:0"></div></div>
   </div>
 </div>
@@ -144,7 +173,7 @@
     <div class="chart-card fade-up">
       <div class="chart-card-head">
         <div>
-          <div class="chart-title"><i class="fas fa-chart-area" style="color:var(--cyan);margin-right:8px"></i>Payment History</div>
+          <div class="chart-title"><i class="fas fa-chart-simple" style="color:var(--cyan);margin-right:8px"></i>Payment Timing — days early or late</div>
           <div class="chart-sub" style="margin-top:3px">Last 6 months — TZS</div>
         </div>
       </div>
@@ -152,6 +181,65 @@
     </div>
 
     <!-- EXPIRY TIMELINE -->
+    <!-- PAYMENT PHASES -->
+    <div class="chart-card fade-up-2 mb-3">
+      <div class="chart-card-head">
+        <div>
+          <div class="chart-title"><i class="fas fa-layer-group" style="color:var(--cyan);margin-right:8px"></i>Payment Phases</div>
+          <div class="chart-sub" style="margin-top:3px">Each renewal and the period it covered</div>
+        </div>
+      </div>
+      <div class="chart-body">
+        {% if history.phases %}
+          {% for ph in history.phases|slice:":8" %}
+          <div class="ph-row">
+            <span class="ph-dot {% if ph.status == 'late' %}bad{% else %}ok{% endif %}"></span>
+            <div class="ph-main">
+              <b>Phase {{ ph.index }} — {{ ph.months }} month{{ ph.months|pluralize }}</b>
+              <span>{{ ph.website_name }} · {{ ph.period_start|date:'d M Y' }} → {{ ph.period_end|date:'d M Y' }}</span>
+            </div>
+            <span class="ph-tag {% if ph.status == 'late' %}bad{% else %}ok{% endif %}">
+              {% if ph.status == 'early' %}{{ ph.days_late|cut:"-" }}d early
+              {% elif ph.status == 'on_time' %}on time
+              {% else %}{{ ph.days_late }}d late{% endif %}
+            </span>
+          </div>
+          {% endfor %}
+          {% if history.phases|length > 8 %}
+          <div style="text-align:center;margin-top:10px">
+            <a href="{% url 'portal_billing' %}" style="font-family:var(--mono);font-size:11px;color:var(--cyan);text-decoration:none">
+              View all {{ history.phases|length }} phases →
+            </a>
+          </div>
+          {% endif %}
+        {% else %}
+        <div style="text-align:center;padding:30px;color:rgba(240,242,255,.35);font-family:var(--mono);font-size:12px">
+          No payment phases yet
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if history.gaps %}
+    <!-- UNPAID DAYS -->
+    <div class="chart-card fade-up-3 mb-3">
+      <div class="chart-card-head">
+        <div>
+          <div class="chart-title"><i class="fas fa-calendar-xmark" style="color:#ff3b5c;margin-right:8px"></i>Days Not Covered</div>
+          <div class="chart-sub" style="margin-top:3px">Periods that started before payment arrived — {{ history.stats.total_days_unpaid }} day{{ history.stats.total_days_unpaid|pluralize }} in total</div>
+        </div>
+      </div>
+      <div class="chart-body">
+        {% for g in history.gaps %}
+        <div class="gap-row">
+          <i class="fas fa-triangle-exclamation" style="color:#ff3b5c"></i>
+          <div>{{ g.website_name }} · {{ g.from|date:'d M Y' }} → {{ g.to|date:'d M Y' }} — <b>{{ g.days }} day{{ g.days|pluralize }}</b></div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
     <div class="chart-card fade-up-1">
       <div class="chart-card-head">
         <div>
@@ -294,15 +382,31 @@
       </div>
     </div>
 
-    <!-- TOTAL PAID + MINI CHART -->
+    <!-- PAYMENT RECORD -->
     <div class="chart-card fade-up-1 mb-3">
       <div class="chart-card-head" style="padding-bottom:4px">
-        <div class="chart-title"><i class="fas fa-coins" style="color:var(--green);margin-right:8px"></i>Total Payments</div>
+        <div class="chart-title"><i class="fas fa-calendar-check" style="color:var(--green);margin-right:8px"></i>Your Payment Record</div>
       </div>
       <div style="padding:6px 16px 16px">
-        <div class="paid-num">{{ total_paid|floatformat:0 }}</div>
-        <div class="paid-sub">Tanzanian Shillings</div>
+        {% if pay_stats.total_phases %}
+        <div class="paid-num">{{ pay_stats.on_time_pct }}<span style="font-size:22px">%</span></div>
+        <div class="paid-sub">paid on time · {{ pay_stats.months_covered }} month{{ pay_stats.months_covered|pluralize }} covered</div>
+        <div class="rec-row">
+          <div class="rec-item"><b style="color:var(--green)">{{ pay_stats.on_time }}</b><span>on time</span></div>
+          <div class="rec-item"><b style="color:{% if pay_stats.late %}var(--red){% else %}var(--muted){% endif %}">{{ pay_stats.late }}</b><span>late</span></div>
+          <div class="rec-item"><b style="color:var(--cyan)">{{ pay_stats.current_streak }}</b><span>streak</span></div>
+        </div>
+        {% if pay_stats.trend == 'improving' %}
+        <div class="trend-chip up"><i class="fas fa-arrow-trend-up"></i> Improving — you're paying earlier than before</div>
+        {% elif pay_stats.trend == 'slipping' %}
+        <div class="trend-chip down"><i class="fas fa-arrow-trend-down"></i> Payments have been arriving later recently</div>
+        {% else %}
+        <div class="trend-chip flat"><i class="fas fa-equals"></i> Steady payment pattern</div>
+        {% endif %}
         <div style="margin-top:14px"><canvas id="miniChart" height="50"></canvas></div>
+        {% else %}
+        <div class="paid-sub" style="padding:18px 0">No payment history yet.</div>
+        {% endif %}
       </div>
     </div>
 
@@ -356,52 +460,66 @@ Chart.defaults.font.size = 10;
 
 const labels = {{ chart_labels|safe }};
 const vals   = {{ chart_values|safe }};
+const colors = {{ chart_colors|safe }};
+const names  = {{ chart_names|safe }};
 
-// Payment area chart
+// Payment timing chart — siku za kuchelewa (chanya) au kulipa mapema (hasi)
 const ctx = document.getElementById('payChart').getContext('2d');
-const grad = ctx.createLinearGradient(0,0,0,140);
-grad.addColorStop(0,'rgba(0,212,255,0.28)');
-grad.addColorStop(1,'rgba(0,212,255,0)');
-new Chart(ctx, {
-  type:'line',
-  data:{
-    labels,
-    datasets:[{
-      data:vals, fill:true,
-      backgroundColor:grad,
-      borderColor:'#00d4ff', borderWidth:2.5,
-      pointBackgroundColor:'#00d4ff',
-      pointBorderColor:'#050810', pointBorderWidth:2,
-      pointRadius:5, pointHoverRadius:7,
-      tension:0.4
-    }]
-  },
-  options:{
-    responsive:true,
-    plugins:{
-      legend:{display:false},
-      tooltip:{
-        backgroundColor:'rgba(5,8,16,.95)',
-        borderColor:'rgba(0,212,255,.2)', borderWidth:1,
-        callbacks:{label:c=>' TZS '+c.parsed.y.toLocaleString()}
-      }
+if (labels.length) {
+  new Chart(ctx, {
+    type:'bar',
+    data:{
+      labels,
+      datasets:[{
+        data:vals,
+        backgroundColor:colors.map(c=>c+'cc'),
+        borderColor:colors, borderWidth:1.5,
+        borderRadius:5, barPercentage:0.62
+      }]
     },
-    scales:{
-      x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'rgba(240,242,255,.4)'}},
-      y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'rgba(240,242,255,.4)',callback:v=>v>=1000?(v/1000).toFixed(0)+'k':v}}
-    },
-    animation:{duration:1200,easing:'easeOutQuart'}
-  }
-});
+    options:{
+      responsive:true,
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          backgroundColor:'rgba(5,8,16,.95)',
+          borderColor:'rgba(0,212,255,.2)', borderWidth:1,
+          callbacks:{
+            title:c=>names[c[0].dataIndex] || '',
+            label:c=>{
+              const d=c.parsed.y;
+              if(d<0)  return '  Paid '+Math.abs(d)+' day(s) early';
+              if(d===0) return '  Paid on the due date';
+              if(d<=3) return '  Paid '+d+' day(s) after — on time';
+              return '  Paid '+d+' day(s) late';
+            }
+          }
+        }
+      },
+      scales:{
+        x:{grid:{display:false},ticks:{color:'rgba(240,242,255,.4)'}},
+        y:{
+          grid:{color:'rgba(255,255,255,.04)'},
+          ticks:{color:'rgba(240,242,255,.4)',callback:v=>v+'d'},
+          title:{display:true,text:'days late / early',color:'rgba(240,242,255,.3)',font:{size:9}}
+        }
+      },
+      animation:{duration:1000,easing:'easeOutQuart'}
+    }
+  });
+} else {
+  ctx.canvas.parentNode.innerHTML =
+    '<div style="text-align:center;padding:40px 16px;color:rgba(240,242,255,.35);font-family:var(--mono);font-size:12px">No payment history yet</div>';
+}
 
 // Mini bar chart
-new Chart(document.getElementById('miniChart').getContext('2d'),{
+if (labels.length) new Chart(document.getElementById('miniChart').getContext('2d'),{
   type:'bar',
   data:{
     labels,
     datasets:[{
-      data:vals,
-      backgroundColor:vals.map((_,i)=>i===vals.length-1?'#00ff88':'rgba(0,255,136,0.22)'),
+      data:vals.map(v=>Math.max(Math.abs(v),1)),
+      backgroundColor:colors.map(c=>c+'99'),
       borderRadius:4, borderSkipped:false
     }]
   },

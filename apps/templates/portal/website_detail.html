@@ -112,9 +112,9 @@
     <div class="mc-label">Months Paid</div>
   </div>
   <div class="mc" style="--ac:var(--green)">
-    <div class="mc-ico" style="background:var(--green-d);color:var(--green)"><i class="fas fa-coins"></i></div>
-    <div class="mc-val" style="color:var(--green);font-size:16px">{{ total_paid|floatformat:0 }}</div>
-    <div class="mc-label">Total Paid (TZS)</div>
+    <div class="mc-ico" style="background:var(--green-d);color:var(--green)"><i class="fas fa-layer-group"></i></div>
+    <div class="mc-val" style="color:var(--green);font-size:16px">{{ phases|length }}</div>
+    <div class="mc-label">Payment Phases</div>
   </div>
   <div class="mc" style="--ac:{% if website.is_overdue %}var(--red){% elif website.days_until_expiry <= 7 %}var(--yellow){% else %}var(--cyan){% endif %}">
     <div class="mc-ico" style="background:{% if website.is_overdue %}var(--red-d){% elif website.days_until_expiry <= 7 %}var(--yellow-d){% else %}var(--cyan-d){% endif %};color:{% if website.is_overdue %}var(--red){% elif website.days_until_expiry <= 7 %}var(--yellow){% else %}var(--cyan){% endif %}"><i class="fas fa-clock"></i></div>
