@@ -6,7 +6,10 @@
     <h1 style="font-family:var(--head);font-size:22px;font-weight:800;color:var(--text);margin-bottom:3px">All Websites</h1>
     <div style="font-family:var(--mono);font-size:12px;color:var(--text-3)">{{ websites|length }} site(s) found</div>
   </div>
-  <a href="{% url 'website_add' %}" class="jt-btn btn-cyan"><i class="fas fa-plus"></i> Add Website</a>
+  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+    <a href="{% url 'run_auto_suspend' %}" class="jt-btn btn-ghost"><i class="fas fa-power-off"></i> Auto-Suspend Expired</a>
+    <a href="{% url 'website_add' %}" class="jt-btn btn-cyan"><i class="fas fa-plus"></i> Add Website</a>
+  </div>
 </div>
 
 <!-- FILTERS -->

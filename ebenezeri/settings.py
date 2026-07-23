@@ -13,11 +13,14 @@ SECRET_KEY    = 'django-insecure-@&r$)$xpb)f6pm=_73pupatv2#n-%0%d=(cky=kab5ww6&*
 DEBUG = True
 # MUHIMU: dot ya mwanzo (.jamiitek.com / .localhost) inaruhusu SUBDOMAINS ZOTE.
 # 'localhost' pekee HAIRUHUSU duka.localhost — lazima '.localhost' iwepo.
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [h.strip() for h in os.getenv(
+    'ALLOWED_HOSTS',
+    '.jamiitek.com,jamiitek.onrender.com,127.0.0.1,localhost,.localhost'
+).split(',') if h.strip()]
 
 # Kwa DEV tu: ruhusu host yoyote (inarahisisha kutest custom domains kwa hosts file)
-# if DEBUG:
-#     ALLOWED_HOSTS.append('*')
+if DEBUG:
+    ALLOWED_HOSTS.append('*')
 
 INSTALLED_APPS = [
     'jazzmin',
@@ -47,6 +50,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'builder.middleware.SubdomainMiddleware',
+    'apps.daily_tasks.DailyTasksMiddleware',
 ]
 
 ROOT_URLCONF = 'ebenezeri.urls'
@@ -115,7 +119,7 @@ JAZZMIN_SETTINGS = {
     "site_header":  "JamiiTek Dashboard",
     "site_brand":   "JamiiTek",
     "welcome_sign": "Welcome to JamiiTek Dashboard",
-    "copyright":    "JamiiTek © 2025",
+    "copyright":    "JamiiTek © 2026",
     "search_model": "auth.User",
     "topmenu_links": [
         {"name": "Home",  "url": "admin:index", "permissions": ["auth.view_user"]},
@@ -166,7 +170,7 @@ CLOUDINARY_API_KEY    = os.getenv('CLOUDINARY_API_KEY',    '321181265585861')
 CLOUDINARY_API_SECRET = os.getenv('CLOUDINARY_API_SECRET', 'KA2L_qJUCyBBZFcyeQDGzH1kfUo')
 
 # ── Chatbot / WhatsApp ─────────────────────────────────
-GROQ_API_KEY = os.getenv('GROQ_API_KEY', '')
+GROQ_API_KEY = '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'
 SITE_URL     = 'https://jamiitek.com'
 
 WHATSAPP_MASTER_TOKEN         = os.getenv('WHATSAPP_MASTER_TOKEN',         'EAARTZCRXCM9sBRCw5ratThW8zsfNp3h8TdFqoKmh6crYm7a4OZBe0u1y5jZBHu3LkEARBFCZAZCVwF6NsqKWsi1n460VWl1IjOO1UsZC3hmjmGMfBkeHUG7ZA5ie1iVvZB9m0hQy8OLpmiMKn8JMgbhlJM7hFNwBHDvXmlC3uatpVADEZA0wLmWbzyUZBwtFTCdhHnj6je4y1gRFk5mdZARtgB5uuE7lQ7juhUAQSlaEt8m4SZBZAkQkmj6KclZAHoiKHFaKPZCfHptOy4J9ZCvmfErOFLCS')
@@ -188,14 +192,12 @@ BUILDER_PLATFORM_HOSTS = {
     'localhost', '127.0.0.1', 'testserver',
 }
 
-
-# ── Cache: Redis kwa production, LocMem kwa dev ──
-REDIS_URL = os.getenv('REDIS_URL', '')
-if REDIS_URL:
+# ── Cache: Redis kwa production (weka REDIS_URL kwenye Render env), LocMem kwa dev ──
+if os.getenv('REDIS_URL'):
     CACHES = {
         'default': {
             'BACKEND': 'django.core.cache.backends.redis.RedisCache',
-            'LOCATION': REDIS_URL,          # ← bila quotes: variable halisi
+            'LOCATION': os.getenv('REDIS_URL'),
             'TIMEOUT': 3600,
         }
     }

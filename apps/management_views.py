@@ -1,6 +1,6 @@
 # apps/management_views.py — JamiiTek Management Panel
 
-import json, secrets
+import json, secrets, logging
 from datetime import date, timedelta
 from decimal import Decimal
 
@@ -12,7 +12,10 @@ from django.utils import timezone
 from django.core.mail import send_mail
 from django.conf import settings
 from django.views.decorators.http import require_GET, require_POST
+from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Sum, Count, Q
+
+logger = logging.getLogger(__name__)
 
 
 def staff_required(view_func):
@@ -831,3 +834,127 @@ def email_hosting_restore(request, pk):
             recipient_list=[plan.client.email], fail_silently=True)
     messages.success(request, 'Email plan restored.')
     return redirect('email_hosting_detail', pk=plan.pk)
+
+# ══════════════════════════════════════════════════════════════════════════════
+# AUTO-SUSPEND (tovuti zilizofikia mwisho wa muda)
+# ══════════════════════════════════════════════════════════════════════════════
+
+@staff_required
+def run_auto_suspend_view(request):
+    """
+    Endesha auto-suspend kwa mkono.
+    GET  → onyesha zitakazosimamishwa (dry run)
+    POST → simamisha kweli
+    """
+    from . import hosting_service
+
+    if request.method == 'POST':
+        report = hosting_service.run_auto_suspend(
+            dry_run=False,
+            notify=request.POST.get('notify') == 'on',
+            actor=request.user,
+        )
+        n = len(report['suspended'])
+        m = len(report['maintenance'])
+        if report.get('systemic_failure'):
+            messages.error(request,
+                           'A system problem occurred. Affected websites were put '
+                           'in maintenance, not suspended. Please check the logs.')
+        elif n or m:
+            parts = []
+            if n:
+                parts.append(f'{n} website(s) suspended')
+            if m:
+                parts.append(f'{m} set to maintenance (system issue)')
+            messages.success(request, ' · '.join(parts) + '.')
+        else:
+            messages.info(request, 'No expired websites — nothing to suspend.')
+        return redirect('website_list')
+
+    # GET — hakiki tu
+    report = hosting_service.run_auto_suspend(dry_run=True)
+    return render(request, 'management/auto_suspend.html', {
+        'report': report,
+        'candidates': report['suspended'],
+    })
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# ENDPOINT YA KAZI ZA KILA SIKU (kwa cron ya nje — bila kuhitaji login)
+# ══════════════════════════════════════════════════════════════════════════════
+
+@csrf_exempt
+def daily_tasks_endpoint(request):
+    """
+    Endesha kazi za kila siku kwa kupitia URL yenye token.
+    Imeundwa kwa ajili ya UptimeRobot / cron-job.org.
+
+        https://jamiitek.com/tasks/daily/?token=XXXXX
+
+    Tabia:
+      • Inafanya kazi MARA MOJA tu kwa siku, hata ikipigwa kila dakika 5.
+        (Inatumia alama ile ile ya middleware — hazirudii kazi.)
+      • Inarudisha jibu MARA MOJA (chini ya sekunde 1). Kazi halisi
+        inafanyika kwenye thread ya nyuma — UptimeRobot haitakata muunganisho.
+      • Daima 200 kama token ni sahihi — UptimeRobot isione "down" bure.
+
+    Vigezo:
+      ?dry=1     → onyesha zitakazoguswa, bila kubadilisha (haraka, bila AI)
+      ?force=1   → lazimisha ikimbie hata kama imeshakimbia leo
+    """
+    import os
+    import threading
+    from datetime import date as _date
+    from django.core.cache import cache
+    from django.http import JsonResponse
+    from . import hosting_service, daily_tasks
+
+    expected = os.getenv('TASKS_TOKEN', '')
+    if not expected:
+        return JsonResponse(
+            {'ok': False, 'error': 'Endpoint disabled — TASKS_TOKEN is not set.'},
+            status=503)
+
+    given = request.GET.get('token') or request.headers.get('X-Tasks-Token', '')
+    if not secrets.compare_digest(str(given), str(expected)):
+        return JsonResponse({'ok': False, 'error': 'Invalid token.'}, status=403)
+
+    # Dry run — haraka, bila AI, bila kubadilisha chochote
+    if request.GET.get('dry') in ('1', 'true', 'yes'):
+        try:
+            report = hosting_service.run_auto_suspend(dry_run=True)
+        except Exception as e:
+            logger.exception('daily tasks dry run failed')
+            return JsonResponse({'ok': False, 'error': type(e).__name__}, status=500)
+        return JsonResponse({
+            'ok': True, 'dry_run': True, 'checked': report['checked'],
+            'would_suspend': [r['website'].name for r in report['suspended']],
+        })
+
+    today = _date.today().isoformat()
+    force = request.GET.get('force') in ('1', 'true', 'yes')
+
+    # Imeshakimbia leo? (alama ile ile ya middleware)
+    try:
+        already = cache.get(daily_tasks.CACHE_KEY) == today
+    except Exception:
+        already = False
+
+    if already and not force:
+        return JsonResponse({'ok': True, 'status': 'already_ran_today', 'date': today})
+
+    # Zuia kazi mbili kwa wakati mmoja
+    with daily_tasks._thread_lock:
+        if daily_tasks._running:
+            return JsonResponse({'ok': True, 'status': 'already_running'})
+        daily_tasks._running = True
+
+    try:
+        cache.set(daily_tasks.CACHE_KEY, today, daily_tasks.CACHE_TTL)
+    except Exception:
+        pass  # cache imelala — bado tunaendelea
+
+    threading.Thread(target=daily_tasks._run_tasks_in_background,
+                     name='jamiitek-daily-tasks-http', daemon=True).start()
+
+    return JsonResponse({'ok': True, 'status': 'started', 'date': today})

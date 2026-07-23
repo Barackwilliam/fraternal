@@ -157,6 +157,47 @@ admin.site.register(Team, TeamAdmin)
 @admin.register(ManagedWebsite)
 class ManagedWebsiteAdmin(admin.ModelAdmin):
 
+    actions = ['action_suspend_expired', 'action_set_maintenance', 'action_restore']
+
+    @admin.action(description='⏻ Suspend selected (if hosting expired) — AI writes the notice')
+    def action_suspend_expired(self, request, queryset):
+        from datetime import date
+        from . import hosting_service
+        today = date.today()
+        done, skipped = 0, 0
+        for w in queryset:
+            if w.hosting_end_date and w.hosting_end_date <= today and w.status != 'suspended':
+                try:
+                    hosting_service.suspend_website(
+                        w, (today - w.hosting_end_date).days, actor=request.user)
+                    done += 1
+                except Exception as e:
+                    hosting_service.mark_maintenance(w, problem=str(e)[:200], actor=request.user)
+                    self.message_user(request,
+                        f'{w.name}: system problem — set to maintenance instead.',
+                        level='WARNING')
+            else:
+                skipped += 1
+        if done:
+            self.message_user(request, f'{done} website(s) suspended.')
+        if skipped:
+            self.message_user(request,
+                f'{skipped} skipped (not expired, or already suspended).',
+                level='INFO')
+
+    @admin.action(description='🔧 Set to maintenance (our technical issue)')
+    def action_set_maintenance(self, request, queryset):
+        from . import hosting_service
+        for w in queryset:
+            hosting_service.mark_maintenance(
+                w, problem='Set to maintenance by staff.', actor=request.user)
+        self.message_user(request, f'{queryset.count()} website(s) set to maintenance.')
+
+    @admin.action(description='✓ Restore to active')
+    def action_restore(self, request, queryset):
+        n = queryset.update(status='active', suspension_reason='', suspension_message='')
+        self.message_user(request, f'{n} website(s) restored to active.')
+
     list_display = (
         "name",
         "client",

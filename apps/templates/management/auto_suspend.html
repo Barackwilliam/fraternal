@@ -1,0 +1,69 @@
+{% extends 'management/base.html' %}
+{% block title %}Auto-Suspend{% endblock %}
+{% block extra_css %}
+<style>
+  .warn{background:var(--yellow-d);border:1px solid rgba(255,184,0,.25);border-radius:var(--r-lg);
+    padding:16px 20px;margin-bottom:22px;font-size:13.5px;color:var(--yellow);display:flex;gap:12px}
+  .warn i{margin-top:2px;flex-shrink:0}
+  .ok-box{background:var(--green-d);border:1px solid rgba(0,255,136,.25);border-radius:var(--r-lg);
+    padding:24px;text-align:center;color:var(--green);font-family:var(--mono);font-size:13.5px}
+  .site{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);
+    padding:14px 18px;margin-bottom:10px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .site .nm{flex:1;min-width:180px}
+  .site .nm b{color:var(--text);font-size:14px}
+  .site .nm div{font-family:var(--mono);font-size:11px;color:var(--text-3);margin-top:2px}
+  .site .od{font-family:var(--mono);font-size:11.5px;color:var(--red);background:var(--red-d);
+    border:1px solid rgba(255,59,92,.25);border-radius:100px;padding:5px 12px;white-space:nowrap}
+  .actions{margin-top:24px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+  .chk{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;color:var(--text-3)}
+  .chk input{width:17px;height:17px;accent-color:var(--cyan);cursor:pointer}
+</style>
+{% endblock %}
+{% block content %}
+<div style="margin-bottom:20px">
+  <a href="{% url 'website_list' %}" style="font-family:var(--mono);font-size:12px;color:var(--text-3);text-decoration:none">
+    <i class="fas fa-arrow-left"></i> All websites
+  </a>
+  <h1 style="font-family:var(--head);font-size:22px;font-weight:800;color:var(--text);margin-top:6px">
+    <i class="fas fa-power-off" style="color:var(--yellow)"></i> Auto-Suspend Expired Websites
+  </h1>
+  <div style="font-family:var(--mono);font-size:12px;color:var(--text-3);margin-top:3px">
+    Checked {{ report.checked }} website(s) that have reached their hosting end date
+  </div>
+</div>
+
+{% if candidates %}
+<div class="warn">
+  <i class="fas fa-triangle-exclamation"></i>
+  <div>
+    These websites have passed their hosting end date and will be
+    <strong>suspended</strong>. AI will write the suspension reason and the
+    notice visitors see. Websites with <em>"Auto suspend on expiry"</em> turned
+    off are not included.
+  </div>
+</div>
+
+{% for c in candidates %}
+<div class="site">
+  <div class="nm">
+    <b>{{ c.website.name }}</b>
+    <div>{{ c.website.client.name }} · expired {{ c.website.hosting_end_date|date:'d M Y' }} · TZS {{ c.website.monthly_cost|floatformat:0 }}/mo</div>
+  </div>
+  <div class="od">{{ c.days_overdue }} day{{ c.days_overdue|pluralize }} overdue</div>
+</div>
+{% endfor %}
+
+<form method="post" class="actions">
+  {% csrf_token %}
+  <button type="submit" class="jt-btn btn-cyan" onclick="return confirm('Suspend {{ candidates|length }} website(s)?')">
+    <i class="fas fa-power-off"></i> Suspend {{ candidates|length }} website{{ candidates|length|pluralize }}
+  </button>
+  <label class="chk"><input type="checkbox" name="notify" checked> Email the clients</label>
+</form>
+{% else %}
+<div class="ok-box">
+  <div style="font-size:30px;margin-bottom:10px">✓</div>
+  No expired websites — nothing to suspend right now.
+</div>
+{% endif %}
+{% endblock %}
