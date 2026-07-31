@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ post.meta_title|default:post.title }} | JamiiTek{% endblock %}
+{% block meta_desc %}{{ post.meta_description|default:post.excerpt }}{% endblock %}
+{% block meta_keywords %}{{ post.focus_keyword }}{% if post.focus_keyword %}, {% endif %}web developer Tanzania, JamiiTek, WhatsApp bot Tanzania{% endblock %}
+{% block canonical %}{{ canonical }}{% endblock %}
+
+{% block og_type %}article{% endblock %}
+{% block og_title %}{{ post.title }}{% endblock %}
+{% block og_desc %}{{ post.meta_description|default:post.excerpt }}{% endblock %}
+{% block og_url %}{{ canonical }}{% endblock %}
+{% if post.cover_image %}{% block og_image %}{{ post.cover_image }}{% endblock %}{% endif %}
+
+{% block extra_css %}
+<style>
+.article-wrap{max-width:760px;margin:0 auto;padding:120px 22px 70px}
+.article-back{display:inline-flex;align-items:center;gap:7px;color:#7d8ca0;text-decoration:none;
+  font-size:13px;margin-bottom:28px;font-family:'JetBrains Mono',monospace;transition:color .2s}
+.article-back:hover{color:#00d4ff}
+.article-cat{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;color:#00d4ff;
+  text-transform:uppercase;margin-bottom:16px;display:block}
+.article-wrap h1{font-size:clamp(28px,5vw,44px);font-weight:800;color:#fff;line-height:1.15;margin:0 0 20px;letter-spacing:-.02em}
+.article-meta{display:flex;flex-wrap:wrap;gap:18px;font-size:13px;color:#7d8ca0;
+  font-family:'JetBrains Mono',monospace;padding-bottom:26px;margin-bottom:32px;border-bottom:1px solid rgba(255,255,255,.1)}
+.article-cover{width:100%;border-radius:18px;margin-bottom:34px;border:1px solid rgba(255,255,255,.1)}
+.article-body{font-size:17px;line-height:1.85;color:#c4d2e0}
+.article-body h2{font-size:26px;color:#fff;margin:44px 0 16px;font-weight:700}
+.article-body h3{font-size:21px;color:#fff;margin:34px 0 12px;font-weight:700}
+.article-body p{margin:0 0 22px}
+.article-body a{color:#00d4ff;text-decoration:underline}
+.article-body ul,.article-body ol{margin:0 0 22px;padding-left:26px}
+.article-body li{margin-bottom:10px}
+.article-body img{max-width:100%;border-radius:12px;margin:24px 0}
+.article-body blockquote{border-left:3px solid #00d4ff;padding:6px 20px;margin:24px 0;color:#9fb0c4;font-style:italic}
+.article-body code{background:rgba(0,212,255,.1);padding:2px 7px;border-radius:5px;font-size:15px;color:#00d4ff}
+
+/* ── SHARE BAR ── */
+.share-box{margin:44px 0;padding:26px;border-radius:18px;
+  background:linear-gradient(160deg,rgba(14,26,48,.6),rgba(8,16,32,.4));border:1px solid rgba(0,212,255,.15)}
+.share-box h4{margin:0 0 16px;color:#fff;font-size:16px;display:flex;align-items:center;gap:9px}
+.share-btns{display:flex;flex-wrap:wrap;gap:10px}
+.sbtn{display:inline-flex;align-items:center;gap:9px;padding:11px 18px;border-radius:11px;
+  text-decoration:none;font-weight:700;font-size:14px;color:#fff;border:none;cursor:pointer;
+  transition:transform .18s,box-shadow .25s;font-family:inherit}
+.sbtn:hover{transform:translateY(-2px)}
+.sbtn svg{width:18px;height:18px;fill:currentColor}
+.sbtn.wa{background:#25d366;color:#04120a}
+.sbtn.wa:hover{box-shadow:0 8px 22px rgba(37,211,102,.4)}
+.sbtn.fb{background:#1877f2}
+.sbtn.fb:hover{box-shadow:0 8px 22px rgba(24,119,242,.4)}
+.sbtn.x{background:#000;border:1px solid rgba(255,255,255,.2)}
+.sbtn.x:hover{box-shadow:0 8px 22px rgba(255,255,255,.15)}
+.sbtn.li{background:#0a66c2}
+.sbtn.li:hover{box-shadow:0 8px 22px rgba(10,102,194,.4)}
+.sbtn.tg{background:#0088cc}
+.sbtn.tg:hover{box-shadow:0 8px 22px rgba(0,136,204,.4)}
+.sbtn.copy{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18)}
+.sbtn.copy:hover{border-color:#00d4ff;color:#00d4ff}
+.sbtn.copy.done{background:rgba(0,255,136,.15);border-color:#00ff88;color:#00ff88}
+
+/* CTA + related */
+.article-cta{margin:50px 0;padding:38px;border-radius:20px;text-align:center;
+  background:linear-gradient(135deg,rgba(0,212,255,.12),rgba(108,99,255,.08));border:1px solid rgba(0,212,255,.25)}
+.article-cta h3{color:#fff;font-size:24px;margin:0 0 10px}
+.article-cta p{color:#9fb0c4;margin:0 0 22px}
+.article-cta a{display:inline-block;background:linear-gradient(135deg,#25d366,#00d4ff);color:#04120a;
+  padding:14px 34px;border-radius:12px;font-weight:800;text-decoration:none}
+.related{margin-top:60px}
+.related h3{color:#fff;font-size:22px;margin-bottom:22px}
+.rel-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,220px),1fr));gap:18px}
+.rel-card{border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,.1);
+  background:rgba(14,26,48,.4);text-decoration:none;transition:border-color .2s,transform .2s}
+.rel-card:hover{border-color:rgba(0,212,255,.35);transform:translateY(-3px)}
+.rel-card .ri{height:110px;background-size:cover;background-position:center;background-color:#0a1220}
+.rel-card .rb{padding:14px}
+.rel-card h4{color:#fff;font-size:14.5px;margin:0;line-height:1.35}
+</style>
+{% endblock %}
+
+{% block content %}
+<article class="article-wrap">
+  <a class="article-back" href="{% url 'blog_list' %}">← Back to Blog</a>
+
+  {% if post.category %}<span class="article-cat">{{ post.category.name }}</span>{% endif %}
+  <h1>{{ post.title }}</h1>
+  <div class="article-meta">
+    <span>✍ {{ post.author_name }}</span>
+    <span>{{ post.published_at|date:'F j, Y' }}</span>
+    <span>{{ post.read_minutes }} min read</span>
+    <span>{{ post.views }} views</span>
+  </div>
+
+  {% if post.cover_image %}<img class="article-cover" src="{{ post.cover_image }}" alt="{{ post.title }}">{% endif %}
+
+  <div class="article-body">{{ post.body|safe }}</div>
+
+  <!-- SHARE -->
+  <div class="share-box">
+    <h4>📢 Share this article</h4>
+    <div class="share-btns">
+      <a class="sbtn wa" href="{{ share.whatsapp }}" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24"><path d="M17.5 14.4c-.3-.1-1.7-.9-2-1-.3-.1-.5-.1-.6.1-.2.3-.7.9-.8 1-.2.2-.3.2-.6.1-1.5-.8-2.5-1.4-3.5-3.1-.3-.5.3-.4.8-1.4.1-.2 0-.3 0-.5-.1-.1-.6-1.5-.9-2-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.3.3-1 1-1 2.3 0 1.4 1 2.7 1.1 2.9.1.2 2 3 4.8 4.2 1.8.8 2.5.8 3.4.7.5-.1 1.7-.7 1.9-1.4.2-.6.2-1.2.2-1.4-.1 0-.3-.1-.6-.2M12 2a10 10 0 00-10 10c0 1.8.5 3.4 1.3 4.9L2 22l5.3-1.4c1.4.8 3 1.2 4.7 1.2a10 10 0 000-20"/></svg>
+        WhatsApp
+      </a>
+      <a class="sbtn fb" href="{{ share.facebook }}" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24"><path d="M22 12a10 10 0 10-11.6 9.9v-7H8v-3h2.4V9.8c0-2.3 1.4-3.6 3.5-3.6 1 0 2 .2 2 .2v2.3h-1.2c-1.1 0-1.5.7-1.5 1.5V12h2.6l-.4 3h-2.2v7A10 10 0 0022 12"/></svg>
+        Facebook
+      </a>
+      <a class="sbtn x" href="{{ share.twitter }}" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24"><path d="M18.2 2h3.3l-7.2 8.3L23 22h-6.6l-5.2-6.8L5.2 22H1.9l7.7-8.8L1 2h6.8l4.7 6.2L18.2 2m-1.2 18h1.8L7.1 3.9H5.2z"/></svg>
+        X
+      </a>
+      <a class="sbtn li" href="{{ share.linkedin }}" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24"><path d="M20.5 2h-17A1.5 1.5 0 002 3.5v17A1.5 1.5 0 003.5 22h17a1.5 1.5 0 001.5-1.5v-17A1.5 1.5 0 0020.5 2M8 19H5v-9h3zM6.5 8.3a1.8 1.8 0 110-3.5 1.8 1.8 0 010 3.5M19 19h-3v-4.7c0-1.1 0-2.5-1.5-2.5s-1.8 1.2-1.8 2.4V19h-3v-9h2.9v1.3a3.1 3.1 0 012.8-1.5c3 0 3.6 2 3.6 4.5z"/></svg>
+        LinkedIn
+      </a>
+      <a class="sbtn tg" href="{{ share.telegram }}" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24"><path d="M22 3L2 10.5l6 2.3L18 6l-8 8.5v5l3-3 4.5 3.3z"/></svg>
+        Telegram
+      </a>
+      <button class="sbtn copy" id="copyBtn" onclick="copyLink()" type="button">
+        <svg viewBox="0 0 24 24"><path d="M16 1H4a2 2 0 00-2 2v14h2V3h12zm3 4H8a2 2 0 00-2 2v14a2 2 0 002 2h11a2 2 0 002-2V7a2 2 0 00-2-2m0 16H8V7h11z"/></svg>
+        <span id="copyLbl">Copy link</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="article-cta">
+    <h3>Ready to get your business online?</h3>
+    <p>JamiiTek builds websites and AI WhatsApp bots for businesses across Tanzania.</p>
+    <a href="/get-started/">Start your project →</a>
+  </div>
+
+  {% if related %}
+  <div class="related">
+    <h3>Related articles</h3>
+    <div class="rel-grid">
+      {% for r in related %}
+      <a class="rel-card" href="{% url 'blog_detail' r.slug %}">
+        <div class="ri" style="background-image:url('{{ r.cover_image|default:'' }}')"></div>
+        <div class="rb"><h4>{{ r.title|truncatewords:10 }}</h4></div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</article>
+
+<!-- Article JSON-LD (rich results kwenye Google) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "{{ post.title|escapejs }}",
+  "description": "{{ post.excerpt|escapejs }}",
+  {% if post.cover_image %}"image": "{{ post.cover_image }}",{% endif %}
+  "author": {"@type": "Organization", "name": "{{ post.author_name|escapejs }}"},
+  "publisher": {"@type": "Organization", "name": "JamiiTek",
+    "logo": {"@type": "ImageObject", "url": "https://jamiitek.com/static/images/og-image.jpg"}},
+  "datePublished": "{{ post.published_at|date:'c' }}",
+  "dateModified": "{{ post.updated_at|date:'c' }}",
+  "mainEntityOfPage": "{{ canonical }}"
+}
+</script>
+
+<script>
+function copyLink(){
+  const url = "{{ canonical }}";
+  const btn = document.getElementById('copyBtn');
+  const lbl = document.getElementById('copyLbl');
+  navigator.clipboard.writeText(url).then(() => {
+    btn.classList.add('done'); lbl.textContent = 'Copied!';
+    setTimeout(() => { btn.classList.remove('done'); lbl.textContent = 'Copy link'; }, 2000);
+  }).catch(() => {
+    // Fallback
+    const t = document.createElement('textarea'); t.value = url; document.body.appendChild(t);
+    t.select(); document.execCommand('copy'); document.body.removeChild(t);
+    lbl.textContent = 'Copied!';
+  });
+}
+</script>
+{% endblock %}

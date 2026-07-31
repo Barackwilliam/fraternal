@@ -1,0 +1,776 @@
+{% extends 'portal/base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<style>
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.fade-up  {animation:fadeUp .5s ease both}
+.fade-up-1{animation:fadeUp .5s .08s ease both}
+.fade-up-2{animation:fadeUp .5s .16s ease both}
+.fade-up-3{animation:fadeUp .5s .24s ease both}
+
+.dash-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+.dsc{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px 20px;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s;cursor:default}
+.dsc:hover{transform:translateY(-3px);box-shadow:0 8px 30px rgba(0,0,0,.3)}
+.dsc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.dsc-ico{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:17px}
+.dsc-trend{font-family:var(--mono);font-size:10px;padding:3px 9px;border-radius:100px}
+.dsc-val{font-family:var(--head);font-size:34px;font-weight:800;line-height:1;margin-bottom:4px}
+.dsc-label{font-size:12px;color:var(--text-3);font-weight:500}
+.dsc-bar{height:3px;border-radius:100px;background:var(--bg2);margin-top:14px;overflow:hidden}
+.dsc-bar-fill{height:100%;border-radius:100px;transition:width 1.3s cubic-bezier(.4,0,.2,1)}
+
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:18px}
+.chart-card-head{padding:16px 20px 0;display:flex;align-items:center;justify-content:space-between}
+.chart-title{font-family:var(--head);font-size:15px;font-weight:700;color:var(--text)}
+/* ── PAYMENT RECORD ── */
+.rec-row{display:flex;gap:10px;margin-top:14px}
+.rec-item{flex:1;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);
+  border-radius:10px;padding:9px 6px;text-align:center}
+.rec-item b{display:block;font-family:var(--head);font-size:19px;font-weight:800;line-height:1.1}
+.rec-item span{font-family:var(--mono);font-size:9.5px;color:rgba(240,242,255,.4);
+  text-transform:uppercase;letter-spacing:.6px}
+.trend-chip{margin-top:12px;font-family:var(--mono);font-size:10.5px;padding:7px 11px;
+  border-radius:8px;display:flex;align-items:center;gap:7px}
+.trend-chip.up{background:rgba(0,255,136,.08);color:#00ff88;border:1px solid rgba(0,255,136,.18)}
+.trend-chip.down{background:rgba(255,59,92,.08);color:#ff3b5c;border:1px solid rgba(255,59,92,.18)}
+.trend-chip.flat{background:rgba(255,255,255,.03);color:rgba(240,242,255,.45);border:1px solid rgba(255,255,255,.07)}
+/* ── PHASES ── */
+.ph-row{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:10px;
+  background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);margin-bottom:8px}
+.ph-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.ph-dot.ok{background:#00ff88;box-shadow:0 0 7px rgba(0,255,136,.5)}
+.ph-dot.bad{background:#ff3b5c;box-shadow:0 0 7px rgba(255,59,92,.5)}
+.ph-main{flex:1;min-width:0}
+.ph-main b{font-size:13px;color:var(--text);display:block}
+.ph-main span{font-family:var(--mono);font-size:10.5px;color:rgba(240,242,255,.4)}
+.ph-tag{font-family:var(--mono);font-size:10px;padding:4px 10px;border-radius:100px;white-space:nowrap}
+.ph-tag.ok{background:rgba(0,255,136,.09);color:#00ff88}
+.ph-tag.bad{background:rgba(255,59,92,.09);color:#ff3b5c}
+.gap-row{display:flex;align-items:center;gap:11px;padding:10px 13px;border-radius:9px;
+  background:rgba(255,59,92,.05);border-left:3px solid rgba(255,59,92,.4);margin-bottom:7px;
+  font-family:var(--mono);font-size:11px;color:rgba(240,242,255,.6)}
+.gap-row b{color:#ff3b5c}
+
+.chart-sub{font-family:var(--mono);font-size:10px;color:var(--text-3);letter-spacing:1px;text-transform:uppercase}
+.chart-body{padding:14px 16px 18px}
+
+.health-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.health-item{background:var(--bg2);border-radius:12px;padding:13px;display:flex;align-items:center;gap:11px}
+.ring-wrap{position:relative;width:48px;height:48px;flex-shrink:0}
+.ring-wrap svg{transform:rotate(-90deg)}
+.ring-val{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--head);font-size:14px;font-weight:800}
+.health-label{font-size:12px;color:var(--text-2);font-weight:600}
+.health-sub{font-family:var(--mono);font-size:10px;color:var(--text-3);margin-top:2px}
+
+.expiry-list{display:flex;flex-direction:column;gap:10px;padding:2px 0}
+.exp-row{display:grid;grid-template-columns:1fr 90px 44px;gap:10px;align-items:center}
+.exp-name{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.exp-bar-bg{height:7px;background:var(--bg2);border-radius:100px;overflow:hidden}
+.exp-bar-fill{height:100%;border-radius:100px;transition:width 1.2s ease}
+.exp-days{font-family:var(--mono);font-size:11px;text-align:right;white-space:nowrap}
+.fill-ok{background:linear-gradient(90deg,#00ff88,#00d4ff)}
+.fill-warning{background:linear-gradient(90deg,#ffb800,#ff6b00)}
+.fill-critical{background:linear-gradient(90deg,#ff2244,#ff6680)}
+.fill-expired{background:#ff2244}
+.col-ok{color:#00ff88}.col-warning{color:#ffb800}.col-critical{color:var(--red)}.col-expired{color:var(--red)}
+
+.site-row td{transition:background .15s}
+.site-row:hover td{background:rgba(255,255,255,.018)}
+.sp-dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:5px}
+.sp-dot.active{background:#00ff88;box-shadow:0 0 6px #00ff88;animation:pulse 2s infinite}
+.sp-dot.suspended{background:#ff2244;box-shadow:0 0 6px #ff2244;animation:pulse 1.2s infinite}
+.sp-dot.maintenance{background:#ffb800}
+
+.af-item{padding:11px 16px;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:flex-start;transition:background .15s}
+.af-item:hover{background:rgba(255,255,255,.015)}
+.af-item:last-child{border-bottom:none}
+.af-ico{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.af-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.af-date{font-family:var(--mono);font-size:10px;color:var(--text-3)}
+
+.qa-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.qa-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:14px 6px;border-radius:12px;background:var(--bg2);border:1px solid var(--border);text-decoration:none;color:var(--text-2);font-size:11px;font-weight:600;transition:all .2s}
+.qa-btn:hover{background:rgba(0,212,255,.07);border-color:rgba(0,212,255,.2);color:var(--cyan);transform:translateY(-2px)}
+.qa-btn-ico{font-size:18px}
+
+.paid-num{font-family:var(--head);font-size:36px;color:var(--green);line-height:1;text-align:center;filter:drop-shadow(0 0 10px rgba(0,255,136,.3))}
+.paid-sub{font-family:var(--mono);font-size:10px;color:var(--text-3);letter-spacing:1.5px;text-transform:uppercase;text-align:center;margin-top:5px}
+
+@media(max-width:992px){.dash-stats{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:576px){.exp-row{grid-template-columns:1fr 60px 38px}.qa-grid{grid-template-columns:repeat(4,1fr)}}
+</style>
+
+{% for alert in alerts %}
+<div class="jt-alert jt-alert-{{ alert.type }} mb-2 fade-up">
+  <i class="fas {% if alert.type == 'danger' %}fa-circle-exclamation{% else %}fa-triangle-exclamation{% endif %}" style="flex-shrink:0;margin-top:2px"></i>
+  <span>{{ alert.msg|safe }}</span>
+</div>
+{% endfor %}
+
+<div style="display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:20px;flex-wrap:wrap" class="fade-up">
+  <div>
+    <h1 style="font-family:var(--head);font-size:24px;font-weight:800;color:var(--text);margin-bottom:3px">Hello, {{ client.name|truncatewords:2 }} 👋</h1>
+    <div style="font-family:var(--mono);font-size:11px;color:var(--text-3)">
+      Hosting Overview &nbsp;·&nbsp; {% now "d M Y" %} &nbsp;·&nbsp;
+      <span style="color:{% if health.suspended > 0 %}var(--red){% else %}#00ff88{% endif %}">
+        {% if health.suspended > 0 %}⚠ {{ health.suspended }} site(s) suspended{% else %}✓ All systems operational{% endif %}
+      </span>
+    </div>
+  </div>
+  <div style="display:flex;gap:8px">
+    <a href="{% url 'portal_billing' %}" class="jt-btn btn-ghost" style="font-size:12px"><i class="fas fa-coins" style="color:var(--green)"></i> Pay</a>
+    <a href="{% url 'portal_support' %}" class="jt-btn btn-primary" style="font-size:12px"><i class="fas fa-headset"></i> Support</a>
+  </div>
+</div>
+
+<!-- STAT CARDS -->
+<div class="dash-stats">
+  <div class="dsc fade-up">
+    <div class="dsc-top">
+      <div class="dsc-ico" style="background:rgba(139,92,246,.12);color:#8b5cf6"><i class="fas fa-globe"></i></div>
+      <span class="dsc-trend" style="background:rgba(0,255,136,.08);color:#00ff88">{{ health.active }} live</span>
+    </div>
+    <div class="dsc-val" style="color:#8b5cf6">{{ websites.count }}</div>
+    <div class="dsc-label">Total Websites</div>
+    <div class="dsc-bar"><div class="dsc-bar-fill" id="b1" style="background:linear-gradient(90deg,#8b5cf6,#00d4ff);width:0"></div></div>
+  </div>
+  <div class="dsc fade-up-1">
+    <div class="dsc-top">
+      <div class="dsc-ico" style="background:rgba(0,212,255,.12);color:var(--cyan)"><i class="fas fa-at"></i></div>
+      <span class="dsc-trend" style="background:rgba(0,212,255,.08);color:var(--cyan)">{{ health.domains_ok }} ok</span>
+    </div>
+    <div class="dsc-val" style="color:var(--cyan)">{{ domains.count }}</div>
+    <div class="dsc-label">Domains</div>
+    <div class="dsc-bar"><div class="dsc-bar-fill" id="b2" style="background:linear-gradient(90deg,#00d4ff,#8b5cf6);width:0"></div></div>
+  </div>
+  <div class="dsc fade-up-2">
+    <div class="dsc-top">
+      <div class="dsc-ico" style="background:rgba(255,184,0,.1);color:#ffb800"><i class="fas fa-envelope-open-text"></i></div>
+      <span class="dsc-trend" style="background:rgba(255,184,0,.08);color:#ffb800">{{ email_plans.count }} plan(s)</span>
+    </div>
+    <div class="dsc-val" style="color:#ffb800">{{ email_plans.count }}</div>
+    <div class="dsc-label">Email Plans</div>
+    <div class="dsc-bar"><div class="dsc-bar-fill" id="b3" style="background:linear-gradient(90deg,#ffb800,#ff6b00);width:0"></div></div>
+  </div>
+  <div class="dsc fade-up-3">
+    <div class="dsc-top">
+      <div class="dsc-ico" style="background:rgba(0,255,136,.1);color:var(--green)"><i class="fas fa-calendar-check"></i></div>
+      <span class="dsc-trend" style="background:rgba(0,255,136,.08);color:var(--green)">{{ pay_stats.total_phases }} phase{{ pay_stats.total_phases|pluralize }}</span>
+    </div>
+    <div class="dsc-val" style="color:var(--green);font-size:20px">{{ pay_stats.on_time_pct }}%</div>
+    <div class="dsc-label">Paid On Time</div>
+    <div class="dsc-bar"><div class="dsc-bar-fill" id="b4" style="background:linear-gradient(90deg,#00ff88,#00d4ff);width:0"></div></div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-8">
+
+    <!-- PAYMENT CHART -->
+    <div class="chart-card fade-up">
+      <div class="chart-card-head">
+        <div>
+          <div class="chart-title"><i class="fas fa-chart-simple" style="color:var(--cyan);margin-right:8px"></i>Payment Timing — days early or late</div>
+          <div class="chart-sub" style="margin-top:3px">Last 6 months — TZS</div>
+        </div>
+      </div>
+      <div class="chart-body"><canvas id="payChart" height="110"></canvas></div>
+    </div>
+
+    <!-- EXPIRY TIMELINE -->
+    <!-- PAYMENT PHASES -->
+    <div class="chart-card fade-up-2 mb-3">
+      <div class="chart-card-head">
+        <div>
+          <div class="chart-title"><i class="fas fa-layer-group" style="color:var(--cyan);margin-right:8px"></i>Payment Phases</div>
+          <div class="chart-sub" style="margin-top:3px">Each renewal and the period it covered</div>
+        </div>
+      </div>
+      <div class="chart-body">
+        {% if history.phases %}
+          {% for ph in history.phases|slice:":8" %}
+          <div class="ph-row">
+            <span class="ph-dot {% if ph.status == 'late' %}bad{% else %}ok{% endif %}"></span>
+            <div class="ph-main">
+              <b>Phase {{ ph.index }} — {{ ph.months }} month{{ ph.months|pluralize }}</b>
+              <span>{{ ph.website_name }} · {{ ph.period_start|date:'d M Y' }} → {{ ph.period_end|date:'d M Y' }}</span>
+            </div>
+            <span class="ph-tag {% if ph.status == 'late' %}bad{% else %}ok{% endif %}">
+              {% if ph.status == 'early' %}{{ ph.days_late|cut:"-" }}d early
+              {% elif ph.status == 'on_time' %}on time
+              {% else %}{{ ph.days_late }}d late{% endif %}
+            </span>
+          </div>
+          {% endfor %}
+          {% if history.phases|length > 8 %}
+          <div style="text-align:center;margin-top:10px">
+            <a href="{% url 'portal_billing' %}" style="font-family:var(--mono);font-size:11px;color:var(--cyan);text-decoration:none">
+              View all {{ history.phases|length }} phases →
+            </a>
+          </div>
+          {% endif %}
+        {% else %}
+        <div style="text-align:center;padding:30px;color:rgba(240,242,255,.35);font-family:var(--mono);font-size:12px">
+          No payment phases yet
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if history.gaps %}
+    <!-- UNPAID DAYS -->
+    <div class="chart-card fade-up-3 mb-3">
+      <div class="chart-card-head">
+        <div>
+          <div class="chart-title"><i class="fas fa-calendar-xmark" style="color:#ff3b5c;margin-right:8px"></i>Days Not Covered</div>
+          <div class="chart-sub" style="margin-top:3px">Periods that started before payment arrived — {{ history.stats.total_days_unpaid }} day{{ history.stats.total_days_unpaid|pluralize }} in total</div>
+        </div>
+      </div>
+      <div class="chart-body">
+        {% for g in history.gaps %}
+        <div class="gap-row">
+          <i class="fas fa-triangle-exclamation" style="color:#ff3b5c"></i>
+          <div>{{ g.website_name }} · {{ g.from|date:'d M Y' }} → {{ g.to|date:'d M Y' }} — <b>{{ g.days }} day{{ g.days|pluralize }}</b></div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="chart-card fade-up-1">
+      <div class="chart-card-head">
+        <div>
+          <div class="chart-title"><i class="fas fa-clock" style="color:#ffb800;margin-right:8px"></i>Hosting Expiry Timeline</div>
+          <div class="chart-sub" style="margin-top:3px">Days remaining per website</div>
+        </div>
+      </div>
+      <div class="chart-body">
+        {% if websites %}
+        <div class="expiry-list">
+          {% for w in websites %}
+          <div class="exp-row">
+            <div>
+              <div class="exp-name">{{ w.name }}</div>
+              <div style="font-size:10px;color:var(--text-3);font-family:var(--mono)">{{ w.hosting_end_date|date:"d M Y" }}</div>
+            </div>
+            <div class="exp-bar-bg">
+              {% if w.status == 'suspended' or w.is_overdue %}
+              <div class="exp-bar-fill fill-expired" style="width:100%"></div>
+              {% elif w.days_until_expiry <= 3 %}
+              <div class="exp-bar-fill fill-critical" style="width:40%"></div>
+              {% elif w.days_until_expiry <= 7 %}
+              <div class="exp-bar-fill fill-warning" style="width:60%"></div>
+              {% else %}
+              <div class="exp-bar-fill fill-ok" style="width:100%"></div>
+              {% endif %}
+            </div>
+            <div class="exp-days {% if w.status == 'suspended' %}col-expired{% elif w.is_overdue %}col-expired{% elif w.days_until_expiry <= 3 %}col-critical{% elif w.days_until_expiry <= 7 %}col-warning{% else %}col-ok{% endif %}">
+              {% if w.status == 'suspended' %}SUSP{% elif w.is_overdue %}EXP{% else %}{{ w.days_until_expiry }}d{% endif %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="jt-empty"><div class="ei">🌐</div><p>No websites yet.</p></div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- WEBSITES TABLE -->
+    <div class="chart-card fade-up-2">
+      <div class="chart-card-head" style="padding-bottom:12px">
+        <div class="chart-title"><i class="fas fa-globe" style="color:#8b5cf6;margin-right:8px"></i>My Websites</div>
+        <a href="{% url 'portal_website_list' %}" style="font-family:var(--mono);font-size:11px;color:var(--purple)">All →</a>
+      </div>
+      {% if websites %}
+      <div style="overflow-x:auto">
+        <table class="jt-table">
+          <thead><tr><th>Website</th><th>Status</th><th>Expires</th><th>Cost</th><th></th></tr></thead>
+          <tbody>
+            {% for w in websites %}
+            <tr class="site-row">
+              <td>
+                <div style="font-weight:700;color:var(--text)">{{ w.name }}</div>
+                <a href="{{ w.url }}" target="_blank" style="font-family:var(--mono);font-size:10px;color:var(--text-3)">{{ w.url|truncatechars:30 }}</a>
+              </td>
+              <td>
+                <span class="sp-dot {{ w.status }}"></span>
+                <span class="jt-badge b-{{ w.status }}" style="font-size:10px">{{ w.status|capfirst }}</span>
+              </td>
+              <td>
+                <div style="font-family:var(--mono);font-size:11px;{% if w.status == 'suspended' or w.is_overdue %}color:var(--red){% elif w.days_until_expiry <= 7 %}color:#ffb800{% else %}color:var(--text-3){% endif %}">
+                  {{ w.hosting_end_date|date:"d M Y" }}
+                </div>
+                <div style="font-family:var(--mono);font-size:10px;{% if w.status == 'suspended' or w.is_overdue %}color:var(--red){% elif w.days_until_expiry <= 3 %}color:var(--red){% elif w.days_until_expiry <= 7 %}color:#ffb800{% else %}color:var(--text-3){% endif %}">
+                  {% if w.status == 'suspended' %}● Suspended{% elif w.is_overdue %}● Expired{% else %}{{ w.days_until_expiry }}d remaining{% endif %}
+                </div>
+              </td>
+              <td style="font-family:var(--mono);font-size:11px;color:var(--text-2)">TZS {{ w.monthly_cost|floatformat:0 }}</td>
+              <td>
+                <div style="display:flex;gap:5px;flex-wrap:nowrap">
+                  <a href="{% url 'portal_website_detail' w.pk %}" class="jt-btn btn-ghost" style="font-size:10px;padding:5px 9px">Details</a>
+                  <a href="{% url 'portal_hosting_config' w.pk %}" class="jt-btn btn-ghost" style="font-size:10px;padding:5px 9px;color:var(--cyan);border-color:rgba(0,212,255,.2)" title="Hosting Panel"><i class="fas fa-server"></i></a>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="jt-empty" style="padding:32px"><div class="ei">🌐</div><p>No websites linked yet.</p></div>
+      {% endif %}
+    </div>
+
+  </div>
+
+  <div class="col-lg-4">
+
+    <!-- SERVICE HEALTH -->
+    <div class="chart-card fade-up mb-3">
+      <div class="chart-card-head" style="padding-bottom:14px">
+        <div class="chart-title"><i class="fas fa-shield-halved" style="color:#00ff88;margin-right:8px"></i>Service Health</div>
+      </div>
+      <div style="padding:0 16px 16px">
+        <div class="health-grid">
+          <div class="health-item">
+            <div class="ring-wrap">
+              <svg width="48" height="48" viewBox="0 0 48 48">
+                <circle cx="24" cy="24" r="19" fill="none" stroke="var(--bg)" stroke-width="5"/>
+                <circle cx="24" cy="24" r="19" fill="none" stroke="#00ff88" stroke-width="5"
+                  stroke-dasharray="119" stroke-dashoffset="{% if websites.count > 0 %}{{ websites.count|add:0 }}{% else %}119{% endif %}"
+                  stroke-linecap="round"/>
+              </svg>
+              <div class="ring-val" style="color:#00ff88">{{ health.active }}</div>
+            </div>
+            <div><div class="health-label">Active Sites</div><div class="health-sub">Running ok</div></div>
+          </div>
+          <div class="health-item">
+            <div class="ring-wrap">
+              <svg width="48" height="48" viewBox="0 0 48 48">
+                <circle cx="24" cy="24" r="19" fill="none" stroke="var(--bg)" stroke-width="5"/>
+                {% if health.suspended > 0 %}<circle cx="24" cy="24" r="19" fill="none" stroke="#ff2244" stroke-width="5" stroke-dasharray="119 0" stroke-linecap="round"/>{% endif %}
+              </svg>
+              <div class="ring-val" style="color:{% if health.suspended > 0 %}var(--red){% else %}var(--text-3){% endif %}">{{ health.suspended }}</div>
+            </div>
+            <div><div class="health-label">Suspended</div><div class="health-sub">Need payment</div></div>
+          </div>
+          <div class="health-item">
+            <div class="ring-wrap">
+              <svg width="48" height="48" viewBox="0 0 48 48">
+                <circle cx="24" cy="24" r="19" fill="none" stroke="var(--bg)" stroke-width="5"/>
+                {% if health.expiring > 0 %}<circle cx="24" cy="24" r="19" fill="none" stroke="#ffb800" stroke-width="5" stroke-dasharray="60 59" stroke-linecap="round"/>{% endif %}
+              </svg>
+              <div class="ring-val" style="color:{% if health.expiring > 0 %}#ffb800{% else %}var(--text-3){% endif %}">{{ health.expiring }}</div>
+            </div>
+            <div><div class="health-label">Expiring</div><div class="health-sub">Within 7 days</div></div>
+          </div>
+          <div class="health-item">
+            <div class="ring-wrap">
+              <svg width="48" height="48" viewBox="0 0 48 48">
+                <circle cx="24" cy="24" r="19" fill="none" stroke="var(--bg)" stroke-width="5"/>
+                <circle cx="24" cy="24" r="19" fill="none" stroke="var(--cyan)" stroke-width="5" stroke-dasharray="119 0" stroke-linecap="round"/>
+              </svg>
+              <div class="ring-val" style="color:var(--cyan)">{{ health.domains_ok }}</div>
+            </div>
+            <div><div class="health-label">Domains</div><div class="health-sub">Active & valid</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAYMENT RECORD -->
+    <div class="chart-card fade-up-1 mb-3">
+      <div class="chart-card-head" style="padding-bottom:4px">
+        <div class="chart-title"><i class="fas fa-calendar-check" style="color:var(--green);margin-right:8px"></i>Your Payment Record</div>
+      </div>
+      <div style="padding:6px 16px 16px">
+        {% if pay_stats.total_phases %}
+        <div class="paid-num">{{ pay_stats.on_time_pct }}<span style="font-size:22px">%</span></div>
+        <div class="paid-sub">paid on time · {{ pay_stats.months_covered }} month{{ pay_stats.months_covered|pluralize }} covered</div>
+        <div class="rec-row">
+          <div class="rec-item"><b style="color:var(--green)">{{ pay_stats.on_time }}</b><span>on time</span></div>
+          <div class="rec-item"><b style="color:{% if pay_stats.late %}var(--red){% else %}var(--muted){% endif %}">{{ pay_stats.late }}</b><span>late</span></div>
+          <div class="rec-item"><b style="color:var(--cyan)">{{ pay_stats.current_streak }}</b><span>streak</span></div>
+        </div>
+        {% if pay_stats.trend == 'improving' %}
+        <div class="trend-chip up"><i class="fas fa-arrow-trend-up"></i> Improving — you're paying earlier than before</div>
+        {% elif pay_stats.trend == 'slipping' %}
+        <div class="trend-chip down"><i class="fas fa-arrow-trend-down"></i> Payments have been arriving later recently</div>
+        {% else %}
+        <div class="trend-chip flat"><i class="fas fa-equals"></i> Steady payment pattern</div>
+        {% endif %}
+        <div style="margin-top:14px"><canvas id="miniChart" height="50"></canvas></div>
+        {% else %}
+        <div class="paid-sub" style="padding:18px 0">No payment history yet.</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- NOTIFICATIONS -->
+    <div class="chart-card fade-up-2 mb-3">
+      <div class="chart-card-head" style="padding-bottom:0">
+        <div class="chart-title"><i class="fas fa-bell" style="color:#8b5cf6;margin-right:8px"></i>Messages</div>
+        <a href="{% url 'portal_notifications' %}" style="font-family:var(--mono);font-size:11px;color:var(--purple)">All →</a>
+      </div>
+      <div class="activity-feed">
+        {% for n in notifications %}
+        <div class="af-item">
+          <div class="af-ico" style="background:rgba(139,92,246,.1);color:#8b5cf6">📩</div>
+          <div style="flex:1;min-width:0">
+            <div class="af-title">{{ n.subject|truncatechars:34 }}</div>
+            <div class="af-date">{{ n.sent_at|date:"d M Y" }}</div>
+          </div>
+        </div>
+        {% empty %}
+        <div class="jt-empty" style="padding:22px"><div class="ei" style="font-size:22px">📭</div><p>No messages</p></div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- QUICK ACTIONS -->
+    <div class="chart-card fade-up-3">
+      <div class="chart-card-head" style="padding-bottom:12px">
+        <div class="chart-title">Quick Actions</div>
+      </div>
+      <div style="padding:0 16px 16px">
+        <div class="qa-grid">
+          <a href="{% url 'portal_billing' %}"        class="qa-btn"><span class="qa-btn-ico">💰</span>Pay</a>
+          <a href="{% url 'portal_website_list' %}"   class="qa-btn"><span class="qa-btn-ico">🌐</span>Sites</a>
+          <a href="{% url 'portal_domains' %}"        class="qa-btn"><span class="qa-btn-ico">🌍</span>Domains</a>
+          <a href="{% url 'portal_support' %}"        class="qa-btn"><span class="qa-btn-ico">🎧</span>Support</a>
+          <a href="{% url 'portal_email_hosting' %}"  class="qa-btn"><span class="qa-btn-ico">📧</span>Email</a>
+          <a href="{% url 'portal_profile' %}"        class="qa-btn"><span class="qa-btn-ico">👤</span>Profile</a>
+          <a href="{% url 'portal_notifications' %}"  class="qa-btn"><span class="qa-btn-ico">🔔</span>Alerts</a>
+          <a href="{% url 'portal_billing' %}"        class="qa-btn"><span class="qa-btn-ico">📊</span>History</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+Chart.defaults.color = 'rgba(240,242,255,0.4)';
+Chart.defaults.font.family = "'DM Mono', monospace";
+Chart.defaults.font.size = 10;
+
+const labels = {{ chart_labels|safe }};
+const vals   = {{ chart_values|safe }};
+const colors = {{ chart_colors|safe }};
+const names  = {{ chart_names|safe }};
+
+// Payment timing chart — siku za kuchelewa (chanya) au kulipa mapema (hasi)
+const ctx = document.getElementById('payChart').getContext('2d');
+if (labels.length) {
+  new Chart(ctx, {
+    type:'bar',
+    data:{
+      labels,
+      datasets:[{
+        data:vals,
+        backgroundColor:colors.map(c=>c+'cc'),
+        borderColor:colors, borderWidth:1.5,
+        borderRadius:5, barPercentage:0.62
+      }]
+    },
+    options:{
+      responsive:true,
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          backgroundColor:'rgba(5,8,16,.95)',
+          borderColor:'rgba(0,212,255,.2)', borderWidth:1,
+          callbacks:{
+            title:c=>names[c[0].dataIndex] || '',
+            label:c=>{
+              const d=c.parsed.y;
+              if(d<0)  return '  Paid '+Math.abs(d)+' day(s) early';
+              if(d===0) return '  Paid on the due date';
+              if(d<=3) return '  Paid '+d+' day(s) after — on time';
+              return '  Paid '+d+' day(s) late';
+            }
+          }
+        }
+      },
+      scales:{
+        x:{grid:{display:false},ticks:{color:'rgba(240,242,255,.4)'}},
+        y:{
+          grid:{color:'rgba(255,255,255,.04)'},
+          ticks:{color:'rgba(240,242,255,.4)',callback:v=>v+'d'},
+          title:{display:true,text:'days late / early',color:'rgba(240,242,255,.3)',font:{size:9}}
+        }
+      },
+      animation:{duration:1000,easing:'easeOutQuart'}
+    }
+  });
+} else {
+  ctx.canvas.parentNode.innerHTML =
+    '<div style="text-align:center;padding:40px 16px;color:rgba(240,242,255,.35);font-family:var(--mono);font-size:12px">No payment history yet</div>';
+}
+
+// Mini bar chart
+if (labels.length) new Chart(document.getElementById('miniChart').getContext('2d'),{
+  type:'bar',
+  data:{
+    labels,
+    datasets:[{
+      data:vals.map(v=>Math.max(Math.abs(v),1)),
+      backgroundColor:colors.map(c=>c+'99'),
+      borderRadius:4, borderSkipped:false
+    }]
+  },
+  options:{
+    responsive:true,
+    plugins:{legend:{display:false},tooltip:{enabled:false}},
+    scales:{x:{display:false},y:{display:false}},
+    animation:{duration:1200,delay:ctx=>ctx.dataIndex*80}
+  }
+});
+
+// Animate stat bars after load
+setTimeout(()=>{
+  document.getElementById('b1').style.width = '{{ health.active }}00%'.replace('00%','0%');
+  document.getElementById('b1').style.width = '100%';
+  document.getElementById('b2').style.width = '100%';
+  document.getElementById('b3').style.width = '100%';
+  document.getElementById('b4').style.width = '100%';
+},400);
+</script>
+
+<!-- ══ JAMIIBOT PROMO SECTION ══════════════════════════════════ -->
+<style>
+@keyframes botFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes botPulse{0%,100%{box-shadow:0 0 0 0 rgba(37,211,102,.4)}70%{box-shadow:0 0 0 12px rgba(37,211,102,0)}}
+@keyframes msgSlide{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:translateX(0)}}
+@keyframes typingBounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
+@keyframes gradShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+
+.bot-promo-section{
+  background:linear-gradient(135deg,#020d08,#050f1a,#080518);
+  background-size:300% 300%;
+  animation:gradShift 8s ease infinite;
+  border:1.5px solid rgba(37,211,102,.15);
+  border-radius:24px;
+  padding:0;
+  margin-top:28px;
+  overflow:hidden;
+  position:relative;
+}
+.bot-promo-section::before{
+  content:'';position:absolute;top:-80px;left:-80px;width:300px;height:300px;
+  border-radius:50%;background:radial-gradient(circle,rgba(37,211,102,.06),transparent 70%);
+  pointer-events:none
+}
+.bot-promo-section::after{
+  content:'';position:absolute;bottom:-60px;right:-60px;width:240px;height:240px;
+  border-radius:50%;background:radial-gradient(circle,rgba(0,212,255,.05),transparent 70%);
+  pointer-events:none
+}
+.promo-inner{display:grid;grid-template-columns:1fr 380px;gap:0;align-items:stretch;position:relative;z-index:2}
+.promo-left{padding:40px 44px}
+.promo-right{background:rgba(0,0,0,.25);border-left:1px solid rgba(255,255,255,.06);padding:28px;display:flex;flex-direction:column;justify-content:center}
+
+.promo-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.25);border-radius:100px;padding:5px 14px;font-size:11px;font-weight:700;color:#4ade80;letter-spacing:.8px;text-transform:uppercase;margin-bottom:18px}
+.promo-badge .dot{width:7px;height:7px;border-radius:50%;background:#25d366;animation:botPulse 2s infinite;flex-shrink:0}
+.promo-title{font-size:clamp(22px,3vw,36px);font-weight:900;color:#fff;letter-spacing:-1px;line-height:1.1;margin-bottom:12px}
+.promo-title .hl{background:linear-gradient(110deg,#25d366,#00d4ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.promo-sub{font-size:14px;color:rgba(255,255,255,.45);line-height:1.8;margin-bottom:24px;max-width:440px}
+
+.promo-feats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:28px}
+.promo-feat{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:12px}
+.promo-feat-ico{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.promo-feat-title{font-size:12px;font-weight:700;color:rgba(255,255,255,.85);margin-bottom:2px}
+.promo-feat-sub{font-size:11px;color:rgba(255,255,255,.35);line-height:1.4}
+
+.promo-cta-main{display:inline-flex;align-items:center;gap:9px;padding:13px 28px;border-radius:12px;background:linear-gradient(135deg,#25d366,#00b5d8);color:#000;font-weight:900;font-size:14px;text-decoration:none;transition:all .25s;box-shadow:0 6px 24px rgba(37,211,102,.3);margin-right:10px}
+.promo-cta-main:hover{transform:translateY(-2px);box-shadow:0 10px 36px rgba(37,211,102,.5);color:#000}
+.promo-cta-ghost{display:inline-flex;align-items:center;gap:7px;padding:13px 22px;border-radius:12px;background:transparent;border:1.5px solid rgba(255,255,255,.12);color:rgba(255,255,255,.55);font-weight:600;font-size:14px;text-decoration:none;transition:all .25s}
+.promo-cta-ghost:hover{border-color:rgba(37,211,102,.3);color:#4ade80;background:rgba(37,211,102,.05)}
+
+/* CHAT DEMO */
+.chat-demo{background:#0a0f1a;border:1px solid rgba(255,255,255,.08);border-radius:16px;overflow:hidden}
+.chat-demo-head{padding:10px 14px;background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:10px}
+.chat-demo-av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#25d366,#00d4ff);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;animation:botFloat 3s ease-in-out infinite}
+.chat-demo-body{padding:14px;display:flex;flex-direction:column;gap:9px;min-height:220px}
+.chat-msg{max-width:85%;padding:9px 13px;border-radius:14px;font-size:12px;line-height:1.55;opacity:0}
+.chat-msg.bot-msg{align-self:flex-start;background:rgba(255,255,255,.08);color:rgba(255,255,255,.85);border-bottom-left-radius:4px}
+.chat-msg.user-msg{align-self:flex-end;background:#25d366;color:#000;border-bottom-right-radius:4px;font-weight:600}
+.chat-typing{display:flex;gap:4px;padding:9px 13px;background:rgba(255,255,255,.06);border-radius:12px;width:50px;align-self:flex-start;opacity:0}
+.chat-dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.4);animation:typingBounce 1s infinite}
+.chat-dot:nth-child(2){animation-delay:.15s}.chat-dot:nth-child(3){animation-delay:.3s}
+.chat-msg.visible{animation:msgSlide .3s ease both;opacity:1}
+.chat-typing.visible{opacity:1}
+
+.promo-plans{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px}
+.pplan{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:12px 10px;text-align:center;transition:all .2s;cursor:default}
+.pplan:hover{border-color:rgba(37,211,102,.25);background:rgba(37,211,102,.05)}
+.pplan.popular{background:rgba(37,211,102,.07);border-color:rgba(37,211,102,.25);position:relative}
+.pplan.popular::before{content:'HOT';position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:#25d366;color:#000;font-size:8px;font-weight:900;padding:2px 8px;border-radius:100px;letter-spacing:.5px}
+.pplan-name{font-size:11px;font-weight:700;color:rgba(255,255,255,.6);margin-bottom:4px}
+.pplan-price{font-size:18px;font-weight:900;color:#fff;line-height:1}
+.pplan-unit{font-size:9px;color:rgba(255,255,255,.3);letter-spacing:.5px}
+
+@media(max-width:900px){.promo-inner{grid-template-columns:1fr}.promo-right{display:none}.promo-feats{grid-template-columns:1fr}}
+</style>
+
+{% if bot_config %}
+<!-- CLIENT HAS A BOT — show status widget -->
+<div class="bot-promo-section">
+  <div style="padding:28px 32px;position:relative;z-index:2">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px">
+      <div style="display:flex;align-items:center;gap:14px">
+        <div style="width:50px;height:50px;border-radius:14px;background:linear-gradient(135deg,#25d366,#00d4ff);display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 14px rgba(37,211,102,.3);animation:botFloat 3s ease-in-out infinite">🤖</div>
+        <div>
+          <div style="font-size:18px;font-weight:800;color:#fff">{{ bot_config.bot_name }}</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.45);margin-top:2px">{{ bot_config.business_name }} · WhatsApp Bot</div>
+          <div style="margin-top:6px;display:flex;align-items:center;gap:8px">
+            <span style="display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;background:rgba({% if bot_config.status == 'active' %}37,211,102{% elif bot_config.status == 'pending' %}245,158,11{% else %}239,68,68{% endif %},.15);color:{% if bot_config.status == 'active' %}#4ade80{% elif bot_config.status == 'pending' %}#fbbf24{% else %}#f87171{% endif %};border:1px solid rgba({% if bot_config.status == 'active' %}37,211,102{% elif bot_config.status == 'pending' %}245,158,11{% else %}239,68,68{% endif %},.25)">
+              <span style="width:6px;height:6px;border-radius:50%;background:currentColor{% if bot_config.status == 'active' %};animation:botPulse 2s infinite{% endif %}"></span>
+              {{ bot_config.status|capfirst }}
+            </span>
+            {% if bot_config.whatsapp_number %}<span style="font-size:11px;color:#4ade80;font-family:monospace"><i class="fab fa-whatsapp"></i> {{ bot_config.whatsapp_number }}</span>{% endif %}
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:9px;flex-wrap:wrap">
+        <a href="/chatbot/dashboard/" class="promo-cta-main" style="font-size:13px;padding:10px 22px"><i class="fas fa-robot"></i> Bot Dashboard</a>
+        <a href="/chatbot/config/" class="promo-cta-ghost" style="font-size:13px;padding:10px 18px"><i class="fas fa-sliders"></i> Configure</a>
+        <a href="/chatbot/conversations/" class="promo-cta-ghost" style="font-size:13px;padding:10px 18px"><i class="fas fa-comments"></i> Chats</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% else %}
+<!-- CLIENT HAS NO BOT — show powerful promo -->
+<div class="bot-promo-section">
+  <div class="promo-inner">
+
+    <!-- LEFT: Main promo content -->
+    <div class="promo-left">
+      <div class="promo-badge"><span class="dot"></span> New Feature Available</div>
+      <h2 class="promo-title">Your Customers Deserve<br>Answers <span class="hl">24/7.</span></h2>
+      <p class="promo-sub">Add an AI-powered WhatsApp bot to your business today. It handles customer questions, shares your services, and never misses a message — in Swahili and English.</p>
+
+      <div class="promo-feats">
+        <div class="promo-feat">
+          <div class="promo-feat-ico" style="background:rgba(37,211,102,.1);color:#4ade80">🤖</div>
+          <div><div class="promo-feat-title">AI-Powered</div><div class="promo-feat-sub">Smart replies using Gemini AI</div></div>
+        </div>
+        <div class="promo-feat">
+          <div class="promo-feat-ico" style="background:rgba(0,212,255,.1);color:#22d3ee">⚡</div>
+          <div><div class="promo-feat-title">Ready in 10 min</div><div class="promo-feat-sub">No coding, simple setup</div></div>
+        </div>
+        <div class="promo-feat">
+          <div class="promo-feat-ico" style="background:rgba(139,92,246,.1);color:#c084fc">🇹🇿</div>
+          <div><div class="promo-feat-title">Swahili + English</div><div class="promo-feat-sub">Auto-detects customer language</div></div>
+        </div>
+        <div class="promo-feat">
+          <div class="promo-feat-ico" style="background:rgba(245,158,11,.1);color:#fbbf24">📊</div>
+          <div><div class="promo-feat-title">Your Dashboard</div><div class="promo-feat-sub">See every conversation live</div></div>
+        </div>
+      </div>
+
+      <div style="margin-bottom:20px">
+        <div class="promo-plans">
+          <div class="pplan"><div class="pplan-name">Starter</div><div class="pplan-price">15K</div><div class="pplan-unit">TZS/MONTH</div></div>
+          <div class="pplan popular"><div class="pplan-name">Business</div><div class="pplan-price">30K</div><div class="pplan-unit">TZS/MONTH</div></div>
+          <div class="pplan"><div class="pplan-name">Enterprise</div><div class="pplan-price">60K</div><div class="pplan-unit">TZS/MONTH</div></div>
+        </div>
+        <div style="font-size:12px;color:rgba(37,211,102,.6);display:flex;align-items:center;gap:6px;font-family:monospace">
+          <span style="width:5px;height:5px;border-radius:50%;background:#25d366;animation:botPulse 2s infinite"></span>
+          7-day free trial · No payment required to start
+        </div>
+      </div>
+
+      <div>
+        <a href="/chatbot/register/" class="promo-cta-main"><i class="fab fa-whatsapp" style="font-size:16px"></i> Get My Bot — Free Trial</a>
+        <a href="/bot/" class="promo-cta-ghost">Learn More <i class="fas fa-arrow-right" style="font-size:11px"></i></a>
+      </div>
+    </div>
+
+    <!-- RIGHT: Live chat demo -->
+    <div class="promo-right">
+      <div style="font-family:monospace;font-size:9px;color:rgba(255,255,255,.25);text-transform:uppercase;letter-spacing:2px;margin-bottom:12px;text-align:center">Live Demo</div>
+      <div class="chat-demo">
+        <div class="chat-demo-head">
+          <div class="chat-demo-av">🤖</div>
+          <div>
+            <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.85)">{{ client.name|cut:" "|default:"Your" }}Bot</div>
+            <div style="font-size:10px;color:#25d366;font-family:monospace">● Online · replies instantly</div>
+          </div>
+        </div>
+        <div class="chat-demo-body" id="chatDemo">
+          <div class="chat-msg bot-msg" id="dm1">Habari! 👋 I'm your AI assistant. How can I help you today?</div>
+          <div class="chat-msg user-msg" id="dm2">What services do you offer?</div>
+          <div class="chat-typing" id="dmTyping"><div class="chat-dot"></div><div class="chat-dot"></div><div class="chat-dot"></div></div>
+          <div class="chat-msg bot-msg" id="dm3">We offer web hosting, domain registration, and email services. Which one interests you? 😊</div>
+          <div class="chat-msg user-msg" id="dm4">Domain price?</div>
+          <div class="chat-msg bot-msg" id="dm5">.com domains start from TZS 35,000/year. Want me to check availability for your name? 🔍</div>
+        </div>
+      </div>
+      <div style="margin-top:14px;padding:12px 14px;background:rgba(37,211,102,.06);border:1px solid rgba(37,211,102,.15);border-radius:10px">
+        <div style="font-size:12px;font-weight:700;color:#4ade80;margin-bottom:4px">✅ This could be YOUR bot</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.4);line-height:1.55">Customized with your business name, services, and prices. Responds 24/7 — even when you're sleeping.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// Animate chat messages sequentially
+(function(){
+  const seq = [
+    {el:'dm1', delay:600},
+    {el:'dm2', delay:1800},
+    {el:'dmTyping', delay:2400, hide:3400},
+    {el:'dm3', delay:3400},
+    {el:'dm4', delay:5000},
+    {el:'dmTyping', delay:5600, hide:6400, second:true},
+    {el:'dm5', delay:6400},
+  ];
+  let typingShown = false;
+  seq.forEach(s => {
+    if(s.el === 'dmTyping'){
+      if(s.second && typingShown) return;
+      setTimeout(()=>{
+        const el = document.getElementById(s.el);
+        if(el) el.classList.add('visible');
+        typingShown = true;
+      }, s.delay);
+      if(s.hide) setTimeout(()=>{
+        const el = document.getElementById(s.el);
+        if(el) el.classList.remove('visible');
+      }, s.hide);
+    } else {
+      setTimeout(()=>{
+        const el = document.getElementById(s.el);
+        if(el) el.classList.add('visible');
+      }, s.delay);
+    }
+  });
+  // Loop animation every 10 seconds
+  setTimeout(function loop(){
+    document.querySelectorAll('.chat-msg,.chat-typing').forEach(e=>e.classList.remove('visible'));
+    typingShown = false;
+    seq.forEach(s => {
+      if(s.el === 'dmTyping'){
+        setTimeout(()=>{const el=document.getElementById(s.el);if(el)el.classList.add('visible');},s.delay);
+        if(s.hide)setTimeout(()=>{const el=document.getElementById(s.el);if(el)el.classList.remove('visible');},s.hide);
+      } else {
+        setTimeout(()=>{const el=document.getElementById(s.el);if(el)el.classList.add('visible');},s.delay);
+      }
+    });
+    setTimeout(loop, 10000);
+  }, 10000);
+})();
+</script>
+{% endif %}
+<!-- ══ END JAMIIBOT PROMO ══════════════════════════════════════ -->
+
+{% endblock %}

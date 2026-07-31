@@ -1,4 +1,10 @@
-JamiiTek.zip
-venv
-db.sqlite3
 .env
+*.env
+db.sqlite3
+venv/
+__pycache__/
+*.pyc
+staticfiles/
+media/
+reports/
+*.zip

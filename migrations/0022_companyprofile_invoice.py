@@ -1,0 +1,87 @@
+# CompanyProfile + Invoice
+from django.db import migrations, models
+import django.db.models.deletion
+
+
+class Migration(migrations.Migration):
+
+    dependencies = [
+        ('apps', '0021_proposal'),
+    ]
+
+    operations = [
+        migrations.CreateModel(
+            name='CompanyProfile',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('company_name', models.CharField(default='JamiiTek Digital Agency', max_length=140)),
+                ('short_name', models.CharField(default='JamiiTek', max_length=60)),
+                ('tagline_en', models.CharField(default="Building Tanzania's Digital Future", max_length=200)),
+                ('tagline_sw', models.CharField(default='Tunajenga Mustakabali wa Kidijitali wa Tanzania', max_length=200)),
+                ('subtitle_en', models.CharField(default='Your Trusted Digital Partner in Tanzania', max_length=200)),
+                ('subtitle_sw', models.CharField(default='Mshirika Wako wa Kidijitali Tanzania', max_length=200)),
+                ('period', models.CharField(blank=True, help_text='e.g. 2025 — 2026', max_length=40)),
+                ('about_en', models.TextField(blank=True)),
+                ('about_sw', models.TextField(blank=True)),
+                ('mission_en', models.TextField(blank=True)),
+                ('mission_sw', models.TextField(blank=True)),
+                ('vision_en', models.TextField(blank=True)),
+                ('vision_sw', models.TextField(blank=True)),
+                ('services', models.JSONField(blank=True, default=list)),
+                ('why_us', models.JSONField(blank=True, default=list)),
+                ('projects', models.JSONField(blank=True, default=list)),
+                ('facts', models.JSONField(blank=True, default=list)),
+                ('sections', models.JSONField(blank=True, default=list)),
+                ('pricing_note_en', models.TextField(blank=True)),
+                ('pricing_note_sw', models.TextField(blank=True)),
+                ('email', models.EmailField(default='info@jamiitek.com', max_length=254)),
+                ('phone', models.CharField(blank=True, max_length=40)),
+                ('website', models.CharField(default='www.jamiitek.com', max_length=120)),
+                ('address', models.CharField(default='Dar es Salaam, Tanzania', max_length=200)),
+                ('logo_url', models.URLField(blank=True)),
+                ('is_active', models.BooleanField(default=True, help_text='Only the active profile is shown publicly')),
+                ('created_at', models.DateTimeField(auto_now_add=True)),
+                ('updated_at', models.DateTimeField(auto_now=True)),
+            ],
+            options={'ordering': ['-is_active', '-updated_at']},
+        ),
+        migrations.CreateModel(
+            name='Invoice',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('token', models.CharField(db_index=True, editable=False, max_length=48, unique=True)),
+                ('invoice_number', models.CharField(blank=True, help_text='Auto: INV-YYYY-NNNN if blank', max_length=40)),
+                ('invoice_type', models.CharField(choices=[('standard', 'Standard Invoice'), ('proforma', 'Proforma Invoice'), ('deposit', 'Deposit / Advance'), ('balance', 'Balance / Final'), ('recurring', 'Recurring (hosting, retainer)'), ('credit', 'Credit Note')], default='standard', max_length=12)),
+                ('client_name', models.CharField(blank=True, max_length=160)),
+                ('client_email', models.EmailField(blank=True, max_length=254)),
+                ('client_company', models.CharField(blank=True, max_length=160)),
+                ('client_phone', models.CharField(blank=True, max_length=40)),
+                ('client_address', models.CharField(blank=True, max_length=240)),
+                ('title', models.CharField(default='Invoice', max_length=200)),
+                ('project_name', models.CharField(blank=True, max_length=200)),
+                ('issue_date', models.DateField(blank=True, null=True)),
+                ('due_date', models.DateField(blank=True, null=True)),
+                ('line_items', models.JSONField(blank=True, default=list)),
+                ('currency', models.CharField(default='TZS', max_length=8)),
+                ('tax_percent', models.DecimalField(blank=True, decimal_places=2, help_text='e.g. 18 for 18% VAT. Leave blank for none.', max_digits=5, null=True)),
+                ('discount_amount', models.DecimalField(blank=True, decimal_places=2, max_digits=12, null=True)),
+                ('amount_paid', models.DecimalField(blank=True, decimal_places=2, help_text='For partial payments', max_digits=12, null=True)),
+                ('payment_methods', models.JSONField(blank=True, default=list)),
+                ('payment_terms', models.CharField(blank=True, max_length=300)),
+                ('notes_en', models.TextField(blank=True)),
+                ('notes_sw', models.TextField(blank=True)),
+                ('status', models.CharField(choices=[('draft', 'Draft'), ('sent', 'Sent to client'), ('viewed', 'Viewed'), ('partial', 'Partially paid'), ('paid', 'Paid'), ('overdue', 'Overdue'), ('cancelled', 'Cancelled')], default='draft', max_length=12)),
+                ('logo_url', models.URLField(blank=True)),
+                ('provider_name', models.CharField(default='JamiiTek', max_length=120)),
+                ('provider_rep', models.CharField(default='W. Chipindi', max_length=120)),
+                ('paid_at', models.DateTimeField(blank=True, null=True)),
+                ('paid_reference', models.CharField(blank=True, help_text='M-Pesa / bank reference', max_length=120)),
+                ('viewed_at', models.DateTimeField(blank=True, null=True)),
+                ('sent_at', models.DateTimeField(blank=True, null=True)),
+                ('created_at', models.DateTimeField(auto_now_add=True)),
+                ('updated_at', models.DateTimeField(auto_now=True)),
+                ('client', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='invoices', to='apps.client')),
+            ],
+            options={'ordering': ['-created_at']},
+        ),
+    ]

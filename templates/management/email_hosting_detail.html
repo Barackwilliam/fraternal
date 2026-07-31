@@ -1,0 +1,185 @@
+{% extends 'management/base.html' %}
+{% block title %}{{ plan.plan_name }}{% endblock %}
+{% block content %}
+
+<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:22px;flex-wrap:wrap">
+  <div style="display:flex;align-items:center;gap:12px">
+    <a href="{% url 'email_hosting_list' %}" class="jt-btn btn-ghost btn-icon"><i class="fas fa-arrow-left"></i></a>
+    <div>
+      <h1 style="font-family:var(--head);font-size:20px;font-weight:800;color:var(--text);margin-bottom:3px">{{ plan.plan_name }}</h1>
+      <div style="font-family:var(--mono);font-size:13px;color:var(--cyan)">@{{ plan.email_domain }}</div>
+    </div>
+  </div>
+  <span class="jt-badge b-{{ plan.status }}" style="padding:6px 16px;font-size:12px">{{ plan.status|capfirst }}</span>
+</div>
+
+{% if plan.is_overdue %}
+<div class="jt-alert jt-alert-danger mb-3"><i class="fas fa-triangle-exclamation" style="flex-shrink:0"></i><strong>Plan Expired!</strong>&nbsp;Record a payment to restore.</div>
+{% elif plan.days_until_expiry <= 7 %}
+<div class="jt-alert jt-alert-warning mb-3"><i class="fas fa-clock" style="flex-shrink:0"></i>Expires in <strong>{{ plan.days_until_expiry }} day(s)</strong> — {{ plan.end_date|date:"d M Y" }}</div>
+{% endif %}
+
+<!-- ACTION BAR -->
+<div class="jt-card mb-4">
+  <div class="jt-card-body" style="padding:12px 16px">
+    <div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px">
+      <span style="font-family:var(--mono);font-size:10px;color:var(--text-3);letter-spacing:2px;margin-right:4px">ACTIONS</span>
+      <button onclick="openModal('paymentModal')" class="jt-btn btn-green"><i class="fas fa-coins"></i> Record Payment</button>
+      {% if plan.status == 'active' %}
+      <button onclick="openModal('suspendModal')" class="jt-btn btn-red"><i class="fas fa-ban"></i> Suspend</button>
+      {% else %}
+      <button onclick="openModal('restoreModal')" class="jt-btn btn-green"><i class="fas fa-play"></i> Restore</button>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <!-- Plan info -->
+  <div class="col-lg-4">
+    <div class="jt-card">
+      <div class="jt-card-head"><span class="jt-card-title"><i class="fas fa-envelope-open-text" style="color:var(--cyan)"></i> Plan Details</span></div>
+      <div class="jt-card-body">
+        <div class="info-row"><span class="info-key">Client</span><span class="info-val"><a href="{% url 'client_detail_admin' plan.client.pk %}" style="color:var(--cyan)">{{ plan.client.name }}</a></span></div>
+        <div class="info-row"><span class="info-key">Email Domain</span><span class="info-val" style="font-family:var(--mono);color:var(--cyan)">{{ plan.email_domain }}</span></div>
+        <div class="info-row"><span class="info-key">Accounts</span><span class="info-val">{{ plan.accounts_count }}</span></div>
+        <div class="info-row"><span class="info-key">Storage / Acct</span><span class="info-val">{{ plan.storage_gb }} GB</span></div>
+        <div class="info-row"><span class="info-key">Monthly Cost</span><span class="info-val" style="color:var(--green)">TZS {{ plan.monthly_cost|floatformat:0 }}</span></div>
+        <div class="info-row"><span class="info-key">Started</span><span class="info-val">{{ plan.start_date|date:"d M Y" }}</span></div>
+        <div class="info-row"><span class="info-key">Expires</span>
+          <span class="info-val" style="{% if plan.is_overdue %}color:var(--red){% elif plan.days_until_expiry <= 7 %}color:var(--yellow){% endif %}">
+            {{ plan.end_date|date:"d M Y" }}{% if plan.is_overdue %} ⚠{% endif %}
+          </span>
+        </div>
+        <div class="info-row"><span class="info-key">Total Paid</span><span class="info-val" style="color:var(--green)">TZS {{ plan.total_paid|floatformat:0 }}</span></div>
+        {% if plan.website %}
+        <div class="info-row" style="border:none"><span class="info-key">Website</span><span class="info-val"><a href="{% url 'website_detail' plan.website.pk %}" style="color:var(--cyan)">{{ plan.website.name }}</a></span></div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Payment history -->
+  <div class="col-lg-8">
+    <div class="jt-card" style="padding:0">
+      <div class="jt-card-head">
+        <span class="jt-card-title"><i class="fas fa-receipt" style="color:var(--green)"></i> Payment History</span>
+        <button onclick="openModal('paymentModal')" class="jt-btn btn-icon btn-green" style="width:32px;height:32px"><i class="fas fa-plus"></i></button>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="jt-table">
+          <thead><tr><th>Date</th><th>Amount</th><th>Months</th><th>Method</th><th>Reference</th></tr></thead>
+          <tbody>
+            {% for p in payments %}
+            <tr>
+              <td style="font-family:var(--mono);font-size:12px;color:var(--text-3)">{{ p.payment_date|date:"d M Y" }}</td>
+              <td style="font-family:var(--mono);font-weight:600;color:var(--green)">TZS {{ p.amount|floatformat:0 }}</td>
+              <td style="font-family:var(--mono);font-size:12px;text-align:center">{{ p.months_covered }}</td>
+              <td style="font-size:12px;color:var(--text-2)">{{ p.payment_method|default:"—" }}</td>
+              <td style="font-family:var(--mono);font-size:11px;color:var(--cyan)">{{ p.transaction_ref|default:"—" }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5"><div class="jt-empty" style="padding:30px"><div class="ei">💳</div><p>No payments recorded yet</p></div></td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PAYMENT MODAL -->
+<div class="jt-modal-overlay" id="paymentModal">
+  <div class="jt-modal-bg"></div>
+  <div class="jt-modal-box">
+    <div class="jt-modal-head">
+      <h3><i class="fas fa-coins" style="color:var(--green)"></i> Record Email Hosting Payment</h3>
+      <button class="jt-modal-close" onclick="closeModal('paymentModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <form method="post" action="{% url 'email_hosting_payment' plan.pk %}">
+      {% csrf_token %}
+      <div class="jt-modal-body">
+        <div class="row g-3">
+          <div class="col-6">
+            <label class="f-label">Amount (TZS) *</label>
+            <input type="number" name="amount" class="f-input" placeholder="{{ plan.monthly_cost }}" required>
+          </div>
+          <div class="col-6">
+            <label class="f-label">Payment Date *</label>
+            <input type="date" name="payment_date" class="f-input" value="{% now 'Y-m-d' %}" required>
+          </div>
+          <div class="col-6">
+            <label class="f-label">Months Covered</label>
+            <input type="number" name="months_covered" class="f-input" value="1" min="1" max="24">
+          </div>
+          <div class="col-6">
+            <label class="f-label">Payment Method</label>
+            <select name="payment_method" class="f-input">
+              <option>NMB Bank Transfer</option><option>M-Pesa</option><option>Tigo Pesa</option><option>Airtel Money</option><option>Cash</option>
+            </select>
+          </div>
+          <div class="col-12">
+            <label class="f-label">Transaction Reference</label>
+            <input type="text" name="transaction_ref" class="f-input" placeholder="NMB20240912345">
+          </div>
+          <div class="col-12" style="display:flex;flex-direction:column;gap:8px">
+            <label class="f-check"><input type="checkbox" name="extend_plan" checked style="width:15px;height:15px"><span>Extend plan end date by months covered</span></label>
+            <label class="f-check"><input type="checkbox" name="notify_client" checked style="width:15px;height:15px"><span>Email payment receipt to {{ plan.client.name }}</span></label>
+          </div>
+        </div>
+      </div>
+      <div class="jt-modal-foot">
+        <button type="button" onclick="closeModal('paymentModal')" class="jt-btn btn-ghost">Cancel</button>
+        <button type="submit" class="jt-btn btn-green"><i class="fas fa-save"></i> Save Payment</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- SUSPEND MODAL -->
+<div class="jt-modal-overlay" id="suspendModal">
+  <div class="jt-modal-bg"></div>
+  <div class="jt-modal-box">
+    <div class="jt-modal-head">
+      <h3><i class="fas fa-ban" style="color:var(--red)"></i> Suspend Email Hosting</h3>
+      <button class="jt-modal-close" onclick="closeModal('suspendModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <form method="post" action="{% url 'email_hosting_suspend' plan.pk %}">
+      {% csrf_token %}
+      <div class="jt-modal-body">
+        <div class="mb-3">
+          <label class="f-label">Suspension Message for Client</label>
+          <textarea name="suspension_message" class="f-input" style="min-height:90px">{{ plan.suspension_message }}</textarea>
+        </div>
+        <label class="f-check"><input type="checkbox" name="notify_client" checked style="width:15px;height:15px"><span>Email suspension notice to {{ plan.client.name }}</span></label>
+      </div>
+      <div class="jt-modal-foot">
+        <button type="button" onclick="closeModal('suspendModal')" class="jt-btn btn-ghost">Cancel</button>
+        <button type="submit" class="jt-btn btn-red"><i class="fas fa-ban"></i> Suspend Plan</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- RESTORE MODAL -->
+<div class="jt-modal-overlay" id="restoreModal">
+  <div class="jt-modal-bg"></div>
+  <div class="jt-modal-box">
+    <div class="jt-modal-head">
+      <h3><i class="fas fa-play" style="color:var(--green)"></i> Restore Email Hosting</h3>
+      <button class="jt-modal-close" onclick="closeModal('restoreModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <form method="post" action="{% url 'email_hosting_restore' plan.pk %}">
+      {% csrf_token %}
+      <div class="jt-modal-body">
+        <p style="color:var(--text-2);font-size:14px;line-height:1.7">Restore email hosting for <strong style="color:var(--text)">@{{ plan.email_domain }}</strong> to active status?</p>
+        <label class="f-check mt-3"><input type="checkbox" name="notify_client" checked style="width:15px;height:15px"><span>Email restoration notice to {{ plan.client.name }}</span></label>
+      </div>
+      <div class="jt-modal-foot">
+        <button type="button" onclick="closeModal('restoreModal')" class="jt-btn btn-ghost">Cancel</button>
+        <button type="submit" class="jt-btn btn-green"><i class="fas fa-play"></i> Restore Plan</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

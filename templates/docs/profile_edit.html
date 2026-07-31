@@ -1,0 +1,312 @@
+{% extends 'management/base.html' %}
+{% block title %}Company Profile{% endblock %}
+{% block extra_css %}
+<style>
+  .cb-topline{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:20px;flex-wrap:wrap}
+  .cb-title{font-family:var(--head);font-size:20px;font-weight:800;color:var(--text)}
+  .cb-sub{font-family:var(--mono);font-size:12px;color:var(--text-3);margin-top:3px}
+  .cb-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .share-box{background:var(--green-d);border:1px solid rgba(0,255,136,.25);border-radius:var(--r-lg);
+    padding:14px 18px;margin-bottom:22px;font-size:13px;font-family:var(--mono)}
+  .share-box a{color:var(--green);font-weight:700;text-decoration:none}
+  .share-box .sub{color:var(--text-3);margin-top:4px;font-size:11px}
+  .cb-section{margin-bottom:20px}
+  .cb-section .sh{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+  .cb-section .sh .n{width:26px;height:26px;border-radius:8px;background:var(--cyan-d);color:var(--cyan);
+    display:inline-flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:800;
+    font-family:var(--mono);border:1px solid rgba(0,212,255,.25)}
+  .cb-section .sh h2{font-family:var(--head);font-size:15px;font-weight:700;color:var(--text)}
+  .cb-section .sh .hint{font-family:var(--mono);font-size:11px;color:var(--text-3);font-weight:400}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+  .fld{margin-bottom:14px}
+  .fld-row{display:flex;gap:8px;align-items:flex-end}
+  .fld-row .fld{flex:1;margin-bottom:0}
+  .lang-pair{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .ai-btn{background:var(--purple-d);color:var(--purple);border:1px solid rgba(139,92,246,.3);border-radius:8px;
+    padding:10px 13px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;
+    font-family:var(--mono);display:inline-flex;align-items:center;gap:6px;transition:.2s}
+  .ai-btn:hover{background:var(--purple);color:#fff;box-shadow:0 0 16px rgba(139,92,246,.35);transform:translateY(-1px)}
+  .ai-btn:disabled{opacity:.5;cursor:wait}
+  .ai-btn.small{padding:7px 10px;font-size:11px}
+  .item{border:1px solid var(--border);border-radius:var(--r-lg);padding:16px;margin-bottom:12px;background:var(--card)}
+  .item .ihead{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+  .item .inum{font-family:var(--mono);font-weight:700;color:var(--text-3);font-size:11.5px;
+    text-transform:uppercase;letter-spacing:1px}
+  .iact{display:flex;gap:6px}
+  .icon-btn{background:var(--card-s);border:1px solid var(--border);border-radius:7px;width:29px;height:29px;
+    cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:12px;color:var(--text-3)}
+  .icon-btn:hover{border-color:var(--border-s);color:var(--cyan)}
+  .icon-btn.del:hover{border-color:rgba(255,59,92,.4);color:var(--red)}
+  .add-btn{background:transparent;border:1.5px dashed var(--border);border-radius:var(--r-lg);padding:13px;
+    width:100%;cursor:pointer;color:var(--text-3);font-weight:700;font-size:13px;font-family:var(--mono);transition:.2s}
+  .add-btn:hover{border-color:var(--border-s);color:var(--cyan);background:var(--cyan-d)}
+  .row-flex{display:flex;gap:8px;margin-bottom:9px;align-items:center}
+  .row-flex input{flex:1}
+  .cb-savebar{position:fixed;bottom:0;left:var(--sb);right:0;background:var(--bg2);border-top:1px solid var(--border);
+    padding:14px 24px;display:flex;justify-content:center;gap:12px;box-shadow:0 -8px 30px rgba(0,0,0,.3);z-index:90}
+  @media(max-width:900px){.cb-savebar{left:0}}
+  .toast{position:fixed;top:70px;right:20px;background:var(--bg2);border:1px solid var(--border-s);color:var(--text);
+    padding:14px 22px;border-radius:var(--r-lg);font-size:13px;box-shadow:0 8px 30px rgba(0,0,0,.4);z-index:200;
+    opacity:0;transform:translateY(-10px);transition:.3s;pointer-events:none;font-family:var(--mono)}
+  .toast.show{opacity:1;transform:translateY(0)}
+  .toast.err{border-color:rgba(255,59,92,.4);color:var(--red)}
+  .toast.ok{border-color:rgba(0,255,136,.4);color:var(--green)}
+  body{padding-bottom:100px}
+  @media(max-width:640px){.grid2,.grid3,.lang-pair{grid-template-columns:1fr}}
+</style>
+{% endblock %}
+{% block content %}
+<div class="cb-topline">
+  <div>
+    <div class="cb-title"><i class="fas fa-building" style="color:var(--cyan)"></i> Company Profile</div>
+    <div class="cb-sub">Public page + downloadable PDF</div>
+  </div>
+  <div class="cb-actions">
+    <button type="button" class="ai-btn" id="bigAiBtn" onclick="draftWhole()">✨ AI: Draft About / Mission / Vision</button>
+    <button type="button" class="jt-btn btn-cyan" onclick="saveProfile()"><i class="fas fa-floppy-disk"></i> Save</button>
+  </div>
+</div>
+
+<div class="share-box">
+  <i class="fas fa-link"></i> Public link: <a href="/company-profile/" target="_blank">https://jamiitek.com/company-profile/</a>
+  &nbsp;·&nbsp; <a href="/company-profile/pdf/" target="_blank">Download PDF</a>
+  <div class="sub">Share this link with clients — always up to date, no attachments needed.</div>
+</div>
+
+<form id="profForm">
+  <div class="cb-section">
+    <div class="sh"><span class="n">1</span><h2>Identity</h2></div>
+    <div class="jt-card" style="padding:20px">
+      <div class="grid2">
+        <div class="fld"><label class="f-label">Company name</label><input type="text" class="f-input" id="company_name" value="{{ profile.company_name }}"></div>
+        <div class="fld"><label class="f-label">Short name</label><input type="text" class="f-input" id="short_name" value="{{ profile.short_name }}"></div>
+      </div>
+      <div class="lang-pair">
+        <div class="fld"><label class="f-label">Tagline (EN)</label><input type="text" class="f-input" id="tagline_en" value="{{ profile.tagline_en }}"></div>
+        <div class="fld"><label class="f-label">Tagline (SW)</label><input type="text" class="f-input" id="tagline_sw" value="{{ profile.tagline_sw }}"></div>
+      </div>
+      <div class="lang-pair">
+        <div class="fld"><label class="f-label">Subtitle (EN)</label><input type="text" class="f-input" id="subtitle_en" value="{{ profile.subtitle_en }}"></div>
+        <div class="fld"><label class="f-label">Subtitle (SW)</label><input type="text" class="f-input" id="subtitle_sw" value="{{ profile.subtitle_sw }}"></div>
+      </div>
+      <div class="grid2">
+        <div class="fld"><label class="f-label">Period</label><input type="text" class="f-input" id="period" value="{{ profile.period }}" placeholder="2025 — 2026"></div>
+        <div class="fld"><label class="f-label">Logo URL</label><input type="url" class="f-input" id="logo_url" value="{{ profile.logo_url }}"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cb-section">
+    <div class="sh"><span class="n">2</span><h2>About</h2>
+      <button type="button" class="ai-btn small" style="margin-left:auto" onclick="assist('about','about_en')">✨ AI (EN)</button></div>
+    <div class="jt-card" style="padding:20px"><div class="lang-pair">
+      <div class="fld"><label class="f-label">English</label><textarea class="f-input" id="about_en" rows="6">{{ profile.about_en }}</textarea></div>
+      <div class="fld"><label class="f-label">Kiswahili</label><textarea class="f-input" id="about_sw" rows="6">{{ profile.about_sw }}</textarea></div>
+    </div></div>
+  </div>
+
+  <div class="cb-section">
+    <div class="sh"><span class="n">3</span><h2>Quick Facts</h2><span class="hint">Registered, Specialization, etc.</span></div>
+    <div class="jt-card" style="padding:20px">
+      <div id="factsBody"></div>
+      <button type="button" class="add-btn" onclick="addFact()">+ Add fact</button>
+    </div>
+  </div>
+
+  <div class="cb-section">
+    <div class="sh"><span class="n">4</span><h2>Mission &amp; Vision</h2>
+      <button type="button" class="ai-btn small" style="margin-left:auto" onclick="assist('mission','mission_en')">✨ Mission</button>
+      <button type="button" class="ai-btn small" onclick="assist('vision','vision_en')">✨ Vision</button></div>
+    <div class="jt-card" style="padding:20px">
+      <div class="lang-pair">
+        <div class="fld"><label class="f-label">Mission (EN)</label><textarea class="f-input" id="mission_en" rows="3">{{ profile.mission_en }}</textarea></div>
+        <div class="fld"><label class="f-label">Mission (SW)</label><textarea class="f-input" id="mission_sw" rows="3">{{ profile.mission_sw }}</textarea></div>
+      </div>
+      <div class="lang-pair">
+        <div class="fld"><label class="f-label">Vision (EN)</label><textarea class="f-input" id="vision_en" rows="3">{{ profile.vision_en }}</textarea></div>
+        <div class="fld"><label class="f-label">Vision (SW)</label><textarea class="f-input" id="vision_sw" rows="3">{{ profile.vision_sw }}</textarea></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cb-section">
+    <div class="sh"><span class="n">5</span><h2>Services</h2><span class="hint">✨ AI writes each description</span></div>
+    <div id="svcBody"></div>
+    <button type="button" class="add-btn" onclick="addService()">+ Add service</button>
+  </div>
+
+  <div class="cb-section">
+    <div class="sh"><span class="n">6</span><h2>Why Choose Us</h2></div>
+    <div class="jt-card" style="padding:20px">
+      <div id="whyBody"></div>
+      <button type="button" class="add-btn" onclick="addWhy()">+ Add point</button>
+    </div>
+  </div>
+
+  <div class="cb-section">
+    <div class="sh"><span class="n">7</span><h2>Selected Projects</h2></div>
+    <div class="jt-card" style="padding:20px">
+      <div id="projBody"></div>
+      <button type="button" class="add-btn" onclick="addProject()">+ Add project</button>
+    </div>
+  </div>
+
+  <div class="cb-section">
+    <div class="sh"><span class="n">8</span><h2>Extra Sections</h2><span class="hint">optional</span></div>
+    <div id="secBody"></div>
+    <button type="button" class="add-btn" onclick="addSection()">+ Add section</button>
+  </div>
+
+  <div class="cb-section">
+    <div class="sh"><span class="n">9</span><h2>Pricing Note</h2>
+      <button type="button" class="ai-btn small" style="margin-left:auto" onclick="assist('pricing_note','pricing_note_en')">✨ AI (EN)</button></div>
+    <div class="jt-card" style="padding:20px"><div class="lang-pair">
+      <div class="fld"><label class="f-label">English</label><textarea class="f-input" id="pricing_note_en" rows="3">{{ profile.pricing_note_en }}</textarea></div>
+      <div class="fld"><label class="f-label">Kiswahili</label><textarea class="f-input" id="pricing_note_sw" rows="3">{{ profile.pricing_note_sw }}</textarea></div>
+    </div></div>
+  </div>
+
+  <div class="cb-section">
+    <div class="sh"><span class="n">10</span><h2>Contact</h2></div>
+    <div class="jt-card" style="padding:20px">
+      <div class="grid2">
+        <div class="fld"><label class="f-label">Email</label><input type="email" class="f-input" id="email" value="{{ profile.email }}"></div>
+        <div class="fld"><label class="f-label">Phone</label><input type="text" class="f-input" id="phone" value="{{ profile.phone }}"></div>
+        <div class="fld"><label class="f-label">Website</label><input type="text" class="f-input" id="website" value="{{ profile.website }}"></div>
+        <div class="fld"><label class="f-label">Address</label><input type="text" class="f-input" id="address" value="{{ profile.address }}"></div>
+      </div>
+    </div>
+  </div>
+</form>
+
+<div class="cb-savebar">
+  <button type="button" class="jt-btn btn-cyan" onclick="saveProfile()"><i class="fas fa-floppy-disk"></i> Save Profile</button>
+  <a class="jt-btn btn-ghost" href="/company-profile/" target="_blank"><i class="fas fa-eye"></i> Preview</a>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const CSRF="{{ csrf_token }}";
+let services={{ services_json|safe }};
+let why={{ why_json|safe }};
+let projects={{ projects_json|safe }};
+let facts={{ facts_json|safe }};
+let sections={{ sections_json|safe }};
+function toast(m,t){const e=document.getElementById('toast');e.textContent=m;e.className='toast show'+(t?' '+t:'');setTimeout(()=>e.className='toast',2600);}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+function renderFacts(){const b=document.getElementById('factsBody');b.innerHTML='';
+  facts.forEach((f,i)=>{const d=document.createElement('div');d.className='row-flex';d.innerHTML=
+   `<input type="text" class="f-input" placeholder="Label (EN)" value="${esc(f.label_en||'')}" onchange="facts[${i}].label_en=this.value">
+    <input type="text" class="f-input" placeholder="Label (SW)" value="${esc(f.label_sw||'')}" onchange="facts[${i}].label_sw=this.value">
+    <input type="text" class="f-input" placeholder="Value" value="${esc(f.value||'')}" onchange="facts[${i}].value=this.value">
+    <button type="button" class="icon-btn del" onclick="rmFact(${i})">✕</button>`;b.appendChild(d);});}
+function addFact(){facts.push({label_en:'',label_sw:'',value:''});renderFacts();}
+function rmFact(i){facts.splice(i,1);renderFacts();}
+
+function renderServices(){const b=document.getElementById('svcBody');b.innerHTML='';
+  services.forEach((s,i)=>{const d=document.createElement('div');d.className='item';d.innerHTML=
+   `<div class="ihead"><span class="inum">Service ${i+1}</span><div class="iact">
+      <button type="button" class="icon-btn" onclick="moveSvc(${i},-1)"><i class="fas fa-arrow-up"></i></button>
+      <button type="button" class="icon-btn" onclick="moveSvc(${i},1)"><i class="fas fa-arrow-down"></i></button>
+      <button type="button" class="ai-btn small" onclick="assistSvc(${i})">✨ AI</button>
+      <button type="button" class="icon-btn del" onclick="rmSvc(${i})">✕</button></div></div>
+    <div class="lang-pair">
+      <div class="fld"><label class="f-label">Name (EN)</label><input type="text" class="f-input" value="${esc(s.name_en||'')}" onchange="services[${i}].name_en=this.value"></div>
+      <div class="fld"><label class="f-label">Name (SW)</label><input type="text" class="f-input" value="${esc(s.name_sw||'')}" onchange="services[${i}].name_sw=this.value"></div>
+    </div>
+    <div class="lang-pair">
+      <div class="fld"><label class="f-label">Description (EN)</label><textarea class="f-input" rows="2" onchange="services[${i}].desc_en=this.value">${esc(s.desc_en||'')}</textarea></div>
+      <div class="fld"><label class="f-label">Description (SW)</label><textarea class="f-input" rows="2" onchange="services[${i}].desc_sw=this.value">${esc(s.desc_sw||'')}</textarea></div>
+    </div>`;b.appendChild(d);});}
+function addService(){services.push({name_en:'',name_sw:'',desc_en:'',desc_sw:''});renderServices();}
+function rmSvc(i){services.splice(i,1);renderServices();}
+function moveSvc(i,d){const j=i+d;if(j<0||j>=services.length)return;[services[i],services[j]]=[services[j],services[i]];renderServices();}
+
+function renderWhy(){const b=document.getElementById('whyBody');b.innerHTML='';
+  why.forEach((w,i)=>{const d=document.createElement('div');d.className='row-flex';d.innerHTML=
+   `<input type="text" class="f-input" placeholder="Point (EN)" value="${esc(w.text_en||'')}" onchange="why[${i}].text_en=this.value">
+    <input type="text" class="f-input" placeholder="Point (SW)" value="${esc(w.text_sw||'')}" onchange="why[${i}].text_sw=this.value">
+    <button type="button" class="ai-btn small" onclick="assistWhy(${i})">✨</button>
+    <button type="button" class="icon-btn del" onclick="rmWhy(${i})">✕</button>`;b.appendChild(d);});}
+function addWhy(){why.push({text_en:'',text_sw:''});renderWhy();}
+function rmWhy(i){why.splice(i,1);renderWhy();}
+
+function renderProjects(){const b=document.getElementById('projBody');b.innerHTML='';
+  projects.forEach((p,i)=>{const d=document.createElement('div');d.className='row-flex';d.innerHTML=
+   `<input type="text" class="f-input" placeholder="Project name" value="${esc(p.name||'')}" onchange="projects[${i}].name=this.value">
+    <input type="text" class="f-input" placeholder="Type" value="${esc(p.type||'')}" onchange="projects[${i}].type=this.value">
+    <input type="text" class="f-input" placeholder="Technology" value="${esc(p.tech||'')}" onchange="projects[${i}].tech=this.value">
+    <button type="button" class="icon-btn del" onclick="rmProj(${i})">✕</button>`;b.appendChild(d);});}
+function addProject(){projects.push({name:'',type:'',tech:''});renderProjects();}
+function rmProj(i){projects.splice(i,1);renderProjects();}
+
+function renderSections(){const b=document.getElementById('secBody');b.innerHTML='';
+  sections.forEach((s,i)=>{const d=document.createElement('div');d.className='item';d.innerHTML=
+   `<div class="ihead"><span class="inum">Section ${i+1}</span><div class="iact">
+      <button type="button" class="ai-btn small" onclick="assistSec(${i})">✨ AI</button>
+      <button type="button" class="icon-btn del" onclick="rmSec(${i})">✕</button></div></div>
+    <div class="lang-pair">
+      <div class="fld"><label class="f-label">Heading (EN)</label><input type="text" class="f-input" value="${esc(s.heading_en||'')}" onchange="sections[${i}].heading_en=this.value"></div>
+      <div class="fld"><label class="f-label">Heading (SW)</label><input type="text" class="f-input" value="${esc(s.heading_sw||'')}" onchange="sections[${i}].heading_sw=this.value"></div>
+    </div>
+    <div class="lang-pair">
+      <div class="fld"><label class="f-label">Body (EN)</label><textarea class="f-input" rows="3" onchange="sections[${i}].body_en=this.value">${esc(s.body_en||'')}</textarea></div>
+      <div class="fld"><label class="f-label">Body (SW)</label><textarea class="f-input" rows="3" onchange="sections[${i}].body_sw=this.value">${esc(s.body_sw||'')}</textarea></div>
+    </div>`;b.appendChild(d);});}
+function addSection(){sections.push({heading_en:'',heading_sw:'',body_en:'',body_sw:''});renderSections();}
+function rmSec(i){sections.splice(i,1);renderSections();}
+
+async function aiCall(ft,ctx){
+  const fd=new FormData();fd.append('field_type',ft);fd.append('context',ctx);fd.append('language','en');
+  const r=await fetch("{% url 'profile_ai_assist' %}",{method:'POST',headers:{'X-CSRFToken':CSRF},body:fd});
+  return await r.json();
+}
+async function assist(ft,inputId){const btn=event.target;const o=btn.textContent;btn.disabled=true;btn.textContent='…';
+  try{const d=await aiCall(ft,document.getElementById('company_name').value);
+    if(d.ok){document.getElementById(inputId).value=d.text;toast('AI applied ✓','ok');}else toast(d.error||'AI failed','err');
+  }catch(e){toast('Network error','err');}btn.disabled=false;btn.textContent=o;}
+async function assistSvc(i){toast('AI is writing…');
+  try{const d=await aiCall('service',services[i].name_en||'digital service');
+    if(d.ok){services[i].desc_en=d.text;renderServices();toast('Service drafted ✓','ok');}else toast(d.error||'AI failed','err');
+  }catch(e){toast('Network error','err');}}
+async function assistWhy(i){toast('AI is writing…');
+  try{const d=await aiCall('why',document.getElementById('company_name').value);
+    if(d.ok){why[i].text_en=d.text;renderWhy();toast('Point drafted ✓','ok');}else toast(d.error||'AI failed','err');
+  }catch(e){toast('Network error','err');}}
+async function assistSec(i){toast('AI is writing…');
+  try{const d=await aiCall('section',sections[i].heading_en||'company information');
+    if(d.ok){const p=d.text.split('||');sections[i].heading_en=sections[i].heading_en||(p[0]||'').trim();
+      sections[i].body_en=(p[1]||d.text).trim();renderSections();toast('Section drafted ✓','ok');}
+    else toast(d.error||'AI failed','err');
+  }catch(e){toast('Network error','err');}}
+
+async function draftWhole(){
+  if(!confirm('AI will write the About, Mission and Vision sections (English + Swahili). This replaces the current text. Continue?'))return;
+  const btn=document.getElementById('bigAiBtn');const o=btn.textContent;btn.disabled=true;btn.textContent='✨ Drafting…';
+  try{await saveProfile(true);
+    const r=await fetch("{% url 'profile_ai_full' %}",{method:'POST',headers:{'X-CSRFToken':CSRF}});
+    const d=await r.json();
+    if(d.ok){['about_en','about_sw','mission_en','mission_sw','vision_en','vision_sw'].forEach(k=>{
+      if(d[k]!==undefined)document.getElementById(k).value=d[k];});toast('✓ AI drafted the profile','ok');}
+    else toast(d.error||'AI failed','err');
+  }catch(e){toast('Network error','err');}btn.disabled=false;btn.textContent=o;}
+
+async function saveProfile(silent){const fd=new FormData();
+  const ids=['company_name','short_name','tagline_en','tagline_sw','subtitle_en','subtitle_sw','period',
+    'about_en','about_sw','mission_en','mission_sw','vision_en','vision_sw',
+    'pricing_note_en','pricing_note_sw','email','phone','website','address','logo_url'];
+  ids.forEach(id=>fd.append(id,document.getElementById(id).value));
+  fd.append('services',JSON.stringify(services));
+  fd.append('why_us',JSON.stringify(why));
+  fd.append('projects',JSON.stringify(projects));
+  fd.append('facts',JSON.stringify(facts));
+  fd.append('sections',JSON.stringify(sections));
+  try{const r=await fetch("{% url 'profile_builder' %}",{method:'POST',headers:{'X-CSRFToken':CSRF},body:fd});
+    if(r.ok||r.redirected){if(!silent)toast('✓ Saved','ok');}else if(!silent)toast('Save failed','err');
+  }catch(e){if(!silent)toast('Network error','err');}}
+
+renderFacts();renderServices();renderWhy();renderProjects();renderSections();
+</script>
+{% endblock %}

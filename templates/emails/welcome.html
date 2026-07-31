@@ -1,0 +1,36 @@
+{% extends 'emails/base_email.html' %}
+{% block content %}
+<p class="greeting">Welcome to JamiiTek, {{ client_name }}! 🚀</p>
+
+<p>Your client portal account has been created. You can now log in to view your websites, domains, hosting status, and payment history — all in one place.</p>
+
+<div class="info-box">
+  <div class="info-row">
+    <span class="info-label">Portal URL</span>
+    <span class="info-value"><a href="{{ portal_url }}" style="color:#5b6ef5">{{ portal_url }}</a></span>
+  </div>
+  <div class="info-row">
+    <span class="info-label">Your Email (Username)</span>
+    <span class="info-value">{{ client_email }}</span>
+  </div>
+</div>
+
+<div class="alert alert-info">
+  <strong>🔐 First Login</strong>
+  Use your email address and the password you set during registration. If you forget your password, use the "Forgot Password" link on the login page.
+</div>
+
+<p>From your portal you can:</p>
+<div class="info-box">
+  <div class="info-row"><span class="info-label">🌐 Websites</span><span class="info-value">View hosting status & expiry</span></div>
+  <div class="info-row"><span class="info-label">🌍 Domains</span><span class="info-value">Track domain renewal dates</span></div>
+  <div class="info-row"><span class="info-label">📧 Email Hosting</span><span class="info-value">Manage email plans</span></div>
+  <div class="info-row"><span class="info-label">💳 Payments</span><span class="info-value">Full payment history</span></div>
+</div>
+
+<div class="btn-wrap">
+  <a href="{{ portal_url }}" class="btn btn-cyan">Access My Portal</a>
+</div>
+
+<p style="text-align:center;font-size:13px;color:#718096;margin-top:20px">Need help? We're always available — just reply to this email.</p>
+{% endblock %}

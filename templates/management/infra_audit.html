@@ -1,0 +1,24 @@
+{% extends "management/base.html" %}
+{% block title %}Audit log{% endblock %}
+{% block content %}
+<table style="width:100%;border-collapse:collapse;font-size:12px">
+  <thead>
+    <tr style="text-align:left;border-bottom:1px solid var(--border);color:var(--text-3);font-size:10px;text-transform:uppercase;letter-spacing:1px">
+      <th style="padding:8px 6px">Lini</th><th style="padding:8px 6px">Nani</th>
+      <th style="padding:8px 6px">Kitendo</th><th style="padding:8px 6px">Project</th>
+      <th style="padding:8px 6px">IP</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for l in logs %}
+    <tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:7px 6px;font-family:var(--mono);color:var(--text-3)">{{ l.created_at|date:"d/m/Y H:i" }}</td>
+      <td style="padding:7px 6px">{{ l.user|default:"system" }}</td>
+      <td style="padding:7px 6px;font-family:var(--mono)">{{ l.action }}</td>
+      <td style="padding:7px 6px">{{ l.website.name|default:"—" }}</td>
+      <td style="padding:7px 6px;font-family:var(--mono);color:var(--text-3)">{{ l.ip_address|default:"—" }}</td>
+    </tr>
+  {% empty %}<tr><td colspan="5" style="padding:24px;text-align:center;color:var(--text-3)">Hakuna bado.</td></tr>{% endfor %}
+  </tbody>
+</table>
+{% endblock %}

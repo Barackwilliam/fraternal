@@ -1,0 +1,83 @@
+{% extends 'management/base.html' %}
+{% block title %}Add Domain{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:22px">
+      <a href="{% url 'domain_list' %}" class="jt-btn btn-ghost btn-icon"><i class="fas fa-arrow-left"></i></a>
+      <h1 style="font-family:var(--head);font-size:20px;font-weight:800;color:var(--text)">Add Domain Record</h1>
+    </div>
+    <div class="jt-card">
+      <div class="jt-card-body">
+        <form method="post">
+          {% csrf_token %}
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="f-label">Linked Website *</label>
+              <select name="website" class="f-input" required>
+                <option value="">— Select website —</option>
+                {% for w in websites %}
+                <option value="{{ w.pk }}">{{ w.name }} ({{ w.client.name }}) — {{ w.url }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-8">
+              <label class="f-label">Domain Name *</label>
+              <input type="text" name="domain_name" class="f-input" placeholder="e.g. mmexy.co.tz" required>
+            </div>
+            <div class="col-md-4">
+              <label class="f-label">Registrar *</label>
+              <select name="registrar" class="f-input" id="regSelect" required>
+                {% for val, label in registrar_choices %}<option value="{{ val }}">{{ label }}</option>{% endfor %}
+              </select>
+            </div>
+            <div class="col-12" id="regOther" style="display:none">
+              <label class="f-label">Registrar Name</label>
+              <input type="text" name="registrar_other" class="f-input" placeholder="e.g. NameSilo, Name.com">
+            </div>
+            <div class="col-md-6">
+              <label class="f-label">Registration Date *</label>
+              <input type="date" name="registration_date" class="f-input" required>
+            </div>
+            <div class="col-md-6">
+              <label class="f-label">Expiry Date *</label>
+              <input type="date" name="expiry_date" class="f-input" required>
+            </div>
+            <div class="col-md-6">
+              <label class="f-label">Renewal Cost (TZS)</label>
+              <input type="number" name="renewal_cost" class="f-input" value="0" placeholder="e.g. 25000">
+            </div>
+            <div class="col-md-6">
+              <label class="f-label">Warn Client X Days Before Expiry</label>
+              <input type="number" name="warning_days_before" class="f-input" value="30">
+            </div>
+            <div class="col-12">
+              <label class="f-label">DNS Nameservers <span style="color:var(--text-3);font-weight:400">(one per line)</span></label>
+              <textarea name="dns_nameservers" class="f-input" style="min-height:80px" placeholder="ns1.cloudflare.com&#10;ns2.cloudflare.com"></textarea>
+            </div>
+            <div class="col-12">
+              <label class="f-label">Internal Notes</label>
+              <textarea name="notes" class="f-input" style="min-height:60px" placeholder="Registrar login, notes..."></textarea>
+            </div>
+            <div class="col-12" style="display:flex;flex-direction:column;gap:10px">
+              <label class="f-check"><input type="checkbox" name="auto_renew" checked style="width:16px;height:16px;accent-color:var(--cyan)"><span style="font-size:13px;color:var(--text-2)">Mark as auto-renew domain</span></label>
+              <label class="f-check"><input type="checkbox" name="send_renewal_warnings" checked style="width:16px;height:16px;accent-color:var(--cyan)"><span style="font-size:13px;color:var(--text-2)">Send renewal warning emails to client</span></label>
+            </div>
+            <div class="col-12" style="border-top:1px solid var(--border);padding-top:18px;display:flex;gap:10px">
+              <button type="submit" class="jt-btn btn-cyan"><i class="fas fa-plus"></i> Add Domain</button>
+              <a href="{% url 'domain_list' %}" class="jt-btn btn-ghost">Cancel</a>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+document.getElementById('regSelect').addEventListener('change', function(){
+  document.getElementById('regOther').style.display = this.value==='other'?'block':'none';
+});
+</script>
+{% endblock %}

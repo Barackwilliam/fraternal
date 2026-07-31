@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy — JamiiTek</title>
+  <meta name="description" content="JamiiTek Privacy Policy — How we collect, use, and protect your personal data across all our services including web development, hosting, and JamiiBot AI WhatsApp Platform.">
+  <meta name="robots" content="index, follow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #040608;
+      --bg2: #070c14;
+      --card: rgba(255,255,255,.028);
+      --card-s: rgba(255,255,255,.05);
+      --border: rgba(255,255,255,.07);
+      --green: #00dc82;
+      --green-d: rgba(0,220,130,.08);
+      --purple: #7c3aed;
+      --purple-d: rgba(124,58,237,.08);
+      --cyan: #00d4ff;
+      --cyan-d: rgba(0,212,255,.08);
+      --yellow: #f59e0b;
+      --yellow-d: rgba(245,158,11,.08);
+      --text: rgba(255,255,255,.88);
+      --text-2: rgba(255,255,255,.5);
+      --text-3: rgba(255,255,255,.22);
+      --mono: 'JetBrains Mono', monospace;
+      --head: 'Syne', sans-serif;
+      --body: 'Space Grotesk', sans-serif;
+    }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--body);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    body::before {
+      content: '';
+      position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      background:
+        radial-gradient(ellipse at 15% 15%, rgba(124,58,237,.06) 0%, transparent 50%),
+        radial-gradient(ellipse at 85% 85%, rgba(0,220,130,.04) 0%, transparent 50%);
+    }
+    a { color: var(--green); text-decoration: none; }
+    a:hover { text-decoration: underline; opacity: .85; }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(4,6,8,.95);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(24px);
+      height: 62px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 48px;
+    }
+    .nav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .nav-ico {
+      width: 34px; height: 34px; border-radius: 10px;
+      background: linear-gradient(135deg, var(--purple), var(--green));
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--head); font-size: 15px; font-weight: 800; color: #fff;
+    }
+    .nav-wordmark {
+      font-family: var(--head); font-size: 20px; font-weight: 800;
+      background: linear-gradient(135deg, #a855f7, var(--green));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .nav-wordmark em { font-style: normal; -webkit-text-fill-color: transparent; }
+    .nav-links { display: flex; align-items: center; gap: 28px; }
+    .nav-links a {
+      font-family: var(--mono); font-size: 11px; color: var(--text-3);
+      text-decoration: none; transition: color .15s; letter-spacing: .5px;
+    }
+    .nav-links a:hover { color: var(--green); }
+    .nav-cta {
+      background: var(--green-d); border: 1px solid rgba(0,220,130,.25);
+      color: var(--green) !important; padding: 7px 16px;
+      border-radius: 8px; font-weight: 600 !important;
+    }
+    .nav-cta:hover { background: rgba(0,220,130,.15) !important; }
+
+    /* ── WRAPPER ── */
+    .wrapper {
+      max-width: 900px; margin: 0 auto;
+      padding: 64px 48px 120px;
+      position: relative; z-index: 1;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      text-align: center;
+      padding: 52px 0 60px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 60px;
+      position: relative;
+    }
+    .hero::after {
+      content: '';
+      position: absolute; bottom: -1px; left: 50%; transform: translateX(-50%);
+      width: 120px; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--green), transparent);
+    }
+    .hero-chip {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: var(--mono); font-size: 10px; color: var(--green);
+      background: var(--green-d); border: 1px solid rgba(0,220,130,.2);
+      padding: 6px 16px; border-radius: 100px;
+      letter-spacing: 2px; text-transform: uppercase; margin-bottom: 24px;
+    }
+    .hero-chip i { font-size: 10px; }
+    .hero-title {
+      font-family: var(--head); font-size: 48px; font-weight: 800;
+      line-height: 1.05; margin-bottom: 18px;
+    }
+    .hero-title .grad {
+      background: linear-gradient(135deg, #a855f7, var(--green));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .hero-sub {
+      font-size: 15.5px; color: var(--text-2);
+      max-width: 560px; margin: 0 auto 32px; line-height: 1.75;
+    }
+    .hero-pills {
+      display: flex; align-items: center; justify-content: center;
+      gap: 10px; flex-wrap: wrap;
+    }
+    .pill {
+      display: inline-flex; align-items: center; gap: 7px;
+      font-family: var(--mono); font-size: 10px; color: var(--text-3);
+      background: var(--card); border: 1px solid var(--border);
+      padding: 5px 12px; border-radius: 100px;
+    }
+    .pill i { font-size: 10px; }
+
+    /* ── TOC ── */
+    .toc {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 16px; padding: 26px 30px; margin-bottom: 52px;
+    }
+    .toc-head {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 18px;
+    }
+    .toc-head-label {
+      font-family: var(--mono); font-size: 10px; color: var(--text-3);
+      letter-spacing: 2px; text-transform: uppercase;
+    }
+    .toc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 32px; }
+    .toc-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,.04);
+      text-decoration: none; color: var(--text-2); font-size: 13.5px;
+      transition: color .15s;
+    }
+    .toc-item:hover { color: var(--green); text-decoration: none; }
+    .toc-item .n {
+      font-family: var(--mono); font-size: 10px; color: var(--text-3);
+      min-width: 20px;
+    }
+
+    /* ── SERVICES COVERED STRIP ── */
+    .services-strip {
+      display: flex; gap: 10px; flex-wrap: wrap;
+      margin-bottom: 52px; padding: 20px 24px;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 14px;
+    }
+    .svc-tag {
+      display: inline-flex; align-items: center; gap: 7px;
+      font-family: var(--mono); font-size: 11px;
+      padding: 6px 13px; border-radius: 8px;
+    }
+    .svc-tag.green { background: var(--green-d); border: 1px solid rgba(0,220,130,.2); color: var(--green); }
+    .svc-tag.purple { background: var(--purple-d); border: 1px solid rgba(124,58,237,.2); color: #a78bfa; }
+    .svc-tag.cyan { background: var(--cyan-d); border: 1px solid rgba(0,212,255,.2); color: var(--cyan); }
+    .svc-tag.yellow { background: var(--yellow-d); border: 1px solid rgba(245,158,11,.2); color: var(--yellow); }
+
+    /* ── SECTIONS ── */
+    .section { margin-bottom: 52px; scroll-margin-top: 80px; }
+    .section-header {
+      display: flex; align-items: center; gap: 14px;
+      margin-bottom: 22px; padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+    }
+    .section-header::after {
+      content: ''; position: absolute; bottom: -1px; left: 0;
+      width: 48px; height: 1px; background: var(--green);
+    }
+    .section-num {
+      font-family: var(--mono); font-size: 11px; color: var(--green);
+      background: var(--green-d); border: 1px solid rgba(0,220,130,.2);
+      min-width: 30px; height: 30px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; font-weight: 600;
+    }
+    .section-title {
+      font-family: var(--head); font-size: 21px; font-weight: 800;
+      color: var(--text);
+    }
+    .section p { font-size: 14.5px; color: var(--text-2); margin-bottom: 14px; line-height: 1.8; }
+    .section p:last-child { margin-bottom: 0; }
+    .section h3 {
+      font-family: var(--head); font-size: 15px; font-weight: 700;
+      color: var(--text); margin: 22px 0 10px;
+    }
+
+    /* ── TABLE ── */
+    .pp-table {
+      width: 100%; border-collapse: collapse;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; overflow: hidden; margin: 18px 0;
+      font-size: 13.5px;
+    }
+    .pp-table th {
+      padding: 12px 16px; text-align: left;
+      font-family: var(--mono); font-size: 10px; color: var(--text-3);
+      letter-spacing: 1.5px; text-transform: uppercase;
+      background: rgba(255,255,255,.02);
+      border-bottom: 1px solid var(--border);
+    }
+    .pp-table td {
+      padding: 12px 16px; color: var(--text-2); vertical-align: top;
+      border-bottom: 1px solid rgba(255,255,255,.04); line-height: 1.65;
+    }
+    .pp-table tr:last-child td { border-bottom: none; }
+    .pp-table td:first-child { color: var(--text); font-weight: 600; white-space: nowrap; }
+
+    /* ── CALLOUT ── */
+    .callout {
+      border-radius: 12px; padding: 16px 20px;
+      margin: 18px 0; display: flex; gap: 14px; align-items: flex-start;
+      font-size: 14px; line-height: 1.7;
+    }
+    .callout.green { background: var(--green-d); border: 1px solid rgba(0,220,130,.2); color: var(--text-2); }
+    .callout.purple { background: var(--purple-d); border: 1px solid rgba(124,58,237,.2); color: var(--text-2); }
+    .callout.yellow { background: var(--yellow-d); border: 1px solid rgba(245,158,11,.2); color: var(--text-2); }
+    .callout i { flex-shrink: 0; margin-top: 2px; font-size: 15px; }
+    .callout.green i { color: var(--green); }
+    .callout.purple i { color: #a78bfa; }
+    .callout.yellow i { color: var(--yellow); }
+    .callout strong { color: var(--text); }
+
+    /* ── LIST ── */
+    .pp-list { list-style: none; margin: 12px 0 16px; }
+    .pp-list li {
+      display: flex; align-items: flex-start; gap: 10px;
+      font-size: 14px; color: var(--text-2); padding: 5px 0; line-height: 1.7;
+    }
+    .pp-list li::before {
+      content: ''; width: 5px; height: 5px; border-radius: 50%;
+      background: var(--green); flex-shrink: 0; margin-top: 9px;
+    }
+    .pp-list li strong { color: var(--text); }
+
+    /* ── CONTACT CARD ── */
+    .contact-card {
+      background: linear-gradient(135deg, rgba(124,58,237,.1), rgba(0,220,130,.06));
+      border: 1px solid rgba(124,58,237,.25);
+      border-radius: 20px; padding: 36px 40px; text-align: center;
+      margin-top: 64px; position: relative; overflow: hidden;
+    }
+    .contact-card::before {
+      content: ''; position: absolute; top: -60px; right: -60px;
+      width: 200px; height: 200px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(124,58,237,.1), transparent 70%);
+    }
+    .contact-title { font-family: var(--head); font-size: 22px; font-weight: 800; color: var(--text); margin-bottom: 8px; position: relative; }
+    .contact-sub { font-size: 14px; color: var(--text-2); margin-bottom: 24px; position: relative; }
+    .contact-btns { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; position: relative; }
+    .cbtn {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--card); border: 1px solid var(--border);
+      color: var(--text-2) !important; font-size: 13px; font-family: var(--mono);
+      padding: 11px 20px; border-radius: 10px;
+      transition: all .15s; text-decoration: none !important;
+    }
+    .cbtn:hover { border-color: rgba(0,220,130,.3); color: var(--green) !important; }
+    .cbtn.primary { background: var(--green-d); border-color: rgba(0,220,130,.3); color: var(--green) !important; }
+    .cbtn.primary:hover { background: rgba(0,220,130,.15); }
+
+    /* ── DIVIDER ── */
+    .divider {
+      height: 1px; margin: 48px 0;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 28px 48px;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 14px;
+      font-family: var(--mono); font-size: 11px; color: var(--text-3);
+    }
+    .footer-links { display: flex; gap: 20px; }
+    .footer-links a { color: var(--text-3); }
+    .footer-links a:hover { color: var(--green); }
+    .footer-dot { color: rgba(0,220,130,.4); margin: 0 4px; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      nav { padding: 0 20px; }
+      .nav-links { display: none; }
+      .wrapper { padding: 40px 22px 80px; }
+      .hero-title { font-size: 34px; }
+      .toc-grid { grid-template-columns: 1fr; }
+      .pp-table { font-size: 12.5px; }
+      .pp-table td:first-child { white-space: normal; }
+      .contact-card { padding: 28px 24px; }
+      footer { flex-direction: column; text-align: center; padding: 24px 22px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="https://www.jamiitek.com" class="nav-brand">
+    <div class="nav-ico">J</div>
+    <div class="nav-wordmark">Jamii<em>Tek</em></div>
+  </a>
+  <div class="nav-links">
+    <a href="https://www.jamiitek.com/">Home</a>
+    <a href="https://www.jamiitek.com/service/">Services</a>
+    <a href="https://www.jamiitek.com/About/">About</a>
+    <a href="https://www.jamiitek.com/contact/">Contact</a>
+    <a href="https://www.jamiitek.com/portal/login/" class="nav-cta">Client Portal</a>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="wrapper">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-chip">
+      <i class="fas fa-shield-halved"></i>
+      Legal · Privacy Policy
+    </div>
+    <h1 class="hero-title">
+      Your Privacy.<br>
+      <span class="grad">Our Responsibility.</span>
+    </h1>
+    <p class="hero-sub">
+      This Privacy Policy explains how JamiiTek Ltd. collects, uses, stores, and protects
+      your personal information across all our services — including web development, hosting,
+      the client portal, and the JamiiBot AI WhatsApp Platform.
+    </p>
+    <div class="hero-pills">
+      <span class="pill"><i class="fas fa-calendar"></i> Effective: April 1, 2026</span>
+      <span class="pill"><i class="fas fa-rotate"></i> Updated: April 3, 2026</span>
+      <span class="pill"><i class="fas fa-building"></i> JamiiTek Ltd., Tanzania</span>
+      <span class="pill"><i class="fas fa-globe"></i> jamiitek.com</span>
+    </div>
+  </div>
+
+  <!-- SERVICES COVERED -->
+  <div style="margin-bottom:16px">
+    <div style="font-family:var(--mono);font-size:10px;color:var(--text-3);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px">This policy covers all JamiiTek services</div>
+    <div class="services-strip">
+      <span class="svc-tag purple"><i class="fas fa-globe"></i> Web Development</span>
+      <span class="svc-tag purple"><i class="fas fa-mobile-alt"></i> Mobile Apps</span>
+      <span class="svc-tag cyan"><i class="fas fa-server"></i> Web Hosting & Domains</span>
+      <span class="svc-tag cyan"><i class="fas fa-envelope"></i> Email Hosting</span>
+      <span class="svc-tag green"><i class="fab fa-whatsapp"></i> JamiiBot — AI WhatsApp Platform</span>
+      <span class="svc-tag green"><i class="fas fa-robot"></i> AI Chatbot Services</span>
+      <span class="svc-tag yellow"><i class="fas fa-palette"></i> UI/UX Design</span>
+      <span class="svc-tag yellow"><i class="fas fa-user"></i> Client Portal</span>
+    </div>
+  </div>
+
+  <!-- SUMMARY CALLOUT -->
+  <div class="callout green" style="margin-bottom:52px">
+    <i class="fas fa-circle-info"></i>
+    <div>
+      <strong>Plain-language summary:</strong> JamiiTek collects only what is necessary
+      to deliver our services. We do not sell your data. We do not run advertising.
+      You can request deletion of your data at any time. This policy applies to
+      everyone who uses our website, client portal, hosting services, or JamiiBot platform.
+    </div>
+  </div>
+
+  <!-- TOC -->
+  <div class="toc">
+    <div class="toc-head">
+      <i class="fas fa-list" style="color:var(--text-3);font-size:12px"></i>
+      <span class="toc-head-label">Table of Contents</span>
+    </div>
+    <div class="toc-grid">
+      <a href="#s1" class="toc-item"><span class="n">01</span> Who We Are</a>
+      <a href="#s2" class="toc-item"><span class="n">02</span> Information We Collect</a>
+      <a href="#s3" class="toc-item"><span class="n">03</span> How We Use Your Information</a>
+      <a href="#s4" class="toc-item"><span class="n">04</span> JamiiBot & WhatsApp Data</a>
+      <a href="#s5" class="toc-item"><span class="n">05</span> Hosting & Domain Services</a>
+      <a href="#s6" class="toc-item"><span class="n">06</span> Third-Party Services</a>
+      <a href="#s7" class="toc-item"><span class="n">07</span> Data Sharing</a>
+      <a href="#s8" class="toc-item"><span class="n">08</span> Data Retention</a>
+      <a href="#s9" class="toc-item"><span class="n">09</span> Your Rights</a>
+      <a href="#s10" class="toc-item"><span class="n">10</span> Security</a>
+      <a href="#s11" class="toc-item"><span class="n">11</span> Cookies</a>
+      <a href="#s12" class="toc-item"><span class="n">12</span> Children's Privacy</a>
+      <a href="#s13" class="toc-item"><span class="n">13</span> Changes to This Policy</a>
+      <a href="#s14" class="toc-item"><span class="n">14</span> Contact Us</a>
+    </div>
+  </div>
+
+  <!-- S1 — WHO WE ARE -->
+  <div class="section" id="s1">
+    <div class="section-header">
+      <div class="section-num">01</div>
+      <h2 class="section-title">Who We Are</h2>
+    </div>
+    <p>
+      <strong style="color:var(--text)">JamiiTek Ltd.</strong> is a technology company incorporated
+      and operating in Tanzania, headquartered in Dar es Salaam. We provide digital services to
+      businesses, organisations, and individuals across Tanzania and East Africa.
+    </p>
+    <p>Our services include website design and development, mobile application development,
+    web hosting and domain registration, email hosting, UI/UX design, custom software development,
+    system integration, and the <strong style="color:var(--text)">JamiiBot</strong> AI WhatsApp chatbot platform.</p>
+    <p>
+      For the purposes of data protection law, JamiiTek Ltd. is the <strong style="color:var(--text)">data controller</strong>
+      for personal information collected through our website and services. Where JamiiBot is used
+      by business clients to communicate with their own customers, those clients act as
+      independent data controllers for their customer conversations.
+    </p>
+    <div class="callout purple">
+      <i class="fas fa-map-marker-alt"></i>
+      <div>
+        <strong>Data Controller:</strong> JamiiTek Ltd. · Dar es Salaam, Tanzania ·
+        <a href="mailto:info@jamiitek.com">info@jamiitek.com</a> ·
+        <a href="https://www.jamiitek.com">www.jamiitek.com</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- S2 — INFORMATION WE COLLECT -->
+  <div class="section" id="s2">
+    <div class="section-header">
+      <div class="section-num">02</div>
+      <h2 class="section-title">Information We Collect</h2>
+    </div>
+    <p>The information we collect depends on which of our services you use. We only collect
+    what is necessary to provide the relevant service.</p>
+
+    <h3>A. Website Visitors (jamiitek.com)</h3>
+    <table class="pp-table">
+      <tr><th>Data</th><th>Why We Collect It</th></tr>
+      <tr><td>IP address</td><td>Server logs for security monitoring and abuse prevention. Not linked to your identity.</td></tr>
+      <tr><td>Browser & device type</td><td>To ensure the website renders correctly on your device.</td></tr>
+      <tr><td>Pages visited & timestamps</td><td>Aggregate analytics to understand which content is most useful.</td></tr>
+      <tr><td>Contact form submissions</td><td>Name, email, and message when you contact us or request a quote.</td></tr>
+    </table>
+
+    <h3>B. Client Portal & Project Clients</h3>
+    <table class="pp-table">
+      <tr><th>Data</th><th>Why We Collect It</th></tr>
+      <tr><td>Full name</td><td>Account identification and project communication.</td></tr>
+      <tr><td>Email address</td><td>Account access, project updates, and invoices.</td></tr>
+      <tr><td>Phone number</td><td>Project communication and support.</td></tr>
+      <tr><td>Company name</td><td>Business identification and invoicing.</td></tr>
+      <tr><td>Billing address</td><td>Invoice generation and financial records.</td></tr>
+      <tr><td>Payment references</td><td>Verification of subscription and project payments (M-Pesa, bank transfer). We do not store card numbers.</td></tr>
+      <tr><td>Project files & assets</td><td>Design assets, content, and documents shared for project delivery.</td></tr>
+    </table>
+
+    <h3>C. Hosting & Domain Clients</h3>
+    <table class="pp-table">
+      <tr><th>Data</th><th>Why We Collect It</th></tr>
+      <tr><td>Domain name & registrant details</td><td>Required by ICANN for domain registration. Registrant info may be visible in public WHOIS unless you request privacy protection.</td></tr>
+      <tr><td>Server access credentials</td><td>Stored securely to manage your hosting account. Never shared externally.</td></tr>
+      <tr><td>Email account details</td><td>Configuration and management of hosted email accounts.</td></tr>
+      <tr><td>Bandwidth & storage usage</td><td>Billing calculations and plan enforcement.</td></tr>
+    </table>
+
+    <h3>D. JamiiBot — Business Clients (Bot Owners)</h3>
+    <table class="pp-table">
+      <tr><th>Data</th><th>Why We Collect It</th></tr>
+      <tr><td>Full name & business name</td><td>Account creation and bot identity.</td></tr>
+      <tr><td>Email & phone number</td><td>Account access and WhatsApp number registration with Meta.</td></tr>
+      <tr><td>WhatsApp number & Phone Number ID</td><td>Required to connect your number to the WhatsApp Cloud API.</td></tr>
+      <tr><td>Bot configuration</td><td>Services, FAQs, greeting messages, AI personality settings.</td></tr>
+      <tr><td>Subscription & payment records</td><td>Plan management and billing verification.</td></tr>
+    </table>
+
+    <h3>E. JamiiBot — End Users (Customers Chatting with Bots)</h3>
+    <table class="pp-table">
+      <tr><th>Data</th><th>Why We Collect It</th></tr>
+      <tr><td>WhatsApp phone number</td><td>To identify the conversation and route messages to the correct bot.</td></tr>
+      <tr><td>WhatsApp display name</td><td>Provided by Meta's API when available; used to personalise greetings.</td></tr>
+      <tr><td>Message content</td><td>Stored so business clients can review their customer conversations in the dashboard.</td></tr>
+      <tr><td>Conversation timestamps</td><td>Analytics and conversation history for business clients.</td></tr>
+    </table>
+    <div class="callout yellow">
+      <i class="fas fa-triangle-exclamation"></i>
+      <div>
+        <strong>Note for end users:</strong> When you message a JamiiBot-powered bot, your conversation
+        is stored by JamiiTek on behalf of the business client whose bot you are using. That business
+        client controls this data. Contact them directly for questions about their specific data practices.
+      </div>
+    </div>
+  </div>
+
+  <!-- S3 — HOW WE USE -->
+  <div class="section" id="s3">
+    <div class="section-header">
+      <div class="section-num">03</div>
+      <h2 class="section-title">How We Use Your Information</h2>
+    </div>
+    <p>We use personal information only for legitimate purposes directly related to providing our services:</p>
+    <ul class="pp-list">
+      <li><strong>Service delivery</strong> — to build, host, and maintain your website, app, or chatbot.</li>
+      <li><strong>Account management</strong> — to manage your client portal account, subscriptions, and access rights.</li>
+      <li><strong>Communication</strong> — to respond to enquiries, send project updates, invoices, and support messages.</li>
+      <li><strong>Billing</strong> — to verify payments, issue invoices, and manage subscription plans.</li>
+      <li><strong>WhatsApp bot operation</strong> — to route messages, generate AI responses, and store conversation history for business clients.</li>
+      <li><strong>Platform improvement</strong> — to analyse aggregate usage data (never individual behaviour) to improve our services.</li>
+      <li><strong>Security</strong> — to detect, prevent, and investigate fraudulent or abusive activity.</li>
+      <li><strong>Legal compliance</strong> — to comply with Tanzanian law, regulations, and court orders.</li>
+    </ul>
+    <p>We do not use your personal information for advertising, profiling, or selling to third parties.</p>
+  </div>
+
+  <!-- S4 — JAMIIBOT & WHATSAPP -->
+  <div class="section" id="s4">
+    <div class="section-header">
+      <div class="section-num">04</div>
+      <h2 class="section-title">JamiiBot & WhatsApp Data</h2>
+    </div>
+    <p>JamiiBot operates on top of the <strong style="color:var(--text)">WhatsApp Cloud API</strong>
+    provided by Meta Platforms, Inc. This means WhatsApp messaging rules and Meta's data policies apply
+    in addition to this privacy policy.</p>
+
+    <h3>Meta & WhatsApp</h3>
+    <ul class="pp-list">
+      <li>Messages sent through WhatsApp are subject to <a href="https://www.whatsapp.com/legal/privacy-policy" target="_blank">WhatsApp's Privacy Policy</a> and <a href="https://www.facebook.com/privacy/policy/" target="_blank">Meta's Privacy Policy</a>.</li>
+      <li>Meta processes message metadata (delivery status, timestamps, phone numbers) on their own infrastructure.</li>
+      <li>JamiiTek registers business clients' WhatsApp numbers under our Meta developer account on their behalf.</li>
+      <li>JamiiTek only receives message content that Meta delivers to our webhook — we do not intercept end-to-end encrypted messages outside of the business messaging platform.</li>
+    </ul>
+
+    <h3>Groq AI Engine</h3>
+    <p>Bot responses are generated by <strong style="color:var(--text)">Groq API</strong> running
+    the Llama 3.3 70B language model. When a customer sends a message, that message is transmitted
+    to Groq for response generation.</p>
+    <div class="callout purple">
+      <i class="fas fa-robot"></i>
+      <div>
+        <strong>Groq data handling:</strong> Groq processes messages in real time and does not
+        retain conversation data after response generation, per their enterprise data processing
+        terms. See <a href="https://groq.com/privacy-policy/" target="_blank">Groq's Privacy Policy</a>.
+      </div>
+    </div>
+
+    <h3>Business Client Responsibility</h3>
+    <p>Business clients who use JamiiBot are responsible for:</p>
+    <ul class="pp-list">
+      <li>Obtaining appropriate consent from their customers before collecting their data through the bot.</li>
+      <li>Informing their customers that conversations are handled by an AI system.</li>
+      <li>Complying with applicable data protection laws in their own jurisdiction.</li>
+      <li>Not configuring bots to collect sensitive personal data (health, financial, or identity information) without proper safeguards.</li>
+    </ul>
+  </div>
+
+  <!-- S5 — HOSTING -->
+  <div class="section" id="s5">
+    <div class="section-header">
+      <div class="section-num">05</div>
+      <h2 class="section-title">Hosting & Domain Services</h2>
+    </div>
+    <p>When JamiiTek provides web hosting, email hosting, or domain registration services:</p>
+    <ul class="pp-list">
+      <li><strong>Website content</strong> — your website files, databases, and media are stored on our servers. You retain full ownership of all your content.</li>
+      <li><strong>Email data</strong> — emails in hosted accounts are stored on our mail servers. We do not read or analyse email content.</li>
+      <li><strong>Domain registration</strong> — registrant information is submitted to domain registries and may appear in public WHOIS databases as required by ICANN. Contact us to request WHOIS privacy protection.</li>
+      <li><strong>Server logs</strong> — access logs recording IP addresses and request details are retained for 30 days for security and troubleshooting, then deleted.</li>
+      <li><strong>Backups</strong> — we maintain regular backups of hosted data for disaster recovery. Backup data is encrypted at rest.</li>
+    </ul>
+    <div class="callout green">
+      <i class="fas fa-lock"></i>
+      <div>
+        <strong>Your data is yours:</strong> JamiiTek does not claim ownership of any content,
+        files, databases, or emails stored on our hosting infrastructure. Upon termination,
+        we provide a data export window of 30 days.
+      </div>
+    </div>
+  </div>
+
+  <!-- S6 — THIRD PARTIES -->
+  <div class="section" id="s6">
+    <div class="section-header">
+      <div class="section-num">06</div>
+      <h2 class="section-title">Third-Party Services We Use</h2>
+    </div>
+    <p>We use a limited number of trusted third-party services to operate our platform:</p>
+    <table class="pp-table">
+      <tr><th>Service</th><th>Purpose</th><th>Their Privacy Policy</th></tr>
+      <tr>
+        <td>Meta / WhatsApp Cloud API</td>
+        <td>WhatsApp message delivery and reception for JamiiBot</td>
+        <td><a href="https://www.facebook.com/privacy/policy/" target="_blank">facebook.com/privacy</a></td>
+      </tr>
+      <tr>
+        <td>Groq API</td>
+        <td>AI language model for JamiiBot responses (Llama 3.3)</td>
+        <td><a href="https://groq.com/privacy-policy/" target="_blank">groq.com/privacy-policy</a></td>
+      </tr>
+      <tr>
+        <td>Render</td>
+        <td>Cloud infrastructure and application hosting for JamiiBot platform</td>
+        <td><a href="https://render.com/privacy" target="_blank">render.com/privacy</a></td>
+      </tr>
+      <tr>
+        <td>Google Fonts</td>
+        <td>Web typography (Space Grotesk, JetBrains Mono, Syne)</td>
+        <td><a href="https://policies.google.com/privacy" target="_blank">policies.google.com/privacy</a></td>
+      </tr>
+      <tr>
+        <td>Font Awesome</td>
+        <td>Icon library served via CDN</td>
+        <td><a href="https://fontawesome.com/privacy" target="_blank">fontawesome.com/privacy</a></td>
+      </tr>
+    </table>
+    <p>We do not use Google Analytics, Facebook Pixel, advertising networks, or any behavioural tracking tools on our website or platform.</p>
+  </div>
+
+  <!-- S7 — DATA SHARING -->
+  <div class="section" id="s7">
+    <div class="section-header">
+      <div class="section-num">07</div>
+      <h2 class="section-title">Data Sharing</h2>
+    </div>
+    <p>We do not sell, rent, or trade personal data under any circumstances. We share data only in these limited cases:</p>
+    <ul class="pp-list">
+      <li><strong>Service delivery</strong> — with third-party services listed in Section 6, strictly to operate our platform.</li>
+      <li><strong>Business clients</strong> — JamiiBot business clients can see their own customers' conversation history in their dashboard. They cannot access data from other clients' bots.</li>
+      <li><strong>Legal requirements</strong> — when required by Tanzanian law, court orders, or regulatory authorities, we may disclose data after verification of the legal requirement.</li>
+      <li><strong>Business transfer</strong> — in the event of a merger, acquisition, or sale of JamiiTek, personal data may transfer to the new entity. We will notify affected users with at least 30 days' notice.</li>
+    </ul>
+    <div class="callout green">
+      <i class="fas fa-ban"></i>
+      <div>
+        <strong>We will never share your data</strong> for advertising purposes, sell it to data brokers,
+        or disclose it to foreign governments without a verified and valid legal basis under Tanzanian law.
+      </div>
+    </div>
+  </div>
+
+  <!-- S8 — RETENTION -->
+  <div class="section" id="s8">
+    <div class="section-header">
+      <div class="section-num">08</div>
+      <h2 class="section-title">Data Retention</h2>
+    </div>
+    <p>We keep your data only as long as necessary:</p>
+    <table class="pp-table">
+      <tr><th>Data Type</th><th>Retention Period</th></tr>
+      <tr><td>Website contact enquiries</td><td>2 years, then deleted</td></tr>
+      <tr><td>Client portal account data</td><td>Duration of account + 90 days after closure</td></tr>
+      <tr><td>Project files & deliverables</td><td>6 months after project completion unless longer storage is agreed</td></tr>
+      <tr><td>Hosting data (files, databases, email)</td><td>Duration of hosting contract + 30-day export window after termination</td></tr>
+      <tr><td>JamiiBot conversation history</td><td>12 months from conversation date, or until deleted by the business client</td></tr>
+      <tr><td>JamiiBot account & bot configuration</td><td>Duration of account + 90 days after deletion</td></tr>
+      <tr><td>Payment & invoice records</td><td>7 years (Tanzanian financial regulations)</td></tr>
+      <tr><td>Server access logs</td><td>30 days</td></tr>
+    </table>
+    <p>You may request early deletion of your data at any time. Payment records cannot be deleted early due to legal requirements.</p>
+  </div>
+
+  <!-- S9 — YOUR RIGHTS -->
+  <div class="section" id="s9">
+    <div class="section-header">
+      <div class="section-num">09</div>
+      <h2 class="section-title">Your Rights</h2>
+    </div>
+    <p>You have the following rights regarding your personal data held by JamiiTek:</p>
+    <ul class="pp-list">
+      <li><strong>Right to Access</strong> — request a copy of the personal data we hold about you.</li>
+      <li><strong>Right to Correction</strong> — request correction of inaccurate or incomplete data.</li>
+      <li><strong>Right to Deletion</strong> — request that we delete your personal data (subject to legal retention requirements).</li>
+      <li><strong>Right to Data Portability</strong> — request your data in a portable, machine-readable format (JSON or CSV).</li>
+      <li><strong>Right to Object</strong> — object to certain types of processing, including marketing communications.</li>
+      <li><strong>Right to Withdraw Consent</strong> — where processing is based on your consent, withdraw it at any time without penalty.</li>
+      <li><strong>Right to Restrict Processing</strong> — request that we limit how we use your data while a dispute is being resolved.</li>
+    </ul>
+    <p>To exercise any of these rights, email us at <a href="mailto:privacy@jamiitek.co.tz">privacy@jamiitek.co.tz</a> with your name, the service you use, and your specific request. We will respond within <strong style="color:var(--text)">30 days</strong>.</p>
+    <p>We will not charge a fee for exercising your rights. If a request is clearly unfounded or excessive, we may ask for a reasonable fee or decline, giving you written reasons.</p>
+  </div>
+
+  <!-- S10 — SECURITY -->
+  <div class="section" id="s10">
+    <div class="section-header">
+      <div class="section-num">10</div>
+      <h2 class="section-title">Security</h2>
+    </div>
+    <p>We take the security of your data seriously and implement appropriate technical and organisational measures:</p>
+    <ul class="pp-list">
+      <li>All data in transit is encrypted using <strong>HTTPS/TLS 1.2+</strong></li>
+      <li>API keys, tokens, and credentials are stored as encrypted environment variables — never in source code or version control</li>
+      <li>Production databases are not publicly accessible — all connections are restricted to the application server</li>
+      <li>Access to systems containing personal data is restricted to authorised JamiiTek personnel only</li>
+      <li>Regular security dependency updates and code reviews are performed</li>
+      <li>Hosting infrastructure benefits from DDoS protection and automated monitoring</li>
+      <li>Backups are encrypted at rest and stored separately from primary data</li>
+    </ul>
+    <p>No system is 100% secure. If you discover a security vulnerability in any JamiiTek service, please
+    report it responsibly to <a href="mailto:security@jamiitek.co.tz">security@jamiitek.co.tz</a> before
+    public disclosure. We will acknowledge reports within 48 hours.</p>
+    <div class="callout yellow">
+      <i class="fas fa-triangle-exclamation"></i>
+      <div>
+        <strong>Data breach notification:</strong> In the event of a data breach that affects your personal
+        data, we will notify you within 72 hours of becoming aware of it, in accordance with applicable law.
+      </div>
+    </div>
+  </div>
+
+  <!-- S11 — COOKIES -->
+  <div class="section" id="s11">
+    <div class="section-header">
+      <div class="section-num">11</div>
+      <h2 class="section-title">Cookies</h2>
+    </div>
+    <p>JamiiTek uses a minimal set of cookies strictly necessary to operate our website and services:</p>
+    <table class="pp-table">
+      <tr><th>Cookie</th><th>Type</th><th>Purpose</th><th>Duration</th></tr>
+      <tr>
+        <td>sessionid</td>
+        <td>Strictly necessary</td>
+        <td>Keeps you logged in to your client portal or JamiiBot account</td>
+        <td>Session (deleted on browser close or logout)</td>
+      </tr>
+      <tr>
+        <td>csrftoken</td>
+        <td>Strictly necessary</td>
+        <td>Prevents cross-site request forgery on forms</td>
+        <td>1 year (browser-managed)</td>
+      </tr>
+    </table>
+    <p>We do <strong style="color:var(--text)">not</strong> use advertising cookies, tracking pixels,
+    Google Analytics, Facebook Pixel, or any third-party analytics cookies on our website or platform.</p>
+    <p>Because we only use strictly necessary cookies, we are not required to show a cookie consent banner.
+    If we ever introduce non-essential cookies, we will update this policy and seek your consent first.</p>
+  </div>
+
+  <!-- S12 — CHILDREN -->
+  <div class="section" id="s12">
+    <div class="section-header">
+      <div class="section-num">12</div>
+      <h2 class="section-title">Children's Privacy</h2>
+    </div>
+    <p>JamiiTek's services are not directed at or intended for children under the age of 13.
+    We do not knowingly collect personal information from children under 13.</p>
+    <p>If you are a parent or guardian and believe your child has provided us with personal information,
+    please contact us immediately at <a href="mailto:privacy@jamiitek.co.tz">privacy@jamiitek.co.tz</a>.
+    We will investigate and delete any such information promptly.</p>
+    <p>JamiiBot business clients are solely responsible for ensuring their chatbots comply with
+    applicable laws regarding minors in the jurisdictions where their business operates.</p>
+  </div>
+
+  <!-- S13 — CHANGES -->
+  <div class="section" id="s13">
+    <div class="section-header">
+      <div class="section-num">13</div>
+      <h2 class="section-title">Changes to This Policy</h2>
+    </div>
+    <p>We may update this Privacy Policy from time to time to reflect changes in our services,
+    technology, or applicable law. The "Last updated" date at the top of this page will always
+    reflect the most recent version.</p>
+    <p>For significant changes that materially affect your rights or how we process your data,
+    we will notify registered clients by email at least 14 days before the changes take effect.
+    For minor clarifications, the updated policy will be posted here without individual notification.</p>
+    <p>Your continued use of JamiiTek services after the effective date of any changes constitutes
+    acceptance of the updated Privacy Policy. If you do not agree with the changes, you may
+    close your account and request deletion of your data.</p>
+  </div>
+
+  <!-- S14 — CONTACT -->
+  <div class="section" id="s14">
+    <div class="section-header">
+      <div class="section-num">14</div>
+      <h2 class="section-title">Contact Us</h2>
+    </div>
+    <p>For any questions, concerns, or requests regarding this Privacy Policy or the handling
+    of your personal data, please contact us through any of the channels below.</p>
+    <p>We are committed to resolving privacy concerns promptly and transparently.
+    All privacy-related requests will receive a response within <strong style="color:var(--text)">30 days</strong>.</p>
+  </div>
+
+  <!-- CONTACT CARD -->
+  <div class="contact-card">
+    <div class="contact-title">Privacy Questions or Requests?</div>
+    <div class="contact-sub">Reach out to the JamiiTek team — we respond within 30 days.</div>
+    <div class="contact-btns">
+      <a href="mailto:privacy@jamiitek.com" class="cbtn primary">
+        <i class="fas fa-shield-halved"></i> privacy@jamiitek.com
+      </a>
+      <a href="mailto:info@jamiitek.com" class="cbtn">
+        <i class="fas fa-envelope"></i> info@jamiitek.com
+      </a>
+      <a href="https://www.jamiitek.com/contact/" class="cbtn">
+        <i class="fas fa-comment-dots"></i> Contact Form
+      </a>
+      <a href="https://wa.me/255757854907" target="_blank" class="cbtn">
+        <i class="fab fa-whatsapp" style="color:#25d366"></i> WhatsApp
+      </a>
+    </div>
+    <div style="margin-top:22px;font-family:var(--mono);font-size:10px;color:var(--text-3);line-height:1.8">
+      JamiiTek Ltd. · Dar es Salaam, Tanzania 🇹🇿<br>
+      © 2026 JamiiTek Ltd. All rights reserved.
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div>
+    <span style="color:var(--green)">Jamii</span>Tek Ltd.
+    <span class="footer-dot">·</span>
+    Privacy Policy
+    <span class="footer-dot">·</span>
+    Effective April 1, 2026
+  </div>
+  <div class="footer-links">
+    <a href="https://www.jamiitek.com/">Home</a>
+    <a href="https://www.jamiitek.com/service/">Services</a>
+    <a href="https://www.jamiitek.com/About/">About</a>
+    <a href="https://www.jamiitek.com/contact/">Contact</a>
+    <a href="https://www.jamiitek.com/portal/login/">Client Portal</a>
+    <a href="https://www.jamiitek.com/chatbot/login/">JamiiBot</a>
+  </div>
+</footer>
+
+</body>
+</html>

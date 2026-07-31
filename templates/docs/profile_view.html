@@ -1,0 +1,210 @@
+{% load static custom_filters %}<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ profile.company_name }} — {% if lang == 'sw' %}Wasifu wa Kampuni{% else %}Company Profile{% endif %}</title>
+<meta name="description" content="{% if lang == 'sw' %}{{ profile.subtitle_sw }}{% else %}{{ profile.subtitle_en }}{% endif %}">
+<style>
+  :root{--navy:#1a3c6e;--navy-d:#12294c;--gold:#c49a28;--gold-t:#8a6a00;
+    --tint:#eaf0fa;--tint-l:#f5f8fd;--cream:#fdf6e3;--ink:#1a1a1a;--muted:#666666;
+    --line:#cccccc;--line-l:#e4e9f2;--paper:#fff;--bg:#e8edf5}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+  .topbar{background:var(--navy);position:sticky;top:0;z-index:50;box-shadow:0 2px 12px rgba(26,60,110,.2)}
+  .topbar-in{max-width:900px;margin:0 auto;padding:12px 20px;display:flex;align-items:center;
+    justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .tb-brand{color:#fff;font-size:15px;font-weight:bold;letter-spacing:1.4px}
+  .tb-tag{color:#c9d8ee;font-size:10.5px;font-style:italic;margin-top:1px}
+  .tb-right{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .lang-switch{display:flex;background:rgba(255,255,255,.12);border-radius:3px;padding:3px;gap:3px}
+  .lang-switch a{padding:6px 15px;border-radius:2px;text-decoration:none;font-size:12px;font-weight:bold;
+    color:rgba(255,255,255,.75);letter-spacing:.5px}
+  .lang-switch a.on{background:#fff;color:var(--navy)}
+  .dl{background:var(--gold);color:#2e2200;padding:8px 16px;text-decoration:none;font-size:12px;font-weight:bold;letter-spacing:.5px}
+  .dl:hover{background:#d9ac36}
+  .wrap{max-width:900px;margin:0 auto;padding:22px 20px 60px}
+  .paper{background:var(--paper);box-shadow:0 1px 3px rgba(26,60,110,.1),0 10px 40px rgba(26,60,110,.08)}
+  .titlewrap{text-align:center;padding:46px 50px 6px}
+  .logo-img{max-height:56px;margin-bottom:16px}
+  .doctitle{font-size:33px;font-weight:bold;color:var(--navy);letter-spacing:2px}
+  .docsub{font-size:15px;color:var(--muted);font-style:italic;margin-top:9px}
+  .period{font-size:11px;letter-spacing:2.5px;color:var(--gold-t);font-weight:bold;margin-top:12px}
+  .rule{width:70px;height:2px;background:var(--gold);margin:18px auto 0}
+  .secbar{background:var(--navy);color:#fff;font-size:12.5px;font-weight:bold;letter-spacing:1.6px;
+    padding:9px 18px;margin:28px 50px 14px}
+  .sec-text{margin:0 50px;font-size:14px}
+  .sec-text p{margin:0 0 12px}
+  .info-wrap{margin:14px 50px 0}
+  .info{width:100%;border-collapse:collapse}
+  .info td{padding:11px 15px;font-size:13.5px;border:1px solid var(--line)}
+  .info .k{background:var(--tint);color:var(--navy);font-weight:bold;width:23%;white-space:nowrap}
+  .info .v{background:var(--tint-l);width:27%}
+  .mv{display:flex;gap:18px;margin:0 50px;flex-wrap:wrap}
+  .mv .box{flex:1;min-width:250px;padding:18px 20px;border:1px solid var(--line)}
+  .mv .box.mission{background:var(--tint-l)}
+  .mv .box.vision{background:var(--cream)}
+  .mv .box .h{font-size:12px;font-weight:bold;letter-spacing:2px;margin-bottom:9px}
+  .mv .box.mission .h{color:var(--navy)}
+  .mv .box.vision .h{color:var(--gold-t)}
+  .mv .box p{font-size:13.5px}
+  .svc{margin:0 50px}
+  .svc .row{display:flex;margin-bottom:12px;border:1px solid var(--line)}
+  .svc .name{flex:0 0 190px;background:var(--navy);color:#fff;font-weight:bold;font-size:13.5px;
+    padding:16px 18px;display:flex;align-items:center}
+  .svc .desc{flex:1;background:var(--tint-l);padding:16px 18px;font-size:13.5px}
+  .why{margin:0 50px;padding:0}
+  .why li{list-style:none;padding:9px 0 9px 26px;position:relative;font-size:14px;border-bottom:1px solid var(--line-l)}
+  .why li:last-child{border-bottom:none}
+  .why li::before{content:'';position:absolute;left:4px;top:16px;width:8px;height:8px;background:var(--gold)}
+  .proj{margin:0 50px}
+  .proj table{width:100%;border-collapse:collapse}
+  .proj th{background:var(--navy);color:#fff;font-size:11px;text-transform:uppercase;letter-spacing:1px;
+    padding:11px 15px;text-align:left;font-weight:bold}
+  .proj td{padding:11px 15px;font-size:13px;border-bottom:1px solid var(--line-l)}
+  .proj tr:nth-child(even) td{background:var(--tint-l)}
+  .note{margin:14px 50px 0;background:var(--cream);border-left:4px solid var(--gold);
+    padding:14px 18px;font-size:13.5px;color:var(--gold-t)}
+  .contact{margin:0 50px}
+  .contact table{width:100%;border-collapse:collapse}
+  .contact td{padding:11px 15px;font-size:13.5px;border:1px solid var(--line)}
+  .contact .k{background:var(--tint);color:var(--navy);font-weight:bold;width:25%}
+  .contact .v{background:#fff}
+  .contact a{color:var(--navy);text-decoration:none;font-weight:bold}
+  .doc-foot{background:var(--navy);color:#fff;text-align:center;padding:20px;margin-top:34px;font-size:12px}
+  .doc-foot a{color:#c9d8ee;text-decoration:none}
+  .doc-foot .tagline{color:#c9d8ee;font-style:italic;font-size:11px;margin-top:4px}
+  @media(max-width:680px){
+    .titlewrap{padding-left:22px;padding-right:22px}
+    .secbar,.sec-text,.info-wrap,.mv,.svc,.why,.proj,.note,.contact{margin-left:16px;margin-right:16px}
+    .doctitle{font-size:24px}.svc .row{flex-direction:column}.svc .name{flex:none}
+  }
+  @media print{.topbar{display:none!important}body{background:#fff}.paper{box-shadow:none}.wrap{padding:0}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-in">
+    <div>
+      <div class="tb-brand">{{ profile.short_name|upper }}</div>
+      <div class="tb-tag">{% if lang == 'sw' %}{{ profile.tagline_sw }}{% else %}{{ profile.tagline_en }}{% endif %}</div>
+    </div>
+    <div class="tb-right">
+      <div class="lang-switch">
+        <a href="?lang=en" class="{% if lang == 'en' %}on{% endif %}">EN</a>
+        <a href="?lang=sw" class="{% if lang == 'sw' %}on{% endif %}">SW</a>
+      </div>
+      <a class="dl" href="{% url 'company_profile_pdf' %}?lang={{ lang }}">{% if lang == 'sw' %}PAKUA PDF{% else %}DOWNLOAD PDF{% endif %}</a>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="paper">
+    <div class="titlewrap">
+      {% if profile.logo_url %}<img class="logo-img" src="{{ profile.logo_url }}" alt="{{ profile.company_name }}">{% endif %}
+      <div class="doctitle">{% if lang == 'sw' %}WASIFU WA KAMPUNI{% else %}COMPANY PROFILE{% endif %}</div>
+      <div class="docsub">{% if lang == 'sw' %}{{ profile.subtitle_sw }}{% else %}{{ profile.subtitle_en }}{% endif %}</div>
+      {% if profile.period %}<div class="period">{{ profile.period }}</div>{% endif %}
+      <div class="rule"></div>
+    </div>
+
+    {% if profile.about_en or profile.about_sw %}
+    <div class="secbar">{% if lang == 'sw' %}01.&nbsp;&nbsp;KUHUSU {{ profile.short_name|upper }}{% else %}01.&nbsp;&nbsp;ABOUT {{ profile.short_name|upper }}{% endif %}</div>
+    <div class="sec-text">
+      {% if lang == 'sw' %}{% if profile.about_sw %}<p>{{ profile.about_sw|linebreaksbr }}</p>{% elif profile.about_en %}<p>{{ profile.about_en|linebreaksbr }}</p>{% endif %}
+      {% else %}{% if profile.about_en %}<p>{{ profile.about_en|linebreaksbr }}</p>{% elif profile.about_sw %}<p>{{ profile.about_sw|linebreaksbr }}</p>{% endif %}{% endif %}
+    </div>
+    {% if profile.facts %}
+    <div class="info-wrap">
+      <table class="info">
+        {% for f in profile.facts %}{% if forloop.counter0|divisibleby:2 %}<tr>{% endif %}
+        <td class="k">{% if lang == 'sw' %}{{ f.label_sw|default:f.label_en }}{% else %}{{ f.label_en|default:f.label_sw }}{% endif %}</td>
+        <td class="v">{{ f.value }}</td>
+        {% if forloop.counter|divisibleby:2 or forloop.last %}</tr>{% endif %}{% endfor %}
+      </table>
+    </div>
+    {% endif %}
+    {% endif %}
+
+    {% if profile.mission_en or profile.vision_en or profile.mission_sw or profile.vision_sw %}
+    <div class="secbar">{% if lang == 'sw' %}02.&nbsp;&nbsp;DHIMA NA DIRA{% else %}02.&nbsp;&nbsp;OUR MISSION &amp; VISION{% endif %}</div>
+    <div class="mv">
+      <div class="box mission">
+        <div class="h">{% if lang == 'sw' %}DHIMA{% else %}MISSION{% endif %}</div>
+        <p>{% if lang == 'sw' %}{{ profile.mission_sw|default:profile.mission_en|linebreaksbr }}{% else %}{{ profile.mission_en|default:profile.mission_sw|linebreaksbr }}{% endif %}</p>
+      </div>
+      <div class="box vision">
+        <div class="h">{% if lang == 'sw' %}DIRA{% else %}VISION{% endif %}</div>
+        <p>{% if lang == 'sw' %}{{ profile.vision_sw|default:profile.vision_en|linebreaksbr }}{% else %}{{ profile.vision_en|default:profile.vision_sw|linebreaksbr }}{% endif %}</p>
+      </div>
+    </div>
+    {% endif %}
+
+    {% if profile.services %}
+    <div class="secbar">{% if lang == 'sw' %}03.&nbsp;&nbsp;HUDUMA ZETU{% else %}03.&nbsp;&nbsp;OUR SERVICES{% endif %}</div>
+    <div class="svc">
+      {% for s in profile.services %}
+      <div class="row">
+        <div class="name">{% if lang == 'sw' %}{{ s.name_sw|default:s.name_en }}{% else %}{{ s.name_en|default:s.name_sw }}{% endif %}</div>
+        <div class="desc">{% if lang == 'sw' %}{{ s.desc_sw|default:s.desc_en }}{% else %}{{ s.desc_en|default:s.desc_sw }}{% endif %}</div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if profile.why_us %}
+    <div class="secbar">{% if lang == 'sw' %}04.&nbsp;&nbsp;KWA NINI {{ profile.short_name|upper }}{% else %}04.&nbsp;&nbsp;WHY CHOOSE {{ profile.short_name|upper }}{% endif %}</div>
+    <ul class="why">
+      {% for w in profile.why_us %}
+      <li>{% if lang == 'sw' %}{{ w.text_sw|default:w.text_en }}{% else %}{{ w.text_en|default:w.text_sw }}{% endif %}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+
+    {% if profile.projects %}
+    <div class="secbar">{% if lang == 'sw' %}05.&nbsp;&nbsp;MIRADI TULIYOFANYA{% else %}05.&nbsp;&nbsp;SELECTED PROJECTS{% endif %}</div>
+    <div class="proj">
+      <table>
+        <thead><tr>
+          <th>{% if lang == 'sw' %}Mradi{% else %}Project{% endif %}</th>
+          <th>{% if lang == 'sw' %}Aina{% else %}Type{% endif %}</th>
+          <th>{% if lang == 'sw' %}Teknolojia{% else %}Technology{% endif %}</th>
+        </tr></thead>
+        <tbody>
+          {% for p in profile.projects %}
+          <tr><td>{{ p.name }}</td><td>{{ p.type }}</td><td>{{ p.tech }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+
+    {% for s in profile.sections %}
+    <div class="secbar">{% if lang == 'sw' %}{{ s.heading_sw|default:s.heading_en }}{% else %}{{ s.heading_en|default:s.heading_sw }}{% endif %}</div>
+    <div class="sec-text"><p>{% if lang == 'sw' %}{{ s.body_sw|default:s.body_en|linebreaksbr }}{% else %}{{ s.body_en|default:s.body_sw|linebreaksbr }}{% endif %}</p></div>
+    {% endfor %}
+
+    {% if profile.pricing_note_en or profile.pricing_note_sw %}
+    <div class="secbar">{% if lang == 'sw' %}06.&nbsp;&nbsp;BEI NA MALIPO{% else %}06.&nbsp;&nbsp;PRICING &amp; PAYMENT TERMS{% endif %}</div>
+    <div class="note">{% if lang == 'sw' %}{{ profile.pricing_note_sw|default:profile.pricing_note_en|linebreaksbr }}{% else %}{{ profile.pricing_note_en|default:profile.pricing_note_sw|linebreaksbr }}{% endif %}</div>
+    {% endif %}
+
+    <div class="secbar">{% if lang == 'sw' %}07.&nbsp;&nbsp;WASILIANA NASI{% else %}07.&nbsp;&nbsp;CONTACT US{% endif %}</div>
+    <div class="contact">
+      <table>
+        <tr><td class="k">Email</td><td class="v"><a href="mailto:{{ profile.email }}">{{ profile.email }}</a></td></tr>
+        {% if profile.phone %}<tr><td class="k">{% if lang == 'sw' %}Simu{% else %}Phone{% endif %}</td><td class="v">{{ profile.phone }}</td></tr>{% endif %}
+        <tr><td class="k">Website</td><td class="v"><a href="https://{{ profile.website }}">{{ profile.website }}</a></td></tr>
+        <tr><td class="k">{% if lang == 'sw' %}Mahali{% else %}Location{% endif %}</td><td class="v">{{ profile.address }}</td></tr>
+      </table>
+    </div>
+
+    <div class="doc-foot">
+      {{ profile.company_name|upper }} &nbsp;·&nbsp; <a href="https://{{ profile.website }}">{{ profile.website }}</a> &nbsp;·&nbsp; {{ profile.email }}
+      <div class="tagline">{% if lang == 'sw' %}{{ profile.subtitle_sw }}{% else %}{{ profile.subtitle_en }}{% endif %}</div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

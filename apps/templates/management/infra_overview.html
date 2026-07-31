@@ -1,0 +1,54 @@
+{% extends "management/base.html" %}
+{% block title %}Infrastructure{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:12px;margin-bottom:20px">
+  <p style="color:var(--text-3);margin:0;font-size:13px">Projects zote na afya ya providers wao</p>
+  <div style="text-align:right">
+    <div style="font-family:var(--mono);font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:1px">Gharama / mwezi</div>
+    <div style="font-size:22px;font-weight:800">${{ total_cost }}</div>
+  </div>
+</div>
+
+{% if not encryption_ok %}
+<div style="padding:12px 14px;border-radius:10px;background:rgba(255,59,92,.08);border:1px solid rgba(255,59,92,.2);margin-bottom:16px;font-size:13px">
+  <strong style="color:#ff3b5c">FERNET_KEY haijawekwa.</strong>
+  Credentials haziwezi kusomwa wala kuhifadhiwa. Weka kwenye Render &rarr; Environment.
+</div>
+{% endif %}
+
+<div style="overflow-x:auto">
+<table style="width:100%;border-collapse:collapse;font-size:13px;min-width:720px">
+  <thead>
+    <tr style="text-align:left;border-bottom:1px solid var(--border);color:var(--text-3);font-size:10px;text-transform:uppercase;letter-spacing:1px">
+      <th style="padding:8px 6px">Project</th>
+      <th style="padding:8px 6px">Mteja</th>
+      <th style="padding:8px 6px">Hali</th>
+      <th style="padding:8px 6px">Providers</th>
+      <th style="padding:8px 6px">Sync</th>
+      <th style="padding:8px 6px;text-align:right">$/mwezi</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for r in rows %}
+    <tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:10px 6px"><a href="{% url 'infra_detail' r.website.pk %}" style="font-weight:600">{{ r.website.name }}</a></td>
+      <td style="padding:10px 6px;color:var(--text-2)">{{ r.website.client.name }}</td>
+      <td style="padding:10px 6px"><span style="color:{{ r.cfg.status_color }};font-family:var(--mono);font-size:11px;font-weight:700">&#9679; {{ r.cfg.status_label }}</span></td>
+      <td style="padding:10px 6px">
+        {% for i in r.integrations %}
+          <span title="{{ i.provider }}{% if i.sync_error %} — {{ i.sync_error|truncatechars:60 }}{% endif %}"
+                style="display:inline-block;padding:2px 7px;margin:1px;border-radius:5px;font-size:10px;font-family:var(--mono);background:{% if i.health == 'ok' %}rgba(0,255,136,.1);color:#00ff88{% elif i.health == 'stale' %}rgba(255,184,0,.1);color:#ffb800{% else %}rgba(255,59,92,.1);color:#ff3b5c{% endif %}">{{ i.provider }}</span>
+        {% empty %}<span style="color:var(--text-3);font-size:11px">haijaunganishwa</span>{% endfor %}
+      </td>
+      <td style="padding:10px 6px;color:var(--text-3);font-size:11px">{{ r.cfg.last_synced_label|default:"—" }}</td>
+      <td style="padding:10px 6px;text-align:right;font-family:var(--mono)">{% if r.cost %}${{ r.cost }}{% else %}—{% endif %}</td>
+    </tr>
+  {% empty %}
+    <tr><td colspan="6" style="padding:24px;text-align:center;color:var(--text-3)">Hakuna projects bado.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+
+<p style="margin-top:16px"><a href="{% url 'infra_audit' %}" style="font-size:12px;color:var(--text-3)">Audit log &rarr;</a></p>
+{% endblock %}

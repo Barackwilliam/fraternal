@@ -1,0 +1,51 @@
+{% extends 'management/base.html' %}
+{% block title %}Add Website{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:22px">
+      <a href="{% url 'website_list' %}" class="jt-btn btn-ghost btn-icon"><i class="fas fa-arrow-left"></i></a>
+      <h1 style="font-family:var(--head);font-size:20px;font-weight:800;color:var(--text)">Add New Website</h1>
+    </div>
+    <div class="jt-card">
+      <div class="jt-card-body">
+        <form method="post">
+          {% csrf_token %}
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="f-label">Client *</label>
+              <select name="client" class="f-input" required>
+                <option value="">— Select client —</option>
+                {% for c in clients %}<option value="{{ c.pk }}">{{ c.name }} ({{ c.email }}){% if c.user %} — @{{ c.user.username }}{% endif %}</option>{% endfor %}
+              </select>
+            </div>
+            <div class="col-md-6"><label class="f-label">Website Name *</label><input type="text" name="name" class="f-input" placeholder="e.g. mmexy.com" required></div>
+            <div class="col-md-6">
+              <label class="f-label">Site Type</label>
+              <select name="site_type" class="f-input">
+                <option value="static">Static HTML/CSS</option>
+                <option value="django">Django</option>
+                <option value="wordpress">WordPress</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div class="col-12"><label class="f-label">Website URL *</label><input type="url" name="url" class="f-input" placeholder="https://www.example.com" required></div>
+            <div class="col-md-6"><label class="f-label">Hosting Start Date *</label><input type="date" name="hosting_start_date" class="f-input" required></div>
+            <div class="col-md-6"><label class="f-label">Hosting End Date *</label><input type="date" name="hosting_end_date" class="f-input" required></div>
+            <div class="col-md-6"><label class="f-label">Monthly Cost (TZS)</label><input type="number" name="monthly_cost" class="f-input" placeholder="15000" value="0"></div>
+            <div class="col-12"><label class="f-label">Internal Notes</label><textarea name="notes" class="f-input" style="min-height:80px" placeholder="Any internal notes..."></textarea></div>
+            <div class="col-12" style="display:flex;flex-direction:column;gap:12px">
+              <label style="display:flex;align-items:center;gap:9px;cursor:pointer;font-size:13.5px;color:var(--text-2)"><input type="checkbox" name="auto_suspend_on_expiry" checked style="width:16px;height:16px;accent-color:var(--cyan)"><span>Auto-suspend when hosting expires</span></label>
+              <label style="display:flex;align-items:center;gap:9px;cursor:pointer;font-size:13.5px;color:var(--text-2)"><input type="checkbox" name="send_expiry_warnings" checked style="width:16px;height:16px;accent-color:var(--cyan)"><span>Send expiry warning emails to client</span></label>
+            </div>
+            <div class="col-12" style="border-top:1px solid var(--border);padding-top:18px;display:flex;gap:10px">
+              <button type="submit" class="jt-btn btn-cyan"><i class="fas fa-plus"></i> Add Website</button>
+              <a href="{% url 'website_list' %}" class="jt-btn btn-ghost">Cancel</a>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,69 @@
+{% extends 'management/base.html' %}
+{% block title %}{{ client.name }}{% endblock %}
+{% block content %}
+<div style="display:flex;align-items:center;gap:12px;margin-bottom:22px">
+  <a href="{% url 'client_list' %}" class="jt-btn btn-ghost btn-icon"><i class="fas fa-arrow-left"></i></a>
+  <div>
+    <h1 style="font-family:var(--head);font-size:20px;font-weight:800;color:var(--text)">{{ client.name }}</h1>
+    <div style="font-family:var(--mono);font-size:12px;color:var(--text-3)">{{ client.email }}{% if client.phone %} · {{ client.phone }}{% endif %}</div>
+  </div>
+  {% if client.user %}<span class="jt-badge b-active">Portal: @{{ client.user.username }}</span>{% endif %}
+</div>
+<div class="row g-3">
+  <div class="col-lg-4">
+    <div class="jt-card mb-3">
+      <div class="jt-card-head"><span class="jt-card-title"><i class="fas fa-user" style="color:var(--cyan)"></i> Client Profile</span></div>
+      <div class="jt-card-body">
+        <div class="info-row"><span class="info-key">Name</span><span class="info-val">{{ client.name }}</span></div>
+        <div class="info-row"><span class="info-key">Email</span><span class="info-val" style="font-size:12px">{{ client.email }}</span></div>
+        <div class="info-row"><span class="info-key">Phone</span><span class="info-val">{{ client.phone|default:"—" }}</span></div>
+        <div class="info-row"><span class="info-key">Company</span><span class="info-val">{{ client.company|default:"—" }}</span></div>
+        <div class="info-row"><span class="info-key">Total Revenue</span><span class="info-val" style="color:var(--green);font-size:17px;font-weight:700">TZS {{ total_revenue|floatformat:0 }}</span></div>
+        <div class="info-row" style="border:none"><span class="info-key">Portal Account</span><span class="info-val">
+          {% if client.user %}<span class="jt-badge b-active">@{{ client.user.username }}</span>{% else %}<span style="color:var(--text-3);font-size:12px">No portal account</span>{% endif %}
+        </span></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-8">
+    <div class="jt-card mb-3" style="padding:0">
+      <div class="jt-card-head"><span class="jt-card-title"><i class="fas fa-globe" style="color:var(--cyan)"></i> Websites ({{ websites.count }})</span></div>
+      {% for w in websites %}
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 18px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:8px">
+        <div>
+          <div style="font-weight:600;color:var(--text)">{{ w.name }}</div>
+          <div style="font-family:var(--mono);font-size:11px;color:var(--text-3)">{{ w.url }}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="jt-badge b-{{ w.status }}">{{ w.status|capfirst }}</span>
+          <a href="{% url 'website_detail' w.pk %}" class="jt-btn btn-ghost" style="font-size:11px;padding:6px 12px">Manage</a>
+        </div>
+      </div>
+      {% empty %}
+      <div class="jt-empty" style="padding:28px"><div class="ei">🌐</div><p>No websites</p></div>
+      {% endfor %}
+    </div>
+    <div class="jt-card" style="padding:0">
+      <div class="jt-card-head"><span class="jt-card-title"><i class="fas fa-receipt" style="color:var(--green)"></i> Payments</span></div>
+      <div style="overflow-x:auto">
+        <table class="jt-table">
+          <thead><tr><th>Date</th><th>Website</th><th>Amount</th><th>Method</th><th>Ref</th></tr></thead>
+          <tbody>
+            {% for p in payments %}
+            <tr>
+              <td style="font-family:var(--mono);font-size:12px;color:var(--text-3)">{{ p.payment_date|date:"d M Y" }}</td>
+              <td style="font-size:13px">{{ p.website.name }}</td>
+              <td style="font-family:var(--mono);font-weight:600;color:var(--green)">TZS {{ p.amount|floatformat:0 }}</td>
+              <td style="font-size:12px;color:var(--text-2)">{{ p.payment_method|default:"—" }}</td>
+              <td style="font-family:var(--mono);font-size:11px;color:var(--cyan)">{{ p.transaction_ref|default:"—" }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5"><div class="jt-empty" style="padding:20px"><div class="ei">💳</div><p>No payments</p></div></td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

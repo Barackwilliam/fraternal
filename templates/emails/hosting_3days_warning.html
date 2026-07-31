@@ -1,0 +1,94 @@
+{% extends 'emails/base_email.html' %}
+{% block content %}
+
+<!-- HEADER ACCENT: Red/Orange — urgent -->
+<div style="background:linear-gradient(135deg,#fef2f2,#fff1f2);border:2px solid #fca5a5;border-radius:12px;padding:18px 20px;margin-bottom:24px;display:flex;align-items:flex-start;gap:14px">
+  <div style="font-size:28px;line-height:1;flex-shrink:0">🚨</div>
+  <div>
+    <div style="font-size:13px;font-weight:800;color:#991b1b;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">URGENT — 3 Days Until Suspension</div>
+    <div style="font-size:14px;color:#7f1d1d;line-height:1.6">Your hosting for <strong>{{ website_name }}</strong> expires in <strong>3 days</strong>. Your website will be suspended on <strong>{{ expiry_date }}</strong> if payment is not received.</div>
+  </div>
+</div>
+
+<p class="greeting">Hello, {{ client_name }}</p>
+
+<p>This is an <strong>urgent notice</strong> — your website hosting is expiring in just <strong>3 days</strong>. We have not yet received a payment for your hosting renewal.</p>
+<p>If we do not receive payment by <strong>{{ expiry_date }}</strong>, your website will be <strong>automatically suspended</strong> and all visitors will be redirected to a suspension notice page. Your website will remain offline until payment is confirmed.</p>
+
+<!-- COUNTDOWN STYLE BLOCK -->
+<div style="background:#1a1a2e;border-radius:12px;padding:20px;text-align:center;margin:20px 0">
+  <div style="font-size:48px;font-weight:900;color:#ef4444;line-height:1;letter-spacing:-2px">3</div>
+  <div style="font-size:11px;color:rgba(255,255,255,0.5);letter-spacing:3px;text-transform:uppercase;margin-top:4px">Days Remaining</div>
+  <div style="font-size:13px;color:rgba(255,255,255,0.7);margin-top:10px">Website suspends on <strong style="color:#ef4444">{{ expiry_date }}</strong></div>
+</div>
+
+<!-- HOSTING DETAILS -->
+<div class="info-box">
+  <div class="info-row">
+    <span class="info-label">Website Name</span>
+    <span class="info-value">{{ website_name }}</span>
+  </div>
+  <div class="info-row">
+    <span class="info-label">Website URL</span>
+    <span class="info-value"><a href="{{ website_url }}" style="color:#5b6ef5">{{ website_url }}</a></span>
+  </div>
+  <div class="info-row">
+    <span class="info-label">Expiry Date</span>
+    <span class="info-value" style="color:#ef4444;font-weight:700">{{ expiry_date }}</span>
+  </div>
+  <div class="info-row">
+    <span class="info-label">Days Until Suspended</span>
+    <span class="info-value" style="color:#ef4444;font-weight:700">3 days</span>
+  </div>
+  <div class="info-row">
+    <span class="info-label">Monthly Cost</span>
+    <span class="info-value">TZS {{ monthly_cost|floatformat:0 }}</span>
+  </div>
+</div>
+
+<div class="alert alert-danger">
+  <strong>🔒 Automatic Suspension Notice</strong>
+  On <strong>{{ expiry_date }}</strong> at midnight, our system will automatically suspend your website. This means your website will go offline and all visitors will see a "Website Suspended" page. Your website data is safe — we just need a payment to restore access immediately.
+</div>
+
+<!-- HOW TO PAY -->
+<p style="font-size:15px;font-weight:700;color:#1a1a2e;margin-bottom:8px">Pay Now to Avoid Suspension</p>
+<p>Transfer the renewal amount to the bank account below, then send us your payment confirmation <strong>immediately</strong>:</p>
+
+<div class="info-box">
+  <div style="font-size:11px;font-weight:700;color:#ef4444;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:12px">💳 Payment Details — NMB Bank</div>
+  <div class="info-row">
+    <span class="info-label">Bank</span>
+    <span class="info-value">NMB Bank</span>
+  </div>
+  <div class="info-row">
+    <span class="info-label">Account Name</span>
+    <span class="info-value">JamiiTek Technologies</span>
+  </div>
+  <div class="info-row">
+    <span class="info-label">Account Number</span>
+    <span class="info-value" style="font-size:17px;font-weight:800;color:#1a1a2e">21410034200</span>
+  </div>
+  <div class="info-row">
+    <span class="info-label">Branch</span>
+    <span class="info-value">Dar es Salaam</span>
+  </div>
+  <div class="info-row">
+    <span class="info-label">Amount</span>
+    <span class="info-value" style="color:#22c55e;font-weight:700">TZS {{ monthly_cost|floatformat:0 }} (1 month)</span>
+  </div>
+</div>
+
+<div class="alert alert-info">
+  <strong>⚡ After Payment — What to Do</strong>
+  After making the payment, <strong>do not wait</strong> — immediately contact us with your payment proof so we can process your renewal right away and avoid suspension:<br><br>
+  📱 <strong>WhatsApp:</strong> +255 750 910 158<br>
+  ✉ <strong>Email:</strong> info@jamiitek.co.tz<br><br>
+  We process renewals within a few hours of receiving payment confirmation.
+</div>
+
+<div class="btn-wrap">
+  <a href="{{ portal_url }}" class="btn" style="background:linear-gradient(135deg,#ef4444,#dc2626)">Renew Now — Go to Portal</a>
+</div>
+
+{% endblock %}

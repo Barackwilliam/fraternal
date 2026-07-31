@@ -1,0 +1,60 @@
+{% extends 'management/base.html' %}
+{% block title %}Invoices{% endblock %}
+{% block extra_css %}
+<style>
+  .stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:22px}
+  .stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:18px 20px}
+  .stat-card:hover{border-color:var(--border-s)}
+  .stat-card .sv{font-family:var(--head);font-size:26px;font-weight:800;color:var(--text);margin-bottom:2px}
+  .stat-card .sl{font-family:var(--mono);font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:1px}
+  .stat-card.c-cyan .sv{color:var(--cyan)} .stat-card.c-green .sv{color:var(--green)}
+  .stat-card.c-yellow .sv{color:var(--yellow)} .stat-card.c-red .sv{color:var(--red)}
+  .b-draft{background:rgba(255,255,255,.04);color:var(--text-3);border:1px solid var(--border)}.b-draft::before{background:var(--text-3)}
+  .b-sent,.b-viewed{background:var(--cyan-d);color:var(--cyan);border:1px solid rgba(0,212,255,.2)}.b-sent::before,.b-viewed::before{background:var(--cyan)}
+  .b-partial{background:var(--yellow-d);color:var(--yellow);border:1px solid rgba(255,184,0,.2)}.b-partial::before{background:var(--yellow)}
+  .b-paid{background:var(--green-d);color:var(--green);border:1px solid rgba(0,255,136,.2)}.b-paid::before{background:var(--green);box-shadow:0 0 6px var(--green);animation:pulse-dot 2s infinite}
+  .b-overdue{background:var(--red-d);color:var(--red);border:1px solid rgba(255,59,92,.2)}.b-overdue::before{background:var(--red)}
+  .b-cancelled{background:rgba(255,255,255,.03);color:var(--text-3);border:1px solid var(--border)}.b-cancelled::before{background:var(--text-3)}
+  .num{font-family:var(--mono);font-weight:700;color:var(--text)}
+  .ttl{font-size:11px;color:var(--text-3);margin-top:2px}
+</style>
+{% endblock %}
+{% block content %}
+<div style="display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px;flex-wrap:wrap">
+  <div>
+    <h1 style="font-family:var(--head);font-size:22px;font-weight:800;color:var(--text);margin-bottom:3px">
+      <i class="fas fa-file-invoice-dollar" style="color:var(--cyan)"></i> Invoices
+    </h1>
+    <div style="font-family:var(--mono);font-size:12px;color:var(--text-3)">{{ invoices|length }} invoice(s)</div>
+  </div>
+  <a href="{% url 'invoice_new' %}" class="jt-btn btn-cyan"><i class="fas fa-plus"></i> New Invoice</a>
+</div>
+<div class="stat-row">
+  <div class="stat-card c-cyan"><div class="sv">{{ invoices|length }}</div><div class="sl">Total</div></div>
+  <div class="stat-card c-yellow"><div class="sv">{{ unpaid }}</div><div class="sl">Unpaid</div></div>
+  <div class="stat-card c-green"><div class="sv">{{ paid_count }}</div><div class="sl">Paid</div></div>
+  <div class="stat-card c-red"><div class="sv">{{ outstanding|floatformat:0 }}</div><div class="sl">TZS Outstanding</div></div>
+</div>
+<div class="jt-card" style="padding:0">
+  <div style="overflow-x:auto">
+    <table class="jt-table">
+      <thead><tr><th>Invoice</th><th>Client</th><th>Total</th><th>Balance</th><th>Status</th><th>Due</th><th></th></tr></thead>
+      <tbody>
+        {% for i in invoices %}
+        <tr>
+          <td><div class="num">{{ i.invoice_number|default:'—' }}</div><div class="ttl">{{ i.get_invoice_type_display }}</div></td>
+          <td><div style="font-size:13px;color:var(--text-2)">{{ i.display_client }}</div>{% if i.display_company %}<div style="font-family:var(--mono);font-size:10px;color:var(--purple)">{{ i.display_company }}</div>{% endif %}</td>
+          <td style="font-family:var(--mono);font-size:12px;color:var(--text-2)">{{ i.currency }} {{ i.grand_total|floatformat:0 }}</td>
+          <td style="font-family:var(--mono);font-size:12px;color:{% if i.is_paid %}var(--green){% else %}var(--yellow){% endif %}">{% if i.is_paid %}—{% else %}{{ i.balance_due|floatformat:0 }}{% endif %}</td>
+          <td><span class="jt-badge b-{% if i.is_overdue %}overdue{% else %}{{ i.status }}{% endif %}">{% if i.is_overdue %}Overdue{% else %}{{ i.get_status_display }}{% endif %}</span></td>
+          <td style="font-family:var(--mono);font-size:12px;color:var(--text-3)">{% if i.due_date %}{{ i.due_date|date:'M j, Y' }}{% else %}—{% endif %}</td>
+          <td><a href="{% url 'invoice_edit' i.pk %}" class="jt-btn btn-ghost" style="font-size:11px;padding:6px 12px"><i class="fas fa-arrow-right"></i> Open</a></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7"><div class="jt-empty"><div class="ei">🧾</div><p>No invoices yet — create your first one</p></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

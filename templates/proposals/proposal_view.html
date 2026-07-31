@@ -1,0 +1,378 @@
+{% load static custom_filters %}<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ proposal.title }} — {{ proposal.provider_name }}</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#101a2b; --ink-soft:#3a4859; --muted:#7a8a9e; --faint:#a8b3c2;
+    --line:#e6ebf2; --line-soft:#f1f4f9; --bg:#0e1b2e; --paper:#ffffff;
+    --brand:#0e1b2e; --accent:{{ proposal.accent_color|default:'#00d4ff' }};
+    --gold:#c9a961; --shadow:rgba(14,27,46,.14);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--ink);line-height:1.7}
+
+  .topbar{background:rgba(14,27,46,.85);backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,255,255,.08);
+    padding:0 24px;position:sticky;top:0;z-index:50}
+  .topbar-in{max-width:900px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:62px;gap:16px}
+  .tb-brand{font-family:'Cormorant Garamond',serif;font-weight:700;font-size:23px;color:#fff;letter-spacing:.3px}
+  .tb-brand span{color:var(--accent)}
+  .lang-switch{display:flex;background:rgba(255,255,255,.08);border-radius:100px;padding:3px;gap:2px}
+  .lang-switch a{padding:7px 16px;border-radius:100px;text-decoration:none;font-size:12.5px;font-weight:600;color:rgba(255,255,255,.6);transition:.25s}
+  .lang-switch a.on{background:var(--accent);color:#04121e;box-shadow:0 2px 10px rgba(0,212,255,.35)}
+
+  .wrap{max-width:900px;margin:0 auto;padding:0 20px 130px}
+
+  /* HERO */
+  .hero{padding:64px 20px 74px;text-align:center;position:relative;overflow:hidden}
+  .hero::before{content:'';position:absolute;inset:0;
+    background:radial-gradient(circle at 50% 0%,rgba(0,212,255,.12),transparent 60%);pointer-events:none}
+  .hero-logo{max-height:54px;margin-bottom:20px;position:relative}
+  .hero-eyebrow{font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:18px;position:relative}
+  .hero h1{font-family:'Cormorant Garamond',serif;font-weight:700;font-size:clamp(34px,6vw,56px);line-height:1.1;color:#fff;
+    letter-spacing:-.01em;margin-bottom:16px;position:relative}
+  .hero .prepared{font-size:16px;color:rgba(255,255,255,.6);position:relative}
+  .hero .prepared b{color:#fff;font-weight:700}
+  .hero-meta{display:inline-flex;gap:26px;flex-wrap:wrap;justify-content:center;margin-top:26px;position:relative}
+  .hero-meta .hm{font-family:'Inter';font-size:12.5px;color:rgba(255,255,255,.5)}
+  .hero-meta .hm b{color:var(--accent);font-weight:700;display:block;font-size:14px;margin-top:2px}
+
+  /* PAPER */
+  .paper{background:var(--paper);border-radius:20px 20px 0 0;box-shadow:0 -6px 50px var(--shadow);overflow:hidden;position:relative;z-index:2}
+  .sec{padding:44px 56px}
+  .sec+.sec{border-top:1px solid var(--line-soft)}
+  .sec-label{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:9px}
+  .sec-label svg{width:16px;height:16px;fill:var(--accent)}
+  .sec h2{font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:700;color:var(--brand);margin-bottom:18px;line-height:1.2}
+  .sec p{color:var(--ink-soft);font-size:15px;margin-bottom:14px}
+  .sec p:last-child{margin-bottom:0}
+  .lang-missing{color:var(--faint);font-style:italic}
+
+  /* Pricing table */
+  .price-table{width:100%;border-collapse:collapse;border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-top:8px}
+  .price-table thead th{background:var(--brand);color:#fff;font-size:11px;letter-spacing:.5px;text-transform:uppercase;font-weight:600;padding:14px 18px;text-align:left}
+  .price-table thead th.r{text-align:right}.price-table thead th.c{text-align:center}
+  .price-table tbody td{padding:15px 18px;font-size:14.5px;border-bottom:1px solid var(--line-soft);color:var(--ink-soft)}
+  .price-table tbody td.r{text-align:right;font-variant-numeric:tabular-nums}.price-table tbody td.c{text-align:center}
+  .price-table tbody tr:last-child td{border-bottom:none}
+  .price-table tbody tr:nth-child(even){background:#fbfcfe}
+  .price-table tbody td .li-desc{font-weight:600;color:var(--ink)}
+  .price-foot{margin-top:0}
+  .price-foot td{padding:13px 18px;font-size:14px;background:#fbfcfe}
+  .price-foot .lbl{text-align:right;color:var(--muted)}
+  .price-foot .val{text-align:right;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
+  .price-foot.grand td{border-top:2px solid var(--brand);font-size:18px;padding:16px 18px}
+  .price-foot.grand .lbl{color:var(--brand);font-weight:700;letter-spacing:.5px;text-transform:uppercase;font-size:13px}
+  .price-foot.grand .val{color:var(--brand);font-weight:800;font-size:20px}
+  .price-note{font-size:12.5px;color:var(--muted);margin-top:12px;font-style:italic}
+
+  /* Timeline */
+  .timeline{position:relative;padding-left:28px;margin-top:6px}
+  .timeline::before{content:'';position:absolute;left:7px;top:6px;bottom:6px;width:2px;background:var(--line)}
+  .tl-item{position:relative;padding-bottom:22px}
+  .tl-item:last-child{padding-bottom:0}
+  .tl-item::before{content:'';position:absolute;left:-25px;top:4px;width:14px;height:14px;border-radius:50%;background:var(--accent);border:3px solid #fff;box-shadow:0 0 0 1px var(--line)}
+  .tl-phase{font-weight:700;color:var(--ink);font-size:15px}
+  .tl-dur{font-size:12px;color:var(--accent);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin:2px 0 4px}
+  .tl-detail{font-size:14px;color:var(--ink-soft)}
+
+  /* Custom sections */
+  .cs h3{font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--brand);margin:24px 0 10px;font-weight:700}
+  .cs h3:first-child{margin-top:0}
+
+  /* Accept panel */
+  .accept-panel{margin:0;padding:44px 56px;background:linear-gradient(135deg,var(--brand),#16283f);color:#fff;text-align:center}
+  .accept-panel h2{font-family:'Cormorant Garamond',serif;font-size:30px;color:#fff;margin-bottom:10px}
+  .accept-panel p{color:rgba(255,255,255,.65);font-size:14.5px;margin-bottom:26px;max-width:460px;margin-left:auto;margin-right:auto}
+  .ap-signature{margin-top:30px;padding-top:24px;border-top:1px solid rgba(255,255,255,.12);display:flex;justify-content:space-between;flex-wrap:wrap;gap:20px;text-align:left}
+  .ap-sig-col{font-size:12.5px;color:rgba(255,255,255,.5)}
+  .ap-sig-col b{color:#fff;display:block;font-size:14px;margin-top:3px}
+
+  /* Accepted proof */
+  .accepted-proof{margin:0;padding:36px 56px;background:linear-gradient(135deg,#f0fdf5,#e9f9ef);text-align:center}
+  .accepted-proof .ap-ico{width:56px;height:56px;border-radius:50%;background:#16a34a;display:inline-flex;align-items:center;justify-content:center;margin-bottom:16px}
+  .accepted-proof .ap-ico svg{width:30px;height:30px;fill:#fff}
+  .accepted-proof h2{font-family:'Cormorant Garamond',serif;font-size:28px;color:#0a6b34;margin-bottom:8px}
+  .accepted-proof p{color:#166534;font-size:14px}
+  .ap-detail{display:inline-flex;gap:22px;flex-wrap:wrap;justify-content:center;margin-top:18px;font-size:12.5px;color:#0a6b34}
+  .ap-detail b{display:block;color:#166534;margin-top:2px}
+
+  .doc-foot{text-align:center;padding:26px;color:var(--faint);font-size:12px;background:#fff}
+  .doc-foot a{color:var(--accent);text-decoration:none;font-weight:600}
+
+  /* Action bar */
+  .actionbar{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.95);backdrop-filter:blur(16px);border-top:1px solid var(--line);padding:16px 20px;z-index:60;box-shadow:0 -6px 30px rgba(14,27,46,.1)}
+  .actionbar-in{max-width:900px;margin:0 auto;display:flex;gap:12px;align-items:center;justify-content:flex-end;flex-wrap:wrap}
+  .btn{display:inline-flex;align-items:center;gap:9px;padding:14px 28px;border-radius:12px;font-weight:700;font-size:14.5px;cursor:pointer;border:none;font-family:inherit;transition:.22s;text-decoration:none}
+  .btn svg{width:18px;height:18px}
+  .btn-primary{background:linear-gradient(135deg,var(--accent),#0090c8);color:#04121e;box-shadow:0 4px 16px rgba(0,212,255,.3)}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 26px rgba(0,212,255,.42)}
+  .btn-primary svg{fill:#04121e}
+  .btn-ghost{background:#fff;border:1.5px solid var(--line);color:var(--ink-soft)}
+  .btn-ghost:hover{border-color:var(--accent);color:var(--accent)}.btn-ghost svg{fill:currentColor}
+  .btn-text{background:none;color:var(--muted);font-size:13px;font-weight:600;padding:14px 12px}
+  .btn-text:hover{color:#dc3545}
+
+  /* Modal */
+  .modal-bg{position:fixed;inset:0;background:rgba(14,27,46,.6);backdrop-filter:blur(4px);z-index:100;display:none;align-items:center;justify-content:center;padding:20px}
+  .modal-bg.show{display:flex}
+  .modal{background:#fff;border-radius:20px;max-width:480px;width:100%;box-shadow:0 30px 90px rgba(0,0,0,.4)}
+  .modal-head{padding:28px 30px 0}
+  .modal-head h3{font-family:'Cormorant Garamond',serif;font-size:27px;color:var(--brand);font-weight:700}
+  .modal-head p{color:var(--muted);font-size:13.5px;margin-top:6px}
+  .modal-body{padding:22px 30px}
+  .m-fld{margin-bottom:16px}
+  .m-fld label{display:block;font-size:12px;font-weight:700;color:var(--ink);margin-bottom:7px}
+  .m-fld input{width:100%;padding:13px 15px;border:1.5px solid var(--line);border-radius:11px;font-size:15px;font-family:inherit;color:var(--ink)}
+  .m-fld input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,212,255,.1)}
+  .modal-foot{padding:0 30px 26px;display:flex;gap:12px}
+  .modal-foot .btn{flex:1;justify-content:center}
+  .m-status{font-size:13px;padding:0 30px;min-height:20px;margin-bottom:10px}.m-status.err{color:#dc3545}
+
+  @media(max-width:640px){
+    .sec,.accept-panel,.accepted-proof{padding-left:24px;padding-right:24px}
+    .hero h1{font-size:34px}.hero{padding:44px 20px 54px}
+  }
+  @media print{.topbar,.actionbar{display:none!important}body{background:#fff}.paper{box-shadow:none}.hero{color:#000}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-in">
+    <div class="tb-brand">{{ proposal.provider_name }}<span>.</span></div>
+    <div class="lang-switch">
+      <a href="?lang=en" class="{% if lang == 'en' %}on{% endif %}">English</a>
+      <a href="?lang=sw" class="{% if lang == 'sw' %}on{% endif %}">Kiswahili</a>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <!-- HERO -->
+  <div class="hero">
+    {% if proposal.logo_url %}<img class="hero-logo" src="{{ proposal.logo_url }}" alt="{{ proposal.provider_name }}">{% endif %}
+    <div class="hero-eyebrow">{% if lang == 'sw' %}Pendekezo la Mradi{% else %}Project Proposal{% endif %}</div>
+    <h1>{{ proposal.title }}</h1>
+    <div class="prepared">{% if lang == 'sw' %}Imeandaliwa kwa ajili ya{% else %}Prepared for{% endif %} <b>{{ proposal.display_client }}</b>{% if proposal.display_company %} · {{ proposal.display_company }}{% endif %}</div>
+    <div class="hero-meta">
+      {% if proposal.reference_number %}<div class="hm">{% if lang == 'sw' %}Kumbukumbu{% else %}Reference{% endif %}<b>{{ proposal.reference_number }}</b></div>{% endif %}
+      <div class="hm">{% if lang == 'sw' %}Tarehe{% else %}Date{% endif %}<b>{{ proposal.created_at|date:'M j, Y' }}</b></div>
+      {% if proposal.valid_until %}<div class="hm">{% if lang == 'sw' %}Inaisha{% else %}Valid Until{% endif %}<b>{{ proposal.valid_until|date:'M j, Y' }}</b></div>{% endif %}
+      {% if proposal.grand_total %}<div class="hm">{% if lang == 'sw' %}Uwekezaji{% else %}Investment{% endif %}<b>{{ proposal.currency }} {{ proposal.grand_total|thousands }}</b></div>{% endif %}
+    </div>
+  </div>
+
+  <div class="paper">
+    <!-- SUMMARY -->
+    {% if proposal.summary_en or proposal.summary_sw %}
+    <div class="sec">
+      <div class="sec-label"><svg viewBox="0 0 24 24"><path d="M4 4h16v2H4zm0 5h16v2H4zm0 5h10v2H4z"/></svg>{% if lang == 'sw' %}Muhtasari{% else %}Executive Summary{% endif %}</div>
+      <h2>{% if lang == 'sw' %}Utangulizi{% else %}Overview{% endif %}</h2>
+      {% if lang == 'sw' %}{% if proposal.summary_sw %}<p>{{ proposal.summary_sw|linebreaksbr }}</p>{% elif proposal.summary_en %}<p class="lang-missing">{{ proposal.summary_en|linebreaksbr }}</p>{% endif %}
+      {% else %}{% if proposal.summary_en %}<p>{{ proposal.summary_en|linebreaksbr }}</p>{% elif proposal.summary_sw %}<p class="lang-missing">{{ proposal.summary_sw|linebreaksbr }}</p>{% endif %}{% endif %}
+    </div>
+    {% endif %}
+
+    <!-- SCOPE -->
+    {% if proposal.scope_en or proposal.scope_sw %}
+    <div class="sec">
+      <div class="sec-label"><svg viewBox="0 0 24 24"><path d="M12 2 2 7l10 5 10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>{% if lang == 'sw' %}Kazi{% else %}Scope of Work{% endif %}</div>
+      <h2>{% if lang == 'sw' %}Tutakachofanya{% else %}What We'll Deliver{% endif %}</h2>
+      {% if lang == 'sw' %}{% if proposal.scope_sw %}<p>{{ proposal.scope_sw|linebreaksbr }}</p>{% elif proposal.scope_en %}<p class="lang-missing">{{ proposal.scope_en|linebreaksbr }}</p>{% endif %}
+      {% else %}{% if proposal.scope_en %}<p>{{ proposal.scope_en|linebreaksbr }}</p>{% elif proposal.scope_sw %}<p class="lang-missing">{{ proposal.scope_sw|linebreaksbr }}</p>{% endif %}{% endif %}
+    </div>
+    {% endif %}
+
+    <!-- CUSTOM SECTIONS -->
+    {% if proposal.sections %}
+    <div class="sec cs">
+      {% for s in proposal.sections %}
+        {% if lang == 'sw' %}
+          <h3>{% if s.heading_sw %}{{ s.heading_sw }}{% elif s.heading_en %}{{ s.heading_en }}{% endif %}</h3>
+          {% if s.body_sw %}<p>{{ s.body_sw|linebreaksbr }}</p>{% elif s.body_en %}<p class="lang-missing">{{ s.body_en|linebreaksbr }}</p>{% endif %}
+        {% else %}
+          <h3>{% if s.heading_en %}{{ s.heading_en }}{% elif s.heading_sw %}{{ s.heading_sw }}{% endif %}</h3>
+          {% if s.body_en %}<p>{{ s.body_en|linebreaksbr }}</p>{% elif s.body_sw %}<p class="lang-missing">{{ s.body_sw|linebreaksbr }}</p>{% endif %}
+        {% endif %}
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- PRICING -->
+    {% if proposal.line_items %}
+    <div class="sec">
+      <div class="sec-label"><svg viewBox="0 0 24 24"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>{% if lang == 'sw' %}Uwekezaji{% else %}Investment{% endif %}</div>
+      <h2>{% if lang == 'sw' %}Bei na Bidhaa{% else %}Pricing & Deliverables{% endif %}</h2>
+      <table class="price-table">
+        <thead><tr>
+          <th>{% if lang == 'sw' %}Maelezo{% else %}Description{% endif %}</th>
+          <th class="c">{% if lang == 'sw' %}Idadi{% else %}Qty{% endif %}</th>
+          <th class="r">{% if lang == 'sw' %}Bei{% else %}Unit Price{% endif %}</th>
+          <th class="r">{% if lang == 'sw' %}Kiasi{% else %}Amount{% endif %}</th>
+        </tr></thead>
+        <tbody>
+          {% for it in proposal.line_items %}
+          <tr><td><span class="li-desc">{{ it.desc }}</span></td><td class="c">{{ it.qty }}</td><td class="r">{{ it.unit_price|thousands }}</td><td class="r">{{ it.amount|thousands }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <table class="price-table" style="margin-top:0;border-top:none;border-radius:0 0 14px 14px">
+        {% if proposal.discount_amount %}
+        <tr class="price-foot"><td class="lbl" colspan="3">{% if lang == 'sw' %}Jumla ndogo{% else %}Subtotal{% endif %}</td><td class="val">{{ proposal.currency }} {{ proposal.subtotal|thousands }}</td></tr>
+        <tr class="price-foot"><td class="lbl" colspan="3">{% if lang == 'sw' %}Punguzo{% else %}Discount{% endif %}</td><td class="val">− {{ proposal.currency }} {{ proposal.discount_amount|thousands }}</td></tr>
+        {% endif %}
+        <tr class="price-foot grand"><td class="lbl" colspan="3">{% if lang == 'sw' %}Jumla Kuu{% else %}Total Investment{% endif %}</td><td class="val">{{ proposal.currency }} {{ proposal.grand_total|thousands }}</td></tr>
+      </table>
+      {% if proposal.pricing_note %}<div class="price-note">{{ proposal.pricing_note }}</div>{% endif %}
+      {% if proposal.payment_terms %}<div class="price-note">{% if lang == 'sw' %}Malipo{% else %}Payment{% endif %}: {{ proposal.payment_terms }}</div>{% endif %}
+    </div>
+    {% endif %}
+
+    <!-- TIMELINE -->
+    {% if proposal.timeline_items %}
+    <div class="sec">
+      <div class="sec-label"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 10V6h-2v8h6v-2z"/></svg>{% if lang == 'sw' %}Ratiba{% else %}Timeline{% endif %}</div>
+      <h2>{% if lang == 'sw' %}Mpango wa Utekelezaji{% else %}Project Timeline{% endif %}</h2>
+      <div class="timeline">
+        {% for t in proposal.timeline_items %}
+        <div class="tl-item">
+          <div class="tl-phase">{{ t.phase }}</div>
+          {% if t.duration %}<div class="tl-dur">{{ t.duration }}</div>{% endif %}
+          {% if t.detail %}<div class="tl-detail">{{ t.detail }}</div>{% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- ABOUT -->
+    {% if proposal.about_en or proposal.about_sw %}
+    <div class="sec">
+      <div class="sec-label"><svg viewBox="0 0 24 24"><path d="M12 2 4 5v6c0 5 3.4 9.7 8 11 4.6-1.3 8-6 8-11V5z"/></svg>{% if lang == 'sw' %}Kuhusu Sisi{% else %}Why JamiiTek{% endif %}</div>
+      <h2>{% if lang == 'sw' %}Kwa Nini JamiiTek{% else %}Your Partner{% endif %}</h2>
+      {% if lang == 'sw' %}{% if proposal.about_sw %}<p>{{ proposal.about_sw|linebreaksbr }}</p>{% elif proposal.about_en %}<p class="lang-missing">{{ proposal.about_en|linebreaksbr }}</p>{% endif %}
+      {% else %}{% if proposal.about_en %}<p>{{ proposal.about_en|linebreaksbr }}</p>{% elif proposal.about_sw %}<p class="lang-missing">{{ proposal.about_sw|linebreaksbr }}</p>{% endif %}{% endif %}
+    </div>
+    {% endif %}
+
+    <!-- ACCEPT / ACCEPTED -->
+    {% if is_accepted %}
+    <div class="accepted-proof">
+      <div class="ap-ico"><svg viewBox="0 0 24 24"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg></div>
+      <h2>{% if lang == 'sw' %}Pendekezo Limekubaliwa{% else %}Proposal Accepted{% endif %}</h2>
+      <p>{% if lang == 'sw' %}Asante! Tutawasiliana nawe hivi karibuni kuanza mradi.{% else %}Thank you! We'll be in touch shortly to begin the project.{% endif %}</p>
+      <div class="ap-detail">
+        <div>{% if lang == 'sw' %}Amekubali{% else %}Accepted by{% endif %}<b>{{ proposal.accepted_name }}</b></div>
+        <div>{% if lang == 'sw' %}Tarehe{% else %}Date{% endif %}<b>{{ proposal.accepted_at|date:'M j, Y · H:i' }}</b></div>
+      </div>
+    </div>
+    {% else %}
+    <div class="accept-panel">
+      <h2>{% if lang == 'sw' %}Uko Tayari Kuanza?{% else %}Ready to Get Started?{% endif %}</h2>
+      <p>{% if lang == 'sw' %}Ukikubali pendekezo hili, bonyeza kitufe hapa chini. Tutawasiliana nawe kuanza mara moja.{% else %}If this proposal meets your needs, accept it below and we'll begin right away.{% endif %}</p>
+      <div class="ap-signature">
+        <div class="ap-sig-col">{% if lang == 'sw' %}Imeandaliwa na{% else %}Prepared by{% endif %}<b>{{ proposal.provider_rep }}</b>{{ proposal.provider_name }}</div>
+        <div class="ap-sig-col" style="text-align:right">{% if lang == 'sw' %}Uwekezaji{% else %}Total Investment{% endif %}<b>{% if proposal.grand_total %}{{ proposal.currency }} {{ proposal.grand_total|thousands }}{% else %}—{% endif %}</b></div>
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="doc-foot">{{ proposal.provider_name }} · {% if lang == 'sw' %}Imewezeshwa na{% else %}Powered by{% endif %} <a href="https://jamiitek.com">JamiiTek</a></div>
+  </div>
+</div>
+
+{% if not is_accepted and proposal.status != 'declined' %}
+<div class="actionbar">
+  <div class="actionbar-in">
+    <button class="btn btn-text" onclick="declineProposal()">{% if lang == 'sw' %}Sina nia{% else %}Not interested{% endif %}</button>
+    <a class="btn btn-ghost" href="{% url 'proposal_pdf' proposal.token %}?lang={{ lang }}">
+      <svg viewBox="0 0 24 24"><path d="M12 16 6 10l1.4-1.4 3.6 3.6V4h2v8.2l3.6-3.6L18 10zM4 18h16v2H4z"/></svg>
+      {% if lang == 'sw' %}Pakua PDF{% else %}Download PDF{% endif %}
+    </a>
+    <button class="btn btn-primary" onclick="openAcceptModal()">
+      <svg viewBox="0 0 24 24"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>
+      {% if lang == 'sw' %}Kubali Pendekezo{% else %}Accept Proposal{% endif %}
+    </button>
+  </div>
+</div>
+{% else %}
+<div class="actionbar">
+  <div class="actionbar-in">
+    <a class="btn btn-primary" href="{% url 'proposal_pdf' proposal.token %}?lang={{ lang }}">
+      <svg viewBox="0 0 24 24"><path d="M12 16 6 10l1.4-1.4 3.6 3.6V4h2v8.2l3.6-3.6L18 10zM4 18h16v2H4z"/></svg>
+      {% if lang == 'sw' %}Pakua PDF{% else %}Download PDF{% endif %}
+    </a>
+  </div>
+</div>
+{% endif %}
+
+{% if not is_accepted and proposal.status != 'declined' %}
+<div class="modal-bg" id="acceptModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>{% if lang == 'sw' %}Kubali Pendekezo{% else %}Accept Proposal{% endif %}</h3>
+      <p>{% if lang == 'sw' %}Tunafurahi kufanya kazi nawe. Thibitisha hapa chini.{% else %}We're excited to work with you. Confirm below.{% endif %}</p>
+    </div>
+    <div class="modal-body">
+      <div class="m-fld">
+        <label>{% if lang == 'sw' %}Jina kamili{% else %}Full name{% endif %} *</label>
+        <input type="text" id="acc-name" value="{{ proposal.display_client }}" placeholder="{% if lang == 'sw' %}Jina lako{% else %}Your full name{% endif %}">
+      </div>
+      <div class="m-fld">
+        <label>Email</label>
+        <input type="email" id="acc-email" value="{{ proposal.display_email }}" placeholder="you@example.com">
+      </div>
+    </div>
+    <div class="m-status" id="accStatus"></div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeAcceptModal()" style="flex:.5">{% if lang == 'sw' %}Ghairi{% else %}Cancel{% endif %}</button>
+      <button class="btn btn-primary" id="doAcceptBtn" onclick="acceptProposal()">{% if lang == 'sw' %}Kubali Sasa{% else %}Accept Now{% endif %}</button>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<script>
+const TOKEN = "{{ proposal.token }}";
+const LANG = "{{ lang }}";
+const CSRF = "{{ csrf_token }}";
+function openAcceptModal(){ document.getElementById('acceptModal').classList.add('show'); }
+function closeAcceptModal(){ document.getElementById('acceptModal').classList.remove('show'); }
+function accStatus(msg,err){const e=document.getElementById('accStatus');e.textContent=msg;e.className='m-status'+(err?' err':'');}
+
+async function acceptProposal(){
+  const name=document.getElementById('acc-name').value.trim();
+  const email=document.getElementById('acc-email').value.trim();
+  if(name.length<3){accStatus(LANG==='sw'?'Tafadhali andika jina lako kamili.':'Please type your full name.',true);return;}
+  const btn=document.getElementById('doAcceptBtn');btn.disabled=true;btn.textContent=LANG==='sw'?'Inakubali…':'Accepting…';
+  accStatus(LANG==='sw'?'Inahifadhi…':'Recording your acceptance…');
+  const fd=new FormData();fd.append('name',name);fd.append('email',email);fd.append('lang',LANG);
+  try{
+    const res=await fetch(`/proposal/${TOKEN}/accept/`,{method:'POST',headers:{'X-CSRFToken':CSRF},body:fd});
+    const data=await res.json();
+    if(data.ok){window.location.href=data.redirect;}
+    else{accStatus(data.error||'Error',true);btn.disabled=false;btn.textContent=LANG==='sw'?'Kubali Sasa':'Accept Now';}
+  }catch(e){accStatus(LANG==='sw'?'Hitilafu ya mtandao.':'Network error.',true);btn.disabled=false;btn.textContent=LANG==='sw'?'Kubali Sasa':'Accept Now';}
+}
+
+async function declineProposal(){
+  const msg=LANG==='sw'?'Una uhakika hutaki kuendelea na pendekezo hili?':'Are you sure you do not want to proceed?';
+  if(!confirm(msg))return;
+  const reason=prompt(LANG==='sw'?'Sababu (hiari):':'Reason (optional):')||'';
+  const fd=new FormData();fd.append('reason',reason);
+  try{await fetch(`/proposal/${TOKEN}/decline/`,{method:'POST',headers:{'X-CSRFToken':CSRF},body:fd});
+    alert(LANG==='sw'?'Tumepokea jibu lako. Asante.':'We have received your response. Thank you.');location.reload();
+  }catch(e){}
+}
+document.getElementById('acceptModal')?.addEventListener('click',(e)=>{if(e.target.id==='acceptModal')closeAcceptModal();});
+</script>
+</body>
+</html>

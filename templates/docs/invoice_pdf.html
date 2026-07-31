@@ -1,0 +1,152 @@
+{% load static custom_filters %}<!DOCTYPE html>
+<html><head><meta charset="UTF-8">
+<style>
+  @page{margin:1.4cm 1.5cm}
+  body{font-family:"Helvetica","Arial",sans-serif;color:#1a1a1a;font-size:10.5pt;line-height:1.55}
+  .hdr{width:100%;border-collapse:collapse;background-color:#1a3c6e}
+  .hdr td{padding:11px 16px;color:#ffffff;vertical-align:middle}
+  .hdr .brand{font-size:12pt;font-weight:bold;letter-spacing:1px}
+  .hdr .tag{font-size:8pt;font-style:italic;color:#c9d8ee}
+  .hdr .right{text-align:right;font-size:8.5pt;letter-spacing:1px;color:#eaf0fa}
+  .hdr .right b{display:block;font-size:10pt;color:#ffffff;letter-spacing:2px}
+  .tophead{width:100%;border-collapse:collapse;margin-top:22px}
+  .tophead td{vertical-align:top}
+  .doctype{font-size:8.5pt;letter-spacing:3px;color:#8a6a00;font-weight:bold}
+  .invtitle{font-size:19pt;font-weight:bold;color:#1a3c6e;letter-spacing:1.4px;padding-top:5px}
+  .invsub{font-size:9.5pt;color:#666666;font-style:italic;padding-top:3px}
+  .rightcol{text-align:right}
+  .invnum{font-size:12pt;font-weight:bold;color:#1a3c6e;letter-spacing:1px}
+  .amtlbl{font-size:8pt;letter-spacing:1.5px;text-transform:uppercase;color:#666666;padding-top:9px}
+  .amt{font-size:18pt;font-weight:bold;color:#1a3c6e}
+  .rule{width:70px;border-bottom:2px solid #c49a28;margin-top:12px}
+  .secbar{width:100%;border-collapse:collapse;margin:16px 0 9px}
+  .secbar td{background-color:#1a3c6e;color:#ffffff;font-size:10pt;font-weight:bold;
+    padding:7px 14px;letter-spacing:1.4px}
+  .info{width:100%;border-collapse:collapse}
+  .info td{padding:8px 13px;font-size:9.5pt;border:1px solid #cccccc}
+  .info .k{background-color:#eaf0fa;color:#1a3c6e;font-weight:bold;width:23%}
+  .info .v{background-color:#f5f8fd;width:27%}
+  .items{width:100%;border-collapse:collapse;margin:5px 0}
+  .items th{background-color:#1a3c6e;color:#ffffff;font-size:8.5pt;text-transform:uppercase;
+    letter-spacing:1px;padding:8px 12px;text-align:left;font-weight:bold}
+  .items th.r{text-align:right}.items th.c{text-align:center}
+  .items td{padding:8px 12px;font-size:10pt;border-bottom:1px solid #e4e9f2}
+  .items td.r{text-align:right}.items td.c{text-align:center}
+  .items tr.alt td{background-color:#f5f8fd}
+  .items tr.sub td{background-color:#f5f8fd;font-size:9.5pt;color:#666666}
+  .items tr.grand td{background-color:#eaf0fa;border-top:2px solid #1a3c6e;font-weight:bold;
+    font-size:11.5pt;color:#1a3c6e;padding:10px 12px}
+  .items tr.bal td{background-color:#fdf6e3;border-top:1px solid #c49a28;font-weight:bold;
+    font-size:11pt;color:#8a6a00;padding:10px 12px}
+  .pay{width:100%;border-collapse:collapse}
+  .pay td{padding:8px 13px;font-size:9.5pt;border:1px solid #cccccc}
+  .pay .k{background-color:#eaf0fa;color:#1a3c6e;font-weight:bold;width:30%}
+  .terms{font-size:9pt;color:#666666;padding-top:9px}
+  .note{width:100%;border-collapse:collapse;margin-top:11px}
+  .note td{background-color:#fdf6e3;border-left:3px solid #c49a28;color:#8a6a00;padding:10px 14px;font-size:9pt}
+  .paidbox{width:100%;border-collapse:collapse;margin-top:16px}
+  .paidbox td{background-color:#eaf7ee;border-left:3px solid #1e7b45;padding:12px 15px;
+    text-align:center;color:#155e33}
+  .paidbox .t{font-size:12pt;font-weight:bold;letter-spacing:2px}
+  .paidbox .d{font-size:9pt;padding-top:3px}
+  .ftr{width:100%;border-collapse:collapse;background-color:#1a3c6e;margin-top:24px}
+  .ftr td{padding:10px 16px;color:#ffffff;font-size:8.5pt;text-align:center}
+  .ftr .tagline{color:#c9d8ee;font-style:italic;font-size:8pt;padding-top:3px}
+</style></head>
+<body>
+
+<table class="hdr"><tr>
+  <td>
+    <div class="brand">{{ invoice.provider_name|upper }}</div>
+    <div class="tag">{% if lang == 'sw' %}Tunajenga Mustakabali wa Kidijitali wa Tanzania{% else %}Building Tanzania's Digital Future{% endif %}</div>
+  </td>
+  <td class="right">
+    <b>{% if lang == 'sw' %}ANKARA{% else %}INVOICE{% endif %}</b>
+    {{ invoice.issue_date|default:invoice.created_at|date:'Y' }}
+  </td>
+</tr></table>
+
+<table class="tophead"><tr>
+  <td>
+    <div class="doctype">{% if lang == 'sw' %}{% if invoice.invoice_type == 'proforma' %}ANKARA YA AWALI{% elif invoice.invoice_type == 'credit' %}NOTI YA MKOPO{% else %}ANKARA{% endif %}{% else %}{{ invoice.get_invoice_type_display|upper }}{% endif %}</div>
+    <div class="invtitle">{{ invoice.title|upper }}</div>
+    {% if invoice.project_name %}<div class="invsub">{{ invoice.project_name }}</div>{% endif %}
+    <div class="rule"></div>
+  </td>
+  <td class="rightcol">
+    <div class="invnum">{{ invoice.invoice_number }}</div>
+    <div class="amtlbl">{% if invoice.is_paid %}{% if lang == 'sw' %}Imelipwa{% else %}Paid{% endif %}{% else %}{% if lang == 'sw' %}Kiasi cha kulipa{% else %}Amount Due{% endif %}{% endif %}</div>
+    <div class="amt">{{ invoice.currency }} {% if invoice.is_paid %}{{ invoice.grand_total|thousands }}{% else %}{{ invoice.balance_due|thousands }}{% endif %}</div>
+  </td>
+</tr></table>
+
+<table class="secbar"><tr><td>{% if lang == 'sw' %}01.&nbsp;&nbsp;TAARIFA ZA ANKARA{% else %}01.&nbsp;&nbsp;INVOICE DETAILS{% endif %}</td></tr></table>
+<table class="info">
+  <tr>
+    <td class="k">{% if lang == 'sw' %}Kwa{% else %}Bill To{% endif %}</td>
+    <td class="v">{{ invoice.display_client }}{% if invoice.display_company %}<br>{{ invoice.display_company }}{% endif %}{% if invoice.client_address %}<br>{{ invoice.client_address }}{% endif %}</td>
+    <td class="k">{% if lang == 'sw' %}Kutoka{% else %}From{% endif %}</td>
+    <td class="v">{{ invoice.provider_name }}<br>{{ invoice.provider_rep }}</td>
+  </tr>
+  <tr>
+    <td class="k">{% if lang == 'sw' %}Tarehe{% else %}Issue Date{% endif %}</td>
+    <td class="v">{{ invoice.issue_date|default:invoice.created_at|date:'F j, Y' }}</td>
+    <td class="k">{% if lang == 'sw' %}Mwisho{% else %}Due Date{% endif %}</td>
+    <td class="v">{% if invoice.due_date %}{{ invoice.due_date|date:'F j, Y' }}{% else %}—{% endif %}</td>
+  </tr>
+</table>
+
+<table class="secbar"><tr><td>{% if lang == 'sw' %}02.&nbsp;&nbsp;MAELEZO YA MALIPO{% else %}02.&nbsp;&nbsp;ITEMS{% endif %}</td></tr></table>
+<table class="items" repeat="1">
+  <thead><tr>
+    <th>{% if lang == 'sw' %}Maelezo{% else %}Description{% endif %}</th>
+    <th class="c">{% if lang == 'sw' %}Idadi{% else %}Qty{% endif %}</th>
+    <th class="r">{% if lang == 'sw' %}Bei{% else %}Unit Price{% endif %}</th>
+    <th class="r">{% if lang == 'sw' %}Kiasi{% else %}Amount{% endif %}</th>
+  </tr></thead>
+  {% for it in invoice.line_items %}
+  <tr{% if forloop.counter|divisibleby:2 %} class="alt"{% endif %}>
+    <td>{{ it.desc }}</td><td class="c">{{ it.qty }}</td>
+    <td class="r">{{ it.unit_price|thousands }}</td><td class="r">{{ it.amount|thousands }}</td>
+  </tr>
+  {% endfor %}
+  <tr class="sub"><td class="r" colspan="3">{% if lang == 'sw' %}Jumla ndogo{% else %}Subtotal{% endif %}</td><td class="r">{{ invoice.currency }} {{ invoice.subtotal|thousands }}</td></tr>
+  {% if invoice.discount_amount %}<tr class="sub"><td class="r" colspan="3">{% if lang == 'sw' %}Punguzo{% else %}Discount{% endif %}</td><td class="r">− {{ invoice.currency }} {{ invoice.discount_amount|thousands }}</td></tr>{% endif %}
+  {% if invoice.tax_percent %}<tr class="sub"><td class="r" colspan="3">{% if lang == 'sw' %}Kodi{% else %}VAT{% endif %} ({{ invoice.tax_percent|floatformat:"-2" }}%)</td><td class="r">{{ invoice.currency }} {{ invoice.tax_amount|thousands }}</td></tr>{% endif %}
+  <tr class="grand"><td class="r" colspan="3">{% if lang == 'sw' %}JUMLA KUU{% else %}TOTAL{% endif %}</td><td class="r">{{ invoice.currency }} {{ invoice.grand_total|thousands }}</td></tr>
+  {% if invoice.amount_paid %}
+  <tr class="sub"><td class="r" colspan="3">{% if lang == 'sw' %}Imelipwa{% else %}Amount Paid{% endif %}</td><td class="r">− {{ invoice.currency }} {{ invoice.amount_paid|thousands }}</td></tr>
+  {% if not invoice.is_paid %}<tr class="bal"><td class="r" colspan="3">{% if lang == 'sw' %}SALIO{% else %}BALANCE DUE{% endif %}</td><td class="r">{{ invoice.currency }} {{ invoice.balance_due|thousands }}</td></tr>{% endif %}
+  {% endif %}
+</table>
+
+{% if invoice.payment_methods %}
+<table class="secbar"><tr><td>{% if lang == 'sw' %}03.&nbsp;&nbsp;NAMNA YA KULIPA{% else %}03.&nbsp;&nbsp;HOW TO PAY{% endif %}</td></tr></table>
+<table class="pay">
+  {% for m in invoice.payment_methods %}{% if m.details %}
+  <tr><td class="k">{{ m.method }}</td><td>{{ m.details }}</td></tr>
+  {% endif %}{% endfor %}
+</table>
+{% endif %}
+
+{% if invoice.payment_terms %}<div class="terms">{% if lang == 'sw' %}Masharti{% else %}Terms{% endif %}: {{ invoice.payment_terms }}</div>{% endif %}
+
+{% if invoice.notes_en or invoice.notes_sw %}
+<table class="note"><tr><td>
+  {% if lang == 'sw' %}{% if invoice.notes_sw %}{{ invoice.notes_sw|linebreaksbr }}{% elif invoice.notes_en %}{{ invoice.notes_en|linebreaksbr }}{% endif %}{% else %}{% if invoice.notes_en %}{{ invoice.notes_en|linebreaksbr }}{% elif invoice.notes_sw %}{{ invoice.notes_sw|linebreaksbr }}{% endif %}{% endif %}
+</td></tr></table>
+{% endif %}
+
+{% if invoice.is_paid %}
+<table class="paidbox"><tr><td>
+  <div class="t">{% if lang == 'sw' %}IMELIPWA{% else %}PAID IN FULL{% endif %}</div>
+  <div class="d">{% if invoice.paid_at %}{{ invoice.paid_at|date:'F j, Y' }}{% endif %}{% if invoice.paid_reference %} · {% if lang == 'sw' %}Kumbukumbu{% else %}Ref{% endif %}: {{ invoice.paid_reference }}{% endif %}</div>
+</td></tr></table>
+{% endif %}
+
+<table class="ftr"><tr><td>
+  {{ invoice.provider_name|upper }} &nbsp;·&nbsp; www.jamiitek.com &nbsp;·&nbsp; info@jamiitek.com
+  <div class="tagline">{% if lang == 'sw' %}Mshirika Wako wa Kidijitali Tanzania{% else %}Your Trusted Digital Partner in Tanzania{% endif %}</div>
+</td></tr></table>
+
+</body></html>

@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: mudandaza
+    runtime: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn core.wsgi:application"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.0
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: mudandaza-db
+          property: connectionString
+
+databases:
+  - name: mudandaza-db
+    databaseName: mudandaza
+    user: mudandaza

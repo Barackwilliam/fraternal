@@ -1,0 +1,80 @@
+{% extends 'management/base.html' %}
+{% block title %}Add Email Hosting Plan{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:22px">
+      <a href="{% url 'email_hosting_list' %}" class="jt-btn btn-ghost btn-icon"><i class="fas fa-arrow-left"></i></a>
+      <h1 style="font-family:var(--head);font-size:20px;font-weight:800;color:var(--text)">Add Email Hosting Plan</h1>
+    </div>
+    <div class="jt-card">
+      <div class="jt-card-body">
+        <form method="post">
+          {% csrf_token %}
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="f-label">Client *</label>
+              <select name="client" class="f-input" required>
+                <option value="">— Select client —</option>
+                {% for c in clients %}<option value="{{ c.pk }}">{{ c.name }} ({{ c.email }})</option>{% endfor %}
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="f-label">Linked Website <span style="color:var(--text-3);font-weight:400">(optional)</span></label>
+              <select name="website" class="f-input">
+                <option value="">— None —</option>
+                {% for w in websites %}<option value="{{ w.pk }}">{{ w.name }} — {{ w.url }}</option>{% endfor %}
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="f-label">Plan Name *</label>
+              <input type="text" name="plan_name" class="f-input" placeholder="e.g. Business Email — 5 Accounts" required>
+            </div>
+            <div class="col-md-6">
+              <label class="f-label">Email Domain *</label>
+              <input type="text" name="email_domain" class="f-input" placeholder="e.g. mmexy.co.tz" required>
+              <div class="f-help">Accounts will be: info@mmexy.co.tz, admin@mmexy.co.tz ...</div>
+            </div>
+            <div class="col-md-4">
+              <label class="f-label">Number of Accounts</label>
+              <input type="number" name="accounts_count" class="f-input" value="1" min="1">
+            </div>
+            <div class="col-md-4">
+              <label class="f-label">Storage per Account (GB)</label>
+              <input type="number" name="storage_gb" class="f-input" value="5" min="1" step="0.5">
+            </div>
+            <div class="col-md-4">
+              <label class="f-label">Monthly Cost (TZS)</label>
+              <input type="number" name="monthly_cost" class="f-input" value="0" placeholder="e.g. 10000">
+            </div>
+            <div class="col-md-6">
+              <label class="f-label">Start Date *</label>
+              <input type="date" name="start_date" class="f-input" required>
+            </div>
+            <div class="col-md-6">
+              <label class="f-label">End Date *</label>
+              <input type="date" name="end_date" class="f-input" required>
+            </div>
+            <div class="col-md-6">
+              <label class="f-label">Warn Client X Days Before Expiry</label>
+              <input type="number" name="warning_days_before" class="f-input" value="7">
+            </div>
+            <div class="col-12">
+              <label class="f-label">Internal Notes</label>
+              <textarea name="notes" class="f-input" placeholder="cPanel login, mailbox details..."></textarea>
+            </div>
+            <div class="col-12" style="display:flex;flex-direction:column;gap:10px">
+              <label class="f-check"><input type="checkbox" name="auto_suspend_on_expiry" checked style="width:16px;height:16px;accent-color:var(--cyan)"><span style="font-size:13px;color:var(--text-2)">Auto-mark as suspended when end date passes</span></label>
+              <label class="f-check"><input type="checkbox" name="send_expiry_warnings" checked style="width:16px;height:16px;accent-color:var(--cyan)"><span style="font-size:13px;color:var(--text-2)">Send expiry warning emails to client</span></label>
+            </div>
+            <div class="col-12" style="border-top:1px solid var(--border);padding-top:18px;display:flex;gap:10px">
+              <button type="submit" class="jt-btn btn-cyan"><i class="fas fa-plus"></i> Create Plan</button>
+              <a href="{% url 'email_hosting_list' %}" class="jt-btn btn-ghost">Cancel</a>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

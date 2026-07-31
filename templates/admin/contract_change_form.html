@@ -1,0 +1,12 @@
+{% extends "admin/change_form.html" %}
+{% block object-tools-items %}
+  {% if original.pk %}
+  <li>
+    <a href="{% url 'admin:contract_ai_draft' original.pk %}" style="background:#6c63ff;color:#fff"
+       onclick="return confirm('AI will draft the contract text in English & Swahili using the client and terms info. This replaces the current text. Continue?')">
+      ✨ AI: Draft contract
+    </a>
+  </li>
+  {% endif %}
+  {{ block.super }}
+{% endblock %}
