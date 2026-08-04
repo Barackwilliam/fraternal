@@ -78,7 +78,6 @@ def diagnose():
                        'Inatakiwa iwe base64 ya bytes 32.')
     return True, 'FERNET_KEY iko sawa.'
 
-
 def encryption_available() -> bool:
     return _fernet() is not None
 

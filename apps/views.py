@@ -7,13 +7,66 @@ from django.contrib.auth.models import User, auth
 from django.contrib.auth.decorators import login_required
 
 
-# Home Page
+# # Home Page
+# def home(request):
+#     from apps.seo.schema import (
+#         organization_schema, website_schema, local_business_schema,
+#         jamiibot_product_schema, faq_schema, render_schemas
+#     )
+#     team = Team.objects.all()
+
+#     faqs = [
+#         ("Je, JamiiTek ni nini?", "JamiiTek ni kampuni ya teknolojia Tanzania inayotengeneza websites, apps, na AI WhatsApp bots kwa biashara."),
+#         ("What is JamiiBot?", "JamiiBot is an AI-powered WhatsApp chatbot that responds to customer questions 24/7 in Swahili and English, starting from TZS 15,000/month."),
+#         ("How much does a website cost in Tanzania?", "JamiiTek builds websites starting from TZS 150,000. Price depends on complexity, features, and design requirements."),
+#         ("Je, JamiiBot inafanya kazi vipi?", "JamiiBot inajibu maswali ya wateja kupitia WhatsApp kiotomatiki, saa 24 kwa lugha ya Kiswahili na Kiingereza."),
+#         ("Do you offer web hosting in Tanzania?", "Yes, JamiiTek offers reliable web hosting with 99.9% uptime, SSL certificates, and daily backups."),
+#         ("How long does website development take?", "Most websites are delivered within 2-6 weeks depending on scope and content availability."),
+#         ("Je, mnaunda WhatsApp bot Tanzania?", "Ndiyo! JamiiBot ni AI WhatsApp bot ya biashara Tanzania. Inajibu wateja saa 24 bila msaada wa binadamu."),
+#         ("What programming languages do you use?", "We use Python/Django, JavaScript, React, and modern web technologies for all our projects."),
+#     ]
+
+#     schema_html = render_schemas(
+#         organization_schema(),
+#         website_schema(),
+#         local_business_schema(),
+#         jamiibot_product_schema(),
+#         faq_schema(faqs),
+#     )
+
+#     context = {
+#         'team': team,
+#         'schema_markup': schema_html,
+#         'latest_posts': BlogPost.objects.filter(status='published')[:3],
+#         'page_title': 'JamiiTek — Web Development & AI WhatsApp Bot Tanzania',
+#         'page_desc': (
+#             "JamiiTek: Tanzania's leading web developer. We build websites, AI WhatsApp bots "
+#             "(JamiiBot), web hosting & domains. Serving Dar es Salaam and all Tanzania. "
+#             "Tunajenga website Tanzania. Bot WhatsApp Tanzania."
+#         ),
+#         'canonical': 'https://jamiitek.com/',
+#     }
+#     return render(request, 'index.html', context)
+
+
+
+
+
+# Replacement for the `home` view in apps/views.py
+#
+# Only the context changes — the SEO block is untouched.
+
+from django.shortcuts import render
+
+from .models import Team, BlogPost, Service
+from .site_content import HeroSlide, PortfolioItem, Testimonial
+
+
 def home(request):
     from apps.seo.schema import (
         organization_schema, website_schema, local_business_schema,
         jamiibot_product_schema, faq_schema, render_schemas
     )
-    team = Team.objects.all()
 
     faqs = [
         ("Je, JamiiTek ni nini?", "JamiiTek ni kampuni ya teknolojia Tanzania inayotengeneza websites, apps, na AI WhatsApp bots kwa biashara."),
@@ -35,9 +88,16 @@ def home(request):
     )
 
     context = {
-        'team': team,
-        'schema_markup': schema_html,
+        # ── slider content (all admin-managed) ──────────────────
+        'hero_slides':  HeroSlide.objects.filter(is_active=True).exclude(image=''),
+        'portfolio':    PortfolioItem.objects.filter(is_featured=True).exclude(image='')[:12],
+        'testimonials': Testimonial.objects.filter(is_active=True)[:9],
+        'services':     Service.objects.all()[:8],
+        'team':         Team.objects.all(),
         'latest_posts': BlogPost.objects.filter(status='published')[:3],
+
+        # ── SEO (unchanged) ─────────────────────────────────────
+        'schema_markup': schema_html,
         'page_title': 'JamiiTek — Web Development & AI WhatsApp Bot Tanzania',
         'page_desc': (
             "JamiiTek: Tanzania's leading web developer. We build websites, AI WhatsApp bots "

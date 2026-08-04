@@ -6,6 +6,7 @@ from django.utils import timezone
 
 from .integration_models import ResolverMixin
 import secrets
+from .site_content import HeroSlide, PortfolioItem, Testimonial  # noqa: F401
 
 
 # ============================================================

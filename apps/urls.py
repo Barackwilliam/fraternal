@@ -12,6 +12,7 @@ from . import management_views
 from . import infra_views
 from . import client_portal_views as portal
 from builder import views as builder_views
+from . import domain_views
 
 urlpatterns = [
     # ── COMPANY PROFILE ─────────────────────────────────────
@@ -66,6 +67,7 @@ urlpatterns = [
     path('service/', views.service, name='service'),
     path('About/', views.About, name='About'),
     path('contact/', views.contact, name='contact'),
+    path('domain-check/', domain_views.domain_check, name='domain_check'),
 
     # ── TEMPLATES MARKETPLACE ─────────────────────────────
     path('templates/', templates_marketplace, name='templates_marketplace'),

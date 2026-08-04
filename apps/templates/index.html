@@ -1,1230 +1,1517 @@
-{% extends 'base.html' %}
-{% load static %}
-{% block title %}JamiiTek — Modern Web Development & AI WhatsApp Bots in Tanzania{% endblock %}
-{% block extra_css %}
-<style>
-/* ═══════════════════════════════════════════════════════════
-   GLOBAL ANIMATIONS
-═══════════════════════════════════════════════════════════ */
-@keyframes fadeUp   { from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:translateY(0)} }
-@keyframes fadeIn   { from{opacity:0} to{opacity:1} }
-@keyframes floatY   { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
-@keyframes floatYS  { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
-@keyframes glitch   { 0%,100%{clip-path:inset(0 0 98% 0)} 10%{clip-path:inset(15% 0 66% 0)} 20%{clip-path:inset(44% 0 32% 0)} 30%{clip-path:inset(72% 0 8% 0)} 40%{clip-path:inset(30% 0 60% 0)} 50%{clip-path:inset(0 0 98% 0)} }
-@keyframes scanline { 0%{transform:translateY(-100%)} 100%{transform:translateY(100vh)} }
-@keyframes pulse2   { 0%,100%{opacity:1;box-shadow:0 0 8px currentColor} 50%{opacity:.3;box-shadow:none} }
-@keyframes ringExp  { 0%{transform:translate(-50%,-50%) scale(1);opacity:.5} 100%{transform:translate(-50%,-50%) scale(2.2);opacity:0} }
-@keyframes textShim { 0%{background-position:200% center} 100%{background-position:-200% center} }
-@keyframes borderGlow { 0%,100%{box-shadow:0 0 8px rgba(0,200,255,.2)} 50%{box-shadow:0 0 24px rgba(0,200,255,.5)} }
-@keyframes waveMsg  { 0%{transform:translateY(0) scaleX(1)} 50%{transform:translateY(-4px) scaleX(.98)} 100%{transform:translateY(0) scaleX(1)} }
-@keyframes botTyp   { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-5px)} }
-@keyframes revealX  { from{opacity:0;transform:translateX(-20px)} to{opacity:1;transform:translateX(0)} }
-@keyframes slideR   { from{opacity:0;transform:translateX(32px)} to{opacity:1;transform:translateX(0)} }
-@keyframes counterUp{ from{opacity:0;transform:scale(.8)} to{opacity:1;transform:scale(1)} }
+{% load static %}<!DOCTYPE html>
+<html lang="en" prefix="og: https://ogp.me/ns#">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
-/* INTERSECTION OBSERVER classes */
-.reveal { opacity:0; transform:translateY(28px); transition:opacity .7s ease, transform .7s ease; }
-.reveal.visible { opacity:1; transform:translateY(0); }
-.reveal-l { opacity:0; transform:translateX(-28px); transition:opacity .7s ease, transform .7s ease; }
-.reveal-l.visible { opacity:1; transform:translateX(0); }
-.reveal-r { opacity:0; transform:translateX(28px); transition:opacity .7s ease, transform .7s ease; }
-.reveal-r.visible { opacity:1; transform:translateX(0); }
+<title>{{ page_title|default:"JamiiTek — Web Development & AI WhatsApp Bot Tanzania" }}</title>
+<meta name="description" content="{{ page_desc|default:'JamiiTek: Tanzania&#39;s leading web developer. Websites, AI WhatsApp bots (JamiiBot), web hosting & domains. Dar es Salaam.' }}">
+<meta name="author" content="JamiiTek">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+<link rel="canonical" href="{{ canonical|default:'https://jamiitek.com/' }}">
 
-/* ═══════════════════════════════════════════════════════════
-   BOT PROMO HERO STRIP — full-width top announcement
-═══════════════════════════════════════════════════════════ */
-.bot-announce {
-  position:relative; overflow:hidden; z-index:10;
-  background:linear-gradient(135deg,rgba(0,20,10,.98),rgba(0,10,20,.98));
-  border-bottom:1px solid rgba(37,211,102,.2);
-}
-.bot-announce::before {
-  content:''; position:absolute; inset:0; pointer-events:none;
-  background:radial-gradient(ellipse 60% 100% at 80% 50%,rgba(37,211,102,.08),transparent 65%),
-             radial-gradient(ellipse 40% 100% at 20% 50%,rgba(0,212,255,.05),transparent 65%);
-}
-.bot-announce-inner {
-  display:flex; align-items:center; gap:20px; padding:18px 24px;
-  position:relative; z-index:2; flex-wrap:wrap;
-}
-.ba-badge {
-  display:inline-flex; align-items:center; gap:7px;
-  background:rgba(37,211,102,.1); border:1px solid rgba(37,211,102,.3);
-  border-radius:100px; padding:5px 14px;
-  font-family:var(--ff-mono); font-size:10px; font-weight:700;
-  color:#25d366; letter-spacing:1.5px; text-transform:uppercase;
-  white-space:nowrap; flex-shrink:0;
-}
-.ba-badge .dot { width:6px; height:6px; border-radius:50%; background:#25d366; animation:pulse2 2s infinite; flex-shrink:0; }
-.ba-text { flex:1; min-width:180px; }
-.ba-text strong { font-family:var(--ff-display); font-size:13px; color:#fff; font-weight:700; letter-spacing:.5px; }
-.ba-text span { font-family:var(--ff-mono); font-size:11px; color:rgba(255,255,255,.38); margin-left:8px; }
-.ba-btns { display:flex; gap:8px; flex-wrap:wrap; flex-shrink:0; }
-.ba-btn-primary {
-  display:inline-flex; align-items:center; gap:7px; padding:9px 20px;
-  border-radius:9px; background:linear-gradient(135deg,#25d366,#00b5d8);
-  color:#000; font-family:var(--ff-display); font-size:11px; font-weight:800;
-  text-decoration:none; transition:all .2s; white-space:nowrap;
-  letter-spacing:.5px; box-shadow:0 4px 16px rgba(37,211,102,.25);
-}
-.ba-btn-primary:hover { color:#000; transform:translateY(-2px); box-shadow:0 8px 28px rgba(37,211,102,.5); }
-.ba-btn-ghost {
-  display:inline-flex; align-items:center; gap:6px; padding:9px 18px;
-  border-radius:9px; background:rgba(255,255,255,.04);
-  border:1px solid rgba(255,255,255,.1); color:rgba(255,255,255,.5);
-  font-family:var(--ff-mono); font-size:11px; text-decoration:none;
-  transition:all .2s; white-space:nowrap;
-}
-.ba-btn-ghost:hover { border-color:rgba(37,211,102,.3); color:#25d366; }
-.ba-close { background:none; border:none; color:rgba(255,255,255,.2); font-size:16px; cursor:pointer; padding:4px; flex-shrink:0; transition:color .2s; }
-.ba-close:hover { color:rgba(255,255,255,.6); }
+<meta name="geo.region" content="TZ-02">
+<meta name="geo.placename" content="Dar es Salaam, Tanzania">
+<meta name="geo.position" content="-6.7924;39.2083">
+<meta name="ICBM" content="-6.7924, 39.2083">
 
-/* TICKER inside announce */
-.ba-ticker { display:flex; align-items:center; gap:12px; }
-.ba-ticker .plans { display:flex; gap:10px; flex-shrink:0; }
-.ba-plan { font-family:var(--ff-mono); font-size:10px; color:rgba(255,255,255,.35); display:flex; align-items:center; gap:5px; }
-.ba-plan strong { color:#25d366; font-size:11px; }
-.ba-plan .sep { color:rgba(255,255,255,.12); }
+<meta property="og:type" content="website">
+<meta property="og:url" content="{{ canonical|default:'https://jamiitek.com/' }}">
+<meta property="og:site_name" content="JamiiTek">
+<meta property="og:title" content="{{ page_title|default:'JamiiTek — Web Development & AI WhatsApp Bot Tanzania' }}">
+<meta property="og:description" content="{{ page_desc|default:'Websites, AI WhatsApp bots, hosting & domains for businesses across Tanzania.' }}">
+<meta property="og:image" content="https://jamiitek.com{% static 'images/hero/hero-1.jpg' %}">
+<meta property="og:locale" content="en_TZ">
+<meta property="og:locale:alternate" content="sw_TZ">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@JamiiTek">
 
-/* ═══════════════════════════════════════════════════════════
-   HERO
-═══════════════════════════════════════════════════════════ */
-.hero {
-  min-height:100vh; display:flex; align-items:center;
-  background:#00010a; position:relative; overflow:hidden;
-  padding:120px 0 80px;
-}
-.hero-bg-canvas { position:absolute; inset:0; z-index:0; pointer-events:none; }
-.hero-scanline {
-  position:absolute; inset:0; z-index:1; pointer-events:none;
-  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,200,255,.006) 3px,rgba(0,200,255,.006) 4px);
-}
-.hero-grid {
-  position:absolute; inset:0; z-index:1; pointer-events:none;
-  background-image:linear-gradient(rgba(0,200,255,.032) 1px,transparent 1px),linear-gradient(90deg,rgba(0,200,255,.032) 1px,transparent 1px);
-  background-size:60px 60px;
-  mask-image:radial-gradient(ellipse 90% 80% at 50% 50%,black 20%,transparent 100%);
-}
-.hero-nebula {
-  position:absolute; inset:0; z-index:1; pointer-events:none;
-  background:radial-gradient(ellipse 75% 60% at 65% 20%,rgba(91,110,245,.18) 0%,transparent 65%),
-             radial-gradient(ellipse 50% 65% at 10% 75%,rgba(180,77,255,.1) 0%,transparent 60%),
-             radial-gradient(ellipse 40% 40% at 90% 80%,rgba(0,212,255,.08) 0%,transparent 55%);
-  animation:nebula 16s ease-in-out infinite alternate;
-}
-@keyframes nebula { from{opacity:.7;transform:scale(1)} to{opacity:1;transform:scale(1.06)} }
-.hero-inner { position:relative; z-index:3; }
+<meta name="theme-color" content="#04101F">
+<link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
+<link rel="manifest" href="/manifest.json">
+<link rel="preload" as="image" href="{% static 'images/hero/hero-1.jpg' %}" fetchpriority="high">
 
-/* PILL */
-.h-pill {
-  display:inline-flex; align-items:center; gap:10px;
-  background:rgba(0,200,255,.07); border:1px solid rgba(0,200,255,.2);
-  border-radius:100px; padding:7px 18px; margin-bottom:24px;
-  font-family:var(--ff-mono); font-size:11px; letter-spacing:2px; text-transform:uppercase;
-  color:rgba(0,200,255,.85);
-  animation:fadeUp .6s .1s ease both;
-}
-.h-pill .live { width:7px; height:7px; background:#00ff88; border-radius:50%; box-shadow:0 0 8px #00ff88; animation:pulse2 2s infinite; flex-shrink:0; }
+{{ schema_markup|safe }}
 
-/* BOT STRIP inside hero */
-.h-bot-strip {
-  display:inline-flex; align-items:center; gap:10px;
-  background:rgba(37,211,102,.06); border:1px solid rgba(37,211,102,.18);
-  border-radius:100px; padding:7px 18px; margin-bottom:24px;
-  font-family:var(--ff-mono); font-size:11px; letter-spacing:1.5px;
-  color:rgba(37,211,102,.8); text-transform:uppercase;
-  animation:fadeUp .6s .15s ease both;
-  text-decoration:none; transition:all .2s;
-}
-.h-bot-strip:hover { border-color:rgba(37,211,102,.4); color:#25d366; background:rgba(37,211,102,.1); }
-.h-bot-strip .waDot { width:7px; height:7px; background:#25d366; border-radius:50%; box-shadow:0 0 8px #25d366; animation:pulse2 2s .5s infinite; flex-shrink:0; }
-
-/* TITLE */
-.h-title {
-  font-family:var(--ff-display);
-  font-size:clamp(32px,6vw,80px);
-  font-weight:900; color:#fff;
-  letter-spacing:-1px; line-height:1.05;
-  margin-bottom:18px;
-  animation:fadeUp .7s .2s ease both;
-}
-.h-title .line-web {
-  display:block;
-  background:linear-gradient(110deg,var(--cyan),var(--plasma) 50%,#ff2d8a);
-  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
-  background-clip:text; background-size:200% auto;
-  animation:textShim 4s linear infinite;
-  filter:drop-shadow(0 0 28px rgba(0,200,255,.25));
-}
-.h-title .line-bot {
-  display:block;
-  background:linear-gradient(110deg,#25d366,#00d4ff 50%,#25d366);
-  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
-  background-clip:text; background-size:200% auto;
-  animation:textShim 4s 1s linear infinite;
-  filter:drop-shadow(0 0 28px rgba(37,211,102,.25));
-}
-
-.h-sub {
-  font-size:clamp(14px,1.4vw,17px); color:rgba(232,244,255,.45);
-  line-height:1.85; max-width:500px; margin-bottom:28px;
-  animation:fadeUp .7s .3s ease both;
-}
-
-/* DUAL CTA ROW */
-.h-ctas { display:flex; gap:12px; flex-wrap:wrap; animation:fadeUp .7s .35s ease both; }
-.h-cta-main {
-  display:inline-flex; align-items:center; gap:9px;
-  padding:13px 26px; border-radius:11px;
-  background:linear-gradient(135deg,rgba(0,200,255,.2),rgba(180,77,255,.2));
-  border:1px solid rgba(0,200,255,.35); color:#fff;
-  font-family:var(--ff-display); font-weight:700; font-size:13px;
-  text-decoration:none; transition:all .25s; letter-spacing:.5px;
-  box-shadow:0 6px 24px rgba(0,200,255,.15);
-}
-.h-cta-main:hover { color:#fff; border-color:rgba(0,200,255,.7); box-shadow:0 10px 36px rgba(0,200,255,.35); transform:translateY(-2px); }
-.h-cta-bot {
-  display:inline-flex; align-items:center; gap:9px;
-  padding:13px 26px; border-radius:11px;
-  background:linear-gradient(135deg,#25d366,#00b5d8);
-  color:#000; font-family:var(--ff-display); font-weight:800; font-size:13px;
-  text-decoration:none; transition:all .25s; letter-spacing:.5px;
-  box-shadow:0 6px 24px rgba(37,211,102,.25);
-}
-.h-cta-bot:hover { color:#000; transform:translateY(-2px); box-shadow:0 10px 36px rgba(37,211,102,.5); }
-.h-cta-ghost {
-  display:inline-flex; align-items:center; gap:9px;
-  padding:13px 22px; border-radius:11px;
-  border:1px solid rgba(255,255,255,.1); background:transparent;
-  color:rgba(255,255,255,.5); font-family:var(--ff-display);
-  font-weight:600; font-size:12px; text-decoration:none; transition:all .25s;
-}
-.h-cta-ghost:hover { color:#fff; border-color:rgba(255,255,255,.28); background:rgba(255,255,255,.04); }
-
-/* PORTAL BOX */
-.h-portal {
-  display:flex; align-items:center; gap:14px; flex-wrap:wrap;
-  padding:14px 18px; margin-top:22px; margin-bottom:24px;
-  background:rgba(0,200,255,.04); border:1px solid rgba(0,200,255,.12);
-  border-radius:16px; position:relative; overflow:hidden;
-  animation:fadeUp .7s .4s ease both;
-}
-.h-portal::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:linear-gradient(180deg,var(--cyan),var(--plasma)); }
-.h-portal-ico { width:38px; height:38px; border-radius:10px; background:rgba(0,200,255,.1); border:1px solid rgba(0,200,255,.2); display:flex; align-items:center; justify-content:center; color:var(--cyan); flex-shrink:0; }
-.h-portal-txt strong { display:block; font-size:13px; font-weight:700; color:rgba(232,244,255,.85); margin-bottom:2px; }
-.h-portal-txt span { font-family:var(--ff-mono); font-size:10px; color:rgba(255,255,255,.3); letter-spacing:.4px; }
-.h-sign { display:inline-flex; align-items:center; gap:6px; padding:8px 16px; border-radius:9px; background:rgba(0,200,255,.12); border:1px solid rgba(0,200,255,.28); color:var(--cyan); font-size:12px; font-weight:700; text-decoration:none; transition:all .2s; }
-.h-sign:hover { background:rgba(0,200,255,.22); color:#fff; }
-.h-reg  { display:inline-flex; align-items:center; gap:6px; padding:8px 16px; border-radius:9px; border:1px solid rgba(255,255,255,.1); color:rgba(255,255,255,.45); font-size:12px; font-weight:600; text-decoration:none; transition:all .2s; }
-.h-reg:hover { border-color:rgba(180,77,255,.4); color:#fff; background:rgba(180,77,255,.07); }
-
-/* TRUST ROW */
-.h-trust { display:flex; align-items:center; gap:14px; flex-wrap:wrap; padding-top:20px; border-top:1px solid rgba(255,255,255,.06); animation:fadeUp .7s .45s ease both; }
-.h-av { width:30px; height:30px; border-radius:50%; margin-right:-8px; border:2px solid #00010a; font-family:var(--ff-display); font-size:9px; font-weight:800; color:#fff; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; }
-
-/* HERO VISUAL */
-.h-vis { position:relative; height:520px; }
-.h-ring { position:absolute; top:50%; left:50%; border-radius:50%; border:1px solid; pointer-events:none; animation:ringPulse 5s ease-in-out infinite; }
-.h-ring-1 { width:420px; height:420px; border-color:rgba(0,200,255,.1); box-shadow:0 0 60px rgba(0,200,255,.05); }
-.h-ring-2 { width:280px; height:280px; border-color:rgba(180,77,255,.13); animation-direction:reverse; }
-.h-ring-exp { position:absolute; top:50%; left:50%; width:420px; height:420px; border-radius:50%; border:1px solid rgba(0,200,255,.15); animation:ringExp 4s ease-out infinite; pointer-events:none; }
-@keyframes ringPulse { 0%,100%{opacity:.5;transform:translate(-50%,-50%) scale(1)} 50%{opacity:1;transform:translate(-50%,-50%) scale(1.03)} }
-.h-cards-grid { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); display:grid; grid-template-columns:1fr 1fr; gap:14px; width:300px; }
-.hc { background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.07); border-radius:18px; padding:20px; backdrop-filter:blur(10px); transition:all .3s; }
-.hc:hover { border-color:rgba(0,200,255,.3); transform:translateY(-3px); box-shadow:0 12px 32px rgba(0,200,255,.08); }
-.hc:nth-child(even) { margin-top:28px; }
-.hc-ico { font-size:22px; margin-bottom:8px; }
-.hc-t { font-family:var(--ff-display); font-weight:700; font-size:12px; color:rgba(255,255,255,.85); margin-bottom:3px; letter-spacing:.5px; }
-.hc-s { font-family:var(--ff-mono); font-size:9px; color:rgba(255,255,255,.3); }
-.h-float { position:absolute; background:rgba(2,8,24,.96); border:1px solid rgba(0,200,255,.18); border-radius:14px; padding:12px 16px; box-shadow:0 20px 48px rgba(0,0,0,.6),0 0 24px rgba(0,200,255,.07); display:flex; align-items:center; gap:10px; backdrop-filter:blur(14px); }
-.h-float.f1 { top:16px; right:0; animation:floatY 4s ease-in-out infinite; }
-.h-float.f2 { bottom:20px; left:0; animation:floatY 4s 2s ease-in-out infinite; }
-.h-float.f3 { top:50%; right:-20px; transform:translateY(-50%); animation:floatY 4s 1s ease-in-out infinite; }
-.hf-ico { font-size:20px; }
-.hf-t { font-family:var(--ff-display); font-size:12px; font-weight:700; color:#fff; }
-.hf-s { font-family:var(--ff-mono); font-size:9px; color:rgba(255,255,255,.35); margin-top:2px; }
-
-/* ═══════════════════════════════════════════════════════════
-   BOT HERO SECTION — dedicated powerful section after main hero
-═══════════════════════════════════════════════════════════ */
-.bot-hero {
-  padding:100px 0; background:#000d08; position:relative; overflow:hidden;
-}
-.bot-hero::before {
-  content:''; position:absolute; inset:0; pointer-events:none;
-  background:radial-gradient(ellipse 65% 55% at 50% 0%,rgba(37,211,102,.1),transparent 65%),
-             radial-gradient(ellipse 40% 40% at 5% 100%,rgba(0,212,255,.05),transparent 60%);
-}
-.bot-hero-grid {
-  position:absolute; inset:0; pointer-events:none;
-  background-image:linear-gradient(rgba(37,211,102,.022) 1px,transparent 1px),linear-gradient(90deg,rgba(37,211,102,.022) 1px,transparent 1px);
-  background-size:56px 56px;
-}
-/* GLITCH TITLE */
-.bot-h-title {
-  font-family:var(--ff-display);
-  font-size:clamp(30px,5.5vw,72px);
-  font-weight:900; color:#fff;
-  letter-spacing:-1px; line-height:1.06; margin-bottom:16px;
-  position:relative;
-}
-.bot-h-title .gl {
-  background:linear-gradient(110deg,#25d366,#00d4ff 40%,#25d366);
-  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
-  background-clip:text; background-size:200% auto;
-  animation:textShim 3s linear infinite;
-  filter:drop-shadow(0 0 24px rgba(37,211,102,.3));
-}
-.bot-h-title::after {
-  content:attr(data-text);
-  position:absolute; left:2px; top:0; width:100%;
-  font-family:var(--ff-display); font-size:inherit; font-weight:900;
-  color:rgba(37,211,102,.25); letter-spacing:-1px; line-height:1.06;
-  animation:glitch 8s step-end infinite; pointer-events:none;
-}
-
-/* ANIMATED CHAT DEMO */
-.bot-chat-demo {
-  background:rgba(0,0,0,.6); border:1px solid rgba(37,211,102,.15);
-  border-radius:20px; overflow:hidden; backdrop-filter:blur(20px);
-  box-shadow:0 32px 80px rgba(0,0,0,.7),0 0 40px rgba(37,211,102,.06);
-  max-width:340px; width:100%;
-}
-.bcd-head {
-  padding:12px 16px; background:rgba(37,211,102,.06);
-  border-bottom:1px solid rgba(37,211,102,.1);
-  display:flex; align-items:center; gap:10px;
-}
-.bcd-av {
-  width:36px; height:36px; border-radius:50%;
-  background:linear-gradient(135deg,#25d366,#00d4ff);
-  display:flex; align-items:center; justify-content:center;
-  font-size:16px; flex-shrink:0;
-  animation:floatYS 3s ease-in-out infinite;
-}
-.bcd-name { font-family:var(--ff-display); font-size:13px; font-weight:700; color:#fff; }
-.bcd-online { font-family:var(--ff-mono); font-size:9px; color:#25d366; margin-top:2px; display:flex; align-items:center; gap:4px; }
-.bcd-online .od { width:5px; height:5px; border-radius:50%; background:#25d366; animation:pulse2 2s infinite; }
-.bcd-body { padding:16px; display:flex; flex-direction:column; gap:10px; min-height:220px; background:#060a06; }
-.bcd-msg { max-width:85%; padding:9px 13px; border-radius:14px; font-size:12px; line-height:1.55; opacity:0; transition:opacity .4s,transform .4s; transform:translateY(8px); }
-.bcd-msg.show { opacity:1; transform:translateY(0); }
-.bcd-msg.bot { background:rgba(255,255,255,.07); color:rgba(255,255,255,.85); border-bottom-left-radius:3px; align-self:flex-start; }
-.bcd-msg.user { background:#25d366; color:#000; font-weight:600; border-bottom-right-radius:3px; align-self:flex-end; }
-.bcd-typing { display:flex; gap:4px; padding:9px 13px; background:rgba(255,255,255,.05); border-radius:12px; width:52px; align-self:flex-start; opacity:0; transition:opacity .3s; }
-.bcd-typing.show { opacity:1; }
-.bcd-dot { width:5px; height:5px; border-radius:50%; background:rgba(255,255,255,.4); animation:botTyp 1s infinite; }
-.bcd-dot:nth-child(2){animation-delay:.15s}.bcd-dot:nth-child(3){animation-delay:.3s}
-.bcd-foot { padding:10px 14px; border-top:1px solid rgba(37,211,102,.08); display:flex; align-items:center; gap:8px; background:rgba(0,0,0,.4); }
-.bcd-input { flex:1; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08); border-radius:8px; padding:7px 12px; font-family:var(--ff-mono); font-size:10px; color:rgba(255,255,255,.4); }
-.bcd-send { width:28px; height:28px; border-radius:8px; background:rgba(37,211,102,.15); border:1px solid rgba(37,211,102,.25); color:#25d366; display:flex; align-items:center; justify-content:center; font-size:11px; cursor:pointer; }
-
-/* STATS ROW */
-.bot-stats-row { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:28px; }
-.bot-stat { text-align:center; padding:20px 16px; background:rgba(37,211,102,.03); border:1px solid rgba(37,211,102,.1); border-radius:14px; transition:all .25s; }
-.bot-stat:hover { border-color:rgba(37,211,102,.3); background:rgba(37,211,102,.07); transform:translateY(-3px); }
-.bot-stat-n { font-family:var(--ff-display); font-size:clamp(22px,3vw,36px); font-weight:900; color:#25d366; line-height:1; margin-bottom:5px; }
-.bot-stat-l { font-family:var(--ff-mono); font-size:10px; color:rgba(255,255,255,.3); text-transform:uppercase; letter-spacing:1px; }
-
-/* FEAT CARDS */
-.bot-feat { background:rgba(255,255,255,.02); border:1px solid rgba(255,255,255,.07); border-radius:18px; padding:26px; height:100%; transition:all .3s; position:relative; overflow:hidden; }
-.bot-feat::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; transform:scaleX(0); transform-origin:left; transition:transform .4s; }
-.bot-feat:hover { transform:translateY(-5px); box-shadow:0 20px 48px rgba(0,0,0,.5); }
-.bot-feat:hover::before { transform:scaleX(1); }
-.bot-feat.green::before { background:linear-gradient(90deg,#25d366,#00d4ff); }
-.bot-feat.cyan::before { background:linear-gradient(90deg,#00d4ff,#8b5cf6); }
-.bot-feat.purple::before { background:linear-gradient(90deg,#8b5cf6,#ff2d8a); }
-.bot-feat:hover.green { border-color:rgba(37,211,102,.2); }
-.bot-feat:hover.cyan { border-color:rgba(0,212,255,.2); }
-.bot-feat:hover.purple { border-color:rgba(139,92,246,.2); }
-.bot-feat-ico { width:48px; height:48px; border-radius:13px; display:flex; align-items:center; justify-content:center; font-size:22px; margin-bottom:18px; }
-.bot-feat-t { font-family:var(--ff-display); font-weight:700; font-size:15px; color:rgba(255,255,255,.9); margin-bottom:10px; letter-spacing:.3px; }
-.bot-feat-d { font-size:13px; color:rgba(255,255,255,.35); line-height:1.8; margin-bottom:18px; }
-.bot-feat-list { display:flex; flex-direction:column; gap:7px; }
-.bot-feat-li { display:flex; align-items:center; gap:8px; font-family:var(--ff-mono); font-size:10px; letter-spacing:.3px; }
-.bot-feat-li .d { width:5px; height:5px; border-radius:50%; flex-shrink:0; }
-
-/* PRICING SECTION */
-.bot-pricing-sect { background:#00060a; padding:80px 0; position:relative; overflow:hidden; }
-.bot-pricing-sect::before { content:''; position:absolute; inset:0; pointer-events:none; background:radial-gradient(ellipse 50% 60% at 50% 100%,rgba(37,211,102,.06),transparent 65%); }
-.bot-plan { border-radius:20px; padding:28px; text-align:center; position:relative; overflow:hidden; transition:all .3s; height:100%; }
-.bot-plan.starter { background:rgba(255,255,255,.03); border:1.5px solid rgba(255,255,255,.08); }
-.bot-plan.business { background:rgba(37,211,102,.06); border:1.5px solid rgba(37,211,102,.3); box-shadow:0 0 40px rgba(37,211,102,.1); }
-.bot-plan.enterprise { background:rgba(255,255,255,.03); border:1.5px solid rgba(255,255,255,.08); }
-.bot-plan:hover { transform:translateY(-6px); box-shadow:0 24px 56px rgba(0,0,0,.5); }
-.bot-plan.business:hover { box-shadow:0 24px 56px rgba(0,0,0,.5),0 0 50px rgba(37,211,102,.15); }
-.bp-badge { position:absolute; top:-1px; left:50%; transform:translateX(-50%); background:linear-gradient(135deg,#25d366,#00d4ff); color:#000; font-family:var(--ff-mono); font-size:9px; font-weight:800; padding:4px 14px; border-radius:0 0 10px 10px; letter-spacing:1px; white-space:nowrap; }
-.bp-name { font-family:var(--ff-display); font-size:14px; font-weight:700; color:rgba(255,255,255,.7); margin-bottom:10px; letter-spacing:1px; }
-.bp-price { font-family:var(--ff-display); font-size:clamp(28px,4vw,44px); font-weight:900; color:#fff; line-height:1; margin-bottom:4px; }
-.bp-unit { font-family:var(--ff-mono); font-size:10px; color:rgba(255,255,255,.28); margin-bottom:18px; }
-.bp-feat { font-family:var(--ff-mono); font-size:10px; color:rgba(255,255,255,.45); padding:6px 0; border-bottom:1px solid rgba(255,255,255,.05); display:flex; align-items:center; gap:7px; text-align:left; }
-.bp-feat:last-of-type { border-bottom:none; }
-.bp-feat .bi { flex-shrink:0; }
-.bp-btn { display:block; width:100%; padding:11px; border-radius:10px; font-family:var(--ff-display); font-size:12px; font-weight:800; text-decoration:none; transition:all .2s; margin-top:18px; letter-spacing:.5px; text-align:center; }
-.bp-btn.g { background:linear-gradient(135deg,#25d366,#00b5d8); color:#000; }
-.bp-btn.g:hover { color:#000; box-shadow:0 8px 28px rgba(37,211,102,.4); transform:translateY(-1px); }
-.bp-btn.o { background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); color:rgba(255,255,255,.65); }
-.bp-btn.o:hover { background:rgba(255,255,255,.1); color:#fff; }
-.bp-trial { display:inline-flex; align-items:center; gap:6px; font-family:var(--ff-mono); font-size:10px; color:rgba(37,211,102,.6); margin-top:10px; }
-.bp-trial .d { width:5px; height:5px; border-radius:50%; background:#25d366; animation:pulse2 2s infinite; flex-shrink:0; }
-
-/* ═══════════════════════════════════════════════════════════
-   STRIP
-═══════════════════════════════════════════════════════════ */
-.sf-strip { background:#020510; border-top:1px solid rgba(0,200,255,.07); border-bottom:1px solid rgba(0,200,255,.07); }
-.sf-strip-inner { display:flex; overflow-x:auto; scrollbar-width:none; }
-.sf-strip-inner::-webkit-scrollbar { display:none; }
-.sf-si { display:flex; align-items:center; gap:12px; flex-shrink:0; padding:20px 28px; border-right:1px solid rgba(255,255,255,.04); }
-.sf-si:last-child { border-right:none; }
-.sf-si-ico { width:38px; height:38px; border-radius:10px; background:rgba(0,200,255,.07); border:1px solid rgba(0,200,255,.12); display:flex; align-items:center; justify-content:center; font-size:16px; color:var(--cyan); flex-shrink:0; }
-.sf-si strong { display:block; font-family:var(--ff-display); font-weight:700; font-size:12px; color:rgba(232,244,255,.82); margin-bottom:2px; white-space:nowrap; letter-spacing:.5px; }
-.sf-si span { font-family:var(--ff-mono); font-size:10px; color:rgba(255,255,255,.28); white-space:nowrap; }
-
-/* ═══════════════════════════════════════════════════════════
-   SERVICES
-═══════════════════════════════════════════════════════════ */
-.sf-svc { padding:88px 0; background:#020510; position:relative; }
-.sf-svc::before { content:''; position:absolute; inset:0; pointer-events:none; background-image:linear-gradient(rgba(0,200,255,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(0,200,255,.02) 1px,transparent 1px); background-size:56px 56px; }
-.sf-card { background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.07); border-radius:20px; padding:28px; height:100%; position:relative; overflow:hidden; transition:all .35s; }
-.sf-card::after { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,var(--cyan),var(--plasma)); transform:scaleX(0); transform-origin:left; transition:transform .35s; }
-.sf-card:hover { border-color:rgba(0,200,255,.18); transform:translateY(-5px); box-shadow:0 20px 40px rgba(0,0,0,.4),0 0 24px rgba(0,200,255,.05); }
-.sf-card:hover::after { transform:scaleX(1); }
-.sf-card-n { font-family:var(--ff-mono); font-size:10px; color:rgba(0,200,255,.5); letter-spacing:3px; margin-bottom:16px; }
-.sf-card-ico { width:48px; height:48px; border-radius:13px; background:rgba(0,200,255,.07); border:1px solid rgba(0,200,255,.12); display:flex; align-items:center; justify-content:center; font-size:20px; color:var(--cyan); margin-bottom:16px; transition:all .3s; }
-.sf-card:hover .sf-card-ico { background:var(--cyan); color:#000; box-shadow:0 0 20px rgba(0,200,255,.4); }
-.sf-card-t { font-family:var(--ff-display); font-weight:700; font-size:15px; color:rgba(232,244,255,.88); margin-bottom:8px; letter-spacing:.3px; }
-.sf-card-d { font-size:13px; color:rgba(255,255,255,.35); line-height:1.75; margin:0; }
-
-/* ═══════════════════════════════════════════════════════════
-   STATS
-═══════════════════════════════════════════════════════════ */
-.sf-stats { background:#020510; border-top:1px solid rgba(0,200,255,.08); border-bottom:1px solid rgba(0,200,255,.08); }
-.sf-stats-g { display:grid; grid-template-columns:repeat(4,1fr); }
-.sf-stat { padding:56px 24px; text-align:center; border-right:1px solid rgba(255,255,255,.05); position:relative; overflow:hidden; }
-.sf-stat:last-child { border-right:none; }
-.sf-stat-n { font-family:var(--ff-display); font-size:clamp(36px,5vw,60px); font-weight:900; color:#fff; line-height:1; margin-bottom:8px; }
-.sf-stat-n em { color:var(--cyan); font-style:normal; filter:drop-shadow(0 0 8px rgba(0,200,255,.5)); }
-.sf-stat-l { font-family:var(--ff-mono); font-size:10px; color:rgba(255,255,255,.3); letter-spacing:1.5px; text-transform:uppercase; }
-
-/* ═══════════════════════════════════════════════════════════
-   PROCESS
-═══════════════════════════════════════════════════════════ */
-.sf-proc { padding:88px 0; background:#040918; position:relative; overflow:hidden; }
-.sf-proc::before { content:''; position:absolute; width:600px; height:600px; border-radius:50%; background:radial-gradient(circle,rgba(180,77,255,.07) 0%,transparent 70%); top:-200px; right:-200px; pointer-events:none; }
-.sf-pstep { text-align:center; position:relative; }
-.sf-pstep+.sf-pstep::before { content:''; position:absolute; top:30px; right:calc(50% + 44px); left:calc(-50% + 44px); height:1px; background:linear-gradient(90deg,transparent,rgba(0,200,255,.3),transparent); }
-.sf-pn { width:60px; height:60px; border-radius:18px; background:linear-gradient(135deg,rgba(0,200,255,.15),rgba(180,77,255,.15)); border:1px solid rgba(0,200,255,.22); font-family:var(--ff-mono); font-size:20px; font-weight:700; color:var(--cyan); display:inline-flex; align-items:center; justify-content:center; margin-bottom:18px; box-shadow:0 0 20px rgba(0,200,255,.1); }
-.sf-pt { font-family:var(--ff-display); font-weight:700; font-size:14px; color:rgba(255,255,255,.85); margin-bottom:8px; letter-spacing:.5px; }
-.sf-pd { font-size:13px; color:rgba(255,255,255,.35); line-height:1.7; margin:0; }
-
-/* ═══════════════════════════════════════════════════════════
-   CTA
-═══════════════════════════════════════════════════════════ */
-.sf-cta-sec { padding:88px 0; background:#040918; }
-.sf-cta-band { position:relative; overflow:hidden; background:linear-gradient(135deg,rgba(0,200,255,.06),rgba(91,110,245,.1),rgba(180,77,255,.06)); border:1px solid rgba(0,200,255,.12); border-radius:28px; padding:72px 48px; text-align:center; }
-.sf-cta-band::before { content:''; position:absolute; inset:0; background-image:linear-gradient(rgba(0,200,255,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(0,200,255,.02) 1px,transparent 1px); background-size:50px 50px; pointer-events:none; }
-.sf-cta-band::after { content:''; position:absolute; width:500px; height:500px; border-radius:50%; background:radial-gradient(circle,rgba(91,110,245,.1) 0%,transparent 70%); top:-200px; right:-100px; pointer-events:none; }
-.sf-cta-h { font-family:var(--ff-display); font-size:clamp(24px,4vw,50px); font-weight:900; color:#fff; letter-spacing:-1px; margin-bottom:14px; line-height:1.1; position:relative; z-index:2; }
-.sf-cta-p { font-size:16px; color:rgba(232,244,255,.38); max-width:460px; margin:0 auto 36px; line-height:1.7; position:relative; z-index:2; }
-.sf-cta-main { display:inline-flex; align-items:center; justify-content:center; gap:9px; padding:14px 30px; border-radius:12px; background:linear-gradient(135deg,var(--cyan),#5b6ef5); color:#000; font-family:var(--ff-display); font-weight:800; font-size:14px; text-decoration:none; transition:all .25s; box-shadow:0 0 28px rgba(0,200,255,.2); position:relative; z-index:2; letter-spacing:.5px; }
-.sf-cta-main:hover { color:#000; transform:translateY(-2px); box-shadow:0 0 50px rgba(0,200,255,.4); }
-.sf-cta-alt { display:inline-flex; align-items:center; justify-content:center; gap:9px; padding:14px 30px; border-radius:12px; border:1px solid rgba(255,255,255,.14); background:transparent; color:rgba(255,255,255,.6); font-family:var(--ff-display); font-weight:600; font-size:13px; text-decoration:none; transition:all .25s; position:relative; z-index:2; }
-.sf-cta-alt:hover { color:#fff; border-color:rgba(255,255,255,.32); }
-
-.sf-eye { display:inline-flex; align-items:center; gap:10px; font-family:var(--ff-mono); font-size:10px; letter-spacing:2.5px; text-transform:uppercase; color:var(--cyan); margin-bottom:14px; }
-.sf-eye::before,.sf-eye::after { content:''; display:block; width:18px; height:1px; background:var(--cyan); opacity:.5; }
-
-/* ═══════════════════════════════════════════════════════════
-   RESPONSIVE
-═══════════════════════════════════════════════════════════ */
-@media(max-width:991px){
-  .h-vis{ display:none; }
-  .bot-hero .col-lg-5 { display:none; }
-}
-@media(max-width:768px){
-  .hero{ padding:90px 0 56px; min-height:auto; }
-  .h-ctas{ flex-direction:column; gap:10px; }
-  .h-cta-main,.h-cta-bot,.h-cta-ghost{ width:100%; padding:13px 20px; }
-  .h-portal{ flex-direction:column; gap:12px; }
-  .h-portal-btns-wrap{ display:grid; grid-template-columns:1fr 1fr; gap:8px; width:100%; }
-  .bot-hero{ padding:64px 0; }
-  .bot-stats-row{ grid-template-columns:1fr 1fr; }
-  .bot-hero-grid{ display:none; }
-  .sf-stats-g{ grid-template-columns:1fr 1fr; }
-  .sf-stat{ padding:36px 16px; }
-  .sf-stat:nth-child(2){ border-right:none; }
-  .sf-proc{ padding:60px 0; }
-  .sf-pstep+.sf-pstep::before{ display:none; }
-  .sf-cta-band{ padding:48px 20px; border-radius:20px; }
-  .sf-cta-sec .d-flex.flex-wrap{ flex-direction:column; align-items:stretch; }
-  .sf-cta-main,.sf-cta-alt{ padding:14px 20px; font-size:13px; }
-  .bot-pricing-sect .row{ flex-direction:column; }
-  .ba-text span{ display:none; }
-  .ba-plan{ display:none; }
-}
-@media(max-width:480px){
-  .bot-stats-row{ grid-template-columns:repeat(3,1fr); gap:10px; }
-  .bot-stat-n{ font-size:22px; }
-}
-
-
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Inter:wght@400;450;500;600&display=swap" rel="stylesheet">
 
 <style>
-.tpl-announce {
-  position:relative; overflow:hidden; z-index:10;
-  background:linear-gradient(135deg,rgba(8,5,28,.98),rgba(5,4,18,.98));
-  border-bottom:1px solid rgba(108,99,255,.2);
+/* ═══════════════════════════════════════════════════════════
+   JamiiTek — Home.  Mobile-first: base styles are phone styles,
+   media queries only ever scale UP.
+   ═══════════════════════════════════════════════════════════ */
+:root{
+  --navy-950:#04101F; --navy-900:#071A31; --navy-800:#0A2245; --navy-700:#123563; --navy-600:#1B4C8C;
+  --gold:#F5A623; --gold-2:#FFC456; --gold-soft:rgba(245,166,35,.14);
+  --blue:#2E7BF6; --green:#1FA97A; --wa:#25D366;
+  --ink:#0C1626; --ink-2:#33445E; --muted:#66788F;
+  --line:#E3E9F2; --line-2:#EEF2F7;
+  --bg:#F6F8FB; --card:#FFFFFF;
+  --r-sm:8px; --r:14px; --r-lg:20px;
+  --sh-1:0 1px 2px rgba(12,22,38,.05), 0 4px 16px rgba(12,22,38,.05);
+  --sh-2:0 2px 6px rgba(12,22,38,.06), 0 18px 44px rgba(12,22,38,.11);
+  --sh-3:0 26px 60px rgba(4,16,31,.3);
+  --wrap:1240px;
+  --pad:18px;                       /* gutter — grows on wider screens */
+  --sec-y:52px;                     /* section rhythm — grows too */
+  --ease:cubic-bezier(.22,.61,.36,1);
 }
-.tpl-announce::before {
-  content:''; position:absolute; inset:0; pointer-events:none;
-  background:
-    radial-gradient(ellipse 55% 100% at 75% 50%,rgba(108,99,255,.08),transparent 65%),
-    radial-gradient(ellipse 35% 100% at 20% 50%,rgba(250,109,158,.05),transparent 65%);
-}
-.tpl-announce-inner {
-  display:flex; align-items:center; gap:18px; padding:15px 24px;
-  position:relative; z-index:2; flex-wrap:wrap;
-}
-.ta-badge {
-  display:inline-flex; align-items:center; gap:7px;
-  background:rgba(108,99,255,.12); border:1px solid rgba(108,99,255,.3);
-  border-radius:100px; padding:4px 13px;
-  font-family:var(--ff-mono); font-size:10px; font-weight:700;
-  color:#a78bfa; letter-spacing:1.5px; text-transform:uppercase;
-  white-space:nowrap; flex-shrink:0;
-}
-.ta-badge .dot {
-  width:6px; height:6px; border-radius:50%; background:#a78bfa;
-  animation:pulse2 2s infinite; flex-shrink:0;
-}
-.ta-text { flex:1; min-width:180px; }
-.ta-text strong { font-family:var(--ff-display); font-size:13px; color:#fff; font-weight:700; letter-spacing:.3px; }
-.ta-text span { font-family:var(--ff-mono); font-size:11px; color:rgba(255,255,255,.32); margin-left:8px; }
-.ta-btns { display:flex; gap:8px; flex-wrap:wrap; flex-shrink:0; }
-.ta-btn-main {
-  display:inline-flex; align-items:center; gap:7px; padding:8px 18px;
-  border-radius:9px; background:linear-gradient(135deg,#6c63ff,#fa6d9e);
-  color:#fff; font-family:var(--ff-display); font-size:11px; font-weight:800;
-  text-decoration:none; transition:all .2s; white-space:nowrap;
-  letter-spacing:.5px; box-shadow:0 3px 14px rgba(108,99,255,.3);
-}
-.ta-btn-main:hover { color:#fff; transform:translateY(-2px); box-shadow:0 7px 24px rgba(108,99,255,.5); }
-.ta-btn-ghost {
-  display:inline-flex; align-items:center; gap:6px; padding:8px 16px;
-  border-radius:9px; background:rgba(255,255,255,.04);
-  border:1px solid rgba(255,255,255,.1); color:rgba(255,255,255,.5);
-  font-family:var(--ff-mono); font-size:11px; text-decoration:none;
-  transition:all .2s; white-space:nowrap;
-}
-.ta-btn-ghost:hover { border-color:rgba(108,99,255,.4); color:#a78bfa; }
-.ta-close {
-  background:none; border:none; color:rgba(255,255,255,.2);
-  font-size:15px; cursor:pointer; padding:4px; flex-shrink:0; transition:color .2s;
-}
-.ta-close:hover { color:rgba(255,255,255,.6); }
-@media(max-width:540px) {
-  .ta-text span { display:none; }
-  .ta-btn-ghost { display:none; }
-  .tpl-announce-inner { gap:12px; padding:13px 16px; }
+@media (min-width:600px){:root{--pad:24px;--sec-y:64px}}
+@media (min-width:1000px){:root{--pad:28px;--sec-y:78px}}
+
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  font-size:15px;line-height:1.65;font-feature-settings:'cv02','cv03','cv11';
+  -webkit-font-smoothing:antialiased;width:100%;max-width:100%;
+  overflow-x:hidden;overflow-x:clip}
+@media (min-width:700px){body{font-size:15.5px}}
+h1,h2,h3,h4{font-family:'Sora',sans-serif;margin:0;line-height:1.16;letter-spacing:-.028em;font-weight:700}
+p{margin:0}
+a{color:inherit;text-decoration:none;-webkit-tap-highlight-color:rgba(245,166,35,.2)}
+img,svg,video{display:block;max-width:100%}
+ul{margin:0;padding:0;list-style:none}
+button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
+:focus-visible{outline:3px solid var(--gold);outline-offset:3px;border-radius:5px}
+::selection{background:var(--gold-soft);color:var(--ink)}
+.wrap{width:100%;max-width:var(--wrap);margin:0 auto;padding-inline:var(--pad)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* Photo helper — the gradient shows through if a file is missing,
+   so a not-yet-uploaded image still looks deliberate. */
+.ph{position:relative;overflow:hidden;background:linear-gradient(140deg,var(--navy-800),var(--navy-600))}
+.ph>img{width:100%;height:100%;object-fit:cover;display:block}
+
+/* ── Buttons: 46px min height everywhere so they're thumb-friendly ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;
+  min-height:46px;padding:12px 22px;border-radius:10px;
+  font-family:'Sora',sans-serif;font-weight:600;font-size:13.5px;
+  letter-spacing:-.005em;text-align:center;
+  transition:transform .22s var(--ease),box-shadow .22s var(--ease),background .2s,color .2s,border-color .2s}
+.btn:active{transform:scale(.98)}
+@media (hover:hover){.btn:hover{transform:translateY(-2px)}}
+.btn svg{width:15px;height:15px;flex:none}
+.btn--gold{background:var(--gold);color:#1A1206;box-shadow:0 6px 20px rgba(245,166,35,.32)}
+.btn--glass{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.36);
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.btn--navy{background:var(--navy-800);color:#fff}
+.btn--white{background:#fff;color:var(--navy-800);box-shadow:var(--sh-1)}
+.btn--wa{background:var(--wa);color:#04120E}
+.btn--sm{min-height:42px;padding:10px 18px;font-size:12.5px}
+@media (hover:hover){
+  .btn--gold:hover{background:var(--gold-2)}
+  .btn--glass:hover{background:#fff;color:var(--navy-900);border-color:#fff}
+  .btn--navy:hover{background:var(--navy-700)}
 }
 
-/* ── BLOG SECTION ── */
-.sf-blog { padding:90px 0; position:relative; }
-.sf-blog-card { display:flex; flex-direction:column; height:100%; border-radius:16px; overflow:hidden;
-  background:rgba(255,255,255,.02); border:1px solid rgba(255,255,255,.08); text-decoration:none;
-  transition:transform .3s, border-color .3s, box-shadow .3s; }
-.sf-blog-card:hover { transform:translateY(-6px); border-color:rgba(0,200,255,.35);
-  box-shadow:0 18px 46px rgba(0,120,180,.18); }
-.sf-blog-img { height:180px; background-size:cover; background-position:center;
-  background-color:#0a1220; display:flex; align-items:center; justify-content:center; position:relative; }
-.sf-blog-img::after { content:''; position:absolute; inset:0;
-  background:linear-gradient(160deg, rgba(0,200,255,.08), rgba(108,99,255,.05)); }
-.sf-blog-ph { font-family:var(--ff-display); font-size:22px; font-weight:900;
-  color:rgba(0,200,255,.3); letter-spacing:1px; position:relative; z-index:1; }
-.sf-blog-body { padding:22px; flex:1; display:flex; flex-direction:column; }
-.sf-blog-cat { font-family:var(--ff-mono); font-size:10px; letter-spacing:2px; text-transform:uppercase;
-  color:var(--cyan); margin-bottom:10px; }
-.sf-blog-title { font-family:var(--ff-display); font-size:18px; font-weight:700; color:#fff;
-  line-height:1.3; margin-bottom:10px; }
-.sf-blog-exc { font-size:13.5px; color:rgba(255,255,255,.4); line-height:1.6; margin-bottom:16px; flex:1; }
-.sf-blog-meta { display:flex; justify-content:space-between; font-family:var(--ff-mono); font-size:11px;
-  color:rgba(255,255,255,.3); padding-top:14px; border-top:1px solid rgba(255,255,255,.07); }
-.sf-blog-all { display:inline-flex; align-items:center; gap:9px; padding:13px 30px; border-radius:11px;
-  background:rgba(0,200,255,.1); border:1px solid rgba(0,200,255,.3); color:var(--cyan);
-  font-family:var(--ff-display); font-weight:700; font-size:14px; text-decoration:none; transition:all .2s; }
-.sf-blog-all:hover { background:rgba(0,200,255,.18); transform:translateY(-2px); }
+/* ── Reveal ── */
+.rv{opacity:0;transform:translateY(20px);transition:opacity .7s var(--ease),transform .7s var(--ease)}
+.rv.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+  .rv{opacity:1;transform:none}
+  html{scroll-behavior:auto}
+}
+
+/* ═══ TOP BAR — phone shows only the essentials ═══ */
+.topbar{background:var(--navy-950);color:#9FB3CC;font-size:12px}
+.topbar__in{display:flex;align-items:center;justify-content:center;gap:16px;
+  min-height:38px;flex-wrap:wrap}
+.topbar__g{display:flex;align-items:center;gap:16px;flex-wrap:wrap;justify-content:center}
+.topbar__g--r{display:none}
+.topbar__i{display:inline-flex;align-items:center;gap:6px;transition:color .16s}
+.topbar__i svg{width:13px;height:13px;flex:none;color:var(--gold)}
+.topbar__i--loc{display:none}
+.social{display:flex;gap:7px}
+.social a{width:26px;height:26px;display:grid;place-items:center;border-radius:50%;
+  background:rgba(255,255,255,.08);transition:background .2s,transform .2s,color .2s}
+.social svg{width:12px;height:12px}
+@media (hover:hover){
+  .topbar__i:hover{color:#fff}
+  .social a:hover{background:var(--gold);color:#1A1206;transform:translateY(-2px)}
+}
+@media (min-width:560px){.topbar__i--loc{display:inline-flex}}
+@media (min-width:940px){
+  .topbar{font-size:12.5px}
+  .topbar__in{justify-content:space-between;gap:18px}
+  .topbar__g{gap:22px}
+  .topbar__g--r{display:flex}
+}
+
+/* ═══ HEADER ═══ */
+.hdr{position:sticky;top:0;z-index:70;background:#fff;
+  border-bottom:1px solid transparent;transition:box-shadow .3s,border-color .3s}
+.hdr.is-stuck{box-shadow:0 1px 22px rgba(12,22,38,.09);border-bottom-color:var(--line-2)}
+.hdr__in{display:flex;align-items:center;gap:14px;min-height:62px}
+.brand{display:flex;align-items:center;flex:none;min-width:0}
+/* Logo file sets its own width; we only control the height. */
+.brand__logo{height:34px;width:auto;max-width:190px;object-fit:contain;display:block}
+@media (min-width:420px){.brand__logo{height:38px;max-width:220px}}
+@media (min-width:1100px){.brand__logo{height:42px;max-width:250px}}
+.ft .brand__logo{height:40px;max-width:230px}
+
+.burger{margin-left:auto;width:46px;height:46px;display:grid;place-items:center;
+  border-radius:12px;background:var(--line-2)}
+.burger svg{width:21px;height:21px}
+.nav{position:fixed;top:0;right:0;bottom:0;left:auto;
+  width:min(330px,88vw);height:100vh;height:100dvh;max-height:100vh;max-height:100dvh;
+  background:#fff;display:flex;flex-direction:column;align-items:stretch;gap:0;
+  padding:74px 16px calc(26px + env(safe-area-inset-bottom));
+  box-shadow:-10px 0 50px rgba(4,16,31,.22);transform:translateX(101%);
+  transition:transform .32s var(--ease);overflow-y:auto;overscroll-behavior:contain;
+  z-index:1;-webkit-overflow-scrolling:touch}
+.nav.is-open{transform:translateX(0)}
+.nav__l{display:flex;align-items:center;min-height:50px;padding:12px;
+  font-family:'Sora',sans-serif;font-weight:500;font-size:14.5px;color:var(--ink-2);
+  border-bottom:1px solid var(--line-2)}
+.nav__l.is-active{color:var(--navy-900);font-weight:600}
+.nav__x{position:absolute;top:18px;right:16px;width:44px;height:44px;
+  display:grid;place-items:center;border-radius:12px;background:var(--line-2)}
+.hdr__cta{margin:18px 12px 0}
+.scrim{position:fixed;inset:0;background:rgba(4,16,31,.55);opacity:0;pointer-events:none;
+  transition:opacity .3s;z-index:60}
+.scrim.is-on{opacity:1;pointer-events:auto}
+@media (min-width:1180px){
+  .hdr{background:rgba(255,255,255,.94);
+    -webkit-backdrop-filter:saturate(180%) blur(14px);backdrop-filter:saturate(180%) blur(14px)}
+  .hdr__in{gap:22px;min-height:66px}
+  .burger,.nav__x,.scrim{display:none}
+  .nav{position:static;inset:auto;width:auto;height:auto;max-height:none;
+    flex-direction:row;align-items:center;padding:0;
+    box-shadow:none;transform:none;overflow:visible;margin-left:auto;background:none}
+  .nav__l{min-height:0;padding:9px 10px;border:0;border-radius:8px;font-size:12.5px;
+    position:relative;white-space:nowrap;transition:color .16s,background .16s}
+  .nav__l:hover{color:var(--navy-900);background:var(--line-2)}
+  .nav__l.is-active::after{content:"";position:absolute;left:10px;right:10px;bottom:2px;
+    height:2px;background:var(--gold);border-radius:2px}
+  .hdr__cta{margin:0 0 0 12px}
+}
+
+/* ═══════════════════════════════════════════════════════════
+   HERO SLIDER
+   ═══════════════════════════════════════════════════════════ */
+.hs{position:relative;background:var(--navy-950);overflow:hidden;isolation:isolate;
+  min-height:560px;min-height:clamp(500px,86vh,620px);min-height:clamp(500px,86svh,620px)}
+@media (min-width:900px){.hs{min-height:clamp(560px,74vh,720px)}}
+.hs__slide{position:absolute;inset:0;opacity:0;visibility:hidden;
+  transition:opacity .9s var(--ease),visibility .9s}
+.hs__slide.is-on{opacity:1;visibility:visible;z-index:2}
+.hs__img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+  transform:scale(1.06);will-change:transform}
+.hs__slide.is-on .hs__img{animation:ken 10s ease-out forwards}
+@keyframes ken{from{transform:scale(1.1)}to{transform:scale(1.005)}}
+/* mobile: dark top-to-bottom so text always reads; desktop: side gradient */
+.hs__scrim{position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(4,16,31,.72) 0%,rgba(4,16,31,.86) 50%,rgba(4,16,31,.95) 100%)}
+@media (min-width:900px){
+  .hs__scrim{background:
+    linear-gradient(100deg,rgba(4,16,31,.94) 0%,rgba(4,16,31,.8) 34%,rgba(4,16,31,.38) 64%,rgba(4,16,31,.24) 100%),
+    linear-gradient(0deg,rgba(4,16,31,.7) 0%,transparent 44%)}
+}
+.hs__grid{position:absolute;inset:0;pointer-events:none;opacity:.45;
+  background-image:linear-gradient(rgba(140,190,255,.07) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(140,190,255,.07) 1px,transparent 1px);
+  background-size:48px 48px;
+  -webkit-mask-image:radial-gradient(80% 70% at 30% 45%,#000 20%,transparent 100%);
+  mask-image:radial-gradient(80% 70% at 30% 45%,#000 20%,transparent 100%)}
+.hs__body{position:relative;z-index:3;height:100%;display:flex;flex-direction:column;
+  justify-content:center;color:#fff;
+  padding-block:96px 104px;max-width:760px}
+@media (min-width:900px){.hs__body{padding-block:80px 96px}}
+.hs__eyebrow{display:inline-flex;align-items:center;gap:8px;align-self:flex-start;
+  padding:6px 13px;border-radius:100px;background:rgba(245,166,35,.16);
+  border:1px solid rgba(245,166,35,.42);color:var(--gold-2);
+  font-family:'Sora',sans-serif;font-size:10px;font-weight:600;
+  letter-spacing:.1em;text-transform:uppercase;margin-bottom:16px}
+@media (min-width:700px){.hs__eyebrow{font-size:11px;padding:7px 15px;margin-bottom:20px}}
+.hs__eyebrow i{width:6px;height:6px;border-radius:50%;background:var(--gold);display:block;
+  animation:ping 2.4s infinite}
+@keyframes ping{0%,100%{box-shadow:0 0 0 0 rgba(245,166,35,.55)}55%{box-shadow:0 0 0 8px rgba(245,166,35,0)}}
+.hs__title{font-size:clamp(28px,7.4vw,62px);font-weight:800;letter-spacing:-.038em;
+  text-wrap:balance;text-shadow:0 2px 26px rgba(0,0,0,.4)}
+.hs__title em{font-style:normal;
+  background:linear-gradient(96deg,var(--gold) 10%,var(--gold-2) 90%);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  color:var(--gold)}
+.hs__sub{margin-top:14px;font-size:clamp(14px,3.6vw,17px);color:#C6D6EA;max-width:52ch;
+  text-shadow:0 1px 14px rgba(0,0,0,.45)}
+.hs__btns{display:flex;flex-wrap:wrap;gap:11px;margin-top:24px}
+.hs__btns .btn{flex:1 1 auto;min-width:150px}
+@media (min-width:560px){.hs__btns .btn{flex:0 0 auto}}
+.hs__slide.is-on .hs__eyebrow{animation:rise .7s .1s both var(--ease)}
+.hs__slide.is-on .hs__title{animation:rise .8s .2s both var(--ease)}
+.hs__slide.is-on .hs__sub{animation:rise .8s .32s both var(--ease)}
+.hs__slide.is-on .hs__btns{animation:rise .8s .44s both var(--ease)}
+@keyframes rise{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+
+.hs__ui{position:absolute;left:0;right:0;bottom:0;z-index:6;pointer-events:none}
+.hs__ui .wrap{display:flex;align-items:center;gap:14px;padding-bottom:22px}
+.hs__dots{display:flex;gap:7px;pointer-events:auto}
+.hs__dot{width:26px;height:4px;border-radius:99px;background:rgba(255,255,255,.28);
+  position:relative;overflow:hidden;transition:width .3s var(--ease),background .3s;
+  padding:0;border:0}
+.hs__dot::after{content:"";position:absolute;inset:0;width:0;background:var(--gold);border-radius:99px}
+.hs__dot.is-on{width:52px;background:rgba(255,255,255,.2)}
+.hs__dot.is-on::after{animation:fill var(--hs-dur,7s) linear forwards}
+.hs.is-paused .hs__dot.is-on::after{animation-play-state:paused}
+@keyframes fill{from{width:0}to{width:100%}}
+.hs__count{font-family:'Sora',sans-serif;font-size:11.5px;font-weight:600;
+  color:rgba(255,255,255,.62);letter-spacing:.06em;pointer-events:auto}
+.hs__count b{color:#fff}
+.hs__arrows{margin-left:auto;display:none;gap:9px;pointer-events:auto}
+.hs__arrow{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;color:#fff;
+  background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.26);
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+  transition:background .2s,transform .2s,border-color .2s}
+.hs__arrow svg{width:17px;height:17px}
+@media (hover:hover){.hs__arrow:hover{background:var(--gold);color:#1A1206;border-color:var(--gold);transform:translateY(-2px)}}
+@media (min-width:768px){
+  .hs__arrows{display:flex}
+  .hs__ui .wrap{padding-bottom:26px}
+  .hs__dot{width:34px}.hs__dot.is-on{width:66px}
+}
+
+/* ═══ DOMAIN SEARCH ═══ */
+.dom{position:relative;z-index:20;margin-top:-46px}
+@media (min-width:900px){.dom{margin-top:-58px}}
+.dom__card{background:linear-gradient(122deg,var(--navy-800),var(--navy-700));
+  border:1px solid rgba(255,255,255,.1);border-radius:var(--r-lg);
+  padding:20px;color:#fff;display:grid;gap:20px;box-shadow:var(--sh-3)}
+@media (min-width:640px){.dom__card{padding:24px 26px}}
+@media (min-width:1120px){.dom__card{grid-template-columns:auto minmax(300px,1fr) auto;gap:26px;align-items:center}}
+.dom__head{display:flex;align-items:center;gap:13px}
+.dom__globe{width:46px;height:46px;flex:none;border-radius:13px;display:grid;place-items:center;
+  background:rgba(46,123,246,.2);border:1px solid rgba(46,123,246,.5);color:#8FC0FF}
+.dom__globe svg{width:22px;height:22px}
+.dom__head h2{font-size:15.5px;font-weight:700;letter-spacing:-.02em}
+.dom__head h2 span{display:block;color:var(--gold)}
+.dom__head p{font-size:11.5px;color:#8FA8C6;margin-top:4px}
+.dom__form{display:grid;grid-template-columns:1fr auto;gap:9px}
+.dom__input{grid-column:1/-1;min-width:0;padding:13px 15px;border-radius:10px;
+  border:1px solid rgba(255,255,255,.14);background:#fff;color:var(--ink);font-size:16px}
+.dom__input::placeholder{color:#94A5BA}
+.dom__select{padding:13px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.14);
+  background:#fff;color:var(--ink);font-size:16px;font-weight:600;min-height:48px}
+.dom__form .btn{min-width:0}
+@media (min-width:560px){
+  .dom__form{display:flex;flex-wrap:wrap}
+  .dom__input{flex:1 1 200px;font-size:14px}
+  .dom__select{font-size:14px}
+}
+.tlds{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media (min-width:520px){.tlds{display:flex;gap:22px}}
+.tld{text-align:center}
+.tld b{display:block;font-family:'Sora',sans-serif;font-size:14px;font-weight:700}
+.tld small{font-size:10.5px;color:#8FA8C6}
+
+.dres{border-radius:var(--r);padding:18px;border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.05);display:none}
+@media (min-width:1120px){.dres{grid-column:1/-1}}
+.dres.is-on{display:block;animation:rise .35s both var(--ease)}
+.dres__top{display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap}
+.dres__ico{width:40px;height:40px;flex:none;border-radius:12px;display:grid;place-items:center}
+.dres__ico svg{width:19px;height:19px}
+.dres h3{font-size:15.5px;font-weight:700;overflow-wrap:anywhere;letter-spacing:-.02em}
+.dres p{font-size:12.5px;color:#BACBE0;margin-top:5px;max-width:62ch}
+.dres__price{text-align:left;flex:none;width:100%}
+@media (min-width:640px){.dres__price{margin-left:auto;text-align:right;width:auto}
+  .dres h3{font-size:17px}}
+.dres__price b{display:block;font-family:'Sora',sans-serif;font-size:18px;font-weight:700;color:var(--gold)}
+.dres__price small{font-size:10.5px;color:#8FA8C6}
+.dres__acts{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.dres__acts .btn{flex:1 1 auto;min-width:170px}
+.dres--free{border-color:rgba(37,211,102,.42);background:rgba(37,211,102,.1)}
+.dres--free .dres__ico{background:rgba(37,211,102,.2);color:#84F2C4}
+.dres--taken{border-color:rgba(224,90,90,.42);background:rgba(224,90,90,.1)}
+.dres--taken .dres__ico{background:rgba(224,90,90,.2);color:#FFA3A3}
+.dres--warn{border-color:rgba(245,166,35,.42);background:rgba(245,166,35,.1)}
+.dres--warn .dres__ico{background:rgba(245,166,35,.18);color:var(--gold)}
+.dres__alt{margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,.11)}
+.dres__alt h4{font-family:'Sora',sans-serif;font-size:10.5px;font-weight:600;letter-spacing:.08em;
+  text-transform:uppercase;color:#8FA8C6;margin-bottom:10px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:9px;min-height:42px;padding:8px 14px;
+  border-radius:100px;background:rgba(255,255,255,.08);
+  border:1px solid rgba(37,211,102,.34);font-size:12.5px;transition:background .2s}
+.chip small{color:var(--gold);font-weight:600}
+.spin{width:17px;height:17px;border-radius:50%;border:2px solid rgba(255,255,255,.24);
+  border-top-color:var(--gold);animation:spin .7s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ═══ SECTION SHELL ═══ */
+.sec{padding-block:var(--sec-y)}
+.sec--sm{padding-block:calc(var(--sec-y) * .62)}
+.sec__hd{max-width:660px;margin:0 auto 32px;text-align:center}
+@media (min-width:900px){.sec__hd{margin-bottom:46px}}
+.sec__hd--left{margin-inline:0;text-align:left}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:'Sora',sans-serif;
+  font-size:10.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:12px}
+.eyebrow::before{content:"";width:20px;height:2px;background:var(--gold);border-radius:2px;flex:none}
+.sec__hd h2{font-size:clamp(23px,5.6vw,40px);letter-spacing:-.035em;text-wrap:balance}
+.sec__hd p{color:var(--muted);margin-top:11px;font-size:clamp(14px,3.5vw,16px);text-wrap:pretty}
+
+/* ═══ MARQUEE — solid, no fade ═══ */
+.mq{overflow:hidden;background:var(--card);border-block:1px solid var(--line);
+  padding-block:18px}
+.mq__track{display:flex;gap:36px;width:max-content;animation:slide 40s linear infinite}
+@media (min-width:700px){.mq__track{gap:56px}}
+@media (hover:hover){.mq:hover .mq__track{animation-play-state:paused}}
+@keyframes slide{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.mq__item{display:flex;flex-direction:column;align-items:center;gap:2px;flex:none}
+.mq__item b{font-family:'Sora',sans-serif;font-size:16px;font-weight:700;
+  letter-spacing:-.03em;white-space:nowrap;line-height:1.2}
+@media (min-width:700px){.mq__item b{font-size:18px}}
+.mq__item small{font-size:9.5px;color:var(--muted);letter-spacing:.04em;white-space:nowrap}
+
+/* ═══ SERVICES ═══ */
+.svcs{display:grid;grid-template-columns:1fr;gap:16px}
+@media (min-width:520px){.svcs{grid-template-columns:repeat(2,1fr)}}
+@media (min-width:1000px){.svcs{grid-template-columns:repeat(4,1fr);gap:20px}}
+.svc{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  overflow:hidden;display:flex;flex-direction:column;
+  transition:transform .3s var(--ease),box-shadow .3s var(--ease),border-color .3s}
+@media (hover:hover){.svc:hover{transform:translateY(-6px);box-shadow:var(--sh-2);border-color:transparent}}
+.svc__media{aspect-ratio:16/10}
+.svc__media>img{transition:transform .6s var(--ease)}
+@media (hover:hover){.svc:hover .svc__media>img{transform:scale(1.07)}}
+.svc__media::after{content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg,transparent 42%,rgba(4,16,31,.62))}
+.svc__badge{position:absolute;left:13px;bottom:11px;z-index:2;width:38px;height:38px;
+  border-radius:11px;display:grid;place-items:center;color:#fff;box-shadow:0 6px 18px rgba(0,0,0,.32)}
+.svc__badge svg{width:19px;height:19px}
+.svc__b{padding:18px;display:flex;flex-direction:column;flex:1}
+.svc h3{font-size:15.5px;font-weight:600;letter-spacing:-.025em}
+.svc p{font-size:13px;color:var(--muted);line-height:1.6;margin:8px 0 16px}
+.svc__more{font-family:'Sora',sans-serif;font-size:12px;font-weight:600;color:var(--blue);
+  display:inline-flex;align-items:center;gap:6px;margin-top:auto}
+.svc__more svg{width:13px;height:13px;transition:transform .25s var(--ease)}
+@media (hover:hover){.svc:hover .svc__more svg{transform:translateX(4px)}}
+
+/* ═══ PROMOS ═══ */
+.promos{display:grid;grid-template-columns:1fr;gap:16px}
+@media (min-width:1000px){.promos{grid-template-columns:repeat(3,1fr);gap:20px}}
+.promo{border-radius:var(--r-lg);padding:26px 22px;color:#fff;position:relative;overflow:hidden;
+  display:flex;flex-direction:column;box-shadow:var(--sh-1)}
+@media (min-width:640px){.promo{padding:30px 28px;min-height:352px}}
+.promo--host{background:linear-gradient(142deg,#0B2E5E,#1B5FB8)}
+.promo--bot{background:linear-gradient(142deg,#093326,#17845C)}
+.promo--build{background:linear-gradient(142deg,#2E0F5C,#7431C4)}
+.promo::after{content:"";position:absolute;width:240px;height:240px;border-radius:50%;
+  right:-90px;top:-90px;background:rgba(255,255,255,.08);pointer-events:none}
+.promo h3{font-size:clamp(18px,4.6vw,21px);letter-spacing:-.03em;position:relative;z-index:1}
+.promo__list{margin:18px 0;display:grid;gap:10px;position:relative;z-index:1}
+.promo__list li{display:flex;align-items:center;gap:10px;font-size:13px;color:rgba(255,255,255,.94)}
+.promo__list svg{width:14px;height:14px;flex:none}
+.promo--host .promo__list svg{color:#93C7FF}
+.promo--bot .promo__list svg{color:#84F2C4}
+.promo--build .promo__list svg{color:#DEC0FF}
+.promo__ft{margin-top:auto;display:flex;align-items:flex-end;justify-content:space-between;
+  gap:14px;flex-wrap:wrap;position:relative;z-index:1}
+.promo__px small{display:block;font-size:11.5px;color:rgba(255,255,255,.66)}
+.promo__px b{font-family:'Sora',sans-serif;font-size:22px;font-weight:700;letter-spacing:-.03em}
+.promo__px b i{font-style:normal;font-size:12.5px;font-weight:500;color:rgba(255,255,255,.7)}
+
+/* ═══ WORK SLIDER ═══ */
+.wk{background:var(--navy-950);color:#fff;padding-block:var(--sec-y);overflow:hidden}
+.wk .sec__hd h2{color:#fff}
+.wk .sec__hd p{color:#9FB3CC}
+.wk__hd{display:flex;align-items:flex-end;justify-content:space-between;gap:22px;
+  margin-bottom:28px;flex-wrap:wrap}
+.wk__hd .sec__hd{margin:0;max-width:560px}
+.wk__nav{display:none;gap:10px}
+@media (min-width:768px){.wk__nav{display:flex}.wk__hd{margin-bottom:38px}}
+.wk__arrow{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;color:#fff;
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.18);
+  transition:background .2s,transform .2s,border-color .2s,opacity .2s}
+.wk__arrow:disabled{opacity:.3;cursor:not-allowed}
+.wk__arrow svg{width:18px;height:18px}
+@media (hover:hover){.wk__arrow:hover:not(:disabled){background:var(--gold);color:#1A1206;
+  border-color:var(--gold);transform:translateY(-2px)}}
+/* full-bleed track on phones so cards can peek past the gutter */
+.wk__track{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;
+  scroll-behavior:smooth;padding-block:4px 22px;scrollbar-width:none;
+  margin-inline:calc(var(--pad) * -1);padding-inline:var(--pad);
+  -webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+.wk__track::-webkit-scrollbar{display:none}
+@media (min-width:768px){.wk__track{gap:22px;margin-inline:0;padding-inline:0;cursor:grab}}
+.wk__track.is-drag{cursor:grabbing;scroll-behavior:auto;scroll-snap-type:none}
+.wk__card{flex:0 0 82%;scroll-snap-align:center;border-radius:var(--r-lg);overflow:hidden;
+  position:relative;background:var(--navy-800);border:1px solid rgba(255,255,255,.09);
+  transition:transform .35s var(--ease),border-color .3s}
+@media (min-width:768px){.wk__card{flex:0 0 clamp(300px,38vw,432px);scroll-snap-align:start}}
+@media (hover:hover){.wk__card:hover{transform:translateY(-7px);border-color:rgba(245,166,35,.4)}}
+.wk__media{aspect-ratio:4/3}
+.wk__media>img{object-position:top center;transition:transform .7s var(--ease)}
+@media (hover:hover){.wk__card:hover .wk__media>img{transform:scale(1.05)}}
+.wk__media::after{content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg,transparent 36%,rgba(4,16,31,.94) 96%)}
+.wk__meta{position:absolute;left:0;right:0;bottom:0;padding:18px;z-index:2}
+@media (min-width:768px){.wk__meta{padding:22px}}
+.wk__cat{display:inline-block;padding:4px 11px;border-radius:100px;margin-bottom:10px;
+  background:rgba(245,166,35,.2);border:1px solid rgba(245,166,35,.44);color:var(--gold-2);
+  font-family:'Sora',sans-serif;font-size:9.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase}
+.wk__meta h3{font-size:clamp(16px,4.2vw,18px);letter-spacing:-.03em}
+.wk__meta p{font-size:12px;color:#A8BDD6;margin-top:5px}
+.wk__link{display:inline-flex;align-items:center;gap:7px;margin-top:12px;
+  font-family:'Sora',sans-serif;font-size:11.5px;font-weight:600;color:var(--gold)}
+.wk__link svg{width:12px;height:12px;transition:transform .25s var(--ease)}
+@media (hover:hover){.wk__card:hover .wk__link svg{transform:translate(3px,-3px)}}
+.wk__bar{height:3px;border-radius:99px;background:rgba(255,255,255,.12);overflow:hidden;
+  max-width:280px;margin-inline:auto}
+@media (min-width:768px){.wk__bar{margin-inline:0}}
+.wk__bar i{display:block;height:100%;background:var(--gold);border-radius:99px;width:30%;
+  transition:transform .2s var(--ease),width .2s}
+.wk__swipe{text-align:center;font-size:11px;color:#7E95B2;margin-top:12px;letter-spacing:.05em}
+@media (min-width:768px){.wk__swipe{display:none}}
+
+/* ═══ STATS ═══ */
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+@media (min-width:900px){.stats{grid-template-columns:repeat(4,1fr);gap:20px}}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  padding:22px 16px;text-align:center;box-shadow:var(--sh-1)}
+@media (min-width:600px){.stat{padding:28px 22px}}
+.stat__ic{width:30px;height:30px;margin:0 auto 10px;color:var(--gold)}
+.stat b{display:block;font-family:'Sora',sans-serif;font-size:clamp(26px,7vw,38px);
+  font-weight:800;letter-spacing:-.04em;color:var(--navy-900);line-height:1.1}
+.stat small{font-size:11.5px;color:var(--muted)}
+
+/* ═══ TESTIMONIALS ═══ */
+.tm__track{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;
+  scroll-behavior:smooth;padding-block:6px 26px;scrollbar-width:none;
+  margin-inline:calc(var(--pad) * -1);padding-inline:var(--pad);
+  -webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+.tm__track::-webkit-scrollbar{display:none}
+@media (min-width:768px){.tm__track{gap:22px;margin-inline:0;padding-inline:0;cursor:grab}}
+.tm__track.is-drag{cursor:grabbing;scroll-behavior:auto;scroll-snap-type:none}
+.tm__card{flex:0 0 86%;scroll-snap-align:center;background:var(--card);
+  border:1px solid var(--line);border-radius:var(--r-lg);padding:24px 22px;
+  display:flex;flex-direction:column;box-shadow:var(--sh-1);
+  transition:transform .3s var(--ease),box-shadow .3s var(--ease)}
+@media (min-width:768px){.tm__card{flex:0 0 clamp(300px,32vw,406px);padding:30px 28px}}
+@media (hover:hover){.tm__card:hover{transform:translateY(-5px);box-shadow:var(--sh-2)}}
+.tm__stars{display:flex;gap:3px;margin-bottom:14px}
+.tm__stars svg{width:15px;height:15px;color:var(--gold)}
+.tm__q{font-size:14.5px;line-height:1.72;color:var(--ink-2);text-wrap:pretty;flex:1}
+@media (min-width:768px){.tm__q{font-size:15.5px}}
+.tm__who{display:flex;align-items:center;gap:12px;margin-top:20px;
+  padding-top:18px;border-top:1px solid var(--line-2)}
+.tm__pic{width:48px;height:48px;border-radius:50%;flex:none;object-fit:cover;border:2px solid var(--line)}
+.tm__who b{display:block;font-family:'Sora',sans-serif;font-size:14px;font-weight:600;letter-spacing:-.02em}
+.tm__who small{font-size:12px;color:var(--muted)}
+.tm__nav{display:flex;align-items:center;gap:12px;justify-content:center;margin-top:4px}
+.tm__arrow{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;
+  background:var(--card);border:1px solid var(--line);color:var(--ink-2);box-shadow:var(--sh-1);
+  transition:background .2s,color .2s,transform .2s,opacity .2s}
+.tm__arrow:disabled{opacity:.35;cursor:not-allowed}
+.tm__arrow svg{width:17px;height:17px}
+@media (hover:hover){.tm__arrow:hover:not(:disabled){background:var(--navy-800);color:#fff;transform:translateY(-2px)}}
+
+/* ═══ CTA ═══ */
+.cta{position:relative;overflow:hidden;border-radius:var(--r-lg);padding:34px 22px;color:#fff;
+  background:radial-gradient(600px 320px at 82% 22%,rgba(46,123,246,.34),transparent 62%),
+             linear-gradient(126deg,var(--navy-950),var(--navy-700));
+  display:flex;flex-direction:column;align-items:flex-start;gap:24px}
+@media (min-width:900px){.cta{padding:56px 44px;flex-direction:row;align-items:center;
+  justify-content:space-between;gap:30px}}
+.cta::before{content:"";position:absolute;inset:0;opacity:.5;pointer-events:none;
+  background-image:linear-gradient(rgba(140,190,255,.08) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(140,190,255,.08) 1px,transparent 1px);
+  background-size:44px 44px;
+  -webkit-mask-image:radial-gradient(70% 90% at 20% 50%,#000,transparent);
+  mask-image:radial-gradient(70% 90% at 20% 50%,#000,transparent)}
+.cta__t{position:relative;z-index:1;max-width:600px}
+.cta h2{font-size:clamp(22px,5.4vw,36px);letter-spacing:-.035em;text-wrap:balance}
+.cta p{color:#A8BDD6;margin-top:11px;font-size:clamp(14px,3.6vw,15.5px)}
+.cta__b{position:relative;z-index:1;display:flex;gap:11px;flex-wrap:wrap;width:100%}
+.cta__b .btn{flex:1 1 auto;min-width:160px}
+@media (min-width:900px){.cta__b{width:auto}.cta__b .btn{flex:0 0 auto}}
+
+/* ═══ FOOTER ═══ */
+.ft{background:var(--navy-950);color:#9FB3CC;margin-top:18px;
+  padding-bottom:env(safe-area-inset-bottom)}
+.news{display:flex;align-items:flex-start;gap:16px;padding-block:26px;flex-wrap:wrap;
+  border-bottom:1px solid rgba(255,255,255,.08)}
+.news__ic{width:46px;height:46px;border-radius:13px;display:grid;place-items:center;flex:none;
+  background:var(--gold-soft);color:var(--gold)}
+.news__ic svg{width:21px;height:21px}
+.news h3{color:#fff;font-size:15.5px;font-weight:600;letter-spacing:-.02em}
+.news p{font-size:12.5px;color:#7E95B2;margin-top:3px}
+.news__f{display:flex;gap:10px;flex-wrap:wrap;width:100%}
+.news__in{flex:1 1 200px;min-width:0;padding:12px 15px;border-radius:10px;
+  border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);color:#fff;font-size:16px}
+.news__in::placeholder{color:#6F87A6}
+@media (min-width:900px){.news{align-items:center}.news__f{margin-left:auto;width:auto}
+  .news__in{flex:0 0 250px;font-size:13.5px}}
+.fgrid{display:grid;grid-template-columns:1fr;gap:28px;padding-block:34px 30px}
+@media (min-width:560px){.fgrid{grid-template-columns:repeat(2,1fr)}}
+@media (min-width:1050px){.fgrid{grid-template-columns:1.6fr 1fr 1.15fr 1fr 1.5fr;gap:34px;padding-block:44px 34px}}
+.fgrid h4{color:#fff;font-family:'Sora',sans-serif;font-size:13.5px;font-weight:600;
+  margin-bottom:14px;letter-spacing:-.02em}
+.fcol li+li{margin-top:4px}
+.fcol a{display:inline-flex;align-items:center;min-height:34px;font-size:13px;color:#8FA8C6;
+  transition:color .16s,padding-left .16s}
+@media (hover:hover){.fcol a:hover{color:var(--gold);padding-left:4px}}
+.fab p{font-size:13px;color:#7E95B2;margin-top:14px;max-width:36ch}
+.fct li{display:flex;gap:10px;font-size:13px;color:#8FA8C6;line-height:1.55}
+.fct li+li{margin-top:10px}
+.fct svg{width:14px;height:14px;flex:none;margin-top:4px;color:var(--gold)}
+.pay{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.pay span{background:#fff;color:#0B1F3A;border-radius:6px;padding:6px 11px;
+  font-family:'Sora',sans-serif;font-weight:700;font-size:11px}
+.fst{display:inline-flex;align-items:center;gap:9px;margin-top:15px;font-family:'Sora',sans-serif;
+  font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:#84F2C4}
+.fst i{width:7px;height:7px;border-radius:50%;background:var(--wa);display:block;animation:ping 2.4s infinite}
+.fsoc{display:flex;gap:9px;margin-top:16px}
+.fsoc a{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;
+  background:rgba(255,255,255,.08);transition:.22s}
+.fsoc svg{width:15px;height:15px}
+@media (hover:hover){.fsoc a:hover{background:var(--gold);color:#1A1206;transform:translateY(-2px)}}
+.fbot{border-top:1px solid rgba(255,255,255,.08);padding-block:18px;display:flex;gap:12px;
+  align-items:center;justify-content:space-between;flex-wrap:wrap;font-size:12px;color:#6F87A6}
+@media (hover:hover){.fbot a:hover{color:var(--gold)}}
+
+.wa{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));
+  width:54px;height:54px;border-radius:50%;z-index:50;background:var(--wa);color:#fff;
+  display:grid;place-items:center;box-shadow:0 10px 30px rgba(37,211,102,.44);
+  transition:transform .22s var(--ease)}
+.wa svg{width:28px;height:28px}
+@media (hover:hover){.wa:hover{transform:scale(1.08)}}
 </style>
+</head>
+<body>
 
-</style>
-{% endblock %}
-
-{% block content %}
-
-<!-- ══ JAMIITEK BUILDER — SLIDING ADS + CTA (self-contained) ══ -->
-<style>
-.bld-strip{position:relative;overflow:hidden;z-index:11;
-  background:linear-gradient(135deg,rgba(0,16,10,.98),rgba(2,5,16,.98));
-  border-bottom:1px solid rgba(0,212,255,.18)}
-.bld-strip::before{content:'';position:absolute;inset:0;pointer-events:none;
-  background:radial-gradient(ellipse 55% 120% at 15% 50%,rgba(0,212,255,.08),transparent 60%),
-             radial-gradient(ellipse 45% 120% at 85% 50%,rgba(37,211,102,.08),transparent 60%)}
-.bld-strip::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;
-  background:linear-gradient(90deg,#25d366,#00d4ff,#6c63ff,#25d366);background-size:300% 100%;
-  animation:bldFlow 7s linear infinite}
-@keyframes bldFlow{to{background-position:300% 0}}
-.bld-inner{display:flex;align-items:center;gap:18px;padding:16px 24px;position:relative;z-index:2;
-  max-width:1240px;margin:0 auto;flex-wrap:wrap}
-.bld-badge{display:inline-flex;align-items:center;gap:7px;flex-shrink:0;
-  background:rgba(0,212,255,.09);border:1px solid rgba(0,212,255,.32);border-radius:100px;padding:6px 15px;
-  font-family:'JetBrains Mono','Courier New',monospace;font-size:10px;font-weight:700;color:#00d4ff;
-  letter-spacing:1.6px;text-transform:uppercase;white-space:nowrap}
-.bld-badge .dot{width:6px;height:6px;border-radius:50%;background:#00d4ff;animation:bldPulse 2s infinite}
-@keyframes bldPulse{0%,100%{box-shadow:0 0 0 0 rgba(0,212,255,.55)}55%{box-shadow:0 0 0 7px rgba(0,212,255,0)}}
-.bld-ads{flex:1;min-width:230px;height:42px;position:relative;overflow:hidden}
-.bld-ad{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;
-  opacity:0;transform:translateY(14px);transition:opacity .55s ease,transform .55s ease;pointer-events:none}
-.bld-ad.on{opacity:1;transform:none;pointer-events:auto}
-.bld-ad strong{font-size:14.5px;color:#fff;font-weight:700;line-height:1.25}
-.bld-ad strong em{font-style:normal;background:linear-gradient(90deg,#25d366,#00d4ff);
-  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-.bld-ad span{font-size:11.5px;color:rgba(255,255,255,.42);line-height:1.3}
-.bld-dots{display:flex;gap:5px;flex-shrink:0}
-.bld-dots i{width:16px;height:4px;border-radius:4px;background:rgba(255,255,255,.14);cursor:pointer;transition:all .3s}
-.bld-dots i.on{background:#00d4ff;width:26px;box-shadow:0 0 8px rgba(0,212,255,.5)}
-.bld-cta{display:inline-flex;align-items:center;gap:9px;flex-shrink:0;padding:12px 26px;border-radius:12px;
-  background:linear-gradient(135deg,#25d366,#00d4ff);color:#04120e;font-weight:800;font-size:14px;
-  text-decoration:none;position:relative;overflow:hidden;
-  box-shadow:0 6px 24px rgba(37,211,102,.3);transition:transform .2s ease,box-shadow .25s}
-.bld-cta:hover{transform:translateY(-2px);box-shadow:0 10px 32px rgba(0,212,255,.45);color:#04120e}
-.bld-cta::after{content:'';position:absolute;inset:0;
-  background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.35) 50%,transparent 70%);
-  transform:translateX(-130%);animation:bldShine 3.2s ease infinite}
-@keyframes bldShine{0%,55%{transform:translateX(-130%)}85%,100%{transform:translateX(130%)}}
-@media(max-width:720px){
-  .bld-inner{gap:12px;padding:14px 16px}
-  .bld-badge{display:none}
-  .bld-ads{min-width:100%;order:1;height:46px}
-  .bld-cta{order:2;flex:1;justify-content:center;min-height:46px}
-  .bld-dots{order:3;margin:0 auto}
-}
-@media(prefers-reduced-motion:reduce){.bld-cta::after,.bld-strip::after{animation:none}}
-</style>
-
-<!-- 
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<div class="bld-strip">
-  <div class="bld-inner">
-    <span class="bld-badge"><span class="dot"></span>NEW · BUILDER</span>
-    <div class="bld-ads" id="bldAds">
-      <div class="bld-ad on"><strong>Build your website <em>in 10 minutes</em> — no coding needed</strong><span>Drag & drop, AI assistant, and your free subdomain: yourname.jamiitek.com</span></div>
-      <div class="bld-ad"><strong>Run a safari company? 🦁 A <em>tourism website</em> with Packages & Booking</strong><span>Packages, Trips and Destinations — customers book straight via WhatsApp</span></div>
-      <div class="bld-ad"><strong>Open <em>your online shop</em> 🛍️ today</strong><span>Products, prices, photos — orders come straight to your WhatsApp</span></div>
-      <div class="bld-ad"><strong>Restaurant, Events, Company — <em>every kind of website</em> ✨</strong><span>Pick a type and the system builds the whole structure automatically</span></div>
-      <div class="bld-ad"><strong>NEW — <em>AI builds your whole website</em> in 30 seconds 🪄</strong><span>Just describe your business in one sentence — English or Swahili. That's it.</span></div>
-      <strong>Out of words? <em>The AI writes</em> all your content 🤖</strong><span>In English or Swahili — About Us, services, promotions</span></div>
-      <div class="bld-ad"><strong>Build it yourself, <em>buy ready-made</em>, or order custom 🎯</strong><span>Three ways to get online — pick what suits you</span></div>
+<!-- ═══ TOP BAR ═══ -->
+<div class="topbar">
+  <div class="wrap topbar__in">
+    <div class="topbar__g">
+      <a class="topbar__i" href="tel:+255629712678">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.6 10.8a15 15 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.6 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.6 3.6a1 1 0 0 1-.25 1z"/></svg>
+        +255 629 712 678</a>
+      <a class="topbar__i" href="mailto:info@jamiitek.com">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2m0 4-8 5-8-5V6l8 5 8-5z"/></svg>
+        info@jamiitek.com</a>
+      <span class="topbar__i topbar__i--loc">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7m0 9.5A2.5 2.5 0 1 1 14.5 9 2.5 2.5 0 0 1 12 11.5"/></svg>
+        Dar es Salaam, Tanzania</span>
     </div>
-    <div class="bld-dots" id="bldDots"></div>
-    <a href="{% url 'get_started' %}" class="bld-cta">🚀 Get Your Website</a>
+    <div class="topbar__g topbar__g--r">
+      <a class="topbar__i" href="{% url 'jamiibot_landing' %}">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2"/></svg>
+        JamiiBot</a>
+      <a class="topbar__i" href="{% url 'portal_login' %}">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 4 5v6c0 5 3.4 9.7 8 11 4.6-1.3 8-6 8-11V5z"/></svg>
+        Support</a>
+      <div class="social">
+        <a href="#" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 21v-8h2.7l.4-3.1h-3.1V7.9c0-.9.25-1.5 1.55-1.5H16.7V3.6A22 22 0 0 0 14.3 3.5c-2.4 0-4 1.45-4 4.1v2.3H7.6V13h2.7v8z"/></svg></a>
+        <a href="#" aria-label="LinkedIn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.9 8.5H4V20h2.9zM5.45 3.5A1.7 1.7 0 1 0 7.1 5.2a1.67 1.67 0 0 0-1.65-1.7M20 13.4c0-3-1.6-4.4-3.75-4.4a3.2 3.2 0 0 0-2.9 1.6h-.05V8.5H10.6V20h2.9v-5.7c0-1.5.29-2.95 2.15-2.95s1.85 1.7 1.85 3V20H20z"/></svg></a>
+        <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.2c3.2 0 3.58 0 4.85.07 3.25.15 4.77 1.69 4.92 4.92.06 1.27.07 1.65.07 4.85s0 3.58-.07 4.85c-.15 3.23-1.66 4.77-4.92 4.92-1.27.06-1.64.07-4.85.07s-3.58 0-4.85-.07c-3.26-.15-4.77-1.7-4.92-4.92C2.17 15.62 2.16 15.25 2.16 12s0-3.58.07-4.85c.15-3.23 1.66-4.77 4.92-4.92C8.42 2.17 8.8 2.16 12 2.16m0 4.97A4.87 4.87 0 1 0 16.87 12 4.87 4.87 0 0 0 12 7.13m0 8.03A3.16 3.16 0 1 1 15.16 12 3.16 3.16 0 0 1 12 15.16m5.06-9.31a1.14 1.14 0 1 0 1.14 1.14 1.14 1.14 0 0 0-1.14-1.14"/></svg></a>
+        <a href="#" aria-label="GitHub"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2A10 10 0 0 0 8.8 21.5c.5.1.7-.2.7-.5v-1.7C6.7 19.9 6.1 18 6.1 18c-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.3 1.1 2.9.8.1-.6.3-1.1.6-1.3-2.2-.3-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.7 0 0 .8-.3 2.7 1a9.4 9.4 0 0 1 5 0c1.9-1.3 2.7-1 2.7-1 .5 1.4.2 2.4.1 2.7.6.7 1 1.6 1 2.7 0 3.9-2.4 4.7-4.6 5 .4.3.7.9.7 1.9v2.8c0 .3.2.6.7.5A10 10 0 0 0 12 2"/></svg></a>
+      </div>
+    </div>
   </div>
 </div>
+
+<!-- ═══ HEADER ═══ -->
+<header class="hdr" id="hdr">
+  <div class="wrap hdr__in">
+    <a class="brand" href="{% url 'home' %}" aria-label="JamiiTek home">
+      <img class="brand__logo" src="{% static 'images/logo.png' %}"
+           alt="JamiiTek" width="220" height="42" fetchpriority="high">
+    </a>
+
+    <button class="burger" id="burger" aria-label="Open menu" aria-expanded="false" aria-controls="nav">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+
+    <nav class="nav" id="nav" aria-label="Main">
+      <button class="nav__x" id="navX" aria-label="Close menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="width:21px;height:21px"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+      <a class="nav__l is-active" href="{% url 'home' %}">Home</a>
+      <a class="nav__l" href="{% url 'service' %}">Services</a>
+      <a class="nav__l" href="#work">Work</a>
+      <a class="nav__l" href="#domains">Domains</a>
+      <a class="nav__l" href="{% url 'jamiibot_landing' %}">JamiiBot</a>
+      <a class="nav__l" href="{% url 'templates_marketplace' %}">Templates</a>
+      <a class="nav__l" href="{% url 'blog_list' %}">Blog</a>
+      <a class="nav__l" href="{% url 'About' %}">About</a>
+      <a class="nav__l" href="{% url 'contact' %}">Contact</a>
+      <a class="btn btn--navy hdr__cta" href="{% url 'portal_login' %}">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5m0 2c-4 0-8 2-8 4.5V21h16v-2.5C20 16 16 14 12 14"/></svg>
+        Client Portal</a>
+    </nav>
+  </div>
+</header>
+<div class="scrim" id="scrim"></div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     HERO SLIDER — 5 slides, images from static/images/hero/
+     ═══════════════════════════════════════════════════════════ -->
+<section class="hs" id="hero" aria-roledescription="carousel" aria-label="JamiiTek highlights">
+
+  <!-- 1 · Websites -->
+  <article class="hs__slide is-on" aria-roledescription="slide" aria-label="1 of 5">
+    <img class="hs__img" src="{% static 'images/hero/hero-1.jpg' %}"
+         alt="A JamiiTek client website on a laptop" fetchpriority="high" decoding="async">
+    <div class="hs__scrim"></div><div class="hs__grid"></div>
+    <div class="wrap hs__body">
+      <span class="hs__eyebrow"><i></i>Website Development</span>
+      <h1 class="hs__title">We Build Websites That <em>Win Customers</em></h1>
+      <p class="hs__sub">Fast, secure and mobile-first sites designed to turn visitors into paying customers. Delivered in 2&ndash;6 weeks, from TZS 150,000.</p>
+      <div class="hs__btns">
+        <a class="btn btn--gold" href="{% url 'get_started' %}">Start Your Project
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 11h12.2l-4.6-4.6L13 5l7 7-7 7-1.4-1.4 4.6-4.6H4z"/></svg></a>
+        <a class="btn btn--glass" href="#work">See Our Work</a>
+      </div>
+    </div>
+  </article>
+
+  <!-- 2 · JamiiBot -->
+  <article class="hs__slide" aria-roledescription="slide" aria-label="2 of 5" aria-hidden="true">
+    <img class="hs__img" src="{% static 'images/hero/hero-2.jpg' %}"
+         alt="JamiiBot WhatsApp chatbot dashboard" loading="lazy" decoding="async">
+    <div class="hs__scrim"></div><div class="hs__grid"></div>
+    <div class="wrap hs__body">
+      <span class="hs__eyebrow"><i></i>AI WhatsApp Chatbot</span>
+      <h1 class="hs__title">Answer Every Customer, <em>Even at 2am</em></h1>
+      <p class="hs__sub">JamiiBot replies to your WhatsApp customers in Swahili and English, 24 hours a day. Live in 10 minutes, from TZS 15,000 a month.</p>
+      <div class="hs__btns">
+        <a class="btn btn--gold" href="{% url 'jamiibot_landing' %}">Get Free Trial
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 11h12.2l-4.6-4.6L13 5l7 7-7 7-1.4-1.4 4.6-4.6H4z"/></svg></a>
+        <a class="btn btn--glass" href="https://wa.me/255629712678" target="_blank" rel="noopener">Try It on WhatsApp</a>
+      </div>
+    </div>
+  </article>
+
+  <!-- 3 · Hosting & domains -->
+  <article class="hs__slide" aria-roledescription="slide" aria-label="3 of 5" aria-hidden="true">
+    <img class="hs__img" src="{% static 'images/hero/hero-3.jpg' %}"
+         alt="Server infrastructure powering JamiiTek hosting" loading="lazy" decoding="async">
+    <div class="hs__scrim"></div><div class="hs__grid"></div>
+    <div class="wrap hs__body">
+      <span class="hs__eyebrow"><i></i>Hosting &amp; Domains</span>
+      <h1 class="hs__title">Hosting That <em>Never Sleeps</em></h1>
+      <p class="hs__sub">99.9% uptime, free SSL, daily backups and renewal reminders before anything expires. Domains from TZS 15,000 a year.</p>
+      <div class="hs__btns">
+        <a class="btn btn--gold" href="#domains">Check a Domain
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 11h12.2l-4.6-4.6L13 5l7 7-7 7-1.4-1.4 4.6-4.6H4z"/></svg></a>
+        <a class="btn btn--glass" href="#hosting">View Hosting</a>
+      </div>
+    </div>
+  </article>
+
+  <!-- 4 · Builder & templates -->
+  <article class="hs__slide" aria-roledescription="slide" aria-label="4 of 5" aria-hidden="true">
+    <img class="hs__img" src="{% static 'images/hero/hero-4.jpg' %}"
+         alt="Business owner building a website on the JamiiTek builder" loading="lazy" decoding="async">
+    <div class="hs__scrim"></div><div class="hs__grid"></div>
+    <div class="wrap hs__body">
+      <span class="hs__eyebrow"><i></i>Website Builder</span>
+      <h1 class="hs__title">Your Website Live in <em>10 Minutes</em></h1>
+      <p class="hs__sub">Pick a template, let AI write your content, and publish on a free jamiitek.com subdomain. Orders go straight to your WhatsApp.</p>
+      <div class="hs__btns">
+        <a class="btn btn--gold" href="/builder/">Start Building Free
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 11h12.2l-4.6-4.6L13 5l7 7-7 7-1.4-1.4 4.6-4.6H4z"/></svg></a>
+        <a class="btn btn--glass" href="{% url 'templates_marketplace' %}">Browse Templates</a>
+      </div>
+    </div>
+  </article>
+
+  <!-- 5 · Custom systems & apps -->
+  <article class="hs__slide" aria-roledescription="slide" aria-label="5 of 5" aria-hidden="true">
+    <img class="hs__img" src="{% static 'images/hero/hero-5.jpg' %}"
+         alt="The JamiiTek team building custom software" loading="lazy" decoding="async">
+    <div class="hs__scrim"></div><div class="hs__grid"></div>
+    <div class="wrap hs__body">
+      <span class="hs__eyebrow"><i></i>Custom Software &amp; Mobile Apps</span>
+      <h1 class="hs__title">Systems Built <em>Around Your Business</em></h1>
+      <p class="hs__sub">POS, school management, booking, inventory &mdash; Android and iOS apps engineered for Tanzanian networks and real workloads.</p>
+      <div class="hs__btns">
+        <a class="btn btn--gold" href="{% url 'get_started' %}">Discuss Your System
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 11h12.2l-4.6-4.6L13 5l7 7-7 7-1.4-1.4 4.6-4.6H4z"/></svg></a>
+        <a class="btn btn--glass" href="{% url 'service' %}">Explore Services</a>
+      </div>
+    </div>
+  </article>
+
+  <div class="hs__ui">
+    <div class="wrap">
+      <div class="hs__dots" id="hsDots" role="tablist" aria-label="Choose slide">
+        <button class="hs__dot is-on" role="tab" aria-label="Slide 1" aria-selected="true"></button>
+        <button class="hs__dot" role="tab" aria-label="Slide 2" aria-selected="false"></button>
+        <button class="hs__dot" role="tab" aria-label="Slide 3" aria-selected="false"></button>
+        <button class="hs__dot" role="tab" aria-label="Slide 4" aria-selected="false"></button>
+        <button class="hs__dot" role="tab" aria-label="Slide 5" aria-selected="false"></button>
+      </div>
+      <span class="hs__count"><b id="hsNow">01</b> / 05</span>
+      <div class="hs__arrows">
+        <button class="hs__arrow" id="hsPrev" aria-label="Previous slide">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.8l4.6-4.6L11 5l-7 7 7 7 1.4-1.4L7.8 13H20z"/></svg></button>
+        <button class="hs__arrow" id="hsNext" aria-label="Next slide">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 11h12.2l-4.6-4.6L13 5l7 7-7 7-1.4-1.4 4.6-4.6H4z"/></svg></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ DOMAIN SEARCH ═══ -->
+<section class="dom" id="domains">
+  <div class="wrap">
+    <div class="dom__card">
+      <div class="dom__head">
+        <span class="dom__globe"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2m6.9 6h-2.95a15.6 15.6 0 0 0-1.4-3.6A8 8 0 0 1 18.9 8M12 4.04A14 14 0 0 1 13.9 8h-3.8A14 14 0 0 1 12 4.04M4.26 14a7.8 7.8 0 0 1 0-4h3.4a17 17 0 0 0 0 4m.84 2h2.95a15.6 15.6 0 0 0 1.4 3.6A8 8 0 0 1 5.1 16m2.95-8H5.1a8 8 0 0 1 4.35-3.6A15.6 15.6 0 0 0 8.05 8M12 19.96A14 14 0 0 1 10.1 16h3.8A14 14 0 0 1 12 19.96M14.34 14H9.66a15 15 0 0 1 0-4h4.68a15 15 0 0 1 0 4m.21 5.6a15.6 15.6 0 0 0 1.4-3.6h2.95a8 8 0 0 1-4.35 3.6M16.36 14a17 17 0 0 0 0-4h3.4a7.8 7.8 0 0 1 0 4z"/></svg></span>
+        <div>
+          <h2>Find Your Perfect <span>Domain Name</span></h2>
+          <p>Search now &mdash; we register it for you within 24 hours.</p>
+        </div>
+      </div>
+
+      <form class="dom__form" id="domForm" role="search" autocomplete="off">
+        <label class="sr" for="domq">Domain name</label>
+        <input class="dom__input" id="domq" name="q" type="text" inputmode="url"
+               autocapitalize="none" spellcheck="false"
+               placeholder="Enter your domain name..." required>
+        <label class="sr" for="domtld">Extension</label>
+        <select class="dom__select" id="domtld" name="tld">
+          <option value=".com">.com</option>
+          <option value=".co.tz" selected>.co.tz</option>
+          <option value=".tz">.tz</option>
+          <option value=".org">.org</option>
+          <option value=".net">.net</option>
+        </select>
+        <button class="btn btn--gold" type="submit" id="domBtn">Search</button>
+      </form>
+
+      <div class="tlds">
+        <div class="tld"><b>.com</b><small>Tsh 30,000</small></div>
+        <div class="tld"><b>.co.tz</b><small>Tsh 25,000</small></div>
+        <div class="tld"><b>.tz</b><small>Tsh 15,000</small></div>
+        <div class="tld"><b>.org</b><small>Tsh 30,000</small></div>
+        <div class="tld"><b>.net</b><small>Tsh 30,000</small></div>
+      </div>
+
+      <div class="dres" id="domRes" role="status" aria-live="polite"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ MARQUEE ═══ -->
+<section class="sec--sm" style="padding-bottom:0">
+  <div class="wrap" style="text-align:center;margin-bottom:20px">
+    <span class="eyebrow" style="justify-content:center">Built on trusted infrastructure</span>
+  </div>
+  <div class="mq" aria-label="Technology partners">
+    <div class="mq__track">
+      <span class="mq__item"><b style="color:#0A7C4A">.tz</b><small>tzNIC Registry</small></span>
+      <span class="mq__item"><b style="color:#F38020">Cloudflare</b><small>DNS &amp; CDN</small></span>
+      <span class="mq__item"><b style="color:#1B9E7A">Render</b><small>Cloud Hosting</small></span>
+      <span class="mq__item"><b style="color:#2A9D6E">Supabase</b><small>Databases</small></span>
+      <span class="mq__item"><b style="color:#C4801A">Groq</b><small>AI Engine</small></span>
+      <span class="mq__item"><b style="color:#1FA153">WhatsApp</b><small>Business API</small></span>
+      <span class="mq__item"><b style="color:#12A54B">M-Pesa</b><small>Payments</small></span>
+      <span class="mq__item"><b style="color:#E4002B">Airtel Money</b><small>Payments</small></span>
+      <span class="mq__item"><b style="color:#0A6CB4">Tigo Pesa</b><small>Payments</small></span>
+      <span class="mq__item"><b style="color:#3B5BDB">Uploadcare</b><small>Media CDN</small></span>
+      <!-- duplicate set keeps the loop seamless -->
+      <span class="mq__item" aria-hidden="true"><b style="color:#0A7C4A">.tz</b><small>tzNIC Registry</small></span>
+      <span class="mq__item" aria-hidden="true"><b style="color:#F38020">Cloudflare</b><small>DNS &amp; CDN</small></span>
+      <span class="mq__item" aria-hidden="true"><b style="color:#1B9E7A">Render</b><small>Cloud Hosting</small></span>
+      <span class="mq__item" aria-hidden="true"><b style="color:#2A9D6E">Supabase</b><small>Databases</small></span>
+      <span class="mq__item" aria-hidden="true"><b style="color:#C4801A">Groq</b><small>AI Engine</small></span>
+      <span class="mq__item" aria-hidden="true"><b style="color:#1FA153">WhatsApp</b><small>Business API</small></span>
+      <span class="mq__item" aria-hidden="true"><b style="color:#12A54B">M-Pesa</b><small>Payments</small></span>
+      <span class="mq__item" aria-hidden="true"><b style="color:#E4002B">Airtel Money</b><small>Payments</small></span>
+      <span class="mq__item" aria-hidden="true"><b style="color:#0A6CB4">Tigo Pesa</b><small>Payments</small></span>
+      <span class="mq__item" aria-hidden="true"><b style="color:#3B5BDB">Uploadcare</b><small>Media CDN</small></span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SERVICES ═══ -->
+<section class="sec" id="services">
+  <div class="wrap">
+    <div class="sec__hd rv">
+      <span class="eyebrow" style="justify-content:center">What we build</span>
+      <h2>Services built for modern businesses</h2>
+      <p>End-to-end digital work &mdash; design, development, hosting and the support that keeps it running.</p>
+    </div>
+
+    <div class="svcs">
+      <a class="svc rv" href="{% url 'service' %}">
+        <div class="svc__media ph">
+          <img src="{% static 'images/services/web-development.jpg' %}" alt="Website development" loading="lazy" decoding="async">
+          <span class="svc__badge" style="background:#2E7BF6"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9.4 16.6 4.8 12l4.6-4.6L8 6l-6 6 6 6zm5.2 0 4.6-4.6-4.6-4.6L16 6l6 6-6 6z"/></svg></span>
+        </div>
+        <div class="svc__b">
+          <h3>Website Development</h3>
+          <p>Modern responsive websites built for speed, security and conversion. From TZS 150,000.</p>
+          <span class="svc__more">Learn more <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 11h12.2l-4.6-4.6L13 5l7 7-7 7-1.4-1.4 4.6-4.6H4z"/></svg></span>
+        </div>
+      </a>
+
+      <a class="svc rv" href="{% url 'jamiibot_landing' %}">
+        <div class="svc__media ph">
+          <img src="{% static 'images/services/jamiibot.jpg' %}" alt="AI WhatsApp chatbot" loading="lazy" decoding="async">
+          <span class="svc__badge" style="background:#1FA97A"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a2 2 0 0 1 2 2v1h3a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V8a3 3 0 0 1 3-3h3V4a2 2 0 0 1 2-2M9 11a1.5 1.5 0 1 0 1.5 1.5A1.5 1.5 0 0 0 9 11m6 0a1.5 1.5 0 1 0 1.5 1.5A1.5 1.5 0 0 0 15 11m-6 5h6v1.5H9z"/></svg></span>
+        </div>
+        <div class="svc__b">
+          <h3>AI WhatsApp Bot</h3>
+          <p>JamiiBot answers customers 24/7 in Swahili and English. From TZS 15,000/month.</p>
+          <span class="svc__more">Learn more <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 11h12.2l-4.6-4.6L13 5l7 7-7 7-1.4-1.4 4.6-4.6H4z"/></svg></span>
+        </div>
+      </a>
+
+      <a class="svc rv" href="#hosting">
+        <div class="svc__media ph">
+          <img src="{% static 'images/services/hosting.jpg' %}" alt="Web hosting and servers" loading="lazy" decoding="async">
+          <span class="svc__badge" style="background:#7431C4"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 4h16a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1m2 3.5h2v-1H6zM4 14h16a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-4a1 1 0 0 1 1-1m2 3.5h2v-1H6z"/></svg></span>
+        </div>
+        <div class="svc__b">
+          <h3>Hosting &amp; Servers</h3>
+          <p>99.9% uptime, free SSL, daily backups and proactive monitoring on every plan.</p>
+          <span class="svc__more">Learn more <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 11h12.2l-4.6-4.6L13 5l7 7-7 7-1.4-1.4 4.6-4.6H4z"/></svg></span>
+        </div>
+      </a>
+
+      <a class="svc rv" href="#domains">
+        <div class="svc__media ph">
+          <img src="{% static 'images/services/domains.jpg' %}" alt="Domain registration" loading="lazy" decoding="async">
+          <span class="svc__badge" style="background:#16A34A"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2m0 2.04A14 14 0 0 1 13.9 8h-3.8A14 14 0 0 1 12 4.04M4.26 14a7.8 7.8 0 0 1 0-4h3.4a17 17 0 0 0 0 4m10.08 0H9.66a15 15 0 0 1 0-4h4.68a15 15 0 0 1 0 4m2.02 0a17 17 0 0 0 0-4h3.4a7.8 7.8 0 0 1 0 4z"/></svg></span>
+        </div>
+        <div class="svc__b">
+          <h3>Domain Registration</h3>
+          <p>Register .com, .co.tz and .tz domains &mdash; we handle the registry paperwork.</p>
+          <span class="svc__more">Check availability <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 11h12.2l-4.6-4.6L13 5l7 7-7 7-1.4-1.4 4.6-4.6H4z"/></svg></span>
+        </div>
+      </a>
+
+      <a class="svc rv" href="{% url 'service' %}">
+        <div class="svc__media ph">
+          <img src="{% static 'images/services/mobile-apps.jpg' %}" alt="Mobile app development" loading="lazy" decoding="async">
+          <span class="svc__badge" style="background:#F5A623"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2m0 4v12h10V6zm4 13h2v1h-2z"/></svg></span>
+        </div>
+        <div class="svc__b">
+          <h3>Mobile App Development</h3>
+          <p>Android and iOS apps designed for scale, offline resilience and low data use.</p>
+          <span class="svc__more">Learn more <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 11h12.2l-4.6-4.6L13 5l7 7-7 7-1.4-1.4 4.6-4.6H4z"/></svg></span>
+        </div>
+      </a>
+
+      <a class="svc rv" href="{% url 'service' %}">
+        <div class="svc__media ph">
+          <img src="{% static 'images/services/ui-ux-design.jpg' %}" alt="UI and UX design" loading="lazy" decoding="async">
+          <span class="svc__badge" style="background:#14B8A6"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.7 3.3a2.5 2.5 0 0 0-3.5 0l-1.4 1.4 3.5 3.5 1.4-1.4a2.5 2.5 0 0 0 0-3.5M14.4 6.1 3 17.5V21h3.5L17.9 9.6z"/></svg></span>
+        </div>
+        <div class="svc__b">
+          <h3>UI/UX Design</h3>
+          <p>Interfaces people actually understand &mdash; and that turn visitors into customers.</p>
+          <span class="svc__more">Learn more <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 11h12.2l-4.6-4.6L13 5l7 7-7 7-1.4-1.4 4.6-4.6H4z"/></svg></span>
+        </div>
+      </a>
+
+      <a class="svc rv" href="/builder/">
+        <div class="svc__media ph">
+          <img src="{% static 'images/services/website-builder.jpg' %}" alt="JamiiTek website builder" loading="lazy" decoding="async">
+          <span class="svc__badge" style="background:#F97316"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 3h8v8H3zm10 0h8v5h-8zm0 7h8v11h-8zM3 13h8v8H3z"/></svg></span>
+        </div>
+        <div class="svc__b">
+          <h3>Website Builder</h3>
+          <p>Build your own site in 10 minutes with a free subdomain on jamiitek.com.</p>
+          <span class="svc__more">Try it free <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 11h12.2l-4.6-4.6L13 5l7 7-7 7-1.4-1.4 4.6-4.6H4z"/></svg></span>
+        </div>
+      </a>
+
+      <a class="svc rv" href="{% url 'templates_marketplace' %}">
+        <div class="svc__media ph">
+          <img src="{% static 'images/services/templates.jpg' %}" alt="Ready-made website templates" loading="lazy" decoding="async">
+          <span class="svc__badge" style="background:#EF4444"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 18a2 2 0 1 0 2 2 2 2 0 0 0-2-2m10 0a2 2 0 1 0 2 2 2 2 0 0 0-2-2M6.2 6H21l-2.5 8H8.1L6.2 6M3 2h2.3l.6 2H3z"/></svg></span>
+        </div>
+        <div class="svc__b">
+          <h3>Ready-Made Templates</h3>
+          <p>Launch in hours, not weeks. Hosted from TZS 15,000/month.</p>
+          <span class="svc__more">Browse templates <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 11h12.2l-4.6-4.6L13 5l7 7-7 7-1.4-1.4 4.6-4.6H4z"/></svg></span>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ PROMOS ═══ -->
+<section class="sec--sm" id="hosting" style="padding-top:0">
+  <div class="wrap promos">
+    <article class="promo promo--host rv">
+      <h3>Hosting &amp; Domains<br>Managed End to End</h3>
+      <ul class="promo__list">
+        <li><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>99.9% uptime guarantee</li>
+        <li><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>Free SSL certificate</li>
+        <li><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>Daily backups</li>
+        <li><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>DNS &amp; email hosting</li>
+        <li><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>Renewal reminders before expiry</li>
+      </ul>
+      <div class="promo__ft">
+        <p class="promo__px"><small>Domains from</small><b>Tsh 15,000<i> /yr</i></b></p>
+        <a class="btn btn--white btn--sm" href="#domains">Check a domain</a>
+      </div>
+    </article>
+
+    <article class="promo promo--bot rv">
+      <h3>JamiiBot<br>Your AI WhatsApp Assistant</h3>
+      <ul class="promo__list">
+        <li><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>Replies in under 2 seconds</li>
+        <li><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>Detects Swahili or English</li>
+        <li><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>Live 24 hours a day</li>
+        <li><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>Your own conversation dashboard</li>
+        <li><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>Ready in 10 minutes, no coding</li>
+      </ul>
+      <div class="promo__ft">
+        <p class="promo__px"><small>Starting from</small><b>Tsh 15,000<i> /mo</i></b></p>
+        <a class="btn btn--white btn--sm" href="{% url 'jamiibot_landing' %}">Get free trial</a>
+      </div>
+    </article>
+
+    <article class="promo promo--build rv">
+      <h3>Website Builder<br>Live in 10 Minutes</h3>
+      <ul class="promo__list">
+        <li><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>Drag &amp; drop, no coding</li>
+        <li><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>AI writes your content</li>
+        <li><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>Free yourname.jamiitek.com</li>
+        <li><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>Shop, safari, restaurant &amp; more</li>
+        <li><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>Orders straight to WhatsApp</li>
+      </ul>
+      <div class="promo__ft">
+        <p class="promo__px"><small>Templates from</small><b>Tsh 15,000<i> /mo</i></b></p>
+        <a class="btn btn--gold btn--sm" href="/builder/">Start building</a>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- ═══ WORK SLIDER ═══ -->
+<section class="wk" id="work">
+  <div class="wrap">
+    <div class="wk__hd">
+      <div class="sec__hd sec__hd--left rv">
+        <span class="eyebrow">Selected work</span>
+        <h2>Real projects, running in production</h2>
+        <p>Every project below is live and serving customers across Tanzania and East Africa.</p>
+      </div>
+      <div class="wk__nav">
+        <button class="wk__arrow" id="wkPrev" aria-label="Previous projects">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.8l4.6-4.6L11 5l-7 7 7 7 1.4-1.4L7.8 13H20z"/></svg></button>
+        <button class="wk__arrow" id="wkNext" aria-label="More projects">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 11h12.2l-4.6-4.6L13 5l7 7-7 7-1.4-1.4 4.6-4.6H4z"/></svg></button>
+      </div>
+    </div>
+
+    <div class="wk__track" id="wkTrack" tabindex="0" aria-label="Project gallery, scrollable">
+      <article class="wk__card">
+        <div class="wk__media ph"><img src="{% static 'images/work/work-1.jpg' %}" alt="Mudandaza POS and marketplace platform" loading="lazy" decoding="async"></div>
+        <div class="wk__meta">
+          <span class="wk__cat">POS &amp; Marketplace</span>
+          <h3>Mudandaza</h3>
+          <p>Multi-branch point of sale with inventory, loans and four languages.</p>
+        </div>
+      </article>
+
+      <article class="wk__card">
+        <div class="wk__media ph"><img src="{% static 'images/work/work-2.jpg' %}" alt="Safari Travels tourism website" loading="lazy" decoding="async"></div>
+        <div class="wk__meta">
+          <span class="wk__cat">Tourism</span>
+          <h3>Safari Travels</h3>
+          <p>Tour packages, enquiry forms and booking flow for inbound travellers.</p>
+        </div>
+      </article>
+
+      <article class="wk__card">
+        <div class="wk__media ph"><img src="{% static 'images/work/work-3.jpg' %}" alt="NyumbaChap real estate marketplace" loading="lazy" decoding="async"></div>
+        <div class="wk__meta">
+          <span class="wk__cat">Real Estate</span>
+          <h3>NyumbaChap</h3>
+          <p>Property listings with search, agent dashboards and lead capture.</p>
+        </div>
+      </article>
+
+      <article class="wk__card">
+        <div class="wk__media ph"><img src="{% static 'images/work/work-4.jpg' %}" alt="Charles Academy school management system" loading="lazy" decoding="async"></div>
+        <div class="wk__meta">
+          <span class="wk__cat">School System</span>
+          <h3>Charles Academy</h3>
+          <p>Students, fees, results and PDF report cards in one system.</p>
+        </div>
+      </article>
+
+      <article class="wk__card">
+        <div class="wk__media ph"><img src="{% static 'images/work/work-5.jpg' %}" alt="Kilimoni AI agricultural WhatsApp assistant" loading="lazy" decoding="async"></div>
+        <div class="wk__meta">
+          <span class="wk__cat">AI Assistant</span>
+          <h3>Kilimoni AI</h3>
+          <p>WhatsApp advisor giving farmers crop guidance in Swahili.</p>
+        </div>
+      </article>
+
+      <article class="wk__card">
+        <div class="wk__media ph"><img src="{% static 'images/work/work-6.jpg' %}" alt="Rode Poultry bilingual online store" loading="lazy" decoding="async"></div>
+        <div class="wk__meta">
+          <span class="wk__cat">E-Commerce</span>
+          <h3>Rode Poultry</h3>
+          <p>Bilingual online store with orders routed straight to WhatsApp.</p>
+        </div>
+      </article>
+    </div>
+
+    <div class="wk__bar"><i id="wkBar"></i></div>
+    <p class="wk__swipe">← Swipe to see more →</p>
+  </div>
+</section>
+
+
+<!-- ═══ TESTIMONIALS ═══ -->
+<section class="sec" style="padding-top:0" id="testimonials">
+  <div class="wrap">
+    <div class="sec__hd rv">
+      <span class="eyebrow" style="justify-content:center">Client stories</span>
+      <h2>What our clients say</h2>
+    </div>
+
+    <div class="tm__track" id="tmTrack" tabindex="0" aria-label="Testimonials, scrollable">
+      <figure class="tm__card">
+        <div class="tm__stars" aria-label="5 out of 5">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
+        </div>
+        <blockquote class="tm__q">&ldquo;JamiiTek delivered beyond our expectations. The support is excellent and their work helped our business grow fast.&rdquo;</blockquote>
+        <figcaption class="tm__who">
+          <img class="tm__pic" src="{% static 'images/testimonials/client-1.jpg' %}" alt="" loading="lazy" decoding="async" width="48" height="48">
+          <span><b>Amina Juma</b><small>CEO, Amina Enterprises</small></span>
+        </figcaption>
+      </figure>
+
+      <figure class="tm__card">
+        <div class="tm__stars" aria-label="5 out of 5">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
+        </div>
+        <blockquote class="tm__q">&ldquo;Our site was live in three weeks and orders doubled in the first month. They understand the Tanzanian market.&rdquo;</blockquote>
+        <figcaption class="tm__who">
+          <img class="tm__pic" src="{% static 'images/testimonials/client-2.jpg' %}" alt="" loading="lazy" decoding="async" width="48" height="48">
+          <span><b>Baraka Mushi</b><small>Founder, Mushi Traders</small></span>
+        </figcaption>
+      </figure>
+
+      <figure class="tm__card">
+        <div class="tm__stars" aria-label="5 out of 5">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
+        </div>
+        <blockquote class="tm__q">&ldquo;JamiiBot answers our customers all night. We stopped losing enquiries after hours completely.&rdquo;</blockquote>
+        <figcaption class="tm__who">
+          <img class="tm__pic" src="{% static 'images/testimonials/client-3.jpg' %}" alt="" loading="lazy" decoding="async" width="48" height="48">
+          <span><b>Neema Kileo</b><small>Operations Lead, Kilimo Group</small></span>
+        </figcaption>
+      </figure>
+    </div>
+
+    <div class="tm__nav">
+      <button class="tm__arrow" id="tmPrev" aria-label="Previous testimonial">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.8l4.6-4.6L11 5l-7 7 7 7 1.4-1.4L7.8 13H20z"/></svg></button>
+      <button class="tm__arrow" id="tmNext" aria-label="Next testimonial">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 11h12.2l-4.6-4.6L13 5l7 7-7 7-1.4-1.4 4.6-4.6H4z"/></svg></button>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ CTA ═══ -->
+<section class="sec--sm" style="padding-top:0">
+  <div class="wrap">
+    <div class="cta rv">
+      <div class="cta__t">
+        <h2>Ready to build something that works?</h2>
+        <p>Tell us what you need. We reply within one business day with a plan, a timeline and a fixed price.</p>
+      </div>
+      <div class="cta__b">
+        <a class="btn btn--gold" href="{% url 'get_started' %}">Start your project
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 11h12.2l-4.6-4.6L13 5l7 7-7 7-1.4-1.4 4.6-4.6H4z"/></svg></a>
+        <a class="btn btn--glass" href="https://wa.me/255629712678" target="_blank" rel="noopener">Chat on WhatsApp</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer class="ft" id="contact">
+  <div class="wrap">
+    <div class="news">
+      <span class="news__ic"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2m0 4-8 5-8-5V6l8 5 8-5z"/></svg></span>
+      <div>
+        <h3>Subscribe to our newsletter</h3>
+        <p>New services, templates and offers &mdash; no spam.</p>
+      </div>
+      <form class="news__f" method="post" action="{% url 'contact' %}">
+        {% csrf_token %}
+        <label class="sr" for="nEmail">Email address</label>
+        <input class="news__in" id="nEmail" name="email" type="email" placeholder="Enter your email address" required>
+        <button class="btn btn--gold" type="submit">Subscribe</button>
+      </form>
+    </div>
+
+    <div class="fgrid">
+      <div class="fab">
+        <a class="brand" href="{% url 'home' %}" aria-label="JamiiTek home">
+          <img class="brand__logo" src="{% static 'images/logo-white.png' %}"
+               alt="JamiiTek" width="230" height="40" loading="lazy">
+        </a>
+        <p>Building next-generation digital products for businesses across Tanzania and East Africa.</p>
+        <div class="fst"><i></i> Systems operational</div>
+        <div class="fsoc">
+          <a href="#" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 21v-8h2.7l.4-3.1h-3.1V7.9c0-.9.25-1.5 1.55-1.5H16.7V3.6A22 22 0 0 0 14.3 3.5c-2.4 0-4 1.45-4 4.1v2.3H7.6V13h2.7v8z"/></svg></a>
+          <a href="#" aria-label="LinkedIn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.9 8.5H4V20h2.9zM5.45 3.5A1.7 1.7 0 1 0 7.1 5.2a1.67 1.67 0 0 0-1.65-1.7M20 13.4c0-3-1.6-4.4-3.75-4.4a3.2 3.2 0 0 0-2.9 1.6h-.05V8.5H10.6V20h2.9v-5.7c0-1.5.29-2.95 2.15-2.95s1.85 1.7 1.85 3V20H20z"/></svg></a>
+          <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.2c3.2 0 3.58 0 4.85.07 3.25.15 4.77 1.69 4.92 4.92.06 1.27.07 1.65.07 4.85s0 3.58-.07 4.85c-.15 3.23-1.66 4.77-4.92 4.92-1.27.06-1.64.07-4.85.07s-3.58 0-4.85-.07c-3.26-.15-4.77-1.7-4.92-4.92C2.17 15.62 2.16 15.25 2.16 12s0-3.58.07-4.85c.15-3.23 1.66-4.77 4.92-4.92C8.42 2.17 8.8 2.16 12 2.16m0 4.97A4.87 4.87 0 1 0 16.87 12 4.87 4.87 0 0 0 12 7.13m0 8.03A3.16 3.16 0 1 1 15.16 12 3.16 3.16 0 0 1 12 15.16m5.06-9.31a1.14 1.14 0 1 0 1.14 1.14 1.14 1.14 0 0 0-1.14-1.14"/></svg></a>
+          <a href="#" aria-label="GitHub"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2A10 10 0 0 0 8.8 21.5c.5.1.7-.2.7-.5v-1.7C6.7 19.9 6.1 18 6.1 18c-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.3 1.1 2.9.8.1-.6.3-1.1.6-1.3-2.2-.3-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.7 0 0 .8-.3 2.7 1a9.4 9.4 0 0 1 5 0c1.9-1.3 2.7-1 2.7-1 .5 1.4.2 2.4.1 2.7.6.7 1 1.6 1 2.7 0 3.9-2.4 4.7-4.6 5 .4.3.7.9.7 1.9v2.8c0 .3.2.6.7.5A10 10 0 0 0 12 2"/></svg></a>
+        </div>
+      </div>
+
+      <div class="fcol">
+        <h4>Quick links</h4>
+        <ul>
+          <li><a href="{% url 'home' %}">Home</a></li>
+          <li><a href="{% url 'About' %}">About us</a></li>
+          <li><a href="{% url 'service' %}">Services</a></li>
+          <li><a href="#work">Our work</a></li>
+          <li><a href="#domains">Domains</a></li>
+          <li><a href="{% url 'templates_marketplace' %}">Templates</a></li>
+          <li><a href="{% url 'blog_list' %}">Blog</a></li>
+        </ul>
+      </div>
+
+      <div class="fcol">
+        <h4>Our services</h4>
+        <ul>
+          <li><a href="{% url 'service' %}">Website development</a></li>
+          <li><a href="{% url 'jamiibot_landing' %}">AI WhatsApp bot</a></li>
+          <li><a href="#hosting">Web hosting</a></li>
+          <li><a href="#domains">Domain registration</a></li>
+          <li><a href="{% url 'service' %}">Mobile apps</a></li>
+          <li><a href="{% url 'service' %}">UI/UX design</a></li>
+          <li><a href="/builder/">Website builder</a></li>
+        </ul>
+      </div>
+
+      <div class="fcol">
+        <h4>Support</h4>
+        <ul>
+          <li><a href="{% url 'portal_login' %}">Client portal</a></li>
+          <li><a href="{% url 'portal_register' %}">Create account</a></li>
+          <li><a href="{% url 'contact' %}">Submit a request</a></li>
+          <li><a href="{% url 'company_profile_view' %}">Company profile</a></li>
+          <li><a href="{% url 'get_started' %}">Start a project</a></li>
+        </ul>
+      </div>
+
+      <div class="fcol">
+        <h4>Contact us</h4>
+        <ul class="fct">
+          <li><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7m0 9.5A2.5 2.5 0 1 1 14.5 9 2.5 2.5 0 0 1 12 11.5"/></svg>
+            Dar es Salaam, Tanzania</li>
+          <li><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.6 10.8a15 15 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.6 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.6 3.6a1 1 0 0 1-.25 1z"/></svg>
+            <a href="tel:+255629712678">+255 629 712 678</a></li>
+          <li><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2m0 4-8 5-8-5V6l8 5 8-5z"/></svg>
+            <a href="mailto:info@jamiitek.com">info@jamiitek.com</a></li>
+          <li><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2m0 2.04A14 14 0 0 1 13.9 8h-3.8A14 14 0 0 1 12 4.04M4.26 14a7.8 7.8 0 0 1 0-4h3.4a17 17 0 0 0 0 4z"/></svg>
+            <a href="https://www.jamiitek.com">www.jamiitek.com</a></li>
+        </ul>
+        <h4 style="margin-top:20px">We accept</h4>
+        <div class="pay">
+          <span style="color:#12A54B">M-Pesa</span>
+          <span style="color:#0A6CB4">Tigo Pesa</span>
+          <span style="color:#E4002B">Airtel Money</span>
+          <span style="color:#0E7A3C">CRDB</span>
+          <span style="color:#0A4C9E">NMB</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="fbot">
+      <p>&copy; {% now "Y" %} JamiiTek Ltd. All rights reserved. // Crafted in Tanzania 🇹🇿</p>
+      <p><a href="{% url 'About' %}">Terms &amp; conditions</a> &nbsp;&middot;&nbsp; <a href="{% url 'About' %}">Privacy policy</a></p>
+    </div>
+  </div>
+</footer>
+
+<a class="wa" href="https://wa.me/255629712678" aria-label="Chat on WhatsApp" target="_blank" rel="noopener">
+  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.15-1.75-.86-2-.96s-.47-.15-.67.15-.77.96-.94 1.16-.35.22-.65.07a8.2 8.2 0 0 1-2.4-1.48 9 9 0 0 1-1.67-2.07c-.17-.3 0-.46.13-.61s.3-.35.45-.53a2 2 0 0 0 .3-.5.55.55 0 0 0 0-.53c-.08-.15-.67-1.6-.92-2.2s-.49-.5-.67-.51h-.57a1.1 1.1 0 0 0-.8.37 3.35 3.35 0 0 0-1.04 2.48 5.8 5.8 0 0 0 1.22 3.09 13.3 13.3 0 0 0 5.1 4.5c.71.3 1.27.49 1.7.63a4.1 4.1 0 0 0 1.88.12 3.07 3.07 0 0 0 2-1.42 2.5 2.5 0 0 0 .17-1.42c-.07-.12-.27-.2-.57-.34M12.05 21.8a9.75 9.75 0 0 1-4.97-1.36l-.36-.21-3.7.97.99-3.6-.23-.37A9.7 9.7 0 1 1 12.05 21.8M12.05 0A12 12 0 0 0 1.65 17.96L0 24l6.2-1.62A12 12 0 1 0 12.05 0"/></svg>
+</a>
+
 <script>
 (function(){
-  const ads = document.querySelectorAll('#bldAds .bld-ad');
-  const dotsBox = document.getElementById('bldDots');
-  let i = 0, timer;
-  ads.forEach((_,k)=>{ const d=document.createElement('i'); if(k===0)d.className='on';
-    d.onclick=()=>{go(k); restart();}; dotsBox.appendChild(d); });
-  const dots = dotsBox.querySelectorAll('i');
-  function go(k){ ads[i].classList.remove('on'); dots[i].classList.remove('on');
-    i = k % ads.length; ads[i].classList.add('on'); dots[i].classList.add('on'); }
-  function tick(){ go(i+1); }
-  function restart(){ clearInterval(timer); timer = setInterval(tick, 4200); }
+'use strict';
+var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* If the logo file is missing, show the wordmark as text rather than nothing */
+document.querySelectorAll('.brand__logo').forEach(function(img){
+  img.addEventListener('error', function(){
+    var dark = img.closest('.ft') ? '#fff' : '#071A31',
+        el = document.createElement('span');
+    el.innerHTML = 'Jamii<em style="font-style:normal;color:#F5A623">Tek</em>';
+    el.style.cssText = "font-family:'Sora',sans-serif;font-weight:800;font-size:20px;" +
+                       'letter-spacing:-.035em;line-height:1;color:' + dark;
+    img.replaceWith(el);
+  });
+});
+
+/* Missing image files fall back to the gradient instead of a broken icon */
+document.querySelectorAll('.ph > img, .hs__img, .tm__pic').forEach(function(img){
+  img.addEventListener('error', function(){ img.style.display = 'none'; });
+});
+
+/* ── Sticky header ── */
+var hdr = document.getElementById('hdr');
+addEventListener('scroll', function(){ hdr.classList.toggle('is-stuck', scrollY > 8); }, {passive:true});
+
+/* ── Mobile nav ── */
+var nav = document.getElementById('nav'), burger = document.getElementById('burger'),
+    navX = document.getElementById('navX'), scrim = document.getElementById('scrim');
+function setNav(open){
+  nav.classList.toggle('is-open', open);
+  scrim.classList.toggle('is-on', open);
+  burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+  document.body.style.overflow = open ? 'hidden' : '';
+}
+burger.addEventListener('click', function(){ setNav(true); });
+navX.addEventListener('click', function(){ setNav(false); });
+scrim.addEventListener('click', function(){ setNav(false); });
+nav.addEventListener('click', function(e){ if(e.target.closest('a')) setNav(false); });
+addEventListener('keydown', function(e){ if(e.key === 'Escape') setNav(false); });
+
+/* ── Reveal ── */
+if ('IntersectionObserver' in window && !reduced) {
+  var rvIO = new IntersectionObserver(function(en){
+    en.forEach(function(e, k){
+      if (!e.isIntersecting) return;
+      setTimeout(function(){ e.target.classList.add('in'); }, k * 70);
+      rvIO.unobserve(e.target);
+    });
+  }, {threshold: .1, rootMargin: '0px 0px -6% 0px'});
+  document.querySelectorAll('.rv').forEach(function(el){ rvIO.observe(el); });
+} else {
+  document.querySelectorAll('.rv').forEach(function(el){ el.classList.add('in'); });
+}
+
+/* ── Count-up ── */
+function countUp(el){
+  var target = parseFloat(el.dataset.count), dec = parseInt(el.dataset.decimals || '0', 10),
+      suffix = el.dataset.suffix || '', dur = 1500, t0 = null;
+  if (reduced) { el.textContent = target.toFixed(dec) + suffix; return; }
+  requestAnimationFrame(function step(t){
+    if (!t0) t0 = t;
+    var p = Math.min((t - t0) / dur, 1), v = target * (1 - Math.pow(1 - p, 3));
+    el.textContent = (dec ? v.toFixed(dec) : Math.floor(v).toLocaleString('en-US')) + suffix;
+    if (p < 1) requestAnimationFrame(step);
+  });
+}
+if ('IntersectionObserver' in window) {
+  var cIO = new IntersectionObserver(function(en){
+    en.forEach(function(e){ if (e.isIntersecting) { countUp(e.target); cIO.unobserve(e.target); } });
+  }, {threshold: .5});
+  document.querySelectorAll('[data-count]').forEach(function(el){ cIO.observe(el); });
+}
+
+/* ═════ HERO SLIDER ═════ */
+(function(){
+  var root = document.querySelector('.hs');
+  if (!root) return;
+  var slides = [].slice.call(root.querySelectorAll('.hs__slide')),
+      dots = [].slice.call(root.querySelectorAll('.hs__dot')),
+      now = document.getElementById('hsNow'),
+      prev = document.getElementById('hsPrev'), next = document.getElementById('hsNext'),
+      DUR = 7000, i = 0, timer = null;
+
+  root.style.setProperty('--hs-dur', DUR + 'ms');
+
+  function go(n){
+    n = (n + slides.length) % slides.length;
+    if (n === i) return;
+    slides[i].classList.remove('is-on'); slides[i].setAttribute('aria-hidden','true');
+    dots[i].classList.remove('is-on');   dots[i].setAttribute('aria-selected','false');
+    i = n;
+    slides[i].classList.add('is-on');    slides[i].removeAttribute('aria-hidden');
+    dots[i].classList.add('is-on');      dots[i].setAttribute('aria-selected','true');
+    if (now) now.textContent = String(i + 1).padStart(2, '0');
+    restart();
+  }
+  function restart(){
+    clearInterval(timer);
+    if (reduced || slides.length < 2) return;
+    timer = setInterval(function(){ go(i + 1); }, DUR);
+  }
+  function pause(on){ root.classList.toggle('is-paused', on); if (on) clearInterval(timer); else restart(); }
+
+  dots.forEach(function(d, k){ d.addEventListener('click', function(){ go(k); }); });
+  if (prev) prev.addEventListener('click', function(){ go(i - 1); });
+  if (next) next.addEventListener('click', function(){ go(i + 1); });
+  root.addEventListener('mouseenter', function(){ pause(true); });
+  root.addEventListener('mouseleave', function(){ pause(false); });
+  root.addEventListener('focusin', function(){ pause(true); });
+  root.addEventListener('focusout', function(){ pause(false); });
+  document.addEventListener('visibilitychange', function(){ pause(document.hidden); });
+  addEventListener('keydown', function(e){
+    if (nav.classList.contains('is-open')) return;
+    if (e.key === 'ArrowLeft') go(i - 1);
+    if (e.key === 'ArrowRight') go(i + 1);
+  });
+
+  var sx = 0, sy = 0, tracking = false;
+  root.addEventListener('touchstart', function(e){
+    sx = e.touches[0].clientX; sy = e.touches[0].clientY; tracking = true; pause(true);
+  }, {passive:true});
+  root.addEventListener('touchend', function(e){
+    if (!tracking) return;
+    tracking = false;
+    var dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
+    if (Math.abs(dx) > 46 && Math.abs(dx) > Math.abs(dy)) go(dx < 0 ? i + 1 : i - 1);
+    pause(false);
+  }, {passive:true});
+
   restart();
 })();
-</script> -->
 
+/* ═════ Scroll-snap carousels ═════ */
+function carousel(trackId, prevId, nextId, barId){
+  var track = document.getElementById(trackId);
+  if (!track) return;
+  var prev = document.getElementById(prevId), next = document.getElementById(nextId),
+      bar = barId ? document.getElementById(barId) : null;
 
-
-
-<!-- ══════════════════════════════════════════════════════════ --> 
-<section class="hero">
-  <canvas class="hero-bg-canvas" id="heroCanvas"></canvas>
-  <div class="hero-nebula"></div>
-  <div class="hero-grid"></div>
-  <div class="hero-scanline"></div>
-  <div class="container hero-inner">
-    <div class="row align-items-center g-4 g-lg-5">
-      <div class="col-lg-6">
-
-        <!-- <div class="h-pill"><span class="live"></span> System Online — Accepting New Projects</div> -->
-
-        <!-- BOT pill -->
-        <a href="/bot/" class="h-bot-strip d-block" style="display:inline-flex!important">
-          <span class="waDot"></span>
-          <i class="fab fa-whatsapp"></i>&nbsp; JamiiBot — AI WhatsApp Bot · Free Trial Available
-          <i class="fas fa-arrow-right" style="font-size:10px;margin-left:4px"></i>
-        </a>
-
-        <h1 class="h-title">
-          We Build<br>
-          <span class="line-web">Digital Products</span>
-          That Perform.<br>
-          <span class="line-bot" style="font-size:.65em">& AI Bots That Sell.</span>
-        </h1>
-        <p class="h-sub">From sleek websites to AI-powered WhatsApp bots — JamiiTek delivers fast, secure, and scalable digital solutions for businesses across Tanzania.</p>
-
-        <div class="h-ctas">
-          <a href="{% url 'get_started' %}" class="h-cta-main">Start Your Website <i class="fas fa-arrow-right"></i></a>
-          <a href="/bot/" class="h-cta-bot"><i class="fab fa-whatsapp" style="font-size:16px"></i> Get AI Bot Free</a>
-          <a href="{% url 'service' %}" class="h-cta-main">Services</a>
-        </div>
-
-        <div class="h-portal">
-          <div class="h-portal-ico"><i class="fas fa-user-shield"></i></div>
-          <div class="h-portal-txt flex-grow-1">
-            <strong>Already a JamiiTek client?</strong>
-            <span>ACCESS_PORTAL // websites · domains · email hosting</span>
-          </div>
-          <div class="h-portal-btns-wrap d-flex gap-2 flex-wrap" style="flex-shrink:0">
-            <a href="{% url 'portal_login' %}" class="h-sign"><i class="fas fa-sign-in-alt"></i> Portal</a>
-            <a href="{% url 'chatbot_login' %}" class="h-sign" style="background:rgba(37,211,102,.12);border-color:rgba(37,211,102,.28);color:#25d366"><i class="fab fa-whatsapp"></i> Bot</a>
-            <a href="{% url 'portal_register' %}" class="h-reg"><i class="fas fa-user-plus"></i> Register</a>
-          </div>
-        </div>
-
-        <div class="h-trust">
-          <div class="h-avs">
-            <div class="h-av" style="background:linear-gradient(135deg,#5b6ef5,#8b5cf6)">AK</div>
-            <div class="h-av" style="background:linear-gradient(135deg,#00d4ff,#5b6ef5)">JM</div>
-            <div class="h-av" style="background:linear-gradient(135deg,#8b5cf6,#ff2d8a)">EM</div>
-            <div class="h-av" style="background:rgba(0,200,255,.1);border:2px solid #00010a;color:var(--cyan);font-size:13px">+</div>
-          </div>
-          <div>
-            <div style="font-family:var(--ff-display);font-weight:700;font-size:13px;color:rgba(255,255,255,.8);letter-spacing:.5px">485+ satisfied clients</div>
-            <div style="font-family:var(--ff-mono);font-size:10px;color:rgba(255,255,255,.28);letter-spacing:1.5px;text-transform:uppercase">Tanzania &amp; East Africa</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-lg-6 d-none d-lg-block">
-        <div class="h-vis">
-          <div class="h-ring h-ring-1" style="transform:translate(-50%,-50%)"></div>
-          <div class="h-ring h-ring-2" style="transform:translate(-50%,-50%)"></div>
-          <div class="h-ring-exp"></div>
-          <div class="h-cards-grid">
-            <div class="hc"><div class="hc-ico">🌐</div><div class="hc-t">WEB APPS</div><div class="hc-s">// full-stack</div></div>
-            <div class="hc"><div class="hc-ico">🤖</div><div class="hc-t">AI BOTS</div><div class="hc-s">// whatsapp</div></div>
-            <div class="hc"><div class="hc-ico">⚡</div><div class="hc-t">FAST BUILD</div><div class="hc-s">// 2-6 weeks</div></div>
-            <div class="hc"><div class="hc-ico">🔒</div><div class="hc-t">SECURE HOST</div><div class="hc-s">// 99.9% up</div></div>
-          </div>
-          <div class="h-float f1">
-            <div class="hf-ico">🚀</div>
-            <div><div class="hf-t">Project Launched</div><div class="hf-s">DELIVERED IN 3 WEEKS</div></div>
-          </div>
-          <div class="h-float f2">
-            <div class="hf-ico">🤖</div>
-            <div><div class="hf-t">Bot Live!</div><div class="hf-s">24/7 RESPONDING</div></div>
-          </div>
-          <div class="h-float f3" style="background:rgba(2,14,8,.96);border-color:rgba(37,211,102,.2)">
-            <div class="hf-ico">⭐</div>
-            <div><div class="hf-t">5.0 Rating</div><div class="hf-s" style="color:#25d366">789 PROJECTS</div></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-
-<div class="tpl-announce" id="tplAnnounce">
-  <div class="tpl-announce-inner container">
- 
-    <div class="ta-badge">
-      <span class="dot"></span>
-      Templates
-    </div>
- 
-    <div class="ta-text">
-      <strong>Ready-made website templates — launch in hours, not weeks.</strong>
-      <span>// e-commerce · restaurant · business · portfolio · starting from TSh 15,000/mo</span>
-    </div>
- 
-    <div class="ta-btns">
-      <a href="/templates/" class="ta-btn-main">
-        <i class="fas fa-th-large" style="font-size:11px"></i>
-        Browse Templates
-      </a>
-      <a href="/templates/" class="ta-btn-ghost">
-        See Pricing <i class="fas fa-arrow-right" style="font-size:10px"></i>
-      </a>
-    </div>
- 
-    <button class="ta-close" id="taClose" aria-label="Close">✕</button>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════════════════════════
-     STRIP
-══════════════════════════════════════════════════════════ -->
-<div class="sf-strip">
-  <div class="sf-strip-inner">
-    <div class="sf-si"><div class="sf-si-ico"><i class="fas fa-rocket"></i></div><div><strong>Fast Delivery</strong><span>2–6 week turnaround</span></div></div>
-    <div class="sf-si"><div class="sf-si-ico"><i class="fas fa-robot" style="color:#25d366"></i></div><div><strong>AI WhatsApp Bot</strong><span>JamiiBot — free trial</span></div></div>
-    <div class="sf-si"><div class="sf-si-ico"><i class="fas fa-shield-halved"></i></div><div><strong>Secure by Default</strong><span>Best-practice code</span></div></div>
-    <div class="sf-si"><div class="sf-si-ico"><i class="fas fa-mobile-screen"></i></div><div><strong>Mobile-First</strong><span>Every device</span></div></div>
-    <div class="sf-si"><div class="sf-si-ico"><i class="fas fa-headset"></i></div><div><strong>24/7 Support</strong><span>Post-launch care</span></div></div>
-    <div class="sf-si"><div class="sf-si-ico"><i class="fas fa-server"></i></div><div><strong>Local Hosting</strong><span>Tanzania infrastructure</span></div></div>
-    <div class="sf-si"><div class="sf-si-ico"><i class="fab fa-whatsapp" style="color:#25d366"></i></div><div><strong>Swahili + English AI</strong><span>Auto-detects language</span></div></div>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════════════════════════
-     JAMIIBOT HERO SECTION
-══════════════════════════════════════════════════════════ -->
-<section class="bot-hero">
-  <div class="bot-hero-grid"></div>
-  <div class="container position-relative" style="z-index:2">
-    <div class="row align-items-center g-5">
-
-      <div class="col-lg-7 reveal-l">
-        <div style="display:inline-flex;align-items:center;gap:10px;font-family:var(--ff-mono);font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:#25d366;margin-bottom:18px">
-          <span style="width:18px;height:1px;background:#25d366;opacity:.5;display:block"></span>
-          JamiiBot · AI WhatsApp Platform
-          <span style="width:18px;height:1px;background:#25d366;opacity:.5;display:block"></span>
-        </div>
-        <h2 class="bot-h-title" data-text="Your Business Answering Customers 24/7">
-          Your Business<br>
-          Answering Customers<br>
-          <span class="gl">24/7 — Automatically.</span>
-        </h2>
-        <p style="font-size:15px;color:rgba(255,255,255,.42);line-height:1.85;max-width:520px;margin-bottom:28px">
-          JamiiBot is an AI-powered WhatsApp assistant that handles customer questions, shares your services, qualifies leads, and never sleeps — in Swahili and English.
-        </p>
-
-        <div class="bot-stats-row">
-          <div class="bot-stat"><div class="bot-stat-n" data-target="10">10<span style="color:rgba(37,211,102,.4)">m</span></div><div class="bot-stat-l">Setup Time</div></div>
-          <div class="bot-stat"><div class="bot-stat-n">&lt;2<span style="font-size:.5em;color:rgba(37,211,102,.4)">s</span></div><div class="bot-stat-l">Reply Speed</div></div>
-          <div class="bot-stat"><div class="bot-stat-n">24<span style="font-size:.5em;color:rgba(37,211,102,.4)">/7</span></div><div class="bot-stat-l">Always Live</div></div>
-        </div>
-
-        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:28px">
-          <a href="{% url 'chatbot_register' %}" class="h-cta-bot" style="animation:none"><i class="fab fa-whatsapp" style="font-size:17px"></i> Get Your Bot — Free Trial</a>
-          <a href="{% url 'chatbot_login' %}" class="h-cta-ghost" style="animation:none"><i class="fas fa-sign-in-alt"></i> Sign In to Bot Portal</a>
-          <a href="/bot/" class="h-cta-ghost" style="animation:none">Learn More <i class="fas fa-external-link-alt" style="font-size:11px"></i></a>
-        </div>
-      </div>
-
-      <div class="col-lg-5 reveal-r d-none d-lg-block">
-        <div class="bot-chat-demo" style="margin:0 auto;animation:floatY 5s ease-in-out infinite">
-          <div class="bcd-head">
-            <div class="bcd-av">🤖</div>
-            <div>
-              <div class="bcd-name">YourBusinessBot</div>
-              <div class="bcd-online"><span class="od"></span> Online · replies instantly</div>
-            </div>
-            <div style="margin-left:auto;font-family:var(--ff-mono);font-size:9px;color:rgba(37,211,102,.4);background:rgba(37,211,102,.06);padding:3px 10px;border-radius:6px">LIVE</div>
-          </div>
-          <div class="bcd-body" id="demoBody">
-            <div class="bcd-msg bot" id="dm1">Habari! 👋 I'm your AI assistant. How can I help you today?</div>
-            <div class="bcd-msg user" id="dm2">What services do you offer?</div>
-            <div class="bcd-typing" id="dmTyp"><div class="bcd-dot"></div><div class="bcd-dot"></div><div class="bcd-dot"></div></div>
-            <div class="bcd-msg bot" id="dm3">We offer website development, hosting, domain registration, and AI bots. Which one interests you? 😊</div>
-            <div class="bcd-msg user" id="dm4">How much is a website?</div>
-            <div class="bcd-typing" id="dmTyp2"><div class="bcd-dot"></div><div class="bcd-dot"></div><div class="bcd-dot"></div></div>
-            <div class="bcd-msg bot" id="dm5">Basic websites start from TZS 300,000 — includes hosting & domain! Want a custom quote? 🔍</div>
-          </div>
-          <div class="bcd-foot">
-            <div class="bcd-input">Type a message...</div>
-            <div class="bcd-send"><i class="fas fa-paper-plane"></i></div>
-          </div>
-        </div>
-        <!-- Floating plans -->
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px">
-          <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px;text-align:center">
-            <div style="font-family:var(--ff-display);font-size:11px;font-weight:700;color:rgba(255,255,255,.6);margin-bottom:4px">Starter</div>
-            <div style="font-family:var(--ff-display);font-size:18px;font-weight:900;color:#fff">15K</div>
-            <div style="font-family:var(--ff-mono);font-size:9px;color:rgba(255,255,255,.25)">TZS/mo</div>
-          </div>
-          <div style="background:rgba(37,211,102,.07);border:1px solid rgba(37,211,102,.25);border-radius:12px;padding:12px;text-align:center;position:relative">
-            <div style="position:absolute;top:-8px;left:50%;transform:translateX(-50%);background:#25d366;color:#000;font-family:var(--ff-mono);font-size:8px;font-weight:800;padding:2px 10px;border-radius:100px;white-space:nowrap">POPULAR</div>
-            <div style="font-family:var(--ff-display);font-size:11px;font-weight:700;color:#25d366;margin-bottom:4px">Business</div>
-            <div style="font-family:var(--ff-display);font-size:18px;font-weight:900;color:#fff">30K</div>
-            <div style="font-family:var(--ff-mono);font-size:9px;color:rgba(255,255,255,.25)">TZS/mo</div>
-          </div>
-          <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px;text-align:center">
-            <div style="font-family:var(--ff-display);font-size:11px;font-weight:700;color:rgba(255,255,255,.6);margin-bottom:4px">Enterprise</div>
-            <div style="font-family:var(--ff-display);font-size:18px;font-weight:900;color:#fff">60K</div>
-            <div style="font-family:var(--ff-mono);font-size:9px;color:rgba(255,255,255,.25)">TZS/mo</div>
-          </div>
-        </div>
-        <div style="text-align:center;margin-top:10px;font-family:var(--ff-mono);font-size:10px;color:rgba(37,211,102,.5);display:flex;align-items:center;justify-content:center;gap:6px">
-          <span style="width:5px;height:5px;border-radius:50%;background:#25d366;animation:pulse2 2s infinite;flex-shrink:0"></span>
-          7-day free trial · No payment required
-        </div>
-      </div>
-    </div>
-
-    <!-- BOT FEATURE CARDS -->
-    <div class="row g-4 mt-5">
-      <div class="col-md-4 reveal">
-        <div class="bot-feat green">
-          <div class="bot-feat-ico" style="background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.2)">🤖</div>
-          <div class="bot-feat-t">Powered by Groq AI</div>
-          <div class="bot-feat-d">Lightning-fast AI engine understands Swahili and English. Gives smart, accurate answers about your business every time.</div>
-          <div class="bot-feat-list">
-            <div class="bot-feat-li" style="color:rgba(37,211,102,.7)"><span class="d" style="background:#25d366"></span>Auto-detects customer language</div>
-            <div class="bot-feat-li" style="color:rgba(37,211,102,.7)"><span class="d" style="background:#25d366"></span>Responds in under 2 seconds</div>
-            <div class="bot-feat-li" style="color:rgba(37,211,102,.7)"><span class="d" style="background:#25d366"></span>Available 24 hours a day</div>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-4 reveal" style="transition-delay:.1s">
-        <div class="bot-feat cyan">
-          <div class="bot-feat-ico" style="background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.2)">⚡</div>
-          <div class="bot-feat-t">Ready in 10 Minutes</div>
-          <div class="bot-feat-d">Fill your business details, add services and FAQs, enter your WhatsApp number — our team handles the technical setup within 24 hours.</div>
-          <div class="bot-feat-list">
-            <div class="bot-feat-li" style="color:rgba(0,212,255,.7)"><span class="d" style="background:#00d4ff"></span>No coding required</div>
-            <div class="bot-feat-li" style="color:rgba(0,212,255,.7)"><span class="d" style="background:#00d4ff"></span>Simple 6-step setup wizard</div>
-            <div class="bot-feat-li" style="color:rgba(0,212,255,.7)"><span class="d" style="background:#00d4ff"></span>Live within 24 hours</div>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-4 reveal" style="transition-delay:.2s">
-        <div class="bot-feat purple">
-          <div class="bot-feat-ico" style="background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.2)">📊</div>
-          <div class="bot-feat-t">Your Own Dashboard</div>
-          <div class="bot-feat-d">See every conversation, track messages your bot handled, and update your bot's knowledge — all from one powerful panel.</div>
-          <div class="bot-feat-list">
-            <div class="bot-feat-li" style="color:rgba(139,92,246,.9)"><span class="d" style="background:#8b5cf6"></span>Live conversation history</div>
-            <div class="bot-feat-li" style="color:rgba(139,92,246,.9)"><span class="d" style="background:#8b5cf6"></span>Message analytics</div>
-            <div class="bot-feat-li" style="color:rgba(139,92,246,.9)"><span class="d" style="background:#8b5cf6"></span>Edit services & FAQs live</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ══════════════════════════════════════════════════════════
-     BOT PRICING
-══════════════════════════════════════════════════════════ -->
-<section class="bot-pricing-sect">
-  <div class="container position-relative" style="z-index:2">
-    <div class="row justify-content-center text-center mb-5">
-      <div class="col-lg-6 reveal">
-        <div class="sf-eye" style="justify-content:center;color:#25d366">
-          <span style="width:18px;height:1px;background:#25d366;opacity:.5;display:block"></span>
-          JamiiBot Pricing
-          <span style="width:18px;height:1px;background:#25d366;opacity:.5;display:block"></span>
-        </div>
-        <h2 style="font-family:var(--ff-display);font-size:clamp(24px,4vw,48px);font-weight:900;color:#fff;letter-spacing:-1px;line-height:1.1;margin-bottom:12px">Simple Pricing,<br>Powerful Results</h2>
-        <p style="color:rgba(255,255,255,.35);font-size:14px;line-height:1.8;font-family:var(--ff-mono)">All plans include 7-day free trial · No payment required to start</p>
-      </div>
-    </div>
-    <div class="row g-4 justify-content-center reveal">
-      <div class="col-md-4">
-        <div class="bot-plan starter">
-          <div class="bp-name">STARTER</div>
-          <div class="bp-price">15,000</div>
-          <div class="bp-unit">TZS / month</div>
-          <div class="bp-feat"><i class="fas fa-check bi" style="color:#25d366"></i>5,000 messages / month</div>
-          <div class="bp-feat"><i class="fas fa-check bi" style="color:#25d366"></i>WhatsApp Integration</div>
-          <div class="bp-feat"><i class="fas fa-check bi" style="color:#25d366"></i>Swahili + English AI</div>
-          <div class="bp-feat"><i class="fas fa-check bi" style="color:#25d366"></i>Basic Dashboard</div>
-          <div class="bp-feat"><i class="fas fa-check bi" style="color:#25d366"></i>Services & FAQs</div>
-          <a href="{% url 'chatbot_register' %}" class="bp-btn o">Get Started</a>
-          <div class="bp-trial"><span class="d"></span> 7-day free trial</div>
-        </div>
-      </div>
-      <div class="col-md-4">
-        <div class="bot-plan business">
-          <div class="bp-badge">⭐ Most Popular</div>
-          <div class="bp-name" style="color:#25d366">BUSINESS</div>
-          <div class="bp-price">30,000</div>
-          <div class="bp-unit">TZS / month</div>
-          <div class="bp-feat"><i class="fas fa-check bi" style="color:#25d366"></i>10,000 messages / month</div>
-          <div class="bp-feat"><i class="fas fa-check bi" style="color:#25d366"></i>WhatsApp Integration</div>
-          <div class="bp-feat"><i class="fas fa-check bi" style="color:#25d366"></i>Swahili + English AI</div>
-          <div class="bp-feat"><i class="fas fa-check bi" style="color:#25d366"></i>Full Analytics Dashboard</div>
-          <div class="bp-feat"><i class="fas fa-check bi" style="color:#25d366"></i>Priority Support</div>
-          <a href="{% url 'chatbot_register' %}?plan=pro" class="bp-btn g">Get Started</a>
-          <div class="bp-trial"><span class="d"></span> 7-day free trial</div>
-        </div>
-      </div>
-      <div class="col-md-4">
-        <div class="bot-plan enterprise">
-          <div class="bp-name">ENTERPRISE</div>
-          <div class="bp-price">60,000</div>
-          <div class="bp-unit">TZS / month</div>
-          <div class="bp-feat"><i class="fas fa-infinity bi" style="color:#25d366"></i>Unlimited messages</div>
-          <div class="bp-feat"><i class="fas fa-check bi" style="color:#25d366"></i>WhatsApp Integration</div>
-          <div class="bp-feat"><i class="fas fa-check bi" style="color:#25d366"></i>Swahili + English AI</div>
-          <div class="bp-feat"><i class="fas fa-check bi" style="color:#25d366"></i>Advanced Analytics</div>
-          <div class="bp-feat"><i class="fas fa-check bi" style="color:#25d366"></i>Dedicated Support</div>
-          <a href="{% url 'chatbot_register' %}?plan=enterprise" class="bp-btn o">Get Started</a>
-          <div class="bp-trial"><span class="d"></span> 7-day free trial</div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ══════════════════════════════════════════════════════════
-     SERVICES
-══════════════════════════════════════════════════════════ -->
-<section class="sf-svc">
-  <div class="container position-relative" style="z-index:2">
-    <div class="row justify-content-center text-center mb-5">
-      <div class="col-lg-6 reveal">
-        <div class="sf-eye">What We Build</div>
-        <h2 style="font-family:var(--ff-display);font-size:clamp(24px,4vw,46px);font-weight:900;color:#fff;letter-spacing:-1px;line-height:1.1;margin-bottom:12px">Services Built for<br>Modern Businesses</h2>
-        <p style="color:rgba(255,255,255,.35);font-size:14px;line-height:1.8;font-family:var(--ff-mono)">End-to-end digital services — from UI design to deployment and ongoing support.</p>
-      </div>
-    </div>
-    <div class="row g-3 g-md-4">
-      {% for svc in services %}
-      <div class="col-12 col-sm-6 col-lg-4 reveal" style="transition-delay:{{ forloop.counter0 }}00ms">
-        <div class="sf-card">
-          <div class="sf-card-n">{{ forloop.counter|stringformat:"02d" }} / {{ services|length|stringformat:"02d" }}</div>
-          <div class="sf-card-ico"><i class="fas fa-globe"></i></div>
-          <div class="sf-card-t">{{ svc.Service_type }}</div>
-          <p class="sf-card-d">{{ svc.description|striptags|truncatewords:22 }}</p>
-        </div>
-      </div>
-      {% empty %}
-      <div class="col-12 col-sm-6 col-lg-4 reveal">
-        <div class="sf-card"><div class="sf-card-n">01 / 06</div><div class="sf-card-ico"><i class="fas fa-globe"></i></div><div class="sf-card-t">Website Development</div><p class="sf-card-d">Modern responsive websites built with the latest frameworks for speed, security, and user experience.</p></div>
-      </div>
-      <div class="col-12 col-sm-6 col-lg-4 reveal" style="transition-delay:100ms">
-        <div class="sf-card"><div class="sf-card-n">02 / 06</div><div class="sf-card-ico"><i class="fas fa-mobile-screen"></i></div><div class="sf-card-t">Mobile App Development</div><p class="sf-card-d">Android &amp; iOS apps designed for scale, performance, and seamless user experience.</p></div>
-      </div>
-      <div class="col-12 col-sm-6 col-lg-4 reveal" style="transition-delay:200ms">
-        <div class="sf-card"><div class="sf-card-n">03 / 06</div><div class="sf-card-ico"><i class="fas fa-server"></i></div><div class="sf-card-t">Web Hosting &amp; Servers</div><p class="sf-card-d">Reliable hosting with 99.9% uptime, daily backups, and proactive monitoring.</p></div>
-      </div>
-      <div class="col-12 col-sm-6 col-lg-4 reveal" style="transition-delay:300ms">
-        <div class="sf-card" style="border-color:rgba(37,211,102,.15)"><div class="sf-card-n">04 / 06</div><div class="sf-card-ico"><i class="fab fa-whatsapp" style="color:#25d366"></i></div><div class="sf-card-t">AI WhatsApp Bot</div><p class="sf-card-d">JamiiBot — AI assistant that handles customer questions 24/7 in Swahili and English automatically.</p></div>
-      </div>
-      <div class="col-12 col-sm-6 col-lg-4 reveal" style="transition-delay:400ms">
-        <div class="sf-card"><div class="sf-card-n">05 / 06</div><div class="sf-card-ico"><i class="fas fa-palette"></i></div><div class="sf-card-t">UI/UX Design</div><p class="sf-card-d">Intuitive interfaces and thoughtful designs that users love and convert well.</p></div>
-      </div>
-      <div class="col-12 col-sm-6 col-lg-4 reveal" style="transition-delay:500ms">
-        <div class="sf-card"><div class="sf-card-n">06 / 06</div><div class="sf-card-ico"><i class="fas fa-gears"></i></div><div class="sf-card-t">System Integration</div><p class="sf-card-d">Smart integrations connecting your tools, APIs, and platforms into one seamless workflow.</p></div>
-      </div>
-      {% endfor %}
-    </div>
-    <div class="text-center mt-4 mt-md-5 reveal">
-      <a href="{% url 'service' %}" class="h-cta-ghost" style="display:inline-flex">View All Services <i class="fas fa-arrow-right" style="margin-left:4px"></i></a>
-    </div>
-  </div>
-</section>
-
-<!-- ══════════════════════════════════════════════════════════
-     STATS
-══════════════════════════════════════════════════════════ -->
-<div class="sf-stats">
-  <div class="sf-stats-g">
-    <div class="sf-stat reveal"><div class="sf-stat-n"><span class="counter" data-target="485">0</span><em>+</em></div><div class="sf-stat-l">Satisfied Clients</div></div>
-    <div class="sf-stat reveal" style="transition-delay:.1s"><div class="sf-stat-n"><span class="counter" data-target="320">0</span><em>+</em></div><div class="sf-stat-l">Projects Delivered</div></div>
-    <div class="sf-stat reveal" style="transition-delay:.2s"><div class="sf-stat-n"><span class="counter" data-target="99">0</span><em>%</em></div><div class="sf-stat-l">Uptime Guarantee</div></div>
-    <div class="sf-stat reveal" style="transition-delay:.3s"><div class="sf-stat-n"><span class="counter" data-target="24">0</span><em>/7</em></div><div class="sf-stat-l">Bot Availability</div></div>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════════════════════════
-     PROCESS
-══════════════════════════════════════════════════════════ -->
-<section class="sf-proc">
-  <div class="container position-relative" style="z-index:2">
-    <div class="row justify-content-center text-center mb-5">
-      <div class="col-lg-6 reveal">
-        <div class="sf-eye">How It Works</div>
-        <h2 style="font-family:var(--ff-display);font-size:clamp(24px,4vw,46px);font-weight:900;color:#fff;letter-spacing:-1px;line-height:1.1">From Idea to Launch<br>in 4 Steps</h2>
-      </div>
-    </div>
-    <div class="row g-4">
-      <div class="col-6 col-md-3 reveal"><div class="sf-pstep"><div class="sf-pn">01</div><div class="sf-pt">Discovery</div><p class="sf-pd">We understand your goals, audience, and technical requirements in depth.</p></div></div>
-      <div class="col-6 col-md-3 reveal" style="transition-delay:.1s"><div class="sf-pstep"><div class="sf-pn">02</div><div class="sf-pt">Design</div><p class="sf-pd">We craft beautiful, intuitive wireframes and UI designs tailored to your brand.</p></div></div>
-      <div class="col-6 col-md-3 reveal" style="transition-delay:.2s"><div class="sf-pstep"><div class="sf-pn">03</div><div class="sf-pt">Development</div><p class="sf-pd">We build with clean, modern, scalable code — tested thoroughly before launch.</p></div></div>
-      <div class="col-6 col-md-3 reveal" style="transition-delay:.3s"><div class="sf-pstep"><div class="sf-pn">04</div><div class="sf-pt">Launch &amp; Support</div><p class="sf-pd">We deploy, monitor, and provide ongoing support so you're always running smoothly.</p></div></div>
-    </div>
-  </div>
-</section>
-
-{% if latest_posts %}
-<!-- ══════════════════════════════════════════════════════════
-     BLOG — Latest articles
-══════════════════════════════════════════════════════════ -->
-<section class="sf-blog">
-  <div class="container position-relative" style="z-index:2">
-    <div class="row justify-content-center text-center mb-5">
-      <div class="col-lg-7 reveal">
-        <div class="sf-eye">From Our Blog</div>
-        <h2 style="font-family:var(--ff-display);font-size:clamp(24px,4vw,46px);font-weight:900;color:#fff;letter-spacing:-1px;line-height:1.1;margin-bottom:12px">Insights for Tanzanian<br>Businesses</h2>
-        <p style="color:rgba(255,255,255,.35);font-size:14px;line-height:1.8;font-family:var(--ff-mono)">Guides on websites, WhatsApp bots, SEO and going digital — in English and Swahili.</p>
-      </div>
-    </div>
-    <div class="row g-3 g-md-4">
-      {% for post in latest_posts %}
-      <div class="col-md-4 reveal">
-        <a href="{% url 'blog_detail' post.slug %}" class="sf-blog-card">
-          <div class="sf-blog-img" style="background-image:url('{{ post.cover_image|default:'' }}')">
-            {% if not post.cover_image %}<span class="sf-blog-ph">JamiiTek</span>{% endif %}
-          </div>
-          <div class="sf-blog-body">
-            {% if post.category %}<span class="sf-blog-cat">{{ post.category.name }}</span>{% endif %}
-            <h3 class="sf-blog-title">{{ post.title }}</h3>
-            <p class="sf-blog-exc">{{ post.excerpt|truncatewords:18 }}</p>
-            <div class="sf-blog-meta">
-              <span>{{ post.published_at|date:'M j, Y' }}</span>
-              <span>{{ post.read_minutes }} min read</span>
-            </div>
-          </div>
-        </a>
-      </div>
-      {% endfor %}
-    </div>
-    <div class="text-center mt-5 reveal">
-      <a href="{% url 'blog_list' %}" class="sf-blog-all">Read all articles <i class="fas fa-arrow-right"></i></a>
-    </div>
-  </div>
-</section>
-{% endif %}
-
-<!-- ══════════════════════════════════════════════════════════
-     FINAL CTA
-══════════════════════════════════════════════════════════ -->
-<section class="sf-cta-sec">
-  <div class="container">
-    <div class="sf-cta-band reveal">
-      <div class="sf-eye" style="justify-content:center">Ready to Build?</div>
-      <h2 class="sf-cta-h">Let's Create Something<br>Remarkable Together</h2>
-      <p class="sf-cta-p">Tell us about your project — we'll send back a detailed proposal within 24 hours, no commitment required.</p>
-      <div class="d-flex flex-wrap gap-3 justify-content-center" style="position:relative;z-index:2">
-        <a href="{% url 'get_started' %}" class="sf-cta-main">Start Your Project <i class="fas fa-arrow-right"></i></a>
-        <a href="/bot/" class="sf-cta-main" style="background:linear-gradient(135deg,#25d366,#00b5d8)"><i class="fab fa-whatsapp"></i> Get AI Bot Free</a>
-        <a href="{% url 'contact' %}" class="sf-cta-alt">Talk to Us First</a>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ══════════════════════════════════════════════════════════
-     SCRIPTS
-══════════════════════════════════════════════════════════ -->
-<script>
-/* ── PARTICLE CANVAS ─────────────────────────────── */
-(function(){
-  const c=document.getElementById('heroCanvas');
-  if(!c)return;
-  const ctx=c.getContext('2d');
-  let W,H,pts=[],mouse={x:0,y:0};
-  function rs(){W=c.width=window.innerWidth;H=c.height=c.parentElement.offsetHeight||window.innerHeight}
-  rs();window.addEventListener('resize',rs);
-  window.addEventListener('mousemove',e=>{mouse.x=e.clientX;mouse.y=e.clientY});
-  for(let i=0;i<80;i++)pts.push({
-    x:Math.random()*window.innerWidth,y:Math.random()*1200,
-    vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,
-    r:Math.random()*1.5+.3,o:Math.random()*.4+.05,
-    c:Math.random()>.7?'180,77,255':Math.random()>.5?'0,200,255':'37,211,102'
-  });
-  function draw(){
-    ctx.clearRect(0,0,W,H);
-    /* connections */
-    for(let i=0;i<pts.length;i++){
-      for(let j=i+1;j<pts.length;j++){
-        const dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y;
-        const dist=Math.sqrt(dx*dx+dy*dy);
-        if(dist<130){
-          ctx.beginPath();
-          ctx.moveTo(pts[i].x,pts[i].y);
-          ctx.lineTo(pts[j].x,pts[j].y);
-          ctx.strokeStyle=`rgba(0,200,255,${.06*(1-dist/130)})`;
-          ctx.lineWidth=.5;
-          ctx.stroke();
-        }
-      }
+  function gap(){ return parseFloat(getComputedStyle(track).columnGap) || 16; }
+  function step(){
+    var card = track.firstElementChild;
+    return card ? card.getBoundingClientRect().width + gap() : track.clientWidth * .8;
+  }
+  function sync(){
+    var max = track.scrollWidth - track.clientWidth;
+    if (prev) prev.disabled = track.scrollLeft < 8;
+    if (next) next.disabled = track.scrollLeft > max - 8;
+    if (bar) {
+      var pct = max > 0 ? track.scrollLeft / max : 0,
+          w = Math.max(18, Math.min(100, (track.clientWidth / track.scrollWidth) * 100));
+      bar.style.width = w + '%';
+      bar.style.transform = 'translateX(' + (pct * ((100 - w) / w) * 100) + '%)';
     }
-    pts.forEach(p=>{
-      /* mouse repel */
-      const dx=p.x-mouse.x,dy=p.y-mouse.y;
-      const d=Math.sqrt(dx*dx+dy*dy);
-      if(d<100){p.vx+=dx/d*.04;p.vy+=dy/d*.04}
-      ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-      ctx.fillStyle=`rgba(${p.c},${p.o})`;ctx.fill();
-      p.x+=p.vx;p.y+=p.vy;
-      if(p.x<0)p.x=W;if(p.x>W)p.x=0;
-      if(p.y<0)p.y=H;if(p.y>H)p.y=0;
-      p.vx*=.99;p.vy*=.99;
-    });
-    requestAnimationFrame(draw);
   }
-  draw();
-})();
+  if (prev) prev.addEventListener('click', function(){ track.scrollBy({left: -step(), behavior:'smooth'}); });
+  if (next) next.addEventListener('click', function(){ track.scrollBy({left: step(), behavior:'smooth'}); });
+  track.addEventListener('scroll', sync, {passive:true});
+  addEventListener('resize', sync);
 
-/* ── CHAT DEMO ANIMATION ─────────────────────────── */
+  var down = false, startX = 0, startL = 0, moved = 0;
+  track.addEventListener('pointerdown', function(e){
+    if (e.pointerType === 'touch') return;
+    down = true; moved = 0; startX = e.clientX; startL = track.scrollLeft;
+    track.classList.add('is-drag');
+  });
+  addEventListener('pointermove', function(e){
+    if (!down) return;
+    var dx = e.clientX - startX; moved = Math.abs(dx); track.scrollLeft = startL - dx;
+  });
+  addEventListener('pointerup', function(){
+    if (!down) return;
+    down = false; track.classList.remove('is-drag');
+  });
+  track.addEventListener('click', function(e){ if (moved > 8) { e.preventDefault(); e.stopPropagation(); } }, true);
+
+  sync();
+}
+carousel('wkTrack', 'wkPrev', 'wkNext', 'wkBar');
+carousel('tmTrack', 'tmPrev', 'tmNext', null);
+
+/* ═════ DOMAIN SEARCH ═════ */
 (function(){
-  const seq=[
-    {id:'dm1',delay:400},{id:'dm2',delay:1600},
-    {id:'dmTyp',delay:2200,hideAt:3200},
-    {id:'dm3',delay:3200},{id:'dm4',delay:4600},
-    {id:'dmTyp2',delay:5200,hideAt:6200},
-    {id:'dm5',delay:6200}
-  ];
-  function run(){
-    seq.forEach(s=>{
-      const el=document.getElementById(s.id);
-      if(!el)return;
-      el.classList.remove('show');
-      setTimeout(()=>el.classList.add('show'),s.delay);
-      if(s.hideAt)setTimeout(()=>el.classList.remove('show'),s.hideAt);
-    });
-    setTimeout(run,10000);
+  var form = document.getElementById('domForm');
+  if (!form) return;
+  var input = document.getElementById('domq'), tld = document.getElementById('domtld'),
+      btn = document.getElementById('domBtn'), box = document.getElementById('domRes'),
+      ENDPOINT = "{% url 'domain_check' %}", CONTACT = "{% url 'contact' %}";
+
+  var ICON = {
+    free:  '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>',
+    taken: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M17 9V7a5 5 0 0 0-10 0v2H5v12h14V9zM9 7a3 3 0 0 1 6 0v2H9z"/></svg>',
+    warn:  '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 1 21h22zm1 15h-2v-2h2zm0-4h-2V8h2z"/></svg>'
+  };
+  function money(n){ return 'Tsh ' + Number(n).toLocaleString('en-US'); }
+  function esc(s){ var d = document.createElement('div'); d.textContent = s == null ? '' : s; return d.innerHTML; }
+
+  function render(d){
+    var kind = d.status === 'available' ? 'free' : (d.status === 'taken' ? 'taken' : 'warn'),
+        m = d.messages || {},
+        html = '<div class="dres__top"><span class="dres__ico">' + ICON[kind] + '</span>' +
+               '<div><h3>' + esc(m.headline || d.domain) + '</h3><p>' + esc(m.body || '') + '</p></div>';
+    if (d.status === 'available' && d.price) {
+      html += '<span class="dres__price"><b>' + money(d.price) + '</b><small>per year</small></span>';
+    }
+    html += '</div><div class="dres__acts">';
+    if (d.status === 'available') {
+      html += '<a class="btn btn--wa btn--sm" href="' + esc(d.whatsapp) + '" target="_blank" rel="noopener">Get this domain</a>' +
+              '<a class="btn btn--white btn--sm" href="' + CONTACT + '">Contact form</a>';
+    } else if (d.status === 'taken') {
+      html += '<a class="btn btn--gold btn--sm" href="' + esc(d.whatsapp) + '" target="_blank" rel="noopener">Help me find another name</a>';
+    } else {
+      html += '<a class="btn btn--gold btn--sm" href="' + esc(d.whatsapp) + '" target="_blank" rel="noopener">Ask JamiiTek</a>';
+    }
+    html += '</div>';
+    if (d.suggestions && d.suggestions.length) {
+      html += '<div class="dres__alt"><h4>Available alternatives</h4><div class="chips">';
+      d.suggestions.forEach(function(s){
+        html += '<button type="button" class="chip" data-domain="' + esc(s.domain) + '">' +
+                '<b>' + esc(s.domain) + '</b><small>' + money(s.price) + '</small></button>';
+      });
+      html += '</div></div>';
+    }
+    box.className = 'dres is-on dres--' + kind;
+    box.innerHTML = html;
   }
-  run();
-})();
 
-/* ── SCROLL REVEAL ───────────────────────────────── */
-(function(){
-  const io=new IntersectionObserver((entries)=>{
-    entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');io.unobserve(e.target);}});
-  },{threshold:.12});
-  document.querySelectorAll('.reveal,.reveal-l,.reveal-r').forEach(el=>io.observe(el));
-})();
+  function search(value, extension){
+    box.className = 'dres is-on dres--warn';
+    box.innerHTML = '<div class="dres__top"><span class="dres__ico"><span class="spin"></span></span>' +
+                    '<div><h3>Searching&hellip;</h3><p>Checking this domain with the registry.</p></div></div>';
+    btn.disabled = true;
+    fetch(ENDPOINT + '?q=' + encodeURIComponent(value) + (extension ? '&tld=' + encodeURIComponent(extension) : ''),
+          {headers: {'X-Requested-With': 'XMLHttpRequest'}})
+      .then(function(r){ return r.json(); })
+      .then(render)
+      .catch(function(){
+        box.className = 'dres is-on dres--warn';
+        box.innerHTML = '<div class="dres__top"><span class="dres__ico">' + ICON.warn + '</span>' +
+          '<div><h3>Connection problem</h3><p>We could not reach the checker. Try again, or contact us directly.</p></div></div>';
+      })
+      .then(function(){ btn.disabled = false; });
+  }
 
-/* ── COUNTER ANIMATION ───────────────────────────── */
-(function(){
-  const io=new IntersectionObserver((entries)=>{
-    entries.forEach(e=>{
-      if(e.isIntersecting){
-        const el=e.target,target=+el.dataset.target;
-        let start=0,dur=1800,step=16;
-        const inc=target/(dur/step);
-        const t=setInterval(()=>{
-          start+=inc;
-          if(start>=target){start=target;clearInterval(t);}
-          el.textContent=Math.floor(start);
-        },step);
-        io.unobserve(e.target);
-      }
-    });
-  },{threshold:.3});
-  document.querySelectorAll('.counter').forEach(el=>io.observe(el));
-})();
-
-
-(function(){
-  try { if(localStorage.getItem('jt_tpl_ann')==='0'){ document.getElementById('tplAnnounce').style.display='none'; } } catch(e){}
-  document.getElementById('taClose').addEventListener('click',function(){
-    document.getElementById('tplAnnounce').style.display='none';
-    try{ localStorage.setItem('jt_tpl_ann','0'); }catch(e){}
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    var v = input.value.trim();
+    if (v) search(v, tld.value);
+  });
+  box.addEventListener('click', function(e){
+    var chip = e.target.closest('.chip');
+    if (!chip) return;
+    input.value = chip.dataset.domain;
+    search(chip.dataset.domain, '');
   });
 })();
-
+})();
 </script>
-{% endblock %}
+</body>
+</html>
