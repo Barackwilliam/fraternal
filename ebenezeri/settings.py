@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.humanize',
     'apps',
     'apps.chatbot',
     'uploadcare',
@@ -208,3 +209,6 @@ else:
             'LOCATION': 'jamiitek-builder',
         }
     }
+
+
+SITE_URL = 'https://jamiitek.com'

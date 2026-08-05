@@ -1,0 +1,81 @@
+{% extends 'portal/base.html' %}
+{% load humanize %}
+{% block title %}My Receipts{% endblock %}
+{% block content %}
+<style>
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+.f0{animation:fadeUp .4s ease both}
+.pg-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:24px;flex-wrap:wrap}
+.pg-title{font-family:var(--head);font-size:24px;font-weight:800;color:var(--text);margin-bottom:4px}
+.pg-sub{font-family:var(--mono);font-size:11px;color:var(--text-3)}
+
+.tot-card{background:var(--card);border:1px solid var(--border);border-radius:16px;
+  padding:18px 22px;margin-bottom:20px}
+.tot-card .k{font-family:var(--mono);font-size:10px;letter-spacing:.6px;text-transform:uppercase;color:var(--text-3)}
+.tot-card .v{font-family:var(--head);font-size:24px;font-weight:800;color:#4ade80;margin-top:4px}
+
+.rcpt{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px 20px;
+  margin-bottom:12px;display:grid;grid-template-columns:1fr auto auto;gap:18px;align-items:center;
+  transition:border-color .22s,transform .22s}
+.rcpt:hover{border-color:rgba(139,92,246,.28);transform:translateY(-3px)}
+.rcpt .num{font-family:var(--mono);font-size:11px;color:var(--text-3)}
+.rcpt .site{font-family:var(--head);font-size:15px;font-weight:700;color:var(--text);margin-top:3px}
+.rcpt .desc{font-size:12px;color:var(--text-3);margin-top:3px}
+.rcpt .amt{font-family:var(--head);font-size:18px;font-weight:800;color:var(--text);text-align:right;white-space:nowrap}
+.rcpt .when{font-size:11px;color:var(--text-3);text-align:right;margin-top:3px;white-space:nowrap}
+.badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:99px;
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.4px;margin-top:8px;
+  background:rgba(74,222,128,.12);color:#4ade80;border:1px solid rgba(74,222,128,.26)}
+.badge.part{background:rgba(245,166,35,.12);color:#f5a623;border-color:rgba(245,166,35,.26)}
+@media (max-width:760px){
+  .rcpt{grid-template-columns:1fr;gap:12px}
+  .rcpt .amt,.rcpt .when{text-align:left}
+  .rcpt .jt-btn{width:100%;justify-content:center}
+}
+.empty{background:var(--card);border:1px dashed var(--border);border-radius:18px;
+  padding:48px 24px;text-align:center;color:var(--text-3)}
+.empty h3{font-family:var(--head);color:var(--text);font-size:17px;margin-bottom:8px}
+</style>
+
+<div class="pg-head f0">
+  <div>
+    <div class="pg-title">My Receipts</div>
+    <div class="pg-sub">Payment receipts for your websites</div>
+  </div>
+  <a href="{% url 'portal_website_list' %}" class="jt-btn btn-ghost" style="font-size:12px">
+    <i class="fas fa-globe"></i> My Websites</a>
+</div>
+
+{% if receipts %}
+<div class="tot-card f0">
+  <div class="k">Total paid to JamiiTek</div>
+  <div class="v">TZS {{ total_paid|floatformat:0|intcomma }}</div>
+</div>
+{% endif %}
+
+{% for r in receipts %}
+<div class="rcpt f0">
+  <div>
+    <div class="num">{{ r.receipt_number }}</div>
+    <div class="site">{{ r.website.name }}</div>
+    <div class="desc">{{ r.title }}</div>
+    <span class="badge {% if not r.is_fully_paid %}part{% endif %}">
+      <i class="fas fa-{% if r.is_fully_paid %}circle-check{% else %}hourglass-half{% endif %}"></i>
+      {{ r.status_label }}</span>
+  </div>
+  <div>
+    <div class="amt">{{ r.currency }} {{ r.amount_paid|floatformat:0|intcomma }}</div>
+    <div class="when">{{ r.payment_date|date:"d M Y" }} · {{ r.get_payment_method_display }}</div>
+  </div>
+  <a href="{% url 'portal_receipt_pdf' r.pk %}" class="jt-btn btn-primary" style="font-size:12px">
+    {% if r.needs_signature %}<i class="fas fa-pen-nib"></i> Sign &amp; download
+    {% else %}<i class="fas fa-download"></i> Download{% endif %}</a>
+</div>
+{% empty %}
+<div class="empty f0">
+  <h3>No receipts yet</h3>
+  <p>Once a payment is recorded for one of your websites,<br>
+     the receipt will appear here for download.</p>
+</div>
+{% endfor %}
+{% endblock %}

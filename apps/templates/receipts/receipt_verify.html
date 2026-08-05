@@ -1,0 +1,136 @@
+{% load humanize %}<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% if valid %}Receipt {{ r.receipt_number }} verified{% else %}Receipt not found{% endif %} — JamiiTek</title>
+<meta name="robots" content="noindex, nofollow">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#04101F;--navy-2:#0A2245;--gold:#F5A623;--green:#1FA97A;--red:#D64545;
+  --ink:#0C1626;--muted:#66788F;--line:#E3E9F2;--bg:#F6F8FB}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:'Inter',system-ui,-apple-system,sans-serif;font-size:15px;line-height:1.6;
+  -webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:'Sora',sans-serif;margin:0;letter-spacing:-.03em;line-height:1.18}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:520px;margin:0 auto;padding:24px 18px 60px}
+
+.top{background:var(--navy);color:#fff;padding:20px 0;margin-bottom:26px}
+.top .wrap{padding-block:0;display:flex;align-items:center;justify-content:space-between;gap:14px}
+.brand{font-family:'Sora',sans-serif;font-weight:800;font-size:19px;letter-spacing:-.04em}
+.brand em{font-style:normal;color:var(--gold)}
+.top small{font-size:11px;color:#8FA8C6;letter-spacing:.08em;text-transform:uppercase}
+
+.verdict{border-radius:20px;padding:30px 24px;text-align:center;color:#fff;margin-bottom:20px}
+.verdict.ok{background:linear-gradient(140deg,#0B3A2C,var(--green))}
+.verdict.no{background:linear-gradient(140deg,#4A1414,var(--red))}
+.mark{width:62px;height:62px;border-radius:50%;background:rgba(255,255,255,.18);
+  display:grid;place-items:center;margin:0 auto 16px;font-size:30px;line-height:1}
+.verdict h1{font-size:23px;margin-bottom:9px}
+.verdict p{font-size:14px;color:rgba(255,255,255,.9);margin:0}
+
+.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px;margin-bottom:16px;
+  box-shadow:0 1px 2px rgba(12,22,38,.05),0 12px 34px rgba(12,22,38,.06)}
+.card h2{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
+  font-weight:600;margin-bottom:16px}
+.row{display:flex;justify-content:space-between;gap:16px;padding:9px 0;border-bottom:1px solid #F1F4F9;
+  font-size:14px}
+.row:last-child{border-bottom:0}
+.row .k{color:var(--muted);flex:none}
+.row .v{text-align:right;font-weight:500;overflow-wrap:anywhere}
+.row .v.big{font-family:'Sora',sans-serif;font-size:19px;font-weight:800;color:var(--navy-2)}
+.tag{display:inline-block;padding:4px 11px;border-radius:99px;font-size:11px;font-weight:600;
+  letter-spacing:.05em}
+.tag.paid{background:rgba(31,169,122,.12);color:#127956}
+.tag.part{background:rgba(245,166,35,.14);color:#96650C}
+.tag.sig{background:rgba(46,123,246,.12);color:#1B58C4}
+.tag.nosig{background:#F1F4F9;color:var(--muted)}
+
+.foot{text-align:center;font-size:12.5px;color:var(--muted);margin-top:26px;line-height:1.7}
+.foot a{color:var(--navy-2);font-weight:600;border-bottom:1px solid var(--line)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  background:var(--gold);color:#1A1206;font-family:'Sora',sans-serif;font-weight:600;
+  font-size:13.5px;padding:13px 24px;border-radius:10px;min-height:46px;width:100%}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div class="wrap">
+    <span class="brand">Jamii<em>Tek</em></span>
+    <small>Receipt check</small>
+  </div>
+</div>
+
+<div class="wrap">
+
+{% if valid %}
+  <div class="verdict ok">
+    <div class="mark">&#10003;</div>
+    <h1>This receipt is genuine</h1>
+    <p>Issued by JamiiTek on {{ r.payment_date|date:"d F Y" }}</p>
+  </div>
+
+  <div class="card">
+    <h2>Receipt details</h2>
+    <div class="row"><span class="k">Receipt no.</span><span class="v">{{ r.receipt_number }}</span></div>
+    <div class="row"><span class="k">Client</span><span class="v">{{ r.client_name|default:"—" }}</span></div>
+    {% if r.client_company %}
+    <div class="row"><span class="k">Company</span><span class="v">{{ r.client_company }}</span></div>
+    {% endif %}
+    <div class="row"><span class="k">Website</span><span class="v">{{ r.website.name }}</span></div>
+    <div class="row"><span class="k">For</span><span class="v">{{ r.get_kind_display }}</span></div>
+    <div class="row"><span class="k">Method</span><span class="v">{{ r.get_payment_method_display }}</span></div>
+    {% if r.payment_reference %}
+    <div class="row"><span class="k">Reference</span><span class="v">{{ r.payment_reference }}</span></div>
+    {% endif %}
+    <div class="row"><span class="k">Amount paid</span>
+      <span class="v big">{{ r.currency }} {{ r.amount_paid|floatformat:0|intcomma }}</span></div>
+    <div class="row"><span class="k">Status</span>
+      <span class="v"><span class="tag {% if r.is_fully_paid %}paid{% else %}part{% endif %}">
+        {{ r.status_label }}</span></span></div>
+    <div class="row"><span class="k">Signature</span>
+      <span class="v">
+        {% if r.is_signed %}
+          <span class="tag sig">SIGNED {{ r.signed_at|date:"d M Y" }}</span>
+        {% else %}
+          <span class="tag nosig">NOT SIGNED</span>
+        {% endif %}
+      </span></div>
+  </div>
+
+  <a class="btn" href="{{ r.public_url }}?pdf=1">Download this receipt</a>
+
+  <p class="foot">
+    Anything look wrong? Contact us on
+    <a href="tel:+255629712678">+255 629 712 678</a> or
+    <a href="mailto:info@jamiitek.com">info@jamiitek.com</a>
+    quoting {{ r.receipt_number }}.
+  </p>
+
+{% else %}
+  <div class="verdict no">
+    <div class="mark">&#10007;</div>
+    <h1>No receipt found</h1>
+    <p>This code does not match any receipt we have issued.</p>
+  </div>
+
+  <div class="card">
+    <h2>What this could mean</h2>
+    <div class="row"><span class="v" style="text-align:left">
+      The code was mistyped, the receipt has been withdrawn, or the document
+      did not come from JamiiTek.</span></div>
+  </div>
+
+  <p class="foot">
+    If someone gave you this document, please check with us before paying anything.<br>
+    <a href="tel:+255629712678">+255 629 712 678</a> &middot;
+    <a href="mailto:info@jamiitek.com">info@jamiitek.com</a>
+  </p>
+{% endif %}
+
+</div>
+</body>
+</html>

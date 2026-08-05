@@ -1,0 +1,110 @@
+{% extends 'management/base.html' %}
+{% load humanize %}
+{% block title %}Receipts{% endblock %}
+{% block content %}
+<style>
+.rl-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px;flex-wrap:wrap}
+.rl-title{font-family:var(--head);font-size:24px;font-weight:800;color:var(--text)}
+.rl-sub{font-family:var(--mono);font-size:11px;color:var(--text-3)}
+.rl-tools{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+.rl-tools input,.rl-tools select{background:rgba(255,255,255,.03);border:1px solid var(--border);
+  border-radius:10px;padding:10px 13px;color:var(--text);font-size:13px;min-height:42px}
+.rl-tools input{flex:1;min-width:180px}
+.rl-stat{background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:16px 20px;margin-bottom:18px;display:flex;gap:28px;flex-wrap:wrap}
+.rl-stat .k{font-family:var(--mono);font-size:10px;letter-spacing:.6px;text-transform:uppercase;color:var(--text-3)}
+.rl-stat .v{font-family:var(--head);font-size:20px;font-weight:800;color:var(--text);margin-top:3px}
+.rl-stat .v.g{color:#4ade80}
+
+.rc{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 18px;
+  margin-bottom:11px;display:grid;grid-template-columns:1.1fr 1.4fr auto auto;gap:16px;align-items:center;
+  transition:border-color .2s,transform .2s}
+.rc:hover{border-color:rgba(0,212,255,.28);transform:translateY(-2px)}
+.rc .num{font-family:var(--mono);font-size:12px;color:var(--cyan)}
+.rc .site{font-family:var(--head);font-size:14px;font-weight:700;color:var(--text);margin-top:3px}
+.rc .who{font-size:12px;color:var(--text-3);margin-top:2px}
+.rc .amt{font-family:var(--head);font-size:17px;font-weight:800;color:var(--text);text-align:right;white-space:nowrap}
+.rc .meta{font-size:11px;color:var(--text-3);text-align:right;margin-top:2px;white-space:nowrap}
+.rc .acts{display:flex;gap:7px}
+.tag{display:inline-flex;align-items:center;gap:5px;padding:4px 9px;border-radius:99px;
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.4px;margin-top:6px}
+.t-paid{background:rgba(74,222,128,.12);color:#4ade80;border:1px solid rgba(74,222,128,.26)}
+.t-part{background:rgba(245,166,35,.12);color:#f5a623;border:1px solid rgba(245,166,35,.26)}
+.t-hid{background:rgba(148,163,184,.12);color:#94a3b8;border:1px solid rgba(148,163,184,.26)}
+@media (max-width:860px){
+  .rc{grid-template-columns:1fr;gap:10px}
+  .rc .amt,.rc .meta{text-align:left}
+}
+.empty{background:var(--card);border:1px dashed var(--border);border-radius:16px;
+  padding:48px 24px;text-align:center;color:var(--text-3)}
+.empty h3{font-family:var(--head);color:var(--text);font-size:17px;margin-bottom:8px}
+</style>
+
+<div class="rl-head">
+  <div>
+    <div class="rl-title">Development Receipts</div>
+    <div class="rl-sub">Proof of payment for building each client website</div>
+  </div>
+  <a href="{% url 'receipt_new' %}" class="jt-btn btn-primary" style="font-size:12px">
+    <i class="fas fa-plus"></i> New receipt</a>
+</div>
+
+<div class="rl-stat">
+  <div>
+    <div class="k">Receipts issued</div>
+    <div class="v">{{ receipts|length }}</div>
+  </div>
+  <div>
+    <div class="k">Total received</div>
+    <div class="v g">TZS {{ total_received|floatformat:0|intcomma }}</div>
+  </div>
+</div>
+
+<form method="get" class="rl-tools">
+  <input type="text" name="q" value="{{ q }}" placeholder="Search receipt no, website, client, reference...">
+  <select name="website" onchange="this.form.submit()">
+    <option value="">All websites</option>
+    {% for w in websites %}
+    <option value="{{ w.pk }}"{% if website_id == w.pk|stringformat:"s" %} selected{% endif %}>
+      {{ w.name }} — {{ w.client.name }}</option>
+    {% endfor %}
+  </select>
+  <button type="submit" class="jt-btn btn-ghost" style="font-size:12px"><i class="fas fa-search"></i> Filter</button>
+</form>
+
+{% for r in receipts %}
+<div class="rc">
+  <div>
+    <div class="num">{{ r.receipt_number }}</div>
+    <div class="site">{{ r.website.name }}</div>
+    <div class="who">{{ r.website.client.name }}{% if r.website.client.company %} · {{ r.website.client.company }}{% endif %}</div>
+  </div>
+  <div>
+    <div style="font-size:13px;color:var(--text)">{{ r.title }}</div>
+    <span class="tag {% if r.is_fully_paid %}t-paid{% else %}t-part{% endif %}">
+      <i class="fas fa-{% if r.is_fully_paid %}check{% else %}hourglass-half{% endif %}"></i> {{ r.status_label }}</span>
+    {% if not r.is_published %}
+    <span class="tag t-hid"><i class="fas fa-eye-slash"></i> HIDDEN</span>
+    {% endif %}
+  </div>
+  <div>
+    <div class="amt">{{ r.currency }} {{ r.amount_paid|floatformat:0|intcomma }}</div>
+    <div class="meta">{{ r.payment_date|date:"d M Y" }} · {{ r.get_payment_method_display }}</div>
+  </div>
+  <div class="acts">
+    <a href="{% url 'receipt_edit' r.pk %}" class="jt-btn btn-ghost" style="font-size:11px;padding:7px 12px">
+      <i class="fas fa-pen"></i></a>
+    <a href="{% url 'receipt_pdf_staff' r.pk %}" class="jt-btn btn-ghost" style="font-size:11px;padding:7px 12px">
+      <i class="fas fa-file-pdf"></i></a>
+  </div>
+</div>
+{% empty %}
+<div class="empty">
+  <h3>No receipts yet</h3>
+  <p>Create one for a website you have already been paid for.<br>
+     The client will then be able to download it from their portal.</p>
+  <a href="{% url 'receipt_new' %}" class="jt-btn btn-primary" style="margin-top:18px;font-size:12px">
+    <i class="fas fa-plus"></i> Create first receipt</a>
+</div>
+{% endfor %}
+{% endblock %}

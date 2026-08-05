@@ -1,0 +1,197 @@
+{% load humanize %}<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>{{ r.receipt_number }} — {{ r.website.name }}</title>
+<style>
+/* 80mm thermal roll. xhtml2pdf: tables and simple CSS only. */
+@page{size:80mm 250mm;margin:6mm 5mm 6mm 5mm}
+body{font-family:Courier,"Courier New",monospace;font-size:8pt;color:#111;
+  line-height:1.42;margin:0}
+table{width:100%;border-collapse:collapse}
+td{vertical-align:top}
+.c{text-align:center}
+.r{text-align:right}
+.b{font-weight:bold}
+.sm{font-size:6.6pt}
+.xs{font-size:5.8pt}
+.mu{color:#666}
+
+.tear{font-family:Courier,monospace;font-size:7pt;color:#aaa;line-height:1;height:9pt}
+
+/* Times italic is the closest thing to a script hand among the fonts
+   xhtml2pdf ships with by default. */
+.head{font-family:Times,"Times New Roman",serif;font-style:italic;font-weight:bold;
+  font-size:21pt;letter-spacing:.5pt;padding-bottom:2pt}
+
+.rule{border-top:1px dashed #555;height:1px;font-size:1pt;line-height:1pt;margin:5pt 0}
+.rule-solid{border-top:1.2pt solid #111;height:1px;font-size:1pt;line-height:1pt;margin:5pt 0}
+
+.item td{padding:1.4pt 0}
+.item .qty{color:#666}
+.amt-row td{padding-top:4pt;padding-bottom:4pt;font-size:13pt;font-weight:bold}
+.tot td{padding:1.2pt 0}
+
+.sig-box{border:1px dashed #777;padding:4pt;margin-top:3pt}
+.sig-img{height:38px}
+.stamp{border:1.4pt solid #111;padding:3pt 8pt;font-weight:bold;font-size:8.5pt;letter-spacing:1pt}
+.qr{width:74px;height:74px}
+.bar{width:190pt;height:36px}
+.btn{background:#111;color:#fff;padding:9pt 20pt;text-decoration:none;
+  font-weight:bold;font-size:9pt;font-family:Helvetica,Arial,sans-serif}
+</style>
+</head>
+<body>
+
+<div class="tear c">\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/</div>
+
+<div class="c">
+  <div class="head">Receipt</div>
+  <div class="b" style="font-size:9pt;letter-spacing:1pt">JAMIITEK</div>
+  <div class="sm mu">YOUR DIGITAL SUCCESS, OUR PASSION</div>
+</div>
+
+<div class="c sm" style="margin-top:5pt">
+  Address: Dar es Salaam, Tanzania<br>
+  Tel: +255 629 712 678<br>
+  info@jamiitek.com
+</div>
+
+<div class="rule"></div>
+
+<table class="sm">
+  <tr>
+    <td>Date: {{ r.payment_date|date:"d-m-Y" }}</td>
+    <td class="r">No: {{ r.receipt_number }}</td>
+  </tr>
+</table>
+
+<div class="rule"></div>
+
+<table class="sm">
+  <tr><td width="34%" class="mu">Client</td>
+      <td class="b">{{ r.client_name|default:"—" }}</td></tr>
+  {% if r.client_company %}
+  <tr><td class="mu">Company</td><td>{{ r.client_company }}</td></tr>
+  {% endif %}
+  <tr><td class="mu">Website</td><td class="b">{{ r.website.name }}</td></tr>
+  <tr><td class="mu">Type</td><td>{{ r.get_kind_display }}</td></tr>
+</table>
+
+<div class="rule"></div>
+
+<table class="item">
+  {% for item in r.line_items %}
+  <tr>
+    <td width="66%">{{ item.desc|truncatechars:34 }}{% if item.qty != 1 %}<br><span class="xs qty">{{ item.qty }} x {{ item.unit_price|floatformat:0|intcomma }}</span>{% endif %}</td>
+    <td class="r">{{ item.amount|floatformat:2|intcomma }}</td>
+  </tr>
+  {% empty %}
+  <tr><td colspan="2" class="c mu">&mdash; no items &mdash;</td></tr>
+  {% endfor %}
+</table>
+
+<div class="rule-solid"></div>
+
+<table class="amt-row">
+  <tr><td>AMOUNT</td>
+      <td class="r">{{ r.grand_total|floatformat:2|intcomma }}</td></tr>
+</table>
+
+<table class="tot sm">
+  <tr><td>Sub-total</td><td class="r">{{ r.subtotal|floatformat:2|intcomma }}</td></tr>
+  {% if r.discount_amount %}
+  <tr><td>Discount</td><td class="r">-{{ r.discount_amount|floatformat:2|intcomma }}</td></tr>
+  {% endif %}
+  {% if r.tax_percent %}
+  <tr><td>VAT ({{ r.tax_percent|floatformat:0 }}%)</td>
+      <td class="r">{{ r.tax_amount|floatformat:2|intcomma }}</td></tr>
+  {% endif %}
+  <tr><td class="b">Paid ({{ r.get_payment_method_display }})</td>
+      <td class="r b">{{ r.amount_paid|floatformat:2|intcomma }}</td></tr>
+  <tr><td class="b">Balance</td>
+      <td class="r b">{{ r.balance_due|floatformat:2|intcomma }}</td></tr>
+  <tr><td colspan="2" class="xs mu" style="padding-top:2pt">
+      Currency: {{ r.currency }}{% if r.payment_reference %} &middot; Ref: {{ r.payment_reference }}{% endif %}</td></tr>
+</table>
+
+<div class="rule"></div>
+
+<div class="c" style="margin:6pt 0">
+  <span class="stamp">{{ r.status_label }}</span>
+</div>
+
+{% if r.notes %}
+<div class="rule"></div>
+<div class="sm">{{ r.notes|linebreaksbr }}</div>
+{% endif %}
+
+<div class="rule"></div>
+
+<table>
+  <tr>
+    <td width="50%" style="padding-right:3pt">
+      <div class="xs mu">RECEIVED BY</div>
+      <div class="sig-box c" style="height:46px">
+        <div style="font-family:Times,serif;font-style:italic;font-size:11pt;padding-top:8pt">
+          {{ r.received_by }}</div>
+      </div>
+      <div class="xs c mu">JamiiTek</div>
+    </td>
+    <td width="50%">
+      <div class="xs mu">CLIENT SIGNATURE</div>
+      <div class="sig-box c" style="height:46px">
+        {% if r.signature_data %}
+          <img src="{{ r.signature_data }}" class="sig-img" alt="signature">
+        {% elif r.signature_name %}
+          <div style="font-family:Times,serif;font-style:italic;font-size:11pt;padding-top:8pt">
+            {{ r.signature_name }}</div>
+        {% else %}
+          <div class="xs mu" style="padding-top:14pt">not signed</div>
+        {% endif %}
+      </div>
+      <div class="xs c mu">
+        {% if r.signed_at %}Signed {{ r.signed_at|date:"d-m-Y H:i" }}{% else %}&mdash;{% endif %}
+      </div>
+    </td>
+  </tr>
+</table>
+
+<div class="rule"></div>
+
+<table style="margin-top:3pt">
+  <tr>
+    <td width="34%" class="c">
+      {% if qr %}<img src="{{ qr }}" class="qr" alt="Verification QR code">{% endif %}
+    </td>
+    <td width="66%" style="padding-left:5pt">
+      <div class="b sm">SCAN TO VERIFY</div>
+      <div class="xs mu" style="margin-top:2pt">
+        This receipt can be checked online. Scan the code or visit the address
+        below to confirm it was issued by JamiiTek.
+      </div>
+      <div class="xs" style="margin-top:3pt">{{ r.verify_url }}</div>
+    </td>
+  </tr>
+</table>
+
+<div class="c" style="margin-top:8pt">
+  {% if barcode %}<img src="{{ barcode }}" class="bar" alt="{{ r.barcode_value }}">{% endif %}
+  <div class="xs" style="letter-spacing:1.5pt;margin-top:1pt">{{ r.barcode_value }}</div>
+</div>
+
+<div class="c xs mu" style="margin-top:6pt">
+  Thank you for your business.<br>
+  Computer-generated receipt &middot; www.jamiitek.com
+</div>
+
+<div class="tear c" style="margin-top:5pt">/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\</div>
+
+{% if not pdf %}
+<div class="c" style="margin-top:22pt">
+  <a href="?pdf=1" class="btn">Download PDF</a>
+</div>
+{% endif %}
+
+</body>
+</html>

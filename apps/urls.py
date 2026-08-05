@@ -13,6 +13,7 @@ from . import infra_views
 from . import client_portal_views as portal
 from builder import views as builder_views
 from . import domain_views
+from . import receipt_views
 
 urlpatterns = [
     # ── COMPANY PROFILE ─────────────────────────────────────
@@ -30,6 +31,21 @@ urlpatterns = [
     path('manage/invoices/ai-assist/', docs_views.invoice_ai_assist, name='invoice_ai_assist'),
     path('invoice/<str:token>/', docs_views.invoice_view, name='invoice_view'),
     path('invoice/<str:token>/pdf/', docs_views.invoice_pdf, name='invoice_pdf'),
+
+
+    path('manage/receipts/', receipt_views.receipt_list, name='receipt_list'),
+    path('manage/receipts/new/', receipt_views.receipt_new, name='receipt_new'),
+    path('manage/receipts/new/<int:website_pk>/', receipt_views.receipt_new, name='receipt_new_for_website'),
+    path('manage/receipts/<int:pk>/edit/', receipt_views.receipt_edit, name='receipt_edit'),
+    path('manage/receipts/<int:pk>/delete/', receipt_views.receipt_delete, name='receipt_delete'),
+    path('manage/receipts/<int:pk>/pdf/', receipt_views.receipt_pdf_staff, name='receipt_pdf_staff'),
+
+    path('portal/receipts/', receipt_views.portal_receipt_list, name='portal_receipt_list'),
+    path('portal/receipts/<int:pk>/download/', receipt_views.portal_receipt_pdf, name='portal_receipt_pdf'),
+    path('portal/receipts/<int:pk>/sign/', receipt_views.portal_receipt_sign, name='portal_receipt_sign'),
+
+    path('receipt/verify/<str:token>/', receipt_views.receipt_verify, name='receipt_verify'),
+    path('receipt/<str:token>/', receipt_views.receipt_public, name='receipt_public'),
 
     # ── PROPOSAL BUILDER (ndani ya /manage/, staff-only) ────
     path('manage/proposals/', proposal_views.proposal_builder_list, name='proposal_builder_list'),

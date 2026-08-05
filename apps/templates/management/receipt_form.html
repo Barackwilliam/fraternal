@@ -1,0 +1,314 @@
+{% extends 'management/base.html' %}
+{% load humanize %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<style>
+.rc-wrap{max-width:1020px}
+.rc-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:18px}
+.rc-card h3{font-family:var(--head);font-size:14px;font-weight:700;color:var(--text);margin:0 0 16px;
+  display:flex;align-items:center;gap:9px}
+.rc-card h3 i{color:var(--cyan);font-size:13px}
+.rc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+.rc-f label{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.6px;
+  text-transform:uppercase;color:var(--text-3);margin-bottom:6px}
+.rc-f input,.rc-f select,.rc-f textarea{width:100%;background:rgba(255,255,255,.03);
+  border:1px solid var(--border);border-radius:10px;padding:11px 13px;color:var(--text);
+  font-size:13px;font-family:inherit;min-height:44px}
+.rc-f textarea{min-height:88px;resize:vertical}
+.rc-f input:focus,.rc-f select:focus,.rc-f textarea:focus{outline:none;border-color:var(--cyan)}
+.rc-f .hint{font-size:11px;color:var(--text-3);margin-top:5px}
+
+.li-row{display:grid;grid-template-columns:1fr 90px 150px 150px 44px;gap:10px;align-items:end;margin-bottom:10px}
+.li-row .amt{font-family:var(--mono);font-size:13px;color:var(--text);padding:11px 13px;
+  background:rgba(255,255,255,.02);border:1px dashed var(--border);border-radius:10px;text-align:right}
+.li-del{width:44px;height:44px;border-radius:10px;border:1px solid var(--border);
+  background:transparent;color:#f87171;cursor:pointer}
+.li-del:hover{background:rgba(248,113,113,.1)}
+@media (max-width:820px){
+  .li-row{grid-template-columns:1fr 1fr;gap:8px}
+  .li-row .desc{grid-column:1/-1}
+  .li-row .amt{grid-column:1/2}
+  .li-del{grid-column:2/3;justify-self:end}
+}
+
+.sum{background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:14px;padding:18px}
+.sum-row{display:flex;justify-content:space-between;padding:7px 0;font-size:13px}
+.sum-row .k{color:var(--text-3)}
+.sum-row.big{border-top:1px solid var(--border);margin-top:8px;padding-top:12px;
+  font-family:var(--head);font-size:18px;font-weight:800;color:var(--text)}
+.sum-row.paid .v{color:#4ade80;font-weight:700}
+.sum-row.bal .v{color:#f87171;font-weight:700}
+
+.rc-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.rc-actions .spacer{flex:1}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:99px;
+  font-family:var(--mono);font-size:10px;letter-spacing:.5px}
+.pill-live{background:rgba(74,222,128,.12);color:#4ade80;border:1px solid rgba(74,222,128,.28)}
+.pill-hidden{background:rgba(248,113,113,.12);color:#f87171;border:1px solid rgba(248,113,113,.28)}
+</style>
+
+<div class="rc-wrap">
+
+  <div class="pg-head" style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:22px">
+    <div>
+      <div class="pg-title" style="font-family:var(--head);font-size:24px;font-weight:800;color:var(--text)">
+        {% if is_new %}New Receipt{% else %}{{ receipt.receipt_number }}{% endif %}
+      </div>
+      <div class="pg-sub" style="font-family:var(--mono);font-size:11px;color:var(--text-3)">
+        {% if receipt.website %}{{ receipt.website.name }} &middot; {{ receipt.website.client.name }}{% else %}Choose a website below{% endif %}
+      </div>
+    </div>
+    <div class="rc-actions">
+      {% if not is_new %}
+        <span class="pill {% if receipt.is_published %}pill-live{% else %}pill-hidden{% endif %}">
+          <i class="fas fa-{% if receipt.is_published %}eye{% else %}eye-slash{% endif %}"></i>
+          {% if receipt.is_published %}Visible to client{% else %}Hidden{% endif %}
+        </span>
+        <a href="{% url 'receipt_pdf_staff' receipt.pk %}" class="jt-btn btn-ghost" style="font-size:12px">
+          <i class="fas fa-file-pdf"></i> PDF</a>
+        <a href="{{ receipt.public_url }}" target="_blank" class="jt-btn btn-ghost" style="font-size:12px">
+          <i class="fas fa-link"></i> Public link</a>
+      {% endif %}
+      <a href="{% url 'receipt_list' %}" class="jt-btn btn-ghost" style="font-size:12px">
+        <i class="fas fa-arrow-left"></i> All receipts</a>
+    </div>
+  </div>
+
+  <form method="post" id="rcForm">
+    {% csrf_token %}
+
+    <!-- ── WHICH WEBSITE ── -->
+    <div class="rc-card">
+      <h3><i class="fas fa-globe"></i> Website</h3>
+      <div class="rc-grid">
+        <div class="rc-f">
+          <label>Website this receipt is for</label>
+          <select name="website" required>
+            <option value="">— choose —</option>
+            {% for w in websites %}
+            <option value="{{ w.pk }}"{% if receipt.website and w.pk == receipt.website.pk %} selected{% endif %}>
+              {{ w.name }} — {{ w.client.name }}
+            </option>
+            {% endfor %}
+          </select>
+          <div class="hint">A client with several websites gets one receipt per website.</div>
+        </div>
+        <div class="rc-f">
+          <label>Payment type</label>
+          <select name="kind">
+            {% for value, label in receipt.KINDS %}
+            <option value="{{ value }}"{% if receipt.kind == value %} selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="rc-f">
+          <label>Receipt title</label>
+          <input type="text" name="title" value="{{ receipt.title }}" placeholder="Website Development Payment">
+        </div>
+      </div>
+      <div class="rc-f" style="margin-top:14px">
+        <label>Description (optional)</label>
+        <textarea name="description" placeholder="Short summary of what was built">{{ receipt.description }}</textarea>
+      </div>
+    </div>
+
+    <!-- ── LINE ITEMS ── -->
+    <div class="rc-card">
+      <h3><i class="fas fa-list"></i> What the client paid for</h3>
+      <div id="items">
+        {% for item in receipt.line_items %}
+        <div class="li-row">
+          <div class="rc-f desc"><label>Description</label>
+            <input type="text" name="item_desc" value="{{ item.desc }}" placeholder="Website design &amp; development"></div>
+          <div class="rc-f"><label>Qty</label>
+            <input type="number" name="item_qty" value="{{ item.qty|floatformat:'-2' }}" step="0.01" min="0" class="qty"></div>
+          <div class="rc-f"><label>Unit price</label>
+            <input type="number" name="item_price" value="{{ item.unit_price|floatformat:'-2' }}" step="0.01" min="0" class="price"></div>
+          <div class="rc-f"><label>Amount</label><div class="amt">0</div></div>
+          <button type="button" class="li-del" title="Remove"><i class="fas fa-trash"></i></button>
+        </div>
+        {% endfor %}
+      </div>
+      <button type="button" id="addItem" class="jt-btn btn-ghost" style="font-size:12px;margin-top:6px">
+        <i class="fas fa-plus"></i> Add line</button>
+    </div>
+
+    <!-- ── MONEY + PAYMENT ── -->
+    <div class="rc-card">
+      <h3><i class="fas fa-coins"></i> Payment</h3>
+      <div class="rc-grid" style="margin-bottom:18px">
+        <div class="rc-f"><label>Currency</label>
+          <input type="text" name="currency" value="{{ receipt.currency|default:'TZS' }}"></div>
+        <div class="rc-f"><label>VAT %</label>
+          <input type="number" name="tax_percent" id="tax" step="0.01" min="0"
+                 value="{{ receipt.tax_percent|default_if_none:'' }}" placeholder="18">
+          <div class="hint">Leave blank if not charging VAT.</div></div>
+        <div class="rc-f"><label>Discount amount</label>
+          <input type="number" name="discount_amount" id="disc" step="0.01" min="0"
+                 value="{{ receipt.discount_amount|default_if_none:'' }}"></div>
+        <div class="rc-f"><label>Amount actually paid</label>
+          <input type="number" name="amount_paid" id="paid" step="0.01" min="0" required
+                 value="{{ receipt.amount_paid|default_if_none:'0'|floatformat:'-2' }}"></div>
+        <div class="rc-f"><label>Method</label>
+          <select name="payment_method">
+            {% for value, label in receipt.METHODS %}
+            <option value="{{ value }}"{% if receipt.payment_method == value %} selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select></div>
+        <div class="rc-f"><label>Reference</label>
+          <input type="text" name="payment_reference" value="{{ receipt.payment_reference }}"
+                 placeholder="M-Pesa / bank transaction ID"></div>
+        <div class="rc-f"><label>Date paid</label>
+          <input type="date" name="payment_date" value="{{ receipt.payment_date|date:'Y-m-d' }}"></div>
+        <div class="rc-f"><label>Received by</label>
+          <input type="text" name="received_by" value="{{ receipt.received_by|default:'W. Chipindi' }}"></div>
+      </div>
+
+      <div class="sum" id="sum">
+        <div class="sum-row"><span class="k">Subtotal</span><span class="v" id="sSub">0</span></div>
+        <div class="sum-row" id="rDisc" style="display:none"><span class="k">Discount</span><span class="v" id="sDisc">0</span></div>
+        <div class="sum-row" id="rTax" style="display:none"><span class="k">VAT</span><span class="v" id="sTax">0</span></div>
+        <div class="sum-row big"><span>Total</span><span id="sTotal">0</span></div>
+        <div class="sum-row paid"><span class="k">Amount paid</span><span class="v" id="sPaid">0</span></div>
+        <div class="sum-row bal" id="rBal" style="display:none"><span class="k">Balance due</span><span class="v" id="sBal">0</span></div>
+      </div>
+    </div>
+
+    <!-- ── NOTES + VISIBILITY ── -->
+    <div class="rc-card">
+      <h3><i class="fas fa-note-sticky"></i> Notes &amp; visibility</h3>
+      <div class="rc-f">
+        <label>Notes shown on the receipt</label>
+        <textarea name="notes" placeholder="Thank you for your business.">{{ receipt.notes }}</textarea>
+      </div>
+      <label style="display:flex;align-items:center;gap:10px;margin-top:16px;cursor:pointer;font-size:13px;color:var(--text)">
+        <input type="checkbox" name="is_published" style="width:18px;height:18px;min-height:0"
+               {% if receipt.is_published or is_new %}checked{% endif %}>
+        Show this receipt in the client portal
+      </label>
+      <label style="display:flex;align-items:center;gap:10px;margin-top:12px;cursor:pointer;font-size:13px;color:var(--text)">
+        <input type="checkbox" name="require_signature" style="width:18px;height:18px;min-height:0"
+               {% if receipt.require_signature or is_new %}checked{% endif %}>
+        Ask the client to sign before downloading
+      </label>
+      {% if not is_new %}
+        {% if receipt.is_signed %}
+        <div style="margin-top:14px;background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.25);
+                    border-radius:12px;padding:13px 15px">
+          <div style="font-family:var(--mono);font-size:10px;letter-spacing:.6px;color:#4ade80">SIGNED</div>
+          <div style="font-size:12.5px;color:var(--text);margin-top:5px">
+            {{ receipt.signature_name|default:"Drawn signature" }} &middot;
+            {{ receipt.signed_at|date:"d M Y H:i" }}
+            {% if receipt.signed_ip %}&middot; {{ receipt.signed_ip }}{% endif %}
+          </div>
+          {% if receipt.signature_data %}
+          <img src="{{ receipt.signature_data }}" alt="signature"
+               style="height:52px;margin-top:9px;background:#fff;border-radius:7px;padding:5px">
+          {% endif %}
+        </div>
+        {% else %}
+        <div style="margin-top:14px;font-size:12px;color:var(--text-3)">
+          <i class="fas fa-hourglass-half"></i> Not signed yet.
+        </div>
+        {% endif %}
+      {% endif %}
+      <div class="hint" style="margin-top:6px;font-size:11px;color:var(--text-3)">
+        Untick while drafting. The client sees nothing until this is on.
+      </div>
+    </div>
+
+    <div class="rc-actions" style="margin-bottom:40px">
+      <button type="submit" class="jt-btn btn-primary">
+        <i class="fas fa-check"></i> {% if is_new %}Create receipt{% else %}Save changes{% endif %}</button>
+      <div class="spacer"></div>
+      {% if not is_new %}
+      <button type="button" class="jt-btn btn-ghost" style="color:#f87171;border-color:rgba(248,113,113,.25)"
+              onclick="if(confirm('Delete {{ receipt.receipt_number }}? This cannot be undone.')) document.getElementById('delForm').submit()">
+        <i class="fas fa-trash"></i> Delete</button>
+      {% endif %}
+    </div>
+  </form>
+
+  {% if not is_new %}
+  <form id="delForm" method="post" action="{% url 'receipt_delete' receipt.pk %}" style="display:none">
+    {% csrf_token %}
+  </form>
+  {% endif %}
+</div>
+
+<script>
+(function(){
+  var items = document.getElementById('items');
+
+  function money(n){
+    return (Math.round(n * 100) / 100).toLocaleString('en-US', {maximumFractionDigits: 2});
+  }
+  function num(el){ var v = parseFloat(el && el.value); return isNaN(v) ? 0 : v; }
+
+  function recalc(){
+    var subtotal = 0;
+    items.querySelectorAll('.li-row').forEach(function(row){
+      var amount = num(row.querySelector('.qty')) * num(row.querySelector('.price'));
+      row.querySelector('.amt').textContent = money(amount);
+      subtotal += amount;
+    });
+
+    var disc = num(document.getElementById('disc')),
+        taxPc = num(document.getElementById('tax')),
+        paid = num(document.getElementById('paid')),
+        afterDisc = Math.max(0, subtotal - disc),
+        tax = afterDisc * taxPc / 100,
+        total = afterDisc + tax,
+        balance = Math.max(0, total - paid);
+
+    document.getElementById('sSub').textContent = money(subtotal);
+    document.getElementById('sDisc').textContent = '− ' + money(disc);
+    document.getElementById('sTax').textContent = money(tax);
+    document.getElementById('sTotal').textContent = money(total);
+    document.getElementById('sPaid').textContent = money(paid);
+    document.getElementById('sBal').textContent = money(balance);
+
+    document.getElementById('rDisc').style.display = disc > 0 ? 'flex' : 'none';
+    document.getElementById('rTax').style.display = taxPc > 0 ? 'flex' : 'none';
+    document.getElementById('rBal').style.display = balance > 0 ? 'flex' : 'none';
+  }
+
+  function addRow(){
+    var row = document.createElement('div');
+    row.className = 'li-row';
+    row.innerHTML =
+      '<div class="rc-f desc"><label>Description</label>' +
+        '<input type="text" name="item_desc" placeholder="Website design &amp; development"></div>' +
+      '<div class="rc-f"><label>Qty</label>' +
+        '<input type="number" name="item_qty" value="1" step="0.01" min="0" class="qty"></div>' +
+      '<div class="rc-f"><label>Unit price</label>' +
+        '<input type="number" name="item_price" value="0" step="0.01" min="0" class="price"></div>' +
+      '<div class="rc-f"><label>Amount</label><div class="amt">0</div></div>' +
+      '<button type="button" class="li-del" title="Remove"><i class="fas fa-trash"></i></button>';
+    items.appendChild(row);
+    row.querySelector('input').focus();
+    recalc();
+  }
+
+  document.getElementById('addItem').addEventListener('click', addRow);
+
+  items.addEventListener('click', function(e){
+    var del = e.target.closest('.li-del');
+    if (!del) return;
+    if (items.querySelectorAll('.li-row').length <= 1) {
+      del.closest('.li-row').querySelectorAll('input').forEach(function(i){
+        i.value = i.classList.contains('qty') ? '1' : (i.classList.contains('price') ? '0' : '');
+      });
+    } else {
+      del.closest('.li-row').remove();
+    }
+    recalc();
+  });
+
+  document.getElementById('rcForm').addEventListener('input', recalc);
+
+  if (!items.querySelector('.li-row')) addRow();
+  recalc();
+})();
+</script>
+{% endblock %}

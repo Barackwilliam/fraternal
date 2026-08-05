@@ -513,6 +513,14 @@
       <i class="fas fa-plus"></i> New Invoice
     </a>
 
+    <div class="sb-section">Receipts</div>
+    <a href="{% url 'receipt_list' %}" class="sb-link {% if request.resolver_match.url_name == 'receipt_list' or request.resolver_match.url_name == 'receipt_edit' %}active{% endif %}">
+      <i class="fas fa-receipt"></i> All Receipts
+    </a>
+    <a href="{% url 'receipt_new' %}" class="sb-link">
+      <i class="fas fa-plus"></i> New Receipt
+    </a>
+
     <div class="sb-section">Company</div>
     <a href="{% url 'profile_builder' %}" class="sb-link {% if request.resolver_match.url_name == 'profile_builder' %}active{% endif %}">
       <i class="fas fa-building"></i> Company Profile

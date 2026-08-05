@@ -1,0 +1,219 @@
+{% extends 'portal/base.html' %}
+{% load humanize %}
+{% block title %}Sign receipt{% endblock %}
+{% block content %}
+<style>
+.sg-wrap{max-width:620px;margin:0 auto}
+.sg-head{margin-bottom:22px}
+.sg-title{font-family:var(--head);font-size:23px;font-weight:800;color:var(--text);margin-bottom:5px}
+.sg-sub{font-family:var(--mono);font-size:11px;color:var(--text-3)}
+
+.sg-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:22px;margin-bottom:16px}
+.sg-sum{display:grid;grid-template-columns:1fr auto;gap:10px 18px;font-size:13px}
+.sg-sum .k{color:var(--text-3)}
+.sg-sum .v{text-align:right;color:var(--text);font-weight:600}
+.sg-sum .big{font-family:var(--head);font-size:19px;font-weight:800;color:#4ade80}
+
+.tabs{display:flex;gap:8px;margin-bottom:16px}
+.tab{flex:1;padding:11px;border-radius:11px;border:1px solid var(--border);background:transparent;
+  color:var(--text-3);font-size:12.5px;font-weight:600;cursor:pointer;min-height:46px}
+.tab.on{border-color:var(--cyan);color:var(--text);background:rgba(0,212,255,.07)}
+
+.pad-wrap{position:relative;border:1px dashed var(--border);border-radius:13px;
+  background:#fff;overflow:hidden;touch-action:none}
+#pad{display:block;width:100%;height:190px;touch-action:none;cursor:crosshair}
+.pad-line{position:absolute;left:24px;right:24px;bottom:44px;border-top:1px solid #c8d0dc;pointer-events:none}
+.pad-hint{position:absolute;left:24px;bottom:24px;font-size:11px;color:#98a4b4;pointer-events:none}
+.pad-tools{display:flex;justify-content:space-between;align-items:center;margin-top:10px;gap:10px}
+.pad-tools .note{font-size:11px;color:var(--text-3)}
+
+.sg-f label{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.6px;
+  text-transform:uppercase;color:var(--text-3);margin-bottom:7px}
+.sg-f input[type=text]{width:100%;background:rgba(255,255,255,.03);border:1px solid var(--border);
+  border-radius:11px;padding:13px 15px;color:var(--text);font-size:16px;min-height:48px}
+.sg-f input[type=text]:focus{outline:none;border-color:var(--cyan)}
+.typed-prev{margin-top:12px;background:#fff;border-radius:11px;padding:18px;text-align:center;
+  font-family:Georgia,'Times New Roman',serif;font-style:italic;font-size:26px;color:#111;min-height:70px}
+
+.agree{display:flex;gap:11px;align-items:flex-start;margin-top:18px;cursor:pointer;
+  font-size:12.5px;color:var(--text-2,var(--text));line-height:1.55}
+.agree input{width:19px;height:19px;flex:none;margin-top:1px}
+.sg-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+.sg-actions .jt-btn{flex:1;justify-content:center;min-width:150px}
+.err{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);color:#f87171;
+  border-radius:11px;padding:11px 14px;font-size:12.5px;margin-bottom:14px}
+</style>
+
+<div class="sg-wrap">
+
+  <div class="sg-head">
+    <div class="sg-title">Sign your receipt</div>
+    <div class="sg-sub">{{ r.receipt_number }} &middot; {{ r.website.name }}</div>
+  </div>
+
+  {% if messages %}{% for m in messages %}
+  <div class="err">{{ m }}</div>
+  {% endfor %}{% endif %}
+
+  <div class="sg-card">
+    <div class="sg-sum">
+      <span class="k">Website</span><span class="v">{{ r.website.name }}</span>
+      <span class="k">Paid on</span><span class="v">{{ r.payment_date|date:"d M Y" }}</span>
+      <span class="k">Method</span><span class="v">{{ r.get_payment_method_display }}</span>
+      <span class="k">Amount</span>
+      <span class="v big">{{ r.currency }} {{ r.amount_paid|floatformat:0|intcomma }}</span>
+    </div>
+  </div>
+
+  <form method="post" id="sgForm">
+    {% csrf_token %}
+    <input type="hidden" name="signature_data" id="sigData">
+
+    <div class="sg-card">
+      <div class="tabs">
+        <button type="button" class="tab on" data-mode="draw">Draw signature</button>
+        <button type="button" class="tab" data-mode="type">Type name</button>
+      </div>
+
+      <div id="modeDraw">
+        <div class="pad-wrap">
+          <canvas id="pad"></canvas>
+          <div class="pad-line"></div>
+          <div class="pad-hint">Sign above this line</div>
+        </div>
+        <div class="pad-tools">
+          <span class="note">Use your finger on a phone, or the mouse on a computer.</span>
+          <button type="button" id="clearPad" class="jt-btn btn-ghost" style="font-size:11px;padding:8px 14px">
+            <i class="fas fa-eraser"></i> Clear</button>
+        </div>
+      </div>
+
+      <div id="modeType" style="display:none">
+        <div class="sg-f">
+          <label>Your full name</label>
+          <input type="text" name="signature_name" id="typedName"
+                 value="{{ r.client_name }}" autocomplete="name" placeholder="e.g. Neema Kileo">
+        </div>
+        <div class="typed-prev" id="typedPrev">{{ r.client_name }}</div>
+      </div>
+
+      <label class="agree">
+        <input type="checkbox" id="agree" required>
+        <span>I confirm that I made this payment of
+          <b>{{ r.currency }} {{ r.amount_paid|floatformat:0|intcomma }}</b>
+          to JamiiTek for <b>{{ r.website.name }}</b>, and that this signature is mine.</span>
+      </label>
+
+      <div class="sg-actions">
+        <a href="{% url 'portal_receipt_list' %}" class="jt-btn btn-ghost">Cancel</a>
+        <button type="submit" class="jt-btn btn-primary" id="submitBtn" disabled>
+          <i class="fas fa-download"></i> Sign &amp; download</button>
+      </div>
+    </div>
+  </form>
+
+  <p style="font-size:11px;color:var(--text-3);text-align:center;margin-top:4px">
+    Your signature, the time and your IP address are recorded on the receipt.
+    You only sign once &mdash; later downloads are instant.
+  </p>
+</div>
+
+<script>
+(function(){
+  var pad = document.getElementById('pad'),
+      ctx = pad.getContext('2d'),
+      form = document.getElementById('sgForm'),
+      sigData = document.getElementById('sigData'),
+      typedName = document.getElementById('typedName'),
+      typedPrev = document.getElementById('typedPrev'),
+      agree = document.getElementById('agree'),
+      submitBtn = document.getElementById('submitBtn'),
+      mode = 'draw', drawn = false, drawing = false, last = null;
+
+  /* Canvas must be sized in device pixels or the line looks fuzzy */
+  function sizePad(){
+    var ratio = window.devicePixelRatio || 1,
+        rect = pad.getBoundingClientRect(),
+        snapshot = drawn ? pad.toDataURL() : null;
+    pad.width = Math.round(rect.width * ratio);
+    pad.height = Math.round(rect.height * ratio);
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    ctx.lineWidth = 2.4;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = '#111';
+    if (snapshot) {
+      var img = new Image();
+      img.onload = function(){ ctx.drawImage(img, 0, 0, rect.width, rect.height); };
+      img.src = snapshot;
+    }
+  }
+  sizePad();
+  addEventListener('resize', sizePad);
+
+  function pos(e){
+    var rect = pad.getBoundingClientRect();
+    return {x: e.clientX - rect.left, y: e.clientY - rect.top};
+  }
+  pad.addEventListener('pointerdown', function(e){
+    drawing = true; drawn = true;
+    pad.setPointerCapture(e.pointerId);
+    last = pos(e);
+    ctx.beginPath(); ctx.moveTo(last.x, last.y); ctx.lineTo(last.x + .1, last.y); ctx.stroke();
+    refresh();
+  });
+  pad.addEventListener('pointermove', function(e){
+    if (!drawing) return;
+    var p = pos(e);
+    ctx.beginPath(); ctx.moveTo(last.x, last.y); ctx.lineTo(p.x, p.y); ctx.stroke();
+    last = p;
+  });
+  ['pointerup','pointercancel','pointerleave'].forEach(function(ev){
+    pad.addEventListener(ev, function(){ drawing = false; });
+  });
+
+  document.getElementById('clearPad').addEventListener('click', function(){
+    ctx.clearRect(0, 0, pad.width, pad.height);
+    drawn = false; refresh();
+  });
+
+  document.querySelectorAll('.tab').forEach(function(tab){
+    tab.addEventListener('click', function(){
+      document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('on'); });
+      tab.classList.add('on');
+      mode = tab.dataset.mode;
+      document.getElementById('modeDraw').style.display = mode === 'draw' ? '' : 'none';
+      document.getElementById('modeType').style.display = mode === 'type' ? '' : 'none';
+      if (mode === 'draw') sizePad();
+      refresh();
+    });
+  });
+
+  typedName.addEventListener('input', function(){
+    typedPrev.textContent = typedName.value || ' ';
+    refresh();
+  });
+
+  function hasSignature(){
+    return mode === 'draw' ? drawn : typedName.value.trim().length > 1;
+  }
+  function refresh(){
+    submitBtn.disabled = !(agree.checked && hasSignature());
+  }
+  agree.addEventListener('change', refresh);
+  refresh();
+
+  form.addEventListener('submit', function(e){
+    if (!hasSignature() || !agree.checked) { e.preventDefault(); return; }
+    if (mode === 'draw') {
+      sigData.value = pad.toDataURL('image/png');
+      typedName.value = '';           // drawn signature wins
+    } else {
+      sigData.value = '';
+    }
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Preparing PDF...';
+  });
+})();
+</script>
+{% endblock %}
