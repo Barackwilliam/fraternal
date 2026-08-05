@@ -163,6 +163,14 @@
         <div class="action-row">
           <a href="{% url 'portal_website_detail' w.pk %}" class="jt-btn btn-primary" style="flex:1;justify-content:center;font-size:12px;padding:8px"><i class="fas fa-eye"></i> Details</a>
           <a href="{% url 'portal_billing' %}" class="jt-btn btn-ghost" style="font-size:12px;padding:8px 14px"><i class="fas fa-coins"></i></a>
+                          {% for r in w.receipts.all %}{% if r.is_published and forloop.first %}
+          <a href="{% url 'portal_receipt_pdf' r.pk %}"
+            class="jt-btn btn-ghost"
+            style="font-size:11px;padding:8px 12px;color:#4ade80;border-color:rgba(74,222,128,.22)">
+            <i class="fas fa-file-invoice"></i>
+            {% if r.needs_signature %}Sign &amp; get receipt{% else %}Receipt{% endif %}
+          </a>
+        {% endif %}{% endfor %}
         </div>
         <div class="action-row">
           <a href="{% url 'portal_hosting_config' w.pk %}" class="jt-btn btn-ghost" style="flex:1;justify-content:center;font-size:11px;color:var(--cyan);border-color:rgba(0,212,255,.18)"><i class="fas fa-server"></i> Hosting Panel</a>
