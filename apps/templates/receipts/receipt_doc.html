@@ -36,6 +36,8 @@ td{vertical-align:top}
 .sig-img{height:38px}
 .stamp{border:1.4pt solid #111;padding:3pt 8pt;font-weight:bold;font-size:8.5pt;letter-spacing:1pt}
 .qr{width:74px;height:74px}
+.vfy{margin-top:5pt}
+.vfy .xs{letter-spacing:.2pt}
 .bar{width:190pt;height:36px}
 .btn{background:#111;color:#fff;padding:9pt 20pt;text-decoration:none;
   font-weight:bold;font-size:9pt;font-family:Helvetica,Arial,sans-serif}
@@ -48,6 +50,9 @@ td{vertical-align:top}
    wrong stretched across a browser window — so on screen we put the same
    receipt on a centred paper card and scale the type up to readable sizes. */
 html{background:#E8ECF1}
+.paper,.paper *{overflow-wrap:anywhere;word-break:break-word}
+.vfy{margin-top:10px;padding:9px 6px;background:#F4F7FB;border-radius:6px}
+.vfy .xs{font-size:11px;line-height:1.6;word-break:break-all}
 body{background:#E8ECF1;font-size:12.5px;line-height:1.55;
   padding:26px 14px 60px;-webkit-font-smoothing:antialiased}
 .paper{width:100%;max-width:400px;margin:0 auto;background:#fff;
@@ -100,7 +105,7 @@ body{background:#E8ECF1;font-size:12.5px;line-height:1.55;
 <body>
 <div class="paper">
 
-<div class="tear c">\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/</div>
+<div class="tear c">\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/</div>
 
 <div class="c">
   <div class="head">Receipt</div>
@@ -224,13 +229,17 @@ body{background:#E8ECF1;font-size:12.5px;line-height:1.55;
     <td width="66%" style="padding-left:5pt">
       <div class="b sm">SCAN TO VERIFY</div>
       <div class="xs mu" style="margin-top:2pt">
-        This receipt can be checked online. Scan the code or visit the address
-        below to confirm it was issued by JamiiTek.
+        This receipt can be checked online. Scan the code, or visit the
+        address below to confirm it was issued by JamiiTek.
       </div>
-      <div class="xs" style="margin-top:3pt">{{ r.verify_url }}</div>
     </td>
   </tr>
 </table>
+
+<div class="c vfy">
+  <div class="xs mu">{{ r.verify_base }}</div>
+  <div class="xs b">{{ r.token }}</div>
+</div>
 
 <div class="c" style="margin-top:8pt">
   {% if barcode %}<img src="{{ barcode }}" class="bar" alt="{{ r.barcode_value }}">{% endif %}
@@ -242,7 +251,7 @@ body{background:#E8ECF1;font-size:12.5px;line-height:1.55;
   Computer-generated receipt &middot; www.jamiitek.com
 </div>
 
-<div class="tear c" style="margin-top:5pt">/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\</div>
+<div class="tear c" style="margin-top:5pt">/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\</div>
 
 </div>
 

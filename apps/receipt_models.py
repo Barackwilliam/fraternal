@@ -16,6 +16,7 @@ import secrets
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
+from django.utils.dateparse import parse_date
 
 
 class DevelopmentReceipt(models.Model):
@@ -97,20 +98,12 @@ class DevelopmentReceipt(models.Model):
     def save(self, *args, **kwargs):
         if not self.token:
             self.token = secrets.token_urlsafe(24)
-
-        # Safety net: if payment_date ever arrives as a raw string (e.g. from
-        # a form field, admin import, or API call), convert it before we
-        # touch .year below.
-        if isinstance(self.payment_date, str):
-            from datetime import datetime as _dt
-            try:
-                self.payment_date = _dt.strptime(self.payment_date, '%Y-%m-%d').date()
-            except ValueError:
-                self.payment_date = timezone.now().date()
-
         super().save(*args, **kwargs)
         if not self.receipt_number and self.pk:
-            year = (self.payment_date or timezone.now().date()).year
+            paid_on = self.payment_date
+            if isinstance(paid_on, str):
+                paid_on = parse_date(paid_on)
+            year = (paid_on or timezone.now().date()).year
             number = f'RCP-{year}-{self.pk:04d}'
             DevelopmentReceipt.objects.filter(pk=self.pk).update(receipt_number=number)
             self.receipt_number = number
@@ -199,6 +192,17 @@ class DevelopmentReceipt(models.Model):
     def verify_url(self):
         base = getattr(settings, 'SITE_URL', 'https://jamiitek.com').rstrip('/')
         return f'{base}{self.verify_path}'
+
+    @property
+    def verify_base(self):
+        """
+        Host + path without the scheme, e.g. 'jamiitek.com/receipt/verify/'.
+        Printed on its own line so the 32-character token can sit below it —
+        the full URL is 68 characters and will not fit on an 80mm roll.
+        """
+        base = getattr(settings, 'SITE_URL', 'https://jamiitek.com').rstrip('/')
+        host = base.split('//')[-1]
+        return f'{host}/receipt/verify/'
 
     @property
     def barcode_value(self):
