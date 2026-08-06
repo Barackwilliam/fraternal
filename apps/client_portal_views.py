@@ -657,7 +657,7 @@ def portal_email_hosting(request):
         'client': client,
         'email_plans': email_plans,
         'payments': payments,
-        'pay_stats': history['stats'],
+        'months_paid': months_paid,
         'payment_info': payment_info,
     })
 
