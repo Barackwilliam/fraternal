@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 
 from apps.utils.email_notifications import send_welcome_email
 from django.core.mail import send_mail
+from .account_billing import build_account
 
 from .models import (
     Client, ManagedWebsite, HostingPayment, ClientNotification, WebsiteFeature,
@@ -334,28 +335,26 @@ def portal_website_detail(request, pk):
 
 # ── BILLING & PAYMENTS ─────────────────────────────────────────────
 
+ 
+# ══════════════════════════════════════════════════════════════
 @client_required
 def portal_billing(request):
     client = request.client_profile
     websites = ManagedWebsite.objects.filter(client=client)
     payments = HostingPayment.objects.filter(
         website__client=client).order_by('-payment_date').select_related('website')
-
-    # Hakuna jumla ya pesa — awamu na mwenendo badala yake
+ 
     from . import payment_history as ph_service
     history = ph_service.build_history(client, websites)
-    total_due = sum([
-        w.monthly_cost for w in websites
-        if w.is_overdue or (w.days_until_expiry is not None and w.days_until_expiry <= 14)
-    ])
-
-    # Chaguo za muda (1/3/6/12) kwa kila tovuti — na bei halisi + punguzo
+ 
+    # Account-level balance, but every amount still tied to its own website.
+    account = build_account(client, websites)
+ 
     billing_plans = [
         {'website': w, 'options': w.billing_options}
         for w in websites
     ]
-
-    # NMB payment details from settings or hardcoded
+ 
     payment_info = {
         'bank': 'NMB Bank',
         'account_name': 'JamiiTek Technologies',
@@ -363,7 +362,7 @@ def portal_billing(request):
         'branch': 'Dar es Salaam',
         'reference_format': 'WEBSITE NAME + PHONE',
     }
-
+ 
     return render(request, 'portal/billing.html', {
         'title': 'Billing & Payments',
         'client': client,
@@ -371,61 +370,142 @@ def portal_billing(request):
         'payments': payments,
         'history': history,
         'pay_stats': history['stats'],
-        'total_due': total_due,
+        'total_due': account['balance'],     # unchanged name, same meaning
+        'account': account,
         'payment_info': payment_info,
         'billing_plans': billing_plans,
     })
-
-
-# ── SUBMIT PAYMENT PROOF ───────────────────────────────────────────
-
+ 
+ 
+# ══════════════════════════════════════════════════════════════
 @client_required
 @require_POST
 def portal_submit_payment(request):
+    """
+    Accepts either shape:
+ 
+      single site (unchanged)  website=<pk>  months_covered=<n>  amount=<n>
+      several sites (new)      pay_website=<pk>&pay_website=<pk>  months_<pk>=<n>
+ 
+    Either way one ClientNotification is raised per website, so you verify and
+    record each site separately and each hosting_end_date moves on its own.
+    """
+    from .models import ClientNotification
+ 
     client = request.client_profile
-    website_pk = request.POST.get('website')
-    amount = request.POST.get('amount', '').strip()
     transaction_ref = request.POST.get('transaction_ref', '').strip()
     payment_method = request.POST.get('payment_method', 'NMB Bank Transfer')
-    months = request.POST.get('months_covered', '1')
     notes = request.POST.get('notes', '').strip()
-
-    if not all([website_pk, amount, transaction_ref]):
+ 
+    selected = request.POST.getlist('pay_website')
+    is_multi = bool(selected)
+ 
+    if not is_multi:
+        single = request.POST.get('website')
+        if single:
+            selected = [single]
+ 
+    if not selected or not transaction_ref:
         messages.error(request, 'Please fill in all required fields.')
         return redirect('portal_billing')
-
-    try:
-        website = ManagedWebsite.objects.get(pk=website_pk, client=client)
-    except ManagedWebsite.DoesNotExist:
+ 
+    websites = list(ManagedWebsite.objects.filter(pk__in=selected, client=client))
+    if not websites:
         messages.error(request, 'Website not found.')
         return redirect('portal_billing')
-
-    # Create pending payment record (staff will confirm)
-    # We note it as pending in the notes field
-    from .models import ClientNotification
-    ClientNotification.objects.create(
-        website=website, client=client,
-        notification_type='payment_received',
-        subject=f'Payment Submission — {website.name}',
-        message=f'Client {client.name} submitted payment proof.\n\nAmount: TZS {amount}\nMethod: {payment_method}\nRef: {transaction_ref}\nMonths: {months}\nNotes: {notes}\n\nPlease verify and record the payment in the management panel.',
-        email_sent=False,
-    )
-
-    # Email JamiiTek staff
+ 
+    # Work out what each site is being paid for. Prices come from the model,
+    # never from the form — the browser only says which site and how long.
+    entries = []
+    for website in websites:
+        if is_multi:
+            raw_months = request.POST.get(f'months_{website.pk}', '1')
+        else:
+            raw_months = request.POST.get('months_covered', '1')
+        try:
+            months = int(raw_months)
+        except (TypeError, ValueError):
+            months = 1
+        if months not in (1, 3, 6, 12):
+            months = 1
+ 
+        price = website.price_for(months)
+        entries.append({'website': website, 'months': months, 'expected': price['total']})
+ 
+    expected_total = sum(e['expected'] for e in entries)
+ 
+    # What the client says they sent. Used for reconciliation only.
+    try:
+        declared = float((request.POST.get('amount') or '0').replace(',', '').strip())
+    except ValueError:
+        declared = 0
+    if not declared:
+        declared = float(expected_total)
+ 
+    site_list = ', '.join(f"{e['website'].name} ({e['months']}mo)" for e in entries)
+ 
+    for entry in entries:
+        website = entry['website']
+        body = (
+            f'Client {client.name} submitted payment proof.\n\n'
+            f'This site:   {website.name}\n'
+            f'Months:      {entry["months"]}\n'
+            f'Expected:    TZS {entry["expected"]:,.0f}\n'
+            f'Method:      {payment_method}\n'
+            f'Ref:         {transaction_ref}\n'
+        )
+        if len(entries) > 1:
+            body += (
+                f'\nPart of one payment covering {len(entries)} websites.\n'
+                f'Sites:            {site_list}\n'
+                f'Expected total:   TZS {expected_total:,.0f}\n'
+                f'Client declared:  TZS {declared:,.0f}\n'
+            )
+            if abs(declared - float(expected_total)) > 1:
+                body += 'MISMATCH — the declared amount differs from the expected total.\n'
+        if notes:
+            body += f'\nNotes: {notes}\n'
+        body += '\nPlease verify and record the payment in the management panel.'
+ 
+        ClientNotification.objects.create(
+            website=website, client=client,
+            notification_type='payment_received',
+            subject=f'Payment Submission — {website.name}',
+            message=body,
+            email_sent=False,
+        )
+ 
     try:
         send_mail(
-            subject=f'Payment Proof Submitted — {website.name} — {client.name}',
-            message=f'Client has submitted payment proof.\n\nWebsite: {website.name}\nClient: {client.name}\nAmount: TZS {amount}\nMethod: {payment_method}\nRef: {transaction_ref}\nMonths: {months}\n\nPlease verify and record it in the management panel.',
-            from_email=getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@jamiitek.com'),
+            subject=f'[JamiiTek] Payment proof — {client.name} ({len(entries)} site{"" if len(entries) == 1 else "s"})',
+            message=(
+                f'Client: {client.name}\n'
+                f'Sites:  {site_list}\n'
+                f'Ref:    {transaction_ref}\n'
+                f'Method: {payment_method}\n'
+                f'Expected total: TZS {expected_total:,.0f}\n'
+                f'Declared:       TZS {declared:,.0f}\n\n'
+                f'{notes}'
+            ),
+            from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[getattr(settings, 'ADMIN_EMAIL', 'info@jamiitek.com')],
             fail_silently=True,
         )
     except Exception:
         pass
-
-    messages.success(request, 'Payment proof submitted! JamiiTek will verify and confirm within 24 hours.')
+ 
+    if len(entries) == 1:
+        messages.success(
+            request,
+            f'Payment proof for {entries[0]["website"].name} received. '
+            'We verify within 24 hours.')
+    else:
+        messages.success(
+            request,
+            f'Payment proof received for {len(entries)} websites. '
+            'Each one is verified separately, within 24 hours.')
+ 
     return redirect('portal_billing')
-
 
 # ── NOTIFICATIONS ──────────────────────────────────────────────────
 

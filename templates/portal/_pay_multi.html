@@ -1,0 +1,239 @@
+{# apps/templates/portal/_pay_multi.html
+   Replaces the single-site form when the client has more than one website. #}
+<div class="sec f2" id="payForm">
+  <div class="sec-head">
+    <div class="sec-title"><i class="fas fa-upload" style="color:var(--green)"></i> Submit Payment Proof</div>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--green)">Verified in 24hrs</span>
+  </div>
+  <div class="sec-body">
+
+    <div class="jt-alert jt-alert-info" style="margin-bottom:20px;font-size:13px">
+      <i class="fas fa-circle-info fa-sm" style="flex-shrink:0;margin-top:2px"></i>
+      Tick the websites you are paying for &mdash; one, some, or all. Pay the total
+      to the NMB account, then submit the details below. Each website is verified
+      and renewed separately.
+    </div>
+
+    <form method="post" action="{% url 'portal_submit_payment' %}" id="multiPayForm">
+      {% csrf_token %}
+
+      <div class="f-section">
+        <div class="f-section-title">
+          <i class="fas fa-globe fa-sm"></i> Choose websites
+          <button type="button" class="pick-all" id="pickDue">Select all due</button>
+        </div>
+
+        {% for l in account.lines %}
+        <div class="pw {% if l.payable %}pw-due{% endif %}" data-pk="{{ l.website.pk }}">
+          <label class="pw-head">
+            <input type="checkbox" name="pay_website" value="{{ l.website.pk }}"
+                   class="pw-check" {% if l.payable %}checked{% endif %}>
+            <span class="pw-info">
+              <span class="pw-name">{{ l.website.name }}</span>
+              <span class="pw-state al-{{ l.tone }}">{{ l.label }}
+                &middot; {{ l.website.monthly_cost|floatformat:0 }} TZS/mo</span>
+            </span>
+            <span class="pw-sub" data-role="sub">0</span>
+          </label>
+
+          <div class="pw-durs">
+            {% for o in l.options %}
+            <button type="button" class="pw-dur{% if o.months == 1 %} on{% endif %}"
+                    data-months="{{ o.months }}" data-total="{{ o.total|floatformat:0 }}">
+              <span class="d1">{{ o.label_en }}</span>
+              <span class="d2">{{ o.total|floatformat:0 }}</span>
+              {% if o.discount_pct %}<span class="d3">-{{ o.discount_pct|floatformat:0 }}%</span>{% endif %}
+            </button>
+            {% endfor %}
+          </div>
+          <input type="hidden" name="months_{{ l.website.pk }}" value="1" data-role="months">
+        </div>
+        {% endfor %}
+      </div>
+
+      <div class="pay-total" id="payTotal">
+        <div>
+          <div class="pt-lbl">Total to pay</div>
+          <div class="pt-sites" id="ptSites">No websites selected</div>
+        </div>
+        <div class="pt-val"><span>TZS</span> <b id="ptVal">0</b></div>
+      </div>
+
+      <div class="f-section">
+        <div class="f-section-title">Payment details</div>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="f-label">Amount Paid (TZS) *</label>
+            <input type="number" name="amount" id="amountInput" class="f-input"
+                   placeholder="e.g. 50000" required>
+            <div class="amt-hint" id="amtHint"></div>
+          </div>
+          <div class="col-md-6">
+            <label class="f-label">Payment Method</label>
+            <select name="payment_method" class="f-input">
+              <option>NMB Bank Transfer</option>
+              <option>M-Pesa</option>
+              <option>Tigo Pesa</option>
+              <option>Airtel Money</option>
+              <option>Cash</option>
+            </select>
+          </div>
+          <div class="col-12">
+            <label class="f-label">Transaction Reference *</label>
+            <input type="text" name="transaction_ref" class="f-input"
+                   placeholder="e.g. NMB20240912345" required>
+          </div>
+          <div class="col-12">
+            <label class="f-label">Notes (optional)</label>
+            <textarea name="notes" class="f-input" style="min-height:65px"
+                      placeholder="Any additional information..."></textarea>
+          </div>
+          <div class="col-12">
+            <button type="submit" class="jt-btn btn-green" id="paySubmit"
+                    style="width:100%;justify-content:center;padding:12px 20px;font-size:14px">
+              <i class="fas fa-paper-plane"></i> Submit Payment Proof
+            </button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<style>
+.pick-all{margin-left:auto;background:transparent;border:1px solid var(--border);
+  color:var(--text-3);font-family:var(--mono);font-size:9.5px;letter-spacing:.5px;
+  padding:5px 10px;border-radius:7px;cursor:pointer;text-transform:uppercase}
+.pick-all:hover{color:var(--cyan);border-color:var(--cyan)}
+
+.pw{border:1px solid var(--border);border-radius:13px;margin-bottom:10px;
+  overflow:hidden;transition:border-color .18s,background .18s}
+.pw.sel{border-color:rgba(0,255,136,.35);background:rgba(0,255,136,.03)}
+.pw-head{display:flex;align-items:center;gap:12px;padding:13px 14px;cursor:pointer;margin:0}
+.pw-check{width:19px;height:19px;flex-shrink:0;accent-color:#00ff88;cursor:pointer}
+.pw-info{flex:1;min-width:0}
+.pw-name{display:block;font-size:13.5px;font-weight:600;color:var(--text);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pw-state{display:block;font-family:var(--mono);font-size:10.5px;color:var(--text-3);margin-top:2px}
+.pw-state.al-red{color:var(--red)}
+.pw-state.al-yellow{color:var(--yellow)}
+.pw-sub{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--text-3);flex-shrink:0}
+.pw.sel .pw-sub{color:var(--green)}
+
+.pw-durs{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;
+  padding:0 14px 13px;max-height:0;opacity:0;overflow:hidden;
+  transition:max-height .25s,opacity .2s,padding .25s}
+.pw.sel .pw-durs{max-height:120px;opacity:1}
+.pw-dur{background:var(--card-s,rgba(255,255,255,.03));border:1px solid var(--border);
+  border-radius:9px;padding:8px 4px;cursor:pointer;text-align:center;transition:all .15s}
+.pw-dur:hover{border-color:var(--border-s,var(--cyan))}
+.pw-dur.on{border-color:var(--cyan);background:rgba(0,212,255,.08)}
+.pw-dur .d1{display:block;font-family:var(--mono);font-size:9px;letter-spacing:.4px;
+  color:var(--text-3);text-transform:uppercase}
+.pw-dur.on .d1{color:var(--cyan)}
+.pw-dur .d2{display:block;font-family:var(--mono);font-size:12px;font-weight:700;
+  color:var(--text);margin-top:3px}
+.pw-dur .d3{display:block;font-family:var(--mono);font-size:8.5px;color:var(--green);margin-top:1px}
+@media (max-width:520px){.pw-durs{grid-template-columns:repeat(2,1fr)}}
+
+.pay-total{display:flex;align-items:center;justify-content:space-between;gap:16px;
+  flex-wrap:wrap;background:linear-gradient(120deg,rgba(139,92,246,.1),rgba(0,212,255,.06));
+  border:1px solid rgba(139,92,246,.22);border-radius:14px;padding:16px 18px;margin:4px 0 20px}
+.pt-lbl{font-family:var(--mono);font-size:10px;letter-spacing:1.2px;
+  text-transform:uppercase;color:var(--text-3)}
+.pt-sites{font-size:12px;color:var(--text-3);margin-top:3px}
+.pt-val{font-family:var(--head);font-size:26px;font-weight:800;color:var(--text);letter-spacing:-1px}
+.pt-val span{font-size:13px;color:var(--text-3);font-weight:600}
+.amt-hint{font-family:var(--mono);font-size:10.5px;margin-top:6px;min-height:14px}
+.amt-hint.ok{color:var(--green)}
+.amt-hint.off{color:var(--yellow)}
+</style>
+
+<script>
+(function(){
+  var form = document.getElementById('multiPayForm');
+  if (!form) return;
+
+  var cards = [].slice.call(form.querySelectorAll('.pw')),
+      ptVal = document.getElementById('ptVal'),
+      ptSites = document.getElementById('ptSites'),
+      amountInput = document.getElementById('amountInput'),
+      amtHint = document.getElementById('amtHint'),
+      submitBtn = document.getElementById('paySubmit'),
+      touchedAmount = false,
+      total = 0;
+
+  function fmt(n){ return Number(n).toLocaleString('en-US'); }
+
+  function cardTotal(card){
+    var active = card.querySelector('.pw-dur.on');
+    return active ? parseFloat(active.dataset.total) || 0 : 0;
+  }
+
+  function recalc(){
+    total = 0;
+    var picked = 0;
+    cards.forEach(function(card){
+      var on = card.querySelector('.pw-check').checked;
+      card.classList.toggle('sel', on);
+      var sub = on ? cardTotal(card) : 0;
+      card.querySelector('[data-role=sub]').textContent = on ? fmt(sub) : '—';
+      total += sub;
+      if (on) picked++;
+    });
+
+    ptVal.textContent = fmt(total);
+    ptSites.textContent = picked === 0 ? 'No websites selected'
+      : picked + ' website' + (picked === 1 ? '' : 's') + ' selected';
+    submitBtn.disabled = picked === 0;
+
+    // Prefill the amount until the client types their own figure
+    if (!touchedAmount) amountInput.value = total || '';
+    checkAmount();
+  }
+
+  function checkAmount(){
+    var typed = parseFloat(amountInput.value) || 0;
+    if (!typed || !total) { amtHint.textContent = ''; amtHint.className = 'amt-hint'; return; }
+    var diff = typed - total;
+    if (Math.abs(diff) < 1) {
+      amtHint.textContent = 'Matches the total';
+      amtHint.className = 'amt-hint ok';
+    } else if (diff < 0) {
+      amtHint.textContent = 'TZS ' + fmt(Math.abs(diff)) + ' less than the total';
+      amtHint.className = 'amt-hint off';
+    } else {
+      amtHint.textContent = 'TZS ' + fmt(diff) + ' more than the total';
+      amtHint.className = 'amt-hint off';
+    }
+  }
+
+  cards.forEach(function(card){
+    card.querySelector('.pw-check').addEventListener('change', recalc);
+
+    card.querySelectorAll('.pw-dur').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        card.querySelectorAll('.pw-dur').forEach(function(b){ b.classList.remove('on'); });
+        btn.classList.add('on');
+        card.querySelector('[data-role=months]').value = btn.dataset.months;
+        if (!card.querySelector('.pw-check').checked) {
+          card.querySelector('.pw-check').checked = true;
+        }
+        recalc();
+      });
+    });
+  });
+
+  amountInput.addEventListener('input', function(){ touchedAmount = true; checkAmount(); });
+
+  document.getElementById('pickDue').addEventListener('click', function(){
+    var anyOff = cards.some(function(c){ return c.classList.contains('pw-due') && !c.querySelector('.pw-check').checked; });
+    cards.forEach(function(c){
+      if (c.classList.contains('pw-due')) c.querySelector('.pw-check').checked = anyOff;
+    });
+    recalc();
+  });
+
+  recalc();
+})();
+</script>

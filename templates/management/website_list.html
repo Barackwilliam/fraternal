@@ -26,34 +26,159 @@
   </div>
 </form>
 
-<div class="jt-card" style="padding:0">
-  <div style="overflow-x:auto">
-    <table class="jt-table">
-      <thead><tr><th>Website</th><th>Client</th><th>Status</th><th>Expires</th><th>Monthly</th><th>Total Paid</th><th></th></tr></thead>
-      <tbody>
-        {% for w in websites %}
-        <tr>
-          <td>
-            <div style="font-weight:600;color:var(--text)">{{ w.name }}</div>
-            <a href="{{ w.url }}" target="_blank" style="font-family:var(--mono);font-size:11px;color:var(--text-3)">{{ w.url|truncatechars:36 }}</a>
-          </td>
-          <td>
-            <div style="font-size:13px;color:var(--text-2)">{{ w.client.name }}</div>
-            {% if w.client.user %}<div style="font-family:var(--mono);font-size:10px;color:var(--purple)">@{{ w.client.user.username }}</div>{% endif %}
-          </td>
-          <td><span class="jt-badge b-{{ w.status }}">{{ w.status|capfirst }}</span></td>
-          <td style="font-family:var(--mono);font-size:12px;{% if w.is_overdue %}color:var(--red){% elif w.days_until_expiry <= 7 %}color:var(--yellow){% else %}color:var(--text-3){% endif %}">
-            {{ w.hosting_end_date|date:"d M Y" }}{% if w.is_overdue %} ⚠{% endif %}
-          </td>
-          <td style="font-family:var(--mono);font-size:12px;color:var(--text-2)">TZS {{ w.monthly_cost|floatformat:0 }}</td>
-          <td style="font-family:var(--mono);font-size:12px;color:var(--green)">TZS {{ w.total_paid|floatformat:0 }}</td>
-          <td><a href="{% url 'website_detail' w.pk %}" class="jt-btn btn-ghost" style="font-size:11px;padding:6px 12px"><i class="fas fa-arrow-right"></i> Manage</a></td>
-        </tr>
-        {% empty %}
-        <tr><td colspan="7"><div class="jt-empty"><div class="ei">🌐</div><p>No websites found</p></div></td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
+<style>
+  .bulk-col{width:38px;text-align:center}
+  .bulk-check,.bulk-all{width:17px;height:17px;accent-color:#00d4ff;cursor:pointer;vertical-align:middle}
+  tr.picked{background:rgba(0,212,255,.05)}
+
+  .bulk-bar{position:fixed;left:50%;bottom:20px;transform:translate(-50%,120%);
+    z-index:120;display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+    background:var(--card);border:1px solid var(--border);border-radius:15px;
+    padding:13px 16px;box-shadow:0 18px 50px rgba(0,0,0,.5);
+    width:min(760px,calc(100vw - 32px));transition:transform .28s cubic-bezier(.22,.61,.36,1)}
+  .bulk-bar.show{transform:translate(-50%,0)}
+  .bulk-count{font-family:var(--mono);font-size:11px;letter-spacing:.5px;color:var(--cyan);
+    background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.25);
+    padding:6px 11px;border-radius:8px;white-space:nowrap;flex-shrink:0}
+  .bulk-bar input[type=text]{flex:1;min-width:170px;background:rgba(255,255,255,.03);
+    border:1px solid var(--border);border-radius:9px;padding:9px 12px;
+    color:var(--text);font-size:12.5px}
+  .bulk-bar input[type=text]:focus{outline:none;border-color:var(--cyan)}
+  .bulk-note{display:flex;align-items:center;gap:7px;font-size:11.5px;
+    color:var(--text-3);white-space:nowrap;cursor:pointer}
+  .bulk-note input{width:16px;height:16px;accent-color:#00d4ff}
+  .bulk-danger{color:#f87171;border-color:rgba(248,113,113,.3)}
+  .bulk-danger:hover{background:rgba(248,113,113,.1)}
+  .bulk-x{background:transparent;border:0;color:var(--text-3);cursor:pointer;
+    font-size:15px;padding:4px 6px;flex-shrink:0}
+  .bulk-x:hover{color:var(--text)}
+  @media (max-width:720px){
+    .bulk-bar{bottom:12px;padding:12px}
+    .bulk-bar input[type=text]{order:5;min-width:100%}
+  }
+</style>
+
+<form method="post" action="{% url 'bulk_website_action' %}" id="bulkForm">
+  {% csrf_token %}
+
+  <div class="jt-card" style="padding:0">
+    <div style="overflow-x:auto">
+      <table class="jt-table">
+        <thead>
+          <tr>
+            <th class="bulk-col"><input type="checkbox" class="bulk-all" id="bulkAll" title="Select all"></th>
+            <th>Website</th><th>Client</th><th>Status</th><th>Expires</th><th>Monthly</th><th>Total Paid</th><th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for w in websites %}
+          <tr>
+            <td class="bulk-col">
+              <input type="checkbox" name="selected" value="{{ w.pk }}" class="bulk-check"
+                     data-status="{{ w.status }}" data-name="{{ w.name }}">
+            </td>
+            <td>
+              <div style="font-weight:600;color:var(--text)">{{ w.name }}</div>
+              <a href="{{ w.url }}" target="_blank" style="font-family:var(--mono);font-size:11px;color:var(--text-3)">{{ w.url|truncatechars:36 }}</a>
+            </td>
+            <td>
+              <div style="font-size:13px;color:var(--text-2)">{{ w.client.name }}</div>
+              {% if w.client.user %}<div style="font-family:var(--mono);font-size:10px;color:var(--purple)">@{{ w.client.user.username }}</div>{% endif %}
+            </td>
+            <td><span class="jt-badge b-{{ w.status }}">{{ w.status|capfirst }}</span></td>
+            <td style="font-family:var(--mono);font-size:12px;{% if w.is_overdue %}color:var(--red){% elif w.days_until_expiry <= 7 %}color:var(--yellow){% else %}color:var(--text-3){% endif %}">
+              {{ w.hosting_end_date|date:"d M Y" }}{% if w.is_overdue %} ⚠{% endif %}
+            </td>
+            <td style="font-family:var(--mono);font-size:12px;color:var(--text-2)">TZS {{ w.monthly_cost|floatformat:0 }}</td>
+            <td style="font-family:var(--mono);font-size:12px;color:var(--green)">TZS {{ w.total_paid|floatformat:0 }}</td>
+            <td><a href="{% url 'website_detail' w.pk %}" class="jt-btn btn-ghost" style="font-size:11px;padding:6px 12px"><i class="fas fa-arrow-right"></i> Manage</a></td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="8"><div class="jt-empty"><div class="ei">🌐</div><p>No websites found</p></div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
   </div>
-</div>
+
+  <!-- BULK BAR -->
+  <div class="bulk-bar" id="bulkBar">
+    <span class="bulk-count" id="bulkCount">0 selected</span>
+    <input type="text" name="reason" id="bulkReason" placeholder="Reason (required to suspend)">
+    <label class="bulk-note"><input type="checkbox" name="notify_client"> Email clients</label>
+    <button type="submit" name="action" value="activate" class="jt-btn btn-ghost" style="font-size:12px;padding:8px 14px">
+      <i class="fas fa-play"></i> Activate</button>
+    <button type="submit" name="action" value="suspend" class="jt-btn btn-ghost bulk-danger" id="bulkSuspend" style="font-size:12px;padding:8px 14px">
+      <i class="fas fa-ban"></i> Suspend</button>
+    <button type="button" class="bulk-x" id="bulkClear" title="Clear selection">&times;</button>
+  </div>
+</form>
+
+<script>
+(function(){
+  var checks = [].slice.call(document.querySelectorAll('.bulk-check')),
+      all = document.getElementById('bulkAll'),
+      bar = document.getElementById('bulkBar'),
+      count = document.getElementById('bulkCount'),
+      reason = document.getElementById('bulkReason'),
+      form = document.getElementById('bulkForm');
+
+  function picked(){ return checks.filter(function(c){ return c.checked; }); }
+
+  function refresh(){
+    var n = picked().length;
+    checks.forEach(function(c){ c.closest('tr').classList.toggle('picked', c.checked); });
+    bar.classList.toggle('show', n > 0);
+    count.textContent = n + ' selected';
+    if (all) {
+      all.checked = n === checks.length && n > 0;
+      all.indeterminate = n > 0 && n < checks.length;
+    }
+  }
+
+  checks.forEach(function(c){ c.addEventListener('change', refresh); });
+
+  if (all) all.addEventListener('change', function(){
+    checks.forEach(function(c){ c.checked = all.checked; });
+    refresh();
+  });
+
+  document.getElementById('bulkClear').addEventListener('click', function(){
+    checks.forEach(function(c){ c.checked = false; });
+    reason.value = '';
+    refresh();
+  });
+
+  /* Confirm before anything destructive, and catch a missing reason here
+     rather than after a round trip to the server. */
+  form.addEventListener('submit', function(e){
+    var action = e.submitter ? e.submitter.value : '',
+        chosen = picked(),
+        names = chosen.slice(0, 3).map(function(c){ return c.dataset.name; }).join(', '),
+        more = chosen.length > 3 ? ' and ' + (chosen.length - 3) + ' more' : '';
+
+    if (!chosen.length) { e.preventDefault(); return; }
+
+    if (action === 'suspend') {
+      if (!reason.value.trim()) {
+        e.preventDefault();
+        reason.focus();
+        reason.style.borderColor = '#f87171';
+        setTimeout(function(){ reason.style.borderColor = ''; }, 1600);
+        return;
+      }
+      if (!confirm('Suspend ' + chosen.length + ' website(s)?\n\n' + names + more +
+                   '\n\nEach one goes offline until you activate it again.')) {
+        e.preventDefault();
+      }
+    } else if (action === 'activate') {
+      if (!confirm('Activate ' + chosen.length + ' website(s)?\n\n' + names + more)) {
+        e.preventDefault();
+      }
+    }
+  });
+
+  refresh();
+})();
+</script>
 {% endblock %}

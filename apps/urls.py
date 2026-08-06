@@ -14,6 +14,7 @@ from . import client_portal_views as portal
 from builder import views as builder_views
 from . import domain_views
 from . import receipt_views
+from . import bulk_actions
 
 urlpatterns = [
     # ── COMPANY PROFILE ─────────────────────────────────────
@@ -152,6 +153,11 @@ urlpatterns = [
     path('portal/email/', portal.portal_email_hosting, name='portal_email_hosting'),
     path('portal/hosting/<int:pk>/', portal.portal_hosting_config, name='portal_hosting_config'),
     path('portal/dns/<int:pk>/', portal.portal_dns_manager, name='portal_dns_manager'),
+
+
+    path('manage/websites/bulk/', bulk_actions.bulk_website_action, name='bulk_website_action'),
+    path('manage/clients/<int:pk>/suspend-all/', bulk_actions.suspend_client_websites, name='suspend_client_websites'),
+    path('manage/clients/<int:pk>/activate-all/', bulk_actions.activate_client_websites, name='activate_client_websites'),
 
     # ── PUBLIC API ─────────────────────────────────────────
     path('api/site-status/<str:api_key>/', management_views.site_status_api, name='site_status_api'),

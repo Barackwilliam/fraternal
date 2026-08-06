@@ -42,6 +42,41 @@
       {% empty %}
       <div class="jt-empty" style="padding:28px"><div class="ei">🌐</div><p>No websites</p></div>
       {% endfor %}
+
+
+      {% if websites.count > 1 %}
+      <div style="padding:14px 18px;background:rgba(255,255,255,.02);border-top:1px solid var(--border)">
+        <div style="font-family:var(--mono);font-size:10px;letter-spacing:.6px;text-transform:uppercase;color:var(--text-3);margin-bottom:10px">
+          All {{ websites.count }} websites at once
+        </div>
+
+        <form method="post" action="{% url 'suspend_client_websites' client.pk %}"
+              onsubmit="return confirm('Suspend ALL {{ websites.count }} websites for {{ client.name }}?\n\nEvery one goes offline until you activate it again.')"
+              style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px">
+          {% csrf_token %}
+          <input type="text" name="reason" placeholder="Reason for suspension" required
+                 style="flex:1;min-width:180px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:9px;padding:9px 12px;color:var(--text);font-size:12.5px">
+          <label style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--text-3);white-space:nowrap;cursor:pointer">
+            <input type="checkbox" name="notify_client" style="width:15px;height:15px;accent-color:#00d4ff"> Email client
+          </label>
+          <button type="submit" class="jt-btn btn-ghost" style="font-size:11.5px;padding:8px 14px;color:#f87171;border-color:rgba(248,113,113,.3)">
+            <i class="fas fa-ban"></i> Suspend all
+          </button>
+        </form>
+
+        <form method="post" action="{% url 'activate_client_websites' client.pk %}"
+              onsubmit="return confirm('Activate all websites for {{ client.name }}?')"
+              style="display:flex;gap:8px;align-items:center">
+          {% csrf_token %}
+          <label style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--text-3);cursor:pointer">
+            <input type="checkbox" name="notify_client" style="width:15px;height:15px;accent-color:#00d4ff"> Email client
+          </label>
+          <button type="submit" class="jt-btn btn-ghost" style="font-size:11.5px;padding:8px 14px;color:#4ade80;border-color:rgba(74,222,128,.28)">
+            <i class="fas fa-play"></i> Activate all
+          </button>
+        </form>
+      </div>
+      {% endif %}
     </div>
     <div class="jt-card" style="padding:0">
       <div class="jt-card-head"><span class="jt-card-title"><i class="fas fa-receipt" style="color:var(--green)"></i> Payments</span></div>
