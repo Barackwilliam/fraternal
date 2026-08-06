@@ -40,8 +40,65 @@ td{vertical-align:top}
 .btn{background:#111;color:#fff;padding:9pt 20pt;text-decoration:none;
   font-weight:bold;font-size:9pt;font-family:Helvetica,Arial,sans-serif}
 </style>
+
+{% if not pdf %}
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+/* Screen only. The rules above are tuned for an 80mm PDF page, which looks
+   wrong stretched across a browser window — so on screen we put the same
+   receipt on a centred paper card and scale the type up to readable sizes. */
+html{background:#E8ECF1}
+body{background:#E8ECF1;font-size:12.5px;line-height:1.55;
+  padding:26px 14px 60px;-webkit-font-smoothing:antialiased}
+.paper{width:100%;max-width:400px;margin:0 auto;background:#fff;
+  padding:26px 24px 30px;border-radius:3px;
+  box-shadow:0 1px 2px rgba(16,26,40,.06),0 16px 42px rgba(16,26,40,.14);
+  position:relative}
+.paper::before,.paper::after{content:'';position:absolute;left:0;right:0;height:9px;
+  background-size:14px 9px;background-repeat:repeat-x}
+.paper::before{top:-9px;
+  background-image:linear-gradient(135deg,#fff 50%,transparent 50%),
+                   linear-gradient(-135deg,#fff 50%,transparent 50%)}
+.paper::after{bottom:-9px;
+  background-image:linear-gradient(45deg,#fff 50%,transparent 50%),
+                   linear-gradient(-45deg,#fff 50%,transparent 50%)}
+.tear{display:none}                      /* real zigzag replaces the ASCII one */
+.head{font-size:34px;padding-bottom:4px}
+.sm{font-size:11px}
+.xs{font-size:10px}
+.rule{margin:11px 0}
+.rule-solid{margin:11px 0}
+.item td{padding:4px 0}
+.amt-row td{font-size:21px;padding:9px 0}
+.tot td{padding:3px 0}
+.stamp{font-size:12px;padding:6px 16px;display:inline-block}
+.sig-box{padding:6px;min-height:62px}
+.sig-img{height:52px}
+.qr{width:104px;height:104px}
+.bar{width:100%;max-width:300px;height:48px;margin:0 auto}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;
+  background:#0A2245;color:#fff;padding:14px 26px;border-radius:10px;
+  font-size:14px;font-family:Helvetica,Arial,sans-serif;font-weight:700;
+  letter-spacing:.2px;box-shadow:0 8px 22px rgba(10,34,69,.28);
+  transition:transform .18s,box-shadow .18s;min-height:48px}
+.btn:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(10,34,69,.34)}
+.verify-link{display:block;margin-top:20px;text-align:center;font-size:11px;color:#7A889B}
+.verify-link a{color:#0A2245;font-weight:600}
+@media (max-width:420px){
+  body{padding:14px 10px 48px}
+  .paper{padding:22px 18px 26px}
+  .head{font-size:29px}
+}
+@media print{
+  html,body{background:#fff;padding:0}
+  .paper{box-shadow:none;max-width:none;padding:0}
+  .paper::before,.paper::after,.no-print{display:none}
+}
+</style>
+{% endif %}
 </head>
 <body>
+<div class="paper">
 
 <div class="tear c">\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/</div>
 
@@ -187,9 +244,19 @@ td{vertical-align:top}
 
 <div class="tear c" style="margin-top:5pt">/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\</div>
 
+</div>
+
 {% if not pdf %}
-<div class="c" style="margin-top:22pt">
-  <a href="?pdf=1" class="btn">Download PDF</a>
+<div class="c no-print" style="margin-top:24px">
+  <a href="?pdf=1" class="btn">
+    <svg viewBox="0 0 24 24" fill="currentColor" style="width:17px;height:17px">
+      <path d="M12 16 6 10l1.4-1.4L11 12.2V4h2v8.2l3.6-3.6L18 10zM5 20v-2h14v2z"/></svg>
+    Download PDF
+  </a>
+  <div class="verify-link">
+    Checking this receipt is genuine?
+    <a href="{{ r.verify_path }}">Verify online</a>
+  </div>
 </div>
 {% endif %}
 
