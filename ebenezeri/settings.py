@@ -9,8 +9,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 WEBSITE_TYPES_DIR = BASE_DIR / 'apps' / 'website_types'
 
 # ── Security ──────────────────────────────────────────
-SECRET_KEY    = 'django-insecure-@&r$)$xpb)f6pm=_73pupatv2#n-%0%d=(cky=kab5ww6&*tzs'
-DEBUG = True
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-dev-only-key-change-me')
+DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 # MUHIMU: dot ya mwanzo (.jamiitek.com / .localhost) inaruhusu SUBDOMAINS ZOTE.
 # 'localhost' pekee HAIRUHUSU duka.localhost — lazima '.localhost' iwepo.
 ALLOWED_HOSTS = [h.strip() for h in os.getenv(
@@ -18,6 +18,9 @@ ALLOWED_HOSTS = [h.strip() for h in os.getenv(
     '.jamiitek.com,jamiitek.onrender.com,127.0.0.1,localhost,.localhost'
 ).split(',') if h.strip()]
 
+
+CSRF_TRUSTED_ORIGINS = ['https://jamiitek.com', 'https://www.jamiitek.com',
+                        'https://jamiitek.onrender.com']
 # Kwa DEV tu: ruhusu host yoyote (inarahisisha kutest custom domains kwa hosts file)
 if DEBUG:
     ALLOWED_HOSTS.append('*')

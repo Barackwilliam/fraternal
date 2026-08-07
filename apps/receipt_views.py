@@ -6,15 +6,15 @@ Follows the same shape as docs_views / proposal_views so it drops straight
 into the existing /manage/ UI.
 """
 
-from datetime import datetime
 from decimal import Decimal, InvalidOperation
 from io import BytesIO
 
 from django.contrib import messages
 from django.db.models import Q, Sum
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
+from django.utils.dateparse import parse_date
 from django.views.decorators.http import require_POST
 
 from .models import ManagedWebsite, DevelopmentReceipt
@@ -112,12 +112,9 @@ def _apply_post(receipt, request):
     receipt.is_published = bool(request.POST.get('is_published'))
     receipt.require_signature = bool(request.POST.get('require_signature'))
 
-    pay_date = request.POST.get('payment_date')
+    pay_date = parse_date((request.POST.get('payment_date') or '').strip())
     if pay_date:
-        try:
-            receipt.payment_date = datetime.strptime(pay_date, '%Y-%m-%d').date()
-        except ValueError:
-            messages.error(request, 'Tarehe ya malipo si sahihi (tumia muundo YYYY-MM-DD).')
+        receipt.payment_date = pay_date
     return receipt
 
 
@@ -302,11 +299,17 @@ def portal_receipt_list(request):
 # PUBLIC LINK (shareable, unguessable token)
 # ══════════════════════════════════════════════════════════════
 def receipt_public(request, token):
-    receipt = get_object_or_404(
-        DevelopmentReceipt.objects.select_related('website', 'website__client'),
-        token=token)
-    if not receipt.is_published and not request.user.is_staff:
-        raise Http404
+    """
+    A receipt link may be shared by WhatsApp and outlive the receipt itself.
+    A deleted or withdrawn one shows the verification page rather than a 404 —
+    the person holding the link deserves an explanation, not a stack trace.
+    """
+    receipt = DevelopmentReceipt.objects.select_related(
+        'website', 'website__client').filter(token=token).first()
+
+    if receipt is None or (not receipt.is_published and not request.user.is_staff):
+        return render(request, 'receipts/receipt_verify.html',
+                      {'r': receipt, 'valid': False}, status=404)
 
     if request.GET.get('pdf'):
         return _render_pdf(request, 'receipts/receipt_doc.html',
@@ -323,7 +326,7 @@ def receipt_verify(request, token):
     receipt = DevelopmentReceipt.objects.select_related(
         'website', 'website__client').filter(token=token).first()
 
-    return render(request, 'receipts/receipt_verify.html', {
-        'r': receipt,
-        'valid': receipt is not None and receipt.is_published,
-    })
+    valid = receipt is not None and receipt.is_published
+    return render(request, 'receipts/receipt_verify.html',
+                  {'r': receipt, 'valid': valid},
+                  status=200 if valid else 404)
