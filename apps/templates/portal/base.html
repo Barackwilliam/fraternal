@@ -248,5 +248,6 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')document.que
 setTimeout(()=>{document.querySelectorAll('.jt-msg').forEach(m=>{m.style.transition='opacity 0.5s';m.style.opacity='0';setTimeout(()=>m.remove(),500)})},5000);
 </script>
 {% block extra_js %}{% endblock %}
+{% include 'includes/offline_guard.html' %}
 </body>
 </html>
