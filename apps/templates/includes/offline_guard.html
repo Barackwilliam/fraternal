@@ -1,0 +1,66 @@
+{# apps/templates/includes/offline_guard.html
+   Include once, just before </body>, in portal/base.html and management/base.html.
+
+   Two jobs:
+     1. register the service worker, so a page load with no network still
+        lands on offline.html instead of the browser's dinosaur
+     2. drop an overlay the instant the connection dies on a page that is
+        already open — no polling, no fetch loop, the browser fires the event #}
+<script>
+(function () {
+  'use strict';
+
+  if ('serviceWorker' in navigator && location.protocol === 'https:') {
+    addEventListener('load', function () {
+      navigator.serviceWorker.register('/sw.js').catch(function () {});
+    });
+  }
+
+  var box = null;
+
+  function show() {
+    if (box) { box.style.display = 'flex'; return; }
+    box = document.createElement('div');
+    box.setAttribute('role', 'status');
+    box.style.cssText =
+      'position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;' +
+      'justify-content:center;padding:28px 20px;background:#04101F;color:#fff;' +
+      'text-align:center;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",' +
+      'Roboto,Helvetica,Arial,sans-serif;line-height:1.6';
+    box.innerHTML =
+      '<div style="max-width:400px">' +
+        '<div style="width:74px;height:74px;margin:0 auto 24px;border-radius:21px;' +
+        'display:flex;align-items:center;justify-content:center;' +
+        'background:rgba(245,166,35,.12);border:1px solid rgba(245,166,35,.28)">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="#F5A623" stroke-width="2" ' +
+          'stroke-linecap="round" style="width:34px;height:34px">' +
+          '<path d="M2.5 8.5A16 16 0 0 1 21.5 8.5"/><path d="M6 12.2a11 11 0 0 1 12 0"/>' +
+          '<path d="M9.3 15.8a6 6 0 0 1 5.4 0"/>' +
+          '<circle cx="12" cy="19.4" r="1.2" fill="#F5A623" stroke="none"/>' +
+          '<path d="M3 3l18 18"/></svg>' +
+        '</div>' +
+        '<div style="font-size:12px;font-weight:700;letter-spacing:2.4px;' +
+        'color:#F5A623;margin-bottom:12px">OFFLINE</div>' +
+        '<h2 style="font-size:26px;font-weight:800;letter-spacing:-.8px;margin:0 0 12px">' +
+        'You&rsquo;re offline</h2>' +
+        '<p style="font-size:15px;color:#93A8C4;margin:0 0 26px">Check your mobile data ' +
+        'or Wi-Fi. Nothing has been lost &mdash; this closes itself the moment ' +
+        'you&rsquo;re back.</p>' +
+        '<div id="jtOffState" style="font-size:12.5px;color:#5F7590">' +
+        'Waiting for a connection&hellip;</div>' +
+      '</div>';
+    document.body.appendChild(box);
+  }
+
+  function hide() {
+    if (!box) return;
+    var s = box.querySelector('#jtOffState');
+    if (s) s.textContent = 'Back online.';
+    setTimeout(function () { box.style.display = 'none'; }, 400);
+  }
+
+  addEventListener('offline', show);
+  addEventListener('online', hide);
+  if (!navigator.onLine) show();
+})();
+</script>

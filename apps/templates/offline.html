@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>No connection — JamiiTek</title>
+<meta name="robots" content="noindex,nofollow">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{min-height:100vh;min-height:100svh;display:flex;align-items:center;justify-content:center;
+padding:28px 20px;background:#04101F;color:#fff;text-align:center;
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+-webkit-font-smoothing:antialiased;line-height:1.6}
+.w{width:100%;max-width:440px}
+.i{width:78px;height:78px;margin:0 auto 26px;border-radius:22px;display:flex;
+align-items:center;justify-content:center;background:rgba(245,166,35,.12);border:1px solid rgba(245,166,35,.28)}
+.i svg{width:36px;height:36px;color:#F5A623}
+.c{font-size:12px;font-weight:700;letter-spacing:2.4px;color:#F5A623;margin-bottom:12px}
+h1{font-size:clamp(25px,6.4vw,33px);font-weight:800;letter-spacing:-.9px;
+line-height:1.2;margin-bottom:13px}
+p{font-size:15px;color:#93A8C4;margin-bottom:28px}
+.b{display:flex;gap:11px;flex-wrap:wrap;justify-content:center}
+a.btn,button.btn{flex:1 1 auto;min-width:145px;min-height:50px;display:inline-flex;
+align-items:center;justify-content:center;gap:9px;padding:14px 24px;border-radius:12px;
+font-size:14.5px;font-weight:600;font-family:inherit;text-decoration:none;border:0;
+cursor:pointer;transition:transform .16s,background .16s}
+.p{background:#F5A623;color:#1A1206}
+.g{background:rgba(255,255,255,.07);color:#fff;border:1px solid rgba(255,255,255,.16)}
+.btn:active{transform:scale(.98)}
+@media(hover:hover){.btn:hover{transform:translateY(-2px)}.g:hover{background:rgba(255,255,255,.13)}}
+.f{margin-top:30px;padding-top:22px;border-top:1px solid rgba(255,255,255,.08);
+font-size:12.5px;color:#5F7590}
+.f a{color:#93A8C4;text-decoration:none;border-bottom:1px solid rgba(147,168,196,.3)}
+.br{font-size:16px;font-weight:800;letter-spacing:-.6px;color:#fff;margin-bottom:5px}
+.br span{color:#F5A623}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+.i{animation:pulse 2.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+.on .i{animation:none}
+
+</style>
+</head>
+<body>
+<div class="w">
+  <div class="i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2.5 8.5A16 16 0 0 1 21.5 8.5"/><path d="M6 12.2a11 11 0 0 1 12 0"/><path d="M9.3 15.8a6 6 0 0 1 5.4 0"/><circle cx="12" cy="19.4" r="1.2" fill="currentColor" stroke="none"/><path d="M3 3l18 18" stroke-width="2.2"/></svg></div>
+  <div class="c">OFFLINE</div>
+  <h1>You&rsquo;re offline</h1>
+  <p>Check your mobile data or Wi-Fi. This page reloads itself the moment you are back online.</p>
+  <div class="b"><button class="btn p" onclick="location.reload()">Try again</button><a class="btn g" href="/">Go to homepage</a></div>
+  <div class="f">
+    <div class="br">Jamii<span>Tek</span></div>
+    <span id="st">Waiting for a connection&hellip;</span>
+  </div>
+</div>
+
+<script>
+/* No framework, no fetch loop — the browser tells us when the network returns. */
+(function(){
+  var st = document.getElementById('st');
+  function back(){
+    document.body.classList.add('on');
+    st.textContent = 'Back online — reloading…';
+    setTimeout(function(){ location.reload(); }, 500);
+  }
+  addEventListener('online', back);
+  if (navigator.onLine) back();
+})();
+</script>
+</body>
+</html>

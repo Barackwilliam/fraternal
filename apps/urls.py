@@ -15,8 +15,18 @@ from builder import views as builder_views
 from . import domain_views
 from . import receipt_views
 from . import bulk_actions
+from django.views.generic import TemplateView
+from django.views.decorators.cache import cache_control
 
 urlpatterns = [
+
+
+    path('offline.html', TemplateView.as_view(template_name='offline.html'), name='offline'),
+    path('sw.js', cache_control(max_age=0)(
+    TemplateView.as_view(template_name='sw.js', content_type='application/javascript')),
+    name='sw'),
+
+    
     # ── COMPANY PROFILE ─────────────────────────────────────
     path('company-profile/', docs_views.company_profile_view, name='company_profile_view'),
     path('company-profile/pdf/', docs_views.company_profile_pdf, name='company_profile_pdf'),
