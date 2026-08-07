@@ -1,11 +1,4 @@
-{# apps/templates/includes/offline_guard.html
-   Include once, just before </body>, in portal/base.html and management/base.html.
 
-   Two jobs:
-     1. register the service worker, so a page load with no network still
-        lands on offline.html instead of the browser's dinosaur
-     2. drop an overlay the instant the connection dies on a page that is
-        already open — no polling, no fetch loop, the browser fires the event #}
 <script>
 (function () {
   'use strict';
