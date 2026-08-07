@@ -22,8 +22,7 @@ ALLOWED_HOSTS = [h.strip() for h in os.getenv(
 CSRF_TRUSTED_ORIGINS = ['https://jamiitek.com', 'https://www.jamiitek.com',
                         'https://jamiitek.onrender.com']
 # Kwa DEV tu: ruhusu host yoyote (inarahisisha kutest custom domains kwa hosts file)
-if DEBUG:
-    ALLOWED_HOSTS.append('*')
+
 
 INSTALLED_APPS = [
     'jazzmin',
