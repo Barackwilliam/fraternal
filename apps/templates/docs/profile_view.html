@@ -1,210 +1,746 @@
-{% load static custom_filters %}<!DOCTYPE html>
+{% load static %}<!DOCTYPE html>
 <html lang="{{ lang }}">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{{ profile.company_name }} — {% if lang == 'sw' %}Wasifu wa Kampuni{% else %}Company Profile{% endif %}</title>
 <meta name="description" content="{% if lang == 'sw' %}{{ profile.subtitle_sw }}{% else %}{{ profile.subtitle_en }}{% endif %}">
+<meta name="theme-color" content="#04101F">
+<link rel="canonical" href="https://jamiitek.com/company-profile/">
+
+<meta property="og:type" content="profile">
+<meta property="og:title" content="{{ profile.company_name }} — {% if lang == 'sw' %}Wasifu wa Kampuni{% else %}Company Profile{% endif %}">
+<meta property="og:description" content="{% if lang == 'sw' %}{{ profile.subtitle_sw }}{% else %}{{ profile.subtitle_en }}{% endif %}">
+{% if profile.logo_url %}<meta property="og:image" content="{{ profile.logo_url }}">{% endif %}
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Inter:wght@400;450;500;600&display=swap" rel="stylesheet">
+
 <style>
-  :root{--navy:#1a3c6e;--navy-d:#12294c;--gold:#c49a28;--gold-t:#8a6a00;
-    --tint:#eaf0fa;--tint-l:#f5f8fd;--cream:#fdf6e3;--ink:#1a1a1a;--muted:#666666;
-    --line:#cccccc;--line-l:#e4e9f2;--paper:#fff;--bg:#e8edf5}
-  *{margin:0;padding:0;box-sizing:border-box}
-  body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
-  .topbar{background:var(--navy);position:sticky;top:0;z-index:50;box-shadow:0 2px 12px rgba(26,60,110,.2)}
-  .topbar-in{max-width:900px;margin:0 auto;padding:12px 20px;display:flex;align-items:center;
-    justify-content:space-between;gap:16px;flex-wrap:wrap}
-  .tb-brand{color:#fff;font-size:15px;font-weight:bold;letter-spacing:1.4px}
-  .tb-tag{color:#c9d8ee;font-size:10.5px;font-style:italic;margin-top:1px}
-  .tb-right{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-  .lang-switch{display:flex;background:rgba(255,255,255,.12);border-radius:3px;padding:3px;gap:3px}
-  .lang-switch a{padding:6px 15px;border-radius:2px;text-decoration:none;font-size:12px;font-weight:bold;
-    color:rgba(255,255,255,.75);letter-spacing:.5px}
-  .lang-switch a.on{background:#fff;color:var(--navy)}
-  .dl{background:var(--gold);color:#2e2200;padding:8px 16px;text-decoration:none;font-size:12px;font-weight:bold;letter-spacing:.5px}
-  .dl:hover{background:#d9ac36}
-  .wrap{max-width:900px;margin:0 auto;padding:22px 20px 60px}
-  .paper{background:var(--paper);box-shadow:0 1px 3px rgba(26,60,110,.1),0 10px 40px rgba(26,60,110,.08)}
-  .titlewrap{text-align:center;padding:46px 50px 6px}
-  .logo-img{max-height:56px;margin-bottom:16px}
-  .doctitle{font-size:33px;font-weight:bold;color:var(--navy);letter-spacing:2px}
-  .docsub{font-size:15px;color:var(--muted);font-style:italic;margin-top:9px}
-  .period{font-size:11px;letter-spacing:2.5px;color:var(--gold-t);font-weight:bold;margin-top:12px}
-  .rule{width:70px;height:2px;background:var(--gold);margin:18px auto 0}
-  .secbar{background:var(--navy);color:#fff;font-size:12.5px;font-weight:bold;letter-spacing:1.6px;
-    padding:9px 18px;margin:28px 50px 14px}
-  .sec-text{margin:0 50px;font-size:14px}
-  .sec-text p{margin:0 0 12px}
-  .info-wrap{margin:14px 50px 0}
-  .info{width:100%;border-collapse:collapse}
-  .info td{padding:11px 15px;font-size:13.5px;border:1px solid var(--line)}
-  .info .k{background:var(--tint);color:var(--navy);font-weight:bold;width:23%;white-space:nowrap}
-  .info .v{background:var(--tint-l);width:27%}
-  .mv{display:flex;gap:18px;margin:0 50px;flex-wrap:wrap}
-  .mv .box{flex:1;min-width:250px;padding:18px 20px;border:1px solid var(--line)}
-  .mv .box.mission{background:var(--tint-l)}
-  .mv .box.vision{background:var(--cream)}
-  .mv .box .h{font-size:12px;font-weight:bold;letter-spacing:2px;margin-bottom:9px}
-  .mv .box.mission .h{color:var(--navy)}
-  .mv .box.vision .h{color:var(--gold-t)}
-  .mv .box p{font-size:13.5px}
-  .svc{margin:0 50px}
-  .svc .row{display:flex;margin-bottom:12px;border:1px solid var(--line)}
-  .svc .name{flex:0 0 190px;background:var(--navy);color:#fff;font-weight:bold;font-size:13.5px;
-    padding:16px 18px;display:flex;align-items:center}
-  .svc .desc{flex:1;background:var(--tint-l);padding:16px 18px;font-size:13.5px}
-  .why{margin:0 50px;padding:0}
-  .why li{list-style:none;padding:9px 0 9px 26px;position:relative;font-size:14px;border-bottom:1px solid var(--line-l)}
-  .why li:last-child{border-bottom:none}
-  .why li::before{content:'';position:absolute;left:4px;top:16px;width:8px;height:8px;background:var(--gold)}
-  .proj{margin:0 50px}
-  .proj table{width:100%;border-collapse:collapse}
-  .proj th{background:var(--navy);color:#fff;font-size:11px;text-transform:uppercase;letter-spacing:1px;
-    padding:11px 15px;text-align:left;font-weight:bold}
-  .proj td{padding:11px 15px;font-size:13px;border-bottom:1px solid var(--line-l)}
-  .proj tr:nth-child(even) td{background:var(--tint-l)}
-  .note{margin:14px 50px 0;background:var(--cream);border-left:4px solid var(--gold);
-    padding:14px 18px;font-size:13.5px;color:var(--gold-t)}
-  .contact{margin:0 50px}
-  .contact table{width:100%;border-collapse:collapse}
-  .contact td{padding:11px 15px;font-size:13.5px;border:1px solid var(--line)}
-  .contact .k{background:var(--tint);color:var(--navy);font-weight:bold;width:25%}
-  .contact .v{background:#fff}
-  .contact a{color:var(--navy);text-decoration:none;font-weight:bold}
-  .doc-foot{background:var(--navy);color:#fff;text-align:center;padding:20px;margin-top:34px;font-size:12px}
-  .doc-foot a{color:#c9d8ee;text-decoration:none}
-  .doc-foot .tagline{color:#c9d8ee;font-style:italic;font-size:11px;margin-top:4px}
-  @media(max-width:680px){
-    .titlewrap{padding-left:22px;padding-right:22px}
-    .secbar,.sec-text,.info-wrap,.mv,.svc,.why,.proj,.note,.contact{margin-left:16px;margin-right:16px}
-    .doctitle{font-size:24px}.svc .row{flex-direction:column}.svc .name{flex:none}
-  }
-  @media print{.topbar{display:none!important}body{background:#fff}.paper{box-shadow:none}.wrap{padding:0}}
+/* ═══════════════════════════════════════════════════════════
+   Company profile — the same design language as the homepage,
+   so a visitor arriving from there does not feel handed off to
+   a smaller company.
+   ═══════════════════════════════════════════════════════════ */
+:root{
+  --navy-950:#04101F; --navy-900:#071A31; --navy-800:#0A2245; --navy-700:#123563; --navy-600:#1B4C8C;
+  --gold:#F5A623; --gold-2:#FFC456; --blue:#2E7BF6;
+  --ink:#0C1626; --ink-2:#33445E; --muted:#66788F;
+  --line:#E3E9F2; --line-2:#EEF2F7; --bg:#F6F8FB; --card:#fff;
+  --r:14px; --r-lg:20px;
+  --sh-1:0 1px 2px rgba(12,22,38,.05),0 4px 16px rgba(12,22,38,.05);
+  --sh-2:0 2px 6px rgba(12,22,38,.06),0 18px 44px rgba(12,22,38,.11);
+  --wrap:1080px; --pad:18px; --sec:56px;
+  --ease:cubic-bezier(.22,.61,.36,1);
+}
+@media (min-width:600px){:root{--pad:24px;--sec:72px}}
+@media (min-width:1000px){:root{--pad:28px;--sec:92px}}
+
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.7;
+  font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden}
+h1,h2,h3,h4{font-family:'Sora',sans-serif;margin:0;line-height:1.16;letter-spacing:-.03em;font-weight:700}
+p{margin:0}
+a{color:inherit;text-decoration:none}
+img{display:block;max-width:100%}
+ul{margin:0;padding:0;list-style:none}
+:focus-visible{outline:3px solid var(--gold);outline-offset:3px;border-radius:5px}
+.wrap{width:100%;max-width:var(--wrap);margin:0 auto;padding-inline:var(--pad)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:46px;
+  padding:12px 22px;border-radius:10px;font-family:'Sora',sans-serif;font-weight:600;
+  font-size:13.5px;transition:transform .2s var(--ease),background .2s,color .2s}
+.btn:active{transform:scale(.98)}
+@media (hover:hover){.btn:hover{transform:translateY(-2px)}}
+.btn svg{width:15px;height:15px;flex:none}
+.btn--gold{background:var(--gold);color:#1A1206;box-shadow:0 6px 20px rgba(245,166,35,.3)}
+.btn--glass{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.3)}
+.btn--navy{background:var(--navy-800);color:#fff}
+@media (hover:hover){
+  .btn--gold:hover{background:var(--gold-2)}
+  .btn--glass:hover{background:#fff;color:var(--navy-900)}
+}
+
+.rv{opacity:0;transform:translateY(18px);transition:opacity .7s var(--ease),transform .7s var(--ease)}
+.rv.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+  .rv{opacity:1;transform:none}
+  html{scroll-behavior:auto}
+}
+
+/* ── Header ── */
+.hd{position:sticky;top:0;z-index:60;background:#fff;border-bottom:1px solid transparent;
+  transition:box-shadow .3s,border-color .3s}
+.hd.stuck{box-shadow:0 1px 22px rgba(12,22,38,.09);border-bottom-color:var(--line-2)}
+.hd__in{display:flex;align-items:center;gap:14px;min-height:62px}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.brand__logo{height:34px;width:auto;max-width:170px;object-fit:contain}
+.brand__txt{font-family:'Sora',sans-serif;font-weight:800;font-size:18px;
+  letter-spacing:-.04em;color:var(--navy-900);line-height:1}
+.brand__txt em{font-style:normal;color:var(--gold)}
+.brand__sub{font-size:9px;color:var(--muted);letter-spacing:.05em;
+  text-transform:uppercase;margin-top:3px;display:none}
+@media (min-width:480px){.brand__sub{display:block}}
+.hd__r{margin-left:auto;display:flex;align-items:center;gap:9px}
+.lang{display:flex;background:var(--line-2);border-radius:9px;padding:3px;gap:2px}
+.lang a{padding:7px 13px;border-radius:7px;font-family:'Sora',sans-serif;font-size:11.5px;
+  font-weight:600;color:var(--muted);letter-spacing:.04em;transition:.18s}
+.lang a.on{background:#fff;color:var(--navy-900);box-shadow:var(--sh-1)}
+.hd .btn{min-height:42px;padding:10px 16px;font-size:12.5px}
+.hd__dl span{display:none}
+@media (min-width:620px){.hd__dl span{display:inline}}
+
+/* ── Hero ── */
+.hero{position:relative;color:#fff;overflow:hidden;padding-block:64px 76px;
+  background:radial-gradient(700px 420px at 78% 20%,rgba(46,123,246,.3),transparent 62%),
+             linear-gradient(128deg,var(--navy-950) 0%,#0E3060 54%,var(--navy-800) 100%)}
+.hero::before{content:'';position:absolute;inset:0;opacity:.42;pointer-events:none;
+  background-image:linear-gradient(rgba(140,190,255,.08) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(140,190,255,.08) 1px,transparent 1px);
+  background-size:52px 52px;
+  -webkit-mask-image:radial-gradient(78% 72% at 28% 42%,#000 18%,transparent 100%);
+  mask-image:radial-gradient(78% 72% at 28% 42%,#000 18%,transparent 100%)}
+.hero__in{position:relative;max-width:760px}
+.eyebrow{display:inline-flex;align-items:center;gap:9px;padding:7px 15px;border-radius:100px;
+  background:rgba(245,166,35,.14);border:1px solid rgba(245,166,35,.4);color:var(--gold-2);
+  font-family:'Sora',sans-serif;font-size:10.5px;font-weight:600;letter-spacing:.13em;
+  text-transform:uppercase;margin-bottom:20px}
+.hero__logo{height:56px;width:auto;margin-bottom:22px}
+.hero h1{font-size:clamp(30px,6.6vw,54px);font-weight:800;letter-spacing:-.04em;text-wrap:balance}
+.hero h1 em{font-style:normal;color:var(--gold)}
+.hero__sub{margin-top:16px;font-size:clamp(15px,3.4vw,18px);color:#B9CCE5;max-width:54ch}
+.hero__meta{margin-top:12px;font-family:'Sora',sans-serif;font-size:11.5px;
+  letter-spacing:.14em;text-transform:uppercase;color:#7E9AC0}
+.hero__btns{display:flex;gap:11px;flex-wrap:wrap;margin-top:30px}
+.hero__btns .btn{flex:1 1 auto;min-width:160px}
+@media (min-width:560px){.hero__btns .btn{flex:0 0 auto}}
+
+/* ── Facts strip ── */
+.facts{position:relative;z-index:5;margin-top:-38px}
+.facts__grid{background:#fff;border:1px solid var(--line);border-radius:var(--r-lg);
+  box-shadow:var(--sh-2);display:grid;grid-template-columns:repeat(2,1fr);overflow:hidden}
+@media (min-width:760px){.facts__grid{grid-template-columns:repeat(4,1fr)}}
+.fact{padding:22px 18px;text-align:center;border-right:1px solid var(--line-2);
+  border-bottom:1px solid var(--line-2)}
+.fact:nth-child(2n){border-right:0}
+@media (min-width:760px){
+  .fact{border-bottom:0}
+  .fact:nth-child(2n){border-right:1px solid var(--line-2)}
+  .fact:last-child{border-right:0}
+}
+.fact b{display:block;font-family:'Sora',sans-serif;font-size:clamp(21px,4.6vw,29px);
+  font-weight:800;letter-spacing:-.04em;color:var(--navy-800);line-height:1.15}
+.fact small{display:block;font-size:11.5px;color:var(--muted);margin-top:5px}
+
+/* ── Sections ── */
+.s{padding-block:var(--sec)}
+.s--tight{padding-block:calc(var(--sec)*.6)}
+.s--dark{background:var(--navy-950);color:#fff}
+.s--soft{background:#fff;border-block:1px solid var(--line-2)}
+.lbl{display:inline-flex;align-items:center;gap:9px;font-family:'Sora',sans-serif;
+  font-size:10.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:13px}
+.lbl::before{content:'';width:22px;height:2px;background:var(--gold);border-radius:2px;flex:none}
+.s h2{font-size:clamp(24px,5.2vw,38px);letter-spacing:-.035em;text-wrap:balance}
+.s--dark h2{color:#fff}
+.lede{margin-top:16px;font-size:clamp(15px,3.4vw,17px);color:var(--ink-2);max-width:68ch}
+.s--dark .lede{color:#A8BDD6}
+.hd2{max-width:640px;margin-bottom:38px}
+.hd2--c{margin-inline:auto;text-align:center}
+.hd2--c .lbl{justify-content:center}
+
+/* ── Mission / vision ── */
+.mv{display:grid;grid-template-columns:1fr;gap:18px}
+@media (min-width:820px){.mv{grid-template-columns:1fr 1fr}}
+.mv__c{border-radius:var(--r-lg);padding:30px 28px;position:relative;overflow:hidden}
+.mv__c--m{background:linear-gradient(140deg,var(--navy-800),var(--navy-600));color:#fff}
+.mv__c--v{background:#fff;border:1px solid var(--line);box-shadow:var(--sh-1)}
+.mv__ic{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;margin-bottom:16px}
+.mv__c--m .mv__ic{background:rgba(255,255,255,.14);color:var(--gold-2)}
+.mv__c--v .mv__ic{background:rgba(245,166,35,.13);color:var(--gold)}
+.mv__ic svg{width:21px;height:21px}
+.mv__c h3{font-size:19px;margin-bottom:11px}
+.mv__c--m p{color:rgba(255,255,255,.86)}
+.mv__c--v p{color:var(--ink-2)}
+
+/* ── Services ── */
+.svcs{display:grid;grid-template-columns:1fr;gap:16px}
+@media (min-width:640px){.svcs{grid-template-columns:repeat(2,1fr)}}
+@media (min-width:1000px){.svcs{grid-template-columns:repeat(3,1fr);gap:20px}}
+.svc{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:26px 24px;
+  transition:transform .3s var(--ease),box-shadow .3s var(--ease),border-color .3s;
+  display:flex;flex-direction:column}
+@media (hover:hover){.svc:hover{transform:translateY(-5px);box-shadow:var(--sh-2);border-color:transparent}}
+.svc__n{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;
+  background:var(--navy-800);color:var(--gold);font-family:'Sora',sans-serif;
+  font-size:12.5px;font-weight:700;margin-bottom:16px}
+.svc h3{font-size:16.5px;margin-bottom:9px;letter-spacing:-.025em}
+.svc p{font-size:14px;color:var(--muted);line-height:1.65}
+
+/* ── Why us ── */
+.why{display:grid;grid-template-columns:1fr;gap:14px}
+@media (min-width:760px){.why{grid-template-columns:repeat(2,1fr);gap:16px 26px}}
+.why li{display:flex;gap:14px;align-items:flex-start;padding:16px 18px;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);
+  border-radius:var(--r);font-size:14.5px;color:#CBDAEC}
+.why__t{width:24px;height:24px;flex:none;border-radius:8px;display:grid;place-items:center;
+  background:rgba(245,166,35,.16);color:var(--gold);margin-top:1px}
+.why__t svg{width:13px;height:13px}
+
+/* ── Projects ── */
+.pr{display:grid;grid-template-columns:1fr;gap:14px}
+@media (min-width:700px){.pr{grid-template-columns:repeat(2,1fr)}}
+@media (min-width:1020px){.pr{grid-template-columns:repeat(3,1fr);gap:18px}}
+.pr__c{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:22px;
+  transition:transform .3s var(--ease),box-shadow .3s var(--ease)}
+@media (hover:hover){.pr__c:hover{transform:translateY(-4px);box-shadow:var(--sh-2)}}
+.pr__t{display:inline-block;padding:4px 11px;border-radius:100px;margin-bottom:13px;
+  background:rgba(46,123,246,.1);color:#1B58C4;font-family:'Sora',sans-serif;
+  font-size:9.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase}
+.pr__c h3{font-size:16px;margin-bottom:11px;letter-spacing:-.025em}
+.pr__tech{display:flex;gap:6px;flex-wrap:wrap}
+.pr__tech span{font-family:'Sora',sans-serif;font-size:10.5px;font-weight:500;
+  padding:4px 9px;border-radius:6px;background:var(--line-2);color:var(--muted)}
+
+
+/* ── Start here: the four doors into JamiiTek ── */
+.doors{display:grid;grid-template-columns:1fr;gap:18px}
+@media (min-width:820px){.doors{grid-template-columns:repeat(2,1fr);gap:20px}}
+.door{position:relative;background:#fff;border:1px solid var(--line);border-radius:var(--r-lg);
+  padding:28px 26px;display:flex;flex-direction:column;overflow:hidden;
+  transition:transform .3s var(--ease),box-shadow .3s var(--ease),border-color .3s}
+.door::before{content:'';position:absolute;inset:0 auto 0 0;width:3px;background:var(--dc,var(--gold))}
+@media (hover:hover){.door:hover{transform:translateY(-6px);box-shadow:var(--sh-2);border-color:transparent}}
+.door__top{display:flex;align-items:center;gap:13px;margin-bottom:16px}
+.door__ic{width:46px;height:46px;flex:none;border-radius:14px;display:grid;place-items:center;
+  background:var(--dt,rgba(245,166,35,.12));color:var(--dc,var(--gold))}
+.door__ic svg{width:22px;height:22px}
+.door__tag{font-family:'Sora',sans-serif;font-size:9.5px;font-weight:600;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--dc,var(--gold))}
+.door h3{font-size:19px;letter-spacing:-.03em;margin-top:3px}
+.door__d{font-size:14.5px;color:var(--ink-2);margin-bottom:16px}
+.door__you{background:var(--line-2);border-radius:12px;padding:14px 16px;margin-bottom:16px;
+  font-size:14px;color:var(--navy-800);line-height:1.6;position:relative}
+.door__you::before{content:'\201C';position:absolute;left:9px;top:2px;
+  font-family:'Sora',sans-serif;font-size:28px;font-weight:800;color:var(--dc,var(--gold));opacity:.35}
+.door__you span{display:block;padding-left:16px;font-style:italic}
+.door__out{display:flex;gap:10px;align-items:flex-start;font-size:14px;
+  color:var(--ink);margin-bottom:16px;font-weight:500}
+.door__out svg{width:17px;height:17px;flex:none;margin-top:4px;color:var(--dc,var(--gold))}
+.door__help{text-align:center;margin-top:30px;font-size:14px;color:#93AAC8}
+.door__help a{color:var(--gold);font-weight:600;border-bottom:1px solid rgba(245,166,35,.4)}
+.door__steps{margin:0 0 18px;padding:0;list-style:none;display:grid;gap:10px}
+.door__steps li{display:flex;gap:12px;align-items:flex-start;font-size:13.5px;color:var(--muted)}
+.door__steps b{width:22px;height:22px;flex:none;border-radius:7px;display:grid;place-items:center;
+  background:var(--line-2);color:var(--navy-800);font-family:'Sora',sans-serif;
+  font-size:10.5px;font-weight:700;margin-top:1px}
+.door__price{font-family:'Sora',sans-serif;font-size:12.5px;font-weight:600;
+  color:var(--navy-800);margin-bottom:16px}
+.door__price span{color:var(--muted);font-weight:400}
+.door__go{margin-top:auto}
+.door__go .btn{width:100%}
+.door__b{background:var(--dc,var(--gold));color:#fff}
+.door__b--dark{color:#1A1206}
+@media (hover:hover){.door__b:hover{filter:brightness(1.08)}}
+
+/* ── Three-step path above the doors ── */
+.path{display:grid;grid-template-columns:1fr;gap:14px;margin-bottom:34px}
+@media (min-width:700px){.path{grid-template-columns:repeat(3,1fr);gap:18px}}
+.step{display:flex;gap:14px;align-items:flex-start;padding:18px 20px;
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:var(--r)}
+.step b{width:28px;height:28px;flex:none;border-radius:9px;display:grid;place-items:center;
+  background:rgba(245,166,35,.16);color:var(--gold);font-family:'Sora',sans-serif;
+  font-size:12px;font-weight:700}
+.step h4{font-family:'Sora',sans-serif;font-size:14px;font-weight:600;color:#fff;margin-bottom:4px}
+.step p{font-size:12.5px;color:#93AAC8;line-height:1.55}
+
+/* ── Prose + note ── */
+.prose p{margin-bottom:14px;color:var(--ink-2)}
+.prose p:last-child{margin-bottom:0}
+.note{border-radius:var(--r);padding:22px 24px;background:rgba(245,166,35,.09);
+  border:1px solid rgba(245,166,35,.28);border-left:3px solid var(--gold)}
+.note h4{font-family:'Sora',sans-serif;font-size:11px;letter-spacing:.13em;
+  text-transform:uppercase;color:#96650C;margin-bottom:9px}
+.note p{color:#5C4410;font-size:14.5px}
+
+/* ── Contact ── */
+.ct{display:grid;grid-template-columns:1fr;gap:12px}
+@media (min-width:640px){.ct{grid-template-columns:repeat(2,1fr)}}
+@media (min-width:1000px){.ct{grid-template-columns:repeat(4,1fr)}}
+.ct a,.ct div{display:flex;gap:13px;align-items:flex-start;padding:20px;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);
+  border-radius:var(--r);transition:border-color .2s,background .2s}
+@media (hover:hover){.ct a:hover{background:rgba(255,255,255,.08);border-color:rgba(245,166,35,.4)}}
+.ct__i{width:36px;height:36px;flex:none;border-radius:11px;display:grid;place-items:center;
+  background:rgba(245,166,35,.14);color:var(--gold)}
+.ct__i svg{width:17px;height:17px}
+.ct__k{font-family:'Sora',sans-serif;font-size:10px;letter-spacing:.12em;
+  text-transform:uppercase;color:#7E9AC0;margin-bottom:4px}
+.ct__v{font-size:13.5px;color:#fff;overflow-wrap:anywhere}
+
+/* ── CTA + footer ── */
+.cta{border-radius:var(--r-lg);padding:38px 26px;text-align:center;
+  background:linear-gradient(126deg,var(--navy-800),var(--navy-600));color:#fff}
+@media (min-width:768px){.cta{padding:52px 44px}}
+.cta h2{font-size:clamp(22px,4.6vw,32px);margin-bottom:12px;color:#fff}
+.cta p{color:#A8BDD6;max-width:52ch;margin:0 auto 26px;font-size:15px}
+.cta__b{display:flex;gap:11px;flex-wrap:wrap;justify-content:center}
+.ft{background:var(--navy-950);color:#7E9AC0;padding-block:26px;text-align:center;font-size:12.5px}
+.ft b{display:block;font-family:'Sora',sans-serif;font-size:16px;font-weight:800;
+  color:#fff;letter-spacing:-.04em;margin-bottom:4px}
+.ft b span{color:var(--gold)}
+.ft__sl{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;margin-bottom:12px}
 </style>
 </head>
 <body>
-<div class="topbar">
-  <div class="topbar-in">
-    <div>
-      <div class="tb-brand">{{ profile.short_name|upper }}</div>
-      <div class="tb-tag">{% if lang == 'sw' %}{{ profile.tagline_sw }}{% else %}{{ profile.tagline_en }}{% endif %}</div>
-    </div>
-    <div class="tb-right">
-      <div class="lang-switch">
-        <a href="?lang=en" class="{% if lang == 'en' %}on{% endif %}">EN</a>
+
+<!-- ═══ HEADER ═══ -->
+<header class="hd" id="hd">
+  <div class="wrap hd__in">
+    <a class="brand" href="/">
+      {% if profile.logo_url %}
+        <img class="brand__logo" src="{{ profile.logo_url }}" alt="{{ profile.company_name }}">
+      {% else %}
+        <span>
+          <span class="brand__txt">{{ profile.short_name }}</span>
+          <span class="brand__sub">{% if lang == 'sw' %}Wasifu wa Kampuni{% else %}Company Profile{% endif %}</span>
+        </span>
+      {% endif %}
+    </a>
+    <div class="hd__r">
+      <nav class="lang" aria-label="Language">
+        <a href="?lang=en" class="{% if lang != 'sw' %}on{% endif %}">EN</a>
         <a href="?lang=sw" class="{% if lang == 'sw' %}on{% endif %}">SW</a>
-      </div>
-      <a class="dl" href="{% url 'company_profile_pdf' %}?lang={{ lang }}">{% if lang == 'sw' %}PAKUA PDF{% else %}DOWNLOAD PDF{% endif %}</a>
+      </nav>
+      <a class="btn btn--navy hd__dl" href="{% url 'company_profile_pdf' %}?lang={{ lang }}">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 16 6 10l1.4-1.4L11 12.2V4h2v8.2l3.6-3.6L18 10zM5 20v-2h14v2z"/></svg>
+        <span>{% if lang == 'sw' %}Pakua PDF{% else %}Download PDF{% endif %}</span>
+      </a>
     </div>
   </div>
-</div>
+</header>
 
-<div class="wrap">
-  <div class="paper">
-    <div class="titlewrap">
-      {% if profile.logo_url %}<img class="logo-img" src="{{ profile.logo_url }}" alt="{{ profile.company_name }}">{% endif %}
-      <div class="doctitle">{% if lang == 'sw' %}WASIFU WA KAMPUNI{% else %}COMPANY PROFILE{% endif %}</div>
-      <div class="docsub">{% if lang == 'sw' %}{{ profile.subtitle_sw }}{% else %}{{ profile.subtitle_en }}{% endif %}</div>
-      {% if profile.period %}<div class="period">{{ profile.period }}</div>{% endif %}
-      <div class="rule"></div>
+<!-- ═══ HERO ═══ -->
+<section class="hero">
+  <div class="wrap hero__in">
+    <span class="eyebrow">{% if lang == 'sw' %}Wasifu wa Kampuni{% else %}Company Profile{% endif %}</span>
+    {% if profile.logo_url %}<img class="hero__logo" src="{{ profile.logo_url }}" alt="">{% endif %}
+    <h1>{% if lang == 'sw' %}{{ profile.tagline_sw|default:profile.tagline_en }}{% else %}{{ profile.tagline_en|default:profile.tagline_sw }}{% endif %}</h1>
+    <p class="hero__sub">{% if lang == 'sw' %}{{ profile.subtitle_sw|default:profile.subtitle_en }}{% else %}{{ profile.subtitle_en|default:profile.subtitle_sw }}{% endif %}</p>
+    {% if profile.period %}<div class="hero__meta">{{ profile.period }}</div>{% endif %}
+    <div class="hero__btns">
+      <a class="btn btn--gold" href="#contact">
+        {% if lang == 'sw' %}Wasiliana nasi{% else %}Get in touch{% endif %}
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 11h12.2l-4.6-4.6L13 5l7 7-7 7-1.4-1.4 4.6-4.6H4z"/></svg>
+      </a>
+      <a class="btn btn--glass" href="{% url 'company_profile_pdf' %}?lang={{ lang }}">
+        {% if lang == 'sw' %}Pakua PDF{% else %}Download as PDF{% endif %}
+      </a>
     </div>
+  </div>
+</section>
 
-    {% if profile.about_en or profile.about_sw %}
-    <div class="secbar">{% if lang == 'sw' %}01.&nbsp;&nbsp;KUHUSU {{ profile.short_name|upper }}{% else %}01.&nbsp;&nbsp;ABOUT {{ profile.short_name|upper }}{% endif %}</div>
-    <div class="sec-text">
-      {% if lang == 'sw' %}{% if profile.about_sw %}<p>{{ profile.about_sw|linebreaksbr }}</p>{% elif profile.about_en %}<p>{{ profile.about_en|linebreaksbr }}</p>{% endif %}
-      {% else %}{% if profile.about_en %}<p>{{ profile.about_en|linebreaksbr }}</p>{% elif profile.about_sw %}<p>{{ profile.about_sw|linebreaksbr }}</p>{% endif %}{% endif %}
+{% if profile.facts %}
+<!-- ═══ FACTS ═══ -->
+<section class="facts">
+  <div class="wrap">
+    <div class="facts__grid rv">
+      {% for f in profile.facts %}
+      <div class="fact">
+        <b>{{ f.value }}</b>
+        <small>{% if lang == 'sw' %}{% firstof f.label_sw f.label_en %}{% else %}{% firstof f.label_en f.label_sw %}{% endif %}</small>
+      </div>
+      {% endfor %}
     </div>
-    {% if profile.facts %}
-    <div class="info-wrap">
-      <table class="info">
-        {% for f in profile.facts %}{% if forloop.counter0|divisibleby:2 %}<tr>{% endif %}
-        <td class="k">{% if lang == 'sw' %}{{ f.label_sw|default:f.label_en }}{% else %}{{ f.label_en|default:f.label_sw }}{% endif %}</td>
-        <td class="v">{{ f.value }}</td>
-        {% if forloop.counter|divisibleby:2 or forloop.last %}</tr>{% endif %}{% endfor %}
-      </table>
-    </div>
-    {% endif %}
-    {% endif %}
+  </div>
+</section>
+{% endif %}
 
-    {% if profile.mission_en or profile.vision_en or profile.mission_sw or profile.vision_sw %}
-    <div class="secbar">{% if lang == 'sw' %}02.&nbsp;&nbsp;DHIMA NA DIRA{% else %}02.&nbsp;&nbsp;OUR MISSION &amp; VISION{% endif %}</div>
+{% if profile.about_en or profile.about_sw %}
+<!-- ═══ ABOUT ═══ -->
+<section class="s">
+  <div class="wrap">
+    <div class="hd2 rv">
+      <span class="lbl">{% if lang == 'sw' %}Kuhusu sisi{% else %}About us{% endif %}</span>
+      <h2>{% if lang == 'sw' %}Kuhusu {{ profile.short_name }}{% else %}About {{ profile.short_name }}{% endif %}</h2>
+    </div>
+    <div class="lede prose rv">
+      {% if lang == 'sw' %}
+        <p>{{ profile.about_sw|default:profile.about_en|linebreaksbr }}</p>
+      {% else %}
+        <p>{{ profile.about_en|default:profile.about_sw|linebreaksbr }}</p>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% if profile.mission_en or profile.mission_sw or profile.vision_en or profile.vision_sw %}
+<!-- ═══ MISSION / VISION ═══ -->
+<section class="s s--soft">
+  <div class="wrap">
+    <div class="hd2 hd2--c rv">
+      <span class="lbl">{% if lang == 'sw' %}Tunachosimamia{% else %}What we stand for{% endif %}</span>
+      <h2>{% if lang == 'sw' %}Dhima na Dira{% else %}Mission &amp; Vision{% endif %}</h2>
+    </div>
     <div class="mv">
-      <div class="box mission">
-        <div class="h">{% if lang == 'sw' %}DHIMA{% else %}MISSION{% endif %}</div>
+      {% if profile.mission_en or profile.mission_sw %}
+      <div class="mv__c mv__c--m rv">
+        <span class="mv__ic"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2m0 15a5 5 0 1 1 5-5 5 5 0 0 1-5 5m0-7.5A2.5 2.5 0 1 0 14.5 12 2.5 2.5 0 0 0 12 9.5"/></svg></span>
+        <h3>{% if lang == 'sw' %}Dhima{% else %}Our Mission{% endif %}</h3>
         <p>{% if lang == 'sw' %}{{ profile.mission_sw|default:profile.mission_en|linebreaksbr }}{% else %}{{ profile.mission_en|default:profile.mission_sw|linebreaksbr }}{% endif %}</p>
       </div>
-      <div class="box vision">
-        <div class="h">{% if lang == 'sw' %}DIRA{% else %}VISION{% endif %}</div>
+      {% endif %}
+      {% if profile.vision_en or profile.vision_sw %}
+      <div class="mv__c mv__c--v rv">
+        <span class="mv__ic"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 5c-5 0-9.3 3-11 7 1.7 4 6 7 11 7s9.3-3 11-7c-1.7-4-6-7-11-7m0 11.5A4.5 4.5 0 1 1 16.5 12 4.5 4.5 0 0 1 12 16.5m0-7A2.5 2.5 0 1 0 14.5 12 2.5 2.5 0 0 0 12 9.5"/></svg></span>
+        <h3>{% if lang == 'sw' %}Dira{% else %}Our Vision{% endif %}</h3>
         <p>{% if lang == 'sw' %}{{ profile.vision_sw|default:profile.vision_en|linebreaksbr }}{% else %}{{ profile.vision_en|default:profile.vision_sw|linebreaksbr }}{% endif %}</p>
       </div>
-    </div>
-    {% endif %}
-
-    {% if profile.services %}
-    <div class="secbar">{% if lang == 'sw' %}03.&nbsp;&nbsp;HUDUMA ZETU{% else %}03.&nbsp;&nbsp;OUR SERVICES{% endif %}</div>
-    <div class="svc">
-      {% for s in profile.services %}
-      <div class="row">
-        <div class="name">{% if lang == 'sw' %}{{ s.name_sw|default:s.name_en }}{% else %}{{ s.name_en|default:s.name_sw }}{% endif %}</div>
-        <div class="desc">{% if lang == 'sw' %}{{ s.desc_sw|default:s.desc_en }}{% else %}{{ s.desc_en|default:s.desc_sw }}{% endif %}</div>
-      </div>
-      {% endfor %}
-    </div>
-    {% endif %}
-
-    {% if profile.why_us %}
-    <div class="secbar">{% if lang == 'sw' %}04.&nbsp;&nbsp;KWA NINI {{ profile.short_name|upper }}{% else %}04.&nbsp;&nbsp;WHY CHOOSE {{ profile.short_name|upper }}{% endif %}</div>
-    <ul class="why">
-      {% for w in profile.why_us %}
-      <li>{% if lang == 'sw' %}{{ w.text_sw|default:w.text_en }}{% else %}{{ w.text_en|default:w.text_sw }}{% endif %}</li>
-      {% endfor %}
-    </ul>
-    {% endif %}
-
-    {% if profile.projects %}
-    <div class="secbar">{% if lang == 'sw' %}05.&nbsp;&nbsp;MIRADI TULIYOFANYA{% else %}05.&nbsp;&nbsp;SELECTED PROJECTS{% endif %}</div>
-    <div class="proj">
-      <table>
-        <thead><tr>
-          <th>{% if lang == 'sw' %}Mradi{% else %}Project{% endif %}</th>
-          <th>{% if lang == 'sw' %}Aina{% else %}Type{% endif %}</th>
-          <th>{% if lang == 'sw' %}Teknolojia{% else %}Technology{% endif %}</th>
-        </tr></thead>
-        <tbody>
-          {% for p in profile.projects %}
-          <tr><td>{{ p.name }}</td><td>{{ p.type }}</td><td>{{ p.tech }}</td></tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-    {% endif %}
-
-    {% for s in profile.sections %}
-    <div class="secbar">{% if lang == 'sw' %}{{ s.heading_sw|default:s.heading_en }}{% else %}{{ s.heading_en|default:s.heading_sw }}{% endif %}</div>
-    <div class="sec-text"><p>{% if lang == 'sw' %}{{ s.body_sw|default:s.body_en|linebreaksbr }}{% else %}{{ s.body_en|default:s.body_sw|linebreaksbr }}{% endif %}</p></div>
-    {% endfor %}
-
-    {% if profile.pricing_note_en or profile.pricing_note_sw %}
-    <div class="secbar">{% if lang == 'sw' %}06.&nbsp;&nbsp;BEI NA MALIPO{% else %}06.&nbsp;&nbsp;PRICING &amp; PAYMENT TERMS{% endif %}</div>
-    <div class="note">{% if lang == 'sw' %}{{ profile.pricing_note_sw|default:profile.pricing_note_en|linebreaksbr }}{% else %}{{ profile.pricing_note_en|default:profile.pricing_note_sw|linebreaksbr }}{% endif %}</div>
-    {% endif %}
-
-    <div class="secbar">{% if lang == 'sw' %}07.&nbsp;&nbsp;WASILIANA NASI{% else %}07.&nbsp;&nbsp;CONTACT US{% endif %}</div>
-    <div class="contact">
-      <table>
-        <tr><td class="k">Email</td><td class="v"><a href="mailto:{{ profile.email }}">{{ profile.email }}</a></td></tr>
-        {% if profile.phone %}<tr><td class="k">{% if lang == 'sw' %}Simu{% else %}Phone{% endif %}</td><td class="v">{{ profile.phone }}</td></tr>{% endif %}
-        <tr><td class="k">Website</td><td class="v"><a href="https://{{ profile.website }}">{{ profile.website }}</a></td></tr>
-        <tr><td class="k">{% if lang == 'sw' %}Mahali{% else %}Location{% endif %}</td><td class="v">{{ profile.address }}</td></tr>
-      </table>
-    </div>
-
-    <div class="doc-foot">
-      {{ profile.company_name|upper }} &nbsp;·&nbsp; <a href="https://{{ profile.website }}">{{ profile.website }}</a> &nbsp;·&nbsp; {{ profile.email }}
-      <div class="tagline">{% if lang == 'sw' %}{{ profile.subtitle_sw }}{% else %}{{ profile.subtitle_en }}{% endif %}</div>
+      {% endif %}
     </div>
   </div>
-</div>
+</section>
+{% endif %}
+
+{% if profile.services %}
+<!-- ═══ SERVICES ═══ -->
+<section class="s">
+  <div class="wrap">
+    <div class="hd2 hd2--c rv">
+      <span class="lbl">{% if lang == 'sw' %}Tunachofanya{% else %}What we do{% endif %}</span>
+      <h2>{% if lang == 'sw' %}Huduma Zetu{% else %}Our Services{% endif %}</h2>
+    </div>
+    <div class="svcs">
+      {% for s in profile.services %}
+      <article class="svc rv">
+        <span class="svc__n">{{ forloop.counter|stringformat:"02d" }}</span>
+        <h3>{% if lang == 'sw' %}{% firstof s.name_sw s.name_en %}{% else %}{% firstof s.name_en s.name_sw %}{% endif %}</h3>
+        <p>{% if lang == 'sw' %}{% firstof s.desc_sw s.desc_en %}{% else %}{% firstof s.desc_en s.desc_sw %}{% endif %}</p>
+      </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% if profile.why_us %}
+<!-- ═══ WHY US ═══ -->
+<section class="s s--dark">
+  <div class="wrap">
+    <div class="hd2 hd2--c rv">
+      <span class="lbl">{% if lang == 'sw' %}Tofauti yetu{% else %}The difference{% endif %}</span>
+      <h2>{% if lang == 'sw' %}Kwa Nini {{ profile.short_name }}{% else %}Why Choose {{ profile.short_name }}{% endif %}</h2>
+    </div>
+    <ul class="why">
+      {% for w in profile.why_us %}
+      <li class="rv">
+        <span class="why__t"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg></span>
+        <span>{% if lang == 'sw' %}{% firstof w.text_sw w.text_en %}{% else %}{% firstof w.text_en w.text_sw %}{% endif %}</span>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+</section>
+{% endif %}
+
+{% if profile.projects %}
+<!-- ═══ PROJECTS ═══ -->
+<section class="s s--soft">
+  <div class="wrap">
+    <div class="hd2 hd2--c rv">
+      <span class="lbl">{% if lang == 'sw' %}Kazi zetu{% else %}Our work{% endif %}</span>
+      <h2>{% if lang == 'sw' %}Miradi Tuliyofanya{% else %}Selected Projects{% endif %}</h2>
+    </div>
+    <div class="pr">
+      {% for p in profile.projects %}
+      <article class="pr__c rv">
+        {% if p.type %}<span class="pr__t">{{ p.type }}</span>{% endif %}
+        <h3>{{ p.name }}</h3>
+        {% if p.tech %}
+        <div class="pr__tech"><span>{{ p.tech }}</span></div>
+        {% endif %}
+      </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+
+<!-- ═══ START HERE — the four ways in ═══ -->
+<section class="s s--dark" id="start">
+  <div class="wrap">
+    <div class="hd2 hd2--c rv">
+      <span class="lbl">{% if lang == 'sw' %}Anza hapa{% else %}Start here{% endif %}</span>
+      <h2>{% if lang == 'sw' %}Njia Nne za Kuanza Nasi{% else %}Four Ways to Start With Us{% endif %}</h2>
+      <p class="lede" style="margin-inline:auto">
+        {% if lang == 'sw' %}Kila biashara inaanza mahali tofauti. Chagua inayokufaa &mdash;
+        unaweza kuanza leo bila kulipa chochote.{% else %}Every business starts from a different
+        place. Pick the door that fits &mdash; you can begin today without paying anything.{% endif %}
+      </p>
+    </div>
+
+    <div class="path rv">
+      <div class="step"><b>1</b><div>
+        <h4>{% if lang == 'sw' %}Chagua njia{% else %}Choose a route{% endif %}</h4>
+        <p>{% if lang == 'sw' %}Jenga mwenyewe, tumia template, au tukujengee.{% else %}Build it
+        yourself, start from a template, or have us build it.{% endif %}</p></div></div>
+      <div class="step"><b>2</b><div>
+        <h4>{% if lang == 'sw' %}Tuone pamoja{% else %}We look at it together{% endif %}</h4>
+        <p>{% if lang == 'sw' %}Tunajibu ndani ya siku moja ya kazi kwa mpango na bei ya uhakika.{% else %}We
+        reply within one business day with a plan and a fixed price.{% endif %}</p></div></div>
+      <div class="step"><b>3</b><div>
+        <h4>{% if lang == 'sw' %}Unakwenda live{% else %}You go live{% endif %}</h4>
+        <p>{% if lang == 'sw' %}Wiki 2&ndash;6 kwa miradi mingi, na tunabaki nawe baadaye.{% else %}Two
+        to six weeks for most projects &mdash; and we stay on afterwards.{% endif %}</p></div></div>
+    </div>
+
+    <div class="doors">
+
+      <!-- 1 · Website builder -->
+      <article class="door rv" style="--dc:#F97316;--dt:rgba(249,115,22,.12)">
+        <div class="door__top">
+          <span class="door__ic"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 3h8v8H3zm10 0h8v5h-8zm0 7h8v11h-8zM3 13h8v8H3z"/></svg></span>
+          <div>
+            <div class="door__tag">{% if lang == 'sw' %}Kama hii ni wewe{% else %}If this sounds like you{% endif %}</div>
+            <h3>{% if lang == 'sw' %}Jenga Mwenyewe{% else %}Build It Yourself{% endif %}</h3>
+          </div>
+        </div>
+
+        <div class="door__you"><span>{% if lang == 'sw' %}Nauza kwa WhatsApp na Instagram, lakini mtu akiuliza &ldquo;una website?&rdquo; sina cha kumtumia.{% else %}I sell on WhatsApp and Instagram, but when someone asks &ldquo;do you have a website?&rdquo; I have nothing to send them.{% endif %}</span></div>
+
+        <div class="door__out"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2m-1.4 14.4-4-4L8 11l2.6 2.6L16 8.2l1.4 1.4z"/></svg>
+          <span>{% if lang == 'sw' %}Jioni ya leo utakuwa na link halisi ya kumtumia yeyote anayeuliza.{% else %}By this evening you will have a real link to send anyone who asks.{% endif %}</span></div>
+
+        <ul class="door__steps">
+          <li><b>1</b><span>{% if lang == 'sw' %}Tuambie unauza nini &mdash; duka, safari, mgahawa, saluni{% else %}Tell us what you sell &mdash; shop, safari, restaurant, salon{% endif %}</span></li>
+          <li><b>2</b><span>{% if lang == 'sw' %}Kompyuta inaandika maandishi na kupanga kurasa{% else %}The computer writes your words and arranges the pages{% endif %}</span></li>
+          <li><b>3</b><span>{% if lang == 'sw' %}Badilisha picha au rangi usiyoipenda, kisha chapisha{% else %}Change any photo or colour you do not like, then publish{% endif %}</span></li>
+        </ul>
+
+        <div class="door__price">{% if lang == 'sw' %}Bure kuanza{% else %}Free to start{% endif %}
+          <span>&middot; {% if lang == 'sw' %}hakuna kadi, hakuna developer{% else %}no card, no developer{% endif %}</span></div>
+        <div class="door__go">
+          <a class="btn door__b door__b--dark" href="/builder/">
+            {% if lang == 'sw' %}Jaribu sasa &mdash; ni bure{% else %}Try it now &mdash; it is free{% endif %}
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 11h12.2l-4.6-4.6L13 5l7 7-7 7-1.4-1.4 4.6-4.6H4z"/></svg></a>
+        </div>
+      </article>
+
+      <article class="door rv" style="--dc:#2E7BF6;--dt:rgba(46,123,246,.12)">
+        <div class="door__top">
+          <span class="door__ic"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 4h16a1 1 0 0 1 1 1v3H3V5a1 1 0 0 1 1-1M3 10h7v10H4a1 1 0 0 1-1-1zm9 0h9v9a1 1 0 0 1-1 1h-8z"/></svg></span>
+          <div>
+            <div class="door__tag">{% if lang == 'sw' %}Kama hii ni wewe{% else %}If this sounds like you{% endif %}</div>
+            <h3>{% if lang == 'sw' %}Anza na Muundo Uliokamilika{% else %}Start From a Finished Design{% endif %}</h3>
+          </div>
+        </div>
+
+        <div class="door__you"><span>{% if lang == 'sw' %}Nataka website inayoonekana vizuri tayari. Sitaki kubuni chochote mwenyewe.{% else %}I want a website that already looks good. I do not want to design anything myself.{% endif %}</span></div>
+
+        <div class="door__out"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2m-1.4 14.4-4-4L8 11l2.6 2.6L16 8.2l1.4 1.4z"/></svg>
+          <span>{% if lang == 'sw' %}Unachagua muundo uliokwisha jengwa, sisi tunaweka biashara yako ndani yake.{% else %}You pick a design that is already built, and we put your business inside it.{% endif %}</span></div>
+
+        <ul class="door__steps">
+          <li><b>1</b><span>{% if lang == 'sw' %}Pitia miundo &mdash; kila mmoja unafanya kazi, si picha{% else %}Look through the designs &mdash; each one is live, not a picture{% endif %}</span></li>
+          <li><b>2</b><span>{% if lang == 'sw' %}Tutumie jina lako, picha zako na bei zako{% else %}Send us your name, photos and prices{% endif %}</span></li>
+          <li><b>3</b><span>{% if lang == 'sw' %}Tunaiweka na kukukabidhi, mara nyingi wiki hiyo hiyo{% else %}We set it up and hand you the keys, usually the same week{% endif %}</span></li>
+        </ul>
+
+        <div class="door__price">{% if lang == 'sw' %}TZS 15,000{% else %}TZS 15,000{% endif %}
+          <span>&middot; {% if lang == 'sw' %}kwa mwezi, hosting imejumuishwa{% else %}per month, hosting included{% endif %}</span></div>
+        <div class="door__go">
+          <a class="btn door__b" href="{% url 'templates_marketplace' %}">
+            {% if lang == 'sw' %}Angalia miundo{% else %}See the designs{% endif %}
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 11h12.2l-4.6-4.6L13 5l7 7-7 7-1.4-1.4 4.6-4.6H4z"/></svg></a>
+        </div>
+      </article>
+
+      <article class="door rv" style="--dc:#1FA97A;--dt:rgba(31,169,122,.12)">
+        <div class="door__top">
+          <span class="door__ic"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a2 2 0 0 1 2 2v1h3a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V8a3 3 0 0 1 3-3h3V4a2 2 0 0 1 2-2M9 11a1.5 1.5 0 1 0 1.5 1.5A1.5 1.5 0 0 0 9 11m6 0a1.5 1.5 0 1 0 1.5 1.5A1.5 1.5 0 0 0 15 11m-6 5h6v1.5H9z"/></svg></span>
+          <div>
+            <div class="door__tag">{% if lang == 'sw' %}Kama hii ni wewe{% else %}If this sounds like you{% endif %}</div>
+            <h3>{% if lang == 'sw' %}Msaidizi kwenye WhatsApp Yako{% else %}An Assistant on Your WhatsApp{% endif %}</h3>
+          </div>
+        </div>
+
+        <div class="door__you"><span>{% if lang == 'sw' %}Watu wananitumia ujumbe saa tano usiku wakiuliza bei. Asubuhi wameshanunua kwingine.{% else %}People message me at 11pm asking prices. By morning they have already bought somewhere else.{% endif %}</span></div>
+
+        <div class="door__out"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2m-1.4 14.4-4-4L8 11l2.6 2.6L16 8.2l1.4 1.4z"/></svg>
+          <span>{% if lang == 'sw' %}Kila swali linajibiwa ndani ya sekunde mbili, mchana au usiku, kwa Kiswahili au Kiingereza.{% else %}Every question gets an answer in two seconds, day or night, in Swahili or English.{% endif %}</span></div>
+
+        <ul class="door__steps">
+          <li><b>1</b><span>{% if lang == 'sw' %}Iambie bei zako, saa zako, maeneo unayofikisha{% else %}Tell it your prices, your hours, your delivery areas{% endif %}</span></li>
+          <li><b>2</b><span>{% if lang == 'sw' %}Inajibu kwa namba yako ya WhatsApp, kwa maneno yako{% else %}It answers on your own WhatsApp number, in your own words{% endif %}</span></li>
+          <li><b>3</b><span>{% if lang == 'sw' %}Mauzo yakikaribia, inakuita wewe{% else %}When a real sale is close, it calls you in{% endif %}</span></li>
+        </ul>
+
+        <div class="door__price">{% if lang == 'sw' %}TZS 15,000{% else %}TZS 15,000{% endif %}
+          <span>&middot; {% if lang == 'sw' %}kwa mwezi &middot; inafanya kazi ndani ya dakika 10{% else %}per month &middot; working within 10 minutes{% endif %}</span></div>
+        <div class="door__go">
+          <a class="btn door__b" href="{% url 'jamiibot_landing' %}">
+            {% if lang == 'sw' %}Ongea nayo kwanza{% else %}Chat with it first{% endif %}
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 11h12.2l-4.6-4.6L13 5l7 7-7 7-1.4-1.4 4.6-4.6H4z"/></svg></a>
+        </div>
+      </article>
+
+      <article class="door rv" style="--dc:#F5A623;--dt:rgba(245,166,35,.12)">
+        <div class="door__top">
+          <span class="door__ic"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 4 5v6c0 5 3.4 9.7 8 11 4.6-1.3 8-6 8-11V5zm-1 14-4-4 1.4-1.4L11 13.2l4.6-4.6L17 10z"/></svg></span>
+          <div>
+            <div class="door__tag">{% if lang == 'sw' %}Kama hii ni wewe{% else %}If this sounds like you{% endif %}</div>
+            <h3>{% if lang == 'sw' %}Tunakujengea Sisi{% else %}We Build It For You{% endif %}</h3>
+          </div>
+        </div>
+
+        <div class="door__you"><span>{% if lang == 'sw' %}Biashara yangu haiendani na website ya kawaida. Nahitaji mfumo &mdash; stock, wanafunzi, booking, risiti.{% else %}My business does not fit a normal website. I need a system &mdash; stock, students, bookings, receipts.{% endif %}</span></div>
+
+        <div class="door__out"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2m-1.4 14.4-4-4L8 11l2.6 2.6L16 8.2l1.4 1.4z"/></svg>
+          <span>{% if lang == 'sw' %}Mfumo unaojengwa kufuata jinsi biashara yako inavyofanya kazi &mdash; si kinyume chake.{% else %}A system built around how your business already works &mdash; not the other way round.{% endif %}</span></div>
+
+        <ul class="door__steps">
+          <li><b>1</b><span>{% if lang == 'sw' %}Tunakaa na kusikiliza. Mazungumzo hayo hayana gharama{% else %}We sit down and listen. That conversation costs nothing{% endif %}</span></li>
+          <li><b>2</b><span>{% if lang == 'sw' %}Unapata bei moja na tarehe moja, kabla hatujaanza{% else %}You get one price and one date, agreed before we start{% endif %}</span></li>
+          <li><b>3</b><span>{% if lang == 'sw' %}Unaiona ikikua kila wiki, kisha tunachapisha na kubaki nawe{% else %}You see it growing every week, then we launch and stay on{% endif %}</span></li>
+        </ul>
+
+        <div class="door__price">{% if lang == 'sw' %}Kuanzia TZS 150,000{% else %}From TZS 150,000{% endif %}
+          <span>&middot; {% if lang == 'sw' %}miradi mingi ni wiki 2&ndash;6{% else %}most projects take 2&ndash;6 weeks{% endif %}</span></div>
+        <div class="door__go">
+          <a class="btn door__b door__b--dark" href="{% url 'home' %}">
+            {% if lang == 'sw' %}Angalia tulichojenga{% else %}See what we have built{% endif %}
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 11h12.2l-4.6-4.6L13 5l7 7-7 7-1.4-1.4 4.6-4.6H4z"/></svg></a>
+        </div>
+      </article>
+
+    </div>
+
+    <p class="door__help rv">
+      {% if lang == 'sw' %}Huna uhakika ipi ni yako? <a href="#contact">Tuambie unafanya biashara gani</a>
+      &mdash; tutakushauri bila malipo.{% else %}Not sure which one is yours?
+      <a href="#contact">Tell us what your business does</a> &mdash; we will point you to the right
+      one, free.{% endif %}
+    </p>
+  </div>
+</section>
+
+{% for s in profile.sections %}
+<!-- ═══ EXTRA SECTION ═══ -->
+<section class="s s--tight">
+  <div class="wrap">
+    <div class="hd2 rv">
+      <h2>{% if lang == 'sw' %}{% firstof s.heading_sw s.heading_en %}{% else %}{% firstof s.heading_en s.heading_sw %}{% endif %}</h2>
+    </div>
+    <div class="lede prose rv">
+      <p>{% if lang == 'sw' %}{% firstof s.body_sw s.body_en as body %}{{ body|linebreaksbr }}{% else %}{% firstof s.body_en s.body_sw as body %}{{ body|linebreaksbr }}{% endif %}</p>
+    </div>
+  </div>
+</section>
+{% endfor %}
+
+{% if profile.pricing_note_en or profile.pricing_note_sw %}
+<section class="s s--tight">
+  <div class="wrap">
+    <div class="note rv">
+      <h4>{% if lang == 'sw' %}Kuhusu bei{% else %}About pricing{% endif %}</h4>
+      <p>{% if lang == 'sw' %}{{ profile.pricing_note_sw|default:profile.pricing_note_en|linebreaksbr }}{% else %}{{ profile.pricing_note_en|default:profile.pricing_note_sw|linebreaksbr }}{% endif %}</p>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- ═══ CONTACT ═══ -->
+<section class="s s--dark" id="contact">
+  <div class="wrap">
+    <div class="hd2 hd2--c rv">
+      <span class="lbl">{% if lang == 'sw' %}Mawasiliano{% else %}Get in touch{% endif %}</span>
+      <h2>{% if lang == 'sw' %}Tuwasiliane{% else %}Contact Us{% endif %}</h2>
+    </div>
+
+    <div class="ct rv">
+      {% if profile.phone %}
+      <a href="tel:{{ profile.phone }}">
+        <span class="ct__i"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.6 10.8a15 15 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.6 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.6 3.6a1 1 0 0 1-.25 1z"/></svg></span>
+        <span><span class="ct__k">{% if lang == 'sw' %}Simu{% else %}Phone{% endif %}</span>
+              <span class="ct__v">{{ profile.phone }}</span></span>
+      </a>
+      {% endif %}
+      {% if profile.email %}
+      <a href="mailto:{{ profile.email }}">
+        <span class="ct__i"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2m0 4-8 5-8-5V6l8 5 8-5z"/></svg></span>
+        <span><span class="ct__k">Email</span><span class="ct__v">{{ profile.email }}</span></span>
+      </a>
+      {% endif %}
+      {% if profile.website %}
+      <a href="https://{{ profile.website|cut:'https://'|cut:'http://' }}" target="_blank" rel="noopener">
+        <span class="ct__i"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2m0 2.04A14 14 0 0 1 13.9 8h-3.8A14 14 0 0 1 12 4.04M4.26 14a7.8 7.8 0 0 1 0-4h3.4a17 17 0 0 0 0 4m10.08 0H9.66a15 15 0 0 1 0-4h4.68a15 15 0 0 1 0 4m2.02 0a17 17 0 0 0 0-4h3.4a7.8 7.8 0 0 1 0 4z"/></svg></span>
+        <span><span class="ct__k">Website</span><span class="ct__v">{{ profile.website }}</span></span>
+      </a>
+      {% endif %}
+      {% if profile.address %}
+      <div>
+        <span class="ct__i"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7m0 9.5A2.5 2.5 0 1 1 14.5 9 2.5 2.5 0 0 1 12 11.5"/></svg></span>
+        <span><span class="ct__k">{% if lang == 'sw' %}Anwani{% else %}Address{% endif %}</span>
+              <span class="ct__v">{{ profile.address }}</span></span>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<!-- ═══ CTA ═══ -->
+<section class="s s--tight">
+  <div class="wrap">
+    <div class="cta rv">
+      <h2>{% if lang == 'sw' %}Tayari kuanza mradi wako?{% else %}Ready to start your project?{% endif %}</h2>
+      <p>{% if lang == 'sw' %}Tuambie unachohitaji. Tunajibu ndani ya siku moja ya kazi kwa mpango, muda, na bei.{% else %}Tell us what you need. We reply within one business day with a plan, a timeline and a price.{% endif %}</p>
+      <div class="cta__b">
+        {% if profile.phone %}
+        <a class="btn btn--gold" href="tel:{{ profile.phone }}">
+          {% if lang == 'sw' %}Piga simu{% else %}Call us{% endif %}</a>
+        {% endif %}
+        <a class="btn btn--glass" href="mailto:{{ profile.email }}">
+          {% if lang == 'sw' %}Tuma barua pepe{% else %}Send an email{% endif %}</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="ft">
+  <div class="wrap">
+    <b>{{ profile.short_name }}</b>
+    <div class="ft__sl">{% if lang == 'sw' %}{{ profile.tagline_sw|default:profile.tagline_en }}{% else %}{{ profile.tagline_en|default:profile.tagline_sw }}{% endif %}</div>
+    &copy; {% now "Y" %} {{ profile.company_name }}.
+    {% if lang == 'sw' %}Haki zote zimehifadhiwa.{% else %}All rights reserved.{% endif %}
+  </div>
+</footer>
+
+<script>
+(function(){
+  var hd = document.getElementById('hd');
+  addEventListener('scroll', function(){ hd.classList.toggle('stuck', scrollY > 8); }, {passive:true});
+
+  if ('IntersectionObserver' in window &&
+      !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    var io = new IntersectionObserver(function(en){
+      en.forEach(function(e, k){
+        if (!e.isIntersecting) return;
+        setTimeout(function(){ e.target.classList.add('in'); }, k * 60);
+        io.unobserve(e.target);
+      });
+    }, {threshold: .1, rootMargin: '0px 0px -6% 0px'});
+    document.querySelectorAll('.rv').forEach(function(el){ io.observe(el); });
+  } else {
+    document.querySelectorAll('.rv').forEach(function(el){ el.classList.add('in'); });
+  }
+})();
+</script>
 </body>
 </html>

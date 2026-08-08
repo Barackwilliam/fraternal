@@ -74,7 +74,7 @@
 {% if profile.facts %}
 <table class="info">
   {% for f in profile.facts %}{% if forloop.counter0|divisibleby:2 %}<tr>{% endif %}
-  <td class="k">{% if lang == 'sw' %}{{ f.label_sw|default:f.label_en }}{% else %}{{ f.label_en|default:f.label_sw }}{% endif %}</td>
+  <td class="k">{% if lang == 'sw' %}{% firstof f.label_sw f.label_en %}{% else %}{% firstof f.label_en f.label_sw %}{% endif %}</td>
   <td class="v">{{ f.value }}</td>
   {% if forloop.counter|divisibleby:2 or forloop.last %}</tr>{% endif %}{% endfor %}
 </table>
@@ -99,8 +99,8 @@
 <table class="secbar"><tr><td>{% if lang == 'sw' %}03.&nbsp;&nbsp;HUDUMA ZETU{% else %}03.&nbsp;&nbsp;OUR SERVICES{% endif %}</td></tr></table>
 {% for s in profile.services %}
 <table class="svc"><tr>
-  <td class="name">{% if lang == 'sw' %}{{ s.name_sw|default:s.name_en }}{% else %}{{ s.name_en|default:s.name_sw }}{% endif %}</td>
-  <td class="desc">{% if lang == 'sw' %}{{ s.desc_sw|default:s.desc_en }}{% else %}{{ s.desc_en|default:s.desc_sw }}{% endif %}</td>
+  <td class="name">{% if lang == 'sw' %}{% firstof s.name_sw s.name_en %}{% else %}{% firstof s.name_en s.name_sw %}{% endif %}</td>
+  <td class="desc">{% if lang == 'sw' %}{% firstof s.desc_sw s.desc_en %}{% else %}{% firstof s.desc_en s.desc_sw %}{% endif %}</td>
 </tr></table>
 {% endfor %}
 {% endif %}
@@ -109,7 +109,7 @@
 <table class="secbar"><tr><td>{% if lang == 'sw' %}04.&nbsp;&nbsp;KWA NINI {{ profile.short_name|upper }}{% else %}04.&nbsp;&nbsp;WHY CHOOSE {{ profile.short_name|upper }}{% endif %}</td></tr></table>
 <table class="why">
   {% for w in profile.why_us %}
-  <tr><td>{% if lang == 'sw' %}{{ w.text_sw|default:w.text_en }}{% else %}{{ w.text_en|default:w.text_sw }}{% endif %}</td></tr>
+  <tr><td>{% if lang == 'sw' %}{% firstof w.text_sw w.text_en %}{% else %}{% firstof w.text_en w.text_sw %}{% endif %}</td></tr>
   {% endfor %}
 </table>
 {% endif %}
@@ -131,8 +131,8 @@
 {% endif %}
 
 {% for s in profile.sections %}
-<table class="secbar"><tr><td>{% if lang == 'sw' %}{{ s.heading_sw|default:s.heading_en }}{% else %}{{ s.heading_en|default:s.heading_sw }}{% endif %}</td></tr></table>
-<div class="txt"><p>{% if lang == 'sw' %}{{ s.body_sw|default:s.body_en|linebreaksbr }}{% else %}{{ s.body_en|default:s.body_sw|linebreaksbr }}{% endif %}</p></div>
+<table class="secbar"><tr><td>{% if lang == 'sw' %}{% firstof s.heading_sw s.heading_en %}{% else %}{% firstof s.heading_en s.heading_sw %}{% endif %}</td></tr></table>
+<div class="txt"><p>{% if lang == 'sw' %}{% firstof s.body_sw s.body_en as body %}{{ body|linebreaksbr }}{% else %}{% firstof s.body_en s.body_sw as body %}{{ body|linebreaksbr }}{% endif %}</p></div>
 {% endfor %}
 
 {% if profile.pricing_note_en or profile.pricing_note_sw %}
