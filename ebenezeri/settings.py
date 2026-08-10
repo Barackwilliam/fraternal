@@ -10,8 +10,9 @@ WEBSITE_TYPES_DIR = BASE_DIR / 'apps' / 'website_types'
 
 # ── Security ──────────────────────────────────────────
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-dev-only-key-change-me')
-# DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
-DEBUG = True
+# Local development sets DEBUG=True in .env; Render leaves it unset so
+# production is safe by default rather than by remembering.
+DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 # MUHIMU: dot ya mwanzo (.jamiitek.com / .localhost) inaruhusu SUBDOMAINS ZOTE.
 # 'localhost' pekee HAIRUHUSU duka.localhost — lazima '.localhost' iwepo.
 ALLOWED_HOSTS = [h.strip() for h in os.getenv(
