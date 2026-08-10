@@ -1,0 +1,21 @@
+{% load i18n mwst_tags %}
+<section class="hero--page">
+  <div class="reveal">
+    <span class="section__eyebrow" style="background:rgba(212,175,55,.16);color:var(--gold-400)">{{ hero.eyebrow|tr }}</span>
+    <h1>{{ hero.title|tr }}</h1>
+    <p>{{ hero.text|tr }}</p>
+    {% block herocta %}
+      <div class="hstack" style="margin-top:22px;flex-wrap:wrap">
+        {% if can_join %}
+          <a href="{% url 'core:jiunge' %}" class="btn btn--gold"><svg><use href="#i-user-plus"></use></svg> {% trans "Jiunge Sasa" %}</a>
+        {% else %}
+          <a href="{% url user.home_url_name %}" class="btn btn--gold"><svg><use href="#i-dashboard"></use></svg> {% trans "Dashibodi Yangu" %}</a>
+        {% endif %}
+        <a href="{% url 'core:mawasiliano' %}" class="btn" style="border:1px solid rgba(255,255,255,.3);color:#fff">{% trans "Wasiliana Nasi" %}</a>
+      </div>
+    {% endblock %}
+  </div>
+  <div class="hero__art reveal">
+    <span class="illus illus--plain">{% include "components/illus.html" with scene=hero.scene %}</span>
+  </div>
+</section>

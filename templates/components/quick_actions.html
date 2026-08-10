@@ -1,0 +1,15 @@
+{% load i18n mwst_tags %}
+{# ctx: qa = {title, cols, items:[{label,icon,tint,url}]} #}
+<section class="card">
+  <div class="card__head"><h3 class="card__title">{{ qa.title|default:"Vitendo vya Haraka"|tr }}</h3></div>
+  <div class="card__body">
+    <div class="qa-grid {% if qa.cols == 6 %}qa-grid--6{% endif %}">
+      {% for a in qa.items %}
+        <a href="{{ a.url|default:'#' }}" class="qa"{% if not a.url %} data-backend="{{ a.label|tr }}"{% endif %}>
+          <span class="qa__icon tint-{{ a.tint|default:'green' }}"><svg><use href="#i-{{ a.icon }}"></use></svg></span>
+          <span class="qa__label">{{ a.label|tr }}</span>
+        </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>

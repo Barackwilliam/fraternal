@@ -1,0 +1,66 @@
+{% extends "public/base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Risiti" %} {{ no }}{% endblock %}
+
+{% block body %}
+<style>
+  @media print {
+    .pub-head, .pub-foot, .noprint { display: none !important; }
+    .receipt { box-shadow: none; border: 1px solid #ddd; margin: 0; }
+  }
+  .receipt { max-width: 620px; margin: 30px auto; background: #fff; border-radius: 14px;
+             box-shadow: 0 4px 24px rgba(0,0,0,.08); overflow: hidden; }
+  .receipt__head { background: var(--g-950); color: #fff; padding: 22px 26px; }
+  .receipt__body { padding: 24px 26px; }
+  .receipt__row { display: flex; justify-content: space-between; padding: 11px 0;
+                  border-bottom: 1px dashed rgba(0,0,0,.09); font-size: 13.5px; }
+  .receipt__row b { font-weight: 700; }
+  .receipt__total { display: flex; justify-content: space-between; align-items: center;
+                    margin-top: 16px; padding: 15px 18px; background: var(--canvas);
+                    border-radius: 10px; }
+</style>
+
+<section class="section">
+  <div class="receipt">
+    <div class="receipt__head">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:14px">
+        <div>
+          <b style="font-size:16px;display:block">{{ settings_obj.org_name }}</b>
+          <span style="font-size:11.5px;opacity:.75">{{ settings_obj.address }}</span><br>
+          <span style="font-size:11.5px;opacity:.75">{{ settings_obj.phone }} · {{ settings_obj.email }}</span>
+        </div>
+        <span class="badge badge--{{ badge }}">{{ status }}</span>
+      </div>
+    </div>
+
+    <div class="receipt__body">
+      <h2 style="font-size:17px;font-weight:800;margin-bottom:4px">{% trans "Risiti ya Malipo" %}</h2>
+      <p style="font-size:12.5px;color:var(--muted);margin-bottom:16px">{{ no }}</p>
+
+      <div class="receipt__row"><span>{% trans "Jina" %}</span><b>{{ name }}</b></div>
+      <div class="receipt__row"><span>{% trans "Namba ya Mwanachama" %}</span><b>{{ membership_no }}</b></div>
+      <div class="receipt__row"><span>{% trans "Aina" %}</span><b>{{ kind }}</b></div>
+      <div class="receipt__row"><span>{% trans "Maelezo" %}</span><b>{{ detail }}</b></div>
+      <div class="receipt__row"><span>{% trans "Njia ya Malipo" %}</span><b>{{ method }}</b></div>
+      {% if reference %}<div class="receipt__row"><span>{% trans "Kumbukumbu" %}</span><b>{{ reference }}</b></div>{% endif %}
+      <div class="receipt__row"><span>{% trans "Tarehe" %}</span><b>{{ date|date:"d/m/Y H:i" }}</b></div>
+
+      <div class="receipt__total">
+        <span style="font-size:13px;font-weight:600">{% trans "Jumla" %}</span>
+        <b style="font-size:20px;color:var(--g-500)">{{ amount }}</b>
+      </div>
+
+      <p style="font-size:11.5px;color:var(--muted);text-align:center;margin-top:18px">
+        {% trans "Risiti hii imetolewa na mfumo. Haihitaji saini." %}
+      </p>
+
+      <div class="hstack noprint" style="margin-top:18px">
+        <button onclick="window.print()" class="btn btn--primary btn--block">
+          <svg><use href="#i-receipt"></use></svg> {% trans "Chapisha" %}
+        </button>
+        <a href="javascript:history.back()" class="btn btn--ghost btn--block">{% trans "Rudi" %}</a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

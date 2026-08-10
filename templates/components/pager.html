@@ -1,0 +1,34 @@
+{% load i18n %}
+{# Pagination halisi. Inatarajia: page, pages, total_records, per_page #}
+<div class="pager">
+  <span class="pager__info">
+    {% blocktrans with a=page_start b=page_end t=total_records %}Inaonyesha {{ a }} hadi {{ b }} ya {{ t }} rekodi{% endblocktrans %}
+  </span>
+  <span class="pager__nav">
+    {% if page > 1 %}
+      <a class="pager__btn" href="?page=1">{% trans "Kwanza" %}</a>
+      <a class="pager__btn" href="?page={{ page|add:'-1' }}">&lsaquo; {% trans "Nyuma" %}</a>
+    {% else %}
+      <button class="pager__btn" disabled>{% trans "Kwanza" %}</button>
+      <button class="pager__btn" disabled>&lsaquo; {% trans "Nyuma" %}</button>
+    {% endif %}
+
+    {% for p in page_range %}
+      {% if p == page %}
+        <button class="pager__btn is-active">{{ p }}</button>
+      {% elif p == 0 %}
+        <button class="pager__btn" disabled>...</button>
+      {% else %}
+        <a class="pager__btn" href="?page={{ p }}">{{ p }}</a>
+      {% endif %}
+    {% endfor %}
+
+    {% if page < pages %}
+      <a class="pager__btn" href="?page={{ page|add:'1' }}">{% trans "Mbele" %} &rsaquo;</a>
+      <a class="pager__btn" href="?page={{ pages }}">{% trans "Mwisho" %}</a>
+    {% else %}
+      <button class="pager__btn" disabled>{% trans "Mbele" %} &rsaquo;</button>
+      <button class="pager__btn" disabled>{% trans "Mwisho" %}</button>
+    {% endif %}
+  </span>
+</div>

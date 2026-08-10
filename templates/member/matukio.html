@@ -1,0 +1,80 @@
+{% extends "base/app.html" %}
+{% load i18n %}
+{% block title %}{% trans "Matukio Yangu" %}{% endblock %}
+
+{% block page %}
+  {% include "base/messages.html" %}
+  <div class="pagehead"><div><h2>{% trans "Matukio Yangu" %}</h2>
+    <p>{% trans "Jiandikishe kwenye matukio ya jumuiya" %}</p></div></div>
+
+  <div class="grid grid--3">
+    {% for k in kpis %}{% include "components/kpi.html" %}{% endfor %}
+  </div>
+
+  <section class="card mt">
+    <div class="card__head"><h3 class="card__title">{% trans "Matukio Yanayokuja" %}</h3></div>
+    <div class="card__body">
+      <div class="grid grid--3">
+        {% for e in upcoming %}
+          <div class="evcard">
+            <span class="evcard__date"><b>{{ e.d }}</b><span>{{ e.m|default:"" }}</span></span>
+            <span class="evcard__body">
+              <b class="evcard__title">{{ e.title }}</b>
+              <span class="evcard__meta"><svg width="12" height="12"><use href="#i-map-pin"></use></svg> {{ e.place }}</span>
+              <span class="evcard__meta"><svg width="12" height="12"><use href="#i-clock"></use></svg> {{ e.time }} · {{ e.days }}</span>
+              {% if e.joined %}
+                <span class="badge badge--ok" style="margin-top:8px">{% trans "Umejiandikisha" %}</span>
+              {% else %}
+                <form method="post" action="{% url 'core:event_register' e.id %}" style="margin-top:8px">
+                  {% csrf_token %}
+        {% if form.non_field_errors %}
+          <div class="formerr">
+            <svg width="15" height="15"><use href="#i-alert"></use></svg>
+            <span>{% for e in form.non_field_errors %}{{ e }}{% if not forloop.last %}<br>{% endif %}{% endfor %}</span>
+          </div>
+        {% endif %}
+                          <button type="submit" class="btn btn--primary btn--sm btn--block">
+                    <svg><use href="#i-calendar-check"></use></svg> {% trans "Jiandikishe" %}
+                  </button>
+                </form>
+              {% endif %}
+            </span>
+          </div>
+        {% empty %}
+          <div class="empty" style="grid-column:1/-1">
+            <span class="empty__icon"><svg width="22" height="22"><use href="#i-calendar"></use></svg></span>
+            <span class="empty__title">{% trans "Hakuna matukio yanayokuja" %}</span>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <section class="card mt">
+    <div class="card__head"><h3 class="card__title">{% trans "Nilizojiandikisha" %}</h3></div>
+    <div class="card__body card__body--flush">
+      <div class="tablewrap">
+        <table class="table">
+          <thead><tr><th>{% trans "Tukio" %}</th><th>{% trans "Tarehe" %}</th>
+            <th>{% trans "Mahali" %}</th><th>{% trans "Nilihudhuria" %}</th></tr></thead>
+          <tbody>
+            {% for r in mine %}
+              <tr>
+                <td class="t-name">{{ r.title }}</td>
+                <td class="t-mono">{{ r.date }}</td>
+                <td>{{ r.place }}</td>
+                <td><span class="badge badge--{% if r.attended %}ok{% else %}muted{% endif %}">
+                  {% if r.attended %}{% trans "Ndiyo" %}{% else %}{% trans "Bado" %}{% endif %}</span></td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="4"><div class="empty">
+                <span class="empty__icon"><svg width="22" height="22"><use href="#i-calendar-check"></use></svg></span>
+                <span class="empty__title">{% trans "Bado hujajiandikisha" %}</span>
+              </div></td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+{% endblock %}

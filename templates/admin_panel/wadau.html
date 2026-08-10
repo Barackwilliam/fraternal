@@ -1,0 +1,189 @@
+{% extends "base/app.html" %}
+{% load i18n mwst_tags %}
+{% block title %}{% trans "Wadau na Wahisani" %}{% endblock %}
+
+{% block page %}
+  {% include "base/messages.html" %}
+
+  <div class="pagehead" style="margin-bottom:14px">
+    <div>
+      <h2>Karibu, Ndugu Msimamizi 👋</h2>
+      <p>{% trans "Dashboard ya Wadau na Wahisani" %}</p>
+    </div>
+    <div class="pagehead__actions">
+      <div class="datepill">
+        <svg width="16" height="16"><use href="#i-calendar"></use></svg>
+        <span><span class="datepill__day">{{ today }}</span><br>
+        <span class="datepill__time">{{ hijri }}</span></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid--6">
+    {% for k in kpis %}{% include "components/kpi.html" %}{% endfor %}
+  </div>
+
+  <div class="grid grid--2-2-1 mt">
+    <section class="card">
+      <div class="card__head">
+        <h3 class="card__title">{% trans "Mwenendo wa Michango" %}<span>({% trans "Miezi 12" %})</span></h3>
+        <form method="get" style="display:inline">{% for k,v in request.GET.items %}{% if k != "year" %}<input type="hidden" name="{{ k }}" value="{{ v }}">{% endif %}{% endfor %}<select class="btn btn--ghost btn--sm" name="year" onchange="this.form.submit()" style="padding-right:26px">{% for y in year_options %}<option value="{{ y }}" {% if y == active_year %}selected{% endif %}>{{ y }}</option>{% endfor %}</select></form>
+      </div>
+      <div class="card__body"><div class="chartbox chartbox--lg"><canvas id="chDonTrend"></canvas></div></div>
+    </section>
+
+    {% with d=by_type %}{% include "components/donut_card.html" %}{% endwith %}
+
+    <section class="card">
+      <div class="card__head">
+        <h3 class="card__title">{% trans "Kampeni Zinazoendelea" %}</h3>
+        <a class="link-more" href="/wadau/">{% trans "Tazama zote" %}</a>
+      </div>
+      <div class="card__body">
+        {% for c in campaigns %}
+          <div class="campaign">
+            <span class="campaign__img" style="background:linear-gradient(135deg,var(--g-400),var(--n-700))"></span>
+            <span class="campaign__body">
+              <span class="campaign__title">{{ c.title|tr }}</span>
+              <span class="campaign__nums">{{ c.raised }} / {{ c.goal }}</span>
+              <span class="prog"><i data-prog="{{ c.bar }}" style="width:0"></i></span>
+              <span style="font-size:10.5px;color:var(--muted);margin-top:3px;display:block">{{ c.pct }}%</span>
+            </span>
+            <span class="campaign__side"><b>{{ c.days }}</b>{% trans "Zilizobaki" %}</span>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+  </div>
+
+  <div class="grid grid--4 mt">
+    <section class="card">
+      <div class="card__head">
+        <h3 class="card__title">{% trans "Wahisani Wakubwa" %}<span>(Top 5)</span></h3>
+        <a class="link-more" href="/wadau/">{% trans "Tazama zote" %}</a>
+      </div>
+      <div class="card__body">
+        <div class="ranklist">
+          {% for d in top_donors %}
+            <div class="rankrow">
+              <span class="rankrow__n" data-n="{{ d.n }}">{{ d.n }}</span>
+              <span class="rankrow__body"><span class="rankrow__label">{{ d.name|tr }}</span></span>
+              <span class="rankrow__value">{{ d.value }}</span>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card__head">
+        <h3 class="card__title">{% trans "Michango ya Hivi Karibuni" %}</h3>
+        <a href="/michango/" class="link-more">{% trans "Tazama zote" %}</a>
+      </div>
+      <div class="card__body">
+        <div class="rowlist">
+          {% for r in recent %}
+            <div class="rowlist__item">
+              <span class="rowlist__icon tint-red"><svg><use href="#i-heart"></use></svg></span>
+              <span class="rowlist__body">
+                <span class="rowlist__title">{{ r.name|tr }}</span>
+                <span class="rowlist__sub">{{ r.type|tr }}</span>
+              </span>
+              <span style="text-align:right">
+                <b class="num" style="display:block;font-size:12px;color:var(--danger)">{{ r.value }}</b>
+                <span class="rowlist__meta">{{ r.date }}</span>
+              </span>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card__head"><h3 class="card__title">{% trans "Wahisani kwa Mkoa" %}<span>(Top 5)</span></h3></div>
+      <div class="card__body">
+        <div style="display:flex;gap:12px;align-items:center">
+          <div style="flex:1;min-width:0">{% include "components/tzmap.html" %}</div>
+          <div style="width:96px;flex:none">
+            {% for r in region_share %}
+              <div style="display:flex;justify-content:space-between;font-size:11px;padding:4px 0">
+                <span style="color:var(--muted)">{{ r.name|tr }}</span><b>{{ r.pct }}%</b>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card__head">
+        <h3 class="card__title">{% trans "Arifa Muhimu" %}</h3>
+        <a class="link-more" href="/mfumo/arifa/">{% trans "Tazama zote" %}</a>
+      </div>
+      <div class="card__body">
+        <div class="rowlist">
+          {% for a in alerts %}
+            <div class="rowlist__item" style="align-items:flex-start">
+              <span class="rowlist__icon tint-{{ a.tint }}"><svg><use href="#i-{{ a.icon }}"></use></svg></span>
+              <span class="rowlist__body">
+                <span class="rowlist__sub" style="white-space:normal;color:var(--ink-2)">{{ a.text|tr }}</span>
+                <span class="rowlist__sub" style="color:var(--muted-2);font-size:10.5px">{{ a.time }}</span>
+              </span>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="grid grid--2-1 mt">
+    <section class="card">
+      <div class="card__head"><h3 class="card__title">{% trans "Vitendo vya Haraka" %}</h3></div>
+      <div class="card__body">
+        <div class="qa-grid qa-grid--6" style="grid-template-columns:repeat(7,minmax(0,1fr))">
+          {% for a in actions %}
+            <button class="qa" data-backend="{{ a.label|tr }}">
+              <span class="qa__icon tint-{{ a.tint }}"><svg><use href="#i-{{ a.icon }}"></use></svg></span>
+              <span class="qa__label">{{ a.label|tr }}</span>
+            </button>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+
+    <section class="card" style="background:linear-gradient(140deg,var(--g-800),var(--g-950));border:0;color:#fff">
+      <div class="card__head">
+        <h3 class="card__title" style="color:#fff">{% trans "Jumla kwa Mwaka 2026" %}</h3>
+        <a class="btn btn--sm" style="color:#fff;border:1px solid rgba(255,255,255,.25)" href="/pakua/wahisani/">{% trans "Tazama Ripoti" %}<svg width="12" height="12"><use href="#i-chevron-down"></use></svg>
+        </a>
+      </div>
+      <div class="card__body">
+        <div style="display:flex;gap:20px;flex-wrap:wrap">
+          <span><span style="display:block;font-size:11px;color:rgba(255,255,255,.6)">{% trans "Lengo la Uchangishaji" %}</span>
+                <b class="num" style="font-size:15px">{{ year_goal.goal }}</b></span>
+          <span><span style="display:block;font-size:11px;color:rgba(255,255,255,.6)">{% trans "Kimekusanywa" %}</span>
+                <b class="num" style="font-size:15px">{{ year_goal.raised }}</b></span>
+          <span><span style="display:block;font-size:11px;color:rgba(255,255,255,.6)">{% trans "Asilimia" %}</span>
+                <b class="num" style="font-size:15px;color:var(--gold-400)">{{ year_goal.pct }}%</b></span>
+        </div>
+        <div class="prog prog--gold" style="height:10px;margin-top:14px;background:rgba(255,255,255,.15)">
+          <i data-prog="{{ year_goal.pct }}" style="width:0"></i>
+        </div>
+      </div>
+    </section>
+  </div>
+
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+  MWST.line("#chDonTrend", {{ trend.labels|safe }},
+    [{ label: "Michango (TZS)", data: {{ trend.data|safe }}, color: MWST.css("--c1"), fill: true }]);
+
+  MWST.donut("#chDonorType",
+    [{% for r in by_type.rows %}"{{ r.label|tr }}",{% endfor %}],
+    [{% for r in by_type.rows %}{{ r.value }},{% endfor %}],
+    [{% for r in by_type.rows %}"{{ r.color }}",{% endfor %}]);
+</script>
+{% endblock %}

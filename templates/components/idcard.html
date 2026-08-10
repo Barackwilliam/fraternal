@@ -1,0 +1,82 @@
+{% load i18n %}
+{% comment %}
+Kadi ya uanachama — muundo wa kimataifa (ukubwa wa CR80: 85.6 x 54 mm).
+Inatumika kwenye: uhakiki wa QR, ukurasa wa kadi, na faili la kupakua.
+Vigezo: m (mwanachama), card, settings_obj, verify_url.
+
+ONYO: `{# ... #}` inafanya kazi mstari mmoja tu. Ikivuka mistari
+inachapishwa kama maandishi. Kwa maelezo marefu tumia `{% templatetag openblock %} comment {% templatetag closeblock %}`.
+{% endcomment %}
+<div class="idcard" style="--tier:{{ m.category.colour|default:'#12864a' }}">
+  <div class="idcard__face idcard__face--front">
+    <div class="idcard__glow"></div>
+    <svg class="idcard__pattern" viewBox="0 0 320 200" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <defs>
+        <pattern id="star8" width="34" height="34" patternUnits="userSpaceOnUse">
+          <path d="M17 3 L21 13 L31 17 L21 21 L17 31 L13 21 L3 17 L13 13 Z"
+                fill="none" stroke="rgba(255,255,255,.13)" stroke-width="1"/>
+        </pattern>
+      </defs>
+      <rect width="320" height="200" fill="url(#star8)"/>
+    </svg>
+
+    <header class="idcard__head">
+      <span class="idcard__crest" aria-hidden="true">
+        <svg viewBox="0 0 40 40" width="30" height="30">
+          <path d="M20 6c-5 0-9 4-9 9v3H9v16h22V18h-2v-3c0-5-4-9-9-9z"
+                fill="none" stroke="#d4af37" stroke-width="1.6"/>
+          <path d="M20 3v3M15 12a5 5 0 0 1 10 0" fill="none" stroke="#d4af37" stroke-width="1.4"/>
+          <circle cx="20" cy="26" r="3.2" fill="none" stroke="#d4af37" stroke-width="1.3"/>
+        </svg>
+      </span>
+      <span class="idcard__org">
+        <b>{{ settings_obj.org_name|default:"Muslim Welfare Society of Tanzania" }}</b>
+        <span>{% trans "Kadi ya Uanachama" %} · Membership Card</span>
+      </span>
+      <span class="idcard__tier">{{ m.category.name }}</span>
+    </header>
+
+    <div class="idcard__body">
+      <span class="idcard__photo">
+        {% if m.photo %}<img src="{{ m.photo.url }}" alt="">{% else %}{{ m.initials }}{% endif %}
+      </span>
+
+      <span class="idcard__fields">
+        <span class="idcard__name">{{ m.full_name }}</span>
+        <span class="idcard__no">{{ m.membership_no }}</span>
+        <span class="idcard__grid">
+          <span><i>{% trans "Tarehe ya Usajili" %}</i><b>{{ m.joined_on|date:"d M Y" }}</b></span>
+          <span><i>{% trans "Halali Hadi" %}</i><b>{{ card.expires_on|date:"d M Y"|default:"—" }}</b></span>
+          <span><i>{% trans "Namba ya Akaunti" %}</i><b>{{ m.account_no }}</b></span>
+          <span><i>{% trans "Mkoa" %}</i><b>{{ m.region.name|default:"—" }}</b></span>
+        </span>
+      </span>
+
+      <span class="idcard__qr">
+        <svg viewBox="0 0 62 62" width="62" height="62" aria-hidden="true">
+          <rect width="62" height="62" rx="3" fill="#fff"/>
+          <g fill="#0b1f16">
+            <rect x="6" y="6" width="15" height="15"/><rect x="9.5" y="9.5" width="8" height="8" fill="#fff"/>
+            <rect x="41" y="6" width="15" height="15"/><rect x="44.5" y="9.5" width="8" height="8" fill="#fff"/>
+            <rect x="6" y="41" width="15" height="15"/><rect x="9.5" y="44.5" width="8" height="8" fill="#fff"/>
+            <rect x="26" y="7" width="4" height="4"/><rect x="32" y="11" width="4" height="4"/>
+            <rect x="26" y="15" width="4" height="4"/><rect x="32" y="19" width="4" height="4"/>
+            <rect x="7" y="26" width="4" height="4"/><rect x="13" y="30" width="4" height="4"/>
+            <rect x="19" y="26" width="4" height="4"/><rect x="26" y="26" width="4" height="4"/>
+            <rect x="34" y="26" width="4" height="4"/><rect x="42" y="26" width="4" height="4"/>
+            <rect x="50" y="30" width="4" height="4"/><rect x="26" y="34" width="4" height="4"/>
+            <rect x="34" y="38" width="4" height="4"/><rect x="44" y="34" width="4" height="4"/>
+            <rect x="26" y="45" width="4" height="4"/><rect x="33" y="49" width="4" height="4"/>
+            <rect x="40" y="45" width="4" height="4"/><rect x="48" y="43" width="4" height="4"/>
+            <rect x="48" y="51" width="4" height="4"/><rect x="40" y="53" width="4" height="4"/>
+          </g>
+        </svg>
+      </span>
+    </div>
+
+    <footer class="idcard__foot">
+      <span class="idcard__serial">{{ card.serial|default:"—" }}</span>
+      <span class="idcard__motto">{% trans "Imani · Huruma · Huduma · Maendeleo" %}</span>
+    </footer>
+  </div>
+</div>

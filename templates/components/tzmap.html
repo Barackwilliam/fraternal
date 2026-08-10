@@ -1,0 +1,23 @@
+{% load i18n mwst_tags %}
+{# Ramani ya Tanzania. ctx: map_regions (kutoka data.tz_map), map_legend #}
+<svg class="tzmap" viewBox="4 6 84 90" xmlns="http://www.w3.org/2000/svg" role="img"
+     aria-label="Ramani ya wanachama kwa mikoa">
+  {% for r in map_regions %}
+    <path d="{{ r.path }}" fill="{{ r.shade }}" href="/taifa/">
+      <title>{{ r.name|tr }} — {{ r.members }}</title>
+    </path>
+  {% endfor %}
+  {% for r in map_regions %}
+    {% if r.label_on %}
+      <text x="{{ r.x }}" y="{{ r.y }}" text-anchor="middle">{{ r.name|tr }}</text>
+      <text x="{{ r.x }}" y="{{ r.y|add:4 }}" text-anchor="middle" class="sub">{{ r.members }}</text>
+    {% endif %}
+  {% endfor %}
+</svg>
+{% if map_legend %}
+  <div class="maplegend">
+    {% for l in map_legend %}
+      <span class="maplegend__row"><span class="maplegend__sw" style="background:{{ l.color }}"></span>{{ l.label|tr }}</span>
+    {% endfor %}
+  </div>
+{% endif %}

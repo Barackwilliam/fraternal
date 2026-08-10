@@ -1,0 +1,170 @@
+{% extends "base/app.html" %}
+{% load i18n mwst_tags %}
+{% block title %}{{ zone.name|tr }}{% endblock %}
+
+{% block page %}
+  {% include "base/messages.html" %}
+
+  <div class="pagehead">
+    <div>
+      <h2>{{ zone.name|tr }}</h2>
+      <p>{% trans "Ofisi ya Kanda" %}: {{ zone.office }} ·
+         {% blocktrans count n=zone.regions.count %}Mkoa {{ n }}{% plural %}Mikoa {{ n }}{% endblocktrans %}</p>
+    </div>
+    <div class="pagehead__actions">
+      {% if all_zones %}
+        <form method="get" style="display:inline">
+          <select class="select" name="kanda" onchange="this.form.submit()" style="height:36px">
+            {% for z in all_zones %}
+              <option value="{{ z.code }}" {% if z.pk == zone.pk %}selected{% endif %}>{{ z.name|tr }}</option>
+            {% endfor %}
+          </select>
+        </form>
+      {% endif %}
+      <a href="/pakua/wanachama/" class="btn btn--ghost">
+        <svg><use href="#i-download"></use></svg> {% trans "Pakua Ripoti" %}</a>
+    </div>
+  </div>
+
+  <div class="grid grid--3">
+    {% for k in kpis %}{% include "components/kpi.html" %}{% endfor %}
+  </div>
+
+  <div class="grid grid--2-1 mt">
+    <section class="card">
+      <div class="card__head"><h3 class="card__title">{% trans "Ramani ya Kanda" %}</h3></div>
+      <div class="card__body">{% include "components/tzmap.html" %}</div>
+    </section>
+
+    <section class="card">
+      <div class="card__head"><h3 class="card__title">{% trans "Mikoa ya Kanda" %}</h3>
+        <a href="{% url 'core:zone_regions' %}" class="btn btn--ghost btn--sm">{% trans "Zote" %}</a></div>
+      <div class="card__body">
+        {% for r in region_rows %}
+          <div class="rankrow">
+            <span class="rankrow__n">{{ forloop.counter }}</span>
+            <span class="rankrow__body">
+              <span class="rankrow__label">{{ r.name }}</span>
+              <span class="progress"><span style="width:{{ r.pct }}%"></span></span>
+              <span class="rowlist__meta">{{ r.districts }} {% trans "halmashauri" %} · {{ r.fees }}</span>
+            </span>
+            <span class="rankrow__val">{{ r.display }}</span>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+  </div>
+
+  <div class="grid grid--2 mt">
+    <section class="card">
+      <div class="card__head"><h3 class="card__title">{% trans "Ukuaji wa Wanachama" %}</h3></div>
+      <div class="card__body"><div class="chartbox chartbox--md"><canvas id="chZoneGrowth"></canvas></div></div>
+    </section>
+    {% with d=by_category %}{% include "components/donut_card.html" %}{% endwith %}
+  </div>
+
+  <section class="card mt">
+    <div class="card__head"><h3 class="card__title">{% trans "Mapato ya Kanda kwa Mwezi" %}</h3></div>
+    <div class="card__body"><div class="chartbox chartbox--md"><canvas id="chZoneRev"></canvas></div></div>
+  </section>
+
+  <div class="grid grid--3 mt">
+    <section class="card">
+      <div class="card__head"><h3 class="card__title">{% trans "Wanachama Wapya" %}</h3></div>
+      <div class="card__body">
+        {% for m in recent %}
+          <div class="rowlist__row">
+            <span class="rowlist__avatar">{{ m.initials }}</span>
+            <span class="rowlist__main">
+              <span class="rowlist__title">{{ m.name }}</span>
+              <span class="rowlist__meta">{{ m.place }} · {{ m.joined }}</span>
+            </span>
+            <span class="badge badge--{{ m.category|lower }}">{{ m.category }}</span>
+          </div>
+        {% empty %}
+          <div class="empty"><span class="empty__title">{% trans "Hakuna wanachama" %}</span></div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card__head"><h3 class="card__title">{% trans "Maombi ya Karibuni" %}</h3>
+        <a href="/maombi/" class="btn btn--ghost btn--sm">{% trans "Zote" %}</a></div>
+      <div class="card__body">
+        {% for a in applications %}
+          <div class="rowlist__row">
+            <span class="rowlist__main">
+              <span class="rowlist__title">{{ a.name }}</span>
+              <span class="rowlist__meta">{{ a.ref }} · {{ a.place }}</span>
+            </span>
+            <span class="badge badge--{{ a.badge }}">{{ a.status }}</span>
+          </div>
+        {% empty %}
+          <div class="empty"><span class="empty__title">{% trans "Hakuna maombi" %}</span></div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card__head"><h3 class="card__title">{% trans "Matukio ya Kanda" %}</h3>
+        <a href="/matukio/" class="btn btn--ghost btn--sm">{% trans "Zote" %}</a></div>
+      <div class="card__body">
+        {% for e in events %}
+          <div class="rowlist__row">
+            <span class="rowlist__main">
+              <span class="rowlist__title">{{ e.title }}</span>
+              <span class="rowlist__meta">{{ e.date }} · {{ e.place }}</span>
+            </span>
+            <span class="badge badge--{{ e.badge }}">{{ e.status }}</span>
+          </div>
+        {% empty %}
+          <div class="empty"><span class="empty__title">{% trans "Hakuna matukio" %}</span></div>
+        {% endfor %}
+      </div>
+    </section>
+  </div>
+
+  <section class="card mt">
+    <div class="card__head"><h3 class="card__title">{% trans "Muhtasari wa Kanda" %}</h3></div>
+    <div class="card__body">
+      <div class="grid grid--5">
+        {% for s in summary %}
+          <div class="fund">
+            <span class="fund__ico tint-green"><svg width="16" height="16"><use href="#i-{{ s.icon }}"></use></svg></span>
+            <span class="fund__body"><span class="fund__label">{{ s.label|tr }}</span>
+              <b class="fund__value">{{ s.value }}</b></span>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  {% with qa_items=actions %}
+    <section class="card mt">
+      <div class="card__head"><h3 class="card__title">{% trans "Vitendo vya Haraka" %}</h3></div>
+      <div class="card__body">
+        <div class="grid grid--5">
+          {% for a in actions %}
+            <a class="qa" href="{{ a.url }}">
+              <span class="qa__ico tint-{{ a.tint }}"><svg width="17" height="17"><use href="#i-{{ a.icon }}"></use></svg></span>
+              <span class="qa__label">{{ a.label|tr }}</span>
+            </a>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+  {% endwith %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+  MWST.line("#chZoneGrowth", {{ members_month.labels|safe }},
+    [{ label: "{% trans 'Wanachama' %}", data: {{ members_month.data|safe }}, color: MWST.css("--c1") }]);
+  MWST.bar("#chZoneRev", {{ revenue_month.labels|safe }},
+    [{ label: "{% trans 'Mapato' %}", data: {{ revenue_month.data|safe }}, color: MWST.css("--c2") }]);
+  MWST.donut("#chZoneCat",
+    [{% for r in by_category.rows %}"{{ r.label|tr }}",{% endfor %}],
+    [{% for r in by_category.rows %}{{ r.value }},{% endfor %}],
+    [{% for r in by_category.rows %}"{{ r.color }}",{% endfor %}]);
+</script>
+{% endblock %}

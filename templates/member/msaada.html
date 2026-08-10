@@ -1,0 +1,52 @@
+{% extends "base/app.html" %}
+{% load i18n mwst_tags %}
+{% block title %}{% trans "Msaada na Maombi" %}{% endblock %}
+
+{% block page %}
+  {% include "base/messages.html" %}
+  <div class="pagehead"><div><h2>{% trans "Msaada na Maombi" %}</h2>
+    <p>{% trans "Omba msaada wa matibabu, elimu, dharura au chakula" %}</p></div></div>
+
+  <div class="grid grid--4">
+    {% for k in kpis %}{% include "components/kpi.html" %}{% endfor %}
+  </div>
+
+  <div class="grid grid--2-1 mt">
+    <section class="card">
+      <div class="card__head"><h3 class="card__title">{% trans "Maombi Yangu" %}</h3></div>
+      <div class="card__body card__body--flush">
+        <div class="tablewrap">
+          <table class="table">
+            <thead><tr>
+              <th>{% trans "Kumbukumbu" %}</th><th>{% trans "Aina" %}</th>
+              <th>{% trans "Kiasi Kilichoombwa" %}</th><th>{% trans "Kilichoidhinishwa" %}</th>
+              <th>{% trans "Tarehe" %}</th><th>{% trans "Hali" %}</th>
+            </tr></thead>
+            <tbody>
+              {% for r in rows %}
+                <tr>
+                  <td class="t-mono">{{ r.ref }}</td>
+                  <td>{{ r.type }}</td>
+                  <td class="t-num">{{ r.requested }}</td>
+                  <td class="t-num">{{ r.approved }}</td>
+                  <td class="t-mono">{{ r.date }}</td>
+                  <td><span class="badge badge--{{ r.badge }}">{{ r.status }}</span></td>
+                </tr>
+              {% empty %}
+                <tr><td colspan="6"><div class="empty">
+                  <span class="empty__icon"><svg width="22" height="22"><use href="#i-hand-heart"></use></svg></span>
+                  <span class="empty__title">{% trans "Hakuna maombi" %}</span>
+                  <span class="empty__text">{% trans "Tumia fomu kuomba msaada." %}</span>
+                </div></td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    {% with form_title=_("Omba Msaada") form_icon="hand-heart" form_button=_("Wasilisha Ombi") form_help=_("Eleza hali yako kwa kina. Afisa wa ustawi atakupigia simu.") %}
+      {% include "member/_form_card.html" %}
+    {% endwith %}
+  </div>
+{% endblock %}

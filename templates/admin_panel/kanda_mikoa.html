@@ -1,0 +1,56 @@
+{% extends "base/app.html" %}
+{% load i18n mwst_tags %}
+{% block title %}{% trans "Mikoa na Halmashauri" %}{% endblock %}
+
+{% block page %}
+  {% include "base/messages.html" %}
+  <div class="pagehead">
+    <div><h2>{% trans "Mikoa na Halmashauri" %}</h2><p>{{ zone.name|tr }}</p></div>
+  </div>
+
+  <div class="grid grid--4">
+    <div class="kpi"><span class="kpi__ico tint-green"><svg width="18" height="18"><use href="#i-map"></use></svg></span>
+      <span class="kpi__body"><span class="kpi__label">{% trans "Mikoa" %}</span>
+        <b class="kpi__value">{{ totals.regions }}</b></span></div>
+    <div class="kpi"><span class="kpi__ico tint-navy"><svg width="18" height="18"><use href="#i-map-pin"></use></svg></span>
+      <span class="kpi__body"><span class="kpi__label">{% trans "Halmashauri" %}</span>
+        <b class="kpi__value">{{ totals.districts }}</b></span></div>
+    <div class="kpi"><span class="kpi__ico tint-gold"><svg width="18" height="18"><use href="#i-file"></use></svg></span>
+      <span class="kpi__body"><span class="kpi__label">{% trans "Kata" %}</span>
+        <b class="kpi__value">{{ totals.wards }}</b></span></div>
+    <div class="kpi"><span class="kpi__ico tint-purple"><svg width="18" height="18"><use href="#i-users"></use></svg></span>
+      <span class="kpi__body"><span class="kpi__label">{% trans "Wanachama" %}</span>
+        <b class="kpi__value">{{ totals.members }}</b></span></div>
+  </div>
+
+  <div class="accordion mt">
+    {% for r in rows %}
+      <div class="acc">
+        <button class="acc__head" type="button">
+          <span><b>{{ r.name }}</b>
+            <span class="rowlist__meta">{{ r.district_count }} {% trans "halmashauri" %} ·
+              {{ r.ward_count }} {% trans "kata" %} · {{ r.members }} {% trans "wanachama" %}</span></span>
+          <svg width="15" height="15"><use href="#i-chevron-down"></use></svg>
+        </button>
+        <div class="acc__body">
+          <div class="tablewrap">
+            <table class="table">
+              <thead><tr><th>#</th><th>{% trans "Halmashauri" %}</th>
+                <th>{% trans "Aina" %}</th><th>{% trans "Idadi ya Kata" %}</th></tr></thead>
+              <tbody>
+                {% for d in r.districts %}
+                  <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td class="t-name">{{ d.name }}</td>
+                    <td><span class="badge badge--{% if d.code == 'CC' %}gold{% elif d.code == 'MC' %}ok{% elif d.code == 'TC' %}info{% else %}muted{% endif %}">{{ d.kind }}</span></td>
+                    <td class="t-num">{{ d.wards }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% endblock %}

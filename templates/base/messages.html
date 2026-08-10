@@ -1,0 +1,13 @@
+{% if messages %}
+  <div class="vstack" style="margin-bottom:16px">
+    {% for m in messages %}
+      <div class="card" style="flex-direction:row;align-items:flex-start;gap:11px;padding:13px 15px;
+           border-left:4px solid var(--{% if m.tags == 'error' %}danger{% elif m.tags == 'warning' %}warn{% elif m.tags == 'info' %}n-700{% else %}ok{% endif %})">
+        <span class="fund__ico tint-{% if m.tags == 'error' %}red{% elif m.tags == 'warning' %}gold{% elif m.tags == 'info' %}navy{% else %}green{% endif %}" style="width:28px;height:28px">
+          <svg width="15" height="15"><use href="#i-{% if m.tags == 'error' %}x-circle{% elif m.tags == 'warning' %}alert{% elif m.tags == 'info' %}info{% else %}check-circle{% endif %}"></use></svg>
+        </span>
+        <span style="flex:1;font-size:13px;line-height:1.6">{{ m }}</span>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}

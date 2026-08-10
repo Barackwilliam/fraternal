@@ -1,0 +1,75 @@
+{% extends "public/base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Uhakiki wa Kadi" %}{% endblock %}
+
+{% block body %}
+<section class="section verify">
+  <div class="verify__wrap">
+
+    {% if card %}
+      <div class="verify__stamp verify__stamp--ok">
+        <span class="verify__ico">
+          <svg width="26" height="26"><use href="#i-check-circle"></use></svg>
+        </span>
+        <span>
+          <b>{% trans "Kadi ni Halali" %}</b>
+          <span>{% trans "Imethibitishwa na Muslim Welfare Society of Tanzania" %}</span>
+        </span>
+      </div>
+
+      {% include "components/idcard.html" %}
+
+      <div class="verify__facts">
+        <div><i>{% trans "Hali ya Uanachama" %}</i>
+          <b><span class="badge badge--{% if m.status == 'active' %}ok{% elif m.status == 'suspended' %}warn{% else %}danger{% endif %}">{{ m.get_status_display }}</span></b></div>
+        <div><i>{% trans "Daraja" %}</i>
+          <b><span class="badge badge--{{ m.category.name|lower }}">{{ m.category.name }}</span></b></div>
+        <div><i>{% trans "Kadi Ilitolewa" %}</i><b>{{ card.issued_on|date:"d M Y" }}</b></div>
+        <div><i>{% trans "Halali Hadi" %}</i><b>{{ card.expires_on|date:"d M Y" }}</b></div>
+        <div><i>{% trans "Namba ya Kadi" %}</i><b class="mono">{{ card.serial }}</b></div>
+        <div><i>{% trans "Imehakikiwa" %}</i><b>{{ checked_at|date:"d M Y H:i" }}</b></div>
+      </div>
+
+      {% if not card.is_active %}
+        <p class="verify__warn">
+          <svg width="15" height="15"><use href="#i-alert"></use></svg>
+          {% trans "Kadi hii imesitishwa. Wasiliana na ofisi ya MWST." %}
+        </p>
+      {% elif expired %}
+        <p class="verify__warn">
+          <svg width="15" height="15"><use href="#i-alert"></use></svg>
+          {% trans "Muda wa kadi hii umeisha." %}
+        </p>
+      {% endif %}
+
+    {% else %}
+      <div class="verify__stamp verify__stamp--bad">
+        <span class="verify__ico">
+          <svg width="26" height="26"><use href="#i-x-circle"></use></svg>
+        </span>
+        <span>
+          <b>{% trans "Kadi Haijapatikana" %}</b>
+          <span>{% trans "Namba hii haipo kwenye mfumo wa MWST" %}</span>
+        </span>
+      </div>
+
+      <div class="card" style="text-align:center;padding:28px 22px">
+        <span class="mono" style="font-size:14px;display:block;color:var(--muted)">{{ serial }}</span>
+        <p style="font-size:13px;color:var(--muted);margin-top:12px;line-height:1.8">
+          {% trans "Hakikisha umeandika namba sawasawa, au skan QR code iliyo kwenye kadi. Kama tatizo linaendelea, wasiliana nasi." %}
+        </p>
+        <a href="{% url 'core:mawasiliano' %}" class="btn btn--primary" style="margin-top:14px">
+          <svg><use href="#i-phone"></use></svg> {% trans "Wasiliana Nasi" %}
+        </a>
+      </div>
+    {% endif %}
+
+    <p class="verify__note">
+      <svg width="14" height="14"><use href="#i-shield"></use></svg>
+      {% trans "Ukurasa huu unaonyesha taarifa za msingi pekee. Taarifa binafsi za mwanachama hazionyeshwi hadharani." %}
+    </p>
+
+    <a href="{% url 'core:home' %}" class="btn btn--ghost btn--block">{% trans "Nyumbani" %}</a>
+  </div>
+</section>
+{% endblock %}

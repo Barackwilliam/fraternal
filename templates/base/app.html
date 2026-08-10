@@ -1,0 +1,41 @@
+{% load static i18n %}<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:'sw' }}" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Dashibodi{% endblock %} · MWST Membership Management System</title>
+  <meta name="description" content="Mfumo wa Usimamizi wa Uanachama wa Muslim Welfare Society of Tanzania (MWST).">
+  <meta name="theme-color" content="#042318">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="{% static 'css/mwst.css' %}">
+  {% block head %}{% endblock %}
+</head>
+<body>
+{% include "base/icons.html" %}
+
+<div class="app">
+  {% block sidebar %}{% include "base/sidebar.html" %}{% endblock %}
+  <div class="scrim" aria-hidden="true"></div>
+
+  <div class="main">
+    {% block topbar %}{% include "base/topbar.html" %}{% endblock %}
+
+    <main class="page">
+      {% block page %}{% endblock %}
+    </main>
+
+    {% block actionbar %}{% endblock %}
+    {% include "base/footer.html" %}
+  </div>
+</div>
+
+{{ i18n_js|json_script:"mwst-i18n" }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="{% static 'js/mwst.js' %}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

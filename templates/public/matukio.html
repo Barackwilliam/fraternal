@@ -1,0 +1,94 @@
+{% extends "public/base.html" %}
+{% load i18n mwst_tags %}
+{% block title %}{% trans "Matukio" %}{% endblock %}
+
+{% block body %}
+{% include "public/_pagehero.html" %}
+
+<div class="section" style="padding-bottom:0">{% include "base/messages.html" %}</div>
+
+<section class="section section--dark">
+  <div class="counters">
+    {% for s in stats %}
+      <div class="reveal">
+        <div class="counter__val" data-count="{{ s.value }}">0</div>
+        <div class="counter__lbl">{{ s.label|tr }}</div>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="section">
+  <div class="section__head reveal">
+    <span class="section__eyebrow">{% trans "Yajayo" %}</span>
+    {% include "public/_ornament.html" %}
+    <h2 class="section__title">{% trans "Matukio Yanayokuja" %}</h2>
+    <p class="section__text">{% trans "Jiandikishe mapema — nafasi ni chache." %}</p>
+  </div>
+  <div class="tabs" data-tabs="#ev-grid">
+    {% for f in filters %}
+      <button class="tab {% if forloop.first %}is-active{% endif %}" data-filter="{{ f.key }}">{{ f.label|tr }}</button>
+    {% endfor %}
+  </div>
+  <div class="grid grid--3" id="ev-grid">
+    {% for e in upcoming %}
+      <article class="card reveal" data-cat="{{ e.cat }}">
+        <div style="position:relative">
+          <span class="illus illus--card"><span class="illus__tag">{{ e.cat_label|tr }}</span>{% include "components/illus.html" with scene=e.scene %}</span>
+          <span class="evdate" style="position:absolute;left:14px;bottom:-20px;background:var(--surface);box-shadow:var(--sh-3);width:56px;padding:8px 0">
+            <b>{{ e.d }}</b><span>{{ e.m }}</span><small>{{ e.y }}</small>
+          </span>
+        </div>
+        <div class="card__body" style="padding:26px 16px 16px">
+          <div class="hstack" style="justify-content:space-between;margin-bottom:8px">
+            <span class="badge badge--muted">{{ e.cat_label|tr }}</span>
+            <span class="badge badge--{{ e.badge }}">{{ e.status|tr }}</span>
+          </div>
+          <h4 style="font-size:14.5px;font-weight:700;line-height:1.45">{{ e.title|tr }}</h4>
+          <p style="font-size:12.5px;color:var(--muted);line-height:1.6;margin:7px 0 10px">{{ e.text|tr }}</p>
+          <span class="rowlist__sub"><svg width="12" height="12" style="vertical-align:-1px"><use href="#i-map-pin"></use></svg> {{ e.venue|tr }}</span>
+          <span class="rowlist__sub"><svg width="12" height="12" style="vertical-align:-1px"><use href="#i-clock"></use></svg> {{ e.time }}</span>
+          <form method="post" action="{% url 'core:event_register' e.id %}" style="margin-top:12px">
+            {% csrf_token %}
+        {% if form.non_field_errors %}
+          <div class="formerr">
+            <svg width="15" height="15"><use href="#i-alert"></use></svg>
+            <span>{% for e in form.non_field_errors %}{{ e }}{% if not forloop.last %}<br>{% endif %}{% endfor %}</span>
+          </div>
+        {% endif %}
+                    <input type="hidden" name="full_name" value="{{ user.get_full_name }}">
+            <input type="hidden" name="phone" value="{{ user.phone }}">
+          <button type="submit" class="btn btn--primary btn--block">
+            <svg><use href="#i-calendar-check"></use></svg> {% trans "Jiandikishe" %}
+          </button>
+          </form>
+        </div>
+      </article>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="section section--tint">
+  <div class="section__head reveal">
+    <span class="section__eyebrow">{% trans "Yaliyopita" %}</span>
+    {% include "public/_ornament.html" %}
+    <h2 class="section__title">{% trans "Matukio Yaliyofanyika" %}</h2>
+  </div>
+  <div class="grid grid--2">
+    {% for p in past %}
+      <div class="card reveal"><div class="card__body" style="padding:14px">
+        <div class="evrow" style="border:0;padding:0">
+          <span class="illus illus--thumb">{% include "components/illus.html" with scene="tukio" %}</span>
+          <span class="evrow__body">
+            <span class="evrow__title">{{ p.title|tr }}</span>
+            <span class="evrow__meta">{{ p.date }} &nbsp;·&nbsp; {{ p.place|tr }}</span>
+          </span>
+          <span class="badge badge--ok">{% trans "Imefanyika" %}</span>
+        </div>
+      </div></div>
+    {% endfor %}
+  </div>
+</section>
+
+{% include "public/_cta.html" %}
+{% endblock %}

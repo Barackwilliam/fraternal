@@ -1,0 +1,16 @@
+{% load i18n %}
+{% comment %}
+Kidokezo cha hali ya majaribio. Kinaonekana popote pale malipo yanapotajwa
+mradi `PAYMENTS_DEMO` bado ni True. Lengo ni mtu asidhani ametuma pesa.
+{% endcomment %}
+{% if payments_demo %}
+  <div class="demo-notice">
+    <span class="demo-notice__tag">{% trans "DEMO" %}</span>
+    <div>
+      <b>{% trans "Malipo bado hayajaunganishwa" %}</b>
+      <p>
+        {% trans "Mfumo wa malipo (API ya mtoa huduma) bado haujaunganishwa. Unaweza kujaza fomu na kuona jinsi itakavyofanya kazi, lakini HAKUNA pesa halisi itakayotolewa kwenye akaunti yako." %}
+      </p>
+    </div>
+  </div>
+{% endif %}

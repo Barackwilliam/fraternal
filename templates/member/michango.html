@@ -1,0 +1,70 @@
+{% extends "base/app.html" %}
+{% load i18n mwst_tags %}
+{% block title %}{% trans "Michango Yangu" %}{% endblock %}
+
+{% block page %}
+  {% include "base/messages.html" %}
+  <div class="pagehead"><div><h2>{% trans "Michango Yangu" %}</h2>
+    <p>{% trans "Zaka, Sadaqa, Waqf na michango ya miradi" %}</p></div></div>
+
+  <div class="grid grid--4">
+    {% for k in kpis %}{% include "components/kpi.html" %}{% endfor %}
+  </div>
+
+  <div class="grid grid--2-1 mt">
+    <section class="card">
+      <div class="card__head"><h3 class="card__title">{% trans "Historia ya Michango" %}</h3></div>
+      <div class="card__body card__body--flush">
+        <div class="tablewrap">
+          <table class="table">
+            <thead><tr>
+              <th>{% trans "Risiti" %}</th><th>{% trans "Aina" %}</th><th>{% trans "Kiasi" %}</th>
+              <th>{% trans "Mradi" %}</th><th>{% trans "Tarehe" %}</th><th>{% trans "Hali" %}</th>
+            </tr></thead>
+            <tbody>
+              {% for r in rows %}
+                <tr>
+                  <td class="t-mono">{{ r.receipt }}</td>
+                  <td>{{ r.fund }}</td>
+                  <td class="t-num">{{ r.amount }}</td>
+                  <td>{{ r.project }}</td>
+                  <td class="t-mono">{{ r.date }}</td>
+                  <td><span class="badge badge--{{ r.badge }}">{{ r.status }}</span></td>
+                </tr>
+              {% empty %}
+                <tr><td colspan="6"><div class="empty">
+                  <span class="empty__icon"><svg width="22" height="22"><use href="#i-hand-heart"></use></svg></span>
+                  <span class="empty__title">{% trans "Bado hujachangia" %}</span>
+                </div></td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    {% with form_title=_("Toa Mchango") form_icon="hand-heart" form_button=_("Wasilisha Mchango") %}
+      {% include "member/_form_card.html" %}
+    {% endwith %}
+  </div>
+
+  <div class="grid grid--2 mt">
+    <section class="card">
+      <div class="card__head"><h3 class="card__title">{% trans "Michango kwa Mwezi" %}</h3></div>
+      <div class="card__body"><div class="chartbox chartbox--md"><canvas id="chMyCon"></canvas></div></div>
+    </section>
+    {% with d=by_fund %}{% include "components/donut_card.html" %}{% endwith %}
+  </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  MWST.bar("#chMyCon", {{ chart.labels|safe }},
+    [{ label: "{% trans 'Michango' %}", data: {{ chart.data|safe }}, color: MWST.css("--c2") }]);
+
+  MWST.donut("#chMyFunds",
+    [{% for r in by_fund.rows %}"{{ r.label|tr }}",{% endfor %}],
+    [{% for r in by_fund.rows %}{{ r.value }},{% endfor %}],
+    [{% for r in by_fund.rows %}"{{ r.color }}",{% endfor %}]);
+</script>
+{% endblock %}

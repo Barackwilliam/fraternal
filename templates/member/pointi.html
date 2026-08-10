@@ -1,0 +1,77 @@
+{% extends "base/app.html" %}
+{% load i18n mwst_tags %}
+{% block title %}{% trans "Pointi na Faida" %}{% endblock %}
+
+{% block page %}
+  {% include "base/messages.html" %}
+  <div class="pagehead"><div><h2>{% trans "Pointi na Faida" %}</h2>
+    <p>{% trans "Pata pointi kwa kila malipo, mchango na ushiriki" %}</p></div></div>
+
+  <div class="grid grid--4">
+    {% for k in kpis %}{% include "components/kpi.html" %}{% endfor %}
+  </div>
+
+  <section class="card mt">
+    <div class="card__head"><h3 class="card__title">{% trans "Tuzo Zinazopatikana" %}</h3></div>
+    <div class="card__body">
+      <div class="grid grid--3">
+        {% for r in rewards %}
+          <div class="tier {% if r.reached %}tier--featured{% endif %}">
+            <span class="tier__name">{{ r.title }}</span>
+            <span class="tier__price">{{ r.points }} <small>{% trans "pointi" %}</small></span>
+            {% if r.text %}<p style="font-size:12.5px;color:var(--muted);margin:8px 0">{{ r.text }}</p>{% endif %}
+            <div class="progress" style="margin-top:10px"><span style="width:{{ r.pct }}%"></span></div>
+            <span style="font-size:11.5px;color:var(--muted);display:block;margin-top:6px">
+              {% if r.reached %}
+                <b style="color:var(--ok)">{% trans "Umefikia!" %}</b>
+              {% else %}
+                {% blocktrans with n=r.remaining %}Zimebaki pointi {{ n }}{% endblocktrans %}
+              {% endif %}
+            </span>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <div class="grid grid--2-1 mt">
+    <section class="card">
+      <div class="card__head"><h3 class="card__title">{% trans "Historia ya Pointi" %}</h3></div>
+      <div class="card__body card__body--flush">
+        <div class="tablewrap">
+          <table class="table">
+            <thead><tr><th>{% trans "Tarehe" %}</th><th>{% trans "Shughuli" %}</th>
+              <th>{% trans "Chanzo" %}</th><th>{% trans "Pointi" %}</th></tr></thead>
+            <tbody>
+              {% for t in rows %}
+                <tr>
+                  <td class="t-mono">{{ t.date }}</td>
+                  <td>{{ t.reason }}</td>
+                  <td class="t-mono">{{ t.source }}</td>
+                  <td class="t-num" style="color:var(--{% if t.positive %}ok{% else %}danger{% endif %});font-weight:700">{{ t.points }}</td>
+                </tr>
+              {% empty %}
+                <tr><td colspan="4"><div class="empty">
+                  <span class="empty__icon"><svg width="22" height="22"><use href="#i-star"></use></svg></span>
+                  <span class="empty__title">{% trans "Bado hujapata pointi" %}</span>
+                </div></td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card__head"><h3 class="card__title">{% trans "Jinsi ya Kupata Pointi" %}</h3></div>
+      <div class="card__body">
+        {% for r in rules %}
+          <div class="rowlist__row">
+            <span class="rowlist__main"><span class="rowlist__title">{{ r.activity }}</span></span>
+            <span class="badge badge--ok">+{{ r.points }}</span>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+  </div>
+{% endblock %}

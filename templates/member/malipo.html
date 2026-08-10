@@ -1,0 +1,66 @@
+{% extends "base/app.html" %}
+{% load i18n mwst_tags %}
+{% block title %}{% trans "Malipo Yangu" %}{% endblock %}
+
+{% block page %}
+  {% include "base/messages.html" %}
+
+  <div class="pagehead">
+    <div><h2>{% trans "Malipo Yangu" %}</h2><p>{{ member_obj.membership_no }}</p></div>
+  </div>
+
+  <div class="grid grid--4">
+    {% for k in kpis %}{% include "components/kpi.html" %}{% endfor %}
+  </div>
+
+  <div class="grid grid--2-1 mt">
+    <section class="card">
+      <div class="card__head"><h3 class="card__title">{% trans "Historia ya Malipo" %}</h3>
+        <span class="rowlist__meta">{{ total_rows }}</span></div>
+      <div class="card__body card__body--flush">
+        <div class="tablewrap">
+          <table class="table">
+            <thead><tr>
+              <th>{% trans "Risiti" %}</th><th>{% trans "Kiasi" %}</th><th>{% trans "Mwezi" %}</th>
+              <th>{% trans "Tarehe" %}</th><th>{% trans "Njia" %}</th><th>{% trans "Hali" %}</th>
+            </tr></thead>
+            <tbody>
+              {% for r in rows %}
+                <tr>
+                  <td class="t-mono">{{ r.receipt }}</td>
+                  <td class="t-num">{{ r.amount }}</td>
+                  <td>{{ r.month|tr }} {{ r.year }}</td>
+                  <td class="t-mono">{{ r.date }}</td>
+                  <td>{{ r.method|tr }}</td>
+                  <td><span class="badge badge--{{ r.badge }}">{{ r.status }}</span></td>
+                </tr>
+              {% empty %}
+                <tr><td colspan="6"><div class="empty">
+                  <span class="empty__icon"><svg width="22" height="22"><use href="#i-wallet"></use></svg></span>
+                  <span class="empty__title">{% trans "Bado hujalipa" %}</span>
+                  <span class="empty__text">{% trans "Tumia fomu upande wa kulia kulipa ada yako." %}</span>
+                </div></td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    {% with form_title=_("Lipa Ada") form_icon="cash" form_button=_("Wasilisha Malipo") form_help=_("Baada ya kulipa kwa simu au benki, weka taarifa hapa. Afisa wa fedha atathibitisha.") %}
+      {% include "member/_form_card.html" %}
+    {% endwith %}
+  </div>
+
+  <section class="card mt">
+    <div class="card__head"><h3 class="card__title">{% trans "Malipo kwa Mwezi" %}</h3></div>
+    <div class="card__body"><div class="chartbox chartbox--md"><canvas id="chMyPay"></canvas></div></div>
+  </section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  MWST.bar("#chMyPay", {{ chart.labels|safe }},
+    [{ label: "{% trans 'Malipo' %}", data: {{ chart.data|safe }}, color: MWST.css("--c1") }]);
+</script>
+{% endblock %}

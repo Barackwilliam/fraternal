@@ -1,0 +1,90 @@
+/* apps/static/css/skeleton.css
+ *
+ * Grey placeholder blocks with a shimmer, like a chat thread loading.
+ *
+ * Worth being clear about where this helps. Django sends finished HTML, so a
+ * skeleton on a normal page would flash and vanish — it would make the site
+ * feel slower, not faster. These classes are for the three places where
+ * content genuinely arrives late:
+ *
+ *   1. images that are still downloading      -> .sk-media
+ *   2. data fetched by JS after the page      -> .sk, .sk-line, .sk-avatar
+ *   3. moving between pages on a slow phone   -> .sk-page
+ */
+
+:root{
+  --sk-base:rgba(255,255,255,.07);
+  --sk-shine:rgba(255,255,255,.14);
+  --sk-radius:8px;
+}
+/* Light surfaces need darker placeholders to stay visible. */
+.sk-light{
+  --sk-base:rgba(12,22,38,.07);
+  --sk-shine:rgba(12,22,38,.13);
+}
+
+.sk,
+.sk-line,
+.sk-avatar,
+.sk-media::before{
+  background:var(--sk-base);
+  background-image:linear-gradient(100deg,
+    transparent 20%, var(--sk-shine) 45%, transparent 70%);
+  background-size:240% 100%;
+  background-repeat:no-repeat;
+  animation:sk-shine 1.5s ease-in-out infinite;
+  border-radius:var(--sk-radius);
+}
+@keyframes sk-shine{
+  from{background-position:180% 0}
+  to{background-position:-60% 0}
+}
+
+/* ── building blocks ── */
+.sk-line{height:12px;margin-bottom:9px}
+.sk-line:last-child{margin-bottom:0}
+.sk-line.w-90{width:90%}
+.sk-line.w-75{width:75%}
+.sk-line.w-60{width:60%}
+.sk-line.w-40{width:40%}
+.sk-line.tall{height:16px}
+
+.sk-avatar{width:38px;height:38px;border-radius:50%;flex:none}
+
+.sk-block{border-radius:14px}
+.sk-block.h-sm{height:64px}
+.sk-block.h-md{height:110px}
+.sk-block.h-lg{height:180px}
+
+/* A message row: avatar on the left, bubble on the right. */
+.sk-row{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px}
+.sk-row .sk-bubble{flex:1;max-width:min(78%,420px)}
+.sk-bubble{border-radius:14px;padding:0}
+.sk-bubble.h-1{height:44px}
+.sk-bubble.h-2{height:72px}
+.sk-bubble.h-3{height:104px}
+
+/* ── images ────────────────────────────────────────────────
+   Put .sk-media on the wrapper. The shimmer sits behind the photo and is
+   removed the moment the file decodes, so there is never a blank grey box
+   and never a layout jump. Set an aspect-ratio so the space is reserved. */
+.sk-media{position:relative;overflow:hidden;background:var(--sk-base)}
+.sk-media::before{content:'';position:absolute;inset:0;z-index:0}
+.sk-media > img{position:relative;z-index:1;width:100%;height:100%;
+  object-fit:cover;opacity:0;transition:opacity .35s ease}
+.sk-media > img.is-in{opacity:1}
+.sk-media.is-done{background:none}
+.sk-media.is-done::before{display:none;animation:none}
+
+/* ── page transition ───────────────────────────────────────
+   Only appears if the next page takes longer than a moment to answer, so a
+   fast connection never sees it. */
+.sk-page{position:fixed;inset:0;z-index:9998;display:none;
+  padding:80px 20px 20px;background:var(--sk-page-bg,#04101F)}
+.sk-page.on{display:block}
+.sk-page .sk-wrap{max-width:640px;margin:0 auto}
+
+/* ── motion ── */
+@media (prefers-reduced-motion:reduce){
+  .sk,.sk-line,.sk-avatar,.sk-media::before{animation:none;background-image:none}
+}

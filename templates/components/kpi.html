@@ -1,0 +1,24 @@
+{% load i18n mwst_tags %}
+{# KPI card. ctx: label, value, icon, tint, delta, delta_dir, note, progress #}
+<div class="kpi">
+  <span class="kpi__icon tint-{{ k.tint|default:'green' }}">
+    <svg><use href="#i-{{ k.icon }}"></use></svg>
+  </span>
+  <span class="kpi__body">
+    <span class="kpi__label">{{ k.label|tr }}</span>
+    <span class="kpi__value {% if k.money %}kpi__value--money{% endif %}">{{ k.value }}</span>
+    {% if k.delta %}
+      <span class="kpi__meta">
+        <span class="kpi__delta kpi__delta--{{ k.dir|default:'up' }}">
+          <svg width="11" height="11"><use href="#i-arrow-{{ k.dir|default:'up' }}"></use></svg>{{ k.delta }}
+        </span>
+        <span class="kpi__note">{{ k.note|tr }}</span>
+      </span>
+    {% elif k.note %}
+      <span class="kpi__meta"><span class="kpi__note">{{ k.note|tr }}</span></span>
+    {% endif %}
+    {% if k.progress %}
+      <span class="kpi__bar"><i data-prog="{{ k.progress }}" style="width:0"></i></span>
+    {% endif %}
+  </span>
+</div>

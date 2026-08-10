@@ -1,0 +1,184 @@
+{% extends "base/app.html" %}
+{% load i18n mwst_tags %}
+{% block title %}{% trans "Picha na Video" %}{% endblock %}
+
+{% block page %}
+  {% include "base/messages.html" %}
+
+  <div class="pagehead" style="margin-bottom:14px">
+    <div>
+      <h2>{% trans "Picha na Video" %}</h2>
+      <p>{% trans "Dashibodi ya Usimamizi wa Picha na Video" %}</p>
+    </div>
+    <div class="pagehead__actions">
+      <form method="get" style="display:inline">{% for k,v in request.GET.items %}{% if k != "year" %}<input type="hidden" name="{{ k }}" value="{{ v }}">{% endif %}{% endfor %}<select class="btn btn--ghost" name="year" onchange="this.form.submit()" style="padding-right:26px">{% for y in year_options %}<option value="{{ y }}" {% if y == active_year %}selected{% endif %}>{{ y }}</option>{% endfor %}</select></form>
+      <a class="btn btn--primary" href="/media/pakia/">
+        <svg><use href="#i-plus"></use></svg>{% trans "Pakia Mpya" %}</a>
+    </div>
+  </div>
+
+  <div class="grid grid--6">
+    {% for k in kpis %}{% include "components/kpi.html" %}{% endfor %}
+  </div>
+
+  <div class="grid grid--4 mt">
+    <section class="card">
+      <div class="card__head">
+        <h3 class="card__title">{% trans "Mwenendo wa Upakiaji" %}</h3>
+        <form method="get" style="display:inline">{% for k,v in request.GET.items %}{% if k != "year" %}<input type="hidden" name="{{ k }}" value="{{ v }}">{% endif %}{% endfor %}<select class="btn btn--ghost btn--sm" name="year" onchange="this.form.submit()" style="padding-right:26px">{% for y in year_options %}<option value="{{ y }}" {% if y == active_year %}selected{% endif %}>{{ y }}</option>{% endfor %}</select></form>
+      </div>
+      <div class="card__body">
+        <div class="chartbox chartbox--md"><canvas id="chUpload"></canvas></div>
+        <div class="hstack" style="justify-content:center;gap:20px;margin-top:8px;font-size:11.5px">
+          <span class="legend-row" style="gap:6px"><span class="legend-row__dot" style="background:var(--c1)"></span>{% trans "Picha" %}</span>
+          <span class="legend-row" style="gap:6px"><span class="legend-row__dot" style="background:#2563eb"></span>{% trans "Video" %}</span>
+        </div>
+      </div>
+    </section>
+
+    {% with d=photo_cat %}{% include "components/donut_card.html" %}{% endwith %}
+    {% with d=video_cat %}{% include "components/donut_card.html" %}{% endwith %}
+
+    <section class="card">
+      <div class="card__head"><h3 class="card__title">{% trans "Hifadhi" %}<span>(Storage)</span></h3></div>
+      <div class="card__body">
+        <div style="display:flex;align-items:center;gap:14px">
+          <span class="gauge" data-gauge="{{ storage.pct }}" style="width:74px;height:74px">
+            <svg width="74" height="74" viewBox="0 0 74 74">
+              <circle class="gauge__track" cx="37" cy="37" r="31" fill="none" stroke-width="8"/>
+              <circle class="gauge__fill" cx="37" cy="37" r="31" fill="none" stroke-width="8" style="stroke:var(--n-700)"/>
+            </svg>
+            <span class="gauge__text" style="font-size:15px">{{ storage.pct }}%</span>
+          </span>
+          <span>
+            <b style="display:block;font-size:15px">{{ storage.used }} / {{ storage.total }}</b>
+            <span style="font-size:11.5px;color:var(--muted)">{% trans "Inatumika" %}</span>
+          </span>
+        </div>
+        <div style="margin-top:14px">
+          {% for r in storage.rows %}
+            <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:12px">
+              <span style="color:var(--muted)">{{ r.label|tr }}:</span><b class="num">{{ r.value }}</b>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="card__foot"><a class="link-more" href="/mfumo/media/">{% trans "Tazama maelezo kamili" %}<svg width="14" height="14"><use href="#i-arrow-right"></use></svg></a></div>
+    </section>
+  </div>
+
+  <div class="grid grid--2-1 mt">
+    <div class="stack">
+
+      <section class="card">
+        <div class="card__head">
+          <h3 class="card__title">{% trans "Picha za Hivi Karibuni" %}</h3>
+          <a class="link-more" href="/media/">{% trans "Tazama zote" %}</a>
+        </div>
+        <div class="card__body">
+          <div class="mediastrip">
+            {% for p in photos %}
+              <a href="{{ p.url|default:'/mfumo/media/' }}" class="mediacard"{% if p.url %} target="_blank"{% endif %}>
+                <span class="mediacard__frame">
+                  <span style="display:block;height:108px;background:linear-gradient(135deg,var(--g-400),var(--n-700))"></span>
+                </span>
+                <span class="mediacard__title">{{ p.title|tr }}</span>
+                <span class="mediacard__meta">
+                  <span>{{ p.date }}</span>
+                  <span><svg width="11" height="11" style="vertical-align:-1px"><use href="#i-eye"></use></svg> {{ p.views }}</span>
+                  <span>{{ p.size }}</span>
+                </span>
+              </a>
+            {% endfor %}
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card__head">
+          <h3 class="card__title">{% trans "Video za Hivi Karibuni" %}</h3>
+          <a class="link-more" href="/media/">{% trans "Tazama zote" %}</a>
+        </div>
+        <div class="card__body">
+          <div class="mediastrip">
+            {% for v in videos %}
+              <a href="{{ v.url|default:'/mfumo/media/' }}" class="mediacard"{% if v.url %} target="_blank"{% endif %}>
+                <span class="mediacard__frame">
+                  <span style="display:block;height:108px;background:linear-gradient(135deg,var(--n-700),var(--g-800))"></span>
+                  <span class="mediacard__play"><i><svg width="16" height="16"><use href="#i-video"></use></svg></i></span>
+                  <span class="mediacard__dur">{{ v.dur }}</span>
+                </span>
+                <span class="mediacard__title">{{ v.title|tr }}</span>
+                <span class="mediacard__meta"><span>{{ v.date }}</span><span>{{ v.size }}</span></span>
+              </a>
+            {% endfor %}
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="stack">
+      <section class="card">
+        <div class="card__head"><h3 class="card__title">{% trans "Vitendo vya Haraka" %}</h3></div>
+        <div class="card__body">
+          {% for a in actions %}
+            <button class="actionbar__btn" style="width:100%;justify-content:flex-start;margin-bottom:8px;height:42px" data-backend="{{ a.label|tr }}">
+              <span class="fund__ico tint-{{ a.tint }}" style="width:26px;height:26px"><svg width="14" height="14"><use href="#i-{{ a.icon }}"></use></svg></span>
+              {{ a.label|tr }}
+            </button>
+          {% endfor %}
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card__head">
+          <h3 class="card__title">{% trans "Upakiaji wa Hivi Karibuni" %}</h3>
+          <a class="link-more" href="/media/">{% trans "Tazama zote" %}</a>
+        </div>
+        <div class="card__body">
+          <div class="rowlist">
+            {% for u in uploads %}
+              <div class="rowlist__item">
+                <span class="newsrow__thumb" style="width:38px;height:30px;background:linear-gradient(135deg,var(--g-400),var(--n-700))"></span>
+                <span class="rowlist__body">
+                  <span class="rowlist__title">{{ u.name|tr }}</span>
+                  <span class="rowlist__sub">{{ u.meta }}</span>
+                </span>
+                <span class="rowlist__meta">{{ u.size }}</span>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div class="card mt" style="flex-direction:row;align-items:center;gap:12px;padding:13px 17px">
+    <span class="fund__ico tint-navy" style="width:28px;height:28px"><svg width="15" height="15"><use href="#i-info"></use></svg></span>
+    <span style="flex:1;font-size:12.5px;color:var(--ink-2)">
+      Kidokezo: Unaweza kupanga, kuhariri na kushiriki picha na video katika albamu au miradi husika.
+    </span>
+    <a class="btn btn--primary btn--sm" href="/mfumo/media/">{% trans "Jifunze Zaidi" %}</a>
+  </div>
+
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+  MWST.line("#chUpload", {{ trend.labels|safe }}, [
+    { label: "Picha", data: {{ trend.photos|safe }}, color: MWST.css("--c1"), fill: true },
+    { label: "Video", data: {{ trend.videos|safe }}, color: "#2563eb" }
+  ]);
+
+  MWST.donut("#chPhotoCat",
+    [{% for r in photo_cat.rows %}"{{ r.label|tr }}",{% endfor %}],
+    [{% for r in photo_cat.rows %}{{ r.value }},{% endfor %}],
+    [{% for r in photo_cat.rows %}"{{ r.color }}",{% endfor %}]);
+
+  MWST.donut("#chVideoCat",
+    [{% for r in video_cat.rows %}"{{ r.label|tr }}",{% endfor %}],
+    [{% for r in video_cat.rows %}{{ r.value }},{% endfor %}],
+    [{% for r in video_cat.rows %}"{{ r.color }}",{% endfor %}]);
+</script>
+{% endblock %}

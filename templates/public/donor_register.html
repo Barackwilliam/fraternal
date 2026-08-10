@@ -1,0 +1,63 @@
+{% extends "public/base.html" %}
+{% load i18n mwst_tags %}
+{% block title %}{% trans "Fungua Akaunti ya Mhisani" %}{% endblock %}
+
+{% block body %}
+<div class="section" style="padding-bottom:0">{% include "base/messages.html" %}</div>
+
+<section class="section auth">
+  <div class="auth__wrap" style="max-width:560px">
+    <div class="auth__card reveal">
+      <div class="auth__head">
+        <span class="auth__ico"><svg width="22" height="22"><use href="#i-user-plus"></use></svg></span>
+        <h1>{% trans "Akaunti ya Mhisani" %}</h1>
+        <p>{% trans "Ili kutunza kumbukumbu za michango yako mahali pamoja." %}</p>
+      </div>
+
+      {% if gift %}
+        <div class="auth__gift">
+          <svg width="16" height="16"><use href="#i-receipt"></use></svg>
+          <span>
+            {% blocktrans with r=gift.receipt_no %}Mchango {{ r }} utaunganishwa na akaunti hii.{% endblocktrans %}
+          </span>
+        </div>
+      {% endif %}
+
+      <form method="post" novalidate>
+        {% csrf_token %}
+        <input type="hidden" name="receipt" value="{{ receipt }}">
+        {% if form.non_field_errors %}
+          <div class="formerr">
+            <svg width="15" height="15"><use href="#i-alert"></use></svg>
+            <span>{% for e in form.non_field_errors %}{{ e }}{% if not forloop.last %}<br>{% endif %}{% endfor %}</span>
+          </div>
+        {% endif %}
+
+        {% for field in form %}
+          <div class="field">
+            <label class="field__label" for="{{ field.id_for_label }}">
+              {{ field.label }}{% if field.field.required %} <em>*</em>{% endif %}
+            </label>
+            {{ field }}
+            {% if field.help_text %}<span class="field__hint">{{ field.help_text }}</span>{% endif %}
+            {% if field.errors %}<span class="field__err">{{ field.errors.0 }}</span>{% endif %}
+          </div>
+        {% endfor %}
+
+        <button type="submit" class="btn btn--primary btn--block" style="margin-top:18px">
+          <svg><use href="#i-check"></use></svg> {% trans "Fungua Akaunti" %}
+        </button>
+      </form>
+
+      <p class="auth__alt">
+        {% trans "Tayari una akaunti?" %}
+        <a href="{% url 'core:login' %}">{% trans "Ingia hapa" %}</a>
+      </p>
+      <p class="auth__legal">
+        {% trans "Taarifa zako zinalindwa kwa mujibu wa" %}
+        <a href="{% url 'core:faragha' %}">{% trans "Sera ya Faragha" %}</a>.
+      </p>
+    </div>
+  </div>
+</section>
+{% endblock %}

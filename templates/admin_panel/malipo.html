@@ -1,0 +1,172 @@
+{% extends "base/app.html" %}
+{% load i18n mwst_tags %}
+{% block title %}{% trans "Malipo ya Ada" %}{% endblock %}
+
+{% block page %}
+  {% include "base/messages.html" %}
+
+  <div class="grid grid--6">
+    {% for k in kpis %}{% include "components/kpi_stacked.html" %}{% endfor %}
+  </div>
+
+  <div class="grid grid--4 mt">
+    <section class="card">
+      <div class="card__head">
+        <h3 class="card__title">{% trans "Mapato kwa Mwezi" %}<span>(2026)</span></h3>
+        <form method="get" style="display:inline">{% for k,v in request.GET.items %}{% if k != "year" %}<input type="hidden" name="{{ k }}" value="{{ v }}">{% endif %}{% endfor %}<select class="btn btn--ghost btn--sm" name="year" onchange="this.form.submit()" style="padding-right:26px">{% for y in year_options %}<option value="{{ y }}" {% if y == active_year %}selected{% endif %}>{{ y }}</option>{% endfor %}</select></form>
+      </div>
+      <div class="card__body"><div class="chartbox chartbox--md"><canvas id="chPayRev"></canvas></div></div>
+    </section>
+
+    {% with d=by_category %}{% include "components/donut_card.html" %}{% endwith %}
+    {% with d=status_mix %}{% include "components/donut_card.html" %}{% endwith %}
+
+    <section class="card">
+      <div class="card__head"><h3 class="card__title">{% trans "Malipo kwa Vyanzo" %}</h3></div>
+      <div class="card__body">
+        {% for s in sources %}
+          <div style="padding:7px 0">
+            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
+              <span>{{ s.label|tr }}</span>
+              <b class="num">{{ s.value }} <span style="color:var(--muted);font-weight:500">({{ s.pct }}%)</span></b>
+            </div>
+            <div class="prog"><i data-prog="{{ s.pct }}" style="width:0;background:{{ s.color }}"></i></div>
+          </div>
+        {% endfor %}
+        <div style="display:flex;justify-content:space-between;padding-top:11px;margin-top:6px;border-top:1px solid var(--line);font-size:13px">
+          <b>{% trans "Jumla" %}</b><b class="num">{{ sources_total }}</b>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="grid grid--2-1 mt">
+
+    <section class="card">
+      <div class="card__head">
+        <h3 class="card__title">{% trans "Rekodi za Malipo ya Ada" %}</h3>
+        <div class="hstack">
+          <form method="get" class="hstack" style="gap:8px;flex-wrap:wrap">
+            <input class="input" name="q" value="{{ filters.q }}" placeholder="{% trans 'Jina au namba' %}" style="height:32px;font-size:12.5px;width:170px">
+            <select class="select" name="status" style="height:32px;font-size:12.5px;width:150px">
+              <option value="">{% trans "Hali zote" %}</option>
+              {% for v, label in statuses %}<option value="{{ v }}" {% if filters.status == v %}selected{% endif %}>{{ label }}</option>{% endfor %}
+            </select>
+            <select class="select" name="method" style="height:32px;font-size:12.5px;width:140px">
+              <option value="">{% trans "Njia zote" %}</option>
+              {% for v, label in methods %}<option value="{{ v }}" {% if filters.method == v %}selected{% endif %}>{{ label }}</option>{% endfor %}
+            </select>
+            <input class="input" type="date" name="from" value="{{ filters.from }}" style="height:32px;font-size:12.5px;width:140px">
+            <input class="input" type="date" name="to" value="{{ filters.to }}" style="height:32px;font-size:12.5px;width:140px">
+            <button class="btn btn--primary btn--sm"><svg width="13" height="13"><use href="#i-search"></use></svg> {% trans "Chuja" %}</button>
+            <a href="{% url 'core:malipo' %}" class="btn btn--ghost btn--sm">{% trans "Futa" %}</a>
+          </form>
+          <a class="btn btn--primary btn--sm" href="/malipo/"><svg><use href="#i-plus"></use></svg>{% trans "Rekodi Malipo" %}</a>
+        </div>
+      </div>
+      <div class="card__body card__body--flush">
+        <div class="tablewrap">
+          <table class="table">
+            <thead><tr>
+              <th>#</th><th>{% trans "Namba ya Mwanachama" %}</th><th>{% trans "Jina la Mwanachama" %}</th><th>{% trans "Aina ya Uanachama" %}</th>
+              <th>{% trans "Mwaka" %}</th><th class="t-num">{% trans "Kiasi (TZS)" %}</th><th>{% trans "Tarehe ya Malipo" %}</th>
+              <th>{% trans "Njia ya Malipo" %}</th><th>{% trans "Hali ya Malipo" %}</th><th>{% trans "Risiti" %}</th><th>{% trans "Vitendo" %}</th>
+            </tr></thead>
+            <tbody>
+              {% for r in records %}
+                <tr>
+                  <td>{{ r.n }}</td>
+                  <td class="t-mono">{{ r.no }}</td>
+                  <td class="t-name">{{ r.name|tr }}</td>
+                  <td><span class="badge badge--{{ r.cat|lower }}">{{ r.cat }}</span></td>
+                  <td class="num">{{ r.year }}</td>
+                  <td class="t-num">{{ r.amount }}</td>
+                  <td class="t-mono">{{ r.date }}</td>
+                  <td>{{ r.method }}</td>
+                  <td><span class="badge badge--{{ r.badge }}">{{ r.status|tr }}</span></td>
+                  <td><a class="t-mono" href="{% url 'core:receipt' 'malipo' r.id %}"
+                          title="{% trans 'Fungua risiti' %}" style="white-space:nowrap">
+                    <svg width="13" height="13" style="vertical-align:-2px"><use href="#i-receipt"></use></svg>
+                    {{ r.receipt }}</a></td>
+                  <td>
+                    <span class="table__actions">
+                      <a class="table__act" href="{% url 'core:member_detail' r.member_id %}" title="{% trans 'Maelezo ya mwanachama' %}"><svg width="15" height="15"><use href="#i-eye"></use></svg></a>
+                      {% if r.pending %}
+                        <form method="post" action="{% url 'core:payment_action' r.id 'confirm' %}" style="display:inline">
+                          {% csrf_token %}
+        {% if form.non_field_errors %}
+          <div class="formerr">
+            <svg width="15" height="15"><use href="#i-alert"></use></svg>
+            <span>{% for e in form.non_field_errors %}{{ e }}{% if not forloop.last %}<br>{% endif %}{% endfor %}</span>
+          </div>
+        {% endif %}
+                                  <button class="table__act" title="{% trans 'Thibitisha' %}"><svg width="15" height="15"><use href="#i-check-circle"></use></svg></button>
+                        </form>
+                        <form method="post" action="{% url 'core:payment_action' r.id 'cancel' %}" style="display:inline">
+                          {% csrf_token %}
+                          <button class="table__act table__act--danger" title="{% trans 'Ghairi' %}"><svg width="15" height="15"><use href="#i-x-circle"></use></svg></button>
+                        </form>
+                      {% endif %}
+                    </span>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% include "components/pager.html" %}
+      </div>
+    </section>
+
+    <div class="stack">
+      <section class="card">
+        <div class="card__head">
+          <h3 class="card__title" style="display:flex;align-items:center;gap:7px">
+            <span class="fund__ico tint-red" style="width:24px;height:24px"><svg width="13" height="13"><use href="#i-alert"></use></svg></span>{% trans "Malipo Yaliyokosekana" %}<span>(Top 5)</span>
+          </h3>
+        </div>
+        <div class="card__body">
+          {% for m in missed %}
+            <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line-soft);font-size:12.5px">
+              <span>{{ m.n }}. {{ m.label|tr }}</span><b class="num">{{ m.value }}</b>
+            </div>
+          {% endfor %}
+          <div style="display:flex;justify-content:space-between;padding-top:11px;font-size:13px">
+            <b>{% trans "Jumla" %}</b><b class="num" style="color:var(--danger)">{{ missed_total }}</b>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card__head"><h3 class="card__title">{% trans "Mapendekezo ya Haraka" %}</h3></div>
+        <div class="card__body">
+          {% for s in suggestions %}
+            <button class="actionbar__btn" style="width:100%;justify-content:flex-start;margin-bottom:8px;height:44px" data-backend="{{ s.label|tr }}">
+              <span class="fund__ico tint-{{ s.tint }}" style="width:26px;height:26px"><svg width="14" height="14"><use href="#i-{{ s.icon }}"></use></svg></span>
+              {{ s.label|tr }}
+            </button>
+          {% endfor %}
+        </div>
+      </section>
+    </div>
+  </div>
+
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+  MWST.bar("#chPayRev", {{ revenue_month.labels|safe }},
+    [{ label: "Mapato", data: {{ revenue_month.data|safe }}, color: MWST.css("--c1") }]);
+
+  MWST.donut("#chPayCat",
+    [{% for r in by_category.rows %}"{{ r.label|tr }}",{% endfor %}],
+    [{% for r in by_category.rows %}{{ r.value }},{% endfor %}],
+    [{% for r in by_category.rows %}"{{ r.color }}",{% endfor %}]);
+
+  MWST.donut("#chPayStatus",
+    [{% for r in status_mix.rows %}"{{ r.label|tr }}",{% endfor %}],
+    [{% for r in status_mix.rows %}{{ r.value }},{% endfor %}],
+    [{% for r in status_mix.rows %}"{{ r.color }}",{% endfor %}]);
+</script>
+{% endblock %}

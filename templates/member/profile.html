@@ -1,0 +1,54 @@
+{% extends "base/app.html" %}
+{% load i18n %}
+{% block title %}{% trans "Wasifu Wangu" %}{% endblock %}
+
+{% block page %}
+  {% include "base/messages.html" %}
+  <div class="pagehead">
+    <div><h2>{% trans "Wasifu Wangu" %}</h2><p>{{ member.membership_no }}</p></div>
+  </div>
+
+  <div class="grid grid--2-1">
+    <section class="card">
+      <div class="sectionband"><svg><use href="#i-user"></use></svg><b>{% trans "Hariri Wasifu" %}</b></div>
+      <div class="card__body" style="padding:20px">
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+        {% if form.non_field_errors %}
+          <div class="formerr">
+            <svg width="15" height="15"><use href="#i-alert"></use></svg>
+            <span>{% for e in form.non_field_errors %}{{ e }}{% if not forloop.last %}<br>{% endif %}{% endfor %}</span>
+          </div>
+        {% endif %}
+                  <div class="grid grid--2" style="gap:12px">
+            {% for field in form %}
+              <div class="field {% if field.name == 'address' %}style-full{% endif %}"
+                   {% if field.name == 'address' %}style="grid-column:1/-1"{% endif %}>
+                <label class="field__label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}<span style="font-size:11.5px;color:var(--danger)">{{ field.errors.0 }}</span>{% endif %}
+              </div>
+            {% endfor %}
+          </div>
+          <button class="btn btn--primary" style="margin-top:16px">
+            <svg><use href="#i-check"></use></svg> {% trans "Hifadhi Mabadiliko" %}
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card__head"><h3 class="card__title">{% trans "Taarifa za Uanachama" %}</h3></div>
+      <div class="card__body">
+        <div class="detail__row"><svg><use href="#i-id-card"></use></svg>
+          <span><span class="detail__lbl">{% trans "Namba ya Mwanachama" %}</span><span class="detail__val">{{ member.membership_no }}</span></span></div>
+        <div class="detail__row"><svg><use href="#i-wallet"></use></svg>
+          <span><span class="detail__lbl">{% trans "Namba ya Akaunti" %}</span><span class="detail__val">{{ member.account_no }}</span></span></div>
+        <div class="detail__row"><svg><use href="#i-star"></use></svg>
+          <span><span class="detail__lbl">{% trans "Aina ya Uanachama" %}</span><span class="detail__val">{{ member.category.name }}</span></span></div>
+        <div class="detail__row"><svg><use href="#i-calendar"></use></svg>
+          <span><span class="detail__lbl">{% trans "Tarehe ya Usajili" %}</span><span class="detail__val">{{ member.joined_on }}</span></span></div>
+      </div>
+    </section>
+  </div>
+{% endblock %}

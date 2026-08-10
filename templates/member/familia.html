@@ -1,0 +1,97 @@
+{% extends "base/app.html" %}
+{% load i18n %}
+{% block title %}{% trans "Familia na Wanufaika" %}{% endblock %}
+
+{% block page %}
+  {% include "base/messages.html" %}
+  <div class="pagehead"><div><h2>{% trans "Familia na Wanufaika" %}</h2>
+    <p>{% trans "Wanafamilia wako na wanaostahili kunufaika" %}</p></div></div>
+
+  <div class="grid grid--2">
+    <section class="card">
+      <div class="card__head"><h3 class="card__title">{% trans "Wanafamilia" %}</h3>
+        <span class="rowlist__meta">{{ family|length }}</span></div>
+      <div class="card__body card__body--flush">
+        <div class="tablewrap">
+          <table class="table">
+            <thead><tr><th>{% trans "Jina" %}</th><th>{% trans "Uhusiano" %}</th>
+              <th>{% trans "Simu" %}</th><th></th></tr></thead>
+            <tbody>
+              {% for f in family %}
+                <tr>
+                  <td class="t-name">{{ f.full_name }}</td>
+                  <td>{{ f.relationship }}</td>
+                  <td class="t-mono">{{ f.phone|default:"—" }}</td>
+                  <td>
+                    <form method="post" style="display:inline">{% csrf_token %}
+        {% if form.non_field_errors %}
+          <div class="formerr">
+            <svg width="15" height="15"><use href="#i-alert"></use></svg>
+            <span>{% for e in form.non_field_errors %}{{ e }}{% if not forloop.last %}<br>{% endif %}{% endfor %}</span>
+          </div>
+        {% endif %}
+                              <input type="hidden" name="kind" value="delete_family">
+                      <input type="hidden" name="pk" value="{{ f.pk }}">
+                      <button class="table__act table__act--danger" title="{% trans 'Ondoa' %}">
+                        <svg width="15" height="15"><use href="#i-x-circle"></use></svg></button>
+                    </form>
+                  </td>
+                </tr>
+              {% empty %}
+                <tr><td colspan="4"><div class="empty">
+                  <span class="empty__icon"><svg width="22" height="22"><use href="#i-users"></use></svg></span>
+                  <span class="empty__title">{% trans "Hakuna wanafamilia" %}</span>
+                </div></td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    {% with form=family_form form_title=_("Ongeza Mwanafamilia") form_icon="users" form_kind="family" form_button=_("Ongeza") %}
+      {% include "member/_form_card.html" %}
+    {% endwith %}
+  </div>
+
+  <div class="grid grid--2 mt">
+    <section class="card">
+      <div class="card__head"><h3 class="card__title">{% trans "Wanufaika" %}</h3>
+        <span class="rowlist__meta">{{ beneficiaries|length }}</span></div>
+      <div class="card__body card__body--flush">
+        <div class="tablewrap">
+          <table class="table">
+            <thead><tr><th>{% trans "Jina" %}</th><th>{% trans "Uhusiano" %}</th>
+              <th>{% trans "Asilimia" %}</th><th></th></tr></thead>
+            <tbody>
+              {% for b in beneficiaries %}
+                <tr>
+                  <td class="t-name">{{ b.full_name }}</td>
+                  <td>{{ b.relationship }}</td>
+                  <td class="t-num">{{ b.percentage_share }}%</td>
+                  <td>
+                    <form method="post" style="display:inline">{% csrf_token %}
+                      <input type="hidden" name="kind" value="delete_beneficiary">
+                      <input type="hidden" name="pk" value="{{ b.pk }}">
+                      <button class="table__act table__act--danger" title="{% trans 'Ondoa' %}">
+                        <svg width="15" height="15"><use href="#i-x-circle"></use></svg></button>
+                    </form>
+                  </td>
+                </tr>
+              {% empty %}
+                <tr><td colspan="4"><div class="empty">
+                  <span class="empty__icon"><svg width="22" height="22"><use href="#i-heart"></use></svg></span>
+                  <span class="empty__title">{% trans "Hakuna wanufaika" %}</span>
+                </div></td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    {% with form=beneficiary_form form_title=_("Ongeza Mnufaika") form_icon="heart" form_kind="beneficiary" form_button=_("Ongeza") %}
+      {% include "member/_form_card.html" %}
+    {% endwith %}
+  </div>
+{% endblock %}

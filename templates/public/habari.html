@@ -1,0 +1,70 @@
+{% extends "public/base.html" %}
+{% load i18n mwst_tags %}
+{% block title %}{% trans "Habari" %}{% endblock %}
+
+{% block body %}
+{% include "public/_pagehero.html" %}
+
+<section class="section">
+  <article class="card reveal" style="overflow:hidden">
+    <div class="grid grid--2" style="gap:0">
+      <span class="illus illus--wide">{% include "components/illus.html" with scene="sadaka" %}</span>
+      <div style="padding:26px">
+        <span class="badge badge--gold">{{ featured.cat|tr }}</span>
+        <h2 style="font-size:24px;font-weight:800;letter-spacing:-.02em;margin:12px 0 8px">{{ featured.title|tr }}</h2>
+        <span class="rowlist__sub" style="margin-bottom:12px"><svg width="12" height="12" style="vertical-align:-1px"><use href="#i-calendar"></use></svg> {{ featured.date }}</span>
+        <p style="font-size:13.5px;line-height:1.75;color:var(--muted)">{{ featured.text|tr }}</p>
+        <a class="btn btn--primary" style="margin-top:16px" href="/habari/">
+          {% trans "Soma Zaidi" %} <svg><use href="#i-arrow-right"></use></svg>
+        </a>
+      </div>
+    </div>
+  </article>
+</section>
+
+<section class="section section--tint">
+  <div class="section__head reveal">
+    <span class="section__eyebrow">{% trans "Habari" %}</span>
+    {% include "public/_ornament.html" %}
+    <h2 class="section__title">{% trans "Habari Nyingine" %}</h2>
+  </div>
+  <div class="tabs" data-tabs="#news-grid">
+    {% for f in filters %}
+      <button class="tab {% if forloop.first %}is-active{% endif %}" data-filter="{{ f.key }}">{{ f.label|tr }}</button>
+    {% endfor %}
+  </div>
+  <div class="grid grid--3" id="news-grid">
+    {% for n in items %}
+      <article class="card reveal" data-cat="{{ n.cat }}">
+        <span class="illus illus--card"><span class="illus__tag">{{ n.cat_label|tr }}</span>{% include "components/illus.html" with scene=n.scene %}</span>
+        <div class="card__body" style="padding:16px">
+          <span class="badge badge--muted">{{ n.cat_label|tr }}</span>
+          <h4 style="font-size:14.5px;font-weight:700;margin:9px 0 5px;line-height:1.45">{{ n.title|tr }}</h4>
+          <span class="rowlist__sub" style="margin-bottom:8px">{{ n.date }}</span>
+          <p style="font-size:12.8px;line-height:1.65;color:var(--muted)">{{ n.text|tr }}</p>
+          <a class="feature__link" href="/habari/">{% trans "Soma Zaidi" %} <svg width="14" height="14"><use href="#i-arrow-right"></use></svg></a>
+        </div>
+      </article>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="section">
+  <div class="section__head reveal">
+    <span class="section__eyebrow">{% trans "Galeria" %}</span>
+    {% include "public/_ornament.html" %}
+    <h2 class="section__title">{% trans "Picha za Shughuli Zetu" %}</h2>
+  </div>
+  <div class="grid grid--3">
+    {% for g in gallery %}
+      <a class="gallery__item reveal" href="{% url 'core:picha' %}">
+        <span class="illus illus--sq"><span class="illus__cap">{{ g.cap|tr }}</span>{% include "components/illus.html" with scene=g.scene %}</span>
+        <span class="gallery__cap">{{ g.cap|tr }}</span>
+        <span class="gallery__meta"><svg width="12" height="12"><use href="#i-image"></use></svg>{{ g.count|tr }}</span>
+      </a>
+    {% endfor %}
+  </div>
+</section>
+
+{% include "public/_cta.html" %}
+{% endblock %}

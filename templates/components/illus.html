@@ -1,0 +1,175 @@
+{% load static %}
+{% comment %}
+Michoro ya matukio (scenes) yenye mtindo wa Kiislamu — sasa yenye PICHA HALISI.
+Matumizi:  {% include "components/illus.html" with scene="elimu" %}
+Scenes: msikiti, elimu, afya, maji, jamii, yatima, ujenzi, uchumi,
+        tukio, mawasiliano, mkutano, sadaka
+
+Picha halisi zinatakiwa ziwe kwenye:  static/img/scenes/<scene>.jpg
+Mfano:  static/img/scenes/elimu.jpg, static/img/scenes/afya.jpg n.k.
+Kama picha haipo bado, mchoro (SVG) wa chini unaonekana badala yake —
+mara ukishaweka faili husika, picha halisi itaonekana kiotomatiki.
+{% endcomment %}
+{% with imgpath="img/scenes/"|add:scene|add:".jpg" webppath="img/scenes/"|add:scene|add:".webp" %}
+<svg class="illus__svg" viewBox="0 0 400 260" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+  <defs>
+    <linearGradient id="sk-{{ scene }}" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0a4028"/><stop offset="1" stop-color="#12864a"/>
+    </linearGradient>
+    <linearGradient id="gd-{{ scene }}" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#e3c463"/><stop offset="1" stop-color="#a9812a"/>
+    </linearGradient>
+    <linearGradient id="pa-{{ scene }}" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fdfaf1"/><stop offset="1" stop-color="#e0d2b6"/>
+    </linearGradient>
+    <pattern id="gp-{{ scene }}" width="34" height="34" patternUnits="userSpaceOnUse">
+      <path d="M17 2 24 9 31 17 24 25 17 32 10 25 3 17 10 9z" fill="none" stroke="#fff" stroke-width=".8" opacity=".16"/>
+      <path d="M17 7 27 17 17 27 7 17z" fill="none" stroke="#fff" stroke-width=".6" opacity=".12"/>
+    </pattern>
+  </defs>
+
+  <rect width="400" height="260" fill="url(#sk-{{ scene }})"/>
+  <rect width="400" height="260" fill="url(#gp-{{ scene }})"/>
+
+  {% if scene == "msikiti" %}
+    <g opacity=".95">
+      <path d="M200 52c30 20 47 46 47 70H153c0-24 17-50 47-70z" fill="url(#pa-{{ scene }})" opacity=".9"/>
+      <rect x="148" y="120" width="104" height="8" rx="3" fill="url(#gd-{{ scene }})"/>
+      <rect x="148" y="128" width="104" height="98" fill="url(#pa-{{ scene }})" opacity=".85"/>
+      <path d="M182 226v-52a18 18 0 0 1 36 0v52z" fill="#0a4028"/>
+      <path d="M182 226v-52a18 18 0 0 1 36 0v52" fill="none" stroke="url(#gd-{{ scene }})" stroke-width="2.5"/>
+      <rect x="116" y="96" width="18" height="130" fill="url(#pa-{{ scene }})" opacity=".8"/>
+      <path d="M125 66c6 8 9 15 9 20h-18c0-5 3-12 9-20z" fill="url(#pa-{{ scene }})"/>
+      <rect x="266" y="96" width="18" height="130" fill="url(#pa-{{ scene }})" opacity=".8"/>
+      <path d="M275 66c6 8 9 15 9 20h-18c0-5 3-12 9-20z" fill="url(#pa-{{ scene }})"/>
+      <path d="M198 24a11 11 0 1 0 8.6 17.6A8.6 8.6 0 1 1 198 24z" fill="url(#gd-{{ scene }})"/>
+      <rect x="198" y="40" width="3" height="14" fill="url(#gd-{{ scene }})"/>
+    </g>
+
+  {% elif scene == "elimu" %}
+    <g>
+      <path d="M200 96c-32-16-62-16-84-6v96c22-10 52-10 84 6z" fill="url(#pa-{{ scene }})" opacity=".92"/>
+      <path d="M200 96c32-16 62-16 84-6v96c-22-10-52-10-84 6z" fill="url(#pa-{{ scene }})" opacity=".78"/>
+      <path d="M200 96v96" stroke="url(#gd-{{ scene }})" stroke-width="3"/>
+      <g stroke="#0a4028" stroke-width="2" opacity=".3">
+        <path d="M132 112h52M132 126h52M132 140h44M216 112h52M216 126h52M216 140h44"/>
+      </g>
+      <path d="M198 46a10 10 0 1 0 7.8 16A7.8 7.8 0 1 1 198 46z" fill="url(#gd-{{ scene }})"/>
+      <path d="m214 48 1.8 3.7 4 .6-2.9 2.8.7 4-3.6-1.9-3.6 1.9.7-4-2.9-2.8 4-.6z" fill="url(#gd-{{ scene }})"/>
+      <g fill="none" stroke="url(#gd-{{ scene }})" stroke-width="2" opacity=".7">
+        <path d="M170 76c10-10 20-14 30-14s20 4 30 14"/>
+      </g>
+      <rect x="186" y="204" width="28" height="6" rx="3" fill="url(#gd-{{ scene }})" opacity=".8"/>
+    </g>
+
+  {% elif scene == "afya" %}
+    <g>
+      <path d="M200 208c-46-30-72-56-72-86a36 36 0 0 1 72-14 36 36 0 0 1 72 14c0 30-26 56-72 86z" fill="url(#pa-{{ scene }})" opacity=".9"/>
+      <path d="M190 96h20v22h22v20h-22v22h-20v-22h-22v-20h22z" fill="#12864a"/>
+      <path d="M186 34a12 12 0 1 0 9.4 19.2A9.4 9.4 0 1 1 186 34z" fill="url(#gd-{{ scene }})"/>
+      <g stroke="url(#gd-{{ scene }})" stroke-width="2.4" fill="none" opacity=".65">
+        <path d="M56 172h34l10-22 14 44 10-22h22M258 172h22l10-22 14 44 10-22h30"/>
+      </g>
+    </g>
+
+  {% elif scene == "maji" %}
+    <g>
+      <path d="M200 46c30 40 46 68 46 88a46 46 0 0 1-92 0c0-20 16-48 46-88z" fill="url(#pa-{{ scene }})" opacity=".9"/>
+      <path d="M200 78c18 26 28 44 28 56a28 28 0 0 1-56 0c0-12 10-30 28-56z" fill="#5fc4e8" opacity=".55"/>
+      <g stroke="url(#gd-{{ scene }})" stroke-width="3" fill="none" stroke-linecap="round">
+        <path d="M96 200c14-10 28-10 42 0s28 10 42 0 28-10 42 0 28 10 42 0 28-10 42 0"/>
+        <path d="M96 222c14-10 28-10 42 0s28 10 42 0 28-10 42 0 28 10 42 0 28-10 42 0" opacity=".5"/>
+      </g>
+      <path d="M188 22a10 10 0 1 0 7.8 16A7.8 7.8 0 1 1 188 22z" fill="url(#gd-{{ scene }})"/>
+    </g>
+
+  {% elif scene == "jamii" or scene == "sadaka" %}
+    <g>
+      <path d="M136 210c-16-18-20-42-12-70 4-14 16-16 18-2l8 38" fill="none" stroke="url(#pa-{{ scene }})" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M264 210c16-18 20-42 12-70-4-14-16-16-18-2l-8 38" fill="none" stroke="url(#pa-{{ scene }})" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M222 96a20 20 0 0 0-28 0l-6 6-6-6a20 20 0 1 0-28 28l34 34 34-34a20 20 0 0 0 0-28z" fill="url(#gd-{{ scene }})" transform="translate(14 -4)"/>
+      <circle cx="200" cy="52" r="9" fill="url(#pa-{{ scene }})"/>
+      <path d="M186 22a10 10 0 1 0 7.8 16A7.8 7.8 0 1 1 186 22z" fill="url(#gd-{{ scene }})" opacity=".8"/>
+    </g>
+
+  {% elif scene == "yatima" %}
+    <g>
+      <circle cx="200" cy="82" r="22" fill="url(#pa-{{ scene }})"/>
+      <path d="M200 110c-24 0-42 16-42 38v58h84v-58c0-22-18-38-42-38z" fill="url(#pa-{{ scene }})" opacity=".9"/>
+      <circle cx="140" cy="118" r="16" fill="url(#gd-{{ scene }})" opacity=".85"/>
+      <path d="M140 138c-17 0-30 12-30 28v40h60v-40c0-16-13-28-30-28z" fill="url(#gd-{{ scene }})" opacity=".7"/>
+      <circle cx="260" cy="118" r="16" fill="url(#gd-{{ scene }})" opacity=".85"/>
+      <path d="M260 138c-17 0-30 12-30 28v40h60v-40c0-16-13-28-30-28z" fill="url(#gd-{{ scene }})" opacity=".7"/>
+      <path d="M186 26a11 11 0 1 0 8.6 17.6A8.6 8.6 0 1 1 186 26z" fill="url(#gd-{{ scene }})"/>
+    </g>
+
+  {% elif scene == "ujenzi" %}
+    <g>
+      <path d="M200 60c26 18 40 40 40 60h-80c0-20 14-42 40-60z" fill="url(#pa-{{ scene }})" opacity=".88"/>
+      <rect x="156" y="118" width="88" height="6" rx="2" fill="url(#gd-{{ scene }})"/>
+      <rect x="156" y="124" width="88" height="86" fill="url(#pa-{{ scene }})" opacity=".62"/>
+      <g stroke="url(#gd-{{ scene }})" stroke-width="2" opacity=".55">
+        <path d="M156 146h88M156 168h88M156 190h88M186 124v86M214 124v86"/>
+      </g>
+      <path d="M78 210V70l16-8v148z" fill="url(#gd-{{ scene }})" opacity=".85"/>
+      <path d="M94 74h96v9H94z" fill="url(#gd-{{ scene }})" opacity=".75"/>
+      <path d="M148 83v22" stroke="url(#gd-{{ scene }})" stroke-width="2.5"/>
+      <rect x="138" y="105" width="20" height="16" rx="2" fill="url(#pa-{{ scene }})" opacity=".8"/>
+      <path d="M196 30a10 10 0 1 0 7.8 16A7.8 7.8 0 1 1 196 30z" fill="url(#gd-{{ scene }})"/>
+    </g>
+
+  {% elif scene == "uchumi" %}
+    <g>
+      <ellipse cx="200" cy="86" rx="52" ry="17" fill="url(#gd-{{ scene }})"/>
+      <path d="M148 86v26c0 9 23 17 52 17s52-8 52-17V86" fill="url(#gd-{{ scene }})" opacity=".8"/>
+      <path d="M148 112v26c0 9 23 17 52 17s52-8 52-17v-26" fill="url(#gd-{{ scene }})" opacity=".65"/>
+      <path d="M148 138v26c0 9 23 17 52 17s52-8 52-17v-26" fill="url(#gd-{{ scene }})" opacity=".5"/>
+      <g stroke="url(#pa-{{ scene }})" stroke-width="3.5" fill="none" stroke-linecap="round">
+        <path d="M70 210V150M104 210v-40M138 210v-70"/>
+      </g>
+      <path d="M262 210v-84l30-24 30 24v84z" fill="url(#pa-{{ scene }})" opacity=".55"/>
+      <path d="M186 26a10 10 0 1 0 7.8 16A7.8 7.8 0 1 1 186 26z" fill="url(#gd-{{ scene }})"/>
+    </g>
+
+  {% elif scene == "tukio" or scene == "mkutano" %}
+    <g>
+      <path d="M100 210v-72a30 30 0 0 1 60 0v72z" fill="url(#pa-{{ scene }})" opacity=".7"/>
+      <path d="M170 210v-86a30 30 0 0 1 60 0v86z" fill="url(#pa-{{ scene }})" opacity=".9"/>
+      <path d="M240 210v-72a30 30 0 0 1 60 0v72z" fill="url(#pa-{{ scene }})" opacity=".7"/>
+      <g fill="url(#gd-{{ scene }})">
+        <circle cx="130" cy="164" r="9"/><circle cx="200" cy="150" r="11"/><circle cx="270" cy="164" r="9"/>
+        <path d="M130 176c-11 0-19 8-19 18v16h38v-16c0-10-8-18-19-18z"/>
+        <path d="M200 164c-13 0-23 10-23 22v24h46v-24c0-12-10-22-23-22z"/>
+        <path d="M270 176c-11 0-19 8-19 18v16h38v-16c0-10-8-18-19-18z"/>
+      </g>
+      <path d="M186 30a11 11 0 1 0 8.6 17.6A8.6 8.6 0 1 1 186 30z" fill="url(#gd-{{ scene }})"/>
+    </g>
+
+  {% elif scene == "mawasiliano" %}
+    <g>
+      <path d="M110 90h180a14 14 0 0 1 14 14v76a14 14 0 0 1-14 14H170l-34 26v-26h-26a14 14 0 0 1-14-14v-76a14 14 0 0 1 14-14z" fill="url(#pa-{{ scene }})" opacity=".9"/>
+      <g stroke="#0a4028" stroke-width="4" opacity=".28" stroke-linecap="round">
+        <path d="M138 122h124M138 142h124M138 162h80"/>
+      </g>
+      <path d="M186 30a11 11 0 1 0 8.6 17.6A8.6 8.6 0 1 1 186 30z" fill="url(#gd-{{ scene }})"/>
+      <path d="m212 32 1.9 4 4.3.6-3.1 3 .7 4.3-3.8-2-3.8 2 .7-4.3-3.1-3 4.3-.6z" fill="url(#gd-{{ scene }})"/>
+    </g>
+
+  {% else %}
+    <g>
+      <path d="M200 62c28 20 44 44 44 66h-88c0-22 16-46 44-66z" fill="url(#pa-{{ scene }})" opacity=".9"/>
+      <rect x="152" y="128" width="96" height="82" fill="url(#pa-{{ scene }})" opacity=".7"/>
+      <path d="M182 210v-46a18 18 0 0 1 36 0v46z" fill="#0a4028"/>
+      <path d="M196 26a11 11 0 1 0 8.6 17.6A8.6 8.6 0 1 1 196 26z" fill="url(#gd-{{ scene }})"/>
+    </g>
+  {% endif %}
+
+  <!-- Ukingo wa dhahabu -->
+  <rect x="4" y="4" width="392" height="252" rx="6" fill="none" stroke="url(#gd-{{ scene }})" stroke-width="1.4" opacity=".45"/>
+</svg>
+<picture class="illus__pic">
+  <source srcset="{% static webppath %}" type="image/webp">
+  <img class="illus__img" src="{% static imgpath %}" alt="" loading="lazy" decoding="async"
+       onerror="(this.closest('picture')||this).remove()">
+</picture>
+{% endwith %}

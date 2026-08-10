@@ -1,0 +1,25 @@
+{% load i18n %}
+{% comment %}
+Kichagua lugha — droplist halisi (<select>), si kitufe cha kubadilisha.
+Inabadilika mara tu mtu anapochagua; kitufe cha "Nenda" kinaonekana tu
+kama JavaScript haipo.
+{% endcomment %}
+{% get_current_language as CURRENT %}
+{% get_available_languages as LANGS %}
+{% get_language_info_list for LANGS as LANG_INFO %}
+<form action="{% url 'set_language' %}" method="post" class="langform" data-langform>
+  {% csrf_token %}
+  <input type="hidden" name="next" value="{{ request.get_full_path }}">
+  <label class="langpick">
+    <svg width="16" height="16"><use href="#i-globe"></use></svg>
+    <select name="language" aria-label="{% trans 'Badili lugha' %}">
+      {# `name_local` = jina la lugha kwa lugha yenyewe (Kiswahili / English),
+         si lililotafsiriwa — ndivyo watu wanavyoitambua lugha yao. #}
+      {% for l in LANG_INFO %}
+        <option value="{{ l.code }}" {% if l.code == CURRENT %}selected{% endif %}>{{ l.name_local|capfirst }}</option>
+      {% endfor %}
+    </select>
+    <svg width="13" height="13" class="langpick__caret"><use href="#i-chevron-down"></use></svg>
+  </label>
+  <noscript><button type="submit" class="btn btn--ghost">{% trans "Nenda" %}</button></noscript>
+</form>

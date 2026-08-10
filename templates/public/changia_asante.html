@@ -1,0 +1,91 @@
+{% extends "public/base.html" %}
+{% load i18n mwst_tags %}
+{% block title %}{% trans "Asante kwa Mchango Wako" %}{% endblock %}
+
+{% block body %}
+<section class="section thanks">
+  <div class="thanks__wrap">
+
+    {# ---------------- Hongera ---------------- #}
+    <div class="thanks__card reveal">
+      {% if payments_demo %}
+        <div class="demo-notice demo-notice--ok">
+          <span class="demo-notice__tag">{% trans "DEMO" %}</span>
+          <div>
+            <b>{% trans "Imefanikiwa — lakini ni majaribio tu" %}</b>
+            <p>
+              {% trans "Mchango wako umehifadhiwa kwenye mfumo na risiti imetengenezwa, ili uone mtiririko mzima. Hata hivyo, API ya malipo bado haijaunganishwa, kwa hiyo hakuna pesa iliyohamishwa." %}
+            </p>
+          </div>
+        </div>
+      {% endif %}
+      <span class="thanks__tick">
+        <svg width="34" height="34"><use href="#i-check-circle"></use></svg>
+      </span>
+      <h1>{% trans "Hongera, na asante sana!" %}</h1>
+      <p class="thanks__lead">
+        {% blocktrans with name=gift.display_name %}Mchango wako umepokelewa, {{ name }}. Allah akubariki kwa moyo wako wa kutoa.{% endblocktrans %}
+      </p>
+
+      <dl class="thanks__facts">
+        <div>
+          <dt>{% trans "Namba ya risiti" %}</dt>
+          <dd><b>{{ gift.receipt_no }}</b></dd>
+        </div>
+        <div>
+          <dt>{% trans "Kiasi" %}</dt>
+          <dd><b>TSh {{ gift.amount|floatformat:0 }}</b></dd>
+        </div>
+        <div>
+          <dt>{% trans "Mfuko" %}</dt>
+          <dd>{{ gift.fund.tx_name|default:gift.fund.name }}</dd>
+        </div>
+        <div>
+          <dt>{% trans "Hali" %}</dt>
+          <dd><span class="badge badge--{{ gift.badge }}">{{ gift.get_status_display }}</span></dd>
+        </div>
+      </dl>
+
+      <p class="thanks__note">
+        {% trans "Mchango wako unasubiri uthibitisho wa afisa wa michango. Utapokea risiti rasmi mara baada ya kuthibitishwa. Hifadhi namba ya risiti hapo juu." %}
+      </p>
+    </div>
+
+    {# ---------------- Mwaliko wa akaunti ---------------- #}
+    {% if show_invite %}
+      <div class="thanks__invite reveal">
+        <span class="thanks__inviteico"><svg width="24" height="24"><use href="#i-user-plus"></use></svg></span>
+        <div class="thanks__invitebody">
+          <h2>{% trans "Fungua akaunti ya mhisani — ni bure" %}</h2>
+          <p>
+            {% trans "Hutahitaji akaunti ili kuchangia, na hatutakulazimisha kamwe. Lakini ukifungua akaunti, kila mchango wako utahifadhiwa mahali pamoja." %}
+          </p>
+          <ul class="thanks__list">
+            <li>{% trans "Kumbukumbu kamili ya michango yako yote, mwaka hadi mwaka." %}</li>
+            <li>{% trans "Risiti zote mahali pamoja — rahisi wakati wa hesabu au zaka." %}</li>
+            <li>{% trans "Kuona jinsi mchango wako ulivyotumika kwenye miradi." %}</li>
+            <li>{% trans "Kuchangia tena bila kujaza taarifa zako upya." %}</li>
+          </ul>
+          <div class="hstack" style="flex-wrap:wrap;margin-top:18px">
+            <a href="{% url 'core:donor_register' %}?risiti={{ gift.receipt_no }}" class="btn btn--gold">
+              <svg><use href="#i-user-plus"></use></svg> {% trans "Fungua Akaunti ya Mhisani" %}
+            </a>
+            <a href="{% url 'core:home' %}" class="btn btn--ghost">{% trans "Baadaye" %}</a>
+          </div>
+          <p class="thanks__small">
+            {% trans "Mchango huu utaunganishwa moja kwa moja na akaunti yako mpya." %}
+          </p>
+        </div>
+      </div>
+    {% elif has_account %}
+      <div class="hstack" style="justify-content:center;flex-wrap:wrap;margin-top:22px">
+        <a href="{% url 'core:donor_dashboard' %}" class="btn btn--primary">
+          <svg><use href="#i-dashboard"></use></svg> {% trans "Tazama Michango Yangu" %}
+        </a>
+        <a href="{% url 'core:changia' %}" class="btn btn--ghost">{% trans "Changia Tena" %}</a>
+      </div>
+    {% endif %}
+
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% load i18n mwst_tags %}
+{# KPI ya Michango: note juu, delta chini #}
+<div class="kpi">
+  <span class="kpi__icon tint-{{ k.tint|default:'green' }}"><svg><use href="#i-{{ k.icon }}"></use></svg></span>
+  <span class="kpi__body">
+    <span class="kpi__label">{{ k.label|tr }}</span>
+    <span class="kpi__value {% if k.money %}kpi__value--money{% endif %}">{{ k.value }}</span>
+    {% if k.big_note %}
+      <span style="display:block;font-size:10.5px;color:var(--muted);margin-top:6px">{{ k.note|tr }}</span>
+      <b style="display:block;font-size:16px;color:var(--ok)">{{ k.big_note }}</b>
+    {% else %}
+      <span style="display:block;font-size:10.5px;color:var(--muted);margin-top:5px">{{ k.note|tr }}</span>
+      {% if k.delta %}
+        <span class="kpi__meta">
+          <span class="kpi__delta kpi__delta--{{ k.dir }}">
+            <svg width="11" height="11"><use href="#i-arrow-{{ k.dir }}"></use></svg>{{ k.delta }}
+          </span>
+          <span class="kpi__note">{{ k.note2 }}</span>
+        </span>
+      {% endif %}
+    {% endif %}
+  </span>
+</div>

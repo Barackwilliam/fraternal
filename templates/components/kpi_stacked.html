@@ -1,0 +1,22 @@
+{% load i18n mwst_tags %}
+{# KPI yenye thamani ya pili chini (Malipo ya Ada). ctx: k #}
+<div class="kpi" style="align-items:flex-start">
+  <span class="kpi__icon tint-{{ k.tint|default:'green' }}"><svg><use href="#i-{{ k.icon }}"></use></svg></span>
+  <span class="kpi__body">
+    <span class="kpi__label">{{ k.label|tr }}</span>
+    <span class="kpi__value {% if k.money %}kpi__value--money{% endif %}">{{ k.value }}</span>
+    {% if k.sub_label %}
+      <span style="display:block;font-size:10.5px;color:var(--muted);margin-top:7px">{{ k.sub_label|tr }}</span>
+      <b class="num" style="display:block;font-size:13px">{{ k.sub_value }}</b>
+    {% endif %}
+  </span>
+  {% if k.gauge %}
+    <span class="gauge" data-gauge="{{ k.gauge }}">
+      <svg width="54" height="54" viewBox="0 0 54 54">
+        <circle class="gauge__track" cx="27" cy="27" r="23" fill="none" stroke-width="6"/>
+        <circle class="gauge__fill" cx="27" cy="27" r="23" fill="none" stroke-width="6"/>
+      </svg>
+      <span class="gauge__text">{{ k.gauge }}%</span>
+    </span>
+  {% endif %}
+</div>

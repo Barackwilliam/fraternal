@@ -1,0 +1,97 @@
+{% extends "base/app.html" %}
+{% load i18n mwst_tags %}
+{% block title %}{{ entry.label|tr }}{% endblock %}
+
+{% block page %}
+  {% include "base/messages.html" %}
+
+  <div class="pagehead">
+    <div>
+      <h2>{{ entry.label|tr }}</h2>
+      <p>{{ total }} {% trans "rekodi" %}</p>
+    </div>
+    <div class="pagehead__actions">
+      <a href="{% url 'core:manage_index' %}" class="btn btn--ghost">
+        <svg><use href="#i-chevron-down"></use></svg> {% trans "Faharasa" %}</a>
+      {% if not readonly %}
+        <a href="{% url 'core:manage_add' slug %}" class="btn btn--primary">
+          <svg><use href="#i-plus"></use></svg> {% trans "Ongeza Mpya" %}</a>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if entry.search or filter_defs %}
+    <section class="card">
+      <div class="card__body">
+        <form method="get" class="filters">
+          {% if entry.search %}
+            <div class="field">
+              <label class="field__label">{% trans "Tafuta" %}</label>
+              <input class="input" name="q" value="{{ term }}" placeholder="{% trans 'Andika hapa...' %}">
+            </div>
+          {% endif %}
+          {% for f in filter_defs %}
+            <div class="field">
+              <label class="field__label">{{ f.label|capfirst }}</label>
+              <select class="select" name="{{ f.name }}">
+                <option value="">{% trans "Zote" %}</option>
+                {% for v, label in f.choices %}
+                  <option value="{{ v }}" {% if f.value == v|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          {% endfor %}
+          <div class="hstack">
+            <button class="btn btn--primary"><svg><use href="#i-search"></use></svg> {% trans "Tafuta" %}</button>
+            <a href="{% url 'core:manage_list' slug %}" class="btn btn--ghost">{% trans "Futa" %}</a>
+          </div>
+        </form>
+      </div>
+    </section>
+  {% endif %}
+
+  <section class="card mt">
+    <div class="card__body card__body--flush">
+      <div class="tablewrap">
+        <table class="table">
+          <thead><tr>
+            <th>#</th>
+            {% for h in headers %}<th>{{ h|tr }}</th>{% endfor %}
+            {% if not readonly %}<th>{% trans "Hatua" %}</th>{% endif %}
+          </tr></thead>
+          <tbody>
+            {% for r in rows %}
+              <tr>
+                <td>{{ forloop.counter0|add:page_start }}</td>
+                {% for c in r.cells %}
+                  <td>
+                    {% if c is True %}<span class="badge badge--ok">{% trans "Ndiyo" %}</span>
+                    {% elif c is False %}<span class="badge badge--muted">{% trans "Hapana" %}</span>
+                    {% else %}{{ c }}{% endif %}
+                  </td>
+                {% endfor %}
+                {% if not readonly %}
+                  <td><a class="table__act" href="{% url 'core:manage_edit' slug r.pk %}"
+                         title="{% trans 'Hariri' %}">
+                    <svg width="15" height="15"><use href="#i-settings"></use></svg></a></td>
+                {% endif %}
+              </tr>
+            {% empty %}
+              <tr><td colspan="{{ headers|length|add:2 }}">
+                <div class="empty">
+                  <span class="empty__icon"><svg width="22" height="22"><use href="#i-{{ entry.icon }}"></use></svg></span>
+                  <span class="empty__title">{% trans "Hakuna rekodi" %}</span>
+                  {% if not readonly %}
+                    <a href="{% url 'core:manage_add' slug %}" class="btn btn--primary btn--sm" style="margin-top:10px">
+                      {% trans "Ongeza ya Kwanza" %}</a>
+                  {% endif %}
+                </div>
+              </td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% if pages > 1 %}{% include "components/pager.html" with total_records=total %}{% endif %}
+    </div>
+  </section>
+{% endblock %}

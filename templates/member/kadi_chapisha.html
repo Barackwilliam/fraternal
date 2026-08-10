@@ -1,0 +1,138 @@
+{% extends "base/app.html" %}
+{% load i18n %}
+{% block title %}{% trans "Kadi Yangu" %}{% endblock %}
+
+{% block page %}
+  {% include "base/messages.html" %}
+  <div class="pagehead">
+    <div><h2>{% trans "Kadi Yangu ya Uanachama" %}</h2>
+      <p>{{ m.membership_no }}</p></div>
+    <div class="pagehead__actions">
+      <a href="{% url 'core:member_card' %}" class="btn btn--ghost">{% trans "Rudi" %}</a>
+    </div>
+  </div>
+
+  <div class="grid grid--2-1">
+    <section class="card">
+      <div class="card__body" style="padding:26px">
+        <div id="cardShot">{% include "components/idcard.html" %}</div>
+
+        <div class="hstack" style="margin-top:20px;justify-content:center">
+          <button id="dlPng" class="btn btn--primary">
+            <svg><use href="#i-download"></use></svg> {% trans "Pakua Kadi (PNG)" %}
+          </button>
+          <a id="dlSvg" class="btn btn--ghost" download="{{ m.membership_no|slugify }}.svg">
+            <svg><use href="#i-download"></use></svg> {% trans "Pakua (SVG)" %}
+          </a>
+        </div>
+        <p id="dlNote" style="font-size:12px;color:var(--muted);text-align:center;margin-top:10px"></p>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card__head"><h3 class="card__title">{% trans "Taarifa za Kadi" %}</h3></div>
+      <div class="card__body">
+        <div class="detail__row"><svg><use href="#i-id-card"></use></svg>
+          <span><span class="detail__lbl">{% trans "Namba ya Kadi" %}</span>
+          <span class="detail__val">{{ card.serial|default:"—" }}</span></span></div>
+        <div class="detail__row"><svg><use href="#i-star"></use></svg>
+          <span><span class="detail__lbl">{% trans "Daraja" %}</span>
+          <span class="detail__val">{{ m.category.name }}</span></span></div>
+        <div class="detail__row"><svg><use href="#i-calendar"></use></svg>
+          <span><span class="detail__lbl">{% trans "Halali Hadi" %}</span>
+          <span class="detail__val">{{ card.expires_on|date:"d M Y"|default:"—" }}</span></span></div>
+        <div class="detail__row"><svg><use href="#i-check-circle"></use></svg>
+          <span><span class="detail__lbl">{% trans "Kiungo cha Uhakiki" %}</span>
+          <span class="detail__val" style="font-size:11px;word-break:break-all">{{ request.scheme }}://{{ request.get_host }}{{ verify_url }}</span></span></div>
+        <a href="{{ verify_url }}" class="btn btn--ghost btn--block" style="margin-top:12px" target="_blank">
+          {% trans "Hakiki Kadi" %}</a>
+        <p style="font-size:12px;color:var(--muted);margin-top:14px;line-height:1.7">
+          {% trans "Pakua kadi kama picha, kisha uihifadhi kwenye simu yako au uichapishe. Afisa yeyote anaweza kuiskan QR code kuthibitisha uanachama wako." %}
+        </p>
+      </div>
+    </section>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+/* ==========================================================================
+   Kupakua kadi kama picha.
+   Hakuna library ya nje: HTML inageuzwa SVG (foreignObject), kisha
+   inachorwa kwenye canvas na kuhifadhiwa PNG. Kivinjari kikishindwa,
+   SVG inapakuliwa moja kwa moja.
+   ========================================================================== */
+(function () {
+  "use strict";
+  const shot = document.getElementById("cardShot");
+  const note = document.getElementById("dlNote");
+  const fileName = "{{ m.membership_no|slugify }}";
+  const SCALE = 3;                    // ubora wa juu wa kuchapisha
+
+  function collectCss() {
+    let out = "";
+    for (const sheet of document.styleSheets) {
+      try {
+        for (const rule of sheet.cssRules) out += rule.cssText + "\n";
+      } catch (e) { /* stylesheet ya nje — ruka */ }
+    }
+    return out;
+  }
+
+  function buildSvg() {
+    const node = shot.firstElementChild.cloneNode(true);
+    const rect = shot.firstElementChild.getBoundingClientRect();
+    const w = Math.round(rect.width), h = Math.round(rect.height);
+    const wrap = document.createElement("div");
+    wrap.appendChild(node);
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
+      <foreignObject width="100%" height="100%">
+        <div xmlns="http://www.w3.org/1999/xhtml" style="width:${w}px">
+          <style>${collectCss()}</style>${wrap.innerHTML}
+        </div>
+      </foreignObject></svg>`;
+  }
+
+  function svgUrl() {
+    return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(buildSvg());
+  }
+
+  function save(href, name) {
+    const a = document.createElement("a");
+    a.href = href; a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+  }
+
+  document.getElementById("dlSvg").addEventListener("click", function () {
+    this.href = svgUrl();
+  });
+
+  document.getElementById("dlPng").addEventListener("click", () => {
+    note.textContent = "{% trans 'Inatengeneza picha...' %}";
+    const rect = shot.firstElementChild.getBoundingClientRect();
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = rect.width * SCALE;
+      canvas.height = rect.height * SCALE;
+      const ctx = canvas.getContext("2d");
+      ctx.scale(SCALE, SCALE);
+      ctx.drawImage(img, 0, 0);
+      try {
+        save(canvas.toDataURL("image/png"), fileName + ".png");
+        note.textContent = "{% trans 'Kadi imepakuliwa.' %}";
+      } catch (e) {
+        save(svgUrl(), fileName + ".svg");
+        note.textContent = "{% trans 'Imepakuliwa kama SVG.' %}";
+      }
+    };
+    img.onerror = () => {
+      save(svgUrl(), fileName + ".svg");
+      note.textContent = "{% trans 'Imepakuliwa kama SVG.' %}";
+    };
+    img.src = svgUrl();
+  });
+})();
+</script>
+{% endblock %}

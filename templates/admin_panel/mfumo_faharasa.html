@@ -1,0 +1,30 @@
+{% extends "base/app.html" %}
+{% load i18n mwst_tags %}
+{% block title %}{% trans "Usimamizi wa Mfumo" %}{% endblock %}
+
+{% block page %}
+  {% include "base/messages.html" %}
+  <div class="pagehead">
+    <div><h2>{% trans "Usimamizi wa Mfumo" %}</h2>
+      <p>{% trans "Kila kitu kinasimamiwa hapa hapa ndani ya mfumo" %}</p></div>
+  </div>
+
+  {% for group, items in groups.items %}
+    <section class="card mt">
+      <div class="card__head"><h3 class="card__title">{{ group|tr }}</h3></div>
+      <div class="card__body">
+        <div class="grid grid--4">
+          {% for it in items %}
+            <a class="qa" href="{% url 'core:manage_list' it.slug %}">
+              <span class="qa__ico tint-{% cycle 'green' 'navy' 'gold' 'purple' 'teal' 'orange' %}">
+                <svg width="17" height="17"><use href="#i-{{ it.icon }}"></use></svg></span>
+              <span class="qa__label">{{ it.label|tr }}
+                {% if it.readonly %}<span class="badge badge--muted" style="margin-left:5px">{% trans "Kusoma" %}</span>{% endif %}
+              </span>
+            </a>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+  {% endfor %}
+{% endblock %}

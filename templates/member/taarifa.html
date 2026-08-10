@@ -1,0 +1,71 @@
+{% extends "base/app.html" %}
+{% load i18n %}
+{% block title %}{% trans "Taarifa na Matangazo" %}{% endblock %}
+
+{% block page %}
+  {% include "base/messages.html" %}
+  <div class="pagehead"><div><h2>{% trans "Taarifa na Matangazo" %}</h2></div></div>
+
+  <div class="grid grid--2-1">
+    <section class="card">
+      <div class="card__head"><h3 class="card__title">{% trans "Matangazo" %}</h3></div>
+      <div class="card__body">
+        {% for a in announcements %}
+          <div class="ann">
+            <span class="ann__ico tint-{{ a.tint }}"><svg width="16" height="16"><use href="#i-{{ a.icon }}"></use></svg></span>
+            <span class="ann__body">
+              <b class="ann__title">{{ a.title }}</b>
+              <span class="ann__text">{{ a.body }}</span>
+              <span class="ann__date">{{ a.date }}</span>
+            </span>
+          </div>
+        {% empty %}
+          <div class="empty">
+            <span class="empty__icon"><svg width="22" height="22"><use href="#i-megaphone"></use></svg></span>
+            <span class="empty__title">{% trans "Hakuna matangazo" %}</span>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card__head"><h3 class="card__title">{% trans "Arifa Zangu" %}</h3></div>
+      <div class="card__body">
+        {% for n in notifications %}
+          <div class="rowlist__row">
+            <span class="fund__ico tint-{{ n.tint }}" style="width:30px;height:30px">
+              <svg width="15" height="15"><use href="#i-{{ n.icon }}"></use></svg></span>
+            <span class="rowlist__main">
+              <span class="rowlist__title">{{ n.title }}</span>
+              <span class="rowlist__meta">{{ n.date }}</span>
+            </span>
+          </div>
+        {% empty %}
+          <div class="empty">
+            <span class="empty__icon"><svg width="22" height="22"><use href="#i-bell"></use></svg></span>
+            <span class="empty__title">{% trans "Hakuna arifa" %}</span>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+  </div>
+
+  <section class="card mt">
+    <div class="card__head"><h3 class="card__title">{% trans "Habari za Karibuni" %}</h3>
+      <a href="/habari/" class="btn btn--ghost btn--sm">{% trans "Zote" %}</a></div>
+    <div class="card__body">
+      <div class="grid grid--3">
+        {% for n in news %}
+          <div class="newscard">
+            <span class="newscard__img">{% include "components/illus.html" with scene=n.scene %}</span>
+            <span class="newscard__body">
+              <span class="newscard__date">{{ n.date }}</span>
+              <b class="newscard__title">{{ n.title }}</b>
+              <span class="newscard__text">{{ n.text }}</span>
+            </span>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+{% endblock %}

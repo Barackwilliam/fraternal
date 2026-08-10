@@ -1,0 +1,29 @@
+{% load i18n mwst_tags %}
+{# Donut + legend. ctx: d = {id,title,sub,center_value,center_label,rows:[{label,value,pct,color}], control} #}
+<section class="card">
+  <div class="card__head">
+    <h3 class="card__title">{{ d.title|tr }} {% if d.sub %}<span>{{ d.sub|tr }}</span>{% endif %}</h3>
+    {% if d.control %}<form method="get" style="display:inline">{% for k,v in request.GET.items %}{% if k != "year" %}<input type="hidden" name="{{ k }}" value="{{ v }}">{% endif %}{% endfor %}<select class="btn btn--ghost btn--sm" name="year" onchange="this.form.submit()" style="padding-right:26px">{% for y in year_options %}<option value="{{ y }}" {% if y == active_year %}selected{% endif %}>{{ y }}</option>{% endfor %}</select></form>{% endif %}
+  </div>
+  <div class="card__body">
+    <div class="donutwrap">
+      <div class="donutwrap__chart">
+        <canvas id="{{ d.id }}"></canvas>
+        <div class="donutwrap__center">
+          <b>{{ d.center_value }}</b>
+          <small>{{ d.center_label|tr }}</small>
+        </div>
+      </div>
+      <div class="donutwrap__legend">
+        {% for r in d.rows %}
+          <div class="legend-row">
+            <span class="legend-row__dot" style="background:{{ r.color }}"></span>
+            <span class="legend-row__label">{{ r.label|tr }}</span>
+            <span class="legend-row__value">{{ r.display|default:r.value }}</span>
+            {% if r.pct %}<span class="legend-row__pct">{{ r.pct }}%</span>{% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>

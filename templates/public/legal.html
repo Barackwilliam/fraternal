@@ -1,0 +1,109 @@
+{% extends "public/base.html" %}
+{% load i18n %}
+{% comment %}
+Kiolezo kimoja kinachotumika na Sera ya Faragha na Sera ya Vidakuzi.
+Maudhui yanatoka `core/data/legal.py` (yameandikwa kwa lugha zote mbili),
+kwa hiyo hakuna `{% trans %}` kwenye maandishi ya hati yenyewe.
+{% endcomment %}
+
+{% block title %}{{ doc.title }}{% endblock %}
+
+{% block body %}
+
+{# ---------------- Hero ---------------- #}
+<section class="hero--page hero--page-legal">
+  <div class="reveal">
+    <span class="section__eyebrow"
+          style="background:rgba(212,175,55,.16);color:var(--gold-400)">{{ doc.eyebrow }}</span>
+    <h1>{{ doc.title }}</h1>
+    <p>{{ doc.intro }}</p>
+    <p class="legal__effective">
+      <svg width="14" height="14" style="vertical-align:-2px"><use href="#i-calendar"></use></svg>
+      {% trans "Imeanza kutumika" %}: <b>{{ doc.effective }}</b>
+    </p>
+  </div>
+  <div class="hero__art reveal">
+    <span class="illus illus--plain">{% include "components/illus.html" with scene=doc.scene %}</span>
+  </div>
+</section>
+
+<section class="section legal">
+  <div class="legal__wrap">
+
+    {# ---------------- Viungo vya kurasa nyingine za kisheria ---------------- #}
+    <nav class="chips legal__switch reveal" aria-label="{% trans 'Kurasa za kisheria' %}">
+      <a class="chip {% if page_key == 'faragha' %}is-active{% endif %}"
+         href="{% url 'core:faragha' %}">{% trans "Sera ya Faragha" %}</a>
+      <a class="chip {% if page_key == 'vidakuzi' %}is-active{% endif %}"
+         href="{% url 'core:vidakuzi' %}">{% trans "Sera ya Vidakuzi" %}</a>
+    </nav>
+
+    {# ---------------- Yaliyomo ---------------- #}
+    <details class="legal__toc reveal" open>
+      <summary>{% trans "Yaliyomo" %}</summary>
+      <ol>
+        {% for s in doc.sections %}
+          <li><a href="#s{{ s.n }}">{{ s.h }}</a></li>
+        {% endfor %}
+        <li><a href="#contact">{{ doc.contact.h }}</a></li>
+      </ol>
+    </details>
+
+    {# ---------------- Vifungu ---------------- #}
+    {% for s in doc.sections %}
+      <article class="legal__sec reveal" id="s{{ s.n }}">
+        <h2><span class="legal__num">{{ s.n }}</span>{{ s.h }}</h2>
+
+        {% for para in s.p %}<p>{{ para }}</p>{% endfor %}
+
+        {% if s.bullets %}
+          <ul class="legal__list">
+            {% for b in s.bullets %}<li>{{ b }}</li>{% endfor %}
+          </ul>
+        {% endif %}
+
+        {% for sub in s.sub %}
+          <section class="legal__sub">
+            <h3>{{ sub.h }}</h3>
+            {% for para in sub.p %}<p>{{ para }}</p>{% endfor %}
+            {% if sub.bullets %}
+              <ul class="legal__list">
+                {% for b in sub.bullets %}<li>{{ b }}</li>{% endfor %}
+              </ul>
+            {% endif %}
+            {% if sub.note %}<p class="legal__note">{{ sub.note }}</p>{% endif %}
+          </section>
+        {% endfor %}
+
+        {% if s.note %}<p class="legal__note">{{ s.note }}</p>{% endif %}
+      </article>
+    {% endfor %}
+
+    {# ---------------- Mawasiliano ---------------- #}
+    <article class="legal__sec reveal" id="contact">
+      <h2><span class="legal__num">{{ doc.contact.n }}</span>{{ doc.contact.h }}</h2>
+      <p>{{ doc.contact.p }}</p>
+      <dl class="legal__contact">
+        {% for label, value in doc.contact.lines %}
+          <div><dt>{{ label }}</dt><dd>{{ value }}</dd></div>
+        {% endfor %}
+      </dl>
+    </article>
+
+    {# ---------------- Ridhaa ---------------- #}
+    <aside class="legal__consent reveal">
+      <h3>{{ doc.consent.h }}</h3>
+      <p>{{ doc.consent.p }}</p>
+      {% if page_key == 'vidakuzi' %}
+        <button type="button" class="btn btn--gold" data-cookie-reopen>
+          <svg><use href="#i-settings"></use></svg>
+          {% trans "Badilisha mapendeleo ya vidakuzi" %}
+        </button>
+      {% endif %}
+    </aside>
+
+  </div>
+</section>
+
+{% include "public/_cta.html" %}
+{% endblock %}

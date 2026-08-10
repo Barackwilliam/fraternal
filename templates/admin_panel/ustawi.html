@@ -1,0 +1,99 @@
+{% extends "base/app.html" %}
+{% load i18n %}
+{% block title %}{% trans "Maombi ya Msaada" %}{% endblock %}
+
+{% block page %}
+  {% include "base/messages.html" %}
+  <div class="pagehead"><div><h2>{% trans "Maombi ya Msaada" %}</h2>
+    <p>{{ total }} {% trans "maombi" %}</p></div></div>
+
+  <div class="grid grid--4">
+    {% for k in kpis %}{% include "components/kpi.html" %}{% endfor %}
+  </div>
+
+  <section class="card mt">
+    <div class="card__body">
+      <form method="get" class="filters">
+        <div class="field">
+          <label class="field__label">{% trans "Tafuta" %}</label>
+          <input class="input" name="q" value="{{ filters.q }}" placeholder="{% trans 'Kumbukumbu au jina' %}">
+        </div>
+        <div class="field">
+          <label class="field__label">{% trans "Hali" %}</label>
+          <select class="select" name="status">
+            <option value="">{% trans "Zote" %}</option>
+            {% for v, label in statuses %}
+              <option value="{{ v }}" {% if filters.status == v %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="field">
+          <label class="field__label">{% trans "Aina ya Msaada" %}</label>
+          <select class="select" name="type">
+            <option value="">{% trans "Zote" %}</option>
+            {% for t in types %}
+              <option value="{{ t.pk }}" {% if filters.type == t.pk|stringformat:"s" %}selected{% endif %}>{{ t.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="hstack">
+          <button class="btn btn--primary"><svg><use href="#i-search"></use></svg> {% trans "Tafuta" %}</button>
+          <a href="{% url 'core:assistance_review' %}" class="btn btn--ghost">{% trans "Futa" %}</a>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <section class="card mt">
+    <div class="card__body card__body--flush">
+      <div class="tablewrap">
+        <table class="table">
+          <thead><tr>
+            <th>{% trans "Kumbukumbu" %}</th><th>{% trans "Mwanachama" %}</th>
+            <th>{% trans "Aina" %}</th><th>{% trans "Maelezo" %}</th>
+            <th>{% trans "Kiasi Kilichoombwa" %}</th><th>{% trans "Kilichoidhinishwa" %}</th>
+            <th>{% trans "Hali" %}</th><th>{% trans "Hatua" %}</th>
+          </tr></thead>
+          <tbody>
+            {% for r in rows %}
+              <tr>
+                <td class="t-mono">{{ r.ref }}</td>
+                <td class="t-name">{{ r.member }}<br><span class="rowlist__meta">{{ r.membership_no }}</span></td>
+                <td>{{ r.type }}</td>
+                <td style="max-width:260px;white-space:normal">{{ r.description|truncatewords:18 }}</td>
+                <td class="t-num">{{ r.requested }}</td>
+                <td class="t-num">{{ r.approved }}</td>
+                <td><span class="badge badge--{{ r.badge }}">{{ r.status }}</span></td>
+                <td>
+                  {% if r.pending %}
+                    <form method="post" style="display:flex;gap:5px;align-items:center">
+                      {% csrf_token %}
+        {% if form.non_field_errors %}
+          <div class="formerr">
+            <svg width="15" height="15"><use href="#i-alert"></use></svg>
+            <span>{% for e in form.non_field_errors %}{{ e }}{% if not forloop.last %}<br>{% endif %}{% endfor %}</span>
+          </div>
+        {% endif %}
+                              <input type="hidden" name="pk" value="{{ r.id }}">
+                      <input class="input" name="amount" value="{{ r.requested_raw }}"
+                             style="width:96px;height:30px;font-size:12px">
+                      <button name="action" value="approve" class="table__act" title="{% trans 'Idhinisha' %}">
+                        <svg width="15" height="15"><use href="#i-check-circle"></use></svg></button>
+                      <button name="action" value="reject" class="table__act table__act--danger" title="{% trans 'Kataa' %}">
+                        <svg width="15" height="15"><use href="#i-x-circle"></use></svg></button>
+                    </form>
+                  {% else %}<span class="rowlist__meta">—</span>{% endif %}
+                </td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="8"><div class="empty">
+                <span class="empty__icon"><svg width="22" height="22"><use href="#i-hand-heart"></use></svg></span>
+                <span class="empty__title">{% trans "Hakuna maombi" %}</span>
+              </div></td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+{% endblock %}

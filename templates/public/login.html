@@ -1,0 +1,126 @@
+{% extends "public/base.html" %}
+{% load static i18n mwst_tags %}
+{% block title %}{% trans "Ingia Mfumo" %}{% endblock %}
+
+{% block body %}
+<div class="section" style="padding-bottom:0">{% include "base/messages.html" %}</div>
+
+<section class="section auth">
+  <div class="auth__wrap">
+
+    {# ---------------- Nembo na kaulimbiu ---------------- #}
+    <div class="auth__brand reveal">
+      <img src="{% static 'img/mwst-logo.svg' %}" alt="MWST" width="92" height="92">
+      <b>MWST</b>
+      <h1>Muslim Welfare Society of Tanzania</h1>
+      <p class="auth__tagline">{% trans "Imani kwa Vitendo, Huduma na Maendeleo kwa Binadamu" %}</p>
+      <span class="auth__rule">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0 15 9l9 3-9 3-3 9-3-9-9-3 9-3z"/></svg>
+      </span>
+    </div>
+
+    {# ---------------- Kadi ya kuingia ---------------- #}
+    <div class="auth__card reveal">
+      <div class="auth__head">
+        <span class="auth__ico"><svg width="22" height="22"><use href="#i-user"></use></svg></span>
+        <h2>{% trans "Karibu Tena!" %}</h2>
+        <p>{% trans "Ingia ili kufikia akaunti yako ya MWST" %}</p>
+      </div>
+
+      <form method="post" novalidate>
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ next }}">
+
+        {# --- 1. Chagua jukumu --- #}
+        <div class="auth__step">
+          <span class="auth__stepnum">1</span>
+          <span class="auth__steptext">{% trans "Chagua Jukumu Lako" %}</span>
+        </div>
+
+        <div class="rolepick">
+          {% for r in login_roles %}
+            <label class="rolepick__item{% if r.key == active_role %} is-on{% endif %}"
+                   data-hint="{{ r.hint|tr }}">
+              <input type="radio" name="as" value="{{ r.key }}"
+                     {% if r.key == active_role %}checked{% endif %}>
+              <span class="rolepick__tick"><svg width="12" height="12"><use href="#i-check"></use></svg></span>
+              <span class="rolepick__ico tint-{{ r.tint }}"><svg><use href="#i-{{ r.icon }}"></use></svg></span>
+              <span class="rolepick__label">{{ r.label|tr }}</span>
+            </label>
+          {% endfor %}
+        </div>
+        <p class="rolepick__hint" data-role-hint>{{ role_hint }}</p>
+
+        {# --- 2. Ingia --- #}
+        <div class="auth__step">
+          <span class="auth__stepnum">2</span>
+          <span class="auth__steptext">{% trans "Ingia" %}</span>
+        </div>
+
+        {% if form.non_field_errors %}
+          <div class="formerr">
+            <svg width="15" height="15"><use href="#i-alert"></use></svg>
+            <span>{% for e in form.non_field_errors %}{{ e }}{% if not forloop.last %}<br>{% endif %}{% endfor %}</span>
+          </div>
+        {% endif %}
+
+        <div class="field">
+          <label class="field__label" for="id_username">
+            {% trans "Barua Pepe / Namba ya Uanachama" %}
+          </label>
+          <span class="authfield">
+            <svg width="17" height="17"><use href="#i-mail"></use></svg>
+            <input type="text" name="username" id="id_username" required autofocus
+                   autocapitalize="none" autocorrect="off" spellcheck="false"
+                   autocomplete="username" value="{{ username_value|default:'' }}"
+                   placeholder="{% trans 'Weka barua pepe au namba ya uanachama' %}">
+          </span>
+        </div>
+
+        <div class="field">
+          <label class="field__label" for="id_password">{% trans "Nenosiri" %}</label>
+          <span class="authfield">
+            <svg width="17" height="17"><use href="#i-lock"></use></svg>
+            <input type="password" name="password" id="id_password" required
+                   autocomplete="current-password"
+                   placeholder="{% trans 'Weka nenosiri lako' %}">
+            <button type="button" data-toggle-pw aria-label="{% trans 'Onyesha nenosiri' %}">
+              <svg width="17" height="17"><use href="#i-eye"></use></svg>
+            </button>
+          </span>
+        </div>
+
+        <div class="auth__row">
+          <label class="checkline">
+            <input type="checkbox" name="remember" value="1"> <span>{% trans "Kumbuka Mimi" %}</span>
+          </label>
+          <a href="{% url 'core:password_reset' %}">{% trans "Umesahau nywila?" %}</a>
+        </div>
+
+        <button type="submit" class="btn btn--primary btn--block auth__submit">
+          <svg><use href="#i-lock"></use></svg> {% trans "INGIA" %}
+        </button>
+      </form>
+
+      <div class="auth__or"><span>{% trans "AU" %}</span></div>
+
+      <a href="{% url 'core:mawasiliano' %}?mada=Uanachama" class="btn btn--block auth__alt2">
+        <svg><use href="#i-phone"></use></svg> {% trans "Ingia kwa Namba ya Simu (OTP)" %}
+      </a>
+
+      <p class="auth__safe">
+        <svg width="17" height="17"><use href="#i-shield"></use></svg>
+        {% trans "Taarifa zako ziko salama nasi. Tunaheshimu faragha yako na kulinda taarifa zako." %}
+      </p>
+
+      <p class="auth__alt">
+        {% trans "Bado huna akaunti?" %}
+        <a href="{% url 'core:jiunge' %}">{% trans "Jiunge kama mwanachama" %}</a>
+        {% trans "au" %}
+        <a href="{% url 'core:donor_register' %}">{% trans "fungua akaunti ya mhisani" %}</a>.
+      </p>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

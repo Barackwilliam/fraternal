@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="MWST">
+  <!-- Nembo ya muda. Badilisha na faili rasmi ya MWST (PNG/SVG) ukiipata. -->
+  <defs>
+    <linearGradient id="mw-gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e3c463"/><stop offset="1" stop-color="#a9812a"/>
+    </linearGradient>
+    <linearGradient id="mw-dome" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1ba05a"/><stop offset="1" stop-color="#0a4028"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Globe -->
+  <circle cx="60" cy="58" r="34" fill="none" stroke="#4cbd83" stroke-width="1.3" opacity=".7"/>
+  <ellipse cx="60" cy="58" rx="16" ry="34" fill="none" stroke="#4cbd83" stroke-width="1.1" opacity=".55"/>
+  <path d="M27 47h66M27 69h66" stroke="#4cbd83" stroke-width="1.1" opacity=".55"/>
+
+  <!-- Hilali na nyota -->
+  <path d="M60 6a11 11 0 1 0 8.6 17.9A8.6 8.6 0 1 1 60 6z" fill="url(#mw-gold)"/>
+  <path d="m66.5 8.5 1.4 2.9 3.2.4-2.3 2.2.6 3.2-2.9-1.5-2.9 1.5.6-3.2-2.3-2.2 3.2-.4z" fill="url(#mw-gold)"/>
+
+  <!-- Arc ya nje -->
+  <path d="M18 62a42 42 0 0 1 84 0" fill="none" stroke="#1b3b6f" stroke-width="3.4" stroke-linecap="round"/>
+
+  <!-- Kuba -->
+  <path d="M60 30c9 6 14 13 14 20H46c0-7 5-14 14-20z" fill="url(#mw-dome)"/>
+  <path d="M46 50h28v18H46z" fill="#1b3b6f"/>
+  <path d="M53 56h4v12h-4zM63 56h4v12h-4z" fill="#e3c463" opacity=".85"/>
+
+  <!-- Mikono -->
+  <path d="M34 96c-5-6-6-14-4-24 1-5 5-6 6-1l3 13" fill="none" stroke="#1b3b6f" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M86 96c5-6 6-14 4-24-1-5-5-6-6-1l-3 13" fill="none" stroke="#1b3b6f" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Watu watatu -->
+  <circle cx="60" cy="76" r="3.4" fill="#12864a"/>
+  <circle cx="50" cy="82" r="3" fill="#d4af37"/>
+  <circle cx="70" cy="82" r="3" fill="#d4af37"/>
+  <path d="M60 80.5 55 91h10zM50 86l-4 8h8zM70 86l4 8h-8z" fill="#12864a"/>
+
+  <!-- Kitabu -->
+  <path d="M42 100c6-3 12-3 18 0 6-3 12-3 18 0v6c-6-3-12-3-18 0-6-3-12-3-18 0z" fill="#fff" stroke="#1b3b6f" stroke-width="1.6" stroke-linejoin="round"/>
+
+  <!-- Matawi -->
+  <path d="M24 74c-2-9-1-18 3-25M96 74c2-9 1-18-3-25" fill="none" stroke="#1ba05a" stroke-width="2" stroke-linecap="round"/>
+</svg>

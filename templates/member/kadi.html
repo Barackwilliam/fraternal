@@ -1,0 +1,70 @@
+{% extends "base/app.html" %}
+{% load i18n %}
+{% block title %}{% trans "Kadi Yangu" %}{% endblock %}
+
+{% block page %}
+  {% include "base/messages.html" %}
+  <div class="pagehead"><div><h2>{% trans "Kadi Yangu ya Uanachama" %}</h2>
+    <p>{{ member.membership_no }}</p></div></div>
+
+  <div class="grid grid--2-1">
+    <section class="card">
+      <div class="card__body" style="padding:22px">
+        {% include "components/idcard.html" with m=member_obj %}
+        <p style="font-size:12.5px;color:var(--muted);margin-top:14px;text-align:center">
+          {% trans "Mwambie afisa aiskan QR code kuthibitisha uanachama wako." %}
+        </p>
+        <div class="hstack" style="margin-top:14px;justify-content:center">
+          <a href="{% url 'core:member_card_print' %}" class="btn btn--primary">
+            <svg><use href="#i-download"></use></svg> {% trans "Pakua Kadi" %}</a>
+          <a href="{{ member.verify_url|default:'#' }}" class="btn btn--ghost" target="_blank">
+            <svg><use href="#i-check-circle"></use></svg> {% trans "Hakiki" %}</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card__head"><h3 class="card__title">{% trans "Taarifa za Kadi" %}</h3></div>
+      <div class="card__body">
+        <div class="detail__row"><svg><use href="#i-id-card"></use></svg>
+          <span><span class="detail__lbl">{% trans "Namba ya Kadi" %}</span>
+          <span class="detail__val">{{ member.card_serial }}</span></span></div>
+        <div class="detail__row"><svg><use href="#i-wallet"></use></svg>
+          <span><span class="detail__lbl">{% trans "Namba ya Akaunti" %}</span>
+          <span class="detail__val">{{ member.account_no }}</span></span></div>
+        <div class="detail__row"><svg><use href="#i-calendar"></use></svg>
+          <span><span class="detail__lbl">{% trans "Ilitolewa" %}</span>
+          <span class="detail__val">{{ member.issued }}</span></span></div>
+        <div class="detail__row"><svg><use href="#i-star"></use></svg>
+          <span><span class="detail__lbl">{% trans "Daraja" %}</span>
+          <span class="detail__val">{{ member.category }}</span></span></div>
+        <a href="{{ member.verify_url|default:'#' }}" class="btn btn--primary btn--block" style="margin-top:14px">
+          <svg><use href="#i-check-circle"></use></svg> {% trans "Hakiki Kadi" %}
+        </a>
+      </div>
+    </section>
+  </div>
+
+  <section class="card mt">
+    <div class="card__head"><h3 class="card__title">{% trans "Kadi Zote" %}</h3></div>
+    <div class="card__body card__body--flush">
+      <div class="tablewrap">
+        <table class="table">
+          <thead><tr><th>{% trans "Namba" %}</th><th>{% trans "Ilitolewa" %}</th>
+            <th>{% trans "Halali Hadi" %}</th><th>{% trans "Hali" %}</th></tr></thead>
+          <tbody>
+            {% for cd in cards %}
+              <tr>
+                <td class="t-mono">{{ cd.serial }}</td>
+                <td class="t-mono">{{ cd.issued_on }}</td>
+                <td class="t-mono">{{ cd.expires_on }}</td>
+                <td><span class="badge badge--{% if cd.is_active %}ok{% else %}muted{% endif %}">
+                  {% if cd.is_active %}{% trans "Active" %}{% else %}{% trans "Imesitishwa" %}{% endif %}</span></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+{% endblock %}

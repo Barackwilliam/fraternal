@@ -1,0 +1,194 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 520" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Msikiti">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8fc7e8"/>
+      <stop offset=".55" stop-color="#cfe6f2"/>
+      <stop offset="1" stop-color="#eef3e8"/>
+    </linearGradient>
+    <linearGradient id="dome" x1=".25" y1="0" x2=".85" y2="1">
+      <stop offset="0" stop-color="#3fbf7d"/>
+      <stop offset=".45" stop-color="#149a55"/>
+      <stop offset="1" stop-color="#0a5c34"/>
+    </linearGradient>
+    <linearGradient id="domeSm" x1=".25" y1="0" x2=".85" y2="1">
+      <stop offset="0" stop-color="#35b273"/>
+      <stop offset="1" stop-color="#0b6438"/>
+    </linearGradient>
+    <linearGradient id="wall" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#fbf6e9"/>
+      <stop offset=".5" stop-color="#f1e7d2"/>
+      <stop offset="1" stop-color="#e0d2b6"/>
+    </linearGradient>
+    <linearGradient id="minaret" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#fdfaf1"/>
+      <stop offset=".6" stop-color="#efe4cc"/>
+      <stop offset="1" stop-color="#d9c8a6"/>
+    </linearGradient>
+    <linearGradient id="lawn" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5aa34a"/>
+      <stop offset="1" stop-color="#2f7333"/>
+    </linearGradient>
+    <linearGradient id="path" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e8dcc2"/>
+      <stop offset="1" stop-color="#cdbb98"/>
+    </linearGradient>
+    <radialGradient id="sun" cx=".5" cy=".5" r=".5">
+      <stop offset="0" stop-color="#fff8dd" stop-opacity=".95"/>
+      <stop offset="1" stop-color="#fff8dd" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Anga -->
+  <rect width="1200" height="520" fill="url(#sky)"/>
+  <circle cx="930" cy="110" r="190" fill="url(#sun)"/>
+
+  <!-- Mawingu -->
+  <g fill="#ffffff" opacity=".62">
+    <ellipse cx="180" cy="88" rx="70" ry="20"/><ellipse cx="228" cy="80" rx="48" ry="24"/>
+    <ellipse cx="132" cy="94" rx="42" ry="15"/>
+    <ellipse cx="1010" cy="62" rx="62" ry="17"/><ellipse cx="1058" cy="56" rx="40" ry="20"/>
+    <ellipse cx="700" cy="52" rx="54" ry="14"/><ellipse cx="742" cy="48" rx="34" ry="17"/>
+  </g>
+
+  <!-- Miti ya mbali -->
+  <g fill="#2f6b3c" opacity=".42">
+    <ellipse cx="70" cy="360" rx="66" ry="42"/><ellipse cx="150" cy="368" rx="52" ry="34"/>
+    <ellipse cx="1140" cy="356" rx="72" ry="46"/><ellipse cx="1058" cy="368" rx="54" ry="34"/>
+  </g>
+
+  <!-- ================= MSIKITI ================= -->
+  <g>
+    <!-- Ukuta wa nyuma -->
+    <rect x="392" y="300" width="416" height="112" fill="url(#wall)"/>
+    <rect x="392" y="296" width="416" height="10" fill="#d8c9a8"/>
+
+    <!-- Minara ya kushoto -->
+    <g>
+      <rect x="356" y="176" width="30" height="236" fill="url(#minaret)"/>
+      <rect x="352" y="246" width="38" height="9" fill="#d4b45e"/>
+      <rect x="352" y="300" width="38" height="9" fill="#d4b45e"/>
+      <path d="M356 176h30l-6-16h-18z" fill="#e6dabd"/>
+      <path d="M371 118c9 12 14 24 14 32H357c0-8 5-20 14-32z" fill="url(#domeSm)"/>
+      <rect x="366" y="104" width="3" height="16" fill="#c79f37"/>
+      <circle cx="367.5" cy="100" r="5" fill="#d4af37"/>
+      <path d="M367 88a7 7 0 1 0 5.6 11.2A5.6 5.6 0 1 1 367 88z" fill="#d4af37"/>
+      <!-- madirisha -->
+      <rect x="364" y="264" width="14" height="26" rx="7" fill="#22475f" opacity=".55"/>
+      <rect x="364" y="322" width="14" height="26" rx="7" fill="#22475f" opacity=".55"/>
+    </g>
+
+    <!-- Minara ya kulia -->
+    <g>
+      <rect x="814" y="176" width="30" height="236" fill="url(#minaret)"/>
+      <rect x="810" y="246" width="38" height="9" fill="#d4b45e"/>
+      <rect x="810" y="300" width="38" height="9" fill="#d4b45e"/>
+      <path d="M814 176h30l-6-16h-18z" fill="#e6dabd"/>
+      <path d="M829 118c9 12 14 24 14 32h-28c0-8 5-20 14-32z" fill="url(#domeSm)"/>
+      <rect x="824" y="104" width="3" height="16" fill="#c79f37"/>
+      <circle cx="825.5" cy="100" r="5" fill="#d4af37"/>
+      <path d="M825 88a7 7 0 1 0 5.6 11.2A5.6 5.6 0 1 1 825 88z" fill="#d4af37"/>
+      <rect x="822" y="264" width="14" height="26" rx="7" fill="#22475f" opacity=".55"/>
+      <rect x="822" y="322" width="14" height="26" rx="7" fill="#22475f" opacity=".55"/>
+    </g>
+
+    <!-- Kuba ndogo za pembeni -->
+    <g>
+      <path d="M470 258c0-24 16-40 30-40s30 16 30 40z" fill="url(#domeSm)"/>
+      <rect x="466" y="256" width="68" height="12" rx="3" fill="#e7dcc0"/>
+      <rect x="498" y="200" width="3" height="20" fill="#c79f37"/>
+      <circle cx="499.5" cy="196" r="4.5" fill="#d4af37"/>
+
+      <path d="M670 258c0-24 16-40 30-40s30 16 30 40z" fill="url(#domeSm)"/>
+      <rect x="666" y="256" width="68" height="12" rx="3" fill="#e7dcc0"/>
+      <rect x="698" y="200" width="3" height="20" fill="#c79f37"/>
+      <circle cx="699.5" cy="196" r="4.5" fill="#d4af37"/>
+    </g>
+
+    <!-- Kuba kuu -->
+    <g>
+      <path d="M600 88c56 34 88 80 88 122H512c0-42 32-88 88-122z" fill="url(#dome)"/>
+      <path d="M600 88c22 34 34 80 34 122h-34z" fill="#ffffff" opacity=".07"/>
+      <path d="M556 128c14-18 30-32 44-40" stroke="#7fe0ab" stroke-width="2.6" fill="none" opacity=".5" stroke-linecap="round"/>
+      <path d="M534 168c18-32 42-58 66-72" stroke="#7fe0ab" stroke-width="2" fill="none" opacity=".35" stroke-linecap="round"/>
+      <rect x="504" y="206" width="192" height="16" rx="4" fill="#e7dcc0"/>
+      <rect x="597" y="52" width="4" height="38" fill="#c79f37"/>
+      <circle cx="599" cy="46" r="7" fill="#d4af37"/>
+      <path d="M598 26a12 12 0 1 0 9.6 19.2A9.6 9.6 0 1 1 598 26z" fill="#d4af37"/>
+      <path d="m609 22 1.7 3.5 3.8.5-2.8 2.7.7 3.8-3.4-1.8-3.4 1.8.7-3.8-2.8-2.7 3.8-.5z" fill="#d4af37"/>
+    </g>
+
+    <!-- Sehemu ya kati -->
+    <rect x="504" y="222" width="192" height="190" fill="url(#wall)"/>
+    <rect x="500" y="218" width="200" height="10" rx="3" fill="#d8c9a8"/>
+
+    <!-- Mlango mkuu -->
+    <path d="M566 412V318a34 34 0 0 1 68 0v94z" fill="#123a56"/>
+    <path d="M566 412V318a34 34 0 0 1 68 0v94z" fill="none" stroke="#d4b45e" stroke-width="4"/>
+    <path d="M600 412V290" stroke="#d4b45e" stroke-width="2.5" opacity=".7"/>
+    <path d="M578 412V330a22 22 0 0 1 44 0v82" fill="none" stroke="#d4b45e" stroke-width="1.6" opacity=".5"/>
+
+    <!-- Matao ya pembeni -->
+    <g fill="#1c4b66" opacity=".72">
+      <path d="M424 412v-52a20 20 0 0 1 40 0v52z"/>
+      <path d="M480 412v-52a20 20 0 0 1 40 0v52z"/>
+      <path d="M680 412v-52a20 20 0 0 1 40 0v52z"/>
+      <path d="M736 412v-52a20 20 0 0 1 40 0v52z"/>
+    </g>
+    <g fill="none" stroke="#d4b45e" stroke-width="2.4" opacity=".85">
+      <path d="M424 412v-52a20 20 0 0 1 40 0v52"/>
+      <path d="M480 412v-52a20 20 0 0 1 40 0v52"/>
+      <path d="M680 412v-52a20 20 0 0 1 40 0v52"/>
+      <path d="M736 412v-52a20 20 0 0 1 40 0v52"/>
+    </g>
+
+    <!-- Madirisha ya juu -->
+    <g fill="#1c4b66" opacity=".6">
+      <path d="M528 288v-26a14 14 0 0 1 28 0v26z"/>
+      <path d="M644 288v-26a14 14 0 0 1 28 0v26z"/>
+    </g>
+  </g>
+
+  <!-- ================= ARDHI ================= -->
+  <path d="M0 404h1200v116H0z" fill="url(#lawn)"/>
+  <path d="M0 404c180-14 340-8 460-4 90 3 190 3 290 0 130-4 300-10 450 4v10H0z" fill="#6bb055" opacity=".55"/>
+
+  <!-- Njia -->
+  <path d="M540 412h120l150 108H390z" fill="url(#path)"/>
+  <g stroke="#bda780" stroke-width="1.5" opacity=".6">
+    <path d="M520 448h160M492 484h216"/>
+  </g>
+
+  <!-- Vichaka -->
+  <g fill="#2c7a3f">
+    <ellipse cx="330" cy="418" rx="46" ry="18"/><ellipse cx="880" cy="418" rx="46" ry="18"/>
+    <ellipse cx="252" cy="430" rx="38" ry="15"/><ellipse cx="958" cy="430" rx="38" ry="15"/>
+  </g>
+
+  <!-- Mitende -->
+  <g>
+    <g transform="translate(196 200)">
+      <path d="M6 216c-2-70 0-130 4-190" stroke="#7a5a30" stroke-width="9" fill="none" stroke-linecap="round"/>
+      <g fill="#2f7d3f">
+        <path d="M10 26c-30-16-56-14-72 4 24-2 46 2 66 14z"/>
+        <path d="M10 26c30-16 56-14 72 4-24-2-46 2-66 14z"/>
+        <path d="M10 26C-14 0-40-10-62-4c22 6 42 20 58 40z"/>
+        <path d="M10 26C34 0 60-10 82-4 60 2 40 16 24 36z"/>
+        <path d="M10 26C4-8-8-30-28-42c8 22 12 44 14 68z"/>
+        <path d="M10 26c6-34 18-56 38-68-8 22-12 44-14 68z"/>
+      </g>
+      <circle cx="10" cy="28" r="7" fill="#8a6534"/>
+    </g>
+    <g transform="translate(984 218) scale(-1 1)">
+      <path d="M6 200c-2-64 0-120 4-176" stroke="#7a5a30" stroke-width="8" fill="none" stroke-linecap="round"/>
+      <g fill="#2b7339">
+        <path d="M10 26c-28-15-52-13-67 4 22-2 43 2 61 13z"/>
+        <path d="M10 26c28-15 52-13 67 4-22-2-43 2-61 13z"/>
+        <path d="M10 26C-13 2-37-8-57-2c20 6 39 19 54 37z"/>
+        <path d="M10 26C33 2 57-8 77-2 57 4 39 17 24 35z"/>
+        <path d="M10 26C4-6-7-27-26-38c7 20 11 41 13 64z"/>
+        <path d="M10 26c6-32 17-53 36-64-7 20-11 41-13 64z"/>
+      </g>
+      <circle cx="10" cy="28" r="6.5" fill="#8a6534"/>
+    </g>
+  </g>
+</svg>

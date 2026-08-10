@@ -1,0 +1,49 @@
+{# apps/templates/includes/skeleton_boot.html
+   Include once, just before </body>. About 1 KB, no dependencies. #}
+<script>
+(function () {
+  'use strict';
+
+  /* ── 1. Photos ───────────────────────────────────────────
+     Fade each image in as it decodes and stop its shimmer. Images already
+     in the cache are handled too — .complete is checked first, otherwise a
+     cached image would keep shimmering forever. */
+  function watch(img) {
+    var box = img.closest('.sk-media');
+    function done() {
+      img.classList.add('is-in');
+      if (box) box.classList.add('is-done');
+    }
+    if (img.complete && img.naturalWidth) { done(); return; }
+    img.addEventListener('load', done, { once: true });
+    img.addEventListener('error', done, { once: true });
+  }
+  document.querySelectorAll('.sk-media > img').forEach(watch);
+
+  /* ── 2. Page transitions ─────────────────────────────────
+     Nothing shows for the first 400ms, so a quick page never flashes a
+     skeleton. Only plain same-origin left-clicks count. */
+  var page = document.querySelector('.sk-page'), timer = null;
+  if (page) {
+    document.addEventListener('click', function (e) {
+      var a = e.target.closest('a');
+      if (!a || e.defaultPrevented || e.button !== 0) return;
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      if (a.target === '_blank' || a.hasAttribute('download')) return;
+
+      var href = a.getAttribute('href') || '';
+      if (!href || href[0] === '#' || /^(mailto|tel|javascript):/i.test(href)) return;
+      if (a.origin && a.origin !== location.origin) return;
+
+      clearTimeout(timer);
+      timer = setTimeout(function () { page.classList.add('on'); }, 400);
+    });
+
+    /* Coming back via the Back button must not leave it stuck on. */
+    addEventListener('pageshow', function () {
+      clearTimeout(timer);
+      page.classList.remove('on');
+    });
+  }
+})();
+</script>

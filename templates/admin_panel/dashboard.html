@@ -1,0 +1,169 @@
+{% extends "base/app.html" %}
+{% load i18n mwst_tags %}
+
+{% block title %}{% trans "Dashibodi Kuu" %}{% endblock %}
+
+{% block page %}
+  {% include "base/messages.html" %}
+
+  {# ---------------- Page header ---------------- #}
+  <div class="pagehead">
+    <div>
+      <h2>{% trans "Dashibodi Kuu" %}</h2>
+      <p>{% trans "Karibu kwenye Mfumo wa Usimamizi wa Uanachama wa MWST" %}</p>
+    </div>
+    <div class="pagehead__actions">
+      <form method="get" style="display:inline">{% for k,v in request.GET.items %}{% if k != "year" %}<input type="hidden" name="{{ k }}" value="{{ v }}">{% endif %}{% endfor %}<select class="btn btn--ghost" name="year" onchange="this.form.submit()" style="padding-right:26px">{% for y in year_options %}<option value="{{ y }}" {% if y == active_year %}selected{% endif %}>{{ y }}</option>{% endfor %}</select></form>
+    </div>
+  </div>
+
+  {# ---------------- KPI row ---------------- #}
+  <div class="grid grid--5">
+    {% for k in kpis %}{% include "components/kpi.html" %}{% endfor %}
+  </div>
+
+  {# ---------------- Row 2: ukuaji | kategoria | usajili ---------------- #}
+  <div class="grid grid--2-2-1 mt">
+
+    <section class="card">
+      <div class="card__head">
+        <h3 class="card__title">{% trans "Ukuaji wa Wanachama" %}<span>(2026)</span></h3>
+        <form method="get" style="display:inline">{% for k,v in request.GET.items %}{% if k != "year" %}<input type="hidden" name="{{ k }}" value="{{ v }}">{% endif %}{% endfor %}<select class="btn btn--ghost btn--sm" name="year" onchange="this.form.submit()" style="padding-right:26px">{% for y in year_options %}<option value="{{ y }}" {% if y == active_year %}selected{% endif %}>{{ y }}</option>{% endfor %}</select></form>
+      </div>
+      <div class="card__body">
+        <div class="chartbox chartbox--lg"><canvas id="chGrowth"></canvas></div>
+      </div>
+    </section>
+
+    {% with d=by_category %}{% include "components/donut_card.html" %}{% endwith %}
+
+    <section class="card">
+      <div class="card__head">
+        <h3 class="card__title">{% trans "Usajili wa Hivi Karibuni" %}</h3>
+        <a class="link-more" href="/wanachama/">{% trans "Tazama Yote" %}</a>
+      </div>
+      <div class="card__body">
+        <div class="rowlist">
+          {% for m in recent_members %}
+            <div class="rowlist__item">
+              <span class="rowlist__avatar">{{ m.initials }}</span>
+              <span class="rowlist__body">
+                <span class="rowlist__title">{{ m.full_name }}</span>
+                <span class="rowlist__sub">
+                  <span class="badge badge--{{ m.category|lower }}">{{ m.category }} Member</span>
+                </span>
+              </span>
+              <span class="rowlist__meta">{{ m.joined }}</span>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+  </div>
+
+  {# ---------------- Row 3: mapato | malipo | vitendo ---------------- #}
+  <div class="grid grid--2-2-1 mt">
+
+    <section class="card">
+      <div class="card__head">
+        <h3 class="card__title">{% trans "Muhtasari wa Mapato" %}</h3>
+        <form method="get" style="display:inline">{% for k,v in request.GET.items %}{% if k != "year" %}<input type="hidden" name="{{ k }}" value="{{ v }}">{% endif %}{% endfor %}<select class="btn btn--ghost btn--sm" name="year" onchange="this.form.submit()" style="padding-right:26px">{% for y in year_options %}<option value="{{ y }}" {% if y == active_year %}selected{% endif %}>{{ y }}</option>{% endfor %}</select></form>
+      </div>
+      <div class="card__body">
+        <div class="chartbox chartbox--lg"><canvas id="chRevenue"></canvas></div>
+      </div>
+    </section>
+
+    {% with d=payment_mix %}{% include "components/donut_card.html" %}{% endwith %}
+
+    {% with qa=quick_actions %}{% include "components/quick_actions.html" %}{% endwith %}
+  </div>
+
+  {# ---------------- Row 4: malipo | matangazo ---------------- #}
+  <div class="grid grid--2-1 mt">
+
+    <section class="card">
+      <div class="card__head">
+        <h3 class="card__title">{% trans "Malipo ya Hivi Karibuni" %}</h3>
+        <a class="link-more" href="/wanachama/">{% trans "Tazama Yote" %}</a>
+      </div>
+      <div class="card__body card__body--flush">
+        <div class="tablewrap">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>{% trans "Tarehe" %}</th><th>{% trans "Mwanachama" %}</th><th>{% trans "Maelezo" %}</th>
+                <th class="t-num">{% trans "Kiasi (TZS)" %}</th><th>{% trans "Njia ya Malipo" %}</th><th>{% trans "Risiti Na." %}</th><th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for p in recent_payments %}
+                <tr>
+                  <td class="t-mono">{{ p.date }}</td>
+                  <td class="t-name">{{ p.member }}</td>
+                  <td>{{ p.desc|tr }}</td>
+                  <td class="t-num">{{ p.amount }}</td>
+                  <td>{{ p.method }}</td>
+                  <td class="t-mono">{{ p.receipt_no }}</td>
+                  <td><span class="badge badge--ok">{{ p.status|tr }}</span></td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card__head">
+        <h3 class="card__title">{% trans "Matangazo na Taarifa" %}</h3>
+        <a class="link-more" href="/wanachama/">{% trans "Tazama Yote" %}</a>
+      </div>
+      <div class="card__body">
+        <div class="rowlist">
+          {% for a in announcements %}
+            <div class="rowlist__item" style="align-items:flex-start">
+              <span class="rowlist__icon tint-{{ a.tint }}"><svg><use href="#i-{{ a.icon }}"></use></svg></span>
+              <span class="rowlist__body">
+                <span class="rowlist__title">{{ a.title|tr }}</span>
+                <span class="rowlist__sub">{{ a.body }}</span>
+              </span>
+              <span class="rowlist__meta">{{ a.date }}</span>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+  </div>
+
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+  // --- Ukuaji wa Wanachama ---
+  MWST.line("#chGrowth", {{ growth.labels|safe }}, [{
+    label: "Wanachama", data: {{ growth.data|safe }},
+    color: MWST.css("--c1"), fill: true
+  }]);
+
+  // --- Wanachama kwa Kategoria ---
+  MWST.donut("#chCategory",
+    [{% for r in by_category.rows %}"{{ r.label|tr }}",{% endfor %}],
+    [{% for r in by_category.rows %}{{ r.value }},{% endfor %}],
+    [{% for r in by_category.rows %}"{{ r.color }}",{% endfor %}]
+  );
+
+  // --- Muhtasari wa Mapato ---
+  MWST.bar("#chRevenue", {{ revenue.labels|safe }}, [{
+    label: "Mapato (TZS)", data: {{ revenue.data|safe }}, color: MWST.css("--c1")
+  }]);
+
+  // --- Muhtasari wa Malipo ---
+  MWST.donut("#chPayments",
+    [{% for r in payment_mix.rows %}"{{ r.label|tr }}",{% endfor %}],
+    [{% for r in payment_mix.rows %}{{ r.value }},{% endfor %}],
+    [{% for r in payment_mix.rows %}"{{ r.color }}",{% endfor %}]
+  );
+</script>
+{% endblock %}

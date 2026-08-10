@@ -1,0 +1,45 @@
+{% extends "base/app.html" %}
+{% load i18n %}
+{% block title %}{% trans "Hariri Ombi" %}{% endblock %}
+
+{% block page %}
+  {% include "base/messages.html" %}
+  <div class="pagehead">
+    <div><h2>{% trans "Hariri Ombi" %}</h2><p>{{ app.full_name }} · {{ app.reference }}</p></div>
+    <div class="pagehead__actions">
+      <a href="{% url 'core:maombi' %}" class="btn btn--ghost">{% trans "Ghairi" %}</a>
+      <form method="post" action="{% url 'core:maombi_action' app.pk 'approve' %}" style="display:inline">
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+          <div class="formerr">
+            <svg width="15" height="15"><use href="#i-alert"></use></svg>
+            <span>{% for e in form.non_field_errors %}{{ e }}{% if not forloop.last %}<br>{% endif %}{% endfor %}</span>
+          </div>
+        {% endif %}
+                <button class="btn btn--primary"><svg><use href="#i-check-circle"></use></svg>
+          {% trans "Idhinisha" %}</button>
+      </form>
+    </div>
+  </div>
+
+  <section class="card">
+    <div class="sectionband"><svg><use href="#i-file"></use></svg><b>{% trans "Taarifa za Ombi" %}</b></div>
+    <div class="card__body" style="padding:20px">
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="grid grid--3" style="gap:12px">
+          {% for f in form %}
+            <div class="field"{% if f.name == "address" %} style="grid-column:1/-1"{% endif %}>
+              <label class="field__label" for="{{ f.id_for_label }}">{{ f.label }}{% if f.field.required %} <em>*</em>{% endif %}</label>
+              {{ f }}
+              {% if f.errors %}<span style="font-size:11.5px;color:var(--danger)">{{ f.errors.0 }}</span>{% endif %}
+            </div>
+          {% endfor %}
+        </div>
+        <button type="submit" class="btn btn--primary" style="margin-top:16px">
+          <svg><use href="#i-check"></use></svg> {% trans "Hifadhi Mabadiliko" %}
+        </button>
+      </form>
+    </div>
+  </section>
+{% endblock %}

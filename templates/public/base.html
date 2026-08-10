@@ -1,0 +1,188 @@
+{% load static i18n mwst_tags %}<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:'sw' }}" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>{% block title %}MWST{% endblock %} — Muslim Welfare Society of Tanzania</title>
+  <meta name="description" content="{% trans 'Tunatekeleza huduma za kijamii, kiuchumi na kiimani kwa mujibu wa maadili ya Kiislamu kwa maendeleo ya jamii na ustawi wa binadamu.' %}">
+  <meta name="theme-color" content="#042318">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/mwst.css' %}">
+  {% block head %}{% endblock %}
+</head>
+<body class="pub">
+{% include "base/icons.html" %}
+
+{# ---------------- Utility bar ---------------- #}
+<div class="pub-utility">
+  <a href="tel:+255769600102"><svg width="14" height="14"><use href="#i-phone"></use></svg>+255 769 600 102</a>
+  <a href="mailto:info@muslimwelfare.or.tz"><svg width="14" height="14"><use href="#i-mail"></use></svg>info@muslimwelfare.or.tz</a>
+  <span><svg width="14" height="14"><use href="#i-map-pin"></use></svg>{% trans "Nkuhungu, Dodoma, Tanzania" %}</span>
+  <span class="pub-utility__social">
+    {% for s in social %}<a href="{{ s.url }}" target="_blank" rel="noopener" aria-label="{{ s.label }}"><svg width="15" height="15"><use href="#i-{{ s.icon }}"></use></svg></a>{% endfor %}
+  </span>
+</div>
+
+{# ---------------- Nav ---------------- #}
+<nav class="pub-nav">
+  <a href="{% url 'core:home' %}" class="pub-brand">
+    <img src="{% static 'img/mwst-logo.svg' %}" alt="MWST">
+    <span>
+      <b>MWST</b>
+      <small>Muslim Welfare Society<br>of Tanzania</small>
+    </span>
+  </a>
+
+  <div class="pub-menu">
+    {% for m in site_menu %}
+      <a href="{{ m.url }}" {% if m.key == page_key %}class="is-active"{% endif %}>{{ m.label|tr }}</a>
+    {% endfor %}
+  </div>
+
+  <div class="pub-nav__right">
+    {% include "components/langpick.html" %}
+
+    {% if is_authed %}
+      <a href="{% url user.home_url_name %}" class="btn btn--primary">
+        <svg><use href="#i-dashboard"></use></svg> <span class="hide-xs">{% trans "Dashibodi" %}</span>
+      </a>
+      <a href="{% url 'core:logout' %}" class="icon-btn pub-logout" title="{% trans 'Toka' %}"
+         aria-label="{% trans 'Toka' %}">
+        <svg width="18" height="18"><use href="#i-logout"></use></svg>
+      </a>
+    {% else %}
+      <a href="{% url 'core:login' %}" class="btn btn--primary">
+        <svg><use href="#i-user"></use></svg> <span class="hide-xs">{% trans "Ingia / Login" %}</span>
+      </a>
+    {% endif %}
+
+    <button class="icon-btn pub-burger" data-drawer-open aria-label="{% trans 'Menyu' %}">
+      <svg width="21" height="21"><use href="#i-menu"></use></svg>
+    </button>
+  </div>
+</nav>
+
+{# ---------------- Mobile drawer ---------------- #}
+<div class="drawer-scrim"></div>
+<aside class="drawer">
+  <div class="drawer__head">
+    <img src="{% static 'img/mwst-logo.svg' %}" alt="" style="width:36px;height:36px">
+    <b>MWST</b>
+    <button class="drawer__x" data-drawer-close aria-label="{% trans 'Funga' %}">
+      <svg width="22" height="22"><use href="#i-x-circle"></use></svg>
+    </button>
+  </div>
+  <nav class="drawer__nav">
+    {% for m in site_menu %}
+      <a href="{{ m.url }}" class="drawer__link {% if m.key == page_key %}is-active{% endif %}">
+        <svg><use href="#i-{{ m.icon }}"></use></svg>{{ m.label|tr }}
+      </a>
+    {% endfor %}
+  </nav>
+  <div class="drawer__foot">
+    {% if is_authed %}
+      <div class="drawer__who">
+        <span class="drawer__avatar">{{ user.initials }}</span>
+        <span>
+          <b>{{ user.get_full_name|default:user.username }}</b>
+          <small>{{ user.get_role_display }}</small>
+        </span>
+      </div>
+      <a href="{% url user.home_url_name %}" class="btn btn--primary btn--block">
+        <svg><use href="#i-dashboard"></use></svg> {% trans "Dashibodi" %}
+      </a>
+      {% if can_join %}
+        <a href="{% url 'core:jiunge' %}" class="btn btn--gold btn--block">
+          <svg><use href="#i-user-plus"></use></svg> {% trans "Jiunge Sasa" %}
+        </a>
+      {% endif %}
+      <a href="{% url 'core:logout' %}" class="btn btn--block drawer__out">
+        <svg><use href="#i-logout"></use></svg> {% trans "Toka" %}
+      </a>
+    {% else %}
+      <a href="{% url 'core:login' %}" class="btn btn--primary btn--block">
+        <svg><use href="#i-user"></use></svg> {% trans "Ingia / Login" %}
+      </a>
+      <a href="{% url 'core:jiunge' %}" class="btn btn--gold btn--block">
+        <svg><use href="#i-user-plus"></use></svg> {% trans "Jiunge Sasa" %}
+      </a>
+    {% endif %}
+  </div>
+</aside>
+
+{% block body %}{% endblock %}
+
+{# ---------------- Footer ---------------- #}
+<footer class="pub-foot">
+  <div class="pub-foot__grid">
+    <div class="pub-foot__brand">
+      <b>MWST</b>
+      <p>{% trans "Tunatekeleza huduma za kijamii, kiuchumi na kiimani kwa mujibu wa maadili ya Kiislamu kwa maendeleo ya jamii na ustawi wa binadamu." %}</p>
+      <div class="appfoot__social" style="margin-top:14px">
+        {% for s in social %}<a href="{{ s.url }}" target="_blank" rel="noopener" style="color:rgba(255,255,255,.7)" aria-label="{{ s.label }}"><svg width="16" height="16"><use href="#i-{{ s.icon }}"></use></svg></a>{% endfor %}
+      </div>
+    </div>
+
+    <div>
+      <h5>{% trans "Viungo" %}</h5>
+      {% for m in footer_menu %}<a href="{{ m.url }}">{{ m.label|tr }}</a>{% endfor %}
+    </div>
+
+    <div>
+      <h5>{% trans "Huduma Zetu" %}</h5>
+      <a href="{% url 'core:huduma' %}">{% trans "Huduma za Ustawi" %}</a>
+      <a href="{% url 'core:huduma' %}">{% trans "Elimu na Mafunzo" %}</a>
+      <a href="{% url 'core:huduma' %}">{% trans "Huduma za Afya" %}</a>
+      <a href="{% url 'core:huduma' %}">{% trans "Miradi ya Maendeleo" %}</a>
+      <a href="{% url 'core:uanachama' %}">{% trans "Uanachama" %}</a>
+    </div>
+
+    <div>
+      <h5>{% trans "Wasiliana Nasi" %}</h5>
+      <a href="tel:+255769600102"><svg width="13" height="13" style="vertical-align:-1px"><use href="#i-phone"></use></svg> +255 769 600 102</a>
+      <a href="mailto:info@muslimwelfare.or.tz"><svg width="13" height="13" style="vertical-align:-1px"><use href="#i-mail"></use></svg> info@muslimwelfare.or.tz</a>
+      <a href="{% url 'core:mawasiliano' %}"><svg width="13" height="13" style="vertical-align:-1px"><use href="#i-map-pin"></use></svg> {% trans "Nkuhungu, Dodoma, Tanzania" %}</a>
+    </div>
+  </div>
+
+  <div class="pub-foot__legal">
+    <a href="{% url 'core:faragha' %}">{% trans "Sera ya Faragha" %}</a>
+    <span>&bull;</span>
+    <a href="{% url 'core:vidakuzi' %}">{% trans "Sera ya Vidakuzi" %}</a>
+    <span>&bull;</span>
+    <a href="{% url 'core:mawasiliano' %}">{% trans "Wasiliana Nasi" %}</a>
+  </div>
+
+  <div class="pub-foot__bottom">
+    <span>&copy; {{ year }} Muslim Welfare Society of Tanzania (MWST). {% trans "Haki zote zimehifadhiwa." %}</span>
+    <span class="pub-foot__values">
+      {% trans "Imani" %} <span>&bull;</span> {% trans "Huruma" %} <span>&bull;</span>
+      {% trans "Huduma" %} <span>&bull;</span> {% trans "Maendeleo" %}
+    </span>
+  </div>
+</footer>
+
+{# ---------------- Kidirisha cha mapendeleo ya vidakuzi ---------------- #}
+{# Sera ya Vidakuzi inaahidi kidirisha hiki, kwa hiyo lazima kiwepo kweli. #}
+<div class="cookiebar" id="cookiebar" hidden>
+  <div class="cookiebar__body">
+    <svg class="cookiebar__ico" width="20" height="20"><use href="#i-shield"></use></svg>
+    <p>
+      {% trans "Tunatumia vidakuzi vya lazima ili tovuti ifanye kazi, na vidakuzi vya hiari kwa uchambuzi na mapendeleo yako." %}
+      <a href="{% url 'core:vidakuzi' %}">{% trans "Soma Sera ya Vidakuzi" %}</a>
+    </p>
+  </div>
+  <div class="cookiebar__actions">
+    <button type="button" class="btn btn--ghost" data-cookie="essential">{% trans "Vya lazima tu" %}</button>
+    <button type="button" class="btn btn--gold" data-cookie="all">{% trans "Kubali vyote" %}</button>
+  </div>
+</div>
+
+{{ i18n_js|json_script:"mwst-i18n" }}
+{% block prescripts %}{% endblock %}
+<script src="{% static 'js/mwst.js' %}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

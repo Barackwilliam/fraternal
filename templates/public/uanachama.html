@@ -1,0 +1,147 @@
+{% extends "public/base.html" %}
+{% load i18n mwst_tags %}
+{% block title %}{% trans "Uanachama" %}{% endblock %}
+
+{% block body %}
+{% include "public/_pagehero.html" %}
+
+{# ==================== KUHUSU UANACHAMA + JINSI YA KUJIUNGA ==================== #}
+<section class="section">
+  <div class="grid grid--1-2 mem__top">
+
+    <article class="mem__panel reveal">
+      <header class="mem__head"><svg width="18" height="18"><use href="#i-users"></use></svg>
+        <h2>{{ mem.about.label }}</h2></header>
+      <div class="mem__body">
+        {% for para in mem.about.paras %}<p>{{ para }}</p>{% endfor %}
+        <blockquote class="mem__quote">
+          <p>&ldquo;{{ mem.about.quote }}&rdquo;</p>
+          <cite>{{ mem.about.quote_ref }}</cite>
+        </blockquote>
+      </div>
+    </article>
+
+    <article class="mem__panel reveal">
+      <header class="mem__head"><svg width="18" height="18"><use href="#i-user-plus"></use></svg>
+        <h2>{{ mem.join.label }}</h2></header>
+      <div class="mem__body">
+        <ol class="mem__steps">
+          {% for s in mem.join.steps %}
+            <li>
+              <span class="mem__stepico"><svg><use href="#i-{{ s.icon }}"></use></svg></span>
+              <b>{{ s.n }}. {{ s.title }}</b>
+              <span>{{ s.text }}</span>
+            </li>
+          {% endfor %}
+        </ol>
+        <div class="mem__joinnote">
+          <svg width="16" height="16"><use href="#i-globe"></use></svg>
+          <span>
+            {{ mem.join.note }}
+            {% if can_join %}
+              <a href="{% url 'core:jiunge' %}">{% trans "Omba mtandaoni" %}</a>
+            {% endif %}
+          </span>
+        </div>
+      </div>
+    </article>
+
+  </div>
+</section>
+
+{# ==================== AINA ZA UANACHAMA ==================== #}
+<section class="section section--tint">
+  <div class="section__head reveal">
+    <span class="section__eyebrow">{{ mem.types.label }}</span>
+    {% include "public/_ornament.html" %}
+    <h2 class="section__title">{{ mem.types.label }}</h2>
+  </div>
+  <div class="mem__types">
+    {% for t in mem.types.items %}
+      <article class="mem__type reveal">
+        <span class="mem__typeico tint-{{ t.tint }}"><svg><use href="#i-{{ t.icon }}"></use></svg></span>
+        <div><h4>{{ t.name }}</h4><p>{{ t.text }}</p></div>
+      </article>
+    {% endfor %}
+  </div>
+  <p class="mem__feelink reveal">
+    {% trans "Ada za kila kifurushi zinapatikana kwenye" %}
+    <a href="{% url 'core:vifurushi' %}">{% trans "ukurasa wa Vifurushi na Ada" %}</a>.
+  </p>
+</section>
+
+{# ==================== MANUFAA ==================== #}
+<section class="section">
+  <div class="section__head reveal">
+    <span class="section__eyebrow">{{ mem.benefits.label }}</span>
+    {% include "public/_ornament.html" %}
+    <h2 class="section__title">{{ mem.benefits.label }}</h2>
+  </div>
+  <div class="mem__benefits">
+    {% for b in mem.benefits.items %}
+      <div class="mem__benefit reveal">
+        <span class="mem__benefitico"><svg><use href="#i-{{ b.icon }}"></use></svg></span>
+        <p>{{ b.text }}</p>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+
+{# ==================== WAJIBU + KUKOMA ==================== #}
+<section class="section section--tint">
+  <div class="grid grid--2 mem__bottom">
+
+    <article class="mem__panel reveal">
+      <header class="mem__head"><svg width="18" height="18"><use href="#i-check-circle"></use></svg>
+        <h2>{{ mem.duties.label }}</h2></header>
+      <div class="mem__body">
+        <ol class="mem__numlist">
+          {% for d in mem.duties.items %}<li>{{ d }}</li>{% endfor %}
+        </ol>
+      </div>
+    </article>
+
+    <article class="mem__panel mem__panel--danger reveal">
+      <header class="mem__head mem__head--danger"><svg width="18" height="18"><use href="#i-logout"></use></svg>
+        <h2>{{ mem.ends.label }}</h2></header>
+      <div class="mem__body">
+        <p class="mem__endsintro">{{ mem.ends.intro }}</p>
+        <ol class="mem__numlist mem__numlist--danger">
+          {% for e in mem.ends.items %}
+            <li><b>{{ e.name }}:</b> {{ e.text }}</li>
+          {% endfor %}
+        </ol>
+        <p class="mem__warn">
+          <svg width="15" height="15"><use href="#i-alert"></use></svg>
+          {{ mem.ends.warning }}
+        </p>
+      </div>
+    </article>
+
+  </div>
+</section>
+
+{# ==================== KWA NINI KUJIUNGA ==================== #}
+<section class="section">
+  <div class="mem__why reveal">
+    <h3>{{ mem.why.label }}</h3>
+    <ul>
+      {% for w in mem.why.items %}
+        <li><svg width="15" height="15"><use href="#i-check"></use></svg>{{ w }}</li>
+      {% endfor %}
+    </ul>
+    {% if can_join %}
+      <div class="hstack" style="flex-wrap:wrap;margin-top:20px">
+        <a href="{% url 'core:jiunge' %}" class="btn btn--gold">
+          <svg><use href="#i-user-plus"></use></svg> {% trans "Jiunge Sasa" %}
+        </a>
+        <a href="{% url 'core:vifurushi' %}" class="btn btn--ghost" style="color:#fff;border-color:rgba(255,255,255,.3)">
+          {% trans "Tazama Ada" %}
+        </a>
+      </div>
+    {% endif %}
+  </div>
+</section>
+
+{% include "public/_cta.html" %}
+{% endblock %}

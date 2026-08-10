@@ -1,0 +1,57 @@
+{% load i18n mwst_tags %}
+<header class="topbar">
+  <button class="icon-btn" data-toggle-sidebar aria-label="Fungua au funga menyu">
+    <svg width="21" height="21"><use href="#i-menu"></use></svg>
+  </button>
+
+  {% if topbar_title %}
+    <div class="topbar__title">
+      <h1>{{ topbar_title|tr }}</h1>
+      {% if topbar_sub %}<p>{{ topbar_sub|tr }}</p>{% endif %}
+    </div>
+  {% endif %}
+
+  {% if show_search %}
+    <label class="search">
+      <svg width="16" height="16"><use href="#i-search"></use></svg>
+      <input type="search" placeholder="{{ search_placeholder|default:'Tafuta hapa...'|tr }}" aria-label="{% trans 'Tafuta' %}">
+    </label>
+  {% else %}
+    <div class="topbar__spacer"></div>
+  {% endif %}
+
+  {% if today %}
+    <div class="datepill">
+      <svg width="16" height="16"><use href="#i-calendar"></use></svg>
+      <span>
+        <span class="datepill__day">{{ today }}</span><br>
+        <span class="datepill__time" data-clock>--:--:--</span>
+      </span>
+    </div>
+  {% endif %}
+
+  {% include "components/langpick.html" %}
+
+  <button class="icon-btn" data-toggle-theme aria-label="Badili mwonekano">
+    <svg width="19" height="19"><use href="#i-moon" data-theme-icon></use></svg>
+  </button>
+
+  <a class="icon-btn" href="{{ notif_url }}" aria-label="{% trans 'Arifa' %}">
+    <svg width="19" height="19"><use href="#i-bell"></use></svg>
+    {% if notif_count %}<span class="icon-btn__dot">{{ notif_count }}</span>{% endif %}
+  </a>
+
+  <a class="icon-btn" href="{{ msg_url }}" aria-label="{% trans 'Ujumbe' %}">
+    <svg width="19" height="19"><use href="#i-mail"></use></svg>
+    {% if msg_count %}<span class="icon-btn__dot">{{ msg_count }}</span>{% endif %}
+  </a>
+
+  <a href="{% url 'core:logout' %}" class="userchip" title="{% trans 'Toka' %}">
+    <span class="userchip__avatar">{{ user_initials|default:"AM" }}</span>
+    <span style="text-align:left">
+      <span class="userchip__name">{{ user_name|default:"Admin MWST" }}</span><br>
+      <span class="userchip__role">{{ user_role|default:"Msimamizi Mkuu"|tr }}</span>
+    </span>
+    <svg width="15" height="15" style="opacity:.5"><use href="#i-logout"></use></svg>
+  </a>
+</header>
