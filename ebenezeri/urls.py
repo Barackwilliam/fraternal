@@ -41,6 +41,10 @@ urlpatterns = [
     path('manage/chatbot/bots/<uuid:bot_id>/whatsapp/', manage_bot_whatsapp, name='manage_bot_whatsapp'),
 ]
 
+# Static/media serving kwa DEBUG (local dev) TU.
+# Kwenye production, Whitenoise (angalia MIDDLEWARE) ndiyo inayosambaza static files,
+# na Cloudinary ndiyo inayosambaza media - hivyo block hii haitumiki huko.
 if settings.DEBUG:
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATICFILES_DIRS[0])
+    if getattr(settings, 'STATICFILES_DIRS', None):
+        urlpatterns += static(settings.STATIC_URL, document_root=settings.STATICFILES_DIRS[0])
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
