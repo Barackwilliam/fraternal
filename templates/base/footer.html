@@ -1,8 +1,0 @@
-{% load i18n mwst_tags %}
-<footer class="appfoot">
-  <span>&copy; {{ year|default:2026 }} Muslim Welfare Society of Tanzania (MWST). Haki zote zimehifadhiwa.</span>
-
-  <span class="appfoot__values">{% trans "Imani" %}<span>&bull;</span>{% trans "Huruma" %}<span>&bull;</span>{% trans "Huduma" %}<span>&bull;</span>{% trans "Maendeleo" %}</span>
-
-  <span class="appfoot__social">{% for s in social %}<a href="{{ s.url }}" target="_blank" rel="noopener" aria-label="{{ s.label }}"><svg width="16" height="16"><use href="#i-{{ s.icon }}"></use></svg></a>{% endfor %}</span>
-</footer>
