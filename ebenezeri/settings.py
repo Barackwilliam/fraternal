@@ -115,7 +115,18 @@ USE_TZ        = True
 STATIC_URL          = '/static/'
 # STATICFILES_DIRS    = [BASE_DIR / 'apps' / 'static']
 STATIC_ROOT         = BASE_DIR / 'staticfiles'
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# Django 5.1 REMOVED the old STATICFILES_STORAGE setting. Leaving it here did
+# nothing at all — no manifest, no compression, no cache-busting — and Django
+# gave no warning about it. STORAGES is the replacement.
+STORAGES = {
+    'default': {
+        'BACKEND': 'django.core.files.storage.FileSystemStorage',
+    },
+    'staticfiles': {
+        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+    },
+}
 
 MEDIA_URL  = f"https://res.cloudinary.com/{os.getenv('CLOUDINARY_CLOUD_NAME', 'drc3xiipg')}/"
 MEDIA_ROOT = BASE_DIR / 'media'
