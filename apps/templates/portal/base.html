@@ -112,5 +112,8 @@ setTimeout(()=>{document.querySelectorAll('.jt-msg').forEach(m=>{m.style.transit
 {% block extra_js %}{% endblock %}
 {% include 'includes/skeleton_boot.html' %}
 {% include 'includes/offline_guard.html' %}
+{% if TURNSTILE_ENABLED %}
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+{% endif %}
 </body>
 </html>

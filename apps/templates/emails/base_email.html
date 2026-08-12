@@ -82,5 +82,8 @@
     </div>
   </div>
 </div>
+{% if TURNSTILE_ENABLED %}
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+{% endif %}
 </body>
 </html>

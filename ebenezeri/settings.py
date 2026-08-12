@@ -55,6 +55,7 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'apps.turnstile_middleware.TurnstileMiddleware',  # ← ADD AFTER CsrfViewMiddleware
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -75,10 +76,15 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'apps.context_processors.turnstile_context',  # ← NEW
+
             ],
         },
     },
 ]
+
+
+
 
 WSGI_APPLICATION = 'ebenezeri.wsgi.application'
 
@@ -231,3 +237,8 @@ else:
 
 
 SITE_URL = 'https://jamiitek.com'
+
+# ── Cloudflare Turnstile (Bot Protection) ──────────────
+TURNSTILE_SITEKEY = os.getenv('TURNSTILE_SITEKEY', '')
+TURNSTILE_SECRET  = os.getenv('TURNSTILE_SECRET', '')
+TURNSTILE_ENABLED = bool(TURNSTILE_SITEKEY and TURNSTILE_SECRET)

@@ -149,27 +149,90 @@ def contact(request):
 def About(request):
     return render(request, 'about.html')
 
-
-# Warsha za Kiroho
 def contact(request):
-    # form = MyContact(request.POST)
-    # ujumbe = ""
-
-
-    # if request.method == 'POST':
-    #     form = MyContact(request.POST)
-    #     if form.is_valid():
-    #         form.save()
-    #         ujumbe = "Hongera Ujumbe Wako Umetumwa Kikamilifu"
-    #     else:
-    #         form = MyContact()  
-      
-    # context = {
-    #     'form':form,
-    #     'ujumbe':ujumbe
-    # }
+    """
+    Contact form view with Turnstile protection
+    
+    Flow:
+    1. GET — render form kwa TURNSTILE_SITEKEY
+    2. POST — frontend sends cf-turnstile-response token
+    3. Mixin au middleware validates token
+    4. Form cleaned (kama valid)
+    5. Email sent to admin
+    """
+    
+    if request.method == 'POST':
+        # Pata data kutoka POST
+        full_name = request.POST.get('full_name', '')
+        email = request.POST.get('email', '')
+        subject = request.POST.get('subject', '')
+        message = request.POST.get('message', '')
+        
+        # Token verification ni automatic via middleware (kama enabled)
+        # Kama hapo na error, middleware itarudi 403 na request hautafikia hapa
+        
+        # Validate required fields
+        if not all([full_name, email, subject, message]):
+            messages.error(request, "Please fill in all fields.")
+            return render(request, 'contact.html')
+        
+        # Email validation (kama inataka zaidi)
+        try:
+            validate_email = email.endswith('.com') or email.endswith('.co.tz') or '@' in email
+            if not validate_email:
+                messages.error(request, "Invalid email address.")
+                return render(request, 'contact.html')
+        except:
+            messages.error(request, "Invalid email address.")
+            return render(request, 'contact.html')
+        
+        # Send email to admin
+        try:
+            admin_email = 'info@jamiitek.com'
+            send_mail(
+                subject=f"New Contact Form: {subject}",
+                message=f"""
+From: {full_name} <{email}>
+Subject: {subject}
+ 
+Message:
+{message}
+ 
+---
+Contact form message from JamiiTek website
+                """,
+                from_email='info@jamiitek.com',
+                recipient_list=[admin_email],
+                fail_silently=False,
+            )
+            
+            # Optional: Send confirmation email to customer
+            send_mail(
+                subject="We received your message — JamiiTek",
+                message=f"""
+Hi {full_name},
+ 
+Thank you for reaching out. We've received your message and will respond within 24 hours.
+ 
+Subject: {subject}
+ 
+Best regards,
+JamiiTek Team
+                """,
+                from_email='info@jamiitek.com',
+                recipient_list=[email],
+                fail_silently=True,
+            )
+            
+            ujumbe = "✓ Your message has been sent successfully! We'll respond within 24 hours."
+            messages.success(request, ujumbe)
+            
+        except Exception as e:
+            ujumbe = f"✗ Error sending email: {str(e)}"
+            messages.error(request, ujumbe)
+            return render(request, 'contact.html', {'ujumbe': ujumbe})
+    
     return render(request, 'contact.html')
-
 
 
 

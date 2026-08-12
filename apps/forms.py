@@ -1,11 +1,17 @@
-# apps/forms.py
+# apps/forms.py — UPDATED WITH TURNSTILE
 import json
 from pathlib import Path
 from django import forms
-from .models import Service,Team
+from .models import Service, Team
 from django.core.exceptions import ValidationError
+from apps.turnstile import TurnstileFormMixin  # ← NEW
 
-class DynamicProposalForm(forms.Form):
+
+class DynamicProposalForm(TurnstileFormMixin, forms.Form):  # ← ADDED MIXIN
+    """
+    Form dynamically na kuload questions kutoka JSON based on website_type
+    Token: Turnstile required kwa security
+    """
     def __init__(self, website_type, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -67,9 +73,8 @@ class DynamicProposalForm(forms.Form):
             raise forms.ValidationError(f"Faili ya {website_type}.json haijaandikwa vizuri. Angalia syntax ya JSON")
 
 
-
-
 class ServiceAdminForm(forms.ModelForm):
+    """Admin form kwa Service — haina Turnstile (admin portal na auth kutendelea)"""
     class Meta:
         model = Service
         fields = '__all__'
@@ -81,6 +86,7 @@ class ServiceAdminForm(forms.ModelForm):
 
 
 class TeamAdminForm(forms.ModelForm):
+    """Admin form kwa Team — haina Turnstile (admin portal na auth kutendelea)"""
     class Meta:
         model = Team
         fields = '__all__'

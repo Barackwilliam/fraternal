@@ -84,5 +84,8 @@
 <script>
 function togglePw(){const i=document.getElementById('pw');const e=document.getElementById('eyeIco');i.type=i.type==='password'?'text':'password';e.className=i.type==='text'?'fas fa-eye-slash':'fas fa-eye';}
 </script>
+{% if TURNSTILE_ENABLED %}
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+{% endif %}
 </body>
 </html>
