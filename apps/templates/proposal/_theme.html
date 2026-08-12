@@ -1,240 +1,287 @@
+{% comment %}
+  apps/templates/proposal/_theme.html
 
+  MUUNDO: Neumorphism ya mwanga (soft UI).
+  Kila kitu kimechongwa kutoka kwenye uso mmoja — hakuna mistari,
+  kina kinatokana na vivuli viwili: giza chini-kulia, mwanga juu-kushoto.
 
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  KANUNI: kilichoinuka kinabonyezwa, kilichobonyea kinajazwa.
+  Sehemu za kujaza zimebonyea; vitufe vimeinuka. Hii inaondoa
+  utata mkubwa wa neumorphism — mtu anajua nini cha kugusa.
+{% endcomment %}
+
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
 /* ═══════════════════════════════════════════════════════
-   PROPOSAL FLOW — LIGHT THEME
-   Site nzima ni giza; hatua hizi tatu ni nyeupe kwa makusudi.
-   Proposal ni hati ya kibiashara — inasomwa, inachapishwa,
-   inatumwa kwa mtu wa tatu. Karatasi nyeupe ndiyo lugha yake.
+   TOKENS
 ═══════════════════════════════════════════════════════ */
-
 :root {
-  --pp-bg:          #F5F7FB;
-  --pp-bg-2:        #EEF2F9;
-  --pp-surface:     #FFFFFF;
-  --pp-line:        #E6EAF2;
-  --pp-line-2:      #D5DCE8;
+  --nu-bg:      #E7ECF3;
+  --nu-bg-2:    #EDF1F7;
+  --nu-hi:      #FFFFFF;                    /* mwanga juu-kushoto */
+  --nu-sh:      rgba(163,177,198,.58);      /* giza chini-kulia */
+  --nu-sh-soft: rgba(163,177,198,.34);
 
-  --pp-ink:         #0F172A;
-  --pp-body:        #475569;
-  --pp-muted:       #94A3B8;
+  /* Maandishi — meusi ya kutosha kusomeka juu ya uso laini */
+  --nu-ink:   #2B3445;
+  --nu-ink-2: #5A6579;
+  --nu-ink-3: #8D97A8;
 
-  --pp-brand:       #0284C7;
-  --pp-brand-2:     #0369A1;
-  --pp-brand-soft:  #E0F2FE;
-  --pp-accent:      #7C3AED;
-  --pp-accent-soft: #F3E8FF;
-  --pp-ok:          #059669;
-  --pp-ok-soft:     #D1FAE5;
-  --pp-warn:        #B45309;
-  --pp-warn-soft:   #FEF3C7;
-  --pp-err:         #DC2626;
-  --pp-err-soft:    #FEE2E2;
+  /* Wino wa brand */
+  --nu-blue:   #3D7FD6;
+  --nu-blue-2: #2C63AC;
+  --nu-violet: #8B5CF6;
+  --nu-pink:   #EC5F9E;
+  --nu-ok:     #21A67A;
+  --nu-warn:   #C77B21;
+  --nu-err:    #D9534F;
 
-  --pp-r:      16px;
-  --pp-r-lg:   22px;
-  --pp-sh-sm:  0 1px 2px rgba(15,23,42,.04), 0 1px 3px rgba(15,23,42,.05);
-  --pp-sh:     0 4px 8px -2px rgba(15,23,42,.05), 0 12px 28px -8px rgba(15,23,42,.09);
-  --pp-sh-lg:  0 18px 44px -12px rgba(15,23,42,.16);
+  --nu-grad: linear-gradient(118deg, #6D8DF0 0%, #A66BF0 38%, #E765A8 70%, #F0925E 100%);
 
-  --pp-font: 'Plus Jakarta Sans', 'Exo 2', system-ui, -apple-system, sans-serif;
+  /* Kina */
+  --nu-out:    8px 8px 18px var(--nu-sh), -8px -8px 18px var(--nu-hi);
+  --nu-out-sm: 4px 4px 9px var(--nu-sh-soft), -4px -4px 9px var(--nu-hi);
+  --nu-out-lg: 14px 14px 30px var(--nu-sh), -12px -12px 26px var(--nu-hi);
+  --nu-in:     inset 5px 5px 11px var(--nu-sh), inset -5px -5px 11px var(--nu-hi);
+  --nu-in-sm:  inset 3px 3px 6px var(--nu-sh-soft), inset -3px -3px 6px var(--nu-hi);
+
+  --nu-r:    18px;
+  --nu-r-lg: 28px;
+  --nu-r-xl: 34px;
+
+  --nu-font: 'Outfit', system-ui, -apple-system, sans-serif;
+  --nu-mono: 'Space Mono', ui-monospace, monospace;
 }
 
-/* ── Page shell ─────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════
+   SHELL
+═══════════════════════════════════════════════════════ */
 body.pp-page {
-  background: var(--pp-bg) !important;
-  color: var(--pp-body);
-  font-family: var(--pp-font);
-  cursor: auto !important;          /* cursor maalum ya cyan haionekani kwenye nyeupe */
+  background: var(--nu-bg) !important;
+  background-image:
+    radial-gradient(ellipse 90% 60% at 15% 0%,  rgba(255,255,255,.75) 0%, transparent 55%),
+    radial-gradient(ellipse 70% 50% at 88% 12%, rgba(196,208,228,.40) 0%, transparent 55%);
+  color: var(--nu-ink-2);
+  font-family: var(--nu-font);
+  cursor: auto !important;
 }
 body.pp-page #cursor-outer,
 body.pp-page #cursor-inner { display: none !important; }
 
-/* ── Nav override (kurasa hizi pekee) ───────────────── */
+/* Nav */
 body.pp-page #site-nav.pinned .nav-inner {
-  background: rgba(255,255,255,.90);
-  border-bottom: 1px solid var(--pp-line);
-  box-shadow: 0 4px 24px rgba(15,23,42,.06);
+  background: rgba(231,236,243,.92);
+  border-bottom: none;
+  box-shadow: 0 8px 20px rgba(163,177,198,.34);
 }
-body.pp-page .nav-logo      { color: var(--pp-ink); }
-body.pp-page .nav-logo em   { color: var(--pp-brand); }
-body.pp-page .nav-menu a    { color: var(--pp-body); }
+body.pp-page .nav-logo    { color: var(--nu-ink); }
+body.pp-page .nav-logo em { color: var(--nu-blue); }
+body.pp-page .nav-menu a  { color: var(--nu-ink-2); }
 body.pp-page .nav-menu a:hover,
-body.pp-page .nav-menu a.active { color: var(--pp-ink); }
+body.pp-page .nav-menu a.active { color: var(--nu-ink); }
 body.pp-page .nav-portal {
-  color: var(--pp-body);
-  border-color: var(--pp-line-2);
-  background: rgba(255,255,255,.6);
+  color: var(--nu-ink-2); border: none;
+  background: var(--nu-bg); box-shadow: var(--nu-out-sm);
 }
-body.pp-page .nav-portal:hover {
-  color: var(--pp-brand); border-color: var(--pp-brand);
-  background: var(--pp-brand-soft);
-}
-body.pp-page .nav-burger span { background: var(--pp-ink) !important; }
+body.pp-page .nav-portal:hover { color: var(--nu-blue); box-shadow: var(--nu-in-sm); }
+body.pp-page .nav-burger span { background: var(--nu-ink) !important; }
 
-/* ── Typography ─────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════
+   TYPE
+═══════════════════════════════════════════════════════ */
+.pp-h1 {
+  font-family: var(--nu-font);
+  font-size: clamp(30px, 4.4vw, 46px);
+  font-weight: 700; letter-spacing: -1.4px; line-height: 1.08;
+  color: var(--nu-ink);
+}
+.pp-h2 { font-size: 19px; font-weight: 600; letter-spacing: -0.4px; color: var(--nu-ink); }
+.pp-lead { font-size: 16px; line-height: 1.72; color: var(--nu-ink-2); max-width: 560px; }
+.pp-small { font-size: 13.5px; line-height: 1.6; color: var(--nu-ink-3); }
+
 .pp-kicker {
   display: inline-flex; align-items: center; gap: 8px;
-  font-size: 11px; font-weight: 700;
-  letter-spacing: 1.4px; text-transform: uppercase;
-  color: var(--pp-brand);
+  padding: 8px 16px; border-radius: 100px;
+  background: var(--nu-bg); box-shadow: var(--nu-out-sm);
+  font-size: 11.5px; font-weight: 600;
+  letter-spacing: 1.4px; text-transform: uppercase; color: var(--nu-blue);
 }
-.pp-h1 {
-  font-family: var(--pp-font);
-  font-size: clamp(30px, 4.6vw, 46px);
-  font-weight: 800; letter-spacing: -1.2px; line-height: 1.1;
-  color: var(--pp-ink);
-}
-.pp-h2 {
-  font-size: 19px; font-weight: 700;
-  letter-spacing: -0.3px; color: var(--pp-ink);
-}
-.pp-lead {
-  font-size: 16.5px; line-height: 1.72;
-  color: var(--pp-body); max-width: 580px;
-}
-.pp-small { font-size: 13.5px; line-height: 1.65; color: var(--pp-muted); }
 
-/* ── Header band ────────────────────────────────────── */
-.pp-top {
-  position: relative; overflow: hidden;
-  padding: 132px 0 52px;
-  background:
-    radial-gradient(ellipse 60% 100% at 15% 0%, rgba(2,132,199,.09) 0%, transparent 62%),
-    radial-gradient(ellipse 50% 90%  at 88% 8%, rgba(124,58,237,.08) 0%, transparent 60%),
-    linear-gradient(180deg, #FFFFFF 0%, var(--pp-bg) 100%);
-  border-bottom: 1px solid var(--pp-line);
-}
-.pp-top-inner { position: relative; z-index: 2; }
+/* ═══════════════════════════════════════════════════════
+   LAYOUT
+═══════════════════════════════════════════════════════ */
+.pp-top    { padding: 128px 0 44px; }
+.pp-main   { padding: 0 0 110px; }
+.pp-narrow { max-width: 900px; margin: 0 auto; }
 
-/* ── Stepper ────────────────────────────────────────── */
+/* ── Stepper: vidonge vilivyoinuka ───────────────────── */
 .pp-steps {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 7px 9px; border-radius: 100px;
-  background: rgba(255,255,255,.75);
-  border: 1px solid var(--pp-line);
-  box-shadow: var(--pp-sh-sm);
-  margin-bottom: 26px; flex-wrap: wrap;
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 8px; margin-bottom: 26px; flex-wrap: wrap;
+  background: var(--nu-bg); border-radius: 100px;
+  box-shadow: var(--nu-in);
 }
 .pp-stp {
-  display: inline-flex; align-items: center; gap: 7px;
-  padding: 5px 13px 5px 6px; border-radius: 100px;
-  font-size: 12.5px; font-weight: 600; color: var(--pp-muted);
-  white-space: nowrap;
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 17px 8px 9px; border-radius: 100px;
+  font-size: 13px; font-weight: 500; color: var(--nu-ink-3); white-space: nowrap;
 }
 .pp-stp b {
   width: 21px; height: 21px; border-radius: 50%;
   display: inline-flex; align-items: center; justify-content: center;
   font-size: 11px; font-weight: 700;
-  background: var(--pp-bg-2); color: var(--pp-muted);
+  background: var(--nu-bg); color: var(--nu-ink-3); box-shadow: var(--nu-out-sm);
 }
-.pp-stp.on { background: var(--pp-ink); color: #fff; }
-.pp-stp.on b { background: rgba(255,255,255,.2); color: #fff; }
-.pp-stp.done { color: var(--pp-ok); }
-.pp-stp.done b { background: var(--pp-ok-soft); color: var(--pp-ok); }
-.pp-stp-sep { width: 12px; height: 1.5px; background: var(--pp-line-2); border-radius: 2px; }
+.pp-stp.on {
+  color: var(--nu-ink); font-weight: 600;
+  background: var(--nu-bg); box-shadow: var(--nu-out-sm);
+}
+.pp-stp.on b { background: var(--nu-grad); color: #fff; box-shadow: none; }
+.pp-stp.done { color: var(--nu-ok); }
+.pp-stp.done b { background: var(--nu-bg); color: var(--nu-ok); box-shadow: var(--nu-in-sm); }
+.pp-stp-sep { width: 8px; height: 3px; border-radius: 3px; background: rgba(163,177,198,.4); }
 
-/* ── Body area ──────────────────────────────────────── */
-.pp-main { padding: 44px 0 96px; background: var(--pp-bg); }
-.pp-narrow { max-width: 920px; margin: 0 auto; }
-
-/* ── Cards & panels ─────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════
+   SURFACES
+═══════════════════════════════════════════════════════ */
 .pp-panel {
-  background: var(--pp-surface);
-  border: 1px solid var(--pp-line);
-  border-radius: var(--pp-r-lg);
-  box-shadow: var(--pp-sh);
+  position: relative;
+  background: var(--nu-bg);
+  border-radius: var(--nu-r-lg);
+  box-shadow: var(--nu-out);
   padding: 32px;
-  margin-bottom: 20px;
+  margin-bottom: 22px;
+}
+.pp-sheet {
+  position: relative;
+  background: var(--nu-bg);
+  border-radius: var(--nu-r-xl);
+  box-shadow: var(--nu-out-lg);
+  overflow: hidden;
 }
 .pp-panel-head {
   display: flex; align-items: flex-start; gap: 14px;
   padding-bottom: 20px; margin-bottom: 24px;
-  border-bottom: 1px solid var(--pp-line);
+  border-bottom: 1px solid rgba(163,177,198,.24);
 }
 .pp-panel-ico {
-  width: 40px; height: 40px; border-radius: 11px; flex-shrink: 0;
+  width: 44px; height: 44px; border-radius: 14px; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
-  background: var(--pp-brand-soft); color: var(--pp-brand); font-size: 15px;
+  font-size: 15px; color: var(--nu-blue);
+  background: var(--nu-bg); box-shadow: var(--nu-out-sm);
 }
-.pp-panel-head p { font-size: 13.5px; color: var(--pp-muted); margin-top: 3px; }
+.pp-panel-head p { font-size: 13.5px; color: var(--nu-ink-3); margin-top: 3px; }
+.pp-secno {
+  margin-left: auto; padding-top: 5px;
+  font-family: var(--nu-mono); font-size: 11px; font-weight: 700;
+  letter-spacing: 1.4px; color: var(--nu-ink-3);
+}
 
-/* ── Callouts ───────────────────────────────────────── */
+/* ── Gradient hero card (kutoka reference) ───────────── */
+.pp-gcard {
+  position: relative; overflow: hidden;
+  padding: 26px 28px; border-radius: 24px;
+  background: var(--nu-grad);
+  box-shadow: 10px 10px 26px rgba(140,110,190,.34), -8px -8px 20px var(--nu-hi);
+  color: #fff;
+}
+.pp-gcard::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(160deg, rgba(255,255,255,.28), transparent 46%);
+}
+.pp-gcard-label {
+  font-size: 11.5px; font-weight: 600; letter-spacing: 1.6px;
+  text-transform: uppercase; opacity: .82; margin-bottom: 8px;
+}
+.pp-gcard-value {
+  font-size: clamp(28px, 4.6vw, 38px); font-weight: 700;
+  letter-spacing: -1.2px; line-height: 1; font-variant-numeric: tabular-nums;
+}
+.pp-gcard-value small { font-size: 15px; font-weight: 600; opacity: .8; margin-left: 7px; }
+.pp-gcard-note { font-size: 12.5px; opacity: .82; margin-top: 10px; line-height: 1.55; }
+
+/* ═══════════════════════════════════════════════════════
+   CALLOUTS
+═══════════════════════════════════════════════════════ */
 .pp-note {
   display: flex; gap: 14px; align-items: flex-start;
-  padding: 16px 18px; border-radius: var(--pp-r);
-  font-size: 14px; line-height: 1.65; color: var(--pp-body);
-  border: 1px solid var(--pp-line);
-  background: var(--pp-surface);
-  box-shadow: var(--pp-sh-sm);
-  margin-bottom: 16px;
+  padding: 17px 19px; margin-bottom: 15px;
+  font-size: 14.5px; line-height: 1.65; color: var(--nu-ink-2);
+  background: var(--nu-bg); border-radius: var(--nu-r);
+  box-shadow: var(--nu-out-sm);
 }
-.pp-note b { color: var(--pp-ink); font-weight: 700; }
-.pp-note a { color: var(--pp-brand); font-weight: 600; text-decoration: none; }
+.pp-note b { color: var(--nu-ink); font-weight: 600; }
+.pp-note a { color: var(--nu-blue); font-weight: 600; text-decoration: none; }
 .pp-note a:hover { text-decoration: underline; }
 .pp-note-ico {
-  width: 38px; height: 38px; border-radius: 11px; flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center; font-size: 15px;
-  background: var(--pp-brand-soft); color: var(--pp-brand);
+  width: 38px; height: 38px; border-radius: 12px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 14px;
+  background: var(--nu-bg); box-shadow: var(--nu-in-sm); color: var(--nu-blue);
 }
-.pp-note--accent { background: linear-gradient(180deg, #FDFBFF, #FFFFFF); border-color: #E9D9FF; }
-.pp-note--accent .pp-note-ico { background: var(--pp-accent-soft); color: var(--pp-accent); }
-.pp-note--ok .pp-note-ico { background: var(--pp-ok-soft); color: var(--pp-ok); }
-.pp-note--warn { background: #FFFDF5; border-color: #F5E6BE; }
-.pp-note--warn .pp-note-ico { background: var(--pp-warn-soft); color: var(--pp-warn); }
-.pp-note--err  { background: #FFF7F7; border-color: #F6CDCD; }
-.pp-note--err .pp-note-ico { background: var(--pp-err-soft); color: var(--pp-err); }
+.pp-note--accent .pp-note-ico { color: var(--nu-violet); }
+.pp-note--ok     .pp-note-ico { color: var(--nu-ok); }
+.pp-note--warn   .pp-note-ico { color: var(--nu-warn); }
+.pp-note--err    .pp-note-ico { color: var(--nu-err); }
 
-/* ── Buttons ────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════
+   BUTTONS — vinabonyea kweli
+═══════════════════════════════════════════════════════ */
 .pp-btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 9px;
-  padding: 13px 24px; border-radius: 12px; border: 1px solid transparent;
-  font-family: var(--pp-font); font-size: 14px; font-weight: 700;
-  letter-spacing: -0.1px; text-decoration: none; cursor: pointer;
-  transition: transform .18s, box-shadow .18s, background .18s, border-color .18s;
+  padding: 14px 26px; border: none; border-radius: 16px;
+  font-family: var(--nu-font); font-size: 14.5px; font-weight: 600;
+  text-decoration: none; cursor: pointer;
+  transition: box-shadow .16s, transform .12s, color .16s;
 }
-.pp-btn:active { transform: translateY(1px); }
 .pp-btn-primary {
-  background: var(--pp-ink); color: #fff;
-  box-shadow: 0 1px 2px rgba(15,23,42,.2), 0 8px 20px -6px rgba(15,23,42,.35);
+  background: var(--nu-grad); color: #fff;
+  box-shadow: 7px 7px 16px rgba(140,110,190,.36), -6px -6px 14px var(--nu-hi);
 }
-.pp-btn-primary:hover { background: #1E293B; box-shadow: 0 10px 26px -6px rgba(15,23,42,.42); }
-.pp-btn-brand {
-  background: var(--pp-brand); color: #fff;
-  box-shadow: 0 1px 2px rgba(2,132,199,.24), 0 8px 20px -6px rgba(2,132,199,.42);
+.pp-btn-primary:hover { transform: translateY(-2px); }
+.pp-btn-primary:active {
+  transform: translateY(0);
+  box-shadow: inset 4px 4px 10px rgba(90,60,140,.34), inset -3px -3px 8px rgba(255,255,255,.28);
 }
-.pp-btn-brand:hover { background: var(--pp-brand-2); }
 .pp-btn-ghost {
-  background: var(--pp-surface); color: var(--pp-body);
-  border-color: var(--pp-line-2); box-shadow: var(--pp-sh-sm);
+  background: var(--nu-bg); color: var(--nu-ink-2); box-shadow: var(--nu-out-sm);
 }
-.pp-btn-ghost:hover { border-color: var(--pp-brand); color: var(--pp-brand); background: #FAFDFF; }
+.pp-btn-ghost:hover { color: var(--nu-blue); transform: translateY(-2px); }
+.pp-btn-ghost:active { transform: translateY(0); box-shadow: var(--nu-in-sm); }
+.pp-btn:focus-visible { outline: 2px solid var(--nu-blue); outline-offset: 4px; }
 
 .pp-back {
-  display: inline-flex; align-items: center; gap: 8px;
-  font-size: 13.5px; font-weight: 600; color: var(--pp-muted);
-  text-decoration: none; margin-bottom: 20px; transition: color .18s;
+  display: inline-flex; align-items: center; gap: 9px;
+  padding: 9px 16px; border-radius: 100px;
+  font-size: 13.5px; font-weight: 500; color: var(--nu-ink-3);
+  text-decoration: none; margin-bottom: 20px;
+  background: var(--nu-bg); box-shadow: var(--nu-out-sm);
+  transition: box-shadow .16s, color .16s;
 }
-.pp-back:hover { color: var(--pp-brand); }
+.pp-back:hover { color: var(--nu-blue); box-shadow: var(--nu-in-sm); }
 
-/* ── Trust strip ────────────────────────────────────── */
-.pp-trust {
-  display: flex; flex-wrap: wrap; gap: 10px 26px;
-  margin-top: 26px; padding-top: 22px;
-  border-top: 1px solid var(--pp-line);
-}
+/* ═══════════════════════════════════════════════════════
+   TRUST
+═══════════════════════════════════════════════════════ */
+.pp-trust { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px; }
 .pp-trust span {
-  display: inline-flex; align-items: center; gap: 8px;
-  font-size: 13px; font-weight: 500; color: var(--pp-muted);
+  display: inline-flex; align-items: center; gap: 9px;
+  padding: 10px 17px; border-radius: 100px;
+  background: var(--nu-bg); box-shadow: var(--nu-out-sm);
+  font-size: 13px; font-weight: 500; color: var(--nu-ink-2);
 }
-.pp-trust i { color: var(--pp-ok); font-size: 12px; }
+.pp-trust i { color: var(--nu-ok); font-size: 11px; }
 
 @media (max-width: 768px) {
-  .pp-top   { padding: 104px 0 38px; }
-  .pp-main  { padding: 32px 0 64px; }
-  .pp-panel { padding: 22px 18px; border-radius: 18px; }
+  .pp-top   { padding: 102px 0 32px; }
+  .pp-main  { padding-bottom: 74px; }
+  .pp-panel { padding: 22px 18px; border-radius: 22px; }
   .pp-steps { width: 100%; justify-content: center; }
+  /* Vivuli vikubwa vinaonekana chafu kwenye skrini ndogo */
+  :root { --nu-out: 6px 6px 13px var(--nu-sh), -6px -6px 13px var(--nu-hi); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pp-btn, .pp-btn:hover, .pp-btn:active { transition: none; transform: none; }
 }
 </style>

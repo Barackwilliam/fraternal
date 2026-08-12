@@ -7,145 +7,121 @@
 {% block extra_css %}
 {% include "proposal/_theme.html" %}
 <style>
-/* ── Step 3: hati yenye muhuri ───────────────────────── */
-.pv-doc { position: relative; }
-
-/* Kichwa cha hati */
-.pv-head {
-  padding: 38px 42px 30px;
-  border-bottom: 2px solid var(--pp-ink);
-  position: relative;
-}
+/* ── Step 3: hati ────────────────────────────────────── */
+.pv-head { padding: 36px 40px 30px; }
 .pv-head-top {
-  display: flex; flex-wrap: wrap; gap: 14px;
-  align-items: flex-start; justify-content: space-between; margin-bottom: 26px;
+  display: flex; flex-wrap: wrap; gap: 16px;
+  align-items: flex-start; justify-content: space-between; margin-bottom: 28px;
 }
 .pv-brand {
-  display: flex; align-items: center; gap: 11px;
-  font-family: var(--pp-display); font-size: 18px; font-weight: 800;
-  letter-spacing: -0.5px; color: var(--pp-ink);
+  display: flex; align-items: center; gap: 13px;
+  font-size: 19px; font-weight: 700; letter-spacing: -0.5px; color: var(--nu-ink);
 }
-.pv-brand em { color: var(--pp-blue); font-style: normal; }
-.pv-brand-mark {
-  width: 34px; height: 34px; border-radius: 9px;
-  display: flex; align-items: center; justify-content: center;
-  background: linear-gradient(180deg, #333B48, var(--pp-ink));
-  color: #FFFDF8; font-size: 14px;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 2px 4px rgba(26,30,38,.28);
-}
+.pv-brand em { color: var(--nu-blue); font-style: normal; }
 .pv-brand small {
-  display: block; font-family: var(--pp-mono); font-size: 8.5px; font-weight: 400;
-  letter-spacing: 1.4px; text-transform: uppercase; color: var(--pp-ink-3);
-  margin-top: 2px; letter-spacing: 1.2px;
+  display: block; font-size: 11px; font-weight: 500;
+  letter-spacing: .3px; color: var(--nu-ink-3); margin-top: 2px;
+}
+.pv-brand-mark {
+  width: 46px; height: 46px; border-radius: 15px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--nu-grad); color: #fff; font-size: 17px;
+  box-shadow: 5px 5px 12px rgba(140,110,190,.34), -4px -4px 10px var(--nu-hi);
 }
 .pv-meta {
-  text-align: right; font-family: var(--pp-mono);
-  font-size: 10.5px; letter-spacing: 1px; color: var(--pp-ink-3); line-height: 1.9;
+  text-align: right; padding: 12px 18px; border-radius: 14px;
+  background: var(--nu-bg); box-shadow: var(--nu-in-sm);
+  font-size: 12px; color: var(--nu-ink-3); line-height: 1.8;
 }
-.pv-meta b { color: var(--pp-ink); font-size: 12px; }
+.pv-meta b {
+  display: block; font-family: var(--nu-mono); font-size: 12.5px;
+  font-weight: 700; color: var(--nu-ink); letter-spacing: .5px;
+}
 
 .pv-title {
-  font-family: var(--pp-display);
-  font-size: clamp(24px, 3.4vw, 33px); font-weight: 800;
-  letter-spacing: -1px; line-height: 1.12; color: var(--pp-ink); margin-bottom: 7px;
+  font-size: clamp(24px, 3.6vw, 34px); font-weight: 700;
+  letter-spacing: -1.2px; line-height: 1.12; color: var(--nu-ink); margin-bottom: 8px;
 }
-.pv-for { font-size: 15px; color: var(--pp-ink-2); }
-.pv-for b { color: var(--pp-ink); font-weight: 700; }
+.pv-for { font-size: 15.5px; color: var(--nu-ink-2); }
+.pv-for b { color: var(--nu-ink); font-weight: 600; }
 
 /* ── Sehemu ─────────────────────────────────────────── */
-.pv-sec { padding: 26px 42px; border-bottom: 1px solid var(--pp-rule); }
+.pv-sec { padding: 26px 40px; }
+.pv-sec + .pv-sec { border-top: 1px solid rgba(163,177,198,.22); }
 .pv-sec-title {
-  display: flex; align-items: center; gap: 9px;
-  font-family: var(--pp-mono); font-size: 10px; font-weight: 700;
-  letter-spacing: 2px; text-transform: uppercase;
-  color: var(--pp-ink-3); margin-bottom: 16px;
+  display: flex; align-items: center; gap: 10px;
+  font-size: 11.5px; font-weight: 600; letter-spacing: 1.6px;
+  text-transform: uppercase; color: var(--nu-ink-3); margin-bottom: 18px;
 }
-.pv-sec-title i { color: var(--pp-blue); font-size: 11px; }
+.pv-sec-title i { color: var(--nu-blue); font-size: 12px; }
 
 .pv-row {
   display: flex; flex-wrap: wrap; gap: 6px 20px;
-  padding: 10px 0;
-  border-bottom: 1px dotted var(--pp-rule-2);
+  padding: 11px 0; border-bottom: 1px solid rgba(163,177,198,.16);
 }
 .pv-row:last-child { border-bottom: none; }
-.pv-dt {
-  min-width: 146px;
-  font-family: var(--pp-mono); font-size: 10px; font-weight: 700;
-  letter-spacing: 1.2px; text-transform: uppercase; color: var(--pp-ink-3);
-  padding-top: 3px;
-}
-.pv-dd { flex: 1; min-width: 200px; font-size: 14.5px; color: var(--pp-ink); line-height: 1.6; }
-.pv-dd a { color: var(--pp-blue); font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
+.pv-dt { min-width: 150px; font-size: 13px; font-weight: 500; color: var(--nu-ink-3); padding-top: 2px; }
+.pv-dd { flex: 1; min-width: 200px; font-size: 15px; font-weight: 500; color: var(--nu-ink); line-height: 1.6; }
+.pv-dd a { color: var(--nu-blue); font-weight: 600; text-decoration: none; }
+.pv-dd a:hover { text-decoration: underline; }
 
 /* ── Vipengele ──────────────────────────────────────── */
-.pv-req { padding: 15px 0; border-bottom: 1px dotted var(--pp-rule-2); }
+.pv-req { padding: 16px 0; border-bottom: 1px solid rgba(163,177,198,.16); }
 .pv-req:last-child { border-bottom: none; padding-bottom: 0; }
-.pv-req-name {
-  font-family: var(--pp-display); font-size: 14px; font-weight: 700;
-  color: var(--pp-ink); margin-bottom: 9px;
-}
-.pv-chips { display: flex; flex-wrap: wrap; gap: 7px; }
+.pv-req-name { font-size: 14.5px; font-weight: 600; color: var(--nu-ink); margin-bottom: 11px; }
+.pv-chips { display: flex; flex-wrap: wrap; gap: 9px; }
 .pv-chip {
-  display: inline-flex; align-items: center; gap: 9px;
-  padding: 7px 12px; border-radius: 7px;
-  background: linear-gradient(180deg, #FFFFFF, var(--pp-paper-2));
-  border: 1px solid var(--pp-rule-2);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.9);
-  font-size: 13.5px; color: var(--pp-ink);
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 9px 15px; border-radius: 100px;
+  background: var(--nu-bg); box-shadow: var(--nu-out-sm);
+  font-size: 13.5px; font-weight: 500; color: var(--nu-ink);
 }
-.pv-chip > i { color: var(--pp-ok); font-size: 10px; }
-.pv-chip-price {
-  font-family: var(--pp-mono); font-size: 12px; font-weight: 700; color: var(--pp-ink-2);
-}
-.pv-plain { font-size: 14.5px; color: var(--pp-ink-2); line-height: 1.7; }
-.pv-none { color: var(--pp-ink-3); font-style: italic; }
+.pv-chip > i { color: var(--nu-ok); font-size: 10px; }
+.pv-chip-price { font-size: 12.5px; font-weight: 600; color: var(--nu-ink-3); }
+.pv-plain { font-size: 15px; color: var(--nu-ink-2); line-height: 1.7; }
+.pv-none { color: var(--nu-ink-3); font-style: italic; }
 
-/* ── Jumla + muhuri ─────────────────────────────────── */
-.pv-total {
-  padding: 32px 42px 38px;
-  background:
-    repeating-linear-gradient(180deg, transparent 0 27px, rgba(20,73,107,.035) 27px 28px),
-    linear-gradient(180deg, var(--pp-paper), var(--pp-paper-2));
-  position: relative;
+/* ── Jumla ──────────────────────────────────────────── */
+.pv-total { padding: 30px 40px 36px; }
+.pv-total-card {
+  position: relative; overflow: hidden;
+  padding: 30px 32px; border-radius: 26px;
+  background: var(--nu-grad); color: #fff;
+  box-shadow: 12px 12px 30px rgba(140,110,190,.36), -8px -8px 22px var(--nu-hi);
+}
+.pv-total-card::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(155deg, rgba(255,255,255,.26), transparent 48%);
 }
 .pv-total-inner {
-  display: flex; flex-wrap: wrap; gap: 24px;
+  position: relative; z-index: 1;
+  display: flex; flex-wrap: wrap; gap: 20px;
   align-items: flex-end; justify-content: space-between;
 }
 .pv-total-label {
-  font-family: var(--pp-mono); font-size: 10px; font-weight: 700;
-  letter-spacing: 2px; text-transform: uppercase; color: var(--pp-ink-3); margin-bottom: 7px;
+  font-size: 11.5px; font-weight: 600; letter-spacing: 1.6px;
+  text-transform: uppercase; opacity: .85; margin-bottom: 9px;
 }
 .pv-total-amount {
-  font-family: var(--pp-display);
-  font-size: clamp(32px, 5.2vw, 44px); font-weight: 800;
-  letter-spacing: -1.8px; line-height: 1; color: var(--pp-ink);
-  font-variant-numeric: tabular-nums;
+  font-size: clamp(34px, 5.4vw, 46px); font-weight: 700;
+  letter-spacing: -2px; line-height: 1; font-variant-numeric: tabular-nums;
 }
-.pv-total-amount small {
-  font-family: var(--pp-mono); font-size: 15px; font-weight: 700;
-  color: var(--pp-ink-3); margin-left: 8px; letter-spacing: 0;
-}
-.pv-total-note {
-  font-size: 12.5px; color: var(--pp-ink-3); line-height: 1.6;
-  max-width: 300px; margin-top: 12px;
-}
+.pv-total-amount small { font-size: 16px; font-weight: 600; opacity: .82; margin-left: 9px; letter-spacing: 0; }
+.pv-total-note { font-size: 12.5px; opacity: .88; line-height: 1.6; max-width: 290px; }
 
-/* Muhuri juu ya jumla */
-.pv-stamp-slot { flex-shrink: 0; }
-
-/* ── Vitendo ────────────────────────────────────────── */
-.pv-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px; }
+.pv-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 26px; }
 
 @media (max-width: 768px) {
   .pv-head, .pv-sec, .pv-total { padding-left: 20px; padding-right: 20px; }
   .pv-head { padding-top: 26px; }
   .pv-meta { text-align: left; }
+  .pv-total-card { padding: 24px 20px; }
   .pv-total-note { max-width: 100%; }
   .pv-actions .pp-btn { width: 100%; }
 }
 
-/* ═══════ PRINT ═══════ */
+/* ═══════ PRINT ═══════
+   Vivuli laini havichapishi vizuri — tunatoa hati safi. */
 @media print {
   @page { margin: 15mm; }
   .no-print, #site-nav, #site-footer, #mob-nav, #q-loader,
@@ -158,18 +134,23 @@
 
   .pp-top, .pp-main { padding: 0 !important; }
   .pp-sheet {
-    border: none !important; box-shadow: none !important;
-    border-radius: 0 !important; background: #fff !important;
-    background-image: none !important;
+    background: #fff !important; box-shadow: none !important;
+    border-radius: 0 !important; border: none !important;
   }
-  .pp-sheet--stack::before, .pp-sheet--stack::after { display: none !important; }
   .pv-head, .pv-sec { padding: 14px 0 !important; }
-  .pv-total {
-    padding: 20px 0 !important; background: #fff !important;
-    background-image: none !important; border-top: 2px solid var(--pp-ink);
+  .pv-sec + .pv-sec { border-top: 1px solid #DDD; }
+  .pv-total { padding: 18px 0 0 !important; }
+  .pv-total-card {
+    background: #fff !important; color: var(--nu-ink) !important;
+    box-shadow: none !important; border-top: 2px solid var(--nu-ink);
+    border-radius: 0 !important; padding: 20px 0 0 !important;
   }
-  .pv-chip { background: #fff !important; box-shadow: none !important; }
-  .pp-stamp { opacity: 1; mix-blend-mode: normal; }
+  .pv-total-card::after { display: none !important; }
+  .pv-brand-mark { background: var(--nu-ink) !important; box-shadow: none !important; }
+  .pv-meta, .pv-chip {
+    background: #fff !important; box-shadow: none !important;
+    border: 1px solid #DDD !important;
+  }
   .pv-req, .pv-chip, .pv-row { break-inside: avoid; page-break-inside: avoid; }
 }
 </style>
@@ -191,12 +172,12 @@
       <span class="pp-stp on"><b>3</b> Quotation</span>
     </div>
 
-    <div class="pp-kicker" style="margin-bottom:13px;color:var(--pp-ok)">
+    <div class="pp-kicker" style="margin-bottom:16px;color:var(--nu-ok)">
       <i class="fas fa-circle-check"></i> Issued
     </div>
 
     <h1 class="pp-h1">Your quotation is ready</h1>
-    <p class="pp-lead" style="margin-top:14px">
+    <p class="pp-lead" style="margin-top:16px">
       Review the scope and estimate below, then download a PDF copy. Our team will be
       in touch within 24 hours to confirm the details.
     </p>
@@ -209,7 +190,7 @@
 <section class="pp-main">
   <div class="container pp-narrow">
 
-    <div class="pp-sheet pp-sheet--stack pv-doc" id="printable-area">
+    <div class="pp-sheet" id="printable-area">
 
       <div class="pv-head">
         <div class="pv-head-top">
@@ -221,7 +202,7 @@
             </span>
           </div>
           <div class="pv-meta">
-            <b>QUOTATION #{{ proposal.id }}</b><br>
+            <b>QUOTATION #{{ proposal.id }}</b>
             Issued {{ proposal.created_at|date:"j M Y" }}<br>
             Valid 30 days
           </div>
@@ -270,7 +251,7 @@
             <a href="{{ proposal.requirements.reference_template.preview_url }}" target="_blank" rel="noopener">
               {{ proposal.requirements.reference_template.name }}
             </a>
-            <span style="color:var(--pp-ink-3)"> · {{ proposal.requirements.reference_template.category }}</span>
+            <span style="color:var(--nu-ink-3)"> · {{ proposal.requirements.reference_template.category }}</span>
           </div>
         </div>
         {% endif %}
@@ -308,24 +289,18 @@
         {% endfor %}
       </div>
 
-      <!-- Total + stamp -->
+      <!-- Total -->
       <div class="pv-total">
-        <div class="pv-total-inner">
-          <div>
-            <div class="pv-total-label">Estimated investment</div>
-            <div class="pv-total-amount">{{ total_cost|thousands }}<small>TZS</small></div>
+        <div class="pv-total-card">
+          <div class="pv-total-inner">
+            <div>
+              <div class="pv-total-label">Estimated investment</div>
+              <div class="pv-total-amount">{{ total_cost|thousands }}<small>TZS</small></div>
+            </div>
             <p class="pv-total-note">
               Based on the scope selected. Final quotation is confirmed in writing
               before any work begins.
             </p>
-          </div>
-
-          <div class="pv-stamp-slot">
-            <div class="pp-stamp">
-              <span class="pp-stamp-org">JamiiTek</span>
-              <span class="pp-stamp-line">Dar es Salaam · Tanzania</span>
-              <span class="pp-stamp-date">{{ proposal.created_at|date:"d.m.Y" }}</span>
-            </div>
           </div>
         </div>
       </div>
@@ -345,7 +320,7 @@
       </a>
     </div>
 
-    <div class="pp-note pp-note--ok no-print" style="margin-top:18px">
+    <div class="pp-note pp-note--ok no-print" style="margin-top:20px">
       <span class="pp-note-ico"><i class="fas fa-comments"></i></span>
       <span>
         <b>What happens next</b><br>
