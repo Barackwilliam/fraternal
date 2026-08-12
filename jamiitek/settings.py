@@ -62,7 +62,7 @@ MIDDLEWARE = [
     'apps.daily_tasks.DailyTasksMiddleware',
 ]
 
-ROOT_URLCONF = 'ebenezeri.urls'
+ROOT_URLCONF = 'jamiitek.urls'
 
 TEMPLATES = [
     {
@@ -85,8 +85,26 @@ TEMPLATES = [
 
 
 
-WSGI_APPLICATION = 'ebenezeri.wsgi.application'
+WSGI_APPLICATION = 'jamiitek.wsgi.application'
 
+# ── Database ──────────────────────────────────────────
+# Njia mbili: DATABASE_URL moja (GitHub Actions inatumia hii), au DB_* moja
+# moja (Render / .env yako). Hakuna nywila iliyoandikwa hapa kwa makusudi.
+
+
+# DATABASE_URL = os.getenv('DATABASE_URL', '')
+
+# if DATABASE_URL:
+#     import dj_database_url
+#     DATABASES = {'default': dj_database_url.parse(
+#         DATABASE_URL, conn_max_age=60, ssl_require=True)}
+# else:
+#     _db_password = os.getenv('DB_PASSWORD', '')
+#     if not _db_password and not DEBUG:
+#         raise RuntimeError(
+#             'DB_PASSWORD (au DATABASE_URL) haijawekwa. Weka environment '
+#             'variables kabla ya kuanzisha mfumo kwenye production.'
+#         )
 DATABASES = {
     'default': {
         'ENGINE':   'django.db.backends.postgresql',
@@ -133,7 +151,7 @@ STORAGES = {
     },
 }
 
-MEDIA_URL  = f"https://res.cloudinary.com/{os.getenv('CLOUDINARY_CLOUD_NAME', 'drc3xiipg')}/"
+MEDIA_URL  = f"https://res.cloudinary.com/{os.getenv('CLOUDINARY_CLOUD_NAME', '')}/"
 MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -163,8 +181,8 @@ JAZZMIN_UI_TWEAKS = {
 
 # ── Uploadcare & Cloudinary ────────────────────────────
 UPLOADCARE = {
-    'pub_key':    os.getenv('UPLOADCARE_PUB_KEY', '4c3ba9de492e0e0eaddc'),
-    'secret':     os.getenv('UPLOADCARE_SECRET',  '28410d13b3cb1098451e'),
+    'pub_key':    os.getenv('UPLOADCARE_PUB_KEY', ''),
+    'secret':     os.getenv('UPLOADCARE_SECRET', ''),
     'use_secure': True,
 }
 
@@ -172,7 +190,7 @@ WEASPRINT_BASEURL = BASE_DIR
  
 # ── Email ──────────────────────────────────────────────
 _email_user = os.getenv('EMAIL_HOST_USER', 'info@jamiitek.com')
-_email_pass = os.getenv('EMAIL_HOST_PASSWORD', 'tbgh swtl zple dhiv')
+_email_pass = os.getenv('EMAIL_HOST_PASSWORD', '')
  
 if _email_user and _email_pass:
     EMAIL_BACKEND       = 'django.core.mail.backends.smtp.EmailBackend'
@@ -191,22 +209,22 @@ else:
 PORTAL_BASE_URL = os.getenv('PORTAL_BASE_URL', 'https://jamiitek.com/portal/')
  
 # ── Cloudinary ─────────────────────────────────────────
-CLOUDINARY_API_KEY    = os.getenv('CLOUDINARY_API_KEY',    '321181265585861')
-CLOUDINARY_API_SECRET = os.getenv('CLOUDINARY_API_SECRET', 'KA2L_qJUCyBBZFcyeQDGzH1kfUo')
+CLOUDINARY_API_KEY    = os.getenv('CLOUDINARY_API_KEY', '')
+CLOUDINARY_API_SECRET = os.getenv('CLOUDINARY_API_SECRET', '')
 
 # ── Chatbot / WhatsApp ─────────────────────────────────
-GROQ_API_KEY = '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'
+GROQ_API_KEY = os.getenv('GROQ_API_KEY', '')
 SITE_URL     = 'https://jamiitek.com'
 
-WHATSAPP_MASTER_TOKEN         = os.getenv('WHATSAPP_MASTER_TOKEN',         'EAARTZCRXCM9sBRCw5ratThW8zsfNp3h8TdFqoKmh6crYm7a4OZBe0u1y5jZBHu3LkEARBFCZAZCVwF6NsqKWsi1n460VWl1IjOO1UsZC3hmjmGMfBkeHUG7ZA5ie1iVvZB9m0hQy8OLpmiMKn8JMgbhlJM7hFNwBHDvXmlC3uatpVADEZA0wLmWbzyUZBwtFTCdhHnj6je4y1gRFk5mdZARtgB5uuE7lQ7juhUAQSlaEt8m4SZBZAkQkmj6KclZAHoiKHFaKPZCfHptOy4J9ZCvmfErOFLCS')
+WHATSAPP_MASTER_TOKEN         = os.getenv('WHATSAPP_MASTER_TOKEN', '')
 WHATSAPP_WEBHOOK_VERIFY_TOKEN = os.getenv('WHATSAPP_WEBHOOK_VERIFY_TOKEN', 'jamiitek_wh_2025')
-WILLIAM_WHATSAPP              = os.getenv('WILLIAM_WHATSAPP',              '15551681112')
-WILLIAM_PHONE_NUMBER_ID       = os.getenv('WILLIAM_PHONE_NUMBER_ID',       '1001845693020330')
+WILLIAM_WHATSAPP              = os.getenv('WILLIAM_WHATSAPP', '')
+WILLIAM_PHONE_NUMBER_ID       = os.getenv('WILLIAM_PHONE_NUMBER_ID', '')
 
 CHATBOT_PAYMENT_INFO = {
     'bank':           'NMB Bank',
-    'account_number': os.getenv('NMB_ACCOUNT', '21410034200'),
-    'account_name':   os.getenv('NMB_NAME',    'WILLIAM CHIPINDI'),
+    'account_number': os.getenv('NMB_ACCOUNT', ''),
+    'account_name':   os.getenv('NMB_NAME', ''),
     'branch':         'Dar es Salaam',
 }
 

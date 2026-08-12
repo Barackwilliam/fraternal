@@ -1,4 +1,4 @@
-"""URLs za dashboard (zinaingia kwenye ebenezeri/urls.py kama /builder/)."""
+"""URLs za dashboard (zinaingia kwenye jamiitek/urls.py kama /builder/)."""
 from django.urls import path
 from . import views, ai
 

@@ -37,4 +37,4 @@ jobs:
           EMAIL_HOST_USER: ${{ secrets.EMAIL_HOST_USER }}
           EMAIL_HOST_PASSWORD: ${{ secrets.EMAIL_HOST_PASSWORD }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-          DJANGO_SETTINGS_MODULE: ebenezeri.settings
+          DJANGO_SETTINGS_MODULE: jamiitek.settings

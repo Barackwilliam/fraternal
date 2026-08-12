@@ -3,8 +3,8 @@
 ## 1. Kilichoongezwa kwenye project
 
 - `builder/` — app nzima (models, views, editor, public rendering, AI, schemas)
-- `ebenezeri/settings.py` — `'builder'` kwenye INSTALLED_APPS, `SubdomainMiddleware` kwenye MIDDLEWARE, na `BUILDER_BASE_DOMAIN` chini
-- `ebenezeri/urls.py` — `path('builder/', include('builder.urls'))`
+- `jamiitek/settings.py` — `'builder'` kwenye INSTALLED_APPS, `SubdomainMiddleware` kwenye MIDDLEWARE, na `BUILDER_BASE_DOMAIN` chini
+- `jamiitek/urls.py` — `path('builder/', include('builder.urls'))`
 - `requirements.txt` — `groq`
 
 ## 2. Environment Variables (Render → Environment)
@@ -83,7 +83,7 @@ Editor ina blocks tayari (category "JamiiTek — Content Yako") zinazoziweka bil
 
 ## ⚠️ TAHADHARI TOFAUTI (si ya builder)
 
-`ebenezeri/settings.py` yako ina Supabase DB password na SECRET_KEY zikiwa
+`jamiitek/settings.py` yako ina Supabase DB password na SECRET_KEY zikiwa
 hardcoded kama defaults. Zibadilishe Supabase kisha ziondoe kwenye code —
 zibaki env variables tu.
 

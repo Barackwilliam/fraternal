@@ -1,1 +1,1 @@
-web: gunicorn ebenezeri.wsgi --log-file -
+web: gunicorn jamiitek.wsgi --log-file -

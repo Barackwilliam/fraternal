@@ -11,12 +11,13 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Python 3.12
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+          cache: 'pip'
 
       - name: Install dependencies
         run: pip install -r requirements.txt
@@ -24,8 +25,8 @@ jobs:
       - name: Run email notifications
         run: python manage.py send_expiry_emails
         env:
-          DATABASE_URL: "postgresql://postgres.frapnewfadymevdkznrq:NyumbaChap@aws-1-eu-north-1.pooler.supabase.com:5432/postgres"
-          EMAIL_HOST_USER: "info@jamiitek.com"
-          EMAIL_HOST_PASSWORD: "tbgh swtl zple dhiv"
-          SECRET_KEY: "django-insecure-@&r$)$xpb)f6pm=_73pupatv2#n-%0%d=(cky=kab5ww6&*tzs"
-          DJANGO_SETTINGS_MODULE: ebenezeri.settings      
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          EMAIL_HOST_USER: ${{ secrets.EMAIL_HOST_USER }}
+          EMAIL_HOST_PASSWORD: ${{ secrets.EMAIL_HOST_PASSWORD }}
+          DJANGO_SETTINGS_MODULE: jamiitek.settings

@@ -1,10 +1,15 @@
 .env
 *.env
+!.env.example
 db.sqlite3
 venv/
+.venv/
 __pycache__/
 *.pyc
 staticfiles/
 media/
 reports/
 *.zip
+.idea/
+.vscode/
+.DS_Store
