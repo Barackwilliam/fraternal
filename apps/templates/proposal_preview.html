@@ -1,205 +1,361 @@
 {% extends "base.html" %}
 {% load static %}
+{% load custom_filters %}
 
-{% block title %}Proposal Preview - {{ block.super }}{% endblock %}
+{% block title %}Quotation #{{ proposal.id }} — {{ block.super }}{% endblock %}
+
+{% block extra_css %}
+{% include "proposal/_theme.html" %}
+<style>
+/* ── Step 3: hati yenye muhuri ───────────────────────── */
+.pv-doc { position: relative; }
+
+/* Kichwa cha hati */
+.pv-head {
+  padding: 38px 42px 30px;
+  border-bottom: 2px solid var(--pp-ink);
+  position: relative;
+}
+.pv-head-top {
+  display: flex; flex-wrap: wrap; gap: 14px;
+  align-items: flex-start; justify-content: space-between; margin-bottom: 26px;
+}
+.pv-brand {
+  display: flex; align-items: center; gap: 11px;
+  font-family: var(--pp-display); font-size: 18px; font-weight: 800;
+  letter-spacing: -0.5px; color: var(--pp-ink);
+}
+.pv-brand em { color: var(--pp-blue); font-style: normal; }
+.pv-brand-mark {
+  width: 34px; height: 34px; border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(180deg, #333B48, var(--pp-ink));
+  color: #FFFDF8; font-size: 14px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 2px 4px rgba(26,30,38,.28);
+}
+.pv-brand small {
+  display: block; font-family: var(--pp-mono); font-size: 8.5px; font-weight: 400;
+  letter-spacing: 1.4px; text-transform: uppercase; color: var(--pp-ink-3);
+  margin-top: 2px; letter-spacing: 1.2px;
+}
+.pv-meta {
+  text-align: right; font-family: var(--pp-mono);
+  font-size: 10.5px; letter-spacing: 1px; color: var(--pp-ink-3); line-height: 1.9;
+}
+.pv-meta b { color: var(--pp-ink); font-size: 12px; }
+
+.pv-title {
+  font-family: var(--pp-display);
+  font-size: clamp(24px, 3.4vw, 33px); font-weight: 800;
+  letter-spacing: -1px; line-height: 1.12; color: var(--pp-ink); margin-bottom: 7px;
+}
+.pv-for { font-size: 15px; color: var(--pp-ink-2); }
+.pv-for b { color: var(--pp-ink); font-weight: 700; }
+
+/* ── Sehemu ─────────────────────────────────────────── */
+.pv-sec { padding: 26px 42px; border-bottom: 1px solid var(--pp-rule); }
+.pv-sec-title {
+  display: flex; align-items: center; gap: 9px;
+  font-family: var(--pp-mono); font-size: 10px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--pp-ink-3); margin-bottom: 16px;
+}
+.pv-sec-title i { color: var(--pp-blue); font-size: 11px; }
+
+.pv-row {
+  display: flex; flex-wrap: wrap; gap: 6px 20px;
+  padding: 10px 0;
+  border-bottom: 1px dotted var(--pp-rule-2);
+}
+.pv-row:last-child { border-bottom: none; }
+.pv-dt {
+  min-width: 146px;
+  font-family: var(--pp-mono); font-size: 10px; font-weight: 700;
+  letter-spacing: 1.2px; text-transform: uppercase; color: var(--pp-ink-3);
+  padding-top: 3px;
+}
+.pv-dd { flex: 1; min-width: 200px; font-size: 14.5px; color: var(--pp-ink); line-height: 1.6; }
+.pv-dd a { color: var(--pp-blue); font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
+
+/* ── Vipengele ──────────────────────────────────────── */
+.pv-req { padding: 15px 0; border-bottom: 1px dotted var(--pp-rule-2); }
+.pv-req:last-child { border-bottom: none; padding-bottom: 0; }
+.pv-req-name {
+  font-family: var(--pp-display); font-size: 14px; font-weight: 700;
+  color: var(--pp-ink); margin-bottom: 9px;
+}
+.pv-chips { display: flex; flex-wrap: wrap; gap: 7px; }
+.pv-chip {
+  display: inline-flex; align-items: center; gap: 9px;
+  padding: 7px 12px; border-radius: 7px;
+  background: linear-gradient(180deg, #FFFFFF, var(--pp-paper-2));
+  border: 1px solid var(--pp-rule-2);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.9);
+  font-size: 13.5px; color: var(--pp-ink);
+}
+.pv-chip > i { color: var(--pp-ok); font-size: 10px; }
+.pv-chip-price {
+  font-family: var(--pp-mono); font-size: 12px; font-weight: 700; color: var(--pp-ink-2);
+}
+.pv-plain { font-size: 14.5px; color: var(--pp-ink-2); line-height: 1.7; }
+.pv-none { color: var(--pp-ink-3); font-style: italic; }
+
+/* ── Jumla + muhuri ─────────────────────────────────── */
+.pv-total {
+  padding: 32px 42px 38px;
+  background:
+    repeating-linear-gradient(180deg, transparent 0 27px, rgba(20,73,107,.035) 27px 28px),
+    linear-gradient(180deg, var(--pp-paper), var(--pp-paper-2));
+  position: relative;
+}
+.pv-total-inner {
+  display: flex; flex-wrap: wrap; gap: 24px;
+  align-items: flex-end; justify-content: space-between;
+}
+.pv-total-label {
+  font-family: var(--pp-mono); font-size: 10px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase; color: var(--pp-ink-3); margin-bottom: 7px;
+}
+.pv-total-amount {
+  font-family: var(--pp-display);
+  font-size: clamp(32px, 5.2vw, 44px); font-weight: 800;
+  letter-spacing: -1.8px; line-height: 1; color: var(--pp-ink);
+  font-variant-numeric: tabular-nums;
+}
+.pv-total-amount small {
+  font-family: var(--pp-mono); font-size: 15px; font-weight: 700;
+  color: var(--pp-ink-3); margin-left: 8px; letter-spacing: 0;
+}
+.pv-total-note {
+  font-size: 12.5px; color: var(--pp-ink-3); line-height: 1.6;
+  max-width: 300px; margin-top: 12px;
+}
+
+/* Muhuri juu ya jumla */
+.pv-stamp-slot { flex-shrink: 0; }
+
+/* ── Vitendo ────────────────────────────────────────── */
+.pv-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px; }
+
+@media (max-width: 768px) {
+  .pv-head, .pv-sec, .pv-total { padding-left: 20px; padding-right: 20px; }
+  .pv-head { padding-top: 26px; }
+  .pv-meta { text-align: left; }
+  .pv-total-note { max-width: 100%; }
+  .pv-actions .pp-btn { width: 100%; }
+}
+
+/* ═══════ PRINT ═══════ */
+@media print {
+  @page { margin: 15mm; }
+  .no-print, #site-nav, #site-footer, #mob-nav, #q-loader,
+  #cursor-outer, #cursor-inner { display: none !important; }
+
+  body { background: #fff !important; background-image: none !important; }
+  body * { visibility: hidden; }
+  #printable-area, #printable-area * { visibility: visible; }
+  #printable-area { position: absolute; left: 0; top: 0; width: 100%; }
+
+  .pp-top, .pp-main { padding: 0 !important; }
+  .pp-sheet {
+    border: none !important; box-shadow: none !important;
+    border-radius: 0 !important; background: #fff !important;
+    background-image: none !important;
+  }
+  .pp-sheet--stack::before, .pp-sheet--stack::after { display: none !important; }
+  .pv-head, .pv-sec { padding: 14px 0 !important; }
+  .pv-total {
+    padding: 20px 0 !important; background: #fff !important;
+    background-image: none !important; border-top: 2px solid var(--pp-ink);
+  }
+  .pv-chip { background: #fff !important; box-shadow: none !important; }
+  .pp-stamp { opacity: 1; mix-blend-mode: normal; }
+  .pv-req, .pv-chip, .pv-row { break-inside: avoid; page-break-inside: avoid; }
+}
+</style>
+{% endblock %}
+
 
 {% block content %}
-<style>
-    body {
-        background: linear-gradient(to right, #f0f2f5, #ffffff);
-        font-family: 'Inter', sans-serif;
-    }
+<script>document.body.classList.add('pp-page');</script>
 
-    .glass-panel {
-        background: rgba(255, 255, 255, 0.9);
-        border-radius: 16px;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
-        padding: 30px;
-    }
+<!-- ══ HEADER ══ -->
+<section class="pp-top">
+  <div class="container pp-narrow">
 
-    .proposal-header {
-        border-bottom: 2px solid #007bff;
-        padding-bottom: 10px;
-        margin-bottom: 20px;
-    }
-
-    .proposal-table th {
-        background-color: #f8f9fa;
-        font-weight: 600;
-    }
-
-    .btn-primary, .btn-success {
-        border-radius: 30px;
-        padding: 8px 20px;
-        font-weight: 600;
-    }
-
-    .btn-light {
-        border-radius: 30px;
-    }
-
-    .print-controls button,
-    .print-controls a {
-        margin-right: 10px;
-    }
-
-    @media print {
-        .no-print {
-            display: none !important;
-        }
-        body {
-            background: white;
-        }
-    }
-</style>
-
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-10">
-            <div class="glass-panel">
-                <div class="d-flex justify-content-between align-items-center mb-4 proposal-header">
-                    <h3 class="text-primary mb-0">📝 Proposal Preview</h3>
-                    <a href="{% url 'generate_pdf' proposal.id %}" class="btn btn-light btn-sm shadow-sm">
-                        <i class="fas fa-download me-2"></i> Download PDF
-                    </a>
-                </div>
-
-                <div id="printable-area">
-                    <div class="text-center mb-4">
-                        <h1 class="text-dark">{{ proposal.website_type.name }} Proposal</h1>
-                        <p class="lead">Prepared for <strong>{{ proposal.client.name }}</strong></p>
-                        <p class="text-muted">Generated on {{ proposal.created_at|date:"F j, Y" }}</p>
-                    </div>
-
-                    <div class="row mb-4">
-                        <div class="col-md-6 mb-3">
-                            <div class="card border-0 shadow-sm h-100">
-                                <div class="card-body">
-                                    <h5 class="text-primary fw-bold mb-3">👤 Client Information</h5>
-                                    <ul class="list-unstyled mb-0">
-                                        <li><strong>Name:</strong> {{ proposal.client.name }}</li>
-                                        <li><strong>Email:</strong> {{ proposal.client.email }}</li>
-                                        {% if proposal.client.phone %}
-                                        <li><strong>Phone:</strong> {{ proposal.client.phone }}</li>
-                                        {% endif %}
-                                        {% if proposal.client.company %}
-                                        <li><strong>Company:</strong> {{ proposal.client.company }}</li>
-                                        {% endif %}
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <div class="card border-0 shadow-sm h-100">
-                                <div class="card-body">
-                                    <h5 class="text-primary fw-bold mb-3">📁 Project Details</h5>
-                                    <ul class="list-unstyled mb-0">
-                                        <li><strong>Website Type:</strong> {{ proposal.website_type.name }}</li>
-                                        {% if proposal.requirements.reference_template %}
-                                        <li><strong>Reference Design:</strong>
-                                          <a href="{{ proposal.requirements.reference_template.preview_url }}" target="_blank">
-                                            {{ proposal.requirements.reference_template.name }}</a>
-                                          ({{ proposal.requirements.reference_template.category }})</li>
-                                        {% endif %}
-                                        <li><strong>Created:</strong> {{ proposal.created_at|date:"F j, Y" }}</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="card border-0 shadow-sm mb-4">
-                        <div class="card-body">
-                            <h5 class="text-primary fw-bold mb-3">📋 Project Requirements</h5>
-                            <div class="table-responsive">
-                                <table class="table table-bordered proposal-table">
-                                    <thead>
-                                        <tr>
-                                            <th width="30%">Requirement</th>
-                                            <th>Details</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for key, value in proposal.requirements.items %}{% if key != 'reference_template' %}
-                                            {% if key|slice:":7" != "client_" %}
-                                            <tr>
-                                                <td><strong>{{ key|title }}</strong></td>
-                                                <td>
-                                                    {% if value is iterable and value is not string %}
-                                                    <ul class="mb-0 ps-3">
-                                                        {% for item in value %}
-                                                        <li>{{ item }}</li>
-                                                        {% endfor %}
-                                                    </ul>
-                                                    {% else %}
-                                                    {{ value|default:"Not specified" }}
-                                                    {% endif %}
-                                                </td>
-                                            </tr>
-                                            {% endif %}
-                                        {% endif %}
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-
-
-                                        <!-- Total Estimated Amount Section -->
-                    <div class="card border-0 shadow-sm mb-4">
-                        <div class="card-body text-center">
-                            <h5 class="text-success fw-bold mb-2">💰 Total Estimated Amount</h5>
-                            <div class="fs-2 fw-bold text-primary" id="totalAmountDisplay">
-                                0 TZS
-                            </div>
-                            <small class="text-muted">Based on selected features</small>
-                        </div>
-                    </div>
-
-                    <script>
-                    // Function to calculate total from table
-                    document.addEventListener('DOMContentLoaded', function() {
-                        let total = 0;
-
-                        document.querySelectorAll('.proposal-table tbody tr').forEach(row => {
-                            // Angalia kama kuna number kwenye Details
-                            let detailsCell = row.querySelector('td:nth-child(2)');
-                            if (detailsCell) {
-                                // Tafuta numbers ndani ya li au text
-                                detailsCell.querySelectorAll('li').forEach(li => {
-                                    let text = li.textContent.replace(/,/g, '').match(/\d+/g);
-                                    if (text) {
-                                        text.forEach(num => total += parseInt(num));
-                                    }
-                                });
-                                // Ikiwa ni text moja tu
-                                if (!detailsCell.querySelector('li')) {
-                                    let text = detailsCell.textContent.replace(/,/g, '').match(/\d+/g);
-                                    if (text) text.forEach(num => total += parseInt(num));
-                                }
-                            }
-                        });
-
-                        document.getElementById('totalAmountDisplay').textContent = total.toLocaleString('en-US') + " TZS";
-                    });
-                    </script>
-
-
-
-                    <div class="text-center no-print print-controls">
-                        <button onclick="window.print()" class="btn btn-primary shadow-sm">
-                            <i class="fas fa-print me-2"></i> Print
-                        </button>
-                        <a href="{% url 'generate_pdf' proposal.id %}" class="btn btn-success shadow-sm">
-                            <i class="fas fa-download me-2"></i> Download PDF
-                        </a>
-                    </div>
-
-                </div>
-            </div>
-        </div>
+    <div class="pp-steps">
+      <span class="pp-stp done"><b><i class="fas fa-check" style="font-size:9px"></i></b> Category</span>
+      <span class="pp-stp-sep"></span>
+      <span class="pp-stp done"><b><i class="fas fa-check" style="font-size:9px"></i></b> Brief</span>
+      <span class="pp-stp-sep"></span>
+      <span class="pp-stp on"><b>3</b> Quotation</span>
     </div>
-</div>
+
+    <div class="pp-kicker" style="margin-bottom:13px;color:var(--pp-ok)">
+      <i class="fas fa-circle-check"></i> Issued
+    </div>
+
+    <h1 class="pp-h1">Your quotation is ready</h1>
+    <p class="pp-lead" style="margin-top:14px">
+      Review the scope and estimate below, then download a PDF copy. Our team will be
+      in touch within 24 hours to confirm the details.
+    </p>
+
+  </div>
+</section>
+
+
+<!-- ══ DOCUMENT ══ -->
+<section class="pp-main">
+  <div class="container pp-narrow">
+
+    <div class="pp-sheet pp-sheet--stack pv-doc" id="printable-area">
+
+      <div class="pv-head">
+        <div class="pv-head-top">
+          <div class="pv-brand">
+            <span class="pv-brand-mark"><i class="fas fa-atom"></i></span>
+            <span>
+              Jamii<em>Tek</em>
+              <small>Web &amp; Software · Dar es Salaam</small>
+            </span>
+          </div>
+          <div class="pv-meta">
+            <b>QUOTATION #{{ proposal.id }}</b><br>
+            Issued {{ proposal.created_at|date:"j M Y" }}<br>
+            Valid 30 days
+          </div>
+        </div>
+
+        <h2 class="pv-title">{{ proposal.website_type.name }} Development</h2>
+        <p class="pv-for">Prepared for <b>{{ proposal.client.name }}</b></p>
+      </div>
+
+      <!-- Client -->
+      <div class="pv-sec">
+        <div class="pv-sec-title"><i class="fas fa-user"></i> Client</div>
+        <div class="pv-row">
+          <div class="pv-dt">Full name</div>
+          <div class="pv-dd">{{ proposal.client.name }}</div>
+        </div>
+        <div class="pv-row">
+          <div class="pv-dt">Email</div>
+          <div class="pv-dd">{{ proposal.client.email }}</div>
+        </div>
+        {% if proposal.client.phone %}
+        <div class="pv-row">
+          <div class="pv-dt">Phone</div>
+          <div class="pv-dd">{{ proposal.client.phone }}</div>
+        </div>
+        {% endif %}
+        {% if proposal.client.company %}
+        <div class="pv-row">
+          <div class="pv-dt">Organisation</div>
+          <div class="pv-dd">{{ proposal.client.company }}</div>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Project -->
+      <div class="pv-sec">
+        <div class="pv-sec-title"><i class="fas fa-folder-open"></i> Project</div>
+        <div class="pv-row">
+          <div class="pv-dt">Category</div>
+          <div class="pv-dd">{{ proposal.website_type.name }}</div>
+        </div>
+        {% if proposal.requirements.reference_template %}
+        <div class="pv-row">
+          <div class="pv-dt">Reference design</div>
+          <div class="pv-dd">
+            <a href="{{ proposal.requirements.reference_template.preview_url }}" target="_blank" rel="noopener">
+              {{ proposal.requirements.reference_template.name }}
+            </a>
+            <span style="color:var(--pp-ink-3)"> · {{ proposal.requirements.reference_template.category }}</span>
+          </div>
+        </div>
+        {% endif %}
+        <div class="pv-row">
+          <div class="pv-dt">Date prepared</div>
+          <div class="pv-dd">{{ proposal.created_at|date:"j F Y" }}</div>
+        </div>
+      </div>
+
+      <!-- Scope -->
+      <div class="pv-sec">
+        <div class="pv-sec-title"><i class="fas fa-list-check"></i> Scope &amp; requirements</div>
+
+        {% for row in requirement_rows %}
+        <div class="pv-req">
+          <div class="pv-req-name">{{ row.label }}</div>
+          {% if row.items %}
+          <div class="pv-chips">
+            {% for item in row.items %}
+            <span class="pv-chip">
+              <i class="fas fa-check"></i>
+              {{ item.name }}
+              {% if item.price %}<span class="pv-chip-price">{{ item.price|thousands }} TZS</span>{% endif %}
+            </span>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div class="pv-plain">
+            {% if row.text %}{{ row.text }}{% else %}<span class="pv-none">Not specified</span>{% endif %}
+          </div>
+          {% endif %}
+        </div>
+        {% empty %}
+        <div class="pv-plain pv-none">No additional requirements were captured.</div>
+        {% endfor %}
+      </div>
+
+      <!-- Total + stamp -->
+      <div class="pv-total">
+        <div class="pv-total-inner">
+          <div>
+            <div class="pv-total-label">Estimated investment</div>
+            <div class="pv-total-amount">{{ total_cost|thousands }}<small>TZS</small></div>
+            <p class="pv-total-note">
+              Based on the scope selected. Final quotation is confirmed in writing
+              before any work begins.
+            </p>
+          </div>
+
+          <div class="pv-stamp-slot">
+            <div class="pp-stamp">
+              <span class="pp-stamp-org">JamiiTek</span>
+              <span class="pp-stamp-line">Dar es Salaam · Tanzania</span>
+              <span class="pp-stamp-date">{{ proposal.created_at|date:"d.m.Y" }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══ ACTIONS ══ -->
+    <div class="pv-actions no-print">
+      <a href="{% url 'generate_pdf' proposal.id %}" class="pp-btn pp-btn-primary">
+        <i class="fas fa-download" style="font-size:12px"></i> Download PDF
+      </a>
+      <button type="button" onclick="window.print()" class="pp-btn pp-btn-ghost">
+        <i class="fas fa-print" style="font-size:12px"></i> Print
+      </button>
+      <a href="{% url 'select_website' %}" class="pp-btn pp-btn-ghost">
+        <i class="fas fa-plus" style="font-size:12px"></i> New quotation
+      </a>
+    </div>
+
+    <div class="pp-note pp-note--ok no-print" style="margin-top:18px">
+      <span class="pp-note-ico"><i class="fas fa-comments"></i></span>
+      <span>
+        <b>What happens next</b><br>
+        Our team reviews your requirements and contacts you within 24 hours to confirm
+        scope, timeline, and the final quotation. Questions before then? Message us on
+        WhatsApp at <a href="https://wa.me/255629712678">+255 629 712 678</a>.
+      </span>
+    </div>
+
+  </div>
+</section>
+
 {% endblock %}

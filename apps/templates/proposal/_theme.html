@@ -1,0 +1,240 @@
+
+
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+/* ═══════════════════════════════════════════════════════
+   PROPOSAL FLOW — LIGHT THEME
+   Site nzima ni giza; hatua hizi tatu ni nyeupe kwa makusudi.
+   Proposal ni hati ya kibiashara — inasomwa, inachapishwa,
+   inatumwa kwa mtu wa tatu. Karatasi nyeupe ndiyo lugha yake.
+═══════════════════════════════════════════════════════ */
+
+:root {
+  --pp-bg:          #F5F7FB;
+  --pp-bg-2:        #EEF2F9;
+  --pp-surface:     #FFFFFF;
+  --pp-line:        #E6EAF2;
+  --pp-line-2:      #D5DCE8;
+
+  --pp-ink:         #0F172A;
+  --pp-body:        #475569;
+  --pp-muted:       #94A3B8;
+
+  --pp-brand:       #0284C7;
+  --pp-brand-2:     #0369A1;
+  --pp-brand-soft:  #E0F2FE;
+  --pp-accent:      #7C3AED;
+  --pp-accent-soft: #F3E8FF;
+  --pp-ok:          #059669;
+  --pp-ok-soft:     #D1FAE5;
+  --pp-warn:        #B45309;
+  --pp-warn-soft:   #FEF3C7;
+  --pp-err:         #DC2626;
+  --pp-err-soft:    #FEE2E2;
+
+  --pp-r:      16px;
+  --pp-r-lg:   22px;
+  --pp-sh-sm:  0 1px 2px rgba(15,23,42,.04), 0 1px 3px rgba(15,23,42,.05);
+  --pp-sh:     0 4px 8px -2px rgba(15,23,42,.05), 0 12px 28px -8px rgba(15,23,42,.09);
+  --pp-sh-lg:  0 18px 44px -12px rgba(15,23,42,.16);
+
+  --pp-font: 'Plus Jakarta Sans', 'Exo 2', system-ui, -apple-system, sans-serif;
+}
+
+/* ── Page shell ─────────────────────────────────────── */
+body.pp-page {
+  background: var(--pp-bg) !important;
+  color: var(--pp-body);
+  font-family: var(--pp-font);
+  cursor: auto !important;          /* cursor maalum ya cyan haionekani kwenye nyeupe */
+}
+body.pp-page #cursor-outer,
+body.pp-page #cursor-inner { display: none !important; }
+
+/* ── Nav override (kurasa hizi pekee) ───────────────── */
+body.pp-page #site-nav.pinned .nav-inner {
+  background: rgba(255,255,255,.90);
+  border-bottom: 1px solid var(--pp-line);
+  box-shadow: 0 4px 24px rgba(15,23,42,.06);
+}
+body.pp-page .nav-logo      { color: var(--pp-ink); }
+body.pp-page .nav-logo em   { color: var(--pp-brand); }
+body.pp-page .nav-menu a    { color: var(--pp-body); }
+body.pp-page .nav-menu a:hover,
+body.pp-page .nav-menu a.active { color: var(--pp-ink); }
+body.pp-page .nav-portal {
+  color: var(--pp-body);
+  border-color: var(--pp-line-2);
+  background: rgba(255,255,255,.6);
+}
+body.pp-page .nav-portal:hover {
+  color: var(--pp-brand); border-color: var(--pp-brand);
+  background: var(--pp-brand-soft);
+}
+body.pp-page .nav-burger span { background: var(--pp-ink) !important; }
+
+/* ── Typography ─────────────────────────────────────── */
+.pp-kicker {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 1.4px; text-transform: uppercase;
+  color: var(--pp-brand);
+}
+.pp-h1 {
+  font-family: var(--pp-font);
+  font-size: clamp(30px, 4.6vw, 46px);
+  font-weight: 800; letter-spacing: -1.2px; line-height: 1.1;
+  color: var(--pp-ink);
+}
+.pp-h2 {
+  font-size: 19px; font-weight: 700;
+  letter-spacing: -0.3px; color: var(--pp-ink);
+}
+.pp-lead {
+  font-size: 16.5px; line-height: 1.72;
+  color: var(--pp-body); max-width: 580px;
+}
+.pp-small { font-size: 13.5px; line-height: 1.65; color: var(--pp-muted); }
+
+/* ── Header band ────────────────────────────────────── */
+.pp-top {
+  position: relative; overflow: hidden;
+  padding: 132px 0 52px;
+  background:
+    radial-gradient(ellipse 60% 100% at 15% 0%, rgba(2,132,199,.09) 0%, transparent 62%),
+    radial-gradient(ellipse 50% 90%  at 88% 8%, rgba(124,58,237,.08) 0%, transparent 60%),
+    linear-gradient(180deg, #FFFFFF 0%, var(--pp-bg) 100%);
+  border-bottom: 1px solid var(--pp-line);
+}
+.pp-top-inner { position: relative; z-index: 2; }
+
+/* ── Stepper ────────────────────────────────────────── */
+.pp-steps {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 9px; border-radius: 100px;
+  background: rgba(255,255,255,.75);
+  border: 1px solid var(--pp-line);
+  box-shadow: var(--pp-sh-sm);
+  margin-bottom: 26px; flex-wrap: wrap;
+}
+.pp-stp {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 5px 13px 5px 6px; border-radius: 100px;
+  font-size: 12.5px; font-weight: 600; color: var(--pp-muted);
+  white-space: nowrap;
+}
+.pp-stp b {
+  width: 21px; height: 21px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700;
+  background: var(--pp-bg-2); color: var(--pp-muted);
+}
+.pp-stp.on { background: var(--pp-ink); color: #fff; }
+.pp-stp.on b { background: rgba(255,255,255,.2); color: #fff; }
+.pp-stp.done { color: var(--pp-ok); }
+.pp-stp.done b { background: var(--pp-ok-soft); color: var(--pp-ok); }
+.pp-stp-sep { width: 12px; height: 1.5px; background: var(--pp-line-2); border-radius: 2px; }
+
+/* ── Body area ──────────────────────────────────────── */
+.pp-main { padding: 44px 0 96px; background: var(--pp-bg); }
+.pp-narrow { max-width: 920px; margin: 0 auto; }
+
+/* ── Cards & panels ─────────────────────────────────── */
+.pp-panel {
+  background: var(--pp-surface);
+  border: 1px solid var(--pp-line);
+  border-radius: var(--pp-r-lg);
+  box-shadow: var(--pp-sh);
+  padding: 32px;
+  margin-bottom: 20px;
+}
+.pp-panel-head {
+  display: flex; align-items: flex-start; gap: 14px;
+  padding-bottom: 20px; margin-bottom: 24px;
+  border-bottom: 1px solid var(--pp-line);
+}
+.pp-panel-ico {
+  width: 40px; height: 40px; border-radius: 11px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--pp-brand-soft); color: var(--pp-brand); font-size: 15px;
+}
+.pp-panel-head p { font-size: 13.5px; color: var(--pp-muted); margin-top: 3px; }
+
+/* ── Callouts ───────────────────────────────────────── */
+.pp-note {
+  display: flex; gap: 14px; align-items: flex-start;
+  padding: 16px 18px; border-radius: var(--pp-r);
+  font-size: 14px; line-height: 1.65; color: var(--pp-body);
+  border: 1px solid var(--pp-line);
+  background: var(--pp-surface);
+  box-shadow: var(--pp-sh-sm);
+  margin-bottom: 16px;
+}
+.pp-note b { color: var(--pp-ink); font-weight: 700; }
+.pp-note a { color: var(--pp-brand); font-weight: 600; text-decoration: none; }
+.pp-note a:hover { text-decoration: underline; }
+.pp-note-ico {
+  width: 38px; height: 38px; border-radius: 11px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 15px;
+  background: var(--pp-brand-soft); color: var(--pp-brand);
+}
+.pp-note--accent { background: linear-gradient(180deg, #FDFBFF, #FFFFFF); border-color: #E9D9FF; }
+.pp-note--accent .pp-note-ico { background: var(--pp-accent-soft); color: var(--pp-accent); }
+.pp-note--ok .pp-note-ico { background: var(--pp-ok-soft); color: var(--pp-ok); }
+.pp-note--warn { background: #FFFDF5; border-color: #F5E6BE; }
+.pp-note--warn .pp-note-ico { background: var(--pp-warn-soft); color: var(--pp-warn); }
+.pp-note--err  { background: #FFF7F7; border-color: #F6CDCD; }
+.pp-note--err .pp-note-ico { background: var(--pp-err-soft); color: var(--pp-err); }
+
+/* ── Buttons ────────────────────────────────────────── */
+.pp-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+  padding: 13px 24px; border-radius: 12px; border: 1px solid transparent;
+  font-family: var(--pp-font); font-size: 14px; font-weight: 700;
+  letter-spacing: -0.1px; text-decoration: none; cursor: pointer;
+  transition: transform .18s, box-shadow .18s, background .18s, border-color .18s;
+}
+.pp-btn:active { transform: translateY(1px); }
+.pp-btn-primary {
+  background: var(--pp-ink); color: #fff;
+  box-shadow: 0 1px 2px rgba(15,23,42,.2), 0 8px 20px -6px rgba(15,23,42,.35);
+}
+.pp-btn-primary:hover { background: #1E293B; box-shadow: 0 10px 26px -6px rgba(15,23,42,.42); }
+.pp-btn-brand {
+  background: var(--pp-brand); color: #fff;
+  box-shadow: 0 1px 2px rgba(2,132,199,.24), 0 8px 20px -6px rgba(2,132,199,.42);
+}
+.pp-btn-brand:hover { background: var(--pp-brand-2); }
+.pp-btn-ghost {
+  background: var(--pp-surface); color: var(--pp-body);
+  border-color: var(--pp-line-2); box-shadow: var(--pp-sh-sm);
+}
+.pp-btn-ghost:hover { border-color: var(--pp-brand); color: var(--pp-brand); background: #FAFDFF; }
+
+.pp-back {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 13.5px; font-weight: 600; color: var(--pp-muted);
+  text-decoration: none; margin-bottom: 20px; transition: color .18s;
+}
+.pp-back:hover { color: var(--pp-brand); }
+
+/* ── Trust strip ────────────────────────────────────── */
+.pp-trust {
+  display: flex; flex-wrap: wrap; gap: 10px 26px;
+  margin-top: 26px; padding-top: 22px;
+  border-top: 1px solid var(--pp-line);
+}
+.pp-trust span {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 13px; font-weight: 500; color: var(--pp-muted);
+}
+.pp-trust i { color: var(--pp-ok); font-size: 12px; }
+
+@media (max-width: 768px) {
+  .pp-top   { padding: 104px 0 38px; }
+  .pp-main  { padding: 32px 0 64px; }
+  .pp-panel { padding: 22px 18px; border-radius: 18px; }
+  .pp-steps { width: 100%; justify-content: center; }
+}
+</style>

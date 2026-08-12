@@ -260,24 +260,102 @@ def select_website_type(request):
     })
 
 
+# ═══════════════════════════════════════════════════════════════════
+# apps/views.py — REPLACEMENT kwa `dynamic_form`
+#
+# Badilisha function nzima ya `dynamic_form` (ilianzia mstari 200)
+# na hii. Hakuna kingine kwenye file kinachohitaji kubadilishwa.
+#
+# Ongeza import hizi juu ya file kama hazipo:
+#     import logging
+#     logger = logging.getLogger(__name__)
+# ═══════════════════════════════════════════════════════════════════
+
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+def _resolve_client(cleaned):
+    """
+    Pata Client anayelingana na email, au tengeneza mpya.
+
+    KWA NINI SI get_or_create:
+    `Client.email` HAINA unique=True (models.py:112), lakini get_or_create
+    inaita .get() ndani yake — hivyo inavunjika na MultipleObjectsReturned
+    mara tu duplicates zinapoingia. Duplicates zinatokea kwa sababu sehemu
+    tatu tofauti zinatengeneza Client: portal register, chatbot fallback
+    (client_portal_views.py:49), na form hii.
+
+    .first() haiwezi kuvunjika hata kama kuna duplicates kumi.
+    order_by('pk') inahakikisha tunachukua rekodi ileile kila mara,
+    si ya nasibu — muhimu ili proposals za mteja zisitawanyike.
+    """
+    email = (cleaned.get('client_email') or '').strip().lower()
+
+    # iexact: 'Willy@x.com' na 'willy@x.com' ni mtu mmoja
+    matches = Client.objects.filter(email__iexact=email).order_by('pk')
+    client = matches.first()
+
+    if client is None:
+        return Client.objects.create(
+            email=email,
+            name=(cleaned.get('client_name') or '').strip(),
+            phone=(cleaned.get('client_phone') or '').strip(),
+            company=(cleaned.get('client_company') or '').strip(),
+        )
+
+    count = matches.count()
+    if count > 1:
+        logger.warning(
+            "Client duplicates kwa %s: %s rekodi (pk: %s). Natumia pk=%s.",
+            email, count, list(matches.values_list('pk', flat=True)), client.pk,
+        )
+
+    # Jaza sehemu tupu TU. Mteja anaweza kuwa alijaza jina kamili kwenye
+    # portal; proposal form isilifute kwa jina fupi alilotumia hapa.
+    updated = []
+    for field, value in (
+        ('name',    cleaned.get('client_name')),
+        ('phone',   cleaned.get('client_phone')),
+        ('company', cleaned.get('client_company')),
+    ):
+        value = (value or '').strip()
+        if value and not getattr(client, field):
+            setattr(client, field, value)
+            updated.append(field)
+
+    if updated:
+        client.save(update_fields=updated)
+
+    return client
+
+
 def dynamic_form(request, website_type_id):
     website_type = get_object_or_404(WebsiteType, id=website_type_id)
-    
+
+    # DynamicProposalForm inakubali request= tu kama TurnstileFormMixin
+    # imeongezwa. Hii inaruhusu view kufanya kazi kabla NA baada ya mixin,
+    # bila TypeError.
+    form_kwargs = {}
+    try:
+        from apps.turnstile import TurnstileFormMixin
+        if issubclass(DynamicProposalForm, TurnstileFormMixin):
+            form_kwargs['request'] = request
+    except ImportError:
+        pass
+
     if request.method == 'POST':
-        form = DynamicProposalForm(website_type.name, request.POST)
+        form = DynamicProposalForm(website_type.name, request.POST, **form_kwargs)
+
         if form.is_valid():
-            # Create or get client
-            client, created = Client.objects.get_or_create(
-                email=form.cleaned_data.get('client_email'),
-                defaults={
-                    'name': form.cleaned_data.get('client_name'),
-                    'phone': form.cleaned_data.get('client_phone'),
-                    'company': form.cleaned_data.get('client_company')
-                }
-            )
-            
-            # Create proposal — na reference template kama ilichaguliwa
+            client = _resolve_client(form.cleaned_data)
+
             requirements = dict(form.cleaned_data)
+            # Token ya Turnstile ni ya matumizi ya mara moja — isihifadhiwe
+            # kwenye JSON wala isionekane kwenye proposal ya mteja.
+            requirements.pop('turnstile', None)
+
             tpl_id = request.POST.get('reference_template')
             if tpl_id:
                 ref = WebsiteTemplate.objects.filter(
@@ -289,35 +367,41 @@ def dynamic_form(request, website_type_id):
                         'category': ref.get_category_display(),
                         'preview_url': f'/templates/preview/{ref.pk}/',
                     }
+
             proposal = ProjectProposal.objects.create(
                 client=client,
                 website_type=website_type,
-                requirements=requirements
+                requirements=requirements,
             )
-            
+
             return redirect('proposal_preview', proposal_id=proposal.id)
+
     else:
         initial_data = {}
-        if request.user.is_authenticated and hasattr(request.user, 'client'):
-            initial_data = {
-                'client_name': request.user.client.name,
-                'client_email': request.user.client.email,
-                'client_phone': request.user.client.phone,
-                'client_company': request.user.client.company
-            }
-        
-        form = DynamicProposalForm(website_type.name, initial=initial_data)
-    
-    # Gawa fields kugawanya client na project requirements
+        if request.user.is_authenticated:
+            profile = Client.objects.filter(user=request.user).first()
+            if profile:
+                initial_data = {
+                    'client_name':    profile.name,
+                    'client_email':   profile.email,
+                    'client_phone':   profile.phone,
+                    'client_company': profile.company,
+                }
+
+        form = DynamicProposalForm(
+            website_type.name, initial=initial_data, **form_kwargs)
+
+    # Gawa fields: client details dhidi ya project requirements
     client_fields = []
     project_fields = []
-    
     for field in form:
+        if field.name == 'turnstile':
+            continue          # inarendwa peke yake kwenye template
         if field.name.startswith('client_'):
             client_fields.append(field)
         else:
             project_fields.append(field)
-    
+
     ref_template = None
     tpl_id = request.GET.get('template') or request.POST.get('reference_template')
     if tpl_id:
@@ -330,16 +414,96 @@ def dynamic_form(request, website_type_id):
         'client_fields': client_fields,
         'project_fields': project_fields,
         'ref_template': ref_template,
-        'title': f'{website_type.name} Requirements'
+        'title': f'{website_type.name} Requirements',
     }
-    
+
     return render(request, 'dynamic_form.html', context)
 
+# ═══════════════════════════════════════════════════════════════════
+# PATCH kwa apps/views.py
+# Badilisha function ya `proposal_preview` (ilikuwa mstari ~275)
+# ═══════════════════════════════════════════════════════════════════
+
+from django.shortcuts import get_object_or_404
+
+
+# ── Helper: gawa "Feature Name | 250000" kuwa (jina, bei) ──────────
+def _parse_choice(raw):
+    """
+    Values za checkbox zinahifadhiwa kama 'Online Payments | 250000'.
+    Rudisha (name, price_int). Kama hakuna '|', bei ni 0.
+    """
+    text = str(raw)
+    if '|' not in text:
+        return text.strip(), 0
+
+    name, _, price_part = text.rpartition('|')
+    digits = ''.join(ch for ch in price_part if ch.isdigit())
+    try:
+        price = int(digits) if digits else 0
+    except ValueError:
+        price = 0
+    return name.strip(), price
+
+
+def _build_requirement_rows(requirements):
+    """
+    Geuza requirements dict kuwa rows tayari kwa template, na uhesabu jumla.
+
+    MUHIMU: bei zinatokana TU na sehemu iliyo baada ya '|' kwenye chaguo
+    zilizochaguliwa. Hesabu ya zamani ilikuwa inakusanya KILA tarakimu
+    kwenye table — ikiwemo namba ya simu ya mteja — hivyo jumla ilikuwa
+    inaweza kuwa mabilioni. Hii ndiyo sababu ya kuhesabu upande wa server.
+    """
+    rows = []
+    total = 0
+
+    for key, value in requirements.items():
+        if key == 'reference_template' or key.startswith('client_'):
+            continue
+        if key in ('turnstile', 'csrfmiddlewaretoken'):
+            continue
+
+        label = key.replace('_', ' ').strip().title()
+
+        # Chaguo nyingi (checkbox) → list
+        if isinstance(value, (list, tuple)):
+            items = []
+            for raw in value:
+                name, price = _parse_choice(raw)
+                total += price
+                items.append({'name': name, 'price': price or None})
+            if items:
+                rows.append({'label': label, 'items': items, 'text': None})
+
+        # Jibu la maandishi
+        else:
+            text = str(value).strip() if value not in (None, '') else ''
+            rows.append({'label': label, 'items': None, 'text': text})
+
+    return rows, total
+
+
 def proposal_preview(request, proposal_id):
-    proposal = ProjectProposal.objects.get(id=proposal_id)
+    proposal = get_object_or_404(ProjectProposal, id=proposal_id)
+
+    requirements = proposal.requirements
+    if isinstance(requirements, str):
+        import json
+        try:
+            requirements = json.loads(requirements)
+        except Exception:
+            requirements = {}
+    if not isinstance(requirements, dict):
+        requirements = {}
+
+    rows, total_cost = _build_requirement_rows(requirements)
+
     return render(request, 'proposal_preview.html', {
         'proposal': proposal,
-        'title': 'Proposal Preview'
+        'requirement_rows': rows,
+        'total_cost': total_cost,
+        'title': 'Proposal Preview',
     })
 
 

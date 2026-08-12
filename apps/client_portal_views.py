@@ -64,12 +64,23 @@ def client_required(view_func):
 
 
 # ── REGISTER ───────────────────────────────────────────────────────
+from apps.turnstile import verify_token, get_client_ip
 
 def portal_register(request):
     if request.user.is_authenticated and not request.user.is_staff:
         return redirect('portal_dashboard')
 
     if request.method == 'POST':
+        errors = []
+
+        # ── Turnstile kwanza ──
+        ok, codes = verify_token(
+            request.POST.get('cf-turnstile-response'),
+            get_client_ip(request),
+        )
+        if not ok:
+            errors.append('Uthibitisho umeshindikana. Tafadhali jaribu tena.')
+
         username    = request.POST.get('username', '').strip()
         email       = request.POST.get('email', '').strip()
         phone       = request.POST.get('phone', '').strip()
@@ -79,7 +90,6 @@ def portal_register(request):
         password    = request.POST.get('password', '')
         password2   = request.POST.get('password2', '')
 
-        errors = []
         if not all([username, email, full_name, password]):
             errors.append('All fields except phone are required.')
         if password != password2:
@@ -162,6 +172,7 @@ def portal_register(request):
 
 
 # ── LOGIN ──────────────────────────────────────────────────────────
+from apps.turnstile import verify_token, get_client_ip
 
 def portal_login(request):
     if request.user.is_authenticated and not request.user.is_staff:
@@ -169,19 +180,27 @@ def portal_login(request):
 
     error = None
     if request.method == 'POST':
-        username = request.POST.get('username', '').strip()
-        password = request.POST.get('password', '')
-        user = authenticate(request, username=username, password=password)
-        if user:
-            if user.is_staff or user.is_superuser:
-                error = 'Staff accounts use the management panel.'
-            elif Client.objects.filter(user=user).exists():
-                login(request, user)
-                return redirect(request.POST.get('next') or '/portal/')
-            else:
-                error = 'Your account is not linked to a client profile. Please contact JamiiTek.'
+        # ── Turnstile kwanza, kabla ya kugusa password ──
+        ok, codes = verify_token(
+            request.POST.get('cf-turnstile-response'),
+            get_client_ip(request),
+        )
+        if not ok:
+            error = 'Uthibitisho umeshindikana. Tafadhali jaribu tena.'
         else:
-            error = 'Invalid username or password.'
+            username = request.POST.get('username', '').strip()
+            password = request.POST.get('password', '')
+            user = authenticate(request, username=username, password=password)
+            if user:
+                if user.is_staff or user.is_superuser:
+                    error = 'Staff accounts use the management panel.'
+                elif Client.objects.filter(user=user).exists():
+                    login(request, user)
+                    return redirect(request.POST.get('next') or '/portal/')
+                else:
+                    error = 'Your account is not linked to a client profile. Please contact JamiiTek.'
+            else:
+                error = 'Invalid username or password.'
 
     return render(request, 'portal/login.html', {
         'error': error, 'next': request.GET.get('next', ''),
