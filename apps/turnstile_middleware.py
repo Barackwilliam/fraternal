@@ -1,76 +1,84 @@
 # apps/turnstile_middleware.py
 """
-Optional middleware kwa forms zisizotumia Django Forms (raw HTML)
-Hadithi: Token ni single-use. Kama form uses TurnstileFormMixin, middleware itakataa request
-(token iliyothibitishwa tayari ni invalid).
+Cloudflare Turnstile middleware — OPT-IN MODEL.
 
-SOLUTION: Chagua moja tu kwa form:
-  - TurnstileFormMixin (kwa Django forms) — Recommended
-  - Middleware (kwa raw HTML forms) — Kwa edges only
+MUHIMU: Middleware hii inakagua TU njia zilizoorodheshwa kwenye PROTECTED_PATHS.
+Kila kitu kingine kinapita bila kuguswa.
 
-Mara nyingi TurnstileFormMixin ni decision sahihi.
+Sababu: mtindo wa "zuia kila kitu, ondoa vichache" ulikuwa unavunja /manage/,
+/portal/, /proposals/, na forms za websites za wateja kwenye subdomains —
+kwa sababu forms hizo hazina widget, hivyo hazitumi token, hivyo kila POST
+inarudi 403 "missing-input-response".
+
+KANUNI: Ongeza path hapa TU baada ya kuhakikisha template yake ina widget:
+    <div class="cf-turnstile" data-sitekey="{{ TURNSTILE_SITEKEY }}"></div>
+
+Kama form inatumia TurnstileFormMixin, USIIWEKE hapa. Token ni single-use —
+ikikaguliwa mara mbili, ya pili inashindwa.
 """
 
+import logging
+
 from django.conf import settings
+from django.contrib import messages
 from django.http import JsonResponse
+from django.shortcuts import redirect
+
 from apps.turnstile import verify_token, get_client_ip
 
+logger = logging.getLogger(__name__)
 
-# Routes zisizohitaji bot check — webhooks, admin, API, n.k.
-EXEMPT_PREFIXES = (
-    "/admin/",
-    "/api/",
-    "/webhooks/",              # Green API, Pesapal IPN, n.k.
-    "/payments/callback",      # Pesapal return URL
-    "/api/",                   # REST API endpoints
-)
+
+# ── Njia zinazolindwa ─────────────────────────────────────────────
+# Public forms TU. Kila moja LAZIMA iwe na widget kwenye template yake.
+# Ni exact match kwenye request.path (si prefix) ili /manage/ isiingie kwa bahati mbaya.
+PROTECTED_PATHS = {
+    # "/contact/",
+    # "/domain-check/",
+}
+
+
+def _wants_json(request):
+    """
+    Browsers hutuma Accept: text/html,...,*/*;q=0.8 — hivyo request.accepts('application/json')
+    inarudi True KILA MARA. Tumia XHR header badala yake.
+    """
+    return (
+        request.headers.get("X-Requested-With") == "XMLHttpRequest"
+        or request.content_type == "application/json"
+    )
 
 
 class TurnstileMiddleware:
-    """
-    POST requests lazima zina cf-turnstile-response token, kwa sehemu zisizoinunguza.
-    
-    MATUKIO:
-    - Entry point: /contact/ (POST) — middleware itacheck
-    - Entry point: /select-website/ (POST) — middleware itacheck
-    - Entry point: /webhooks/pesapal/ (POST) — EXEMPT (webhook ni server-to-server, si user bot)
-    - Entry point: /admin/login/ (POST) — EXEMPT (admin wana session na other protections)
-    """
-
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
-        # Chuja — POST tu, kama Turnstile ni enabled, kama route sio exempt
         if (
             request.method == "POST"
             and settings.TURNSTILE_ENABLED
-            and not any(request.path.startswith(prefix) for prefix in EXEMPT_PREFIXES)
+            and request.path in PROTECTED_PATHS
         ):
-            # Verify token
-            ok, codes = verify_token(
-                request.POST.get("cf-turnstile-response"),
-                get_client_ip(request)
-            )
-            
+            token = request.POST.get("cf-turnstile-response")
+            ok, codes = verify_token(token, get_client_ip(request))
+
             if not ok:
-                # Reject kwa 403 Forbidden
-                if request.accepts("application/json"):
+                logger.warning(
+                    "Turnstile rejected POST %s from %s: %s",
+                    request.path, get_client_ip(request), codes,
+                )
+
+                if _wants_json(request):
                     return JsonResponse(
-                        {
-                            "error": "Uthibitisho umeshindikana. Tafadhali jaribu tena." 
-                                    if settings.LANGUAGE_CODE.startswith('sw')
-                                    else "Verification failed. Please try again.",
-                            "codes": codes
-                        },
-                        status=403
+                        {"error": "Uthibitisho umeshindikana. Tafadhali jaribu tena."},
+                        status=403,
                     )
-                else:
-                    # Fallback: Return HTML error
-                    from django.http import HttpResponse
-                    return HttpResponse(
-                        f"<h1>Verification Failed</h1><p>Codes: {codes}</p>",
-                        status=403
-                    )
-        
+
+                # Browser: rudisha mtumiaji kwenye form na ujumbe, si JSON tupu
+                messages.error(
+                    request,
+                    "Uthibitisho umeshindikana. Tafadhali jaribu tena.",
+                )
+                return redirect(request.path)
+
         return self.get_response(request)
