@@ -18,81 +18,81 @@
     "question": "What type of SaaS product are you planning?",
     "type": "checkbox",
     "options": [
-      "Project Management | 0",
-      "CRM (Customer Relationship Management) | 0",
-      "Accounting & Finance | 0",
-      "Marketing Automation | 0",
-      "Collaboration Tools | 0",
-      "Analytics & Reporting | 0",
-      "Other (Specify in notes) | 0"
+      "Project Management | 0 | A",
+      "CRM (Customer Relationship Management) | 0 | A",
+      "Accounting & Finance | 0 | A",
+      "Marketing Automation | 0 | A",
+      "Collaboration Tools | 0 | A",
+      "Analytics & Reporting | 0 | A",
+      "Other (Specify in notes) | 0 | A"
     ]
   },
   "core_features": {
     "question": "Select the main features required:",
     "type": "checkbox",
     "options": [
-      "User Registration and Authentication | 15000",
-      "Role-based Access Control | 10000",
-      "Subscription Billing & Payment Integration | 15000",
-      "Dashboard with Analytics | 14000",
-      "API Access for Integrations | 15000",
-      "Multi-Tenant Architecture | 25000",
-      "Email Notifications & Alerts | 30000",
-      "Real-time Collaboration | 20000",
-      "Mobile Responsive Design | 9000",
-      "Customizable User Settings | 35000",
-      "Data Export & Import | 6000",
-      "User Activity Logs | 7000"
+      "User Registration and Authentication | 15000 | B",
+      "Role-based Access Control | 10000 | A",
+      "Subscription Billing & Payment Integration | 15000 | B",
+      "Dashboard with Analytics | 14000 | A",
+      "API Access for Integrations | 15000 | B",
+      "Multi-Tenant Architecture | 25000 | C",
+      "Email Notifications & Alerts | 30000 | C",
+      "Real-time Collaboration | 20000 | B",
+      "Mobile Responsive Design | 9000 | A",
+      "Customizable User Settings | 35000 | C",
+      "Data Export & Import | 6000 | A",
+      "User Activity Logs | 7000 | A"
     ]
   },
   "third_party_integrations": {
     "question": "Which third-party services should be integrated?",
     "type": "checkbox",
     "options": [
-      "Payment Gateways (Stripe, PayPal) | 100000",
-      "CRM Tools (Salesforce, HubSpot) | 80000",
-      "Cloud Storage (AWS S3, Google Drive) | 9000",
-      "Email Marketing (Mailchimp, SendGrid) | 8000",
-      "Analytics Platforms (Google Analytics) | 7000"
+      "Payment Gateways (Stripe, PayPal) | 100000 | C",
+      "CRM Tools (Salesforce, HubSpot) | 80000 | B",
+      "Cloud Storage (AWS S3, Google Drive) | 9000 | B",
+      "Email Marketing (Mailchimp, SendGrid) | 8000 | A",
+      "Analytics Platforms (Google Analytics) | 7000 | A"
     ]
   },
   "security_features": {
     "question": "Select required security features:",
     "type": "checkbox",
     "options": [
-      "Data Encryption | 20000",
-      "Two-Factor Authentication (2FA) | 250000",
-      "Regular Backups | 8000",
-      "Activity Monitoring | 7000",
-      "GDPR Compliance | 15000"
+      "Data Encryption | 20000 | B",
+      "Two-Factor Authentication (2FA) | 250000 | C",
+      "Regular Backups | 8000 | A",
+      "Activity Monitoring | 7000 | A",
+      "GDPR Compliance | 15000 | B"
     ]
   },
   "admin_features": {
     "question": "Administrative tools needed:",
     "type": "checkbox",
     "options": [
-      "User Management Dashboard | 25000",
-      "Subscription Management | 12000",
-      "Usage Analytics & Reporting | 25000",
-      "Customer Support Integration | 10000",
-      "Audit Logs | 7000"
+      "User Management Dashboard | 25000 | B",
+      "Subscription Management | 12000 | B",
+      "Usage Analytics & Reporting | 25000 | C",
+      "Customer Support Integration | 10000 | A",
+      "Audit Logs | 7000 | A"
     ]
   },
   "design_preferences": {
     "question": "Choose design style:",
     "type": "checkbox",
     "options": [
-      "Modern & Clean | 8000",
-      "Professional & Minimal | 7000",
-      "Dark Mode Support | 7000"
+      "Modern & Clean | 8000 | B",
+      "Professional & Minimal | 7000 | A",
+      "Dark Mode Support | 7000 | A"
     ]
   },
   "domain_hosting": {
     "question": "Do you want domain and hosting services included?",
     "type": "checkbox",
     "options": [
-      "Yes, please set up | 70000",
-      "No, I already have | 0"
+      "Yes, please set up | 70000 | A",
+      "No, I already have | 0 | A"
     ]
   },
   "project_timeline": {

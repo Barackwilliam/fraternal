@@ -23,45 +23,45 @@
     "question": "Which property types will your website support?",
     "type": "checkbox",
     "options": [
-      "Residential | 0",
-      "Commercial | 0",
-      "Land | 0",
-      "Vacation Rentals | 0",
-      "Short-term Rentals | 0",
-      "Off-plan Properties | 0"
+      "Residential | 0 | A",
+      "Commercial | 0 | A",
+      "Land | 0 | A",
+      "Vacation Rentals | 0 | A",
+      "Short-term Rentals | 0 | A",
+      "Off-plan Properties | 0 | A"
     ]
   },
   "features": {
     "question": "Select features you want to include:",
     "type": "checkbox",
     "options": [
-      "Property Listings with Image Galleries | 50000",
-      "Advanced Search & Filtering (price, type, location, etc.) | 40000",
-      "Interactive Property Map (Google Maps Integration) | 30000",
-      "Agent Profile Pages with Contact Info | 30000",
-      "User Registration/Login | 40000",
-      "Favorites & Saved Listings | 25000",
-      "WhatsApp Chat Integration | 15000",
-      "Contact Forms & Quick Inquiry | 20000",
-      "Multilingual Support | 60000",
-      "Blog/News Articles | 30000",
-      "Admin Dashboard to Manage Listings | 60000",
-      "Email Notifications to Agents or Users | 25000",
-      "Booking Request System | 30000",
-      "Virtual Tour (YouTube or 360°) Embeds | 25000",
-      "Featured Properties Section | 20000",
-      "Search by Region/District | 15000",
-      "Map & List View Toggle | 20000",
-      "Social Media Sharing Buttons | 10000",
-      "Compare Properties Feature | 30000",
-      "Property Tags (e.g., For Sale, New Listing, Hot Deal) | 10000",
-      "Mobile-Responsive Design | 40000",
-      "Progressive Web App (PWA) for Mobile Experience | 60000",
-      "Search Engine Optimization (SEO) | 40000",
-      "Google Analytics Integration | 10000",
-      "Automatic Sitemap & Indexing | 15000",
-      "Featured Ads & Premium Listings Payment System | 50000",
-      "SMS Notifications (via API) | 40000"
+      "Property Listings with Image Galleries | 50000 | C",
+      "Advanced Search & Filtering (price, type, location, etc.) | 40000 | B",
+      "Interactive Property Map (Google Maps Integration) | 30000 | B",
+      "Agent Profile Pages with Contact Info | 30000 | B",
+      "User Registration/Login | 40000 | B",
+      "Favorites & Saved Listings | 25000 | A",
+      "WhatsApp Chat Integration | 15000 | A",
+      "Contact Forms & Quick Inquiry | 20000 | A",
+      "Multilingual Support | 60000 | C",
+      "Blog/News Articles | 30000 | B",
+      "Admin Dashboard to Manage Listings | 60000 | C",
+      "Email Notifications to Agents or Users | 25000 | A",
+      "Booking Request System | 30000 | B",
+      "Virtual Tour (YouTube or 360°) Embeds | 25000 | B",
+      "Featured Properties Section | 20000 | A",
+      "Search by Region/District | 15000 | A",
+      "Map & List View Toggle | 20000 | A",
+      "Social Media Sharing Buttons | 10000 | A",
+      "Compare Properties Feature | 30000 | B",
+      "Property Tags (e.g., For Sale, New Listing, Hot Deal) | 10000 | A",
+      "Mobile-Responsive Design | 40000 | B",
+      "Progressive Web App (PWA) for Mobile Experience | 60000 | C",
+      "Search Engine Optimization (SEO) | 40000 | B",
+      "Google Analytics Integration | 10000 | A",
+      "Automatic Sitemap & Indexing | 15000 | A",
+      "Featured Ads & Premium Listings Payment System | 50000 | C",
+      "SMS Notifications (via API) | 40000 | C"
     ]
   },
   "design_preference": {
@@ -73,8 +73,8 @@
     "question": "Do you need help with domain and hosting?",
     "type": "checkbox",
     "options": [
-      "Yes | 70000",
-      "No | 0"
+      "Yes | 70000 | A",
+      "No | 0 | A"
     ]
   },
   "number_of_properties": {
@@ -86,9 +86,9 @@
     "question": "Which currencies should the site support?",
     "type": "checkbox",
     "options": [
-      "TZS (Tanzanian Shilling) | 0",
-      "USD (US Dollar) | 0",
-      "KES (Kenyan Shilling) | 0"
+      "TZS (Tanzanian Shilling) | 0 | A",
+      "USD (US Dollar) | 0 | A",
+      "KES (Kenyan Shilling) | 0 | A"
     ]
   },
   "timeline": {

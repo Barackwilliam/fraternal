@@ -33,45 +33,45 @@
     "question": "Which features would you like to include?",
     "type": "checkbox",
     "options": [
-      "Shopping Cart | 50000 | A",
-      "Online Payments | 200000 | C",
-      "Cash on Delivery | 50000 | A",
-      "Customer Reviews | 70000 | B",
-      "Product Categories | 50000 | A",
-      "Search Functionality | 80000 | B",
-      "Live Chat Support | 100000 | B",
-      "Customer Accounts / Login | 130000 | C",
-      "Discount Codes / Coupons | 20000 | A",
-      "Product Filters (Price, Brand, etc.) | 70000 | B",
-      "Wishlist Function | 60000 | B",
-      "Admin Dashboard | 50000 | A",
-      "Multi-language Support | 50000 | A",
-      "Multi-currency Support | 130000 | C",
-      "Product Import (CSV/Excel) | 100000 | B"
+      "Shopping Cart | 50000",
+      "Online Payments | 200000",
+      "Cash on Delivery | 50000",
+      "Customer Reviews | 70000",
+      "Product Categories | 50000",
+      "Search Functionality | 80000",
+      "Live Chat Support | 100000",
+      "Customer Accounts / Login | 130000",
+      "Discount Codes / Coupons | 20000",
+      "Product Filters (Price, Brand, etc.) | 70000",
+      "Wishlist Function | 60000",
+      "Admin Dashboard | 50000",
+      "Multi-language Support | 50000",
+      "Multi-currency Support | 130000",
+      "Product Import (CSV/Excel) | 100000"
     ]
   },
   "payment_methods": {
     "question": "Which payment methods do you want to support?",
     "type": "checkbox",
     "options": [
-      "M-Pesa | 50000 | A",
-      "TigoPesa | 50000 | A",
-      "Airtel Money | 50000 | B",
-      "Bank Transfer | 40000 | A",
-      "Visa / MasterCard | 100000 | C",
-      "PayPal | 80000 | B",
-      "Stripe | 80000 | B"
+      "M-Pesa | 50000",
+      "TigoPesa | 50000",
+      "Airtel Money | 50000",
+      "Bank Transfer | 40000",
+      "Visa / MasterCard | 100000",
+      "PayPal | 80000",
+      "Stripe | 80000"
     ]
   },
   "shipping_options": {
     "question": "What kind of shipping options will you offer?",
     "type": "checkbox",
     "options": [
-      "Free Shipping | 30000 | A",
-      "Flat Rate Shipping | 40000 | B",
-      "Local Delivery | 50000 | B",
-      "Pickup from Store | 20000 | A",
-      "International Shipping | 70000 | C"
+      "Free Shipping | 30000",
+      "Flat Rate Shipping | 40000",
+      "Local Delivery | 50000",
+      "Pickup from Store | 20000",
+      "International Shipping | 70000"
     ]
   },
   "design_preference": {
@@ -83,8 +83,8 @@
     "question": "Do you need help with domain name and hosting?",
     "type": "checkbox",
     "options": [
-      "Yes | 70000 | A",
-      "No, I already have them | 0 | A"
+      "Yes | 70000",
+      "No, I already have them | 0"
     ]
   },
   "timeline": {

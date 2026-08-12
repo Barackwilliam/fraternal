@@ -131,3 +131,51 @@ def clean_signatures(html):
         return strip_signature_lines(html or '')
     except Exception:
         return html
+
+
+
+
+def _parse_option(value):
+    """Rudisha (jina, bei_int, daraja). Daraja ni 'A' kama halijawekwa."""
+    parts = [p.strip() for p in str(value).split('|')]
+ 
+    if len(parts) >= 3 and parts[-1].upper() in ('A', 'B', 'C'):
+        tier = parts[-1].upper()
+        price_part = parts[-2]
+        name = '|'.join(parts[:-2]).strip()
+    elif len(parts) >= 2:
+        tier = 'A'
+        price_part = parts[-1]
+        name = '|'.join(parts[:-1]).strip()
+    else:
+        return parts[0], 0, 'A'
+ 
+    digits = ''.join(ch for ch in price_part if ch.isdigit())
+    price = int(digits) if digits else 0
+    return name, price, tier
+ 
+ 
+@register.filter
+def option_name(value):
+    """'SEO Setup | 150000 | B' -> 'SEO Setup'"""
+    return _parse_option(value)[0]
+ 
+ 
+@register.filter
+def option_price(value):
+    """'SEO Setup | 150000 | B' -> '150,000' (tupu kama bei ni 0)"""
+    price = _parse_option(value)[1]
+    return f'{price:,}' if price else ''
+ 
+ 
+@register.filter
+def option_tier(value):
+    """'SEO Setup | 150000 | B' -> 'B'"""
+    return _parse_option(value)[2]
+ 
+ 
+@register.filter
+def option_has_price(value):
+    """True kama kipengele kina bei kubwa kuliko sifuri."""
+    return _parse_option(value)[1] > 0
+ 

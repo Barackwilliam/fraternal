@@ -549,19 +549,33 @@ def generate_proposal_pdf(proposal):
         return HttpResponse('We had some errors with PDF rendering <br>' + html)
     return result.getvalue()
 
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
+from django.contrib import messages
+from django.shortcuts import redirect
+ 
+from apps.utils.proposal_pdf import generate_proposal_pdf
+ 
+ 
 def generate_pdf(request, proposal_id):
-    proposal = ProjectProposal.objects.get(id=proposal_id)
-
-    if isinstance(proposal.requirements, str):
-        try:
-            proposal.requirements = json.loads(proposal.requirements)
-        except Exception:
-            proposal.requirements = {}
-
-    pdf_file = generate_proposal_pdf(proposal)
-
-    response = HttpResponse(pdf_file, content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="proposal_{proposal.id}.pdf"'
+    proposal = get_object_or_404(ProjectProposal, id=proposal_id)
+ 
+    pdf_bytes = generate_proposal_pdf(proposal)
+ 
+    if not pdf_bytes:
+        # Ya zamani ilirudisha HTML mbichi ndani ya response ya PDF —
+        # browser ilipakua faili bovu. Sasa mteja anarudi kwenye preview
+        # na ujumbe unaoeleweka.
+        messages.error(
+            request,
+            'We could not build the PDF just now. Please try again, '
+            'or contact us and we will send it to you directly.'
+        )
+        return redirect('proposal_preview', proposal_id=proposal.id)
+ 
+    filename = f'JamiiTek-Quotation-JT-{proposal.id}.pdf'
+    response = HttpResponse(pdf_bytes, content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
     return response
 
 # import json

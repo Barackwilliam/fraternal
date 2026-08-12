@@ -23,34 +23,34 @@
     "question": "Select membership levels to offer:",
     "type": "checkbox",
     "options": [
-      "Basic Membership | 0 | A",
-      "Premium Membership | 30000 | A",
-      "VIP Membership | 60000 | A",
-      "Lifetime Membership | 100000 | B"
+      "Basic Membership | 0",
+      "Premium Membership | 30000",
+      "VIP Membership | 60000",
+      "Lifetime Membership | 100000"
     ]
   },
   "features": {
     "question": "Choose features for the membership site:",
     "type": "checkbox",
     "options": [
-      "Member Registration & Profile Management | 40000 | B",
-      "Subscription Payment Integration | 60000 | C",
-      "Event Management | 30000 | A",
-      "Member-only Content Access | 35000 | B",
-      "Email/SMS Notifications | 20000 | A",
-      "Discussion Forums | 30000 | A",
-      "Membership Renewal Reminders | 25000 | A",
-      "Admin Dashboard | 45000 | C",
-      "Multi-tier Access Levels | 30000 | B",
-      "Customizable Member Portal | 40000 | B"
+      "Member Registration & Profile Management | 40000",
+      "Subscription Payment Integration | 60000",
+      "Event Management | 30000",
+      "Member-only Content Access | 35000",
+      "Email/SMS Notifications | 20000",
+      "Discussion Forums | 30000",
+      "Membership Renewal Reminders | 25000",
+      "Admin Dashboard | 45000",
+      "Multi-tier Access Levels | 30000",
+      "Customizable Member Portal | 40000"
     ]
   },
   "domain_hosting": {
     "question": "Do you need domain and hosting support?",
     "type": "checkbox",
     "options": [
-      "Yes | 70000 | A",
-      "No | 0 | A"
+      "Yes | 70000",
+      "No | 0"
     ]
   },
   "project_timeline": {

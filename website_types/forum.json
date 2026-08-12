@@ -18,78 +18,78 @@
     "question": "What is the main purpose of the forum?",
     "type": "checkbox",
     "options": [
-      "Community Support | 0",
-      "Product Discussions | 0",
-      "Educational Discussions | 0",
-      "Technical Help | 0",
-      "Interest-Based Groups (e.g. hobbies) | 0"
+      "Community Support | 0 | A",
+      "Product Discussions | 0 | A",
+      "Educational Discussions | 0 | A",
+      "Technical Help | 0 | A",
+      "Interest-Based Groups (e.g. hobbies) | 0 | A"
     ]
   },
   "core_features": {
     "question": "Select the core features you want in the forum:",
     "type": "checkbox",
     "options": [
-      "User Registration/Login | 15000",
-      "User Profiles with Avatars | 10000",
-      "Post Creation (Text, Images, Code) | 9000",
-      "Reply and Comment System | 25000",
-      "Upvote/Like Feature | 10000",
-      "Threaded Discussions | 15000",
-      "Post Tagging and Categorization | 5000",
-      "Rich Text Editor | 20000",
-      "Responsive & Mobile Friendly Design | 8000",
-      "Notification System (Email or in-app) | 10000",
-      "Search by Topic or Tags | 30000",
-      "Multilingual Support | 10000"
+      "User Registration/Login | 15000 | B",
+      "User Profiles with Avatars | 10000 | A",
+      "Post Creation (Text, Images, Code) | 9000 | A",
+      "Reply and Comment System | 25000 | C",
+      "Upvote/Like Feature | 10000 | A",
+      "Threaded Discussions | 15000 | B",
+      "Post Tagging and Categorization | 5000 | A",
+      "Rich Text Editor | 20000 | C",
+      "Responsive & Mobile Friendly Design | 8000 | A",
+      "Notification System (Email or in-app) | 10000 | B",
+      "Search by Topic or Tags | 30000 | C",
+      "Multilingual Support | 10000 | B"
     ]
   },
   "moderation_features": {
     "question": "Moderation and admin features needed:",
     "type": "checkbox",
     "options": [
-      "Admin Panel | 30000",
-      "Moderator Roles | 6000",
-      "Spam Filter / CAPTCHA | 5000",
-      "User Banning / Warnings | 5000",
-      "Content Reporting by Users | 6000",
-      "Post Approval Workflow | 25000"
+      "Admin Panel | 30000 | C",
+      "Moderator Roles | 6000 | A",
+      "Spam Filter / CAPTCHA | 5000 | A",
+      "User Banning / Warnings | 5000 | A",
+      "Content Reporting by Users | 6000 | B",
+      "Post Approval Workflow | 25000 | B"
     ]
   },
   "user_engagement": {
     "question": "Do you want user engagement tools?",
     "type": "checkbox",
     "options": [
-      "Badges & Achievements | 7000",
-      "User Rankings & Leaderboard | 7000",
-      "Polls and Surveys | 6000",
-      "Direct Messaging (Private) | 8000"
+      "Badges & Achievements | 7000 | A",
+      "User Rankings & Leaderboard | 7000 | B",
+      "Polls and Surveys | 6000 | A",
+      "Direct Messaging (Private) | 8000 | C"
     ]
   },
   "monetization": {
     "question": "Monetization options (if needed):",
     "type": "checkbox",
     "options": [
-      "Google Ads Integration | 50000",
-      "Paid Membership Tiers | 30000",
-      "Sponsored Posts | 15000",
-      "Affiliate Banners | 5000"
+      "Google Ads Integration | 50000 | C",
+      "Paid Membership Tiers | 30000 | B",
+      "Sponsored Posts | 15000 | A",
+      "Affiliate Banners | 5000 | A"
     ]
   },
   "design_preferences": {
     "question": "Choose your preferred design style:",
     "type": "checkbox",
     "options": [
-      "Modern & Vibrant | 6000",
-      "Professional & Minimal | 5000",
-      "Dark Theme Support | 5000"
+      "Modern & Vibrant | 6000 | B",
+      "Professional & Minimal | 5000 | A",
+      "Dark Theme Support | 5000 | A"
     ]
   },
   "domain_hosting": {
     "question": "Do you need domain and hosting services?",
     "type": "checkbox",
     "options": [
-      "Yes, set it up for me | 60000",
-      "No, I already have | 0"
+      "Yes, set it up for me | 60000 | A",
+      "No, I already have | 0 | A"
     ]
   },
   "project_timeline": {

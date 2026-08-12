@@ -18,59 +18,59 @@
     "question": "What type of betting platform do you want?",
     "type": "checkbox",
     "options": [
-      "Sports Betting (Football, Basketball, etc.) | 0",
-      "Virtual Games Betting | 0",
-      "Casino Games (Slots, Poker, etc.) | 0",
-      "Live Betting | 0",
-      "Lottery or Jackpot | 0"
+      "Sports Betting (Football, Basketball, etc.) | 0 | A",
+      "Virtual Games Betting | 0 | A",
+      "Casino Games (Slots, Poker, etc.) | 0 | A",
+      "Live Betting | 0 | A",
+      "Lottery or Jackpot | 0 | A"
     ]
   },
   "features": {
     "question": "Select the features you need:",
     "type": "checkbox",
     "options": [
-      "User Registration & Login | 15000",
-      "Wallet System for Deposits/Withdrawals | 100000",
-      "Live Odds Integration | 150000",
-      "Match Schedules & Results Feed | 20000",
-      "Admin Panel for Managing Bets | 25000",
-      "Bet Slip Generator | 150000",
-      "Affiliate/Referral System | 45000",
-      "Mobile-Friendly Responsive Design | 10000",
-      "Multi-Language Support | 12000",
-      "Promotions & Bonus Offers | 50000",
-      "Push Notifications (Web or Mobile) | 12000",
-      "Live Chat Support | 100000",
-      "SMS & Email Notifications | 58000",
-      "Terms, Privacy & Responsible Gaming Pages | 7000"
+      "User Registration & Login | 15000 | A",
+      "Wallet System for Deposits/Withdrawals | 100000 | B",
+      "Live Odds Integration | 150000 | C",
+      "Match Schedules & Results Feed | 20000 | A",
+      "Admin Panel for Managing Bets | 25000 | B",
+      "Bet Slip Generator | 150000 | C",
+      "Affiliate/Referral System | 45000 | B",
+      "Mobile-Friendly Responsive Design | 10000 | A",
+      "Multi-Language Support | 12000 | A",
+      "Promotions & Bonus Offers | 50000 | B",
+      "Push Notifications (Web or Mobile) | 12000 | A",
+      "Live Chat Support | 100000 | C",
+      "SMS & Email Notifications | 58000 | B",
+      "Terms, Privacy & Responsible Gaming Pages | 7000 | A"
     ]
   },
   "payment_methods": {
     "question": "Which payment methods do you want integrated?",
     "type": "checkbox",
     "options": [
-      "Tigo Pesa | 80000",
-      "M-Pesa | 80000",
-      "Airtel Money | 80000",
-      "Bank Transfer | 100000",
-      "Card Payments (Visa, Mastercard) | 100000",
-      "Cryptocurrency (BTC, ETH) | 72000"
+      "Tigo Pesa | 80000 | A",
+      "M-Pesa | 80000 | A",
+      "Airtel Money | 80000 | B",
+      "Bank Transfer | 100000 | B",
+      "Card Payments (Visa, Mastercard) | 100000 | C",
+      "Cryptocurrency (BTC, ETH) | 72000 | A"
     ]
   },
   "regulatory_compliance": {
     "question": "Do you want assistance with regulatory/licensing compliance?",
     "type": "checkbox",
     "options": [
-      "Yes | 15000",
-      "No | 0"
+      "Yes | 15000 | A",
+      "No | 0 | A"
     ]
   },
   "domain_hosting": {
     "question": "Do you need domain and hosting setup?",
     "type": "checkbox",
     "options": [
-      "Yes, include it | 70000",
-      "No, I already have | 0"
+      "Yes, include it | 70000 | A",
+      "No, I already have | 0 | A"
     ]
   },
   "project_timeline": {

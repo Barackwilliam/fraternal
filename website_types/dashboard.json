@@ -18,59 +18,59 @@
     "question": "What type of dashboard do you need?",
     "type": "checkbox",
     "options": [
-      "Business Analytics Dashboard | 0",
-      "E-commerce Admin Dashboard | 0",
-      "School Management Dashboard | 0",
-      "Project Management Dashboard | 0",
-      "HR/Employee Dashboard | 0",
-      "Custom Role-Based Dashboard | 0"
+      "Business Analytics Dashboard | 0 | A",
+      "E-commerce Admin Dashboard | 0 | A",
+      "School Management Dashboard | 0 | A",
+      "Project Management Dashboard | 0 | A",
+      "HR/Employee Dashboard | 0 | A",
+      "Custom Role-Based Dashboard | 0 | A"
     ]
   },
   "features": {
     "question": "Select the features you want in the dashboard:",
     "type": "checkbox",
     "options": [
-      "User Authentication (Login, Register) | 15000",
-      "Role-Based Permissions (Admin, User, etc.) | 15000",
-      "Dynamic Charts (Bar, Pie, Line, etc.) | 50000",
-      "Real-time Data Updates | 38000",
-      "Data Filtering and Export (CSV, Excel, PDF) | 12000",
-      "Notifications (In-app, Email, SMS) | 10000",
-      "Data Tables with Pagination & Search | 10000",
-      "Responsive Design (Mobile + Desktop) | 8000",
-      "Dark/Light Theme Toggle | 7000",
-      "Multi-language Support | 12000",
-      "Activity Logs & Audit Trails | 9000",
-      "Calendar & Scheduling | 8000",
-      "File Upload & Management | 15000"
+      "User Authentication (Login, Register) | 15000 | B",
+      "Role-Based Permissions (Admin, User, etc.) | 15000 | B",
+      "Dynamic Charts (Bar, Pie, Line, etc.) | 50000 | C",
+      "Real-time Data Updates | 38000 | C",
+      "Data Filtering and Export (CSV, Excel, PDF) | 12000 | B",
+      "Notifications (In-app, Email, SMS) | 10000 | A",
+      "Data Tables with Pagination & Search | 10000 | A",
+      "Responsive Design (Mobile + Desktop) | 8000 | A",
+      "Dark/Light Theme Toggle | 7000 | A",
+      "Multi-language Support | 12000 | B",
+      "Activity Logs & Audit Trails | 9000 | A",
+      "Calendar & Scheduling | 8000 | A",
+      "File Upload & Management | 15000 | C"
     ]
   },
   "integrations": {
     "question": "Select external integrations (if any):",
     "type": "checkbox",
     "options": [
-      "Google Sheets or Excel Sync | 10000",
-      "Payment Systems (e.g. Stripe, PayPal) | 15000",
-      "SMS Gateway (e.g. Twilio, Africa's Talking) | 10000",
-      "Email Service (e.g. SendGrid, Mailchimp) | 8000",
-      "API Integration with 3rd Party System | 15000"
+      "Google Sheets or Excel Sync | 10000 | A",
+      "Payment Systems (e.g. Stripe, PayPal) | 15000 | B",
+      "SMS Gateway (e.g. Twilio, Africa's Talking) | 10000 | B",
+      "Email Service (e.g. SendGrid, Mailchimp) | 8000 | A",
+      "API Integration with 3rd Party System | 15000 | C"
     ]
   },
   "design_preferences": {
     "question": "Choose a design preference:",
     "type": "checkbox",
     "options": [
-      "Modern Material UI | 7000",
-      "Minimalist Layout | 6000",
-      "Dark Themed | 7000"
+      "Modern Material UI | 7000 | A",
+      "Minimalist Layout | 6000 | A",
+      "Dark Themed | 7000 | B"
     ]
   },
   "domain_hosting": {
     "question": "Do you need domain and hosting setup?",
     "type": "checkbox",
     "options": [
-      "Yes, include it | 70000",
-      "No, I already have | 0"
+      "Yes, include it | 70000 | A",
+      "No, I already have | 0 | A"
     ]
   },
   "project_timeline": {

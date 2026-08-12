@@ -18,57 +18,57 @@
     "question": "What type of music platform do you want?",
     "type": "checkbox",
     "options": [
-      "Music Streaming Service | 0 | A",
-      "Online Music Store | 0 | A",
-      "Artist Portfolio | 0 | A",
-      "Podcast Platform | 0 | A",
-      "Radio Station | 0 | A"
+      "Music Streaming Service | 0",
+      "Online Music Store | 0",
+      "Artist Portfolio | 0",
+      "Podcast Platform | 0",
+      "Radio Station | 0"
     ]
   },
   "core_features": {
     "question": "Select the core features you want in the platform:",
     "type": "checkbox",
     "options": [
-      "User Registration & Profiles | 15000 | B",
-      "Music Upload & Management | 50000 | C",
-      "Playlists Creation & Sharing | 20000 | B",
-      "Search & Filtering by Genre/Artist | 15000 | B",
-      "Audio Streaming with Player | 25000 | C",
-      "Download Option (if permitted) | 10000 | A",
-      "Subscription Plans & Payments | 25000 | C",
-      "Social Sharing & Comments | 6000 | A",
-      "Live Streaming | 12000 | B",
-      "Artist Analytics & Dashboard | 9000 | A",
-      "Multi-Device Support (Mobile, Desktop) | 8000 | A",
-      "Push Notifications | 6000 | A",
-      "Offline Listening | 10000 | A"
+      "User Registration & Profiles | 15000",
+      "Music Upload & Management | 50000",
+      "Playlists Creation & Sharing | 20000",
+      "Search & Filtering by Genre/Artist | 15000",
+      "Audio Streaming with Player | 25000",
+      "Download Option (if permitted) | 10000",
+      "Subscription Plans & Payments | 25000",
+      "Social Sharing & Comments | 6000",
+      "Live Streaming | 12000",
+      "Artist Analytics & Dashboard | 9000",
+      "Multi-Device Support (Mobile, Desktop) | 8000",
+      "Push Notifications | 6000",
+      "Offline Listening | 10000"
     ]
   },
   "monetization_features": {
     "question": "Do you want monetization features?",
     "type": "checkbox",
     "options": [
-      "Ad Integration | 6000 | A",
-      "Subscription-Based Access | 11000 | C",
-      "Pay-per-download | 7000 | A",
-      "Merchandise Store | 8000 | B"
+      "Ad Integration | 6000",
+      "Subscription-Based Access | 11000",
+      "Pay-per-download | 7000",
+      "Merchandise Store | 8000"
     ]
   },
   "design_preferences": {
     "question": "Choose your preferred design style:",
     "type": "checkbox",
     "options": [
-      "Modern & Vibrant | 7000 | B",
-      "Minimal & Clean | 6000 | A",
-      "Dark Mode Support | 6000 | A"
+      "Modern & Vibrant | 7000",
+      "Minimal & Clean | 6000",
+      "Dark Mode Support | 6000"
     ]
   },
   "domain_hosting": {
     "question": "Do you need domain and hosting setup?",
     "type": "checkbox",
     "options": [
-      "Yes, please include | 60000 | A",
-      "No, I already have | 0 | A"
+      "Yes, please include | 60000",
+      "No, I already have | 0"
     ]
   },
   "project_timeline": {

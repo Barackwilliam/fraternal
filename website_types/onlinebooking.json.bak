@@ -23,39 +23,39 @@
     "question": "What kind of business is this?",
     "type": "checkbox",
     "options": [
-      "Salon or Spa | 0 | A",
-      "Medical or Dental Clinic | 0 | A",
-      "Hotel, Lodge or Guesthouse | 0 | A",
-      "Car Rental or Mechanic | 0 | A",
-      "Event Space | 0 | A",
-      "Coworking or Training Center | 0 | A",
-      "Tours or Experiences | 0 | A",
-      "Others | 0 | A"
+      "Salon or Spa | 0",
+      "Medical or Dental Clinic | 0",
+      "Hotel, Lodge or Guesthouse | 0",
+      "Car Rental or Mechanic | 0",
+      "Event Space | 0",
+      "Coworking or Training Center | 0",
+      "Tours or Experiences | 0",
+      "Others | 0"
     ]
   },
   "features": {
     "question": "Select the booking features you want:",
     "type": "checkbox",
     "options": [
-      "Booking Form with Calendar & Time Slots | 50000 | C",
-      "SMS or Email Booking Confirmations | 30000 | A",
-      "Payment Integration (M-Pesa, TigoPesa, Stripe, PayPal) | 50000 | C",
-      "Admin Panel to Manage Bookings | 60000 | C",
-      "User Dashboard to View Appointments | 40000 | B",
-      "Booking Approval Workflow | 30000 | A",
-      "Multi-Service / Staff Selection | 35000 | B",
-      "Service Categories & Descriptions | 25000 | A",
-      "Dynamic Pricing per Service | 30000 | B",
-      "Rescheduling & Cancellation System | 30000 | B",
-      "Mobile Friendly Design | 40000 | C",
-      "WhatsApp Booking Integration | 15000 | A",
-      "Google Calendar Integration | 30000 | B",
-      "PDF Receipt Generator | 20000 | A",
-      "Multilingual Support | 25000 | A",
-      "Staff Login with Limited Access | 30000 | B",
-      "Customer Feedback/Rating System | 20000 | A",
-      "Search & Filter Bookings | 15000 | A",
-      "Real-Time Availability Checker | 35000 | B"
+      "Booking Form with Calendar & Time Slots | 50000",
+      "SMS or Email Booking Confirmations | 30000",
+      "Payment Integration (M-Pesa, TigoPesa, Stripe, PayPal) | 50000",
+      "Admin Panel to Manage Bookings | 60000",
+      "User Dashboard to View Appointments | 40000",
+      "Booking Approval Workflow | 30000",
+      "Multi-Service / Staff Selection | 35000",
+      "Service Categories & Descriptions | 25000",
+      "Dynamic Pricing per Service | 30000",
+      "Rescheduling & Cancellation System | 30000",
+      "Mobile Friendly Design | 40000",
+      "WhatsApp Booking Integration | 15000",
+      "Google Calendar Integration | 30000",
+      "PDF Receipt Generator | 20000",
+      "Multilingual Support | 25000",
+      "Staff Login with Limited Access | 30000",
+      "Customer Feedback/Rating System | 20000",
+      "Search & Filter Bookings | 15000",
+      "Real-Time Availability Checker | 35000"
     ]
   },
   "design_preference": {
@@ -67,24 +67,24 @@
     "question": "Will you support multiple locations?",
     "type": "checkbox",
     "options": [
-      "Yes | 30000 | A",
-      "No | 0 | A"
+      "Yes | 30000",
+      "No | 0"
     ]
   },
   "staff_profiles": {
     "question": "Do you need individual staff profiles with schedules?",
     "type": "checkbox",
     "options": [
-      "Yes | 25000 | A",
-      "No | 0 | A"
+      "Yes | 25000",
+      "No | 0"
     ]
   },
   "domain_hosting": {
     "question": "Do you need help with domain and hosting?",
     "type": "checkbox",
     "options": [
-      "Yes | 70000 | A",
-      "No | 0 | A"
+      "Yes | 70000",
+      "No | 0"
     ]
   },
   "estimated_bookings": {

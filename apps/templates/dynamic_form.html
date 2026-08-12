@@ -42,12 +42,12 @@
 .pf-field input:focus,
 .pf-field textarea:focus,
 .pf-field select:focus {
-  box-shadow: var(--nu-in), 0 0 0 2.5px rgba(61,127,214,.42);
+  box-shadow: var(--nu-in), 0 0 0 2.5px rgba(47,111,196,.42);
 }
 .pf-field textarea { resize: vertical; min-height: 112px; line-height: 1.65; }
 .pf-field select {
   appearance: none; padding-right: 42px; cursor: pointer;
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235A6579' stroke-width='2.5' stroke-linecap='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23363E4F' stroke-width='2.5' stroke-linecap='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
   background-repeat: no-repeat; background-position: right 16px center; background-size: 15px;
 }
 .pf-err {
@@ -56,7 +56,7 @@
 }
 
 /* ── Vikundi ─────────────────────────────────────────── */
-.pf-feature { padding: 24px 0; border-bottom: 1px solid rgba(163,177,198,.22); }
+.pf-feature { padding: 24px 0; border-bottom: 1px solid rgba(140,156,182,.26); }
 .pf-feature:first-child { padding-top: 0; }
 .pf-feature:last-child { border-bottom: none; padding-bottom: 0; }
 .pf-feature-title { font-size: 15.5px; font-weight: 600; color: var(--nu-ink); letter-spacing: -0.2px; margin-bottom: 5px; }
@@ -89,7 +89,7 @@
 .pf-tick i { font-size: 11px; color: #fff; opacity: 0; transform: scale(.5); transition: all .18s; }
 .pf-opt input:checked ~ label .pf-tick {
   background: var(--nu-grad);
-  box-shadow: 2px 2px 6px rgba(140,110,190,.34), -2px -2px 5px var(--nu-hi);
+  box-shadow: 2px 2px 6px rgba(126,100,172,.36), -2px -2px 5px var(--nu-hi);
 }
 .pf-opt input:checked ~ label .pf-tick i { opacity: 1; transform: scale(1); }
 
@@ -251,9 +251,9 @@
                        {% if choice.data.selected %}checked{% endif %}>
                 <label for="{{ choice.id_for_label }}">
                   <span class="pf-tick"><i class="fas fa-check"></i></span>
-                  <span class="pf-opt-name">{{ choice.choice_label|split_first }}</span>
-                  {% if choice.choice_label|has_delimiter %}
-                  <span class="pf-opt-price">{{ choice.choice_label|split_last }}<small>TZS</small></span>
+                  <span class="pf-opt-name">{{ choice.choice_label|option_name }}</span>
+                  {% if choice.choice_label|option_has_price %}
+                  <span class="pf-opt-price">{{ choice.choice_label|option_price }}<small>TZS</small></span>
                   {% endif %}
                 </label>
               </div>
@@ -291,9 +291,11 @@
       <!-- Total -->
       <div class="pf-bar">
         <div>
-          <div class="pf-bar-label">Estimated total</div>
+          <div class="pf-bar-label">Your selection</div>
           <div class="pf-bar-amount"><span id="totalBudget">0</span><small>TZS</small></div>
-          <div class="pf-bar-note">Indicative — final quotation confirmed by our team.</div>
+          <div class="pf-bar-note">
+            Indicative — your proposal will also show our package options.
+          </div>
         </div>
         <button type="submit" class="pp-btn pp-btn-primary">
           Prepare quotation <i class="fas fa-arrow-right" style="font-size:12px"></i>
@@ -318,7 +320,8 @@ document.addEventListener('DOMContentLoaded', function () {
   function priceOf(box) {
     const el = box.closest('.pf-opt').querySelector('.pf-opt-price');
     if (!el) return 0;
-    const digits = el.textContent.replace(/[^\d]/g, '');   // "250,000 TZS" -> 250000
+    // Chip ina bei pekee ("250,000 TZS") — daraja halionyeshwi hapa
+    const digits = el.textContent.replace(/[^\d]/g, '');
     return digits ? parseInt(digits, 10) : 0;
   }
 

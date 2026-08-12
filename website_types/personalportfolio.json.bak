@@ -23,34 +23,34 @@
     "question": "Select sections to include:",
     "type": "checkbox",
     "options": [
-      "About Me | 0 | A",
-      "Resume / CV | 20000 | B",
-      "Portfolio Gallery | 30000 | C",
-      "Skills & Endorsements | 15000 | A",
-      "Testimonials | 15000 | A",
-      "Blog / Articles | 25000 | B",
-      "Contact Form | 15000 | A",
-      "Social Media Links | 10000 | A",
-      "Video Introduction | 25000 | C",
-      "Downloadable Resume | 15000 | B"
+      "About Me | 0",
+      "Resume / CV | 20000",
+      "Portfolio Gallery | 30000",
+      "Skills & Endorsements | 15000",
+      "Testimonials | 15000",
+      "Blog / Articles | 25000",
+      "Contact Form | 15000",
+      "Social Media Links | 10000",
+      "Video Introduction | 25000",
+      "Downloadable Resume | 15000"
     ]
   },
   "design_preferences": {
     "question": "Preferred Design Style:",
     "type": "checkbox",
     "options": [
-      "Minimalist | 0 | A",
-      "Modern & Sleek | 15000 | A",
-      "Creative & Artistic | 20000 | B",
-      "Professional & Corporate | 15000 | A"
+      "Minimalist | 0",
+      "Modern & Sleek | 15000",
+      "Creative & Artistic | 20000",
+      "Professional & Corporate | 15000"
     ]
   },
   "domain_hosting": {
     "question": "Need domain and hosting setup?",
     "type": "checkbox",
     "options": [
-      "Yes | 70000 | A",
-      "No | 0 | A"
+      "Yes | 70000",
+      "No | 0"
     ]
   },
   "project_timeline": {

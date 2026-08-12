@@ -18,68 +18,68 @@
     "question": "What type of auction platform do you need?",
     "type": "checkbox",
     "options": [
-      "General Auctions (Multiple categories) | 0",
-      "Real Estate Auctions | 0",
-      "Vehicle Auctions | 0",
-      "Art & Collectibles | 0",
-      "Custom Bidding Marketplace | 0"
+      "General Auctions (Multiple categories) | 0 | A",
+      "Real Estate Auctions | 0 | A",
+      "Vehicle Auctions | 0 | A",
+      "Art & Collectibles | 0 | A",
+      "Custom Bidding Marketplace | 0 | A"
     ]
   },
   "features": {
     "question": "Select the core features required:",
     "type": "checkbox",
     "options": [
-      "User Registration and Login | 15000",
-      "Seller Profiles & Verification | 25000",
-      "Live Bidding System | 25000",
-      "Reserve Price Setting | 18000",
-      "Buy Now Option | 6000",
-      "Countdown Timer for Bidding | 7000",
-      "Admin Approval for Listings | 5000",
-      "SMS/Email Notifications | 35000",
-      "Auction History and Logs | 8000",
-      "Search & Filtering by Category/Price | 25000",
-      "Responsive & Mobile Friendly UI | 8000",
-      "Multi-language Support | 35000",
-      "Bidder Auto-Increment Logic | 30000"
+      "User Registration and Login | 15000 | A",
+      "Seller Profiles & Verification | 25000 | B",
+      "Live Bidding System | 25000 | B",
+      "Reserve Price Setting | 18000 | B",
+      "Buy Now Option | 6000 | A",
+      "Countdown Timer for Bidding | 7000 | A",
+      "Admin Approval for Listings | 5000 | A",
+      "SMS/Email Notifications | 35000 | C",
+      "Auction History and Logs | 8000 | A",
+      "Search & Filtering by Category/Price | 25000 | B",
+      "Responsive & Mobile Friendly UI | 8000 | A",
+      "Multi-language Support | 35000 | C",
+      "Bidder Auto-Increment Logic | 30000 | C"
     ]
   },
   "payment_integration": {
     "question": "Preferred payment methods:",
     "type": "checkbox",
     "options": [
-      "Mobile Money (e.g. M-Pesa, Airtel Money) | 90000",
-      "Card Payments (Visa/MasterCard) | 60000",
-      "Bank Transfer Option | 40000",
-      "Escrow System Integration | 12000"
+      "Mobile Money (e.g. M-Pesa, Airtel Money) | 90000 | C",
+      "Card Payments (Visa/MasterCard) | 60000 | B",
+      "Bank Transfer Option | 40000 | A",
+      "Escrow System Integration | 12000 | A"
     ]
   },
   "admin_features": {
     "question": "Admin panel features needed:",
     "type": "checkbox",
     "options": [
-      "User & Seller Management | 25000",
-      "Auction Listing Control | 18000",
-      "Reports & Analytics | 30000",
-      "Dispute Resolution Center | 6000",
-      "Manual Auction Closure | 15000"
+      "User & Seller Management | 25000 | B",
+      "Auction Listing Control | 18000 | B",
+      "Reports & Analytics | 30000 | C",
+      "Dispute Resolution Center | 6000 | A",
+      "Manual Auction Closure | 15000 | A"
     ]
   },
   "design_preferences": {
     "question": "Choose design style:",
     "type": "checkbox",
     "options": [
-      "Modern UI | 7000",
-      "Clean & Minimalist | 6000",
-      "Dark Theme Option | 6000"
+      "Modern UI | 7000 | B",
+      "Clean & Minimalist | 6000 | A",
+      "Dark Theme Option | 6000 | A"
     ]
   },
   "domain_hosting": {
     "question": "Do you need domain and hosting setup?",
     "type": "checkbox",
     "options": [
-      "Yes, include it | 70000",
-      "No, I already have | 0"
+      "Yes, include it | 70000 | A",
+      "No, I already have | 0 | A"
     ]
   },
   "project_timeline": {

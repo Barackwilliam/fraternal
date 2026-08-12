@@ -1,245 +1,365 @@
+{% comment %}
+  apps/templates/proposal_pdf.html
+
+  xhtml2pdf (pisa): hakuna flexbox/grid/box-shadow/border-radius.
+  Layout yote ni tables. Fonts: Helvetica, Times, Courier pekee.
+  MAANDIKO yako kwenye apps/utils/proposal_pdf.py
+{% endcomment %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="sw">
 <head>
-    <meta charset="utf-8">
-    <title>Tanzania Service Agreement Proposal - {{ proposal.client.name }}</title>
-    <style>
-        @page {
-            size: A4;
-            margin: 2cm;
-        }
+<meta charset="utf-8">
+<title>{{ t.doc_kind }} — {{ proposal.client.name }}</title>
+<style>
+@page {
+  size: a4 portrait;
+  margin: 2.6cm 1.5cm 2.0cm 1.5cm;
 
-        body {
-            font-family: 'Helvetica', 'Arial', sans-serif;
-            font-size: 12px;
-            line-height: 1.6;
-            color: #2e2e2e;
-        }
+  @frame header_frame {
+    -pdf-frame-content: headerContent;
+    top: 0.9cm; left: 1.5cm; right: 1.5cm; height: 1.3cm;
+  }
+  @frame footer_frame {
+    -pdf-frame-content: footerContent;
+    bottom: 0.8cm; left: 1.5cm; right: 1.5cm; height: 1cm;
+  }
+}
 
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #007bff;
-        }
+body { font-family: Helvetica, Arial, sans-serif; font-size: 9.5pt; line-height: 1.6; color: #0B0D12; }
 
-        .header h1 {
-            color: #007bff;
-            font-size: 24px;
-            margin: 0;
-            white-space: nowrap; /* Hakikisha jina linabaki mstari mmoja */
-        }
+#headerContent { font-size: 7.5pt; color: #7C8492; border-bottom: 0.5pt solid #D8DEE7; padding-bottom: 1.4mm; }
+#headerContent b { color: #10243D; }
+#footerContent { font-size: 7.5pt; color: #7C8492; border-top: 0.5pt solid #D8DEE7; padding-top: 1.4mm; }
+.f-l { text-align: left; }
+.f-r { text-align: right; }
 
-        .header p {
-            margin: 5px 0;
-            font-size: 14px;
-            color: #555;
-        }
+/* ── Bendera ── */
+.flag { background-color: #10243D; padding: 6mm; margin-bottom: 5mm; }
+.flag-name { font-size: 16pt; font-weight: bold; color: #FFFFFF; letter-spacing: -0.3pt; padding-bottom: 0.8mm; }
+.flag-tag { font-size: 8pt; color: #A8BDD4; padding-bottom: 4mm; }
+.flag-kind { font-size: 13pt; font-weight: bold; color: #FFFFFF; letter-spacing: 3pt; padding-top: 3mm; border-top: 0.8pt solid #33506F; }
 
-        .logo {
-            max-width: 100px;
-            margin-bottom: 10px;
-        }
+/* ── Taarifa ── */
+.meta { width: 100%; border-collapse: collapse; margin-bottom: 6mm; }
+.meta td { padding: 2mm 0; border-bottom: 0.5pt solid #E4E9F0; vertical-align: top; }
+.meta td.k { width: 22%; font-size: 7.5pt; color: #6B7382; text-transform: uppercase; letter-spacing: .8pt; padding-top: 2.6mm; }
+.meta td.v { width: 28%; font-size: 10pt; font-weight: bold; color: #0B0D12; }
+.meta td.v-sm { font-size: 9pt; font-weight: normal; color: #2B313C; }
 
-        h2 {
-            color: #007bff;
-            font-size: 16px;
-            margin-bottom: 10px;
-            border-bottom: 1px solid #ccc;
-            padding-bottom: 4px;
-        }
+/* ── Salamu ── */
+.hello { margin-bottom: 6mm; }
+.hello-h { font-size: 12pt; font-weight: bold; color: #10243D; padding-bottom: 1.6mm; }
+.hello-p { font-size: 9.5pt; color: #2B313C; }
 
-        .section {
-            margin-bottom: 25px;
-            page-break-inside: avoid;
-        }
+/* ── Sehemu ── */
+.sec { margin-bottom: 6mm; }
+table.sec-h { width: 100%; margin-bottom: 3mm; }
+.sec-n { width: 6.5mm; background-color: #10243D; color: #FFFFFF; font-size: 9pt; font-weight: bold; text-align: center; padding: 1.2mm 0; }
+.sec-t { font-size: 11pt; font-weight: bold; color: #10243D; padding-left: 3mm; }
+.sec-intro { font-size: 9.5pt; color: #2B313C; margin-bottom: 3mm; }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
+/* ── Orodha ── */
+table.bul { width: 100%; border-collapse: collapse; }
+table.bul td { padding: 1.1mm 0; vertical-align: top; font-size: 9.5pt; }
+table.bul td.b { width: 5mm; color: #10243D; font-weight: bold; }
+table.bul td.x { color: #2B313C; }
 
-        th {
-            background-color: #f1f1f1;
-            padding: 8px;
-            text-align: left;
-            border: 1px solid #ccc;
-        }
+/* ── KIFURUSHI ── */
+.pkg { margin-bottom: 5mm; page-break-inside: avoid; }
 
-        td {
-            padding: 8px;
-            border: 1px solid #ccc;
-        }
+table.pkg-h { width: 100%; border-collapse: collapse; }
+.pkg-h td { padding: 3.2mm 4mm; vertical-align: middle; }
+.pkg-h .nm { background-color: #EDF1F6; }
+.pkg-h .amt { background-color: #EDF1F6; text-align: right; }
+.pkg-name { font-size: 10.5pt; font-weight: bold; color: #10243D; letter-spacing: .5pt; }
+.pkg-blurb { font-size: 8pt; color: #6B7382; padding-top: .6mm; }
+.pkg-price { font-size: 15pt; font-weight: bold; color: #10243D; }
+.pkg-price small { font-size: 8pt; color: #6B7382; }
 
-        ul {
-            padding-left: 20px;
-            margin: 0;
-        }
+/* Kinachopendekezwa — giza, kinajitokeza */
+.pkg-rec .nm, .pkg-rec .amt { background-color: #10243D; }
+.pkg-rec .pkg-name { color: #FFFFFF; }
+.pkg-rec .pkg-blurb { color: #A8BDD4; }
+.pkg-rec .pkg-price { color: #FFFFFF; }
+.pkg-rec .pkg-price small { color: #A8BDD4; }
 
-        .footer {
-            font-size: 10px;
-            color: #888;
-            text-align: center;
-            margin-top: 30px;
-            padding-top: 10px;
-            border-top: 1px solid #ccc;
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-        }
+.rec-tag {
+  background-color: #C8A03C; color: #FFFFFF;
+  font-size: 7pt; font-weight: bold; letter-spacing: 1.2pt;
+  padding: 1.4mm 3mm;
+}
+.rec-why { font-size: 7.5pt; color: #6B7382; padding: 1.4mm 4mm 0 4mm; }
 
-        .signature {
-            margin-top: 40px;
-            text-align: left;
-        }
+table.pkg-body { width: 100%; border-collapse: collapse; }
+table.pkg-body td { padding: 1.8mm 4mm; border-bottom: 0.5pt solid #E4E9F0; font-size: 9pt; vertical-align: top; }
+table.pkg-body td.b { width: 5mm; color: #10243D; }
+table.pkg-body td.p { text-align: right; width: 22%; white-space: nowrap; color: #2B313C; }
+table.pkg-body td.p-inc { text-align: right; width: 22%; color: #7C8492; font-size: 8pt; }
+.pkg-plus { font-size: 8.5pt; font-style: italic; color: #6B7382; padding: 2mm 4mm 0 4mm; }
+.pkg-time { font-size: 8.5pt; color: #10243D; font-weight: bold; padding: 2mm 4mm 0 4mm; }
 
-        .signature .line {
-            border-top: 1px solid #000;
-            width: 200px;
-            margin-top: 40px;
-        }
+.price-note { font-size: 7.5pt; color: #6B7382; margin-top: 2.5mm; }
 
-        .terms {
-            font-size: 11px;
-            color: #555;
-            background-color: #f9f9f9;
-            padding: 10px;
-            border-left: 4px solid #007bff;
-        }
+/* ── Maelezo ── */
+table.notes { width: 100%; border-collapse: collapse; }
+table.notes td { padding: 2mm 0; border-bottom: 0.5pt solid #E4E9F0; vertical-align: top; }
+table.notes td.k { width: 32%; font-size: 8pt; color: #6B7382; text-transform: uppercase; letter-spacing: .7pt; padding-right: 4mm; }
+table.notes td.v { font-size: 9.5pt; color: #0B0D12; }
 
-        .preamble {
-            font-style: italic;
-            margin-bottom: 20px;
-        }
-    </style>
+/* ── Malipo ── */
+table.pay { width: 100%; border-collapse: collapse; margin-bottom: 2.5mm; }
+table.pay td { vertical-align: top; padding: 0 3mm 0 0; }
+.pay-box { background-color: #F2F5F9; border-left: 2.5pt solid #10243D; padding: 3.4mm 4mm; }
+.pay-pct { font-size: 17pt; font-weight: bold; color: #10243D; padding-bottom: 1mm; }
+.pay-txt { font-size: 8.5pt; color: #2B313C; line-height: 1.5; }
+.pay-note { font-size: 8pt; color: #6B7382; }
+
+/* ── Masharti ── */
+table.terms { width: 100%; border-collapse: collapse; }
+table.terms td { padding: 1.6mm 0; vertical-align: top; font-size: 8.5pt; }
+table.terms td.t { width: 24%; font-weight: bold; color: #10243D; padding-right: 4mm; }
+table.terms td.d { color: #3A4150; }
+
+/* ── Hatua ── */
+.next { background-color: #10243D; padding: 5mm 6mm; margin-bottom: 6mm; }
+.next-h { font-size: 11pt; font-weight: bold; color: #FFFFFF; padding-bottom: 1.6mm; }
+.next-p { font-size: 9pt; color: #C6D3E2; line-height: 1.55; padding-bottom: 2.4mm; }
+.next-cta { font-size: 9pt; color: #FFFFFF; font-weight: bold; }
+
+/* ── Saini ── */
+table.sign { width: 100%; margin-top: 3mm; }
+table.sign td { width: 50%; padding-right: 8mm; vertical-align: top; }
+.sign-role { font-size: 8.5pt; font-weight: bold; color: #10243D; padding-bottom: 14mm; }
+.sign-line { border-bottom: 0.8pt solid #0B0D12; height: 1px; }
+.sign-cap { font-size: 7.5pt; color: #6B7382; padding-top: 1.4mm; }
+
+.keep { page-break-inside: avoid; }
+</style>
 </head>
+
 <body>
-    <div class="header">
-        <img src="{{ STATIC_URL }}logo.png" class="logo" alt="JamiiTek Logo">
-        <h1>{{ proposal.website_type.name }} - JamiiTek Service Agreement Proposal</h1>
-        <p>Prepared for {{ proposal.client.name }}</p>
-        <p>Date: {{ proposal.created_at|date:"F j, Y" }}</p>
-    </div>
 
-    <div class="section preamble">
-        <p>This Agreement ("Agreement") is made between <strong>JamiiTek Company</strong> ("Service Provider") and <strong>{{ proposal.client.name }}</strong> ("Client"). This Agreement shall be governed by and construed in accordance with the laws of [Specify Jurisdiction].</p>
-    </div>
+<div id="headerContent">
+  <table width="100%">
+    <tr>
+      <td class="f-l"><b>{{ company.name }}</b></td>
+      <td class="f-r">{{ proposal.website_type.name }} — Pendekezo la Mradi</td>
+    </tr>
+  </table>
+</div>
 
-    <div class="section">
-        <h2>Client Information</h2>
-        <table>
-            <tr>
-                <td><strong>Name</strong></td>
-                <td>{{ proposal.client.name }}</td>
-            </tr>
-            <tr>
-                <td><strong>Email</strong></td>
-                <td>{{ proposal.client.email }}</td>
-            </tr>
-            {% if proposal.client.phone %}
-            <tr>
-                <td><strong>Phone</strong></td>
-                <td>{{ proposal.client.phone }}</td>
-            </tr>
-            {% endif %}
-            {% if proposal.client.company %}
-            <tr>
-                <td><strong>Company</strong></td>
-                <td>{{ proposal.client.company }}</td>
-            </tr>
-            {% endif %}
-        </table>
-    </div>
+<div id="footerContent">
+  <table width="100%">
+    <tr>
+      <td class="f-l">{{ company.address }} &nbsp;|&nbsp; WhatsApp: {{ company.whatsapp }} &nbsp;|&nbsp; {{ company.website }}</td>
+      <td class="f-r">{{ doc_number }} &nbsp;·&nbsp; {{ t.page }} <pdf:pagenumber/> {{ t.of }} <pdf:pagecount/></td>
+    </tr>
+  </table>
+</div>
 
-    {% if ref_template %}
-    <div class="section">
-        <h2>Reference Design</h2>
-        <table>
-            <tr>
-                <th style="width:32%">Template Name</th>
-                <td>{{ ref_template.name }}</td>
-            </tr>
-            <tr>
-                <th>Category</th>
-                <td>{{ ref_template.category }}</td>
-            </tr>
-            <tr>
-                <th>Live Preview</th>
-                <td>https://jamiitek.com{{ ref_template.preview_url }}</td>
-            </tr>
-        </table>
-        <p style="font-size:11px;color:#555;margin-top:6px">
-            This proposal is based on the reference design above. JamiiTek will customize
-            the design with the Client's branding, content and requirements.</p>
-    </div>
+
+<!-- ═══ BENDERA ═══ -->
+<div class="flag">
+  <div class="flag-name">{{ company.name }}</div>
+  <div class="flag-tag">{{ company.tagline }}</div>
+  <div class="flag-kind">{{ t.doc_kind }}</div>
+</div>
+
+
+<!-- ═══ TAARIFA ═══ -->
+<table class="meta">
+  <tr>
+    <td class="k">{{ t.prepared_for }}</td>
+    <td class="v">{{ proposal.client.name }}</td>
+    <td class="k">{{ t.date }}</td>
+    <td class="v">{{ proposal.created_at|date:"j F Y" }}</td>
+  </tr>
+  <tr>
+    <td class="k">{{ t.project }}</td>
+    <td class="v">{{ proposal.website_type.name }}</td>
+    <td class="k">{{ t.number }}</td>
+    <td class="v">{{ doc_number }}</td>
+  </tr>
+  <tr>
+    <td class="k">{{ t.prepared_by }}</td>
+    <td class="v v-sm">{{ company.name }}</td>
+    <td class="k">{{ t.validity }}</td>
+    <td class="v v-sm">{{ t.days }} {{ validity_days }}</td>
+  </tr>
+  {% if ref_template %}
+  <tr>
+    <td class="k">{{ t.ref_design }}</td>
+    <td class="v v-sm" colspan="3">{{ ref_template.name }}{% if ref_template.category %} — {{ ref_template.category }}{% endif %}</td>
+  </tr>
+  {% endif %}
+</table>
+
+
+<!-- ═══ SALAMU ═══ -->
+<div class="hello keep">
+  <div class="hello-h">{{ t.greeting_h }}</div>
+  <div class="hello-p">{{ t.greeting_p }}</div>
+</div>
+
+
+<!-- ═══ 1. UELEWA ═══ -->
+{% if summary %}
+<div class="sec keep">
+  <table class="sec-h"><tr><td class="sec-n">1</td><td class="sec-t">{{ t.s1 }}</td></tr></table>
+  <div class="sec-intro">{{ t.s1_intro }}</div>
+  <table class="bul">
+    {% for item in summary %}
+    <tr><td class="b">•</td><td class="x">{{ item }}</td></tr>
+    {% endfor %}
+  </table>
+</div>
+{% endif %}
+
+
+<!-- ═══ 2. VIFURUSHI ═══ -->
+<div class="sec">
+  <table class="sec-h"><tr><td class="sec-n">2</td><td class="sec-t">{{ t.s2 }}</td></tr></table>
+  <div class="sec-intro">{{ t.s2_intro }}</div>
+
+  {% for pkg in packages %}
+  <div class="pkg{% if pkg.recommended %} pkg-rec{% endif %}">
+
+    {% if pkg.recommended %}
+    <table width="100%"><tr><td><span class="rec-tag">{{ t.recommended }}</span></td></tr></table>
     {% endif %}
 
-    <div class="section">
-        <h2>Project Requirements</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Requirement</th>
-                    <th>Details</th>
-                </tr>
-            </thead>
-                 <tbody>
-    {% for key, value in requirements.items %}
-        {% if key|slice:":7" != "client_" %}
-        <tr>
-            <td>{{ key|title|cut:" " }}</td>
-            <td>
-                {% if value|slice:":1" == "[" %}
-                    <ul>
-                        {% for item in value %}
-                            <li>{{ item }}</li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                    {{ value|default:"Not specified" }}
-                {% endif %}
-            </td>
-        </tr>
+    <table class="pkg-h">
+      <tr>
+        <td class="nm" width="62%">
+          <div class="pkg-name">{{ pkg.name }}</div>
+          <div class="pkg-blurb">{{ pkg.blurb }}</div>
+        </td>
+        <td class="amt" width="38%">
+          <div class="pkg-price">{{ pkg.total_display }} <small>TZS</small></div>
+        </td>
+      </tr>
+    </table>
+
+    {% if pkg.recommended %}
+    <div class="rec-why">{{ t.rec_why }}</div>
+    {% endif %}
+
+    {% if pkg.is_cumulative %}
+    <div class="pkg-plus">{{ t.plus_prev }}</div>
+    {% endif %}
+
+    <table class="pkg-body">
+      {% for item in pkg.items %}
+      <tr>
+        <td class="b">•</td>
+        <td>{{ item.name }}</td>
+        {% if item.price %}
+        <td class="p">{{ item.price_display }}</td>
+        {% else %}
+        <td class="p-inc">{{ t.included }}</td>
         {% endif %}
+      </tr>
+      {% empty %}
+      <tr><td colspan="3" style="color:#7C8492">{{ t.no_items }}</td></tr>
+      {% endfor %}
+    </table>
+
+    <div class="pkg-time">{{ t.timeline }}: {{ pkg.timeline }}</div>
+  </div>
+  {% endfor %}
+
+  <p class="price-note">{{ t.price_note }}</p>
+</div>
+
+
+<!-- ═══ 3. MAELEZO ═══ -->
+{% if notes %}
+<div class="sec keep">
+  <table class="sec-h"><tr><td class="sec-n">3</td><td class="sec-t">{{ t.s3 }}</td></tr></table>
+  <table class="notes">
+    {% for note in notes %}
+    <tr><td class="k">{{ note.label }}</td><td class="v">{{ note.text }}</td></tr>
     {% endfor %}
-</tbody>
+  </table>
+</div>
+{% endif %}
 
 
-        </table>
-    </div>
-
-    <div class="section">
-        <h2>Agreement Terms</h2>
-        <div class="terms">
-            <p>This proposal outlines the scope of work agreed upon by <strong>JamiiTek Company</strong> and the client. Final design, delivery dates, payment terms, and hosting details will be formalized upon signature of this agreement.</p>
-            <p><strong>Confidentiality:</strong> Both parties agree to keep all information confidential.</p>
-            <p><strong>Liability:</strong> JamiiTek Company shall not be liable for indirect damages.</p>
-            <p><strong>Dispute Resolution:</strong> Any disputes shall be resolved through arbitration in [Specify Location].</p>
-            <p><strong>Termination:</strong> Either party may terminate this agreement with 7 days written notice.</p>
-            <p><strong>Force Majeure:</strong> Neither party shall be liable for delays due to causes beyond their control.</p>
+<!-- ═══ 4. MALIPO ═══ -->
+<div class="sec keep">
+  <table class="sec-h"><tr><td class="sec-n">4</td><td class="sec-t">{{ t.s4 }}</td></tr></table>
+  <table class="pay">
+    <tr>
+      {% for pct, text in payment_split %}
+      <td width="50%">
+        <div class="pay-box">
+          <div class="pay-pct">{{ pct }}</div>
+          <div class="pay-txt">{{ text }}</div>
         </div>
-    </div>
+      </td>
+      {% endfor %}
+    </tr>
+  </table>
+  <p class="pay-note">{{ payment_note }}</p>
+</div>
 
-    <div class="signature">
-        <p><strong>Client Signature:</strong></p>
-        <div class="line"></div>
-        <p>Name: ________________________</p>
-        <p>Title: ________________________</p>
-        <p>Date: ________________________</p>
-    </div>
 
-    <div class="signature" style="margin-top: 60px;">
-        <p><strong>JamiiTek Company Representative:</strong></p>
-        <div class="line"></div>
-        <p>Name: ________________________</p>
-        <p>Title: ________________________</p>
-        <p>Date: ________________________</p>
-    </div>
+<!-- ═══ 5. TUNACHOHITAJI ═══ -->
+<div class="sec keep">
+  <table class="sec-h"><tr><td class="sec-n">5</td><td class="sec-t">{{ t.s5 }}</td></tr></table>
+  <table class="bul">
+    {% for line in client_inputs %}
+    <tr><td class="b">•</td><td class="x">{{ line }}</td></tr>
+    {% endfor %}
+  </table>
+</div>
 
-    <pdf:pageFooter>
-        <div class="footer">
-            Page <pdf:pagenumber/> of <pdf:pagecount/> | JamiiTek Company | info@jamiitek.co.tz | +255 629712678
-        </div>
-    </pdf:pageFooter>
+
+<!-- ═══ 6. DHAMANA ═══ -->
+<div class="sec keep">
+  <table class="sec-h"><tr><td class="sec-n">6</td><td class="sec-t">{{ t.s6 }}</td></tr></table>
+  <table class="bul">
+    {% for line in guarantees %}
+    <tr><td class="b">&#10003;</td><td class="x">{{ line }}</td></tr>
+    {% endfor %}
+  </table>
+</div>
+
+
+<!-- ═══ 7. MASHARTI ═══ -->
+<div class="sec keep">
+  <table class="sec-h"><tr><td class="sec-n">7</td><td class="sec-t">{{ t.s7 }}</td></tr></table>
+  <table class="terms">
+    {% for title, detail in terms %}
+    <tr><td class="t">{{ title }}</td><td class="d">{{ detail }}</td></tr>
+    {% endfor %}
+  </table>
+</div>
+
+
+<!-- ═══ HATUA ═══ -->
+<div class="next keep">
+  <div class="next-h">{{ t.next_h }}</div>
+  <div class="next-p">{{ t.next_p }}</div>
+  <div class="next-cta">{{ t.next_cta }}: {{ company.whatsapp }}</div>
+</div>
+
+
+<!-- ═══ SAINI ═══ -->
+<table class="sign keep">
+  <tr>
+    <td>
+      <div class="sign-role">{{ t.sign_us }}</div>
+      <div class="sign-line"></div>
+      <div class="sign-cap">{{ t.sign_cap }}</div>
+    </td>
+    <td>
+      <div class="sign-role">{{ t.sign_client }} — {{ proposal.client.name }}</div>
+      <div class="sign-line"></div>
+      <div class="sign-cap">{{ t.sign_cap }}</div>
+    </td>
+  </tr>
+</table>
+
 </body>
 </html>

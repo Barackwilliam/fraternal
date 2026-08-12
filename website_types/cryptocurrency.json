@@ -18,68 +18,68 @@
     "question": "Select your preferred cryptocurrency platform type:",
     "type": "checkbox",
     "options": [
-      "Crypto News & Blog | 0",
-      "Token/ICO Promotion Website | 0",
-      "Cryptocurrency Exchange | 0",
-      "Crypto Wallet Interface | 0",
-      "Crypto Dashboard/Portfolio Tracker | 0"
+      "Crypto News & Blog | 0 | A",
+      "Token/ICO Promotion Website | 0 | A",
+      "Cryptocurrency Exchange | 0 | A",
+      "Crypto Wallet Interface | 0 | A",
+      "Crypto Dashboard/Portfolio Tracker | 0 | A"
     ]
   },
   "features": {
     "question": "Select the features you want included:",
     "type": "checkbox",
     "options": [
-      "Live Price Charts (CoinMarketCap API, etc.) | 50000",
-      "Wallet Connection (Metamask, TrustWallet, etc.) | 100000",
-      "User Registration & Login | 15000",
-      "Two-Factor Authentication (2FA) | 10000",
-      "Admin Panel for Managing Listings/Users | 25000",
-      "Trading Interface (Buy/Sell UI) | 30000",
-      "Crypto News Feed & Blog | 10000",
-      "Token Sale Countdown Timer | 30000",
-      "Whitepaper & Tokenomics Section | 5000",
-      "Newsletter Subscription (Email Capture) | 15000",
-      "Contact/Support Form | 10000",
-      "Animated Stats & Token Performance Graphs | 12000",
-      "Roadmap Section with Milestones | 7000",
-      "Team & Advisors Section | 6000",
-      "KYC/AML Verification System Integration | 20000"
+      "Live Price Charts (CoinMarketCap API, etc.) | 50000 | C",
+      "Wallet Connection (Metamask, TrustWallet, etc.) | 100000 | C",
+      "User Registration & Login | 15000 | B",
+      "Two-Factor Authentication (2FA) | 10000 | A",
+      "Admin Panel for Managing Listings/Users | 25000 | B",
+      "Trading Interface (Buy/Sell UI) | 30000 | B",
+      "Crypto News Feed & Blog | 10000 | A",
+      "Token Sale Countdown Timer | 30000 | C",
+      "Whitepaper & Tokenomics Section | 5000 | A",
+      "Newsletter Subscription (Email Capture) | 15000 | B",
+      "Contact/Support Form | 10000 | A",
+      "Animated Stats & Token Performance Graphs | 12000 | B",
+      "Roadmap Section with Milestones | 7000 | A",
+      "Team & Advisors Section | 6000 | A",
+      "KYC/AML Verification System Integration | 20000 | B"
     ]
   },
   "payment_methods": {
     "question": "Which payment options should be supported?",
     "type": "checkbox",
     "options": [
-      "Crypto Payments (BTC, ETH, USDT, etc.) | 100000",
-      "Fiat via PayPal or Card (Stripe) | 80000",
-      "Mobile Money (M-Pesa, TigoPesa) | 80000"
+      "Crypto Payments (BTC, ETH, USDT, etc.) | 100000 | B",
+      "Fiat via PayPal or Card (Stripe) | 80000 | A",
+      "Mobile Money (M-Pesa, TigoPesa) | 80000 | A"
     ]
   },
   "blockchain_features": {
     "question": "Do you want to integrate with any blockchain features?",
     "type": "checkbox",
     "options": [
-      "Smart Contract Viewer | 12000",
-      "NFT Showcase/Market | 25000",
-      "Airdrop Claim Page | 10000",
-      "Staking/Farming Interface | 20000"
+      "Smart Contract Viewer | 12000 | A",
+      "NFT Showcase/Market | 25000 | C",
+      "Airdrop Claim Page | 10000 | A",
+      "Staking/Farming Interface | 20000 | B"
     ]
   },
   "design_style": {
     "question": "Choose a preferred design style:",
     "type": "checkbox",
     "options": [
-      "Modern, Futuristic | 10000",
-      "Dark Theme | 8000",
-      "Minimalist | 7000"
+      "Modern, Futuristic | 10000 | B",
+      "Dark Theme | 8000 | A",
+      "Minimalist | 7000 | A"
     ]
   },
   "domain_hosting": {
     "question": "Do you need domain and hosting support?",
     "type": "checkbox",
     "options": [
-      "Yes, please include | 70000",
-      "No, I already have | 0"
+      "Yes, please include | 70000 | A",
+      "No, I already have | 0 | A"
     ]
   },
   "project_timeline": {

@@ -18,64 +18,64 @@
     "question": "What type of agriculture platform do you want?",
     "type": "checkbox",
     "options": [
-      "Farm Management System | 25000 | B",
-      "Marketplace for Produce | 0 | A",
-      "Agricultural News & Updates | 10000 | A",
-      "Weather & Crop Advisory | 0 | A",
-      "Agro-inputs E-commerce | 0 | A"
+      "Farm Management System | 25000",
+      "Marketplace for Produce | 0",
+      "Agricultural News & Updates | 10000",
+      "Weather & Crop Advisory | 0",
+      "Agro-inputs E-commerce | 0"
     ]
   },
   "core_features": {
     "question": "Select core features needed:",
     "type": "checkbox",
     "options": [
-      "User Registration & Profiles | 15000 | A",
-      "Farm Data Tracking & Analytics | 25000 | A",
-      "Inventory & Supply Chain Management | 31000 | B",
-      "Order Management & Payments | 30000 | B",
-      "Weather Forecast Integration | 25000 | B",
-      "Crop Disease Detection Tools | 45000 | C",
-      "Multi-language Support | 30000 | B",
-      "Mobile Responsive Design | 8000 | A",
-      "Notification System (SMS/Email) | 7000 | A",
-      "Marketplace for Buying & Selling | 50000 | C"
+      "User Registration & Profiles | 15000",
+      "Farm Data Tracking & Analytics | 25000",
+      "Inventory & Supply Chain Management | 31000",
+      "Order Management & Payments | 30000",
+      "Weather Forecast Integration | 25000",
+      "Crop Disease Detection Tools | 45000",
+      "Multi-language Support | 30000",
+      "Mobile Responsive Design | 8000",
+      "Notification System (SMS/Email) | 7000",
+      "Marketplace for Buying & Selling | 50000"
     ]
   },
   "third_party_integrations": {
     "question": "Select third-party integrations required:",
     "type": "checkbox",
     "options": [
-      "Payment Gateways (Stripe, PayPal) | 10000 | A",
-      "Weather APIs (OpenWeatherMap, AccuWeather) | 25000 | C",
-      "SMS Gateways | 15000 | B",
-      "Google Maps / GIS Integration | 12000 | A"
+      "Payment Gateways (Stripe, PayPal) | 10000",
+      "Weather APIs (OpenWeatherMap, AccuWeather) | 25000",
+      "SMS Gateways | 15000",
+      "Google Maps / GIS Integration | 12000"
     ]
   },
   "security_features": {
     "question": "Select required security features:",
     "type": "checkbox",
     "options": [
-      "Data Encryption | 10000 | C",
-      "Two-Factor Authentication (2FA) | 9000 | B",
-      "Regular Backups | 8000 | A",
-      "User Activity Logs | 7000 | A"
+      "Data Encryption | 10000",
+      "Two-Factor Authentication (2FA) | 9000",
+      "Regular Backups | 8000",
+      "User Activity Logs | 7000"
     ]
   },
   "design_preferences": {
     "question": "Choose design style:",
     "type": "checkbox",
     "options": [
-      "Clean & Professional | 7000 | A",
-      "Earthy & Natural Colors | 7000 | B",
-      "Modern & Minimal | 6000 | A"
+      "Clean & Professional | 7000",
+      "Earthy & Natural Colors | 7000",
+      "Modern & Minimal | 6000"
     ]
   },
   "domain_hosting": {
     "question": "Do you want domain and hosting services included?",
     "type": "checkbox",
     "options": [
-      "Yes, please include | 60000 | A",
-      "No, I already have | 0 | A"
+      "Yes, please include | 60000",
+      "No, I already have | 0"
     ]
   },
   "project_timeline": {

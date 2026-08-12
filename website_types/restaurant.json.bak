@@ -23,43 +23,43 @@
     "question": "Select features you want on your restaurant website:",
     "type": "checkbox",
     "options": [
-      "Responsive Homepage | 15000 | A",
-      "Online Menu Display | 20000 | B",
-      "Table Reservation System | 30000 | C",
-      "Online Food Ordering | 40000 | C",
-      "Google Maps Integration | 10000 | A",
-      "Photo Gallery (Food & Interior) | 15000 | B",
-      "Customer Reviews Section | 15000 | B",
-      "WhatsApp/Phone Call Button | 8000 | A",
-      "Multilingual Support | 20000 | B",
-      "Event or Promotion Management | 20000 | C",
-      "Newsletter Signup | 10000 | A",
-      "Instagram Feed Integration | 12000 | A"
+      "Responsive Homepage | 15000",
+      "Online Menu Display | 20000",
+      "Table Reservation System | 30000",
+      "Online Food Ordering | 40000",
+      "Google Maps Integration | 10000",
+      "Photo Gallery (Food & Interior) | 15000",
+      "Customer Reviews Section | 15000",
+      "WhatsApp/Phone Call Button | 8000",
+      "Multilingual Support | 20000",
+      "Event or Promotion Management | 20000",
+      "Newsletter Signup | 10000",
+      "Instagram Feed Integration | 12000"
     ]
   },
   "payment_options": {
     "question": "Do you want to accept payments online?",
     "type": "checkbox",
     "options": [
-      "Yes (Mobile Money, Cards, etc.) | 30000 | A",
-      "No | 0 | A"
+      "Yes (Mobile Money, Cards, etc.) | 30000",
+      "No | 0"
     ]
   },
   "design_preference": {
     "question": "Preferred website design style:",
     "type": "checkbox",
     "options": [
-      "Classic & Elegant | 0 | A",
-      "Modern & Bold | 15000 | A",
-      "Cultural & Traditional Theme | 20000 | B"
+      "Classic & Elegant | 0",
+      "Modern & Bold | 15000",
+      "Cultural & Traditional Theme | 20000"
     ]
   },
   "domain_hosting": {
     "question": "Do you need domain and hosting setup?",
     "type": "checkbox",
     "options": [
-      "Yes | 70000 | A",
-      "No | 0 | A"
+      "Yes | 70000",
+      "No | 0"
     ]
   },
   "project_timeline": {
