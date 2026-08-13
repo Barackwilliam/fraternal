@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000">
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#04101F"/><stop offset="1" stop-color="#0A2245"/>
+  </linearGradient>
+  <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#F5A623"/><stop offset="1" stop-color="#FFC456"/>
+  </linearGradient>
+  <linearGradient id="glass" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#ffffff" stop-opacity=".10"/>
+    <stop offset="1" stop-color="#ffffff" stop-opacity=".03"/>
+  </linearGradient>
+  <linearGradient id="blueg" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#2E7BF6"/><stop offset="1" stop-color="#1B4C8C"/>
+  </linearGradient>
+  <radialGradient id="glow" cx=".5" cy=".5" r=".5">
+    <stop offset="0" stop-color="#F5A623" stop-opacity=".30"/>
+    <stop offset="1" stop-color="#F5A623" stop-opacity="0"/>
+  </radialGradient>
+  <filter id="sh" x="-30%" y="-30%" width="160%" height="160%">
+    <feDropShadow dx="0" dy="26" stdDeviation="30" flood-color="#000" flood-opacity=".45"/>
+  </filter>
+  <filter id="sh2" x="-40%" y="-40%" width="180%" height="180%">
+    <feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#000" flood-opacity=".35"/>
+  </filter>
+  <pattern id="grid" width="64" height="64" patternUnits="userSpaceOnUse">
+    <path d="M64 0H0v64" fill="none" stroke="#ffffff" stroke-opacity=".045" stroke-width="1.2"/>
+  </pattern>
+  
+</defs>
+<rect width="1600" height="1000" fill="url(#bg)"/>
+<rect width="1600" height="1000" fill="url(#grid)"/>
+<ellipse cx="1330" cy="150" rx="620" ry="470" fill="url(#glow)"/>
+<g filter="url(#sh)"><rect x="330" y="120" width="940" height="800" rx="36" fill="#071A31" stroke="#ffffff" stroke-opacity=".13" stroke-width="1.6"/></g>
+<path d="M330 156a36 36 0 0 1 36-36h868a36 36 0 0 1 36 36v96H330z" fill="#25D366" fill-opacity=".12"/>
+<circle cx="404" cy="188" r="34" fill="url(#gold)"/>
+<text x="404" y="201" font-family="Sora,sans-serif" font-size="30" font-weight="800" fill="#04101F" text-anchor="middle">JB</text>
+<rect x="460" y="166" width="200" height="17" rx="8.5" fill="#ffffff" fill-opacity=".58"/>
+<circle cx="468" cy="205" r="5.5" fill="#25D366"/>
+<rect x="484" y="199" width="92" height="12" rx="6" fill="#25D366" fill-opacity=".72"/>
+<line x1="330" y1="252" x2="1270" y2="252" stroke="#ffffff" stroke-opacity=".10"/>
+<rect x="372" y="300" width="420" height="94" rx="24" fill="#ffffff" fill-opacity=".075"/><path d="M376 370v24h24z" fill="#ffffff" fill-opacity=".075"/><rect x="398" y="324" width="300" height="12" rx="6" fill="#ffffff" fill-opacity=".32"/><rect x="398" y="354" width="210" height="12" rx="6" fill="#ffffff" fill-opacity=".24"/>
+<rect x="752" y="428" width="470" height="124" rx="24" fill="#25D366" fill-opacity=".20"/><path d="M1218 528v24h-24z" fill="#25D366" fill-opacity=".20"/><rect x="778" y="452" width="380" height="12" rx="6" fill="#25D366" fill-opacity=".80"/><rect x="778" y="482" width="330" height="12" rx="6" fill="#25D366" fill-opacity=".60"/><rect x="778" y="512" width="240" height="12" rx="6" fill="#25D366" fill-opacity=".46"/>
+<rect x="372" y="586" width="360" height="64" rx="24" fill="#ffffff" fill-opacity=".075"/><path d="M376 626v24h24z" fill="#ffffff" fill-opacity=".075"/><rect x="398" y="610" width="228" height="12" rx="6" fill="#ffffff" fill-opacity=".32"/>
+<rect x="1072" y="684" width="150" height="60" rx="26" fill="#25D366" fill-opacity=".20"/>
+<circle cx="1108" cy="714" r="8" fill="#25D366" fill-opacity=".8"/>
+<circle cx="1134" cy="714" r="8" fill="#25D366" fill-opacity=".55"/>
+<circle cx="1160" cy="714" r="8" fill="#25D366" fill-opacity=".35"/>
+<rect x="366" y="852" width="768" height="48" rx="24" fill="#ffffff" fill-opacity=".06"/>
+<rect x="396" y="870" width="200" height="12" rx="6" fill="#ffffff" fill-opacity=".16"/>
+<circle cx="1202" cy="876" r="30" fill="#25D366"/>
+<path d="M1216 876l-28-13 8 13-8 13z" fill="#ffffff"/>
+<g filter="url(#sh2)" transform="translate(1132,84)">
+  <rect width="248" height="100" rx="28" fill="url(#gold)"/>
+  <text x="124" y="48" font-family="Sora,sans-serif" font-size="31" font-weight="800" fill="#04101F" text-anchor="middle">24/7</text>
+  <text x="124" y="79" font-family="Sora,sans-serif" font-size="19" font-weight="600" fill="#04101F" fill-opacity=".78" text-anchor="middle">AI Assistant</text></g>
+</svg>

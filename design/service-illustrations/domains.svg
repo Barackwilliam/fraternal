@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000">
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#04101F"/><stop offset="1" stop-color="#0A2245"/>
+  </linearGradient>
+  <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#F5A623"/><stop offset="1" stop-color="#FFC456"/>
+  </linearGradient>
+  <linearGradient id="glass" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#ffffff" stop-opacity=".10"/>
+    <stop offset="1" stop-color="#ffffff" stop-opacity=".03"/>
+  </linearGradient>
+  <linearGradient id="blueg" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#2E7BF6"/><stop offset="1" stop-color="#1B4C8C"/>
+  </linearGradient>
+  <radialGradient id="glow" cx=".5" cy=".5" r=".5">
+    <stop offset="0" stop-color="#F5A623" stop-opacity=".30"/>
+    <stop offset="1" stop-color="#F5A623" stop-opacity="0"/>
+  </radialGradient>
+  <filter id="sh" x="-30%" y="-30%" width="160%" height="160%">
+    <feDropShadow dx="0" dy="26" stdDeviation="30" flood-color="#000" flood-opacity=".45"/>
+  </filter>
+  <filter id="sh2" x="-40%" y="-40%" width="180%" height="180%">
+    <feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#000" flood-opacity=".35"/>
+  </filter>
+  <pattern id="grid" width="64" height="64" patternUnits="userSpaceOnUse">
+    <path d="M64 0H0v64" fill="none" stroke="#ffffff" stroke-opacity=".045" stroke-width="1.2"/>
+  </pattern>
+  
+</defs>
+<rect width="1600" height="1000" fill="url(#bg)"/>
+<rect width="1600" height="1000" fill="url(#grid)"/>
+<ellipse cx="1330" cy="150" rx="620" ry="470" fill="url(#glow)"/>
+<circle cx="800" cy="470" r="300" fill="none" stroke="#ffffff" stroke-opacity=".20" stroke-width="2.4"/>
+<circle cx="800" cy="470" r="300" fill="#2E7BF6" fill-opacity=".08"/>
+<ellipse cx="800" cy="470" rx="100" ry="300" fill="none" stroke="#ffffff" stroke-opacity=".16" stroke-width="1.8"/>
+<ellipse cx="800" cy="470" rx="200" ry="300" fill="none" stroke="#ffffff" stroke-opacity=".16" stroke-width="1.8"/>
+<ellipse cx="800" cy="310" rx="254" ry="36" fill="none" stroke="#ffffff" stroke-opacity=".16" stroke-width="1.8"/>
+<ellipse cx="800" cy="470" rx="300" ry="42" fill="none" stroke="#ffffff" stroke-opacity=".16" stroke-width="1.8"/>
+<ellipse cx="800" cy="630" rx="254" ry="36" fill="none" stroke="#ffffff" stroke-opacity=".16" stroke-width="1.8"/>
+<circle cx="706" cy="352" r="12" fill="#F5A623" fill-opacity=".28"/>
+<circle cx="706" cy="352" r="5.5" fill="#F5A623"/>
+<circle cx="902" cy="420" r="12" fill="#F5A623" fill-opacity=".28"/>
+<circle cx="902" cy="420" r="5.5" fill="#F5A623"/>
+<circle cx="760" cy="592" r="12" fill="#F5A623" fill-opacity=".28"/>
+<circle cx="760" cy="592" r="5.5" fill="#F5A623"/>
+<circle cx="940" cy="560" r="12" fill="#F5A623" fill-opacity=".28"/>
+<circle cx="940" cy="560" r="5.5" fill="#F5A623"/>
+<g filter="url(#sh)"><rect x="330" y="392" width="940" height="118" rx="59" fill="#071A31" stroke="#ffffff" stroke-opacity=".14" stroke-width="1.8"/></g>
+<circle cx="412" cy="451" r="20" fill="none" stroke="#7E93B0" stroke-width="4"/>
+<line x1="427" y1="466" x2="443" y2="482" stroke="#7E93B0" stroke-width="4" stroke-linecap="round"/>
+<text x="486" y="468" font-family="Sora,sans-serif" font-size="46" font-weight="700" fill="#ffffff" fill-opacity=".92">biasharayangu</text>
+<text x="854" y="468" font-family="Sora,sans-serif" font-size="46" font-weight="800" fill="#F5A623">.co.tz</text>
+<rect x="1088" y="414" width="158" height="74" rx="37" fill="url(#gold)"/>
+<path d="M1146 451l14 14 26-28" fill="none" stroke="#04101F" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="430" y="560" width="740" height="64" rx="18" fill="#ffffff" fill-opacity=".05" stroke="#ffffff" stroke-opacity=".08"/>
+<text x="466" y="602" font-family="Sora,sans-serif" font-size="27" font-weight="700" fill="#ffffff" fill-opacity=".82">biasharayangu.com</text>
+<circle cx="1064" cy="592" r="7" fill="#1FA97A"/>
+<rect x="1080" y="585" width="64" height="13" rx="6.5" fill="#1FA97A" fill-opacity=".55"/>
+<rect x="430" y="644" width="740" height="64" rx="18" fill="#ffffff" fill-opacity=".05" stroke="#ffffff" stroke-opacity=".08"/>
+<text x="466" y="686" font-family="Sora,sans-serif" font-size="27" font-weight="700" fill="#ffffff" fill-opacity=".82">biasharayangu.co.tz</text>
+<circle cx="1064" cy="676" r="7" fill="#1FA97A"/>
+<rect x="1080" y="669" width="64" height="13" rx="6.5" fill="#1FA97A" fill-opacity=".55"/>
+<rect x="430" y="728" width="740" height="64" rx="18" fill="#ffffff" fill-opacity=".05" stroke="#ffffff" stroke-opacity=".08"/>
+<text x="466" y="770" font-family="Sora,sans-serif" font-size="27" font-weight="700" fill="#ffffff" fill-opacity=".82">biasharayangu.org</text>
+<circle cx="1064" cy="760" r="7" fill="#7E93B0"/>
+<rect x="1080" y="753" width="64" height="13" rx="6.5" fill="#7E93B0" fill-opacity=".55"/>
+</svg>
