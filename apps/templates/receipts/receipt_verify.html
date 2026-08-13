@@ -80,7 +80,7 @@ a{color:inherit;text-decoration:none}
     {% if r.client_company %}
     <div class="row"><span class="k">Company</span><span class="v">{{ r.client_company }}</span></div>
     {% endif %}
-    <div class="row"><span class="k">Website</span><span class="v">{{ r.website.name }}</span></div>
+    <div class="row"><span class="k">{% if r.website %}Website{% else %}Project{% endif %}</span><span class="v">{{ r.subject_name }}</span></div>
     <div class="row"><span class="k">For</span><span class="v">{{ r.get_kind_display }}</span></div>
     <div class="row"><span class="k">Method</span><span class="v">{{ r.get_payment_method_display }}</span></div>
     {% if r.payment_reference %}

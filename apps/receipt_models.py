@@ -38,8 +38,25 @@ class DevelopmentReceipt(models.Model):
         ('partial',  'Part payment'),
     ]
 
+    # Website ni hiari. Risiti nyingi ni za kazi zisizo na tovuti kwenye
+    # mfumo — app, mafunzo, ushauri, au mteja wa mara moja.
     website = models.ForeignKey(
-        'ManagedWebsite', on_delete=models.CASCADE, related_name='receipts')
+        'ManagedWebsite', on_delete=models.SET_NULL, related_name='receipts',
+        null=True, blank=True,
+        help_text='Optional. Leave blank for work not tied to a managed website.')
+
+    # Zinatumika pale website haipo. Website ikiwepo, taarifa zake zinatangulia.
+    client_name_manual = models.CharField(
+        'Client name', max_length=160, blank=True)
+    client_company_manual = models.CharField(
+        'Client company', max_length=160, blank=True)
+    client_email_manual = models.EmailField('Client email', blank=True)
+    client_phone_manual = models.CharField(
+        'Client phone', max_length=40, blank=True)
+    project_label = models.CharField(
+        max_length=200, blank=True,
+        help_text='What this receipt is for, when no website is linked. '
+                  'e.g. "Africanberty Tips — Mobile App"')
 
     receipt_number = models.CharField(
         max_length=40, blank=True, help_text='Auto: RCP-YYYY-NNNN if left blank')
@@ -93,7 +110,15 @@ class DevelopmentReceipt(models.Model):
         verbose_name = 'Development Receipt'
 
     def __str__(self):
-        return f'{self.receipt_number or "Receipt"} — {self.website.name}'
+        return f'{self.receipt_number or "Receipt"} — {self.subject_name}'
+
+    @property
+    def subject_name(self):
+        """Kichwa cha risiti: jina la tovuti, la mradi, au la mteja."""
+        if self.website_id and self.website:
+            return self.website.name
+        return (self.project_label or self.client_company_manual
+                or self.client_name_manual or 'Receipt')
 
     def save(self, *args, **kwargs):
         if not self.token:
@@ -111,23 +136,23 @@ class DevelopmentReceipt(models.Model):
     # ── client shortcuts ──────────────────────────────────────
     @property
     def client(self):
-        return self.website.client
+        return self.website.client if self.website_id and self.website else None
 
     @property
     def client_name(self):
-        return getattr(self.client, 'name', '') or ''
+        return getattr(self.client, 'name', '') or self.client_name_manual
 
     @property
     def client_company(self):
-        return getattr(self.client, 'company', '') or ''
+        return getattr(self.client, 'company', '') or self.client_company_manual
 
     @property
     def client_email(self):
-        return getattr(self.client, 'email', '') or ''
+        return getattr(self.client, 'email', '') or self.client_email_manual
 
     @property
     def client_phone(self):
-        return getattr(self.client, 'phone', '') or ''
+        return getattr(self.client, 'phone', '') or self.client_phone_manual
 
     # ── money ─────────────────────────────────────────────────
     @property
@@ -211,6 +236,6 @@ class DevelopmentReceipt(models.Model):
 
     @property
     def filename(self):
-        safe = ''.join(c for c in self.website.name if c.isalnum() or c in ' -_').strip()
-        safe = safe.replace(' ', '-') or 'website'
+        safe = ''.join(c for c in self.subject_name if c.isalnum() or c in ' -_').strip()
+        safe = safe.replace(' ', '-') or 'receipt'
         return f'{self.receipt_number or "receipt"}-{safe}.pdf'

@@ -112,6 +112,13 @@ def _apply_post(receipt, request):
     receipt.is_published = bool(request.POST.get('is_published'))
     receipt.require_signature = bool(request.POST.get('require_signature'))
 
+    # Website ni hiari — hizi zinatumika pale haipo
+    receipt.project_label = request.POST.get('project_label', '').strip()
+    receipt.client_name_manual = request.POST.get('client_name_manual', '').strip()
+    receipt.client_company_manual = request.POST.get('client_company_manual', '').strip()
+    receipt.client_email_manual = request.POST.get('client_email_manual', '').strip()
+    receipt.client_phone_manual = request.POST.get('client_phone_manual', '').strip()
+
     pay_date = parse_date((request.POST.get('payment_date') or '').strip())
     if pay_date:
         receipt.payment_date = pay_date
@@ -131,6 +138,9 @@ def receipt_list(request):
             Q(receipt_number__icontains=q) |
             Q(website__name__icontains=q) |
             Q(website__client__name__icontains=q) |
+            Q(client_name_manual__icontains=q) |
+            Q(client_company_manual__icontains=q) |
+            Q(project_label__icontains=q) |
             Q(payment_reference__icontains=q)
         )
 
@@ -158,12 +168,20 @@ def receipt_new(request, website_pk=None):
 
     if request.method == 'POST':
         target_pk = request.POST.get('website') or website_pk
-        if not target_pk:
-            messages.error(request, 'Choose which website this receipt is for.')
+        receipt = DevelopmentReceipt()
+        if target_pk:
+            receipt.website = get_object_or_404(ManagedWebsite, pk=target_pk)
+        _apply_post(receipt, request)
+
+        # Bila website, angalau jina la mteja au la mradi linahitajika
+        if not receipt.website_id and not (
+                receipt.client_name_manual or receipt.client_company_manual
+                or receipt.project_label):
+            messages.error(
+                request,
+                'Choose a website, or fill in the client name or project name.')
             return redirect('receipt_new')
 
-        receipt = DevelopmentReceipt(website=get_object_or_404(ManagedWebsite, pk=target_pk))
-        _apply_post(receipt, request)
         receipt.save()
         messages.success(request, f'{receipt.receipt_number} created.')
         return redirect('receipt_edit', pk=receipt.pk)
@@ -194,8 +212,10 @@ def receipt_edit(request, pk):
         DevelopmentReceipt.objects.select_related('website', 'website__client'), pk=pk)
 
     if request.method == 'POST':
-        new_site = request.POST.get('website')
-        if new_site and str(new_site) != str(receipt.website_id):
+        new_site = (request.POST.get('website') or '').strip()
+        if not new_site:
+            receipt.website = None
+        elif str(new_site) != str(receipt.website_id):
             receipt.website = get_object_or_404(ManagedWebsite, pk=new_site)
         _apply_post(receipt, request)
         receipt.save()

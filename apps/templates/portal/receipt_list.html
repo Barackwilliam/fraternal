@@ -57,7 +57,7 @@
 <div class="rcpt f0">
   <div>
     <div class="num">{{ r.receipt_number }}</div>
-    <div class="site">{{ r.website.name }}</div>
+    <div class="site">{{ r.subject_name }}</div>
     <div class="desc">{{ r.title }}</div>
     <span class="badge {% if not r.is_fully_paid %}part{% endif %}">
       <i class="fas fa-{% if r.is_fully_paid %}circle-check{% else %}hourglass-half{% endif %}"></i>

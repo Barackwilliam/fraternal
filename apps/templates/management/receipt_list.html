@@ -76,8 +76,8 @@
 <div class="rc">
   <div>
     <div class="num">{{ r.receipt_number }}</div>
-    <div class="site">{{ r.website.name }}</div>
-    <div class="who">{{ r.website.client.name }}{% if r.website.client.company %} · {{ r.website.client.company }}{% endif %}</div>
+    <div class="site">{{ r.subject_name }}</div>
+    <div class="who">{{ r.client_name }}{% if r.client_company %} · {{ r.client_company }}{% endif %}</div>
   </div>
   <div>
     <div style="font-size:13px;color:var(--text)">{{ r.title }}</div>

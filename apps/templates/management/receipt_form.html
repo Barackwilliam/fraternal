@@ -55,7 +55,7 @@
         {% if is_new %}New Receipt{% else %}{{ receipt.receipt_number }}{% endif %}
       </div>
       <div class="pg-sub" style="font-family:var(--mono);font-size:11px;color:var(--text-3)">
-        {% if receipt.website %}{{ receipt.website.name }} &middot; {{ receipt.website.client.name }}{% else %}Choose a website below{% endif %}
+        {% if receipt.website %}{{ receipt.website.name }} &middot; {{ receipt.website.client.name }}{% elif receipt.project_label or receipt.client_name_manual %}{{ receipt.project_label|default:receipt.client_name_manual }}{% else %}Link a website, or fill in the client below{% endif %}
       </div>
     </div>
     <div class="rc-actions">
@@ -77,21 +77,22 @@
   <form method="post" id="rcForm">
     {% csrf_token %}
 
-    <!-- ── WHICH WEBSITE ── -->
+    <!-- ── WHO THIS RECEIPT IS FOR ── -->
     <div class="rc-card">
-      <h3><i class="fas fa-globe"></i> Website</h3>
+      <h3><i class="fas fa-user-check"></i> Who this receipt is for</h3>
       <div class="rc-grid">
         <div class="rc-f">
-          <label>Website this receipt is for</label>
-          <select name="website" required>
-            <option value="">— choose —</option>
+          <label>Managed website <span style="color:var(--text-3);font-weight:400">(optional)</span></label>
+          <select name="website" id="rcWebsite" onchange="toggleManual()">
+            <option value="">— not linked to a website —</option>
             {% for w in websites %}
             <option value="{{ w.pk }}"{% if receipt.website and w.pk == receipt.website.pk %} selected{% endif %}>
               {{ w.name }} — {{ w.client.name }}
             </option>
             {% endfor %}
           </select>
-          <div class="hint">A client with several websites gets one receipt per website.</div>
+          <div class="hint">Link a website and the client details fill in automatically.
+            Leave it blank for app work, training, consulting, or a one-off client.</div>
         </div>
         <div class="rc-f">
           <label>Payment type</label>
@@ -109,6 +110,43 @@
       <div class="rc-f" style="margin-top:14px">
         <label>Description (optional)</label>
         <textarea name="description" placeholder="Short summary of what was built">{{ receipt.description }}</textarea>
+      </div>
+
+      <!-- Inaonekana pale hakuna website iliyounganishwa -->
+      <div id="manualClient" style="margin-top:18px;padding-top:18px;
+           border-top:1px solid var(--border)">
+        <div style="font-family:var(--mono);font-size:11px;color:var(--text-3);
+             letter-spacing:1px;text-transform:uppercase;margin-bottom:12px">
+          Client details
+        </div>
+        <div class="rc-grid">
+          <div class="rc-f">
+            <label>Client name</label>
+            <input type="text" name="client_name_manual"
+                   value="{{ receipt.client_name_manual }}" placeholder="Salum Magere">
+          </div>
+          <div class="rc-f">
+            <label>Company</label>
+            <input type="text" name="client_company_manual"
+                   value="{{ receipt.client_company_manual }}" placeholder="Africanberty Tips">
+          </div>
+          <div class="rc-f">
+            <label>Email</label>
+            <input type="email" name="client_email_manual"
+                   value="{{ receipt.client_email_manual }}">
+          </div>
+          <div class="rc-f">
+            <label>Phone</label>
+            <input type="text" name="client_phone_manual"
+                   value="{{ receipt.client_phone_manual }}" placeholder="+255 ...">
+          </div>
+        </div>
+        <div class="rc-f" style="margin-top:14px">
+          <label>Project name</label>
+          <input type="text" name="project_label" value="{{ receipt.project_label }}"
+                 placeholder="Africanberty Tips — Mobile App">
+          <div class="hint">Shown on the receipt in place of the website name.</div>
+        </div>
       </div>
     </div>
 
@@ -228,6 +266,18 @@
       {% endif %}
     </div>
   </form>
+
+<script>
+/* Website ikichaguliwa, taarifa za mteja zinatoka kwake — kwa hiyo
+   visanduku vya mkono vinafichwa ili kusiwe na vyanzo viwili. */
+function toggleManual(){
+  var sel = document.getElementById('rcWebsite');
+  var box = document.getElementById('manualClient');
+  if (!sel || !box) return;
+  box.style.display = sel.value ? 'none' : '';
+}
+toggleManual();
+</script>
 
   {% if not is_new %}
   <form id="delForm" method="post" action="{% url 'receipt_delete' receipt.pk %}" style="display:none">

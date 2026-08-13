@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>{{ r.receipt_number }} — {{ r.website.name }}</title>
+<title>{{ r.receipt_number }} — {{ r.subject_name }}</title>
 <style>
 /* 80mm thermal roll. xhtml2pdf: tables and simple CSS only. */
 @page{size:80mm 250mm;margin:6mm 5mm 6mm 5mm}
@@ -136,7 +136,7 @@ body{background:#E8ECF1;font-size:12.5px;line-height:1.55;
   {% if r.client_company %}
   <tr><td class="mu">Company</td><td>{{ r.client_company }}</td></tr>
   {% endif %}
-  <tr><td class="mu">Website</td><td class="b">{{ r.website.name }}</td></tr>
+  <tr><td class="mu">{% if r.website %}Website{% else %}Project{% endif %}</td><td class="b">{{ r.subject_name }}</td></tr>
   <tr><td class="mu">Type</td><td>{{ r.get_kind_display }}</td></tr>
 </table>
 

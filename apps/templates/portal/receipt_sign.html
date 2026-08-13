@@ -48,7 +48,7 @@
 
   <div class="sg-head">
     <div class="sg-title">Sign your receipt</div>
-    <div class="sg-sub">{{ r.receipt_number }} &middot; {{ r.website.name }}</div>
+    <div class="sg-sub">{{ r.receipt_number }} &middot; {{ r.subject_name }}</div>
   </div>
 
   {% if messages %}{% for m in messages %}
@@ -57,7 +57,7 @@
 
   <div class="sg-card">
     <div class="sg-sum">
-      <span class="k">Website</span><span class="v">{{ r.website.name }}</span>
+      <span class="k">{% if r.website %}Website{% else %}Project{% endif %}</span><span class="v">{{ r.subject_name }}</span>
       <span class="k">Paid on</span><span class="v">{{ r.payment_date|date:"d M Y" }}</span>
       <span class="k">Method</span><span class="v">{{ r.get_payment_method_display }}</span>
       <span class="k">Amount</span>
@@ -101,7 +101,7 @@
         <input type="checkbox" id="agree" required>
         <span>I confirm that I made this payment of
           <b>{{ r.currency }} {{ r.amount_paid|floatformat:0|intcomma }}</b>
-          to JamiiTek for <b>{{ r.website.name }}</b>, and that this signature is mine.</span>
+          to JamiiTek for <b>{{ r.subject_name }}</b>, and that this signature is mine.</span>
       </label>
 
       <div class="sg-actions">
