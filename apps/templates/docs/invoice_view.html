@@ -31,9 +31,12 @@
   .ribbon.overdue{background:#fdecee;border-color:var(--red);color:#8c1f2a}
   .ribbon.overdue svg{fill:var(--red)}
   .paper{background:var(--paper);box-shadow:0 1px 3px rgba(26,60,110,.1),0 10px 40px rgba(26,60,110,.08)}
-  .invhead{padding:34px 46px 6px;display:flex;justify-content:space-between;align-items:flex-start;gap:24px;flex-wrap:wrap}
+  .invhead{padding:34px 46px 6px;display:flex;justify-content:space-between;align-items:flex-start;gap:28px;flex-wrap:wrap}
+  .invhead .left{flex:1 1 300px;min-width:0}
+  .invhead .right{flex:0 0 auto}
   .invhead .left .doctype{font-size:10.5px;letter-spacing:3.5px;color:var(--gold-t);font-weight:bold;margin-bottom:8px}
-  .invhead .left h1{font-size:27px;font-weight:bold;color:var(--navy);letter-spacing:1.4px}
+  .invhead .left h1{font-size:27px;font-weight:bold;color:var(--navy);letter-spacing:1.4px;
+    text-wrap:balance;overflow-wrap:break-word}
   .invhead .left .sub{font-size:13.5px;color:var(--muted);font-style:italic;margin-top:5px}
   .invhead .right{text-align:right}
   .invhead .right .num{font-size:15px;font-weight:bold;color:var(--navy);letter-spacing:1px}
@@ -53,6 +56,11 @@
   .items thead th{background:var(--navy);color:#fff;font-size:11px;text-transform:uppercase;
     letter-spacing:1px;padding:11px 15px;text-align:left;font-weight:bold}
   .items thead th.r{text-align:right}.items thead th.c{text-align:center}
+  .items col.c-desc{width:52%}.items col.c-qty{width:9%}
+  .items col.c-price{width:19%}.items col.c-amt{width:20%}
+  .items td.desc .d-main{font-weight:600}
+  .items td.desc .d-detail{font-size:12.5px;color:var(--muted);margin-top:3px;line-height:1.5}
+  .items tbody td.r{white-space:nowrap}
   .items tbody td{padding:12px 15px;font-size:13.5px;border-bottom:1px solid var(--line-l)}
   .items tbody td.r{text-align:right;font-variant-numeric:tabular-nums}
   .items tbody td.c{text-align:center}
@@ -91,9 +99,53 @@
   .btn-primary{background:var(--navy);color:#fff}.btn-primary:hover{background:var(--navy-d)}
   .btn-primary svg{fill:#fff}
   @media(max-width:680px){
-    .invhead{padding-left:20px;padding-right:20px}.invhead .right{text-align:left}
-    .rule,.secbar,.info-wrap,.items-wrap,.pay-wrap,.note,.terms,.paidstamp{margin-left:16px;margin-right:16px}
-    .invhead h1{font-size:21px}.info .k{width:34%}
+    .wrap{padding:16px 12px 100px}
+    .invhead{padding:24px 18px 4px}
+    .invhead .right{text-align:left;width:100%}
+    .invhead .right .amt-lbl{margin-top:14px}
+    .rule,.secbar,.info-wrap,.items-wrap,.pay-wrap,.note,.terms,.paidstamp{margin-left:14px;margin-right:14px}
+    .invhead h1{font-size:20px;letter-spacing:.6px}
+    .secbar{padding:8px 14px;font-size:11.5px;letter-spacing:1.1px}
+
+    /* Jedwali la taarifa: kila kitu kinakuwa safu yake, lebo juu ya thamani */
+    .info,.info tbody,.info tr,.info td{display:block;width:auto}
+    .info tr{border:1px solid var(--line);margin-bottom:10px}
+    .info tr:last-child{margin-bottom:0}
+    .info td{border:none;padding:0}
+    .info .k{background:var(--tint);width:auto;white-space:normal;
+      padding:8px 14px;font-size:11px;letter-spacing:.8px;text-transform:uppercase}
+    .info .v{background:#fff;padding:10px 14px;width:auto;font-size:14px}
+    .info .v + .k{border-top:1px solid var(--line)}
+
+    /* Vitu: kila kitu ni kadi, si safu ya jedwali */
+    .items,.items tbody,.items tfoot,.items tr,.items td{display:block;width:auto}
+    .items thead{display:none}
+    .items tbody tr{border:1px solid var(--line);margin-bottom:12px;background:#fff}
+    .items tbody tr:nth-child(even) td{background:transparent}
+    .items tbody td{border:none;padding:11px 14px}
+    .items tbody td.desc{padding-bottom:6px;font-size:14px}
+    .items tbody td.num{display:flex;justify-content:space-between;align-items:baseline;
+      padding-top:7px;padding-bottom:7px;font-size:13.5px;border-top:1px solid var(--line-l)}
+    .items tbody td.num::before{content:attr(data-label);color:var(--muted);
+      font-size:11px;letter-spacing:.8px;text-transform:uppercase}
+    .items tfoot tr{display:flex;justify-content:space-between;align-items:baseline;
+      padding:9px 14px;border-top:1px solid var(--line-l);background:var(--tint-l)}
+    .items tfoot td{padding:0!important;border:none}
+    .items tfoot td.lbl{text-align:left}
+    .items tfoot tr.grand{background:var(--tint);border-top:2px solid var(--navy)}
+    .items tfoot tr.bal{background:var(--cream);border-top:1px solid var(--gold)}
+
+    /* Namna ya kulipa: lebo juu, thamani chini */
+    .pay,.pay tbody,.pay tr,.pay td{display:block;width:auto}
+    .pay tr{border:1px solid var(--line);margin-bottom:10px}
+    .pay tr:last-child{margin-bottom:0}
+    .pay td{border:none;padding:0}
+    .pay .k{background:var(--tint);width:auto;padding:8px 14px;
+      font-size:11px;letter-spacing:.8px;text-transform:uppercase}
+    .pay .v{padding:11px 14px;font-size:15px;word-break:break-word}
+  }
+  @media(max-width:400px){
+    .invhead h1{font-size:18px}.invhead .right .amt{font-size:22px}
   }
   @media print{.topbar,.actionbar,.ribbon{display:none!important}body{background:#fff}.paper{box-shadow:none}.wrap{padding:0}}
 </style>
@@ -167,6 +219,7 @@
     <div class="secbar">{% if lang == 'sw' %}02.&nbsp;&nbsp;MAELEZO YA MALIPO{% else %}02.&nbsp;&nbsp;ITEMS{% endif %}</div>
     <div class="items-wrap">
       <table class="items">
+        <colgroup><col class="c-desc"><col class="c-qty"><col class="c-price"><col class="c-amt"></colgroup>
         <thead><tr>
           <th>{% if lang == 'sw' %}Maelezo{% else %}Description{% endif %}</th>
           <th class="c">{% if lang == 'sw' %}Idadi{% else %}Qty{% endif %}</th>
@@ -175,7 +228,12 @@
         </tr></thead>
         <tbody>
           {% for it in invoice.line_items %}
-          <tr><td>{{ it.desc }}</td><td class="c">{{ it.qty }}</td><td class="r">{{ it.unit_price|thousands }}</td><td class="r">{{ it.amount|thousands }}</td></tr>
+          <tr>
+            <td class="desc">{% with parts=it.desc|split_first_sentence %}<div class="d-main">{{ parts.0 }}</div>{% if parts.1 %}<div class="d-detail">{{ parts.1 }}</div>{% endif %}{% endwith %}</td>
+            <td class="c num" data-label="{% if lang == 'sw' %}Idadi{% else %}Qty{% endif %}">{{ it.qty }}</td>
+            <td class="r num" data-label="{% if lang == 'sw' %}Bei{% else %}Unit Price{% endif %}">{{ it.unit_price|thousands }}</td>
+            <td class="r num" data-label="{% if lang == 'sw' %}Kiasi{% else %}Amount{% endif %}">{{ it.amount|thousands }}</td>
+          </tr>
           {% endfor %}
         </tbody>
         <tfoot>

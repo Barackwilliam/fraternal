@@ -17,7 +17,7 @@ import re
 import json
 import ast
 
-register = template.Library()
+
 
 @register.filter
 def clean_display(value):
@@ -83,7 +83,7 @@ def extract_money(value):
 
 
 
-register = template.Library()
+
 
 @register.filter
 def split_first(value, delimiter='|'):
@@ -178,4 +178,18 @@ def option_tier(value):
 def option_has_price(value):
     """True kama kipengele kina bei kubwa kuliko sifuri."""
     return _parse_option(value)[1] > 0
- 
+
+
+@register.filter
+def split_first_sentence(value):
+    """Gawa maelezo: sentensi ya kwanza (kichwa) na yaliyobaki (maelezo madogo).
+
+    Inatumika kwenye invoice ili safu ndefu ya maelezo isionekane kama ukuta
+    wa maandishi ya ukubwa mmoja.
+    """
+    text = (value or '').strip()
+    for sep in ('. ', '.\n'):
+        i = text.find(sep)
+        if 0 < i < 120:
+            return [text[:i + 1].strip(), text[i + len(sep):].strip()]
+    return [text, '']

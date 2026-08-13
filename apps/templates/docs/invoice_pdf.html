@@ -1,56 +1,59 @@
 {% load static custom_filters %}<!DOCTYPE html>
 <html><head><meta charset="UTF-8">
 <style>
-  @page{margin:1.4cm 1.5cm}
+  @page{margin:1cm 1.3cm}
   body{font-family:"Helvetica","Arial",sans-serif;color:#1a1a1a;font-size:10.5pt;line-height:1.55}
   .hdr{width:100%;border-collapse:collapse;background-color:#1a3c6e}
-  .hdr td{padding:11px 16px;color:#ffffff;vertical-align:middle}
+  .hdr td{padding:9px 15px;color:#ffffff;vertical-align:middle}
   .hdr .brand{font-size:12pt;font-weight:bold;letter-spacing:1px}
   .hdr .tag{font-size:8pt;font-style:italic;color:#c9d8ee}
   .hdr .right{text-align:right;font-size:8.5pt;letter-spacing:1px;color:#eaf0fa}
   .hdr .right b{display:block;font-size:10pt;color:#ffffff;letter-spacing:2px}
-  .tophead{width:100%;border-collapse:collapse;margin-top:22px}
+  .tophead{width:100%;border-collapse:collapse;margin-top:12px}
   .tophead td{vertical-align:top}
   .doctype{font-size:8.5pt;letter-spacing:3px;color:#8a6a00;font-weight:bold}
-  .invtitle{font-size:19pt;font-weight:bold;color:#1a3c6e;letter-spacing:1.4px;padding-top:5px}
+  .invtitle{font-size:14pt;font-weight:bold;color:#1a3c6e;letter-spacing:1.4px;padding-top:5px}
   .invsub{font-size:9.5pt;color:#666666;font-style:italic;padding-top:3px}
   .rightcol{text-align:right}
   .invnum{font-size:12pt;font-weight:bold;color:#1a3c6e;letter-spacing:1px}
   .amtlbl{font-size:8pt;letter-spacing:1.5px;text-transform:uppercase;color:#666666;padding-top:9px}
   .amt{font-size:18pt;font-weight:bold;color:#1a3c6e}
   .rule{width:70px;border-bottom:2px solid #c49a28;margin-top:12px}
-  .secbar{width:100%;border-collapse:collapse;margin:16px 0 9px}
-  .secbar td{background-color:#1a3c6e;color:#ffffff;font-size:10pt;font-weight:bold;
-    padding:7px 14px;letter-spacing:1.4px}
-  .info{width:100%;border-collapse:collapse}
-  .info td{padding:8px 13px;font-size:9.5pt;border:1px solid #cccccc}
+  .secbar{width:100%;border-collapse:collapse;margin:11px 0 6px}
+  .secbar td{background-color:#1a3c6e;color:#ffffff;font-size:9.5pt;font-weight:bold;
+    padding:6px 14px;letter-spacing:1.4px}
+  .info{width:100%;border-collapse:collapse;page-break-inside:avoid}
+  .info td{padding:7px 12px;font-size:9pt;border:1px solid #cccccc}
   .info .k{background-color:#eaf0fa;color:#1a3c6e;font-weight:bold;width:23%}
   .info .v{background-color:#f5f8fd;width:27%}
-  .items{width:100%;border-collapse:collapse;margin:5px 0}
+  .items{width:100%;border-collapse:collapse;margin:5px 0;table-layout:fixed}
+  .items td.desc{word-wrap:break-word}
+  .items td.desc .d-main{font-size:9.5pt}
+  .items td.desc .d-detail{font-size:8.5pt;color:#555555;line-height:1.4}
   .items th{background-color:#1a3c6e;color:#ffffff;font-size:8.5pt;text-transform:uppercase;
     letter-spacing:1px;padding:8px 12px;text-align:left;font-weight:bold}
   .items th.r{text-align:right}.items th.c{text-align:center}
-  .items td{padding:8px 12px;font-size:10pt;border-bottom:1px solid #e4e9f2}
-  .items td.r{text-align:right}.items td.c{text-align:center}
+  .items td{padding:5px 10px;font-size:9pt;border-bottom:1px solid #e4e9f2}
+  .items td.r{text-align:right;white-space:nowrap}.items td.c{text-align:center}
   .items tr.alt td{background-color:#f5f8fd}
   .items tr.sub td{background-color:#f5f8fd;font-size:9.5pt;color:#666666}
   .items tr.grand td{background-color:#eaf0fa;border-top:2px solid #1a3c6e;font-weight:bold;
-    font-size:11.5pt;color:#1a3c6e;padding:10px 12px}
+    font-size:11pt;color:#1a3c6e;padding:8px 12px}
   .items tr.bal td{background-color:#fdf6e3;border-top:1px solid #c49a28;font-weight:bold;
     font-size:11pt;color:#8a6a00;padding:10px 12px}
-  .pay{width:100%;border-collapse:collapse}
-  .pay td{padding:8px 13px;font-size:9.5pt;border:1px solid #cccccc}
-  .pay .k{background-color:#eaf0fa;color:#1a3c6e;font-weight:bold;width:30%}
-  .terms{font-size:9pt;color:#666666;padding-top:9px}
-  .note{width:100%;border-collapse:collapse;margin-top:11px}
-  .note td{background-color:#fdf6e3;border-left:3px solid #c49a28;color:#8a6a00;padding:10px 14px;font-size:9pt}
+  .pay{width:100%;border-collapse:collapse;page-break-inside:avoid}
+  .pay td{padding:7px 12px;font-size:9pt;border:1px solid #cccccc}
+  .pay .k{background-color:#eaf0fa;color:#1a3c6e;font-weight:bold;width:34%}
+  .terms{font-size:8.5pt;color:#666666;padding-top:6px}
+  .note{width:100%;border-collapse:collapse;margin-top:8px;page-break-inside:avoid}
+  .note td{background-color:#fdf6e3;border-left:3px solid #c49a28;color:#8a6a00;padding:9px 13px;font-size:8.5pt}
   .paidbox{width:100%;border-collapse:collapse;margin-top:16px}
   .paidbox td{background-color:#eaf7ee;border-left:3px solid #1e7b45;padding:12px 15px;
     text-align:center;color:#155e33}
   .paidbox .t{font-size:12pt;font-weight:bold;letter-spacing:2px}
   .paidbox .d{font-size:9pt;padding-top:3px}
-  .ftr{width:100%;border-collapse:collapse;background-color:#1a3c6e;margin-top:24px}
-  .ftr td{padding:10px 16px;color:#ffffff;font-size:8.5pt;text-align:center}
+  .ftr{width:100%;border-collapse:collapse;background-color:#1a3c6e;margin-top:10px;page-break-inside:avoid}
+  .ftr td{padding:9px 16px;color:#ffffff;font-size:8.5pt;text-align:center}
   .ftr .tagline{color:#c9d8ee;font-style:italic;font-size:8pt;padding-top:3px}
 </style></head>
 <body>
@@ -99,14 +102,14 @@
 <table class="secbar"><tr><td>{% if lang == 'sw' %}02.&nbsp;&nbsp;MAELEZO YA MALIPO{% else %}02.&nbsp;&nbsp;ITEMS{% endif %}</td></tr></table>
 <table class="items" repeat="1">
   <thead><tr>
-    <th>{% if lang == 'sw' %}Maelezo{% else %}Description{% endif %}</th>
-    <th class="c">{% if lang == 'sw' %}Idadi{% else %}Qty{% endif %}</th>
-    <th class="r">{% if lang == 'sw' %}Bei{% else %}Unit Price{% endif %}</th>
-    <th class="r">{% if lang == 'sw' %}Kiasi{% else %}Amount{% endif %}</th>
+    <th width="50%">{% if lang == 'sw' %}Maelezo{% else %}Description{% endif %}</th>
+    <th class="c" width="9%">{% if lang == 'sw' %}Idadi{% else %}Qty{% endif %}</th>
+    <th class="r" width="18%">{% if lang == 'sw' %}Bei{% else %}Unit Price{% endif %}</th>
+    <th class="r" width="22%">{% if lang == 'sw' %}Kiasi{% else %}Amount{% endif %}</th>
   </tr></thead>
   {% for it in invoice.line_items %}
   <tr{% if forloop.counter|divisibleby:2 %} class="alt"{% endif %}>
-    <td>{{ it.desc }}</td><td class="c">{{ it.qty }}</td>
+    <td class="desc">{% with parts=it.desc|split_first_sentence %}<div class="d-main">{{ parts.0 }}</div>{% if parts.1 %}<div class="d-detail">{{ parts.1 }}</div>{% endif %}{% endwith %}</td><td class="c">{{ it.qty }}</td>
     <td class="r">{{ it.unit_price|thousands }}</td><td class="r">{{ it.amount|thousands }}</td>
   </tr>
   {% endfor %}
