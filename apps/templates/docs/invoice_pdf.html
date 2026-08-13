@@ -71,9 +71,9 @@
 
 <table class="tophead"><tr>
   <td>
-    <div class="doctype">{% if lang == 'sw' %}{% if invoice.invoice_type == 'proforma' %}ANKARA YA AWALI{% elif invoice.invoice_type == 'credit' %}NOTI YA MKOPO{% else %}ANKARA{% endif %}{% else %}{{ invoice.get_invoice_type_display|upper }}{% endif %}</div>
-    <div class="invtitle">{{ invoice.title|upper }}</div>
-    {% if invoice.project_name %}<div class="invsub">{{ invoice.project_name }}</div>{% endif %}
+    <div class="doctype">{% if lang == 'sw' %}{{ invoice.invoice_type|doctype_label:lang }}{% else %}{{ invoice.get_invoice_type_display|upper }}{% endif %}</div>
+    <div class="invtitle">{{ invoice.title|bilingual:lang|upper }}</div>
+    {% if invoice.project_name %}<div class="invsub">{{ invoice.project_name|bilingual:lang }}</div>{% endif %}
     <div class="rule"></div>
   </td>
   <td class="rightcol">
@@ -93,9 +93,9 @@
   </tr>
   <tr>
     <td class="k">{% if lang == 'sw' %}Tarehe{% else %}Issue Date{% endif %}</td>
-    <td class="v">{{ invoice.issue_date|default:invoice.created_at|date:'F j, Y' }}</td>
+    <td class="v">{{ invoice.issue_date|default:invoice.created_at|localdate:lang }}</td>
     <td class="k">{% if lang == 'sw' %}Mwisho{% else %}Due Date{% endif %}</td>
-    <td class="v">{% if invoice.due_date %}{{ invoice.due_date|date:'F j, Y' }}{% else %}—{% endif %}</td>
+    <td class="v">{{ invoice.due_date|localdate:lang }}</td>
   </tr>
 </table>
 
@@ -109,7 +109,7 @@
   </tr></thead>
   {% for it in invoice.line_items %}
   <tr{% if forloop.counter|divisibleby:2 %} class="alt"{% endif %}>
-    <td class="desc">{% with parts=it.desc|split_first_sentence %}<div class="d-main">{{ parts.0 }}</div>{% if parts.1 %}<div class="d-detail">{{ parts.1 }}</div>{% endif %}{% endwith %}</td><td class="c">{{ it.qty }}</td>
+    <td class="desc">{% with parts=it.desc|bilingual:lang|split_first_sentence %}<div class="d-main">{{ parts.0 }}</div>{% if parts.1 %}<div class="d-detail">{{ parts.1 }}</div>{% endif %}{% endwith %}</td><td class="c">{{ it.qty }}</td>
     <td class="r">{{ it.unit_price|thousands }}</td><td class="r">{{ it.amount|thousands }}</td>
   </tr>
   {% endfor %}
@@ -127,12 +127,12 @@
 <table class="secbar"><tr><td>{% if lang == 'sw' %}03.&nbsp;&nbsp;NAMNA YA KULIPA{% else %}03.&nbsp;&nbsp;HOW TO PAY{% endif %}</td></tr></table>
 <table class="pay">
   {% for m in invoice.payment_methods %}{% if m.details %}
-  <tr><td class="k">{{ m.method }}</td><td>{{ m.details }}</td></tr>
+  <tr><td class="k">{{ m.method|bilingual:lang }}</td><td>{{ m.details }}</td></tr>
   {% endif %}{% endfor %}
 </table>
 {% endif %}
 
-{% if invoice.payment_terms %}<div class="terms">{% if lang == 'sw' %}Masharti{% else %}Terms{% endif %}: {{ invoice.payment_terms }}</div>{% endif %}
+{% if invoice.payment_terms %}<div class="terms">{% if lang == 'sw' %}Masharti{% else %}Terms{% endif %}: {{ invoice.payment_terms|bilingual:lang }}</div>{% endif %}
 
 {% if invoice.notes_en or invoice.notes_sw %}
 <table class="note"><tr><td>
@@ -143,7 +143,7 @@
 {% if invoice.is_paid %}
 <table class="paidbox"><tr><td>
   <div class="t">{% if lang == 'sw' %}IMELIPWA{% else %}PAID IN FULL{% endif %}</div>
-  <div class="d">{% if invoice.paid_at %}{{ invoice.paid_at|date:'F j, Y' }}{% endif %}{% if invoice.paid_reference %} · {% if lang == 'sw' %}Kumbukumbu{% else %}Ref{% endif %}: {{ invoice.paid_reference }}{% endif %}</div>
+  <div class="d">{% if invoice.paid_at %}{{ invoice.paid_at|localdate:lang }}{% endif %}{% if invoice.paid_reference %} · {% if lang == 'sw' %}Kumbukumbu{% else %}Ref{% endif %}: {{ invoice.paid_reference }}{% endif %}</div>
 </td></tr></table>
 {% endif %}
 

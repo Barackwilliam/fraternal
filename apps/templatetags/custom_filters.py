@@ -193,3 +193,55 @@ def split_first_sentence(value):
         if 0 < i < 120:
             return [text[:i + 1].strip(), text[i + len(sep):].strip()]
     return [text, '']
+
+
+# ── Msaada wa lugha mbili kwa nyaraka (invoice, risiti, mikataba) ─────────
+
+SW_MONTHS = ['Januari', 'Februari', 'Machi', 'Aprili', 'Mei', 'Juni',
+             'Julai', 'Agosti', 'Septemba', 'Oktoba', 'Novemba', 'Desemba']
+
+
+@register.filter
+def localdate(value, lang='en'):
+    """Tarehe kwa lugha sahihi.
+
+    Django inatumia locale ya mfumo (en-us), kwa hiyo `date:'F j, Y'`
+    ilikuwa inatoa 'August 13, 2026' hata kwenye ukurasa wa Kiswahili.
+    """
+    if not value:
+        return '—'
+    if lang == 'sw':
+        return '%d %s %d' % (value.day, SW_MONTHS[value.month - 1], value.year)
+    return '%s %d, %d' % (value.strftime('%B'), value.day, value.year)
+
+
+@register.filter
+def bilingual(value, lang='en'):
+    """Chagua upande sahihi wa maandishi yenye lugha mbili.
+
+    Andika uwanja mmoja kama:  English text | Maandishi ya Kiswahili
+    Kama hakuna '|', maandishi yale yale yanarudishwa kwa lugha zote.
+    """
+    text = (value or '').strip()
+    if '|' not in text:
+        return text
+    en, _, sw = text.partition('|')
+    chosen = sw if lang == 'sw' else en
+    return chosen.strip() or text
+
+
+DOCTYPE_SW = {
+    'standard':  'ANKARA',
+    'proforma':  'ANKARA YA AWALI',
+    'deposit':   'MALIPO YA AWALI',
+    'balance':   'MALIPO YA MWISHO',
+    'recurring': 'ANKARA YA KILA MWEZI',
+    'credit':    'NOTI YA MKOPO',
+}
+
+
+@register.filter
+def doctype_label(invoice_type, lang='en'):
+    if lang == 'sw':
+        return DOCTYPE_SW.get(invoice_type, 'ANKARA')
+    return ''

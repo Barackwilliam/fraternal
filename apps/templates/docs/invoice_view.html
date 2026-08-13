@@ -173,12 +173,12 @@
   {% elif invoice.is_overdue %}
   <div class="ribbon overdue">
     <svg viewBox="0 0 24 24"><path d="M12 2 1 21h22zm0 15h-2v2h2zm0-8h-2v6h2z"/></svg>
-    <div>{% if lang == 'sw' %}<b>Ankara hii imepitwa na muda.</b> Tarehe ya mwisho ilikuwa {{ invoice.due_date|date:'F j, Y' }}.{% else %}<b>This invoice is overdue.</b> It was due on {{ invoice.due_date|date:'F j, Y' }}.{% endif %}</div>
+    <div>{% if lang == 'sw' %}<b>Ankara hii imepitwa na muda.</b> Tarehe ya mwisho ilikuwa {{ invoice.due_date|localdate:lang }}.{% else %}<b>This invoice is overdue.</b> It was due on {{ invoice.due_date|localdate:lang }}.{% endif %}</div>
   </div>
   {% else %}
   <div class="ribbon due">
     <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 10V6h-2v8h6v-2z"/></svg>
-    <div>{% if lang == 'sw' %}Asante kwa biashara yako.{% if invoice.due_date %} Tafadhali lipa kabla ya <b>{{ invoice.due_date|date:'F j, Y' }}</b>.{% endif %}{% else %}Thank you for your business.{% if invoice.due_date %} Please pay by <b>{{ invoice.due_date|date:'F j, Y' }}</b>.{% endif %}{% endif %}</div>
+    <div>{% if lang == 'sw' %}Asante kwa biashara yako.{% if invoice.due_date %} Tafadhali lipa kabla ya <b>{{ invoice.due_date|localdate:lang }}</b>.{% endif %}{% else %}Thank you for your business.{% if invoice.due_date %} Please pay by <b>{{ invoice.due_date|localdate:lang }}</b>.{% endif %}{% endif %}</div>
   </div>
   {% endif %}
 
@@ -186,9 +186,9 @@
     <div class="invhead">
       <div class="left">
         {% if invoice.logo_url %}<img class="logo" src="{{ invoice.logo_url }}" alt="{{ invoice.provider_name }}">{% endif %}
-        <div class="doctype">{% if lang == 'sw' %}{% if invoice.invoice_type == 'proforma' %}ANKARA YA AWALI{% elif invoice.invoice_type == 'credit' %}NOTI YA MKOPO{% else %}ANKARA{% endif %}{% else %}{{ invoice.get_invoice_type_display|upper }}{% endif %}</div>
-        <h1>{{ invoice.title|upper }}</h1>
-        {% if invoice.project_name %}<div class="sub">{{ invoice.project_name }}</div>{% endif %}
+        <div class="doctype">{% if lang == 'sw' %}{{ invoice.invoice_type|doctype_label:lang }}{% else %}{{ invoice.get_invoice_type_display|upper }}{% endif %}</div>
+        <h1>{{ invoice.title|bilingual:lang|upper }}</h1>
+        {% if invoice.project_name %}<div class="sub">{{ invoice.project_name|bilingual:lang }}</div>{% endif %}
       </div>
       <div class="right">
         <div class="num">{{ invoice.invoice_number }}</div>
@@ -209,9 +209,9 @@
         </tr>
         <tr>
           <td class="k">{% if lang == 'sw' %}Tarehe{% else %}Issue Date{% endif %}</td>
-          <td class="v">{{ invoice.issue_date|default:invoice.created_at|date:'F j, Y' }}</td>
+          <td class="v">{{ invoice.issue_date|default:invoice.created_at|localdate:lang }}</td>
           <td class="k">{% if lang == 'sw' %}Mwisho{% else %}Due Date{% endif %}</td>
-          <td class="v">{% if invoice.due_date %}{{ invoice.due_date|date:'F j, Y' }}{% else %}—{% endif %}</td>
+          <td class="v">{{ invoice.due_date|localdate:lang }}</td>
         </tr>
       </table>
     </div>
@@ -229,7 +229,7 @@
         <tbody>
           {% for it in invoice.line_items %}
           <tr>
-            <td class="desc">{% with parts=it.desc|split_first_sentence %}<div class="d-main">{{ parts.0 }}</div>{% if parts.1 %}<div class="d-detail">{{ parts.1 }}</div>{% endif %}{% endwith %}</td>
+            <td class="desc">{% with parts=it.desc|bilingual:lang|split_first_sentence %}<div class="d-main">{{ parts.0 }}</div>{% if parts.1 %}<div class="d-detail">{{ parts.1 }}</div>{% endif %}{% endwith %}</td>
             <td class="c num" data-label="{% if lang == 'sw' %}Idadi{% else %}Qty{% endif %}">{{ it.qty }}</td>
             <td class="r num" data-label="{% if lang == 'sw' %}Bei{% else %}Unit Price{% endif %}">{{ it.unit_price|thousands }}</td>
             <td class="r num" data-label="{% if lang == 'sw' %}Kiasi{% else %}Amount{% endif %}">{{ it.amount|thousands }}</td>
@@ -254,13 +254,13 @@
     <div class="pay-wrap">
       <table class="pay">
         {% for m in invoice.payment_methods %}{% if m.details %}
-        <tr><td class="k">{{ m.method }}</td><td class="v">{{ m.details }}</td></tr>
+        <tr><td class="k">{{ m.method|bilingual:lang }}</td><td class="v">{{ m.details }}</td></tr>
         {% endif %}{% endfor %}
       </table>
     </div>
     {% endif %}
 
-    {% if invoice.payment_terms %}<div class="terms">{% if lang == 'sw' %}Masharti{% else %}Terms{% endif %}: {{ invoice.payment_terms }}</div>{% endif %}
+    {% if invoice.payment_terms %}<div class="terms">{% if lang == 'sw' %}Masharti{% else %}Terms{% endif %}: {{ invoice.payment_terms|bilingual:lang }}</div>{% endif %}
 
     {% if invoice.notes_en or invoice.notes_sw %}
     <div class="note">
@@ -272,7 +272,7 @@
     {% if invoice.is_paid %}
     <div class="paidstamp">
       <div class="t">{% if lang == 'sw' %}IMELIPWA{% else %}PAID IN FULL{% endif %}</div>
-      <div class="d">{% if invoice.paid_at %}{{ invoice.paid_at|date:'F j, Y' }}{% endif %}{% if invoice.paid_reference %} · {% if lang == 'sw' %}Kumbukumbu{% else %}Ref{% endif %}: {{ invoice.paid_reference }}{% endif %}</div>
+      <div class="d">{% if invoice.paid_at %}{{ invoice.paid_at|localdate:lang }}{% endif %}{% if invoice.paid_reference %} · {% if lang == 'sw' %}Kumbukumbu{% else %}Ref{% endif %}: {{ invoice.paid_reference }}{% endif %}</div>
     </div>
     {% endif %}
 
