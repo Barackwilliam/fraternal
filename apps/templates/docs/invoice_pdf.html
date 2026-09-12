@@ -1,7 +1,14 @@
 {% load static custom_filters %}<!DOCTYPE html>
 <html><head><meta charset="UTF-8">
 <style>
-  @page{margin:1cm 1.3cm}
+  @page{
+    margin: 1cm 1.3cm 2.2cm 1.3cm;
+    @frame footer_frame {
+      -pdf-frame-content: footerContent;
+      left: 1.3cm; width: 18.4cm;
+      bottom: 0.3cm; height: 1.7cm;
+    }
+  }
   body{font-family:"Helvetica","Arial",sans-serif;color:#1a1a1a;font-size:10.5pt;line-height:1.55}
   .hdr{width:100%;border-collapse:collapse;background-color:#1a3c6e}
   .hdr td{padding:9px 15px;color:#ffffff;vertical-align:middle}
@@ -46,13 +53,13 @@
   .pay .k{background-color:#eaf0fa;color:#1a3c6e;font-weight:bold;width:34%}
   .terms{font-size:8.5pt;color:#666666;padding-top:6px}
   .note{width:100%;border-collapse:collapse;margin-top:8px;page-break-inside:avoid}
-  .note td{background-color:#fdf6e3;border-left:3px solid #c49a28;color:#8a6a00;padding:9px 13px;font-size:8.5pt}
+  .note td{background-color:#fdf6e3;border-left:3px solid #c49a28;color:#8a6a00;padding:8px 12px;font-size:8pt;line-height:1.35}
   .paidbox{width:100%;border-collapse:collapse;margin-top:16px}
   .paidbox td{background-color:#eaf7ee;border-left:3px solid #1e7b45;padding:12px 15px;
     text-align:center;color:#155e33}
   .paidbox .t{font-size:12pt;font-weight:bold;letter-spacing:2px}
   .paidbox .d{font-size:9pt;padding-top:3px}
-  .ftr{width:100%;border-collapse:collapse;background-color:#1a3c6e;margin-top:10px;page-break-inside:avoid}
+  .ftr{width:100%;border-collapse:collapse;background-color:#1a3c6e}
   .ftr td{padding:9px 16px;color:#ffffff;font-size:8.5pt;text-align:center}
   .ftr .tagline{color:#c9d8ee;font-style:italic;font-size:8pt;padding-top:3px}
 </style></head>
@@ -113,7 +120,9 @@
     <td class="r">{{ it.unit_price|thousands }}</td><td class="r">{{ it.amount|thousands }}</td>
   </tr>
   {% endfor %}
+  {% if invoice.discount_amount or invoice.tax_percent %}
   <tr class="sub"><td class="r" colspan="3">{% if lang == 'sw' %}Jumla ndogo{% else %}Subtotal{% endif %}</td><td class="r">{{ invoice.currency }} {{ invoice.subtotal|thousands }}</td></tr>
+  {% endif %}
   {% if invoice.discount_amount %}<tr class="sub"><td class="r" colspan="3">{% if lang == 'sw' %}Punguzo{% else %}Discount{% endif %}</td><td class="r">− {{ invoice.currency }} {{ invoice.discount_amount|thousands }}</td></tr>{% endif %}
   {% if invoice.tax_percent %}<tr class="sub"><td class="r" colspan="3">{% if lang == 'sw' %}Kodi{% else %}VAT{% endif %} ({{ invoice.tax_percent|floatformat:"-2" }}%)</td><td class="r">{{ invoice.currency }} {{ invoice.tax_amount|thousands }}</td></tr>{% endif %}
   <tr class="grand"><td class="r" colspan="3">{% if lang == 'sw' %}JUMLA KUU{% else %}TOTAL{% endif %}</td><td class="r">{{ invoice.currency }} {{ invoice.grand_total|thousands }}</td></tr>
@@ -147,9 +156,11 @@
 </td></tr></table>
 {% endif %}
 
-<table class="ftr"><tr><td>
-  {{ invoice.provider_name|upper }} &nbsp;·&nbsp; www.jamiitek.com &nbsp;·&nbsp; info@jamiitek.com
-  <div class="tagline">{% if lang == 'sw' %}Mshirika Wako wa Kidijitali Tanzania{% else %}Your Trusted Digital Partner in Tanzania{% endif %}</div>
-</td></tr></table>
+<div id="footerContent">
+  <table class="ftr"><tr><td>
+    {{ invoice.provider_name|upper }} &nbsp;·&nbsp; www.jamiitek.com &nbsp;·&nbsp; info@jamiitek.com
+    <div class="tagline">{% if lang == 'sw' %}Mshirika Wako wa Kidijitali Tanzania{% else %}Your Trusted Digital Partner in Tanzania{% endif %}</div>
+  </table>
+</div>
 
 </body></html>

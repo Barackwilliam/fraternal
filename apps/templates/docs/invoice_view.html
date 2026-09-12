@@ -237,7 +237,9 @@
           {% endfor %}
         </tbody>
         <tfoot>
+          {% if invoice.discount_amount or invoice.tax_percent %}
           <tr><td class="lbl" colspan="3">{% if lang == 'sw' %}Jumla ndogo{% else %}Subtotal{% endif %}</td><td class="val">{{ invoice.currency }} {{ invoice.subtotal|thousands }}</td></tr>
+          {% endif %}
           {% if invoice.discount_amount %}<tr><td class="lbl" colspan="3">{% if lang == 'sw' %}Punguzo{% else %}Discount{% endif %}</td><td class="val">− {{ invoice.currency }} {{ invoice.discount_amount|thousands }}</td></tr>{% endif %}
           {% if invoice.tax_percent %}<tr><td class="lbl" colspan="3">{% if lang == 'sw' %}Kodi{% else %}VAT{% endif %} ({{ invoice.tax_percent|floatformat:"-2" }}%)</td><td class="val">{{ invoice.currency }} {{ invoice.tax_amount|thousands }}</td></tr>{% endif %}
           <tr class="grand"><td class="lbl" colspan="3">{% if lang == 'sw' %}Jumla Kuu{% else %}Total{% endif %}</td><td class="val">{{ invoice.currency }} {{ invoice.grand_total|thousands }}</td></tr>

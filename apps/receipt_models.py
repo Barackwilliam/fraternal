@@ -45,7 +45,17 @@ class DevelopmentReceipt(models.Model):
         null=True, blank=True,
         help_text='Optional. Leave blank for work not tied to a managed website.')
 
-    # Zinatumika pale website haipo. Website ikiwepo, taarifa zake zinatangulia.
+    # Mteja wa moja kwa moja. Inatumika pale risiti haiambatani na tovuti
+    # yoyote, lakini bado mteja ana akaunti ya portal — mfano mradi wa app
+    # au mafunzo. Bila hii, risiti hiyo isingeonekana kabisa kwenye portal
+    # yake, kwa sababu portal ilikuwa inachuja kwa website__client pekee.
+    client = models.ForeignKey(
+        'Client', on_delete=models.SET_NULL, related_name='direct_receipts',
+        null=True, blank=True,
+        help_text='Optional. Set this so the receipt appears in the client '
+                  'portal when it is not linked to a website.')
+
+    # Zinatumika pale website wala mteja hawapo.
     client_name_manual = models.CharField(
         'Client name', max_length=160, blank=True)
     client_company_manual = models.CharField(
@@ -135,24 +145,27 @@ class DevelopmentReceipt(models.Model):
 
     # ── client shortcuts ──────────────────────────────────────
     @property
-    def client(self):
-        return self.website.client if self.website_id and self.website else None
+    def client_obj(self):
+        """Mteja halisi: wa tovuti, au aliyewekwa moja kwa moja."""
+        if self.website_id and self.website:
+            return self.website.client
+        return self.client if self.client_id else None
 
     @property
     def client_name(self):
-        return getattr(self.client, 'name', '') or self.client_name_manual
+        return getattr(self.client_obj, 'name', '') or self.client_name_manual
 
     @property
     def client_company(self):
-        return getattr(self.client, 'company', '') or self.client_company_manual
+        return getattr(self.client_obj, 'company', '') or self.client_company_manual
 
     @property
     def client_email(self):
-        return getattr(self.client, 'email', '') or self.client_email_manual
+        return getattr(self.client_obj, 'email', '') or self.client_email_manual
 
     @property
     def client_phone(self):
-        return getattr(self.client, 'phone', '') or self.client_phone_manual
+        return getattr(self.client_obj, 'phone', '') or self.client_phone_manual
 
     # ── money ─────────────────────────────────────────────────
     @property

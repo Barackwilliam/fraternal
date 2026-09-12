@@ -17,7 +17,7 @@ from django.utils import timezone
 from django.utils.dateparse import parse_date
 from django.views.decorators.http import require_POST
 
-from .models import ManagedWebsite, DevelopmentReceipt
+from .models import ManagedWebsite, DevelopmentReceipt, Client
 from .management_views import staff_member_required
 from .client_portal_views import client_required
 from .receipt_graphics import qr_data_uri, barcode_data_uri
@@ -114,6 +114,8 @@ def _apply_post(receipt, request):
 
     # Website ni hiari — hizi zinatumika pale haipo
     receipt.project_label = request.POST.get('project_label', '').strip()
+    cid = (request.POST.get('client') or '').strip()
+    receipt.client = get_object_or_404(Client, pk=cid) if cid else None
     receipt.client_name_manual = request.POST.get('client_name_manual', '').strip()
     receipt.client_company_manual = request.POST.get('client_company_manual', '').strip()
     receipt.client_email_manual = request.POST.get('client_email_manual', '').strip()
@@ -154,6 +156,7 @@ def receipt_list(request):
         'title': 'Development Receipts',
         'receipts': receipts,
         'websites': ManagedWebsite.objects.select_related('client').order_by('name'),
+        'clients': Client.objects.order_by('name'),
         'q': q,
         'website_id': website_id,
         'total_received': total,
@@ -202,6 +205,7 @@ def receipt_new(request, website_pk=None):
         'receipt': draft,
         'website': website,
         'websites': ManagedWebsite.objects.select_related('client').order_by('name'),
+        'clients': Client.objects.order_by('name'),
         'is_new': True,
     })
 
@@ -227,6 +231,7 @@ def receipt_edit(request, pk):
         'receipt': receipt,
         'website': receipt.website,
         'websites': ManagedWebsite.objects.select_related('client').order_by('name'),
+        'clients': Client.objects.order_by('name'),
         'is_new': False,
     })
 
@@ -253,9 +258,14 @@ def receipt_pdf_staff(request, pk):
 # CLIENT PORTAL
 # ══════════════════════════════════════════════════════════════
 def _client_receipt(request, pk):
+    # Risiti inaonekana kwa mteja ikiwa imeambatanishwa na tovuti yake AU
+    # naye moja kwa moja. Awali ilikuwa website__client pekee, kwa hiyo
+    # risiti ya mradi usio na tovuti haikuonekana kabisa portal.
     return get_object_or_404(
-        DevelopmentReceipt.objects.select_related('website', 'website__client'),
-        pk=pk, website__client=request.client_profile, is_published=True)
+        DevelopmentReceipt.objects.select_related('website', 'website__client', 'client')
+        .filter(Q(website__client=request.client_profile)
+                | Q(client=request.client_profile)),
+        pk=pk, is_published=True)
 
 
 @client_required
@@ -305,8 +315,10 @@ def portal_receipt_sign(request, pk):
 @client_required
 def portal_receipt_list(request):
     receipts = DevelopmentReceipt.objects.filter(
-        website__client=request.client_profile, is_published=True
-    ).select_related('website')
+        Q(website__client=request.client_profile)
+        | Q(client=request.client_profile),
+        is_published=True,
+    ).select_related('website', 'client').distinct()
     return render(request, 'portal/receipt_list.html', {
         'title': 'My Receipts',
         'client': request.client_profile,

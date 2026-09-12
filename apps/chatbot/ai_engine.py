@@ -2,8 +2,15 @@
 JamiiTek ChatBot — AI Engine (Groq)
 Uses Groq API (FREE tier) — 14,400 requests/day, responds in under 1 second.
 Get your free key at: https://console.groq.com
-Model: llama-3.3-70b-versatile
+
+MODEL: mnyororo ni BotConfig.ai_model -> GROQ_MODEL (env) -> default.
+
+Kabla, `GROQ_MODEL` ilikuwa hardcoded hapa wakati `BotConfig.ai_model`
+ilikuwa inaonekana kwenye admin na portal. Kubadilisha field hakukufanya
+kitu — bot zote zilitumia model ile ile. Sasa field inafanya kazi kweli,
+na kila bot inaweza kuwa na model yake.
 """
+import os
 import time
 import logging
 import requests
@@ -11,8 +18,8 @@ from django.conf import settings
 
 logger = logging.getLogger('chatbot.ai')
 
-GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
-GROQ_MODEL   = "llama-3.3-70b-versatile"
+GROQ_API_URL  = "https://api.groq.com/openai/v1/chat/completions"
+DEFAULT_MODEL = os.getenv('GROQ_MODEL', 'llama-3.3-70b-versatile')
 
 
 class BotAIEngine:
@@ -20,6 +27,11 @@ class BotAIEngine:
     def __init__(self, bot_config):
         self.bot     = bot_config
         self.api_key = getattr(settings, 'GROQ_API_KEY', '')
+
+    @property
+    def model(self):
+        """Model ya bot hii. Ikiwa tupu, tunatumia ya mfumo mzima."""
+        return (getattr(self.bot, 'ai_model', '') or '').strip() or DEFAULT_MODEL
 
     def build_messages(self, conversation, new_user_message: str) -> list:
         messages = []
@@ -65,7 +77,7 @@ class BotAIEngine:
             messages = self.build_messages(conversation, user_message)
 
             payload = {
-                "model":       GROQ_MODEL,
+                "model":       self.model,
                 "messages":    messages,
                 "temperature": float(getattr(self.bot, 'ai_temperature', 0.7)),
                 "max_tokens":  500,
@@ -90,7 +102,7 @@ class BotAIEngine:
             content = data['choices'][0]['message']['content'].strip()
             tokens  = data.get('usage', {}).get('total_tokens', 0)
 
-            return {'success': True, 'content': content, 'tokens': tokens, 'latency_ms': latency, 'model': GROQ_MODEL, 'is_handoff': False}
+            return {'success': True, 'content': content, 'tokens': tokens, 'latency_ms': latency, 'model': self.model, 'is_handoff': False}
 
         except requests.Timeout:
             latency = int((time.time() - start_time) * 1000)

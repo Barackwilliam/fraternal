@@ -1002,7 +1002,7 @@ def _process_message(bot: BotConfig, msg_data: dict):
     Message.objects.create(
         conversation=conv, role='assistant', content=reply,
         tokens_used=result.get('tokens', 0),
-        ai_model=result.get('model', 'gemini-1.5-flash'),
+        ai_model=result.get('model', ''),
         latency_ms=result.get('latency_ms', 0),
     )
 
