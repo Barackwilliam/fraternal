@@ -47,7 +47,9 @@ class ServiceSitemap(Sitemap):
 
     def items(self):
         from apps.models import Service
-        return Service.objects.all()
+        # Bila ordering, pagination ya sitemap inaweza kutoa matokeo
+        # yasiyolingana kila ombi (UnorderedObjectListWarning).
+        return Service.objects.order_by('pk')
 
     def location(self, item):
         return reverse('service')

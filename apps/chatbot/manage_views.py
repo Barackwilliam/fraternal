@@ -5,6 +5,7 @@ William's panel to manage all bots, clients, payments, WhatsApp setup.
 import logging
 from datetime import date, timedelta
 
+from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -155,10 +156,9 @@ def manage_bot_action(request, bot_id):
         messages.success(request, f"Bot '{bot.bot_name}' imesimamishwa.")
 
     elif action == 'activate':
-        # Only activate if phone_id is set
-        if not bot.whatsapp_phone_id:
-            messages.error(request, "Weka Phone Number ID kwanza kabla ya kuwasha bot.")
-            return redirect('manage_bot_detail', bot_id=bot_id)
+        # Zamani hii ilidai `whatsapp_phone_id` ya Meta. Kwa Baileys
+        # hakuna phone ID — mteja anascan QR. Sharti hilo lingezuia
+        # kila bot milele.
         bot.status    = 'active'
         bot.is_active = True
         bot.admin_suspended_reason = ''
@@ -475,3 +475,123 @@ def jamiibot_landing(request):
     """Public marketing page for JamiiBot."""
     plans = SubscriptionPlan.objects.filter(is_active=True).order_by('price_tzs')
     return render(request, 'chatbot_landing/jamiibot_landing.html', {'plans': plans})
+
+# ══════════════════════════════════════════════════════════════
+#  BAILEYS SESSIONS
+# ══════════════════════════════════════════════════════════════
+
+@staff_required
+def manage_sessions(request):
+    """Orodha ya sessions zote pamoja na hali yao halisi kutoka bridge."""
+    from apps.chatbot import bridge
+
+    bots = list(BotConfig.objects.select_related('client').order_by('bot_name'))
+
+    live = {}
+    health = bridge.health()
+    if health.get('success'):
+        data = bridge.list_sessions()
+        for s in data.get('sessions', []):
+            live[s['session']] = s
+
+    for b in bots:
+        b.live = live.get(b.session_name)
+
+    return render(request, 'management/chatbot_sessions.html', {
+        'bots': bots,
+        'bridge_ok': bool(health.get('success')),
+        'bridge_error': health.get('error', ''),
+        'bridge_configured': bridge.is_configured(),
+        'health': health,
+    })
+
+
+@staff_required
+def manage_session_qr(request, bot_id):
+    """
+    JSON kwa modal ya QR. Ukurasa unaipiga kila sekunde 5 —
+    QR ya WhatsApp inaisha baada ya ~60s, kwa hiyo inabidi ionekane
+    mpya bila kurefresh ukurasa.
+    """
+    bot = get_object_or_404(BotConfig, id=bot_id)
+    from apps.chatbot import bridge
+
+    data = bridge.session_qr(bot.session_name)
+
+    # Session bado haijaanzishwa kwenye bridge — ianzishe
+    if not data.get('success') and 'haipo' in str(data.get('error', '')):
+        bridge.start_session(bot.session_name)
+        data = bridge.session_qr(bot.session_name)
+
+    _sync_bot_status(bot, data)
+    return JsonResponse(data)
+
+
+@staff_required
+def manage_session_action(request, bot_id):
+    """start | restart | stop | logout"""
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST pekee'}, status=405)
+
+    bot = get_object_or_404(BotConfig, id=bot_id)
+    action = request.POST.get('action', '')
+    from apps.chatbot import bridge
+
+    if action == 'start':
+        data = bridge.start_session(bot.session_name)
+    elif action == 'restart':
+        data = bridge.restart_session(bot.session_name)
+    elif action == 'stop':
+        data = bridge.stop_session(bot.session_name)
+    elif action == 'logout':
+        # Kufuta session kunamlazimisha mteja kuscan QR upya — labda
+        # hayuko ofisini. Kwa hiyo inadai jina la biashara liandikwe,
+        # kama GitHub inavyodai jina la repo kabla ya kuifuta.
+        typed = (request.POST.get('confirm') or '').strip().lower()
+        if typed != (bot.business_name or '').strip().lower():
+            return JsonResponse({
+                'success': False,
+                'error': 'Andika jina la biashara kwa usahihi ili kuthibitisha.',
+            }, status=400)
+        data = bridge.logout_session(bot.session_name)
+    else:
+        return JsonResponse({'success': False, 'error': 'Kitendo hakijulikani'}, status=400)
+
+    _sync_bot_status(bot, data)
+
+    # Kila kitendo kinaingia kwenye kumbukumbu. Siku mteja atakapouliza
+    # "kwa nini nilitakiwa kuscan tena Jumanne?", jibu lipo.
+    try:
+        from apps.integration_models import IntegrationAuditLog
+        IntegrationAuditLog.record(
+            action=f'baileys_{action}',
+            user=request.user,
+            detail={'session': bot.session_name, 'bot': bot.bot_name,
+                    'ok': bool(data.get('success')), 'error': data.get('error', '')},
+            request=request,
+        )
+    except Exception:
+        logger.warning('audit log imeshindwa kwa %s', bot.session_name)
+
+    return JsonResponse(data)
+
+
+def _sync_bot_status(bot, data):
+    """Hifadhi hali ya bridge kwenye BotConfig ili dashboard isome haraka."""
+    if not data.get('success'):
+        return
+    fields = []
+    status = data.get('status')
+    if status and status != bot.connection_status:
+        bot.connection_status = status
+        fields.append('connection_status')
+    number = data.get('number') or ''
+    if number and number != bot.connected_number:
+        bot.connected_number = number
+        fields.append('connected_number')
+    if status == 'connected':
+        from django.utils import timezone as _tz
+        bot.last_seen_at = _tz.now()
+        fields.append('last_seen_at')
+    if fields:
+        bot.save(update_fields=fields)

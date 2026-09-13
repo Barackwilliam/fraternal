@@ -121,6 +121,18 @@
         </div>
         <div class="rc-grid">
           <div class="rc-f">
+            <label>Existing client <span style="color:var(--text-3);font-weight:400">(optional)</span></label>
+            <select name="client">
+              <option value="">— not a portal client —</option>
+              {% for c in clients %}
+              <option value="{{ c.pk }}"{% if receipt.client_id == c.pk %} selected{% endif %}>
+                {{ c.name }}{% if c.company %} — {{ c.company }}{% endif %}
+              </option>
+              {% endfor %}
+            </select>
+            <div class="hint">Pick the client and this receipt shows up in their portal.</div>
+          </div>
+          <div class="rc-f">
             <label>Client name</label>
             <input type="text" name="client_name_manual"
                    value="{{ receipt.client_name_manual }}" placeholder="Salum Magere">

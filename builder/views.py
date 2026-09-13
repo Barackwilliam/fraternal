@@ -498,8 +498,21 @@ def page_editor(request, site_id, page_id):
 
 
 def _uploadcare_key():
+    """Public key ya Uploadcare.
+
+    Mradi mzima unatumia UPLOADCARE_PUB_KEY (settings.py na
+    apps/uploadcare_widget.py). Hapa peke yake ilikuwa inasoma
+    UPLOADCARE_PUBLIC_KEY — jina tofauti kwa kigezo kile kile.
+    Matokeo: ukiweka kigezo kimoja tu, kitufe cha kupakia ndani ya
+    builder kilikuwa hakifanyi kazi bila kutoa kosa lolote.
+
+    Sasa inasoma settings kwanza, kisha majina yote mawili.
+    """
     import os
-    return os.getenv('UPLOADCARE_PUBLIC_KEY', '')
+    from django.conf import settings
+    key = (settings.UPLOADCARE or {}).get('pub_key', '')
+    return key or os.getenv('UPLOADCARE_PUB_KEY', '') \
+               or os.getenv('UPLOADCARE_PUBLIC_KEY', '')
 
 
 @login_required

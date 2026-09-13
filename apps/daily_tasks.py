@@ -1,58 +1,186 @@
 """
-Kuendesha kazi za kila siku BILA cron (Render FREE, bila GitHub Actions).
+Kuendesha kazi za ratiba BILA cron ya nje (Render FREE, bila GitHub Actions).
 
 Jinsi inavyofanya kazi:
-  Mtu yeyote akifungua tovuti, middleware inaangalia kama kazi ya leo
-  imeshafanyika. Kama bado, inaanzisha thread ya nyuma inayofanya kazi
-  hiyo — mtumiaji haoni ucheleweshaji hata kidogo.
+  Mtu yeyote akifungua tovuti, middleware inaangalia kama kuna kazi
+  iliyofika muda wake. Kama ipo, inaanzisha thread ya nyuma
+  inayoifanya — mtumiaji haoni ucheleweshaji hata kidogo.
+
+RATIBA (kila kazi ina alama yake ya cache, hazitegemeani):
+
+  | Kazi                       | Kila        |
+  |----------------------------|-------------|
+  | sync_integrations          | dakika 15   |
+  | process_scheduled_actions  | dakika 15   |
+  | check_alerts               | dakika 30   |
+  | auto_suspend               | siku        |
+  | send_expiry_emails         | siku        |
+  | send_digest                | siku        |
+  | prune_snapshots            | siku 7      |
+  | prune_baileys_keys         | siku 7      |
+  | cluster_gaps               | siku 7      |
+  | chatbot_digest             | siku 7      |
+  | monthly_report --all       | siku 30     |
 
 Usalama:
-  • Ombi la kwanza linaweka alama MARA MOJA kabla ya kuanza kazi, kwa hiyo
-    maombi 100 yanayoingia pamoja hayatafungua kazi 100.
-  • Kazi yenyewe haiathiriwi na kurudiwa (inachukua tovuti zenye
-    status='active' tu), kwa hiyo hata ikirudiwa hakuna madhara.
-  • Kila kitu kiko ndani ya try/except — kazi ikishindwa, tovuti
-    inaendelea kufanya kazi kawaida.
+  • Kila kazi inaweka alama MARA MOJA kabla ya kuanza, kwa hiyo maombi 100
+    yanayoingia pamoja hayatafungua kazi 100.
+  • Kila kazi iko ndani ya try/except yake — moja ikishindwa, nyingine
+    zinaendelea, na ombi la mtumiaji halivunjiki kamwe.
+  • MPANGILIO NI WA MAKUSUDI kwenye kazi za kila siku: `auto_suspend`
+    inatangulia kwa sababu ndiyo yenye ujumbe wa AI na maintenance mode.
+    `send_bulk_expiry_warnings` inafuata — inakuta tovuti zilizokwisha
+    simamishwa (haiziguse tena, inachuja status='active') na inashughulikia
+    email hosting, domains, na onyo za siku 7/3/1.
+
+MUHIMU: kwenye production hii inategemea cache ya pamoja (REDIS_URL).
+Bila Redis, kila worker wa gunicorn ana LocMemCache yake — kazi zitarudiwa
+mara moja kwa kila worker.
 """
 import logging
 import threading
-from datetime import date
+from datetime import date, datetime
 
 from django.core.cache import cache
 from django.db import connection
 
 logger = logging.getLogger(__name__)
 
+# Alama ya kazi za kila siku — jina la zamani limehifadhiwa kwa sababu
+# management_views.daily_tasks_endpoint inaitumia.
 CACHE_KEY = 'jamiitek:daily_tasks:last_run'
 CACHE_TTL = 60 * 60 * 30          # saa 30 — inatosha siku moja
-_thread_lock = threading.Lock()
-_running = False
 
+MINUTE = 60
+
+# jina -> (funguo ya cache, sekunde kati ya mizunguko)
+SCHEDULE = {
+    'sync_integrations':         ('jamiitek:task:sync_integrations',   15 * MINUTE),
+    'process_scheduled_actions': ('jamiitek:task:scheduled_actions',   15 * MINUTE),
+    'check_alerts':              ('jamiitek:task:check_alerts',        30 * MINUTE),
+    'send_digest':               ('jamiitek:task:send_digest',         24 * 60 * MINUTE),
+    'prune_snapshots':           ('jamiitek:task:prune_snapshots',      7 * 24 * 60 * MINUTE),
+    'prune_baileys_keys':        ('jamiitek:task:prune_baileys',        7 * 24 * 60 * MINUTE),
+    'cluster_gaps':              ('jamiitek:task:cluster_gaps',         7 * 24 * 60 * MINUTE),
+    'chatbot_digest':            ('jamiitek:task:chatbot_digest',       7 * 24 * 60 * MINUTE),
+    'monthly_report':            ('jamiitek:task:monthly_report',      30 * 24 * 60 * MINUTE),
+}
+
+PERIODIC = ('sync_integrations', 'process_scheduled_actions', 'check_alerts')
+
+_thread_lock = threading.Lock()
+_running = False           # kazi za kila siku
+_running_periodic = False  # kazi za mara kwa mara
+
+
+# ══════════════════════════════════════════════════════════════════
+#  KAZI ZA KILA SIKU
+# ══════════════════════════════════════════════════════════════════
 
 def _run_tasks_in_background():
-    """Kazi halisi. Inaendeshwa kwenye thread ya nyuma."""
+    """Kazi halisi za kila siku. Inaendeshwa kwenye thread ya nyuma."""
     global _running
     try:
-        from . import hosting_service
-        report = hosting_service.run_auto_suspend(notify=True)
-        n, m = len(report['suspended']), len(report['maintenance'])
-        if n or m:
-            logger.info('[daily] auto-suspend: %d suspended, %d maintenance', n, m)
-    except Exception:
-        logger.exception('[daily] auto-suspend failed')
+        # 1. Auto-suspend — hii inatangulia (ujumbe wa AI + maintenance mode)
+        try:
+            from . import hosting_service
+            report = hosting_service.run_auto_suspend(notify=True)
+            n, m = len(report['suspended']), len(report['maintenance'])
+            if n or m:
+                logger.info('[daily] auto-suspend: %d suspended, %d maintenance', n, m)
+        except Exception:
+            logger.exception('[daily] auto-suspend failed')
+
+        # 2. Onyo za muda kuisha + email hosting + domains
+        try:
+            from .utils.email_notifications import send_bulk_expiry_warnings
+            result = send_bulk_expiry_warnings()
+            logger.info('[daily] expiry emails: sent=%s suspended=%s errors=%s',
+                        result.get('sent'), result.get('suspended'), result.get('errors'))
+        except Exception:
+            logger.exception('[daily] expiry emails failed')
+
+        # 3. Kazi za ratiba ndefu (kila moja ina alama yake — haitarudiwa)
+        _run_command('send_digest')
+        _run_command('prune_snapshots')
+        _run_command('prune_baileys_keys', quiet=True)
+
+        # MPANGILIO: kuunganisha KABLA ya muhtasari, ili orodha
+        # inayotumwa WhatsApp iwe imeshasafishwa.
+        _run_command('cluster_gaps', quiet=True)
+        _run_command('chatbot_digest', quiet=True)
+        _run_command('monthly_report', all=True)
+
     finally:
         # Muhimu: funga muunganisho wa database wa thread hii
-        try:
-            connection.close()
-        except Exception:
-            pass
+        _close_connection()
         with _thread_lock:
             _running = False
 
 
+# ══════════════════════════════════════════════════════════════════
+#  KAZI ZA MARA KWA MARA (dakika 15 / 30)
+# ══════════════════════════════════════════════════════════════════
+
+def _run_periodic_in_background():
+    """sync_integrations, scheduled actions, alerts."""
+    global _running_periodic
+    try:
+        _run_command('sync_integrations', quiet=True)
+        _run_command('process_scheduled_actions')
+        _run_command('check_alerts')
+    finally:
+        _close_connection()
+        with _thread_lock:
+            _running_periodic = False
+
+
+# ══════════════════════════════════════════════════════════════════
+#  VISAIDIZI
+# ══════════════════════════════════════════════════════════════════
+
+def _close_connection():
+    try:
+        connection.close()
+    except Exception:
+        pass
+
+
+def _due(name):
+    """Je, kazi hii imefika muda? Ikiwa ndiyo, inaweka alama mara moja."""
+    key, every = SCHEDULE[name]
+    try:
+        if cache.get(key):
+            return False
+        # TTL yenyewe ndiyo ratiba — funguo ikiisha, kazi inastahili tena
+        cache.set(key, datetime.utcnow().isoformat(timespec='seconds'), every)
+        return True
+    except Exception:
+        # Cache haipatikani — usifanye kitu badala ya kurudia kazi bila kikomo
+        return False
+
+
+def _run_command(name, **opts):
+    """Endesha management command. Kamwe isivunje kazi nyingine."""
+    if not _due(name):
+        return False
+    try:
+        from django.core.management import call_command
+        call_command(name, **opts)
+        logger.info('[tasks] %s imekamilika', name)
+        return True
+    except Exception:
+        logger.exception('[tasks] %s imeshindwa', name)
+        return False
+
+
+# ══════════════════════════════════════════════════════════════════
+#  MIDDLEWARE
+# ══════════════════════════════════════════════════════════════════
+
 class DailyTasksMiddleware:
     """
-    Inaendesha kazi za kila siku mara moja tu kwa siku, kwenye thread ya nyuma.
+    Inaendesha kazi za ratiba kwenye thread ya nyuma.
 
     Weka MWISHONI mwa MIDDLEWARE kwenye settings.py.
     """
@@ -63,16 +191,17 @@ class DailyTasksMiddleware:
     def __call__(self, request):
         response = self.get_response(request)
         try:
-            self._maybe_run()
+            self._maybe_run_daily()
+            self._maybe_run_periodic()
         except Exception:
             # Kamwe isivunje ombi la mtumiaji
-            logger.exception('[daily] middleware check failed')
+            logger.exception('[tasks] middleware check failed')
         return response
 
-    def _maybe_run(self):
+    # ── kila siku ──
+    def _maybe_run_daily(self):
         global _running
 
-        # Ruka maombi ya static/media na ya admin — hayahitaji kuangalia
         today = date.today().isoformat()
 
         try:
@@ -97,15 +226,36 @@ class DailyTasksMiddleware:
                 _running = False
             return
 
-        t = threading.Thread(target=_run_tasks_in_background,
-                             name='jamiitek-daily-tasks', daemon=True)
-        t.start()
+        threading.Thread(target=_run_tasks_in_background,
+                         name='jamiitek-daily-tasks', daemon=True).start()
         logger.info('[daily] tasks started in background for %s', today)
+
+    # ── dakika 15 / 30 ──
+    def _maybe_run_periodic(self):
+        global _running_periodic
+
+        # Ruka kabisa kama hakuna kazi iliyofika muda
+        try:
+            pending = any(cache.get(SCHEDULE[n][0]) is None for n in PERIODIC)
+        except Exception:
+            return
+
+        if not pending:
+            return
+
+        with _thread_lock:
+            if _running_periodic:
+                return
+            _running_periodic = True
+
+        threading.Thread(target=_run_periodic_in_background,
+                         name='jamiitek-periodic-tasks', daemon=True).start()
 
 
 def force_run_now():
-    """Lazimisha kazi ifanyike sasa (kwa ajili ya kitufe cha 'Run now')."""
-    try:
-        cache.delete(CACHE_KEY)
-    except Exception:
-        pass
+    """Lazimisha kazi zote zifanyike sasa (kwa ajili ya kitufe cha 'Run now')."""
+    for k in [CACHE_KEY] + [key for key, _ in SCHEDULE.values()]:
+        try:
+            cache.delete(k)
+        except Exception:
+            pass

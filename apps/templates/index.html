@@ -36,11 +36,36 @@
 
 {{ schema_markup|safe }}
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Inter:wght@400;450;500;600&display=swap" rel="stylesheet">
+<!-- Fonts zinatolewa na server yetu, si Google.
+     Awali zilikuwa zinatoka fonts.googleapis.com: hiyo ni DNS lookup mpya,
+     TLS handshake mpya, kisha CSS inayoagiza faili nyingine tena — hatua
+     nne kabla maandishi hayajaonekana sawa. Kwenye 3G ni sekunde kadhaa.
+     Sasa ni faili moja kwenye domain ile ile, tayari kwenye muunganisho
+     uliopo, na inahifadhiwa na Whitenoise kwa mwaka mzima. -->
+<link rel="preload" as="font" type="font/woff2"
+      href="{% static 'fonts/sora-800.woff2' %}" crossorigin>
+<link rel="preload" as="font" type="font/woff2"
+      href="{% static 'fonts/inter-400.woff2' %}" crossorigin>
 
 <style>
+/* ── Fonts ───────────────────────────────────────────────────────── */
+@font-face{font-family:'Sora';font-style:normal;font-weight:400;font-display:swap;
+  src:url("{% static 'fonts/sora-400.woff2' %}") format('woff2')}
+@font-face{font-family:'Sora';font-style:normal;font-weight:500;font-display:swap;
+  src:url("{% static 'fonts/sora-500.woff2' %}") format('woff2')}
+@font-face{font-family:'Sora';font-style:normal;font-weight:600;font-display:swap;
+  src:url("{% static 'fonts/sora-600.woff2' %}") format('woff2')}
+@font-face{font-family:'Sora';font-style:normal;font-weight:700;font-display:swap;
+  src:url("{% static 'fonts/sora-700.woff2' %}") format('woff2')}
+@font-face{font-family:'Sora';font-style:normal;font-weight:800;font-display:swap;
+  src:url("{% static 'fonts/sora-800.woff2' %}") format('woff2')}
+@font-face{font-family:'Inter';font-style:normal;font-weight:400;font-display:swap;
+  src:url("{% static 'fonts/inter-400.woff2' %}") format('woff2')}
+@font-face{font-family:'Inter';font-style:normal;font-weight:500;font-display:swap;
+  src:url("{% static 'fonts/inter-500.woff2' %}") format('woff2')}
+@font-face{font-family:'Inter';font-style:normal;font-weight:600;font-display:swap;
+  src:url("{% static 'fonts/inter-600.woff2' %}") format('woff2')}
+
 /* ═══════════════════════════════════════════════════════════
    JamiiTek — Home.  Mobile-first: base styles are phone styles,
    media queries only ever scale UP.

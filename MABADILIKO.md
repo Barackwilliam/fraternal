@@ -110,3 +110,82 @@ Pia kuna `.json.bak` 20 ndani ya `website_types/` — backups za mkono.
 **`jamiitek_middleware.py`** ipo mzizini na haitumiwi na mradi huu — ni
 snippet ya kupewa mteja aiweke kwenye Django project yake. Ni sahihi
 kubaki, lakini pengine ni bora kwenye folda kama `deliverables/`.
+
+---
+
+# Awamu ya pili — kumaliza yaliyokuwa yamebaki
+
+## Bug: Uploadcare ilikuwa na majina mawili
+
+`builder/views.py` ilikuwa inasoma `UPLOADCARE_PUBLIC_KEY`, wakati
+`settings.py` na `apps/uploadcare_widget.py` zinasoma `UPLOADCARE_PUB_KEY`.
+Ukiweka kigezo kimoja tu, kitufe cha kupakia ndani ya builder kilikuwa
+hakifanyi kazi — **bila kutoa kosa lolote**. Sasa inasoma settings kwanza,
+kisha majina yote mawili.
+
+## `.env.example` ilikuwa imepungukiwa vigezo 14
+
+Niliiandika kwa mkono badala ya kuichambua kwenye code. Vilivyokosekana:
+`RENDER_API_KEY`, `RENDER_SERVICE_ID`, `TELEGRAM_BOT_TOKEN`,
+`TELEGRAM_CHAT_ID`, `GREEN_API_ID`, `GREEN_API_TOKEN`,
+`GREEN_API_RECIPIENT`, `DATABASE_URL`, `GROQ_MODEL`, `REDIS_URL`,
+`BUILDER_AI_DAILY_LIMIT`, `BUILDER_AI_CACHE_TTL`,
+`BUILDER_AUTO_REGISTER_SUBDOMAINS`. Sasa 42 kati ya 43 zimeandikwa
+(iliyobaki ni jina la zamani la Uploadcare).
+
+## Risiti sasa inaonekana kwenye portal ya mteja
+
+Risiti isiyo na tovuti haikuonekana kabisa portal, kwa sababu uchujaji
+ulikuwa `website__client` pekee. Nimeongeza FK ya `client` moja kwa moja
+(migration `0029`), na uchujaji sasa ni `website__client` **AU** `client`.
+Fomu ina chaguo la "Existing client".
+
+Imejaribiwa: risiti bila tovuti inaonekana kwenye orodha ya portal, PDF
+inapakuliwa, ukurasa wa kusaini unafunguka.
+
+## Invoice PDF sasa ni ukurasa mmoja
+
+Mabadiliko mawili:
+
+1. **Footer ni frame ya kudumu** (`@frame` ya xhtml2pdf) badala ya
+   maudhui yanayotiririka. Inarudisha ~2.5 cm, na footer inaonekana chini
+   ya kila ukurasa — si ukurasa wa mwisho pekee.
+2. **Safu ya Subtotal inafichwa** pale hakuna VAT wala punguzo. Ilikuwa
+   inaonyesha namba ile ile ya Total, mara mbili mfululizo.
+
+Invoice ya kawaida sasa inaingia ukurasa mmoja. Note ya sentensi tano
+bado inavuja — weka nne au chini.
+
+## Google Fonts zimehamia kwenye server yetu
+
+`index.html` ilikuwa inapakia Sora (uzito 5) na Inter (uzito 4) kutoka
+`fonts.googleapis.com`. Hiyo ni DNS lookup mpya, TLS handshake mpya,
+kisha CSS inayoagiza faili nyingine tena — hatua nne kabla maandishi
+hayajaonekana sawa. Kwenye 3G ni sekunde kadhaa.
+
+Sasa ni woff2 nane kwenye `apps/static/fonts/` (jumla 156 KB),
+zinatolewa na Whitenoise kwenye domain ile ile, na zinahifadhiwa mwaka
+mzima. Sora 800 na Inter 400 zina `preload`.
+
+## `assets/` (15 MB) imehamishwa `_archive/`
+
+Ilikuwa STATIC_ROOT ya zamani. `STATICFILES_DIRS` imezimwa, kwa hiyo
+`collectstatic` haikuwa inaisoma kabisa — nimethibitisha: faili 301
+kabla, 301 baada. `vendor/adminlte` ya 11 MB ndani yake ni nakala; ile
+inayotumika inatoka kwenye package ya jazzmin.
+
+Mradi umepungua kutoka 24 MB hadi **9.2 MB**.
+
+## Vifungu vya mkataba
+
+`docs/vifungu-vya-mkataba.md` — vifungu nane vya kunakili, kwa Kiswahili
+na Kiingereza, kila kimoja na maelezo ya kwa nini kipo. Kifungu cha 1 na
+2 ndivyo vinavyokulinda kwenye mradi wa Africanberty (app stores na
+malipo ndani ya app).
+
+## Baada ya kufungua
+
+```bash
+python manage.py migrate
+python manage.py collectstatic --no-input
+```

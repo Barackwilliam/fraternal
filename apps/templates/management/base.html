@@ -37,98 +37,115 @@
     <div class="sb-tag">Command Center</div>
     <div class="sb-status-dot" title="System Online"></div>
   </div>
-  <nav class="sb-nav">
-    <div class="sb-section">Overview</div>
-    <a href="{% url 'management_dashboard' %}" class="sb-link {% if request.resolver_match.url_name == 'management_dashboard' %}active{% endif %}">
+  <nav class="sb-nav" id="sbNav">
+
+    <a href="{% url 'management_dashboard' %}" class="sb-link sb-solo {% if nav == 'dashboard' %}active{% endif %}">
       <i class="fas fa-gauge"></i> Dashboard
     </a>
 
-    <div class="sb-section">Builder SaaS</div>
-    <a href="{% url 'manage_builder' %}" class="sb-link {% if 'manage_builder' in request.resolver_match.url_name %}active{% endif %}">
-      <i class="fas fa-shield-halved"></i> Builder Sites
-    </a>
+    <!-- ── CLIENT WORK ── -->
+    <div class="sb-group" data-group="clients">
+      <button type="button" class="sb-head" onclick="sbToggle(this)">
+        <i class="fas fa-users sb-head-i"></i><span>Clients &amp; Sites</span>
+        <i class="fas fa-chevron-down sb-caret"></i>
+      </button>
+      <div class="sb-items">
+        <a href="{% url 'website_list' %}" class="sb-link {% if nav == 'websites' %}active{% endif %}">
+          <i class="fas fa-globe"></i> All Websites</a>
+        <a href="{% url 'website_add' %}" class="sb-link">
+          <i class="fas fa-plus"></i> Add Website</a>
+        <a href="{% url 'client_list' %}" class="sb-link {% if nav == 'clients' %}active{% endif %}">
+          <i class="fas fa-address-book"></i> All Clients</a>
+        <a href="{% url 'lead_list' %}" class="sb-link {% if nav == 'leads' %}active{% endif %}">
+          <i class="fas fa-inbox"></i> Client Requests</a>
+      </div>
+    </div>
 
-    <div class="sb-section">Websites</div>
-    <a href="{% url 'website_list' %}" class="sb-link {% if 'website' in request.resolver_match.url_name %}active{% endif %}">
-      <i class="fas fa-globe"></i> All Websites
-    </a>
-    <a href="{% url 'website_add' %}" class="sb-link">
-      <i class="fas fa-plus"></i> Add Website
-    </a>
+    <!-- ── INFRASTRUCTURE ── -->
+    <div class="sb-group" data-group="infra">
+      <button type="button" class="sb-head" onclick="sbToggle(this)">
+        <i class="fas fa-server sb-head-i"></i><span>Infrastructure</span>
+        <i class="fas fa-chevron-down sb-caret"></i>
+      </button>
+      <div class="sb-items">
+        <a href="{% url 'infra_overview' %}" class="sb-link {% if nav == 'infra' %}active{% endif %}">
+          <i class="fas fa-diagram-project"></i> Overview</a>
+        <a href="{% url 'infra_audit' %}" class="sb-link {% if nav == 'infra_audit' %}active{% endif %}">
+          <i class="fas fa-clipboard-list"></i> Audit Log</a>
+        <a href="{% url 'domain_list' %}" class="sb-link {% if nav == 'domains' %}active{% endif %}">
+          <i class="fas fa-at"></i> Domains</a>
+        <a href="{% url 'domain_add' %}" class="sb-link">
+          <i class="fas fa-plus"></i> Add Domain</a>
+        <a href="{% url 'email_hosting_list' %}" class="sb-link {% if nav == 'email' %}active{% endif %}">
+          <i class="fas fa-envelope-open-text"></i> Email Hosting</a>
+        <a href="{% url 'email_hosting_add' %}" class="sb-link">
+          <i class="fas fa-plus"></i> Add Email Plan</a>
+      </div>
+    </div>
 
-    <div class="sb-section">Clients</div>
-    <a href="{% url 'client_list' %}" class="sb-link {% if 'client' in request.resolver_match.url_name %}active{% endif %}">
-      <i class="fas fa-users"></i> All Clients
-    </a>
+    <!-- ── DOCUMENTS ── -->
+    <div class="sb-group" data-group="docs">
+      <button type="button" class="sb-head" onclick="sbToggle(this)">
+        <i class="fas fa-file-lines sb-head-i"></i><span>Documents</span>
+        <i class="fas fa-chevron-down sb-caret"></i>
+      </button>
+      <div class="sb-items">
+        <a href="{% url 'invoice_list' %}" class="sb-link {% if nav == 'invoices' %}active{% endif %}">
+          <i class="fas fa-file-invoice-dollar"></i> Invoices</a>
+        <a href="{% url 'invoice_new' %}" class="sb-link">
+          <i class="fas fa-plus"></i> New Invoice</a>
+        <a href="{% url 'receipt_list' %}" class="sb-link {% if nav == 'receipts' %}active{% endif %}">
+          <i class="fas fa-receipt"></i> Receipts</a>
+        <a href="{% url 'receipt_new' %}" class="sb-link">
+          <i class="fas fa-plus"></i> New Receipt</a>
+        <a href="{% url 'proposal_builder_list' %}" class="sb-link {% if nav == 'proposals' %}active{% endif %}">
+          <i class="fas fa-file-contract"></i> Proposals</a>
+        <a href="{% url 'proposal_builder_new' %}" class="sb-link">
+          <i class="fas fa-plus"></i> New Proposal</a>
+        <a href="{% url 'contract_builder_list' %}" class="sb-link {% if nav == 'contracts' %}active{% endif %}">
+          <i class="fas fa-file-signature"></i> Contracts</a>
+        <a href="{% url 'contract_builder_new' %}" class="sb-link">
+          <i class="fas fa-plus"></i> New Contract</a>
+        <a href="{% url 'profile_builder' %}" class="sb-link {% if nav == 'profile' %}active{% endif %}">
+          <i class="fas fa-building"></i> Company Profile</a>
+      </div>
+    </div>
 
-    <div class="sb-section">Domains</div>
-    <a href="{% url 'domain_list' %}" class="sb-link {% if 'domain' in request.resolver_match.url_name %}active{% endif %}">
-      <i class="fas fa-at"></i> All Domains
-    </a>
-    <a href="{% url 'domain_add' %}" class="sb-link">
-      <i class="fas fa-plus"></i> Add Domain
-    </a>
+    <!-- ── PRODUCTS ── -->
+    <div class="sb-group" data-group="products">
+      <button type="button" class="sb-head" onclick="sbToggle(this)">
+        <i class="fas fa-cubes sb-head-i"></i><span>Products</span>
+        <i class="fas fa-chevron-down sb-caret"></i>
+      </button>
+      <div class="sb-items">
+        <a href="{% url 'manage_builder' %}" class="sb-link {% if nav == 'builder' %}active{% endif %}">
+          <i class="fas fa-shield-halved"></i> Builder Sites</a>
+        <a href="{% url 'manage_chatbot' %}" class="sb-link {% if nav == 'chatbot' %}active{% endif %}">
+          <i class="fas fa-robot"></i> JamiiBot</a>
+        <a href="{% url 'manage_bot_clients' %}" class="sb-link {% if nav == 'bot_clients' %}active{% endif %}">
+          <i class="fas fa-user-group"></i> Bot Clients</a>
+        <a href="{% url 'manage_bot_payments' %}" class="sb-link {% if nav == 'bot_payments' %}active{% endif %}">
+          <i class="fas fa-credit-card"></i> Bot Payments</a>
+      </div>
+    </div>
 
-    <div class="sb-section">Email Hosting</div>
-    <a href="{% url 'email_hosting_list' %}" class="sb-link {% if 'email_hosting' in request.resolver_match.url_name %}active{% endif %}">
-      <i class="fas fa-envelope-open-text"></i> All Plans
-    </a>
-    <a href="{% url 'email_hosting_add' %}" class="sb-link">
-      <i class="fas fa-plus"></i> Add Plan
-    </a>
+    <!-- ── SYSTEM ── -->
+    <div class="sb-group" data-group="system">
+      <button type="button" class="sb-head" onclick="sbToggle(this)">
+        <i class="fas fa-sliders sb-head-i"></i><span>System</span>
+        <i class="fas fa-chevron-down sb-caret"></i>
+      </button>
+      <div class="sb-items">
+        <a href="{% url 'home' %}" target="_blank" class="sb-link">
+          <i class="fas fa-arrow-up-right-from-square"></i> View Public Site</a>
+        <a href="/admin/" target="_blank" class="sb-link">
+          <i class="fas fa-database"></i> Django Admin</a>
+        <a href="{% url 'management_logout' %}" class="sb-link sb-danger"
+           onclick="return confirm('Sign out?')">
+          <i class="fas fa-power-off"></i> Sign Out</a>
+      </div>
+    </div>
 
-    <div class="sb-section">Invoices</div>
-    <a href="{% url 'invoice_list' %}" class="sb-link {% if request.resolver_match.url_name == 'invoice_list' or request.resolver_match.url_name == 'invoice_edit' %}active{% endif %}">
-      <i class="fas fa-file-invoice-dollar"></i> All Invoices
-    </a>
-    <a href="{% url 'invoice_new' %}" class="sb-link">
-      <i class="fas fa-plus"></i> New Invoice
-    </a>
-
-    <div class="sb-section">Receipts</div>
-    <a href="{% url 'receipt_list' %}" class="sb-link {% if request.resolver_match.url_name == 'receipt_list' or request.resolver_match.url_name == 'receipt_edit' %}active{% endif %}">
-      <i class="fas fa-receipt"></i> All Receipts
-    </a>
-    <a href="{% url 'receipt_new' %}" class="sb-link {% if request.resolver_match.url_name == 'receipt_new' %}active{% endif %}">
-      <i class="fas fa-plus"></i> New Receipt
-    </a>
-
-    <div class="sb-section">Company</div>
-    <a href="{% url 'profile_builder' %}" class="sb-link {% if request.resolver_match.url_name == 'profile_builder' %}active{% endif %}">
-      <i class="fas fa-building"></i> Company Profile
-    </a>
-
-    <div class="sb-section">Leads</div>
-    <a href="{% url 'lead_list' %}" class="sb-link {% if request.resolver_match.url_name == 'lead_list' %}active{% endif %}">
-      <i class="fas fa-inbox"></i> Client Requests
-    </a>
-
-    <div class="sb-section">Proposals</div>
-    <a href="{% url 'proposal_builder_list' %}" class="sb-link {% if 'proposal_builder' in request.resolver_match.url_name %}active{% endif %}">
-      <i class="fas fa-file-lines"></i> All Proposals
-    </a>
-    <a href="{% url 'proposal_builder_new' %}" class="sb-link">
-      <i class="fas fa-plus"></i> New Proposal
-    </a>
-
-    <div class="sb-section">Contracts</div>
-    <a href="{% url 'contract_builder_list' %}" class="sb-link {% if 'contract_builder' in request.resolver_match.url_name %}active{% endif %}">
-      <i class="fas fa-file-signature"></i> All Contracts
-    </a>
-    <a href="{% url 'contract_builder_new' %}" class="sb-link">
-      <i class="fas fa-plus"></i> New Contract
-    </a>
-
-    <div class="sb-section">System</div>
-    <a href="{% url 'home' %}" target="_blank" class="sb-link">
-      <i class="fas fa-arrow-up-right-from-square"></i> View Public Site
-    </a>
-    <a href="/admin/" target="_blank" class="sb-link">
-      <i class="fas fa-database"></i> Django Admin
-    </a>
-    <a href="{% url 'management_logout' %}" class="sb-link" style="color:rgba(255,59,92,0.5)" onclick="return confirm('Sign out?')">
-      <i class="fas fa-power-off"></i> Sign Out
-    </a>
   </nav>
   <div class="sb-footer">
     <div class="sb-user">
@@ -150,6 +167,11 @@
     <span class="tb-title">{% block page_title %}{{ title }}{% endblock %}</span>
   </div>
   <div class="tb-right">
+    <button type="button" class="tb-search" onclick="cmdOpen()" title="Search (Ctrl K)">
+      <i class="fas fa-magnifying-glass"></i>
+      <span>Search…</span>
+      <kbd>Ctrl K</kbd>
+    </button>
     <a href="{% url 'management_dashboard' %}" class="tb-btn" title="Dashboard"><i class="fas fa-gauge"></i></a>
     <a href="{% url 'website_add' %}" class="jt-btn btn-cyan" style="font-size:12px;padding:7px 14px">
       <i class="fas fa-plus"></i> New Website
@@ -236,5 +258,113 @@
 {% if TURNSTILE_ENABLED %}
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 {% endif %}
+
+<!-- COMMAND PALETTE -->
+<div class="cmd-back" id="cmdBack" onclick="if(event.target===this)cmdClose()">
+  <div class="cmd-box" role="dialog" aria-label="Search pages">
+    <div class="cmd-input">
+      <i class="fas fa-magnifying-glass"></i>
+      <input id="cmdQ" type="text" placeholder="Go to page…" autocomplete="off"
+             oninput="cmdFilter()" onkeydown="cmdKey(event)">
+      <kbd>Esc</kbd>
+    </div>
+    <div class="cmd-list" id="cmdList"></div>
+    <div class="cmd-foot">
+      <span><kbd>&uarr;</kbd><kbd>&darr;</kbd> move</span>
+      <span><kbd>&crarr;</kbd> open</span>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── Makundi ya sidebar: hali inakumbukwa ── */
+function sbToggle(btn){
+  var g = btn.parentElement;
+  g.classList.toggle('open');
+  try {
+    var open = [].filter.call(document.querySelectorAll('.sb-group.open'),
+                              function(x){return true;})
+                 .map(function(x){return x.dataset.group;});
+    localStorage.setItem('jt_sb', JSON.stringify(open));
+  } catch(e){}
+}
+(function restoreGroups(){
+  var open = null;
+  try { open = JSON.parse(localStorage.getItem('jt_sb') || 'null'); } catch(e){}
+  document.querySelectorAll('.sb-group').forEach(function(g){
+    /* Kundi lenye ukurasa uliopo linafunguka daima */
+    if (g.querySelector('.sb-link.active')) { g.classList.add('open'); return; }
+    if (open && open.indexOf(g.dataset.group) !== -1) g.classList.add('open');
+  });
+  /* Mara ya kwanza: kundi la ukurasa uliopo pekee. Orodha inabaki fupi
+     na kila kitu kinaonekana bila kuscroll. */
+})();
+
+/* ── Command palette ── */
+var CMD = [];
+document.querySelectorAll('.sb-nav a[href]').forEach(function(a){
+  var group = a.closest('.sb-group');
+  CMD.push({
+    label: a.textContent.trim(),
+    group: group ? group.querySelector('.sb-head span').textContent.trim() : '',
+    href:  a.getAttribute('href'),
+    blank: a.getAttribute('target') === '_blank'
+  });
+});
+var cmdIdx = 0, cmdHits = [];
+
+function cmdOpen(){
+  document.getElementById('cmdBack').classList.add('on');
+  var q = document.getElementById('cmdQ');
+  q.value = ''; cmdFilter(); q.focus();
+}
+function cmdClose(){ document.getElementById('cmdBack').classList.remove('on'); }
+
+function cmdFilter(){
+  var q = document.getElementById('cmdQ').value.toLowerCase().trim();
+  cmdHits = CMD.filter(function(c){
+    if (!q) return true;
+    return (c.label + ' ' + c.group).toLowerCase().indexOf(q) !== -1;
+  });
+  cmdIdx = 0;
+  var list = document.getElementById('cmdList');
+  if (!cmdHits.length){
+    list.innerHTML = '<div class="cmd-empty">Nothing matches that.</div>';
+    return;
+  }
+  list.innerHTML = cmdHits.map(function(c, i){
+    return '<a class="cmd-row' + (i === 0 ? ' on' : '') + '" href="' + c.href + '"' +
+           (c.blank ? ' target="_blank"' : '') + '>' +
+           '<span class="cmd-lbl">' + c.label + '</span>' +
+           (c.group ? '<span class="cmd-grp">' + c.group + '</span>' : '') + '</a>';
+  }).join('');
+}
+function cmdKey(e){
+  if (e.key === 'Escape') { cmdClose(); return; }
+  if (!cmdHits.length) return;
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp'){
+    e.preventDefault();
+    cmdIdx += (e.key === 'ArrowDown' ? 1 : -1);
+    if (cmdIdx < 0) cmdIdx = cmdHits.length - 1;
+    if (cmdIdx >= cmdHits.length) cmdIdx = 0;
+    var rows = document.querySelectorAll('.cmd-row');
+    rows.forEach(function(r){ r.classList.remove('on'); });
+    rows[cmdIdx].classList.add('on');
+    rows[cmdIdx].scrollIntoView({block:'nearest'});
+  }
+  if (e.key === 'Enter'){
+    e.preventDefault();
+    var hit = cmdHits[cmdIdx];
+    if (hit.blank) window.open(hit.href, '_blank'); else window.location = hit.href;
+  }
+}
+document.addEventListener('keydown', function(e){
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k'){
+    e.preventDefault(); cmdOpen();
+  }
+  if (e.key === 'Escape') cmdClose();
+});
+</script>
+
 </body>
 </html>
