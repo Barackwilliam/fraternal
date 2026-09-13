@@ -200,22 +200,19 @@ UPLOADCARE = {
 WEASPRINT_BASEURL = BASE_DIR
  
 # ── Email ──────────────────────────────────────────────
-_email_user = os.getenv('EMAIL_HOST_USER', 'info@jamiitek.com')
-_email_pass = os.getenv('EMAIL_HOST_PASSWORD', '')
- 
 if _email_user and _email_pass:
+    # Host ilikuwa imefungwa kwa 'smtp.gmail.com'. jamiitek.com iko Zoho
+    # (MX: mx.zoho.com), kwa hiyo Gmail haikuweza kutuma kamwe — na
+    # kwa vile nywila haikuwepo, mfumo ulianguka kwenye console bila
+    # mtu kugundua.
     EMAIL_BACKEND       = 'django.core.mail.backends.smtp.EmailBackend'
-    EMAIL_HOST          = 'smtp.gmail.com'
-    EMAIL_PORT          = 587
-    EMAIL_USE_TLS       = True
+    EMAIL_HOST          = os.getenv('EMAIL_HOST', 'smtp.zoho.com')
+    EMAIL_PORT          = int(os.getenv('EMAIL_PORT', '587'))
+    EMAIL_USE_TLS       = os.getenv('EMAIL_USE_SSL', 'False').lower() != 'true'
+    EMAIL_USE_SSL       = not EMAIL_USE_TLS
     EMAIL_HOST_USER     = _email_user
     EMAIL_HOST_PASSWORD = _email_pass
     DEFAULT_FROM_EMAIL  = f"JamiiTek <{_email_user}>"
-else:
-    # Fallback: log emails to console instead of crashing
-    EMAIL_BACKEND   = 'django.core.mail.backends.console.EmailBackend'
-    EMAIL_HOST_USER = 'info@jamiitek.com'
-    DEFAULT_FROM_EMAIL = 'JamiiTek <info@jamiitek.com>'
  
 PORTAL_BASE_URL = os.getenv('PORTAL_BASE_URL', 'https://jamiitek.com/portal/')
  
