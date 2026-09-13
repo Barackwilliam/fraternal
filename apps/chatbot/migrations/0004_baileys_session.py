@@ -5,7 +5,7 @@ Baileys: BotConfig inapata session badala ya Meta phone number ID.
 zilizopo zingepata '' na constraint ingeanguka mara moja kwenye bot ya
 pili. Kwa hiyo hatua ni tatu:
 
-  1. Ongeza field BILA unique
+  1. Ongeza field BILA unique NA BILA INDEX
   2. Jaza kwa kila bot iliyopo (mantiki ile ile ya `_make_session_name`)
   3. Ndipo weka unique
 
@@ -74,12 +74,20 @@ class Migration(migrations.Migration):
             field=models.DateTimeField(blank=True, editable=False, null=True),
         ),
 
-        # ── Hatua 1: bila unique ──
+        # ── Hatua 1: bila unique NA BILA INDEX ──
+        # db_index=False ni LAZIMA hapa. SlugField ina db_index=True kwa
+        # chaguo-msingi, kwa hiyo hatua hii ingeunda index ya
+        # `..._session_name_..._like` (varchar_pattern_ops ya Postgres).
+        # Kisha hatua ya 3 ingejaribu kuiunda tena kwa jina lile lile:
+        #   ProgrammingError: relation "..._like" already exists
+        #
+        # SQLite haina index za _like kabisa, ndiyo maana jaribio la
+        # kwanza lilipita na production ikaanguka.
         migrations.AddField(
             model_name='botconfig',
             name='session_name',
             field=models.SlugField(
-                blank=True, default='', max_length=60,
+                blank=True, default='', max_length=60, db_index=False,
                 help_text='Jina la session kwenye bridge. Linatengenezwa lenyewe.'),
         ),
 
