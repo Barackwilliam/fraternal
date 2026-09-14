@@ -7,6 +7,7 @@ from apps.chatbot.manage_views import (
     manage_chatbot_overview, manage_bot_detail, manage_bot_action,
     manage_bot_payments, manage_verify_payment, manage_reject_payment,
     manage_bulk_payment_action, manage_bot_clients, manage_bot_whatsapp,
+    manage_sessions, manage_session_qr, manage_session_action,
     jamiibot_landing
 )
 from apps.seo.sitemaps import sitemaps
@@ -28,7 +29,6 @@ urlpatterns = [
 
     # JamiiBot Landing Page
     path('bot/', jamiibot_landing, name='jamiibot_landing'),
-    path('ussd/', include('ussd.urls')),
     # Manage ChatBot Section
     path('manage/chatbot/', manage_chatbot_overview, name='manage_chatbot'),
     path('manage/chatbot/bots/<uuid:bot_id>/', manage_bot_detail, name='manage_bot_detail'),
@@ -39,6 +39,11 @@ urlpatterns = [
     path('manage/chatbot/payments/bulk-action/', manage_bulk_payment_action, name='manage_bulk_payment_action'),
     path('manage/chatbot/clients/', manage_bot_clients, name='manage_bot_clients'),
     path('manage/chatbot/bots/<uuid:bot_id>/whatsapp/', manage_bot_whatsapp, name='manage_bot_whatsapp'),
+
+    # ── Baileys sessions ──
+    path('manage/chatbot/sessions/', manage_sessions, name='manage_sessions'),
+    path('manage/chatbot/sessions/<uuid:bot_id>/qr/', manage_session_qr, name='manage_session_qr'),
+    path('manage/chatbot/sessions/<uuid:bot_id>/action/', manage_session_action, name='manage_session_action'),
 ]
 
 # Static/media serving kwa DEBUG (local dev) TU.

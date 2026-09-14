@@ -37,14 +37,18 @@ class DynamicProposalForm(TurnstileFormMixin, forms.Form):  # ← ADDED MIXIN
         )
 
         # Load questions from JSON
-        BASE_DIR = Path(__file__).resolve().parent.parent  # fraternal folder
-        safe_name = website_type.lower().replace(' ', '').replace('-', '')  # sanitize name
-        json_path = BASE_DIR / 'website_types' / f'{safe_name}.json'
+        # NB: slash inabaki kwa MAKUSUDI — majina kama "School/College" na
+        # "NGO/Charity" yanasomwa kutoka website_types/school/college.json.
+        # '..' pekee ndiyo inazuiwa ili jina la WebsiteType lisiweze kusoma
+        # faili nje ya folda hii.
+        BASE_DIR = Path(__file__).resolve().parent.parent
+        TYPES_DIR = (BASE_DIR / 'website_types').resolve()
+        safe_name = website_type.lower().replace(' ', '').replace('-', '')
+        json_path = (TYPES_DIR / f'{safe_name}.json').resolve()
 
-        # Debug print or logging
-        print("\n" + "="*50)
-        print(f"INATAFUTA FAILI HAPA: {json_path}")
-        print("="*50 + "\n")
+        if not json_path.is_relative_to(TYPES_DIR):
+            raise forms.ValidationError(
+                f"Jina la aina ya tovuti '{website_type}' si sahihi.")
 
         if not json_path.exists():
             raise forms.ValidationError(f"Faili ya {website_type}.json haipatikani. Hakikisha iko katika: {json_path}")
@@ -79,10 +83,10 @@ class ServiceAdminForm(forms.ModelForm):
         model = Service
         fields = '__all__'
 
-    class Media:
-        js = [
-            'https://ucarecdn.com/libs/widget/3.x/uploadcare.full.min.js',
-        ]
+    class Meta_widgets_note:
+        # Widget ya Supabase haina library ya nje. Uploadcare ilihitaji
+        # 200KB ya JS kutoka CDN yao kwenye kila ukurasa wa admin.
+        pass
 
 
 class TeamAdminForm(forms.ModelForm):
@@ -91,7 +95,7 @@ class TeamAdminForm(forms.ModelForm):
         model = Team
         fields = '__all__'
 
-    class Media:
-        js = [
-            'https://ucarecdn.com/libs/widget/3.x/uploadcare.full.min.js',
-        ]
+    class Meta_widgets_note:
+        # Widget ya Supabase haina library ya nje. Uploadcare ilihitaji
+        # 200KB ya JS kutoka CDN yao kwenye kila ukurasa wa admin.
+        pass

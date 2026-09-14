@@ -15,6 +15,24 @@
 .sc-val{font-family:var(--head);font-size:26px;font-weight:900;color:var(--text);line-height:1;margin-bottom:3px}
 .sc-lbl{font-family:var(--mono);font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px}
 
+/* WANAOSUBIRI BINADAMU */
+.wait-panel{background:linear-gradient(140deg,rgba(245,158,11,.11),rgba(245,158,11,.02));
+  border:1.5px solid rgba(245,158,11,.28);border-radius:16px;padding:20px 22px;margin-bottom:20px}
+.wait-h{display:flex;align-items:center;gap:11px;margin-bottom:5px}
+.wait-h i{color:var(--yellow);font-size:17px}
+.wait-t{font-family:var(--head);font-size:16px;color:var(--text);font-weight:800}
+.wait-sub{font-size:12.5px;color:var(--text-2);line-height:1.6;margin-bottom:15px}
+.wait-row{display:flex;align-items:center;gap:13px;padding:12px 0;border-top:1px solid rgba(245,158,11,.14)}
+.wait-who{flex:1;min-width:0}
+.wait-nm{font-size:13.5px;color:var(--text);font-weight:600}
+.wait-mt{font-family:var(--mono);font-size:10.5px;color:var(--text-3);margin-top:2px}
+.wait-btn{border:1px solid rgba(0,220,130,.3);background:rgba(0,220,130,.12);color:var(--green);
+  border-radius:9px;padding:8px 15px;font-size:12.5px;font-weight:600;cursor:pointer;
+  font-family:inherit;white-space:nowrap}
+.wait-btn:hover{background:rgba(0,220,130,.2)}
+.wait-tip{font-size:11.5px;color:var(--text-3);margin-top:14px;line-height:1.6}
+.wait-tip code{background:rgba(255,255,255,.07);padding:2px 6px;border-radius:4px;font-size:11px}
+
 /* FILTER */
 .filter-wrap{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:12px 18px;border-bottom:1px solid var(--border)}
 .f-pill{padding:6px 14px;border-radius:100px;border:1.5px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);font-size:12px;font-weight:600;color:var(--text2);cursor:pointer;transition:all .15s;font-family:var(--mono)}
@@ -40,6 +58,40 @@
 </style>
 
 <!-- STATS -->
+{% if waiting_count %}
+<div class="wait-panel f0">
+  <div class="wait-h">
+    <i class="fas fa-hand"></i>
+    <span class="wait-t">Wateja {{ waiting_count }} wanasubiri binadamu</span>
+  </div>
+  <div class="wait-sub">
+    Bot imesimama kwa mazungumzo haya na haitajibu tena. Jibu mteja kwenye
+    WhatsApp, kisha bonyeza <strong>Bot irudi</strong>.
+  </div>
+
+  {% for c in waiting %}
+  <div class="wait-row">
+    <div class="wait-who">
+      <div class="wait-nm">{{ c.customer_name|default:c.wa_contact_name|default:"Hajulikani" }}</div>
+      <div class="wait-mt">
+        {{ c.customer_phone }} · amesubiri dakika {{ c.handoff_waiting_minutes }}
+        {% if c.handoff_reason %} · {{ c.handoff_reason }}{% endif %}
+      </div>
+    </div>
+    <form method="post" action="{% url 'chatbot_resume' c.id %}">
+      {% csrf_token %}
+      <button type="submit" class="wait-btn">Bot irudi</button>
+    </form>
+  </div>
+  {% endfor %}
+
+  <div class="wait-tip">
+    Unaweza pia kuandika <code>endelea {{ waiting.0.customer_phone }}</code>
+    kwenye WhatsApp ya biashara yako.
+  </div>
+</div>
+{% endif %}
+
 <div class="stats-row f0">
   <div class="sc" style="--ac:var(--purple)"><div class="sc-ico" style="background:var(--purple-d);color:var(--purple)"><i class="fas fa-comments"></i></div><div class="sc-val">{{ total_convs }}</div><div class="sc-lbl">Total</div></div>
   <div class="sc" style="--ac:var(--green)"><div class="sc-ico" style="background:var(--green-d);color:var(--green)"><i class="fas fa-comment-dots"></i></div><div class="sc-val">{{ total_msgs }}</div><div class="sc-lbl">Messages</div></div>

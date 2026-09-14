@@ -6,6 +6,13 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.models import User, auth
 from django.contrib.auth.decorators import login_required
 
+# `send_mail` haikuwahi kuimportwa. Contact form ilianguka kwa
+# NameError kwenye KILA ujumbe tangu iandikwe, na `except Exception`
+# iliyoizunguka iliifanya ionekane kama kosa la SMTP badala ya bug.
+# Hakuna ujumbe wa mteja uliowahi kufika.
+import logging
+from django.core.mail import send_mail
+
 
 # # Home Page
 # def home(request):
@@ -227,8 +234,12 @@ JamiiTek Team
             ujumbe = "✓ Your message has been sent successfully! We'll respond within 24 hours."
             messages.success(request, ujumbe)
             
-        except Exception as e:
-            ujumbe = f"✗ Error sending email: {str(e)}"
+        except Exception:
+            # Kosa halisi linaenda logs, si kwa mteja. "name 'send_mail' is
+            # not defined" halimsaidii, na linafichua muundo wa ndani.
+            logger.exception('Contact form: kutuma email kumeshindwa')
+            ujumbe = ("Samahani, ujumbe haujatoka. Tafadhali tupigie "
+                      "+255 629 712 678 au andika info@jamiitek.com.")
             messages.error(request, ujumbe)
             return render(request, 'contact.html', {'ujumbe': ujumbe})
     
@@ -243,7 +254,6 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from .models import WebsiteType, Client, ProjectProposal
 from .forms import DynamicProposalForm
-from .utils.pdf_generator import generate_proposal_pdf
 
 def select_website_type(request):
     website_types = WebsiteType.objects.all()
@@ -508,47 +518,6 @@ def proposal_preview(request, proposal_id):
 
 
 
-import json
-from django.http import HttpResponse
-from django.template.loader import render_to_string
-from xhtml2pdf import pisa
-from io import BytesIO
-from .models import ProjectProposal
-
-def generate_proposal_pdf(proposal):
-    template_path = 'proposal_pdf.html'
-
-    requirements = proposal.requirements.copy()
-    total_cost = 0
-
-    for key, value in requirements.items():
-        if 'cost' in key.lower() or 'price' in key.lower():
-            try:
-                cost = float(value)
-                requirements[key] = cost
-                total_cost += cost
-            except (ValueError, TypeError):
-                continue
-
-    # Reference design (kama proposal ilianzia /templates/preview/) — itolewe
-    # kwenye requirements loop na ionekane kama section yake kwenye PDF
-    ref_template = requirements.pop('reference_template', None)
-
-    context = {
-        'proposal': proposal,
-        'requirements': requirements,
-        'total_cost': total_cost,
-        'ref_template': ref_template,
-    }
-
-    html = render_to_string(template_path, context)
-    result = BytesIO()
-    pisa_status = pisa.CreatePDF(html, dest=result)
-
-    if pisa_status.err:
-        return HttpResponse('We had some errors with PDF rendering <br>' + html)
-    return result.getvalue()
-
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.contrib import messages
@@ -577,90 +546,6 @@ def generate_pdf(request, proposal_id):
     response = HttpResponse(pdf_bytes, content_type='application/pdf')
     response['Content-Disposition'] = f'attachment; filename="{filename}"'
     return response
-
-# import json
-# from django.http import HttpResponse
-# from django.template.loader import render_to_string
-# from xhtml2pdf import pisa
-# from io import BytesIO
-# from pyuploadcare import Uploadcare
-# from .models import ProjectProposal
-
-# # Initialize Uploadcare client
-# uc = Uploadcare(public_key='76122001cca4add87f02', secret_key='f00801b9b65172d50de5')
-
-# def generate_proposal_pdf(proposal):
-#     template_path = 'proposal_pdf.html'
-
-#     requirements = proposal.requirements.copy()
-#     total_cost = 0
-
-#     # Hesabu total cost
-#     for key, value in requirements.items():
-#         if 'cost' in key.lower() or 'price' in key.lower():
-#             try:
-#                 cost = float(value)
-#                 requirements[key] = cost
-#                 total_cost += cost
-#             except (ValueError, TypeError):
-#                 continue
-
-#     context = {
-#         'proposal': proposal,
-#         'requirements': requirements,
-#         'total_cost': total_cost
-#     }
-
-#     html = render_to_string(template_path, context)
-#     result = BytesIO()
-#     pisa_status = pisa.CreatePDF(html, dest=result)
-
-#     if pisa_status.err:
-#         return HttpResponse('We had some errors with PDF rendering <br>' + html)
-#     result.seek(0)  # Read from beginning
-#     return result
-
-# def generate_pdf(request, proposal_id):
-#     proposal = ProjectProposal.objects.get(id=proposal_id)
-
-#     # Ensure requirements is a dict
-#     if isinstance(proposal.requirements, str):
-#         try:
-#             proposal.requirements = json.loads(proposal.requirements)
-#         except Exception:
-#             proposal.requirements = {}
-
-#     pdf_buffer = generate_proposal_pdf(proposal)
-
-#     # Uploadcare: tumia from_bytes (pyuploadcare 6.x inatumia this method)
-#     if pdf_buffer:
-#         pdf_buffer.seek(0)
-#         upload = uc.upload_from_bytes(pdf_buffer.read(), filename=f"proposal_{proposal.id}.pdf")
-#         proposal.pdf_file = upload.cdn_url  # Hii inahifadhi URL kwenye database
-#         proposal.save()
-#         pdf_buffer.seek(0)  # Kurudi mwanzo ili kurudisha HTTP response
-
-#     response = HttpResponse(pdf_buffer.getvalue(), content_type='application/pdf')
-#     response['Content-Disposition'] = f'attachment; filename="proposal_{proposal.id}.pdf"'
-#     return response
-
-
-# ══════════════════════════════════════════════════════════════════
-# CRON ENDPOINT — Called by cron-job.org daily to send emails
-# URL: /cron/emails/jamiitek-cron-2025/
-# ══════════════════════════════════════════════════════════════════
-
-from django.views.decorators.csrf import csrf_exempt
-
-@csrf_exempt
-def run_email_cron(request, secret):
-    if secret != 'jamiitek-cron-2025':
-        from django.http import JsonResponse
-        return JsonResponse({'error': 'Unauthorized'}, status=403)
-    from apps.utils.email_notifications import send_bulk_expiry_warnings
-    from django.http import JsonResponse
-    result = send_bulk_expiry_warnings()
-    return JsonResponse(result)
 
 # ============================================================
 # WEBSITE TEMPLATES MARKETPLACE

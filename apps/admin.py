@@ -29,15 +29,17 @@ from .models import (
 
 class ServiceAdmin(admin.ModelAdmin):
     form = ServiceAdminForm
+    _upload_folder = 'services'
 
     def formfield_for_dbfield(self, db_field, **kwargs):
         formfield = super().formfield_for_dbfield(db_field, **kwargs)
 
         if db_field.name == "image":
-            formfield.widget.attrs.update({
-                "role": "uploadcare-uploader",
-                "data-public-key": "4c3ba9de492e0e0eaddc",
-            })
+            # Uploadcare ilitumia attrs ("role": "uploadcare-uploader")
+            # na public key iliyoandikwa moja kwa moja hapa. Sasa ni
+            # widget kamili inayopakia Supabase kupitia /manage/upload/.
+            from .supabase_widget import SupabaseImageWidget
+            formfield.widget = SupabaseImageWidget(folder=self._upload_folder)
 
         return formfield
 
@@ -123,15 +125,17 @@ class ProjectProposalAdmin(admin.ModelAdmin):
 
 class TeamAdmin(admin.ModelAdmin):
     form = TeamAdminForm
+    _upload_folder = 'team'
 
     def formfield_for_dbfield(self, db_field, **kwargs):
         formfield = super().formfield_for_dbfield(db_field, **kwargs)
 
         if db_field.name == "image":
-            formfield.widget.attrs.update({
-                "role": "uploadcare-uploader",
-                "data-public-key": "4c3ba9de492e0e0eaddc",
-            })
+            # Uploadcare ilitumia attrs ("role": "uploadcare-uploader")
+            # na public key iliyoandikwa moja kwa moja hapa. Sasa ni
+            # widget kamili inayopakia Supabase kupitia /manage/upload/.
+            from .supabase_widget import SupabaseImageWidget
+            formfield.widget = SupabaseImageWidget(folder=self._upload_folder)
 
         return formfield
 

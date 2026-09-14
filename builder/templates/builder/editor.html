@@ -616,22 +616,17 @@ body{font-family:'Inter',-apple-system,sans-serif;height:100vh;height:100dvh;dis
   </div>
 </div>
 
-<!-- Uploadcare -->
-<script type="module">
-  import * as UC from "https://cdn.jsdelivr.net/npm/@uploadcare/file-uploader@v1/web/file-uploader.min.js";
-  UC.defineComponents(UC);
-</script>
-<uc-config ctx-name="jt-uploader" pubkey="{{ uploadcare_public_key }}" img-only="true"
-           max-local-file-size-bytes="8388608" source-list="local, camera, url"></uc-config>
-<uc-file-uploader-regular ctx-name="jt-uploader" style="display:none"></uc-file-uploader-regular>
-<uc-upload-ctx-provider ctx-name="jt-uploader" id="uc-ctx"></uc-upload-ctx-provider>
+<!-- Kupakia image (Supabase) -->
+<!-- Uploadcare ilihitaji library ya 200KB kutoka CDN yao pamoja na
+     web components nne. Sasa ni <input type=file> na fetch(). -->
+<input type="file" id="jt-file" accept="image/*" style="display:none">
 
 <script>
 const CSRF = '{{ csrf_token }}';
 const SAVE_URL = "{% url 'builder:page_save' site.id page.id %}";
 const LOAD_URL = "{% url 'builder:page_load' site.id page.id %}";
 const AI_URL = "{% url 'builder:ai_assist' %}";
-const ASSET_SAVE_URL = "{% url 'builder:asset_save' site.id %}";
+const ASSET_UPLOAD_URL = "{% url 'builder:asset_upload' site.id %}";
 const SITE_ID = {{ site.id }};
 </script>
 
@@ -1043,20 +1038,38 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && document.getElementById('jt-ide').classList.contains('on')) jtCloseIDE();
 });
 
-// Uploadcare kama Asset Manager
-const ucCtx = document.getElementById('uc-ctx');
+// Asset Manager — inapakia Supabase
+// Uploadcare iliambatanisha `-/resize/1200x/` kwenye URL kwa sababu CDN
+// yao ilifanya resize. Supabase haifanyi hivyo kwenye plan ya bure, kwa
+// hiyo tunatumia image kama ilivyo na ukubwa unashughulikiwa na CSS.
+const jtFile = document.getElementById('jt-file');
 let amProps = null;
-editor.on('asset:custom', props => { amProps = props; ucCtx.initFlow(); });
-ucCtx.addEventListener('file-upload-success', e => {
-  const cdnUrl = e.detail.cdnUrl;
-  fetch(ASSET_SAVE_URL, { method:'POST',
-    headers:{'Content-Type':'application/json','X-CSRFToken':CSRF},
-    body: JSON.stringify({cdn_url: cdnUrl, name: e.detail.name || ''}) });
-  if (amProps){ amProps.select({ src: cdnUrl + '-/resize/1200x/' }); }
-  else {
-    const sel = editor.getSelected();
-    if (sel && sel.is('image')) sel.set('src', cdnUrl + '-/resize/1200x/');
-  }
+
+editor.on('asset:custom', props => { amProps = props; jtFile.click(); });
+
+jtFile.addEventListener('change', () => {
+  const f = jtFile.files[0];
+  if (!f) return;
+
+  const fd = new FormData();
+  fd.append('file', f);
+
+  fetch(ASSET_UPLOAD_URL, {
+    method: 'POST',
+    headers: { 'X-CSRFToken': CSRF },
+    body: fd,
+  })
+    .then(r => r.json())
+    .then(d => {
+      if (!d.url) { alert(d.error || 'Kupakia kumeshindwa.'); return; }
+      if (amProps) { amProps.select({ src: d.url }); }
+      else {
+        const sel = editor.getSelected();
+        if (sel && sel.is('image')) sel.set('src', d.url);
+      }
+    })
+    .catch(() => alert('Muunganisho umekatika.'))
+    .finally(() => { jtFile.value = ''; });
 });
 
 // AI

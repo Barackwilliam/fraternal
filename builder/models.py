@@ -74,7 +74,7 @@ class ClientWebsite(models.Model):
     website_type = models.CharField(max_length=50, default='companyprofile')
     site_name = models.CharField(max_length=120)
     tagline = models.CharField(max_length=200, blank=True)
-    logo_url = models.URLField(blank=True)           # Uploadcare CDN URL
+    logo_url = models.URLField(blank=True)           # Supabase Storage URL
     contact_phone = models.CharField(max_length=30, blank=True)
     contact_email = models.EmailField(blank=True)
     contact_address = models.CharField(max_length=200, blank=True)
@@ -241,7 +241,7 @@ class SiteItem(models.Model):
     title = models.CharField(max_length=200)
     slug = models.SlugField(max_length=220, blank=True)
     data = models.JSONField(default=dict)      # values za fields za schema
-    image_url = models.URLField(blank=True)    # picha kuu (Uploadcare)
+    image_url = models.URLField(blank=True)    # picha kuu (Supabase)
     is_visible = models.BooleanField(default=True)
     is_featured = models.BooleanField(default=False)
     sort_order = models.PositiveIntegerField(default=0)
@@ -275,11 +275,11 @@ class SiteItem(models.Model):
 
 
 class SiteAsset(models.Model):
-    """Picha/faili la mteja lililopakiwa Uploadcare. Tunahifadhi URL tu."""
+    """Picha/faili la mteja lililopakiwa Supabase. Tunahifadhi URL tu."""
     website = models.ForeignKey(
         ClientWebsite, on_delete=models.CASCADE, related_name='assets'
     )
-    uploadcare_url = models.URLField()
+    url = models.URLField()
     file_name = models.CharField(max_length=200, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -287,7 +287,7 @@ class SiteAsset(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return self.file_name or self.uploadcare_url
+        return self.file_name or self.url
 
 
 class SiteInquiry(models.Model):

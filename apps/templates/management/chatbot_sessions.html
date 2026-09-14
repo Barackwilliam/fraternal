@@ -1,0 +1,346 @@
+{% extends 'management/base.html' %}
+{% block title %}WhatsApp Sessions{% endblock %}
+{% block page_title %}WhatsApp Sessions{% endblock %}
+{% block breadcrumb %}Manage / JamiiBot / Sessions{% endblock %}
+
+{% block extra_css %}
+<style>
+.jt-main{background:#080c18 !important}
+:root{
+  --dk-card:#0f1629;--dk-card2:#141d35;
+  --dk-border:rgba(255,255,255,.07);
+  --dk-text:rgba(255,255,255,.9);--dk-text2:rgba(255,255,255,.5);--dk-text3:rgba(255,255,255,.28);
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes livePulse{0%,100%{opacity:1}50%{opacity:.25}}
+.f0{animation:fadeUp .3s ease both}.f1{animation:fadeUp .3s .06s ease both}
+@media (prefers-reduced-motion:reduce){.f0,.f1{animation:none}.dot-live{animation:none}}
+
+/* ── Hali ya bridge ── */
+.bridge-bar{display:flex;align-items:center;gap:14px;padding:16px 22px;border-radius:16px;
+  margin-bottom:22px;border:1.5px solid;flex-wrap:wrap}
+.bridge-up{background:linear-gradient(135deg,rgba(16,185,129,.12),rgba(16,185,129,.03));border-color:rgba(16,185,129,.28)}
+.bridge-down{background:linear-gradient(135deg,rgba(239,68,68,.12),rgba(239,68,68,.03));border-color:rgba(239,68,68,.3)}
+.bridge-ico{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:17px;flex:none}
+.bridge-txt{flex:1;min-width:220px}
+.bridge-h{font-size:15px;font-weight:700;color:#fff;margin-bottom:3px}
+.bridge-s{font-family:var(--mono);font-size:11px;color:var(--dk-text2);line-height:1.5}
+
+/* ── Kadi za session ── */
+.sess-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px}
+.sess{background:var(--dk-card);border:1px solid var(--dk-border);border-radius:16px;overflow:hidden;
+  display:flex;flex-direction:column}
+.sess-top{padding:18px 20px 14px;border-bottom:1px solid var(--dk-border)}
+.sess-row{display:flex;align-items:flex-start;gap:11px}
+.dot{width:9px;height:9px;border-radius:50%;flex:none;margin-top:6px}
+.dot-live{animation:livePulse 2s infinite}
+.sess-biz{font-size:15px;font-weight:700;color:#fff;line-height:1.3}
+.sess-bot{font-family:var(--mono);font-size:11px;color:var(--dk-text3);margin-top:3px}
+.sess-state{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:1px;
+  text-transform:uppercase;padding:4px 9px;border-radius:6px;white-space:nowrap;margin-left:auto}
+
+.sess-meta{padding:14px 20px;display:grid;gap:9px;flex:1}
+.mrow{display:flex;justify-content:space-between;gap:12px;font-size:12px;align-items:baseline}
+.mk{color:var(--dk-text3);font-family:var(--mono);font-size:10px;letter-spacing:.6px}
+.mv{color:var(--dk-text);text-align:right;word-break:break-all}
+.mv-dim{color:var(--dk-text3)}
+
+.sess-acts{padding:13px 20px;border-top:1px solid var(--dk-border);display:flex;gap:7px;flex-wrap:wrap}
+.sb{border:1px solid var(--dk-border);background:rgba(255,255,255,.04);color:var(--dk-text);
+  border-radius:8px;padding:7px 13px;font-size:12px;font-weight:600;cursor:pointer;
+  display:inline-flex;align-items:center;gap:6px;font-family:inherit;transition:background .15s}
+.sb:hover{background:rgba(255,255,255,.1)}
+.sb:focus-visible{outline:2px solid #4f46e5;outline-offset:2px}
+.sb-key{background:rgba(16,185,129,.16);border-color:rgba(16,185,129,.35);color:#6ee7b7}
+.sb-key:hover{background:rgba(16,185,129,.26)}
+.sb-warn{color:#fca5a5;border-color:rgba(239,68,68,.28)}
+.sb-warn:hover{background:rgba(239,68,68,.16)}
+
+/* ── Modal ── */
+.ov{position:fixed;inset:0;background:rgba(4,7,16,.82);backdrop-filter:blur(6px);
+  display:none;align-items:center;justify-content:center;z-index:999;padding:20px}
+.ov.on{display:flex}
+.md{background:var(--dk-card);border:1px solid var(--dk-border);border-radius:20px;
+  width:100%;max-width:420px;overflow:hidden}
+.md-h{padding:18px 22px;border-bottom:1px solid var(--dk-border);display:flex;
+  align-items:center;justify-content:space-between;gap:12px}
+.md-t{font-size:15px;font-weight:700;color:#fff}
+.md-x{background:none;border:none;color:var(--dk-text3);font-size:20px;cursor:pointer;line-height:1;padding:4px}
+.md-x:hover{color:#fff}
+.md-b{padding:24px 22px;text-align:center}
+
+.qr-frame{background:#fff;border-radius:14px;padding:14px;display:inline-block;min-height:250px;
+  min-width:250px;display:flex;align-items:center;justify-content:center}
+.qr-frame img{display:block;width:100%;max-width:260px;height:auto}
+.qr-note{font-size:13px;color:var(--dk-text2);line-height:1.65;margin-top:16px;text-align:left}
+.qr-note ol{margin:8px 0 0;padding-left:20px}
+.qr-note li{margin-bottom:4px}
+.qr-state{font-family:var(--mono);font-size:11px;color:var(--dk-text3);margin-top:12px}
+.spin{width:26px;height:26px;border:3px solid rgba(0,0,0,.1);border-top-color:#4f46e5;
+  border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.danger-box{background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.22);
+  border-radius:12px;padding:16px;text-align:left}
+.danger-box p{font-size:13px;color:var(--dk-text);line-height:1.6;margin:0 0 12px}
+.danger-box input{width:100%;background:rgba(0,0,0,.3);border:1px solid var(--dk-border);
+  border-radius:8px;padding:10px 12px;color:#fff;font-size:13px;font-family:inherit}
+.danger-box input:focus{outline:2px solid rgba(239,68,68,.5);outline-offset:1px}
+
+.empty{text-align:center;padding:64px 20px;color:var(--dk-text3)}
+.empty i{font-size:38px;margin-bottom:14px;display:block;opacity:.4}
+</style>
+{% endblock %}
+
+{% block content %}
+
+{% if not bridge_configured %}
+  <div class="bridge-bar bridge-down f0">
+    <div class="bridge-ico" style="background:rgba(239,68,68,.15);color:#f87171"><i class="fas fa-plug-circle-xmark"></i></div>
+    <div class="bridge-txt">
+      <div class="bridge-h">Bridge haijasanidiwa</div>
+      <div class="bridge-s">Weka <code>BRIDGE_URL</code> na <code>BRIDGE_API_KEY</code> kwenye environment, kisha anzisha upya.</div>
+    </div>
+  </div>
+{% elif bridge_ok %}
+  <div class="bridge-bar bridge-up f0">
+    <div class="bridge-ico" style="background:rgba(16,185,129,.15);color:#34d399"><i class="fas fa-plug-circle-check"></i></div>
+    <div class="bridge-txt">
+      <div class="bridge-h">Bridge iko hewani</div>
+      <div class="bridge-s">Sessions {{ health.connected }} zimeunganishwa kati ya {{ health.sessions }} · imekimbia sekunde {{ health.uptime_seconds }}</div>
+    </div>
+  </div>
+{% else %}
+  <div class="bridge-bar bridge-down f0">
+    <div class="bridge-ico" style="background:rgba(239,68,68,.15);color:#f87171"><i class="fas fa-plug-circle-exclamation"></i></div>
+    <div class="bridge-txt">
+      <div class="bridge-h">Bridge haipatikani</div>
+      <div class="bridge-s">{{ bridge_error|default:"Haijajibu." }} — bot haziwezi kupokea wala kutuma jumbe mpaka irudi.</div>
+    </div>
+  </div>
+{% endif %}
+
+{% if bots %}
+<div class="sess-grid f1">
+  {% for bot in bots %}
+  {% with s=bot.live.status|default:bot.connection_status %}
+  <div class="sess">
+    <div class="sess-top">
+      <div class="sess-row">
+        <span class="dot {% if s == 'connected' %}dot-live{% endif %}"
+              style="background:{% if s == 'connected' %}#10b981{% elif s == 'waiting_qr' %}#f59e0b{% else %}#ef4444{% endif %}"></span>
+        <div style="min-width:0">
+          <div class="sess-biz">{{ bot.business_name }}</div>
+          <div class="sess-bot">{{ bot.bot_name }} · {{ bot.session_name }}</div>
+        </div>
+        <span class="sess-state"
+              style="{% if s == 'connected' %}background:rgba(16,185,129,.16);color:#6ee7b7
+                     {% elif s == 'waiting_qr' %}background:rgba(245,158,11,.16);color:#fcd34d
+                     {% else %}background:rgba(239,68,68,.14);color:#fca5a5{% endif %}">
+          {% if s == 'connected' %}Hewani{% elif s == 'waiting_qr' %}Scan QR{% elif s == 'logged_out' %}Imetolewa{% elif s == 'starting' %}Inaanza{% else %}Imekatika{% endif %}
+        </span>
+      </div>
+    </div>
+
+    <div class="sess-meta">
+      <div class="mrow">
+        <span class="mk">Namba</span>
+        <span class="mv {% if not bot.live.number and not bot.connected_number %}mv-dim{% endif %}">
+          {{ bot.live.number|default:bot.connected_number|default:"haijaunganishwa" }}
+        </span>
+      </div>
+      <div class="mrow">
+        <span class="mk">Ujumbe wa mwisho</span>
+        <span class="mv {% if not bot.live.last_message_at %}mv-dim{% endif %}">
+          {% if bot.live.last_message_at %}{{ bot.live.last_message_at|slice:"11:16" }} UTC{% else %}bado{% endif %}
+        </span>
+      </div>
+      {% if bot.live.attempts %}
+      <div class="mrow">
+        <span class="mk">Majaribio ya kuunganisha</span>
+        <span class="mv">{{ bot.live.attempts }}</span>
+      </div>
+      {% endif %}
+      {% if bot.live.last_error %}
+      <div class="mrow">
+        <span class="mk">Kosa</span>
+        <span class="mv mv-dim">{{ bot.live.last_error }}</span>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="sess-acts">
+      {% if s != 'connected' %}
+      <button class="sb sb-key" data-qr="{{ bot.id }}" data-biz="{{ bot.business_name }}">
+        <i class="fas fa-qrcode"></i> Onyesha QR
+      </button>
+      {% endif %}
+      <button class="sb" data-act="restart" data-bot="{{ bot.id }}">
+        <i class="fas fa-rotate"></i> Anzisha upya
+      </button>
+      {% if s == 'connected' %}
+      <button class="sb sb-warn" data-logout="{{ bot.id }}" data-biz="{{ bot.business_name }}">
+        <i class="fas fa-link-slash"></i> Unganisha namba nyingine
+      </button>
+      {% endif %}
+    </div>
+  </div>
+  {% endwith %}
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty f1">
+  <i class="fas fa-robot"></i>
+  Hakuna bot bado. Unda bot kwanza, kisha irudi hapa kuiunganisha na WhatsApp.
+</div>
+{% endif %}
+
+
+<!-- QR -->
+<div class="ov" id="qrOv">
+  <div class="md">
+    <div class="md-h">
+      <span class="md-t" id="qrTitle">Unganisha WhatsApp</span>
+      <button class="md-x" id="qrClose" aria-label="Funga">&times;</button>
+    </div>
+    <div class="md-b">
+      <div class="qr-frame" id="qrFrame"><div class="spin"></div></div>
+      <div class="qr-note">
+        <ol>
+          <li>Fungua WhatsApp kwenye simu ya biashara</li>
+          <li>Settings &rsaquo; Linked Devices &rsaquo; Link a Device</li>
+          <li>Scan QR hii</li>
+        </ol>
+      </div>
+      <div class="qr-state" id="qrState">Inapakia&hellip;</div>
+    </div>
+  </div>
+</div>
+
+<!-- Logout -->
+<div class="ov" id="loOv">
+  <div class="md">
+    <div class="md-h">
+      <span class="md-t">Unganisha namba nyingine</span>
+      <button class="md-x" id="loClose" aria-label="Funga">&times;</button>
+    </div>
+    <div class="md-b">
+      <div class="danger-box">
+        <p>Hii inafuta session. Mteja atalazimika kuscan QR upya — na labda hayuko ofisini sasa hivi.</p>
+        <p style="margin-bottom:8px">Andika <strong id="loBiz"></strong> kuthibitisha:</p>
+        <input type="text" id="loInput" autocomplete="off" spellcheck="false">
+      </div>
+      <div class="qr-state" id="loState"></div>
+      <button class="sb sb-warn" id="loGo" style="margin-top:16px;width:100%;justify-content:center;padding:11px">
+        Futa session na onyesha QR mpya
+      </button>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+  const csrf = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '{{ csrf_token }}';
+  const qrOv = document.getElementById('qrOv');
+  const loOv = document.getElementById('loOv');
+  let poll = null, activeBot = null, logoutBot = null;
+
+  const post = (url, body) => fetch(url, {
+    method: 'POST',
+    headers: { 'X-CSRFToken': csrf, 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams(body || {}),
+  }).then(r => r.json());
+
+  // ── QR ────────────────────────────────────────────────
+  // WhatsApp QR inaisha baada ya ~60s. Tunaipiga kila sekunde 5
+  // ili mpya ionekane bila kurefresh ukurasa.
+  function stopPoll() { if (poll) { clearInterval(poll); poll = null; } }
+
+  function refreshQr() {
+    if (!activeBot) return;
+    fetch(`/manage/chatbot/sessions/${activeBot}/qr/`)
+      .then(r => r.json())
+      .then(d => {
+        const frame = document.getElementById('qrFrame');
+        const state = document.getElementById('qrState');
+        if (d.status === 'connected') {
+          frame.innerHTML = '<div style="color:#059669;font-size:44px"><i class="fas fa-circle-check"></i></div>';
+          state.textContent = `Imeunganishwa — ${d.number || ''}`;
+          stopPoll();
+          setTimeout(() => location.reload(), 1600);
+          return;
+        }
+        if (d.qr) {
+          frame.innerHTML = `<img src="${d.qr}" alt="QR ya kuunganisha WhatsApp">`;
+          state.textContent = d.qr_expired
+            ? 'QR imepitwa na wakati — mpya inakuja'
+            : `QR ina sekunde ${d.qr_age_seconds ?? 0}`;
+        } else {
+          frame.innerHTML = '<div class="spin"></div>';
+          state.textContent = d.error ? d.error : 'Inasubiri QR kutoka bridge…';
+        }
+      })
+      .catch(() => { document.getElementById('qrState').textContent = 'Haikuweza kufikia bridge.'; });
+  }
+
+  function closeQr() { qrOv.classList.remove('on'); stopPoll(); activeBot = null; }
+
+  document.querySelectorAll('[data-qr]').forEach(b => b.addEventListener('click', () => {
+    activeBot = b.dataset.qr;
+    document.getElementById('qrTitle').textContent = b.dataset.biz;
+    document.getElementById('qrFrame').innerHTML = '<div class="spin"></div>';
+    document.getElementById('qrState').textContent = 'Inapakia…';
+    qrOv.classList.add('on');
+    refreshQr();
+    poll = setInterval(refreshQr, 5000);
+  }));
+
+  document.getElementById('qrClose').addEventListener('click', closeQr);
+  qrOv.addEventListener('click', e => { if (e.target === qrOv) closeQr(); });
+
+  // ── Anzisha upya ──────────────────────────────────────
+  document.querySelectorAll('[data-act]').forEach(b => b.addEventListener('click', () => {
+    const original = b.innerHTML;
+    b.disabled = true;
+    b.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Inaanza…';
+    post(`/manage/chatbot/sessions/${b.dataset.bot}/action/`, { action: b.dataset.act })
+      .then(() => location.reload())
+      .catch(() => { b.disabled = false; b.innerHTML = original; });
+  }));
+
+  // ── Logout ────────────────────────────────────────────
+  document.querySelectorAll('[data-logout]').forEach(b => b.addEventListener('click', () => {
+    logoutBot = b.dataset.logout;
+    document.getElementById('loBiz').textContent = b.dataset.biz;
+    document.getElementById('loInput').value = '';
+    document.getElementById('loState').textContent = '';
+    loOv.classList.add('on');
+    document.getElementById('loInput').focus();
+  }));
+
+  const closeLo = () => { loOv.classList.remove('on'); logoutBot = null; };
+  document.getElementById('loClose').addEventListener('click', closeLo);
+  loOv.addEventListener('click', e => { if (e.target === loOv) closeLo(); });
+
+  document.getElementById('loGo').addEventListener('click', () => {
+    if (!logoutBot) return;
+    const state = document.getElementById('loState');
+    state.textContent = 'Inafuta…';
+    post(`/manage/chatbot/sessions/${logoutBot}/action/`, {
+      action: 'logout',
+      confirm: document.getElementById('loInput').value,
+    }).then(d => {
+      if (d.success) location.reload();
+      else state.textContent = d.error || 'Imeshindwa.';
+    }).catch(() => { state.textContent = 'Haikuweza kufikia bridge.'; });
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { closeQr(); closeLo(); }
+  });
+})();
+</script>
+{% endblock %}

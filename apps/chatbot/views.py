@@ -7,6 +7,10 @@ NEW APPROACH: William manages ONE Meta account.
 """
 import json
 import logging
+import re
+import secrets
+import threading
+
 import requests
 from datetime import date, timedelta
 from django.contrib.auth.decorators import login_required
@@ -30,7 +34,10 @@ from .models import (
     Conversation, Message, BotAnalytics
 )
 from .ai_engine import BotAIEngine
-from .whatsapp import WhatsAppHandler, build_services_menu
+from .whatsapp import build_services_menu
+from .bridge import BaileysHandler
+from . import handoff
+from . import knowledge
 
 logger = logging.getLogger('chatbot.views')
 
@@ -320,7 +327,6 @@ def chatbot_setup_wizard(request):
                 messages.error(request, "Tafadhali anza kutoka hatua ya kwanza.")
                 return redirect('/chatbot/setup/?step=1')
 
-            import re
             wa_number = request.POST.get('whatsapp_number', '').strip()
             digits_only = re.sub(r'\D', '', wa_number)
             if not wa_number:
@@ -368,18 +374,29 @@ def chatbot_setup_wizard(request):
                 sub.plan = plan
                 sub.save(update_fields=['plan'])
 
-            # Bot stays 'pending' until William adds phone_id
-            if bot.whatsapp_phone_id:
-                bot.status    = 'active'
-                bot.is_active = True
-            else:
-                bot.status    = 'pending'
-                bot.is_active = False
+            # Zamani bot ilikaa 'pending' hadi William aweke Meta phone ID
+            # kwa mkono — mteja alisubiri saa 24. Kwa Baileys hakuna cha
+            # kusubiri: trial inaanza, QR inafunguka, mteja anascan mwenyewe.
+            #
+            # Lango la malipo halijaondoka — limehamia kwenye subscription.
+            # `_process_message` inakagua `sub.is_active`, ambayo ni kweli
+            # kwa 'trial' na 'active' pekee. Trial ikiisha bila malipo,
+            # bot inanyamaza yenyewe.
+            bot.status      = 'active'
+            bot.is_active   = True
             bot.deployed_at = timezone.now()
             bot.save()
 
-            messages.success(request, f"🎉 Bot yako '{bot.bot_name}' imesajiliwa! Itaanza kufanya kazi ndani ya saa 24.")
-            return redirect('chatbot_dashboard')
+            # Anzisha session ili QR iwe tayari mteja anapofika ukurasa
+            try:
+                from apps.chatbot import bridge
+                if bridge.is_configured():
+                    bridge.start_session(bot.session_name)
+            except Exception:
+                logger.warning('Haikuweza kuanzisha session %s', bot.session_name)
+
+            messages.success(request, f"🎉 Bot yako '{bot.bot_name}' iko tayari! Iunganishe na WhatsApp sasa.")
+            return redirect('chatbot_connect')
 
     # Refresh services/faqs after any POST changes
     if bot:
@@ -494,10 +511,14 @@ def chatbot_conversations(request):
     unique_customers = convs.values('customer_phone').distinct().count()
     today_convs   = convs.filter(started_at__date=date.today()).count()
 
+    # Wanaosubiri binadamu wanatangulia — hao ndio wanaoweza kuondoka
+    waiting = convs.filter(is_human_handoff=True).order_by('handoff_at')
+
     return render(request, 'chatbot/portal/conversations.html', {
         'client': client, 'bot': bot, 'conversations': convs,
         'total_convs': total_convs, 'total_msgs': total_msgs,
         'unique_customers': unique_customers, 'today_convs': today_convs,
+        'waiting': waiting, 'waiting_count': waiting.count(),
     })
 
 
@@ -823,7 +844,8 @@ def _process_message(bot: BotConfig, msg_data: dict):
     if msg_id and Message.objects.filter(wa_message_id=msg_id).exists():
         return
 
-    wa = WhatsAppHandler(bot)
+    # Baileys: `jid` inahitajika kwa mark_as_read (Meta ilihitaji id tu)
+    wa = BaileysHandler(bot, jid=msg_data.get('jid'))
 
     # Get or create conversation
     conv, is_new = Conversation.objects.get_or_create(
@@ -851,11 +873,53 @@ def _process_message(bot: BotConfig, msg_data: dict):
         conversation=conv, role='user', content=text, wa_message_id=msg_id
     )
 
+    # ── AMRI ZA MMILIKI ────────────────────────────────────────────
+    # Mmiliki anazungumza na bot kupitia WhatsApp ya biashara yake.
+    # Hii inakaguliwa KABLA ya kila kitu kingine, lakini ujumbe usio
+    # amri unapita kama kawaida — mmiliki anaweza kuwa mteja wa bot
+    # yake mwenyewe anapoijaribu.
+    owner = bot.owner_digits
+    if owner and from_phone.endswith(owner[-9:]):
+        if handoff.handle_owner_command(bot, wa, from_phone, text):
+            return
+
+    # ── BOT IMESIMAMA ──────────────────────────────────────────────
+    # Mteja ameambiwa "nakuunganisha na mtu halisi". Kuandika chochote
+    # baada ya hapo kungefanya ahadi ile kuwa uongo.
+    #
+    # Ujumbe wake umeshahifadhiwa hapo juu, kwa hiyo mmiliki
+    # ataiona kila kitu alichoandika akiwa anasubiri. Bot inanyamaza
+    # tu — haisemi "bado unasubiri", haikumbushi, haifanyi kitu.
+    if conv.is_human_handoff:
+        # Mkumbushe mmiliki kama mteja anaendelea kuandika bila kujibiwa
+        handoff.remind_owner_if_stale(bot, wa, conv, text)
+        return
+
+    # ── ANAHITAJI BINADAMU? ────────────────────────────────────────
+    # Hii iko HAPA, kabla ya state machine, si ndani ya hali ya 'chat'.
+    #
+    # Ilikuwa chini kwenye 'chat' pekee, kwa hiyo mteja mpya
+    # aliyeandika "nataka kuongea na mtu halisi" kama ujumbe wake wa
+    # KWANZA alipata salamu tu — ombi lake likapotea kimyakimya. Na
+    # huo ndio wakati unaowezekana zaidi kwa mtu kuomba binadamu.
+    #
+    # Pia inashika mtu anayeomba akiwa katikati ya kuulizwa jina.
+    needs_human, why = handoff.detect(text)
+    if needs_human:
+        handoff.trigger(bot, wa, conv, from_phone, by='customer', reason=why)
+        return
+
     # ── State: GREETING (brand new conversation) ───────────────────
     if is_new:
-        # Replace {name} placeholder if we already know the WA profile name
+        # Replace {name} placeholder if we already know the WA profile name.
+        # Bila jina, "Karibu {name}!" ilikuwa inatoa "Karibu !" — .strip()
+        # inaondoa pembeni tu, si nafasi iliyo katikati. Tunaisafisha.
         display_name = contact or ''
-        greeting     = bot.greeting_msg.replace('{name}', display_name).strip()
+        greeting     = bot.greeting_msg.replace('{name}', display_name)
+        if not display_name:
+            greeting = re.sub(r'\s+([!?.,])', r'\1', greeting)
+            greeting = re.sub(r'\s{2,}', ' ', greeting)
+        greeting = greeting.strip()
         _send_and_save(wa, conv, from_phone, greeting)
 
         if bot.collect_name and not conv.customer_name:
@@ -893,7 +957,8 @@ def _process_message(bot: BotConfig, msg_data: dict):
     # ── State: COLLECT_PHONE ───────────────────────────────────────
     if state == 'collect_phone':
         # Basic validation — accept digits, spaces, +, -, ()
-        import re
+        # (`re` sasa imeimportwa juu ya faili — import ya ndani hapa
+        #  ilikuwa inafanya `re` kuwa local kwa function NZIMA)
         digits = re.sub(r'[^\d+\-\s()]', '', text).strip()
         if len(re.sub(r'\D', '', digits)) < 7:
             # Doesn't look like a phone number — ask again
@@ -921,14 +986,6 @@ def _process_message(bot: BotConfig, msg_data: dict):
     if sub and not sub.is_active:
         _send_and_save(wa, conv, from_phone,
                        "Samahani, huduma hii imesimamishwa. Wasiliana na kampuni moja kwa moja.")
-        return
-
-    # Human handoff check
-    handoff_words = ['binadamu', 'mtu halisi', 'human', 'agent', 'operator', 'speak to someone', 'call me']
-    if any(w in text.lower() for w in handoff_words):
-        _send_and_save(wa, conv, from_phone, bot.human_handoff_msg)
-        conv.is_human_handoff = True
-        conv.save(update_fields=['is_human_handoff'])
         return
 
     # ── Media-aware pre-processing ─────────────────────────────────
@@ -1002,7 +1059,7 @@ def _process_message(bot: BotConfig, msg_data: dict):
     Message.objects.create(
         conversation=conv, role='assistant', content=reply,
         tokens_used=result.get('tokens', 0),
-        ai_model=result.get('model', 'gemini-1.5-flash'),
+        ai_model=result.get('model', ''),
         latency_ms=result.get('latency_ms', 0),
     )
 
@@ -1013,8 +1070,16 @@ def _process_message(bot: BotConfig, msg_data: dict):
     wa.send_text(from_phone, reply)
 
     if result.get('is_handoff'):
-        conv.is_human_handoff = True
-        conv.save(update_fields=['is_human_handoff'])
+        # Hii ilikuwa inaweka bendera pekee — mmiliki hakuarifiwa, na bot
+        # iliendelea kujibu. Sasa inapita njia ile ile ya handoff.trigger.
+        handoff.trigger(bot, wa, conv, from_phone, by='ai',
+                        reason='Bot iliomba binadamu')
+
+    # ── Bot imeshindwa? Hifadhi swali ili mmiliki alijibu ──────────
+    knowledge.watch(bot, conv, final_text, reply, result)
+
+    # ── Kumbukumbu ya mteja (kila baada ya jumbe kadhaa) ───────────
+    knowledge.maybe_update_memory(bot, conv)
 
     _update_analytics(bot, result)
 
@@ -1081,20 +1146,23 @@ def simulate_message(request, bot_id):
         bot.conversations.filter(customer_phone=phone).delete()
 
     # Build a fake msg_data and run through the pipeline
-    # We capture outgoing messages by monkey-patching WhatsAppHandler.send_text
+    # Tunanasa jumbe zinazotoka kwa kubadilisha BaileysHandler.send_text
+    # kwa muda. Hakuna kinachotoka kwenda WhatsApp wakati wa simulation.
     sent_messages = []
 
-    original_send = None
-    from .whatsapp import WhatsAppHandler as _WAH
+    from .bridge import BaileysHandler as _BH
 
-    original_send_text = _WAH.send_text
+    original_send_text = _BH.send_text
     def fake_send_text(self, to, message):
         sent_messages.append(message)
         return {'success': True, 'message_id': 'sim_' + str(len(sent_messages))}
-    _WAH.send_text = fake_send_text
+    _BH.send_text = fake_send_text
 
-    original_mark_read = _WAH.mark_as_read
-    _WAH.mark_as_read = lambda self, msg_id: {'success': True}
+    original_mark_read = _BH.mark_as_read
+    _BH.mark_as_read = lambda self, msg_id: {'success': True}
+
+    # `send_interactive_list` inaita `send_text` ndani yake, kwa hiyo
+    # orodha ya huduma nayo inanaswa bila kubadilisha kitu kingine.
 
     try:
         msg_data = {
@@ -1115,8 +1183,8 @@ def simulate_message(request, bot_id):
         logger.exception(f"Simulate error: {e}")
         return JsonResponse({'error': str(e)}, status=500)
     finally:
-        _WAH.send_text  = original_send_text
-        _WAH.mark_as_read = original_mark_read
+        _BH.send_text     = original_send_text
+        _BH.mark_as_read  = original_mark_read
 
     return JsonResponse({
         'success':       True,
@@ -1134,3 +1202,351 @@ def simulate_message(request, bot_id):
 def privacy_policy(request):
     """Public privacy policy page — required by Meta App Review."""
     return render(request, 'chatbot/privacy_policy.html')
+
+# ════════════════════════════════════════════════════════
+# BAILEYS BRIDGE
+# ════════════════════════════════════════════════════════
+# Bridge inatuma ujumbe hapa; tunajibu 200 MARA MOJA kisha
+# tunashughulikia nyuma.
+#
+# Sababu si kasi peke yake. `_process_message` inatuma jumbe MBILI
+# mteja anapoanza (salamu, kisha "niambie jina lako"), na inaweza
+# kuchukua sekunde 20 kusubiri AI. Kama bridge ingesubiri jibu
+# kwenye HTTP response, mkulima wa tano angesubiri wanne wamalize
+# — na tungeweza kurudisha ujumbe mmoja tu.
+
+def _bridge_authorized(request):
+    given = request.headers.get('X-Bridge-Key', '')
+    expected = getattr(settings, 'BRIDGE_API_KEY', '')
+    if not expected:
+        logger.error('BRIDGE_API_KEY haijawekwa — webhook imezimwa')
+        return False
+    return secrets.compare_digest(str(given), str(expected))
+
+
+def _baileys_to_msg_data(payload: dict) -> dict:
+    """
+    Bridge inatuma payload iliyokwisha chambuliwa. Hapa tunaibadilisha
+    iwe na maumbo yale yale ambayo `_process_message` inategemea, ili
+    state machine isibadilike hata kidogo.
+    """
+    msg_type = payload.get('msg_type', 'text')
+    text = (payload.get('text') or '').strip()
+
+    data = {
+        'from':         payload.get('phone', ''),
+        'text':         text,
+        'message_id':   payload.get('message_id', ''),
+        'contact_name': payload.get('contact_name', ''),
+        'msg_type':     msg_type,
+        'media_id':     None,
+        'media_caption': text if msg_type in ('image', 'video', 'document') else '',
+        'filename':     payload.get('filename', ''),
+        'jid':          payload.get('jid', ''),
+    }
+
+    if payload.get('location'):
+        data['location'] = payload['location']
+
+    # Jumbe zisizo na maandishi zinahitaji lebo ili `_process_message`
+    # isiziruke kama tupu (inakagua `if msg_type != 'text' and not text`)
+    if not text and msg_type != 'text':
+        data['text'] = {
+            'image':    '[Picha]',
+            'video':    '[Video]',
+            'audio':    '[Sauti]',
+            'document': '[Faili]',
+            'sticker':  '[Sticker]',
+            'location': '[Mahali]',
+        }.get(msg_type, f'[{msg_type}]')
+
+    return data
+
+
+@csrf_exempt
+def baileys_webhook(request):
+    """Bridge -> Django. Inajibu mara moja, inashughulikia nyuma."""
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST pekee'}, status=405)
+
+    if not _bridge_authorized(request):
+        return JsonResponse({'success': False, 'error': 'Unauthorized'}, status=401)
+
+    try:
+        payload = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'JSON si sahihi'}, status=400)
+
+    session = payload.get('session', '')
+    if not session:
+        return JsonResponse({'success': False, 'error': 'session inahitajika'}, status=400)
+
+    bot = BotConfig.objects.filter(session_name=session).first()
+    if not bot:
+        logger.warning('Hakuna bot yenye session: %s', session)
+        return JsonResponse({'success': False, 'error': 'Session haijulikani'}, status=404)
+
+    # Hali ya bot inagusa mteja — ikiwa imezimwa, bridge haihitaji kujua
+    if not bot.is_active or bot.status != 'active':
+        return JsonResponse({'success': True, 'skipped': 'bot haijawashwa'})
+
+    msg_data = _baileys_to_msg_data(payload)
+
+    def _work():
+        try:
+            _process_message(bot, msg_data)
+        except Exception:
+            logger.exception('Baileys: kushughulikia ujumbe kumeshindwa (session %s)', session)
+        finally:
+            # Thread hii ina muunganisho wake wa database — lazima ufungwe
+            try:
+                from django.db import connection as _conn
+                _conn.close()
+            except Exception:
+                pass
+
+    threading.Thread(target=_work, name=f'baileys-{session}', daemon=True).start()
+
+    return JsonResponse({'success': True})
+
+
+@csrf_exempt
+def bridge_session_list(request):
+    """
+    Bridge inauliza hii ikianza: 'ni sessions zipi ninazopaswa
+    kuziinua?' Session zenyewe ziko Supabase, kwa hiyo hakuna
+    kuscan QR upya — zinarudi zilipoishia.
+    """
+    if not _bridge_authorized(request):
+        return JsonResponse({'success': False, 'error': 'Unauthorized'}, status=401)
+
+    names = list(
+        BotConfig.objects
+        .filter(is_active=True, status='active', autostart=True)
+        .exclude(session_name='')
+        .values_list('session_name', flat=True)
+    )
+    return JsonResponse({'success': True, 'sessions': names})
+
+
+# ════════════════════════════════════════════════════════
+# PORTAL: MTEJA ANAJIUNGANISHA MWENYEWE
+# ════════════════════════════════════════════════════════
+# Bot inapatikana kupitia `client.bots` PEKEE — kamwe kwa id
+# inayotoka kwenye URL. Mteja hawezi kufikia session ya mwenzake
+# hata akijaribu.
+
+def _own_bot(request):
+    """Bot ya mtumiaji aliyeingia, au None."""
+    client = _get_or_create_client(request.user)
+    return client.bots.first()
+
+
+@login_required(login_url='/chatbot/login/')
+def chatbot_connect(request):
+    """Ukurasa wa kuunganisha WhatsApp — QR au hali ya muunganisho."""
+    bot = _own_bot(request)
+    if not bot:
+        return redirect('chatbot_setup_wizard')
+
+    sub = getattr(bot, 'subscription', None)
+
+    # Lango: QR inafunguka baada ya trial (au subscription) kuanza.
+    if not sub or not sub.is_active:
+        return render(request, 'chatbot/portal/connect.html', {
+            'bot': bot, 'sub': sub, 'locked': True,
+        })
+
+    from apps.chatbot import bridge
+    return render(request, 'chatbot/portal/connect.html', {
+        'bot': bot,
+        'sub': sub,
+        'locked': False,
+        'bridge_ok': bridge.is_configured(),
+        'trial_days': sub.days_remaining if sub.status == 'trial' else None,
+    })
+
+
+@login_required(login_url='/chatbot/login/')
+def chatbot_connect_qr(request):
+    """
+    JSON kwa ukurasa unaopiga kila sekunde 5. QR ya WhatsApp inaisha
+    baada ya ~60s, kwa hiyo lazima ionekane mpya bila kurefresh.
+    """
+    bot = _own_bot(request)
+    if not bot:
+        return JsonResponse({'success': False, 'error': 'Hakuna bot'}, status=404)
+
+    sub = getattr(bot, 'subscription', None)
+    if not sub or not sub.is_active:
+        return JsonResponse({'success': False, 'error': 'Mpango wako haujaanza'}, status=403)
+
+    from apps.chatbot import bridge
+    data = bridge.session_qr(bot.session_name)
+
+    # Session bado haijaanzishwa kwenye bridge (bridge ilirestart, n.k.)
+    if not data.get('success') and 'haipo' in str(data.get('error', '')):
+        bridge.start_session(bot.session_name)
+        data = bridge.session_qr(bot.session_name)
+
+    _apply_session_status(bot, data)
+
+    # Onyo la namba: aliyoiandika hatua ya 5 dhidi ya aliyoiscan
+    connected = (data.get('number') or '').lstrip('0')
+    declared  = re.sub(r'\D', '', bot.whatsapp_number or '').lstrip('0')
+    if connected and declared and not (connected.endswith(declared) or declared.endswith(connected)):
+        data['number_mismatch'] = bot.whatsapp_number
+
+    return JsonResponse(data)
+
+
+@login_required(login_url='/chatbot/login/')
+def chatbot_connect_action(request):
+    """restart | disconnect — kwa bot ya mtumiaji mwenyewe pekee."""
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST pekee'}, status=405)
+
+    bot = _own_bot(request)
+    if not bot:
+        return JsonResponse({'success': False, 'error': 'Hakuna bot'}, status=404)
+
+    sub = getattr(bot, 'subscription', None)
+    if not sub or not sub.is_active:
+        return JsonResponse({'success': False, 'error': 'Mpango wako haujaanza'}, status=403)
+
+    from apps.chatbot import bridge
+    action = request.POST.get('action', '')
+
+    if action == 'restart':
+        data = bridge.restart_session(bot.session_name)
+    elif action == 'disconnect':
+        # Kufuta session kunamlazimisha kuscan upya. Anaandika jina la
+        # biashara yake kwanza — kama GitHub inavyodai jina la repo.
+        typed = (request.POST.get('confirm') or '').strip().lower()
+        if typed != (bot.business_name or '').strip().lower():
+            return JsonResponse({
+                'success': False,
+                'error': 'Andika jina la biashara yako kwa usahihi.',
+            }, status=400)
+        data = bridge.logout_session(bot.session_name)
+    else:
+        return JsonResponse({'success': False, 'error': 'Kitendo hakijulikani'}, status=400)
+
+    _apply_session_status(bot, data)
+    return JsonResponse(data)
+
+
+def _apply_session_status(bot, data):
+    """Hifadhi hali kutoka bridge kwenye BotConfig."""
+    if not data.get('success'):
+        return
+    fields = []
+    status = data.get('status')
+    if status and status != bot.connection_status:
+        bot.connection_status = status
+        fields.append('connection_status')
+    number = data.get('number') or ''
+    if number != bot.connected_number:
+        bot.connected_number = number
+        fields.append('connected_number')
+    if status == 'connected':
+        bot.last_seen_at = timezone.now()
+        fields.append('last_seen_at')
+    if fields:
+        bot.save(update_fields=fields)
+
+
+@login_required(login_url='/chatbot/login/')
+def chatbot_resume(request, conv_id):
+    """
+    Kitufe cha 'Bot irudi' kwenye portal.
+
+    Ni njia ile ile ya `endelea` ya WhatsApp — mmiliki mwingine
+    anapendelea kubonyeza. Conversation inapatikana kupitia bot yake
+    mwenyewe pekee.
+    """
+    if request.method != 'POST':
+        return redirect('chatbot_conversations')
+
+    bot = _own_bot(request)
+    if not bot:
+        return redirect('chatbot_setup_wizard')
+
+    conv = get_object_or_404(Conversation, id=conv_id, bot=bot)
+    if conv.resume_bot():
+        who = conv.customer_name or conv.customer_phone
+        messages.success(request, f"Bot imerudi kwa {who}.")
+    else:
+        messages.info(request, "Mazungumzo haya hayakuwa yamesimama.")
+    return redirect('chatbot_conversations')
+
+
+# ════════════════════════════════════════════════════════
+# PORTAL: MAARIFA YA BOT
+# ════════════════════════════════════════════════════════
+
+@login_required(login_url='/chatbot/login/')
+def chatbot_knowledge(request):
+    """
+    Maswali bot iliyoshindwa kuyajibu, na rasimu za majibu.
+
+    Hapa ndipo mmiliki anapofundisha bot yake. Hakuna kitu
+    kinachoingia kwenye maarifa ya bot bila yeye kubonyeza.
+    """
+    from .models import KnowledgeGap
+
+    bot = _own_bot(request)
+    if not bot:
+        return redirect('chatbot_setup_wizard')
+
+    gaps = bot.knowledge_gaps.exclude(status='dismissed')
+    return render(request, 'chatbot/portal/knowledge.html', {
+        'bot': bot,
+        'open_gaps':   gaps.filter(status__in=['open', 'drafted']),
+        'answered':    gaps.filter(status='answered')[:20],
+        'open_count':  gaps.filter(status__in=['open', 'drafted']).count(),
+        'answered_count': gaps.filter(status='answered').count(),
+    })
+
+
+@login_required(login_url='/chatbot/login/')
+def chatbot_knowledge_action(request, gap_id):
+    """draft | approve | dismiss"""
+    from .models import KnowledgeGap
+    from . import knowledge
+
+    if request.method != 'POST':
+        return redirect('chatbot_knowledge')
+
+    bot = _own_bot(request)
+    if not bot:
+        return redirect('chatbot_setup_wizard')
+
+    gap = get_object_or_404(KnowledgeGap, id=gap_id, bot=bot)
+    action = request.POST.get('action', '')
+
+    if action == 'draft':
+        text = knowledge.draft_answer(bot, gap)
+        if text:
+            gap.suggested_answer = text
+            gap.status = 'drafted'
+            gap.save(update_fields=['suggested_answer', 'status'])
+            return JsonResponse({'success': True, 'answer': text})
+        return JsonResponse({'success': False, 'error': 'Haikuweza kuandika rasimu'}, status=502)
+
+    if action == 'approve':
+        answer = request.POST.get('answer', '').strip()
+        if not answer:
+            messages.error(request, "Jibu haliwezi kuwa tupu.")
+            return redirect('chatbot_knowledge')
+        knowledge.approve(gap, answer)
+        messages.success(request, "Bot sasa inajua jibu hili.")
+        return redirect('chatbot_knowledge')
+
+    if action == 'dismiss':
+        gap.status = 'dismissed'
+        gap.save(update_fields=['status'])
+        messages.info(request, "Swali limeondolewa kwenye orodha.")
+        return redirect('chatbot_knowledge')
+
+    return redirect('chatbot_knowledge')

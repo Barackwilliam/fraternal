@@ -23,7 +23,7 @@ from .notify import notify
 logger = logging.getLogger(__name__)
 
 GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions'
-MODEL = 'llama-3.3-70b-versatile'
+MODEL = os.getenv('GROQ_MODEL', 'llama-3.3-70b-versatile')
 
 SYSTEM = (
     'Wewe ni msaidizi wa JamiiTek, kampuni ya Tanzania inayotengeneza na '

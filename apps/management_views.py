@@ -958,3 +958,35 @@ def daily_tasks_endpoint(request):
                      name='jamiitek-daily-tasks-http', daemon=True).start()
 
     return JsonResponse({'ok': True, 'status': 'started', 'date': today})
+
+
+# ══════════════════════════════════════════════════════════════
+#  KUPAKIA IMAGE (Supabase Storage)
+# ══════════════════════════════════════════════════════════════
+
+@staff_required
+def upload_file(request):
+    """
+    Inapokea file kutoka widget, inaipeleka Supabase, inarudisha URL.
+
+    Ni ya staff pekee. Builder ina njia yake (`builder.views.asset_save`)
+    inayomruhusu mteja kupakia kwenye tovuti yake mwenyewe.
+    """
+    from apps import storage
+
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST pekee'}, status=405)
+
+    f = request.FILES.get('file')
+    if not f:
+        return JsonResponse({'success': False, 'error': 'Hakuna file'}, status=400)
+
+    result = storage.upload(f, folder=request.POST.get('folder', 'media'))
+    return JsonResponse(result, status=200 if result.get('success') else 400)
+
+
+@staff_required
+def storage_health(request):
+    """Ukaguzi wa haraka: je, bucket ipo na funguo inafanya kazi?"""
+    from apps import storage
+    return JsonResponse(storage.health())

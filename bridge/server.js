@@ -1,0 +1,326 @@
+/**
+ * JamiiTek WhatsApp Bridge
+ * ------------------------------------------------------------
+ * Bridge ni INJINI tu. Haina akili ya biashara, haina database ya
+ * mazungumzo, haiamui chochote. Kazi yake ni mbili:
+ *
+ *   1. Kupokea ujumbe wa WhatsApp -> kuutuma Django
+ *   2. Kupokea amri kutoka Django -> kutuma ujumbe WhatsApp
+ *
+ * Udhibiti wote (bot ipi, jibu gani, nani analipa) uko JamiiTek.
+ *
+ * HAIJIBU KWA SYNCHRONOUS. Toleo la kwanza lilisubiri jibu la Django
+ * hadi sekunde 120 kisha likatuma `response.data.reply`. Haiwezekani
+ * hapa: `_process_message` ya Django inatuma jumbe MBILI mteja
+ * anapoanza (salamu, kisha "niambie jina lako"). Mkataba wa jibu moja
+ * ungelazimisha kuandika upya state machine nzima.
+ *
+ * Sasa: bridge inatuma, Django inajibu 200 mara moja, kisha Django
+ * inatuma majibu yote kupitia POST /send. Jumbe ngapi inataka.
+ */
+
+require('dotenv').config();
+
+const express = require('express');
+const axios = require('axios');
+
+const {
+    startSession,
+    restartSession,
+    stopSession,
+    getSession,
+    listSessions,
+    sessions,
+} = require('./sessionManager');
+
+const { getPool, closePool, pruneOldKeys } = require('./supabaseAuth');
+
+const app = express();
+app.use(express.json({ limit: '1mb' }));
+
+const PORT           = process.env.PORT || 3001;
+const DJANGO_URL     = (process.env.DJANGO_URL || 'http://127.0.0.1:8000').replace(/\/$/, '');
+const BRIDGE_API_KEY = process.env.BRIDGE_API_KEY || '';
+
+if (!BRIDGE_API_KEY) {
+    console.error('BRIDGE_API_KEY haijawekwa. Bridge haitaanza bila hiyo.');
+    process.exit(1);
+}
+
+
+// ============================================================
+// ULINZI — kila njia isipokuwa /health
+// ============================================================
+// Toleo la kwanza lililinda /logout pekee. /qr ilikuwa wazi: mtu
+// yeyote aliyejua URL angeweza kuiscan, na namba yake ingekuwa ndiyo
+// bot — akisoma mazungumzo yote ya wateja na kuandika kwa niaba yako.
+
+function auth(req, res, next) {
+    const given = req.headers['x-bridge-key'] || '';
+    if (given !== BRIDGE_API_KEY) {
+        return res.status(401).json({ success: false, error: 'Unauthorized' });
+    }
+    next();
+}
+
+
+// ============================================================
+// KUPELEKA UJUMBE DJANGO
+// ============================================================
+
+async function forwardToDjango(payload) {
+    try {
+        await axios.post(
+            `${DJANGO_URL}/chatbot/webhook/baileys/`,
+            payload,
+            {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Bridge-Key': BRIDGE_API_KEY,
+                },
+                // Django inaji-ack mara moja na kuendelea nyuma,
+                // kwa hiyo hii ni fupi kwa makusudi.
+                timeout: 15000,
+            }
+        );
+    } catch (e) {
+        const detail = e.response
+            ? `${e.response.status} ${JSON.stringify(e.response.data).slice(0, 200)}`
+            : e.message;
+        console.error(`[${payload.session}] Django imeshindwa kupokea:`, detail);
+    }
+}
+
+const sessionOpts = { onMessage: forwardToDjango };
+
+
+// ============================================================
+// HEALTH — njia pekee isiyo na ulinzi
+// ============================================================
+
+app.get('/health', (req, res) => {
+    res.json({
+        success: true,
+        service: 'JamiiTek WhatsApp Bridge',
+        sessions: sessions.size,
+        connected: listSessions().filter((s) => s.connected).length,
+        uptime_seconds: Math.round(process.uptime()),
+    });
+});
+
+
+// ============================================================
+// SESSIONS
+// ============================================================
+
+app.get('/sessions', auth, (req, res) => {
+    res.json({ success: true, sessions: listSessions() });
+});
+
+app.get('/sessions/:name', auth, (req, res) => {
+    const s = getSession(req.params.name);
+    if (!s) return res.status(404).json({ success: false, error: 'Session haipo' });
+    res.json({ success: true, ...s.toJSON() });
+});
+
+app.post('/sessions/:name/start', auth, async (req, res) => {
+    try {
+        const s = await startSession(req.params.name, sessionOpts);
+        res.json({ success: true, ...s.toJSON() });
+    } catch (e) {
+        res.status(500).json({ success: false, error: String(e.message || e) });
+    }
+});
+
+app.post('/sessions/:name/restart', auth, async (req, res) => {
+    try {
+        const s = await restartSession(req.params.name, sessionOpts);
+        res.json({ success: true, ...s.toJSON() });
+    } catch (e) {
+        res.status(500).json({ success: false, error: String(e.message || e) });
+    }
+});
+
+app.post('/sessions/:name/stop', auth, async (req, res) => {
+    const ok = await stopSession(req.params.name);
+    res.json({ success: ok });
+});
+
+// QR — sasa ina ulinzi. Picha yenyewe iko hapa tu, si kwenye /sessions,
+// ili orodha isiwe nzito bila sababu.
+app.get('/sessions/:name/qr', auth, (req, res) => {
+    const s = getSession(req.params.name);
+    if (!s) return res.status(404).json({ success: false, error: 'Session haipo' });
+    res.json({ success: true, ...s.toJSON(), qr: s.qrDataUrl });
+});
+
+// Logout — inafuta auth. Django ndiyo inayodai uthibitisho kwa mtumiaji;
+// hapa tunatekeleza tu.
+app.post('/sessions/:name/logout', auth, async (req, res) => {
+    const s = getSession(req.params.name);
+    if (!s) return res.status(404).json({ success: false, error: 'Session haipo' });
+    try {
+        await s.logout();
+        // Anzisha upya ili QR mpya itokee mara moja
+        await s.connect();
+        res.json({ success: true, ...s.toJSON() });
+    } catch (e) {
+        res.status(500).json({ success: false, error: String(e.message || e) });
+    }
+});
+
+
+// ============================================================
+// KUTUMA UJUMBE
+// ============================================================
+
+app.post('/send', auth, async (req, res) => {
+    const { session, to, text } = req.body || {};
+
+    if (!session || !to || !text) {
+        return res.status(400).json({ success: false, error: 'session, to, text zinahitajika' });
+    }
+
+    const s = getSession(session);
+    if (!s) return res.status(404).json({ success: false, error: 'Session haipo' });
+
+    try {
+        const id = await s.sendText(to, text);
+        res.json({ success: true, message_id: id });
+    } catch (e) {
+        res.status(503).json({ success: false, error: String(e.message || e) });
+    }
+});
+
+app.post('/read', auth, async (req, res) => {
+    const { session, jid, message_id } = req.body || {};
+    const s = getSession(session);
+    if (!s) return res.status(404).json({ success: false, error: 'Session haipo' });
+    await s.markRead(jid, message_id);
+    res.json({ success: true });
+});
+
+
+// ============================================================
+// USAFI
+// ============================================================
+
+app.post('/prune', auth, async (req, res) => {
+    try {
+        const days = Number(req.body?.days || 30);
+        const removed = await pruneOldKeys(getPool(process.env.DATABASE_URL), days);
+        res.json({ success: true, removed });
+    } catch (e) {
+        res.status(500).json({ success: false, error: String(e.message || e) });
+    }
+});
+
+
+// ============================================================
+// KUANZA
+// ============================================================
+// Bridge ikirestart (deploy, crash), inauliza Django ni sessions zipi
+// zinapaswa kuwa hewani. Sessions zenyewe ziko Supabase, kwa hiyo
+// hakuna kuscan QR upya — zinarudi zilipoishia.
+
+// Django haiwi tayari mara zote bridge inapoanza. Kwenye Render, service
+// mbili zinarestart kila moja peke yake, na Django ya free tier inachukua
+// sekunde 30-60 kuamka. Bila kurudia, bridge ilikata tamaa mara moja
+// (ECONNREFUSED) na bot ZOTE zilibaki chini hadi mtu abonyeze kwa mkono.
+const RESTORE_RETRIES = 10;
+const RESTORE_WAIT_MS = 15000;
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+async function askDjangoForSessions() {
+    for (let attempt = 1; attempt <= RESTORE_RETRIES; attempt++) {
+        try {
+            const r = await axios.get(`${DJANGO_URL}/chatbot/bridge/sessions/`, {
+                headers: { 'X-Bridge-Key': BRIDGE_API_KEY },
+                timeout: 20000,
+            });
+            return r.data?.sessions || [];
+        } catch (e) {
+            const code = e.response?.status;
+
+            // 401/403 si tatizo la muda — ni ufunguo usiolingana.
+            // Kusubiri dakika mbili hakutaurekebisha; tunasimama na
+            // kusema hasa tatizo ni nini.
+            if (code === 401 || code === 403) {
+                console.error('');
+                console.error('Django imekataa ufunguo (HTTP ' + code + ').');
+                console.error('BRIDGE_API_KEY ya bridge na ya Django hazilingani.');
+                console.error('');
+                return null;
+            }
+
+            const last = attempt === RESTORE_RETRIES;
+            const why = code ? `HTTP ${code}` : (e.code || e.message);
+            console.log(
+                `Django haijajibu (${why}) — jaribio ${attempt}/${RESTORE_RETRIES}`
+                + (last ? '' : `, inasubiri ${RESTORE_WAIT_MS / 1000}s`)
+            );
+            if (last) return null;
+            await sleep(RESTORE_WAIT_MS);
+        }
+    }
+    return null;
+}
+
+async function restoreSessions() {
+    const names = await askDjangoForSessions();
+
+    if (names === null) {
+        console.error('');
+        console.error('Django haikupatikana baada ya majaribio yote.');
+        console.error('Anzisha sessions kwa mkono: /manage/chatbot/sessions/');
+        console.error('');
+        return;
+    }
+
+    if (!names.length) {
+        console.log('Django haina session inayotakiwa kuanzishwa.');
+        return;
+    }
+
+    console.log(`Inarudisha sessions ${names.length} kutoka Django...`);
+    for (const name of names) {
+        try {
+            await startSession(name, sessionOpts);
+            console.log(`  ${name}: imeanzishwa`);
+        } catch (e) {
+            console.error(`  ${name}: imeshindwa —`, e.message);
+        }
+    }
+}
+
+const server = app.listen(PORT, () => {
+    console.log('');
+    console.log('========================================');
+    console.log('   JAMIITEK WHATSAPP BRIDGE');
+    console.log('========================================');
+    console.log(`Port:   ${PORT}`);
+    console.log(`Django: ${DJANGO_URL}`);
+    console.log('');
+    restoreSessions();
+});
+
+
+// ── Kuzima kwa heshima ────────────────────────────────────────
+
+async function shutdown(signal) {
+    console.log(`\n${signal} — inazima...`);
+    server.close();
+    for (const name of Array.from(sessions.keys())) {
+        await stopSession(name).catch(() => {});
+    }
+    await closePool().catch(() => {});
+    process.exit(0);
+}
+
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));
+
+process.on('unhandledRejection', (e) => {
+    console.error('unhandledRejection:', e?.message || e);
+});

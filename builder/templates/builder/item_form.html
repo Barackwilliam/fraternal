@@ -22,10 +22,11 @@
   <label>Main Image</label>
   <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
     <input type="text" name="image_url" id="image_url" value="{{ item.image_url|default:'' }}"
-           placeholder="https://ucarecdn.com/..." style="flex:1;min-width:200px">
-    <button type="button" class="btn sm" onclick="document.getElementById('uc-ctx').initFlow()">📤 Upload Image</button>
+           placeholder="URL itajaa yenyewe baada ya kupakia" style="flex:1;min-width:200px">
+    <input type="file" id="jt-item-file" accept="image/*" style="display:none">
+    <button type="button" class="btn sm" onclick="document.getElementById('jt-item-file').click()">📤 Upload Image</button>
   </div>
-  <img id="img-preview" src="{% if item.image_url %}{{ item.image_url }}-/resize/400x/{% endif %}"
+  <img id="img-preview" src="{% if item.image_url %}{{ item.image_url }}{% endif %}"
        style="margin-top:10px;max-width:260px;border-radius:8px;{% if not item.image_url %}display:none{% endif %}" alt="">
 
   {% for f in collection.fields %}
@@ -65,14 +66,6 @@
 {% include 'builder/_ai_magic.html' %}
 {{ item.data|default:"{}"|json_script:"item-data" }}
 {{ collection.fields|json_script:"col-fields" }}
-<script type="module">
-  import * as UC from "https://cdn.jsdelivr.net/npm/@uploadcare/file-uploader@v1/web/file-uploader.min.js";
-  UC.defineComponents(UC);
-</script>
-<uc-config ctx-name="jt-item" pubkey="{{ uploadcare_public_key }}" img-only="true"
-           max-local-file-size-bytes="8388608" source-list="local, camera, url"></uc-config>
-<uc-file-uploader-regular ctx-name="jt-item" style="display:none"></uc-file-uploader-regular>
-<uc-upload-ctx-provider ctx-name="jt-item" id="uc-ctx"></uc-upload-ctx-provider>
 <script>
 // Jaza values za fields zilizopo (edit mode)
 const itemData = JSON.parse(document.getElementById('item-data').textContent);
@@ -83,18 +76,30 @@ for (const f of colFields){
   const v = itemData[f.key];
   el.value = Array.isArray(v) ? v.join('\n') : (v ?? '');
 }
-// Upload ya picha
-document.getElementById('uc-ctx').addEventListener('file-upload-success', e => {
-  const url = e.detail.cdnUrl;
-  document.getElementById('image_url').value = url;
-  const img = document.getElementById('img-preview');
-  img.src = url + '-/resize/400x/';
-  img.style.display = 'block';
-  fetch("{% url 'builder:asset_save' site.id %}", {
+// Upload ya picha — inakwenda Supabase kupitia Django
+const jtItemFile = document.getElementById('jt-item-file');
+jtItemFile.addEventListener('change', () => {
+  const f = jtItemFile.files[0];
+  if (!f) return;
+
+  const fd = new FormData();
+  fd.append('file', f);
+
+  fetch("{% url 'builder:asset_upload' site.id %}", {
     method: 'POST',
-    headers: {'Content-Type':'application/json','X-CSRFToken':'{{ csrf_token }}'},
-    body: JSON.stringify({cdn_url: url, name: e.detail.name || ''}),
-  });
+    headers: {'X-CSRFToken': '{{ csrf_token }}'},
+    body: fd,
+  })
+    .then(r => r.json())
+    .then(d => {
+      if (!d.url) { alert(d.error || 'Kupakia kumeshindwa.'); return; }
+      document.getElementById('image_url').value = d.url;
+      const img = document.getElementById('img-preview');
+      img.src = d.url;
+      img.style.display = 'block';
+    })
+    .catch(() => alert('Muunganisho umekatika.'))
+    .finally(() => { jtItemFile.value = ''; });
 });
 </script>
 {% endblock %}

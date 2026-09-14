@@ -108,8 +108,39 @@ class BotConfig(models.Model):
         help_text="Message when bot cannot handle and transfers to human"
     )
     whatsapp_number    = models.CharField(max_length=20, help_text="e.g. +255750123456", blank=True)
-    whatsapp_phone_id  = models.CharField(max_length=50, blank=True, help_text="Meta Phone Number ID")
-    whatsapp_token     = models.CharField(max_length=500, blank=True, help_text="WhatsApp Cloud API token")
+
+    # ── Baileys session ───────────────────────────────────────
+    # Mteja anaunganisha kwa kuscan QR — hakuna Meta Business account,
+    # hakuna kusubiri approval. `session_name` ndiyo inayounganisha bot
+    # hii na socket ya bridge, na ndiyo funguo kwenye jedwali
+    # `baileys_auth` la Supabase.
+    session_name       = models.SlugField(
+        max_length=60, unique=True, blank=True,
+        help_text="Jina la session kwenye bridge. Linatengenezwa lenyewe.")
+    connection_status  = models.CharField(
+        max_length=20, default='disconnected', editable=False,
+        help_text="starting | waiting_qr | connected | disconnected | logged_out")
+    connected_number   = models.CharField(
+        max_length=30, blank=True, editable=False,
+        help_text="Namba iliyoscan QR, kutoka bridge")
+    last_seen_at       = models.DateTimeField(null=True, blank=True, editable=False)
+    autostart          = models.BooleanField(
+        default=True,
+        help_text="Bridge ikirestart, session hii ianzishwe upya yenyewe")
+
+    # ── Mmiliki ───────────────────────────────────────────────
+    # Namba hii inapokea taarifa za handoff NA inatoa amri kwa bot.
+    # Ni namba ya binafsi ya mmiliki, si ya biashara — bot inatuma
+    # kwake kutoka WhatsApp ya biashara.
+    owner_whatsapp     = models.CharField(
+        max_length=20, blank=True,
+        help_text="Namba ya mmiliki inayopokea taarifa. Mfano: +255750123456")
+    notify_handoff     = models.BooleanField(
+        default=True, help_text="Tuma taarifa mteja anapohitaji binadamu")
+
+    # ── Meta (zimebaki kwa bot za zamani; hazitumiki tena) ────
+    whatsapp_phone_id  = models.CharField(max_length=50, blank=True, help_text="Meta Phone Number ID (legacy)")
+    whatsapp_token     = models.CharField(max_length=500, blank=True, help_text="WhatsApp Cloud API token (legacy)")
     webhook_verify_token = models.CharField(max_length=100, blank=True, editable=False)
     status             = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
     is_active          = models.BooleanField(default=False)
@@ -118,7 +149,9 @@ class BotConfig(models.Model):
     updated_at         = models.DateTimeField(auto_now=True)
 
     # AI Settings
-    ai_model           = models.CharField(max_length=60, default='claude-sonnet-4-5')
+    ai_model           = models.CharField(
+        max_length=60, blank=True, default='',
+        help_text="Groq model ya bot hii. Ikiachwa tupu, inatumia GROQ_MODEL ya mfumo.")
     ai_temperature     = models.FloatField(default=0.7, help_text="0=strict, 1=creative")
     max_context_msgs   = models.PositiveSmallIntegerField(default=10, help_text="Messages to remember in conversation")
     collect_name       = models.BooleanField(default=True, help_text="Ask for customer name at start")
@@ -138,7 +171,38 @@ class BotConfig(models.Model):
     def save(self, *args, **kwargs):
         if not self.webhook_verify_token:
             self.webhook_verify_token = secrets.token_hex(16)
+        if not self.session_name:
+            self.session_name = self._make_session_name()
+        if not self.owner_whatsapp and self.client_id:
+            # Namba aliyojisajili nayo ndiyo chaguo la kwanza
+            self.owner_whatsapp = (self.client.phone or '')[:20]
         super().save(*args, **kwargs)
+
+    @property
+    def owner_digits(self):
+        """Namba ya mmiliki kama tarakimu pekee, kwa kulinganisha."""
+        import re as _re
+        return _re.sub(r'\D', '', self.owner_whatsapp or '')
+
+    def _make_session_name(self):
+        """
+        Jina fupi, la kudumu, lisilorudiwa.
+
+        Linatokana na jina la biashara ili logs zisomeke ('duka-la-juma'
+        badala ya UUID), na linamalizika kwa herufi 6 za UUID ili
+        biashara mbili zenye jina moja zisigongane.
+
+        LISIBADILIKE baada ya kuwekwa — ndiyo funguo ya `baileys_auth`
+        kwenye Supabase. Likibadilika, session inapotea na mteja
+        analazimika kuscan QR upya.
+        """
+        from django.utils.text import slugify
+        base = slugify(self.business_name or self.bot_name or 'bot')[:40] or 'bot'
+        return f"{base}-{str(self.id)[:6]}"
+
+    @property
+    def is_connected(self):
+        return self.connection_status == 'connected'
 
     def build_system_prompt(self):
         """Build the AI system prompt from bot configuration."""
@@ -180,13 +244,12 @@ MASWALI YA MARA KWA MARA (FAQ):
 {faqs_text if faqs_text else "Hakuna FAQ zilizowekwa — tumia akili yako na maelezo ya biashara."}
 
 MWONGOZO MUHIMU:
-1. Jibu kwa ufupi na wazi — si zaidi ya aya 2-3.
-2. Kama hujui jibu, sema ukweli na elekeza kwenye timu ya binadamu.
-3. USITOE bei au habari ambazo hazijakuwa kwenye mfumo huu.
-4. Kama mteja anataka binadamu, jibu: "{self.human_handoff_msg}"
-5. Daima kuwa mwenye heshima na subira.
-6. Kama swali halihusiani na biashara hii, eleza kwa upole kwamba unaweza tu kusaidia mambo ya {self.business_name}.
-
+1. Kama hujui jibu, sema ukweli na elekeza kwenye timu ya binadamu.
+2. USITOE bei au habari ambazo hazijakuwa kwenye mfumo huu.
+3. Kama mteja anataka binadamu, jibu: "{self.human_handoff_msg}"
+4. Daima kuwa mwenye heshima na subira.
+5. Kama swali halihusiani na biashara hii, eleza kwa upole kwamba unaweza tu kusaidia mambo ya {self.business_name}.
+{CONVERSATION_RULES}
 UJUMBE WA KUANZA: {self.greeting_msg}
 UJUMBE WA KUSHINDWA: {self.fallback_msg}"""
         return prompt
@@ -197,6 +260,74 @@ UJUMBE WA KUSHINDWA: {self.fallback_msg}"""
         base = getattr(settings, 'SITE_URL', 'https://jamiitek.com')
         return f"{base}/chatbot/webhook/{self.id}/"
 
+
+
+# ─────────────────────────────────────────────
+# SHERIA ZA MAZUNGUMZO
+# ─────────────────────────────────────────────
+# Sheria hizi zinaingizwa kwenye kila bot, juu ya usanidi wa mteja.
+# Kila moja iliandikwa baada ya kusoma mazungumzo halisi na kuona
+# hasa kinachomsaliti bot kwamba ni mashine. Zisifutwe bila sababu.
+
+CONVERSATION_RULES = """
+SHERIA ZA MAZUNGUMZO — ZINGATIA KILA UJUMBE
+
+A. USIRUDIE
+1. Jambo ulilokwisha lisema kwenye mazungumzo haya, USILISEME TENA.
+   Hii inahusu hasa bei, muda, na orodha za huduma. Ukiitaja bei mara
+   moja, imekwisha. Mteja akiuliza tena, mpe namba moja kamili au
+   muulize kitu kitakachokusaidia kumpa namba sahihi — usirudie ile
+   safu ile ile.
+2. Usirudie jina la mteja kila ujumbe. Litumie unapomsalimia mara ya
+   kwanza, na tena mnapofikia makubaliano. Katikati, usiliseme.
+3. Usianze ujumbe kwa pongezi za kurudiarudia — "Safi sana!",
+   "Karibu sana!", "Sawa!", "Vizuri sana!". Anza kwa kujibu.
+4. Usirudie kile mteja alichokwisha kusema. Ukitaka kuonyesha
+   umeelewa, jibu kile alichouliza — hiyo ndiyo ushahidi.
+
+B. MASWALI
+5. Uliza swali MOJA tu kwa ujumbe, na tu kama huwezi kuendelea bila
+   jibu lake. Maswali mawili kwenye ujumbe mmoja ni alama ya mashine.
+6. USIMALIZE kila ujumbe kwa swali. Mara nyingi ujumbe unaomalizika
+   kwa jibu kamili ni bora kuliko unaomalizika kwa "Je, ungependa...?"
+7. Usiulize kitu ambacho mteja amekwisha kukijibu. Yaliyokubaliwa
+   yamekubaliwa.
+
+C. UREFU NA MUONEKANO
+8. Urefu wa jibu ufuate urefu wa swali. Mteja akiandika neno moja
+   ("Ndiyo", "Website", "Sawa"), mjibu kwa mstari mmoja au miwili.
+   Usimjibu kwa aya tatu na orodha.
+9. Usitumie **bold** zaidi ya mara moja kwenye ujumbe. Kupaka bold
+   kila jina la biashara na kila bei ni alama ya mashine.
+10. Orodha ya vipengele itumike pale mteja anapoomba orodha, si kila
+    mara. Mazungumzo ya kawaida yaandikwe kama mtu anavyoongea.
+11. Emoji: si zaidi ya moja, na tu kama mtindo unaruhusu.
+
+D. UKWELI
+12. Usiahidi muda wa kukamilisha kazi. Hiyo inaamuliwa na mtu baada
+    ya kuona mahitaji. Sema kwamba timu itampa muda kwenye pendekezo.
+13. Usiseme umefanya kitu ambacho hujakifanya. Usiseme "nimetuma",
+    "nimeunganisha na timu", "wamearifiwa" kama huna uhakika kwamba
+    kimefanyika. Sema kitakachofanyika, si kwamba kimeshafanyika.
+14. Usibuni bei, punguzo, wala vipengele visivyokuwa kwenye mfumo.
+    Usipojua, sema hujui na kwamba mtu atathibitisha.
+15. Kama mteja anauliza jambo la kiufundi lenye majibu mengi,
+    usichague kwa niaba yake. Mpe chaguo, kisha amue mwenyewe.
+
+E. KUMBUKUMBU
+16. Fuatilia yaliyokubaliwa hadi sasa. Kabla ya kuuliza kitu kipya,
+    jiulize kama tayari mnalo jibu lake kwenye mazungumzo haya.
+17. Mnapofikia mwisho, toa muhtasari MARA MOJA tu — si kila ujumbe.
+
+F. HALI
+18. Wewe ni msaidizi wa biashara hii, si mfanyakazi. Usidai kuwa
+    binadamu ukiulizwa moja kwa moja. Lakini pia usijitangaze kama
+    AI kila ujumbe — mteja anataka msaada, si maelezo kukuhusu.
+19. Mteja akikasirika au akiwa na haraka, punguza maneno. Aya ndefu
+    wakati mtu ana wasiwasi ni kumkera.
+20. Mteja akitaka kuongea na mtu, mpe njia hiyo mara moja bila
+    kujaribu kumshawishi abaki nawe.
+"""
 
 # ─────────────────────────────────────────────
 # BOT SERVICES (What the business offers)
@@ -232,6 +363,65 @@ class BotFAQ(models.Model):
 
     def __str__(self):
         return f"FAQ: {self.question[:60]}..."
+
+
+# ─────────────────────────────────────────────
+# MAARIFA — yale bot isiyoyajua
+# ─────────────────────────────────────────────
+class KnowledgeGap(models.Model):
+    """
+    Swali ambalo bot ilishindwa kulijibu vizuri.
+
+    Hii ndiyo njia ya bot kujifunza BILA kujibadilisha yenyewe.
+    Bot inayojiandikia maarifa yake inaweza kuchukua neno la mteja
+    kama ukweli — mteja akisema "saruji ni 15,000", bot ikaliamini,
+    na mteja wa kesho anaambiwa bei isiyo ya mmiliki. Jina la
+    biashara ndilo lililo hatarini, si letu.
+
+    Kwa hiyo: bot inakusanya mapungufu, AI inaandika RASIMU, mmiliki
+    anasoma na kukubali. Akikubali, inakuwa BotFAQ — na FAQ tayari
+    zinaingia kwenye `build_system_prompt`. Hapo ndipo bot inapojua.
+    """
+
+    STATUS_CHOICES = [
+        ('open',      'Bado — hakuna jibu'),
+        ('drafted',   'Rasimu iko tayari'),
+        ('answered',  'Imejibiwa'),
+        ('dismissed', 'Imepuuzwa'),
+    ]
+    SOURCE_CHOICES = [
+        ('fallback', 'Bot ilikwama'),
+        ('unsure',   'Bot haikujua'),
+        ('handoff',  'Mteja alihitaji binadamu'),
+    ]
+
+    bot         = models.ForeignKey(BotConfig, on_delete=models.CASCADE,
+                                    related_name='knowledge_gaps')
+    question    = models.TextField(help_text="Swali la mteja kama alivyoliandika")
+    normalized  = models.CharField(max_length=300, db_index=True,
+                                    help_text="Kwa kuunganisha maswali yanayofanana")
+    source      = models.CharField(max_length=12, choices=SOURCE_CHOICES, default='unsure')
+    status      = models.CharField(max_length=12, choices=STATUS_CHOICES, default='open')
+
+    times_asked    = models.PositiveIntegerField(default=1)
+    first_asked_at = models.DateTimeField(auto_now_add=True)
+    last_asked_at  = models.DateTimeField(auto_now=True)
+
+    example_conversation = models.ForeignKey('Conversation', on_delete=models.SET_NULL,
+                                             null=True, blank=True)
+    bot_reply   = models.TextField(blank=True, help_text="Bot ilijibu nini wakati ule")
+
+    suggested_answer = models.TextField(blank=True, help_text="Rasimu ya AI — bado haijatumika")
+    created_faq      = models.ForeignKey('BotFAQ', on_delete=models.SET_NULL,
+                                          null=True, blank=True)
+
+    class Meta:
+        ordering = ['-times_asked', '-last_asked_at']
+        unique_together = [('bot', 'normalized')]
+        indexes = [models.Index(fields=['bot', 'status'])]
+
+    def __str__(self):
+        return f"{self.question[:60]} (x{self.times_asked})"
 
 
 # ─────────────────────────────────────────────
@@ -323,7 +513,41 @@ class Conversation(models.Model):
     started_at      = models.DateTimeField(auto_now_add=True)
     last_message_at = models.DateTimeField(auto_now_add=True)
     message_count   = models.PositiveIntegerField(default=0)
+    # ── Handoff kwa binadamu ──────────────────────────────
+    # Zamani `is_human_handoff` iliwekwa True na hakuna kilichotokea:
+    # hakuna aliyearifiwa, na bot iliendelea kujibu ujumbe uliofuata
+    # kana kwamba hakuna kilichotokea. Mteja aliambiwa "nakuunganisha"
+    # kisha akaachwa akizungumza na mashine iliyodai imeondoka.
+    HANDOFF_BY = [
+        ('customer', 'Mteja aliomba'),
+        ('ai',       'Bot ilishindwa'),
+        ('owner',    'Mmiliki alisimamisha'),
+    ]
+
     is_human_handoff = models.BooleanField(default=False, help_text="Transferred to human agent")
+    handoff_at          = models.DateTimeField(null=True, blank=True)
+    handoff_by          = models.CharField(max_length=12, choices=HANDOFF_BY, blank=True)
+    handoff_reason      = models.CharField(max_length=200, blank=True)
+    handoff_notified_at = models.DateTimeField(null=True, blank=True,
+                                               help_text="Mmiliki alipoarifiwa")
+    handoff_resumed_at  = models.DateTimeField(null=True, blank=True)
+    handoff_count       = models.PositiveIntegerField(default=0,
+                                                      help_text="Mara ngapi mazungumzo haya yamehitaji binadamu")
+
+    # ── Kumbukumbu ────────────────────────────────────────
+    # `build_messages` inachukua jumbe 10 za mwisho pekee. Mteja
+    # akirudi baada ya mwezi, bot haikumbuki alichonunua, mahali
+    # anapoishi, wala alichoahidiwa — inaanza upya kama mgeni.
+    #
+    # Hii ni muhtasari wa mambo YANAYODUMU, si nakala ya mazungumzo.
+    # Inasasishwa kila baada ya jumbe kadhaa, si kila ujumbe.
+    memory          = models.TextField(
+        blank=True,
+        help_text="Mambo yanayodumu kuhusu mteja huyu — yanaingia kwenye kila jibu")
+    memory_updated_at = models.DateTimeField(null=True, blank=True)
+    memory_at_count   = models.PositiveIntegerField(
+        default=0, help_text="Ilikuwa jumbe ngapi kumbukumbu ilipoandikwa mwisho")
+
     metadata        = models.JSONField(default=dict, blank=True)
 
     class Meta:
@@ -335,6 +559,42 @@ class Conversation(models.Model):
 
     def get_recent_messages(self, limit=10):
         return self.messages.order_by('-created_at')[:limit][::-1]
+
+    # ── Handoff ───────────────────────────────────────────
+
+    def start_handoff(self, by='customer', reason=''):
+        """Simamisha bot kwa mazungumzo haya. Haitajibu tena."""
+        from django.utils import timezone as _tz
+        if self.is_human_handoff:
+            return False
+        self.is_human_handoff = True
+        self.handoff_at       = _tz.now()
+        self.handoff_by       = by
+        self.handoff_reason   = (reason or '')[:200]
+        self.handoff_resumed_at = None
+        self.handoff_count   += 1
+        self.save(update_fields=['is_human_handoff', 'handoff_at', 'handoff_by',
+                                 'handoff_reason', 'handoff_resumed_at', 'handoff_count'])
+        return True
+
+    def resume_bot(self):
+        """Mmiliki amemaliza. Bot inarudi kufanya kazi."""
+        from django.utils import timezone as _tz
+        if not self.is_human_handoff:
+            return False
+        self.is_human_handoff   = False
+        self.handoff_resumed_at = _tz.now()
+        self.handoff_notified_at = None
+        self.save(update_fields=['is_human_handoff', 'handoff_resumed_at',
+                                 'handoff_notified_at'])
+        return True
+
+    @property
+    def handoff_waiting_minutes(self):
+        from django.utils import timezone as _tz
+        if not self.is_human_handoff or not self.handoff_at:
+            return 0
+        return int((_tz.now() - self.handoff_at).total_seconds() // 60)
 
 
 # ─────────────────────────────────────────────

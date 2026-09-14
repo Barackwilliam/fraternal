@@ -28,6 +28,10 @@ urlpatterns = [
     # ── COMPANY PROFILE ─────────────────────────────────────
     path('company-profile/', docs_views.company_profile_view, name='company_profile_view'),
     path('company-profile/pdf/', docs_views.company_profile_pdf, name='company_profile_pdf'),
+
+    # ── Kupakia image (Supabase) ──
+    path('manage/upload/', management_views.upload_file, name='upload_file'),
+    path('manage/storage/health/', management_views.storage_health, name='storage_health'),
     path('manage/profile/', docs_views.profile_builder, name='profile_builder'),
     path('manage/profile/ai-full/', docs_views.profile_ai_full, name='profile_ai_full'),
     path('manage/profile/ai-assist/', docs_views.profile_ai_assist, name='profile_ai_assist'),
@@ -170,9 +174,6 @@ urlpatterns = [
     # ── PUBLIC API ─────────────────────────────────────────
     path('api/site-status/<str:api_key>/', management_views.site_status_api, name='site_status_api'),
     path('api/js/<str:api_key>/', management_views.get_js_snippet, name='get_js_snippet'),
-
-    # ── CRON ENDPOINT ──────────────────────────────────────
-    path('cron/emails/<str:secret>/', views.run_email_cron, name='run_email_cron'),
 
     # ── INFRASTRUCTURE (staff-only) ──
     path('manage/infra/', infra_views.infra_overview, name='infra_overview'),

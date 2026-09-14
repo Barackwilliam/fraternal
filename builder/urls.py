@@ -49,8 +49,7 @@ urlpatterns = [
 
     path('site/<int:site_id>/inquiries/', views.inquiries_list, name='inquiries_list'),
     path('site/<int:site_id>/inquiries/<int:inquiry_id>/status/', views.inquiry_status, name='inquiry_status'),
-
-    path('site/<int:site_id>/assets/save/', views.asset_save, name='asset_save'),
+    path('site/<int:site_id>/asset/upload/', views.asset_upload, name='asset_upload'),
     path('site/<int:site_id>/assets/', views.asset_list, name='asset_list'),
 
     path('ai/assist/', ai.ai_assist, name='ai_assist'),

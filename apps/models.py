@@ -26,13 +26,13 @@ class Service(models.Model):
     # Open Graph image (Facebook / WhatsApp preview)
     def get_og_image_url(self):
         if self.image:
-            return f"https://ucarecdn.com/{self.image}/-/resize/1200x630/-/format/auto/"
+            return self.image  # URL kamili ya Supabase
         return ""
 
     # Optimized image for normal website usage
     def get_image_url(self):
         if self.image:
-            return f"https://ucarecdn.com/{self.image}/-/format/jpg/-/quality/smart/"
+            return self.image  # URL kamili ya Supabase
         return ""
 
 
@@ -68,13 +68,13 @@ class Team(models.Model):
     # Open Graph preview
     def get_og_image_url(self):
         if self.image:
-            return f"https://ucarecdn.com/{self.image}/-/resize/1200x630/-/format/auto/"
+            return self.image  # URL kamili ya Supabase
         return ""
 
     # Optimized image
     def get_image_url(self):
         if self.image:
-            return f"https://ucarecdn.com/{self.image}/-/format/jpg/-/quality/smart/"
+            return self.image  # URL kamili ya Supabase
         return ""
 
 

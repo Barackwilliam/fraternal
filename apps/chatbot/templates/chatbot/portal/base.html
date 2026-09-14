@@ -190,6 +190,18 @@
     <a href="{% url 'chatbot_conversations' %}" class="sb-link {% if 'conversations' in request.resolver_match.url_name %}active{% endif %}">
       <i class="fas fa-comments"></i> Conversations
     </a>
+    <a href="{% url 'chatbot_connect' %}" class="sb-link {% if 'connect' in request.resolver_match.url_name %}active{% endif %}">
+      <i class="fab fa-whatsapp"></i> Unganisha WhatsApp
+      {% if bot.connection_status == 'connected' %}
+        <span style="margin-left:auto;width:7px;height:7px;border-radius:50%;background:var(--green)"></span>
+      {% else %}
+        <span style="margin-left:auto;width:7px;height:7px;border-radius:50%;background:var(--yellow)"></span>
+      {% endif %}
+    </a>
+    <a href="{% url 'chatbot_knowledge' %}" class="sb-link {% if 'knowledge' in request.resolver_match.url_name %}active{% endif %}">
+      <i class="fas fa-graduation-cap"></i> Maarifa ya bot
+      {% with n=bot.knowledge_gaps.all|length %}{% endwith %}
+    </a>
     <div class="sb-section">Bot Settings</div>
     <a href="{% url 'chatbot_config' %}" class="sb-link {% if 'config' in request.resolver_match.url_name %}active{% endif %}">
       <i class="fas fa-sliders"></i> Configure Bot

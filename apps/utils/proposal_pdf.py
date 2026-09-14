@@ -188,11 +188,12 @@ def parse_option(raw):
 
 def load_type_schema(website_type_name):
     """Soma website_types/<jina>.json kwa mtindo uleule wa forms.py."""
-    base = Path(settings.BASE_DIR)
+    types_dir = (Path(settings.BASE_DIR) / 'website_types').resolve()
     safe = str(website_type_name).lower().replace(' ', '').replace('-', '')
-    path = base / 'website_types' / f'{safe}.json'
+    path = (types_dir / f'{safe}.json').resolve()
 
-    if not path.exists():
+    # Slash inaruhusiwa ("School/College"); '..' haikubaliki.
+    if not path.is_relative_to(types_dir) or not path.exists():
         return {}
     try:
         return json.loads(path.read_text(encoding='utf-8'))

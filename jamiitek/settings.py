@@ -6,7 +6,7 @@ import cloudinary
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-WEBSITE_TYPES_DIR = BASE_DIR / 'apps' / 'website_types'
+WEBSITE_TYPES_DIR = BASE_DIR / 'website_types'
 
 # ── Security ──────────────────────────────────────────
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-dev-only-key-change-me')
@@ -35,19 +35,30 @@ INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
-    'django.contrib.sitemaps',   
-    'django.contrib.sites',     
+    'django.contrib.sitemaps',
+    # 'django.contrib.sites' imeondolewa kwa makusudi.
+    #
+    # Ilikuwepo bila SITE_ID. Katika hali hiyo get_current_site()
+    # inatafuta Site kwa host ya ombi. Row pekee iliyokuwepo ni
+    # 'example.com' (default ya migration), kwa hiyo /sitemap.xml
+    # ilikuwa inaanguka kwa Site.DoesNotExist -> 500 kwenye jamiitek.com.
+    #
+    # Ikiondolewa, Django inatumia RequestSite(request) — host halisi ya
+    # ombi. Ndiyo sahihi hapa: builder inahudumia subdomains na custom
+    # domains, kila moja inahitaji sitemap yenye domain yake.
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.humanize',
     'apps',
     'apps.chatbot',
-    'uploadcare',
     'cloudinary',
-     'ussd',
     'builder',
 ]
+
+# 'uploadcare' imeondolewa kabisa. Image zote sasa ziko Supabase Storage
+# (apps/storage.py). Uploadcare imebaki kama integration ya kufuatilia
+# akaunti kwenye /manage/infra/ pekee — si kupakia.
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -75,7 +86,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'apps.context_processors.turnstile_context',  # ← NEW
+                'apps.context_processors.turnstile_context',
+                'apps.context_processors.sidebar_nav',
 
             ],
         },
@@ -90,36 +102,34 @@ WSGI_APPLICATION = 'jamiitek.wsgi.application'
 # ── Database ──────────────────────────────────────────
 # Njia mbili: DATABASE_URL moja (GitHub Actions inatumia hii), au DB_* moja
 # moja (Render / .env yako). Hakuna nywila iliyoandikwa hapa kwa makusudi.
+DATABASE_URL = os.getenv('DATABASE_URL', '')
 
-
-# DATABASE_URL = os.getenv('DATABASE_URL', '')
-
-# if DATABASE_URL:
-#     import dj_database_url
-#     DATABASES = {'default': dj_database_url.parse(
-#         DATABASE_URL, conn_max_age=60, ssl_require=True)}
-# else:
-#     _db_password = os.getenv('DB_PASSWORD', '')
-#     if not _db_password and not DEBUG:
-#         raise RuntimeError(
-#             'DB_PASSWORD (au DATABASE_URL) haijawekwa. Weka environment '
-#             'variables kabla ya kuanzisha mfumo kwenye production.'
-#         )
-DATABASES = {
-    'default': {
-        'ENGINE':   'django.db.backends.postgresql',
-        'NAME':     os.getenv('DB_NAME',     'postgres'),
-        'USER':     os.getenv('DB_USER',     'postgres.frapnewfadymevdkznrq'),
-        'PASSWORD': os.getenv('DB_PASSWORD', 'NyumbaChap'),
-        'HOST':     os.getenv('DB_HOST',     'aws-1-eu-north-1.pooler.supabase.com'),
-        'PORT':     os.getenv('DB_PORT',     '5432'),
-        'CONN_MAX_AGE': 60,
-        'OPTIONS': {
-            'sslmode': 'require',
-            'connect_timeout': 10,
-        },
+if DATABASE_URL:
+    import dj_database_url
+    DATABASES = {'default': dj_database_url.parse(
+        DATABASE_URL, conn_max_age=60, ssl_require=True)}
+else:
+    _db_password = os.getenv('DB_PASSWORD', '')
+    if not _db_password and not DEBUG:
+        raise RuntimeError(
+            'DB_PASSWORD (au DATABASE_URL) haijawekwa. Weka environment '
+            'variables kabla ya kuanzisha mfumo kwenye production.'
+        )
+    DATABASES = {
+        'default': {
+            'ENGINE':   'django.db.backends.postgresql',
+            'NAME':     os.getenv('DB_NAME', 'postgres'),
+            'USER':     os.getenv('DB_USER', ''),
+            'PASSWORD': _db_password,
+            'HOST':     os.getenv('DB_HOST', ''),
+            'PORT':     os.getenv('DB_PORT', '5432'),
+            'CONN_MAX_AGE': 60,
+            'OPTIONS': {
+                'sslmode': 'require',
+                'connect_timeout': 10,
+            },
+        }
     }
-}
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
@@ -151,7 +161,11 @@ STORAGES = {
     },
 }
 
-MEDIA_URL  = f"https://res.cloudinary.com/{os.getenv('CLOUDINARY_CLOUD_NAME', '')}/"
+# MEDIA_URL ilikuwa inaelekea Cloudinary, lakini hakuna ImageField hata
+# moja kwenye models — image zote ni URL zilizohifadhiwa kama maandishi.
+# Kwa hiyo haikuwa ikitumika kwa chochote. Imebaki kwa ajili ya Django
+# admin pekee, ikielekea Supabase.
+MEDIA_URL  = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -180,12 +194,6 @@ JAZZMIN_UI_TWEAKS = {
 }
 
 # ── Uploadcare & Cloudinary ────────────────────────────
-UPLOADCARE = {
-    'pub_key':    os.getenv('UPLOADCARE_PUB_KEY', ''),
-    'secret':     os.getenv('UPLOADCARE_SECRET', ''),
-    'use_secure': True,
-}
-
 WEASPRINT_BASEURL = BASE_DIR
  
 # ── Email ──────────────────────────────────────────────
@@ -193,10 +201,15 @@ _email_user = os.getenv('EMAIL_HOST_USER', 'info@jamiitek.com')
 _email_pass = os.getenv('EMAIL_HOST_PASSWORD', '')
  
 if _email_user and _email_pass:
+    # Host ilikuwa imefungwa kwa 'smtp.gmail.com'. jamiitek.com iko Zoho
+    # (MX: mx.zoho.com), kwa hiyo Gmail haikuweza kutuma kamwe — na
+    # kwa vile nywila haikuwepo, mfumo ulianguka kwenye console bila
+    # mtu kugundua.
     EMAIL_BACKEND       = 'django.core.mail.backends.smtp.EmailBackend'
-    EMAIL_HOST          = 'smtp.gmail.com'
-    EMAIL_PORT          = 587
-    EMAIL_USE_TLS       = True
+    EMAIL_HOST          = os.getenv('EMAIL_HOST', 'smtp.zoho.com')
+    EMAIL_PORT          = int(os.getenv('EMAIL_PORT', '587'))
+    EMAIL_USE_TLS       = os.getenv('EMAIL_USE_SSL', 'False').lower() != 'true'
+    EMAIL_USE_SSL       = not EMAIL_USE_TLS
     EMAIL_HOST_USER     = _email_user
     EMAIL_HOST_PASSWORD = _email_pass
     DEFAULT_FROM_EMAIL  = f"JamiiTek <{_email_user}>"
@@ -220,6 +233,24 @@ WHATSAPP_MASTER_TOKEN         = os.getenv('WHATSAPP_MASTER_TOKEN', '')
 WHATSAPP_WEBHOOK_VERIFY_TOKEN = os.getenv('WHATSAPP_WEBHOOK_VERIFY_TOKEN', 'jamiitek_wh_2025')
 WILLIAM_WHATSAPP              = os.getenv('WILLIAM_WHATSAPP', '')
 WILLIAM_PHONE_NUMBER_ID       = os.getenv('WILLIAM_PHONE_NUMBER_ID', '')
+
+# ── Supabase Storage (image zote) ──────────────────────
+# Image hazihifadhiwi kwenye disk ya Render — filesystem yake ni ya
+# muda, kila deploy inafuta kila kitu. Zinakwenda Supabase Storage,
+# na database inahifadhi URL pekee.
+#
+# SUPABASE_SERVICE_KEY ni ya `service_role` — INABAKI SERVER.
+# Ikifika browser, mtu anaweza kufuta storage yako yote.
+SUPABASE_URL         = os.getenv('SUPABASE_URL', '')
+SUPABASE_SERVICE_KEY = os.getenv('SUPABASE_SERVICE_KEY', '')
+SUPABASE_BUCKET      = os.getenv('SUPABASE_BUCKET', 'media')
+
+# ── Baileys Bridge ─────────────────────────────────────
+# Bridge ni mchakato wa Node unaoshikilia socket za WhatsApp.
+# Ufunguo mmoja unatumika pande zote mbili: Django inautuma kwenye
+# kila ombi kwenda bridge, na inaukagua kwenye webhook inayoingia.
+BRIDGE_URL     = os.getenv('BRIDGE_URL', '')
+BRIDGE_API_KEY = os.getenv('BRIDGE_API_KEY', '')
 
 CHATBOT_PAYMENT_INFO = {
     'bank':           'NMB Bank',
@@ -252,8 +283,6 @@ else:
         }
     }
 
-
-SITE_URL = 'https://jamiitek.com'
 
 # ── Cloudflare Turnstile (Bot Protection) ──────────────
 TURNSTILE_SITEKEY = os.getenv('TURNSTILE_SITEKEY', '')

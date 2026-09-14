@@ -493,13 +493,7 @@ def page_editor(request, site_id, page_id):
     return render(request, 'builder/editor.html', {
         'site': site, 'page': page,
         'collections': site.collections.all(),
-        'uploadcare_public_key': _uploadcare_key(),
     })
-
-
-def _uploadcare_key():
-    import os
-    return os.getenv('UPLOADCARE_PUBLIC_KEY', '')
 
 
 @login_required
@@ -570,7 +564,6 @@ def collection_items(request, site_id, collection_id):
     return render(request, 'builder/items.html', {
         'site': site, 'collection': collection,
         'items': collection.items.all(),
-        'uploadcare_public_key': _uploadcare_key(),
     })
 
 
@@ -609,7 +602,6 @@ def item_form(request, site_id, collection_id, item_id=None):
 
     return render(request, 'builder/item_form.html', {
         'site': site, 'collection': collection, 'item': item,
-        'uploadcare_public_key': _uploadcare_key(),
     })
 
 
@@ -1088,29 +1080,42 @@ def inquiry_status(request, site_id, inquiry_id):
     return redirect(f"/builder/site/{site.id}/inquiries/?status={request.POST.get('back', 'all')}")
 
 
-# ── Assets (Uploadcare) ─────────────────────────────────
+# ── Assets (Supabase Storage) ───────────────────────────
 
 @login_required
 @require_POST
-def asset_save(request, site_id):
+def asset_upload(request, site_id):
+    """
+    Mteja anapakia image ya tovuti yake kwenda Supabase.
+
+    File inapita hapa, inakwenda Supabase, URL inarudi. Njia ya zamani
+    (`asset_save`) ilipokea URL iliyokwisha pakiwa na browser kwenda
+    Uploadcare; imeondolewa kwa sababu hakuna tovuti iliyoijengwa nayo.
+
+    Folda ni kwa kila tovuti — image za mteja mmoja haziingiliani na
+    za mwingine, na ikibidi kufuta tovuti, folda nzima inaondoka.
+    """
+    from apps import storage
+
     site = _my_site(request, site_id)
-    try:
-        data = json.loads(request.body)
-    except json.JSONDecodeError:
-        return JsonResponse({'error': 'bad json'}, status=400)
-    url = data.get('cdn_url', '')
-    if not url.startswith('https://ucarecdn.com/'):
-        return JsonResponse({'error': 'Not an Uploadcare URL.'}, status=400)
+    f = request.FILES.get('file')
+    if not f:
+        return JsonResponse({'error': 'Hakuna file'}, status=400)
+
+    result = storage.upload(f, folder=f'sites/{site.id}')
+    if not result.get('success'):
+        return JsonResponse({'error': result.get('error', 'Imeshindwa')}, status=400)
+
     asset = SiteAsset.objects.create(
-        website=site, uploadcare_url=url, file_name=data.get('name', ''),
+        website=site, url=result['url'], file_name=f.name[:200],
     )
-    return JsonResponse({'status': 'ok', 'id': asset.id, 'url': url})
+    return JsonResponse({'status': 'ok', 'id': asset.id, 'url': result['url']})
 
 
 @login_required
 def asset_list(request, site_id):
     site = _my_site(request, site_id)
     return JsonResponse({'assets': [
-        {'id': a.id, 'url': a.uploadcare_url, 'name': a.file_name}
+        {'id': a.id, 'url': a.url, 'name': a.file_name}
         for a in site.assets.all()[:100]
     ]})

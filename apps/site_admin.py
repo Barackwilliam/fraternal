@@ -12,7 +12,7 @@ from django.contrib import admin
 from django.utils.html import format_html
 
 from .site_content import HeroSlide, PortfolioItem, Testimonial
-from .uploadcare_widget import UploadcareImageWidget
+from .supabase_widget import SupabaseImageWidget
 
 
 # ──────────────────────────────────────────────────────────────
@@ -22,21 +22,21 @@ class HeroSlideForm(forms.ModelForm):
     class Meta:
         model = HeroSlide
         fields = '__all__'
-        widgets = {'image': UploadcareImageWidget(crop='16:9')}
+        widgets = {'image': SupabaseImageWidget(folder='hero')}
 
 
 class PortfolioItemForm(forms.ModelForm):
     class Meta:
         model = PortfolioItem
         fields = '__all__'
-        widgets = {'image': UploadcareImageWidget(crop='4:3')}
+        widgets = {'image': SupabaseImageWidget(folder='portfolio')}
 
 
 class TestimonialForm(forms.ModelForm):
     class Meta:
         model = Testimonial
         fields = '__all__'
-        widgets = {'image': UploadcareImageWidget(crop='1:1')}
+        widgets = {'image': SupabaseImageWidget(folder='testimonials')}
 
 
 # ──────────────────────────────────────────────────────────────

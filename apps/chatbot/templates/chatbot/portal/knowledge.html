@@ -1,0 +1,174 @@
+{% extends 'chatbot/portal/base.html' %}
+{% block title %}Maarifa ya bot{% endblock %}
+{% block page_title %}Maarifa ya bot{% endblock %}
+{% block breadcrumb %}{{ bot.bot_name }} / Maarifa{% endblock %}
+
+{% block extra_css %}
+<style>
+.lead{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);
+  padding:20px 24px;margin-bottom:20px}
+.lead h2{font-family:var(--head);font-size:17px;color:var(--text);margin:0 0 7px}
+.lead p{font-size:13.5px;color:var(--text-2);line-height:1.75;margin:0}
+
+.tally{display:flex;gap:22px;margin-top:15px;padding-top:15px;border-top:1px solid var(--border)}
+.tl-n{font-family:var(--head);font-size:23px;font-weight:900;color:var(--text);line-height:1}
+.tl-l{font-family:var(--mono);font-size:10px;color:var(--text-3);text-transform:uppercase;
+  letter-spacing:.7px;margin-top:4px}
+
+.gap{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);
+  padding:20px 22px;margin-bottom:13px}
+.gap-top{display:flex;align-items:flex-start;gap:13px;margin-bottom:13px}
+.gap-q{flex:1;min-width:0;font-size:15px;color:var(--text);line-height:1.55;font-weight:600}
+.gap-n{font-family:var(--mono);font-size:11px;color:var(--yellow);background:var(--yellow-d);
+  border:1px solid rgba(245,158,11,.22);border-radius:99px;padding:4px 11px;white-space:nowrap}
+.gap-meta{font-family:var(--mono);font-size:10.5px;color:var(--text-3);margin-bottom:14px;line-height:1.7}
+
+.said{background:rgba(239,68,68,.05);border-left:2px solid rgba(239,68,68,.3);
+  border-radius:0 8px 8px 0;padding:11px 14px;margin-bottom:14px}
+.said-l{font-family:var(--mono);font-size:9.5px;color:var(--text-3);text-transform:uppercase;
+  letter-spacing:.8px;margin-bottom:5px}
+.said-t{font-size:12.5px;color:var(--text-2);line-height:1.6}
+
+textarea{width:100%;background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:var(--r);
+  padding:13px 15px;color:var(--text);font-size:13.5px;font-family:inherit;line-height:1.7;
+  resize:vertical;min-height:92px}
+textarea:focus{outline:2px solid rgba(124,58,237,.4);outline-offset:1px}
+textarea::placeholder{color:var(--text-3)}
+
+.hint{font-size:11.5px;color:var(--text-3);line-height:1.6;margin-top:9px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px;align-items:center}
+.b{border:1px solid var(--border);background:var(--card-s);color:var(--text);border-radius:var(--r);
+  padding:9px 16px;font-size:13px;font-family:inherit;cursor:pointer;
+  display:inline-flex;align-items:center;gap:7px}
+.b:hover{background:rgba(255,255,255,.09)}
+.b:focus-visible{outline:2px solid var(--purple);outline-offset:2px}
+.b:disabled{opacity:.45;cursor:default}
+.b-go{background:var(--green-d);border-color:var(--border-s);color:var(--green)}
+.b-ai{background:var(--purple-d);border-color:rgba(124,58,237,.3);color:#c4b5fd}
+.b-x{color:var(--text-3);border-color:transparent;margin-left:auto}
+.b-x:hover{color:var(--text-2);background:rgba(255,255,255,.04)}
+
+.done{background:var(--card);border:1px solid var(--border);border-radius:var(--r);
+  padding:13px 17px;margin-bottom:8px}
+.done-q{font-size:13px;color:var(--text);margin-bottom:5px}
+.done-a{font-size:12.5px;color:var(--text-2);line-height:1.6}
+
+.sect{font-family:var(--mono);font-size:10.5px;color:var(--text-3);text-transform:uppercase;
+  letter-spacing:1.1px;margin:30px 0 13px}
+.empty{text-align:center;padding:52px 20px;color:var(--text-3)}
+.empty i{font-size:34px;display:block;margin-bottom:13px;opacity:.35}
+.empty p{font-size:13.5px;line-height:1.7;max-width:400px;margin:0 auto}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="lead">
+  <h2>Yale {{ bot.bot_name }} isiyoyajua</h2>
+  <p>
+    Kila mteja anapouliza kitu bot isiloweza kulijibu, swali linaingia hapa.
+    Ukilijibu mara moja, bot inalijua milele.
+  </p>
+  <div class="tally">
+    <div><div class="tl-n">{{ open_count }}</div><div class="tl-l">Yanasubiri</div></div>
+    <div><div class="tl-n">{{ answered_count }}</div><div class="tl-l">Umeshajibu</div></div>
+  </div>
+</div>
+
+{% if open_gaps %}
+  {% for g in open_gaps %}
+  <div class="gap" id="g{{ g.id }}">
+    <div class="gap-top">
+      <div class="gap-q">{{ g.question }}</div>
+      {% if g.times_asked > 1 %}
+        <span class="gap-n">mara {{ g.times_asked }}</span>
+      {% endif %}
+    </div>
+
+    <div class="gap-meta">
+      {{ g.get_source_display }} · mara ya mwisho {{ g.last_asked_at|timesince }} zilizopita
+    </div>
+
+    {% if g.bot_reply %}
+    <div class="said">
+      <div class="said-l">Bot ilijibu hivi</div>
+      <div class="said-t">{{ g.bot_reply|truncatechars:220 }}</div>
+    </div>
+    {% endif %}
+
+    <form method="post" action="{% url 'chatbot_knowledge_action' g.id %}">
+      {% csrf_token %}
+      <textarea name="answer" id="a{{ g.id }}"
+                placeholder="Andika jibu sahihi hapa…">{{ g.suggested_answer }}</textarea>
+      {% if g.suggested_answer %}
+      <div class="hint">
+        Hii ni rasimu ya AI — isome kwa makini. Popote penye <strong>[mabano]</strong>,
+        AI haikuwa na taarifa; jaza wewe.
+      </div>
+      {% endif %}
+      <div class="row">
+        <button type="button" class="b b-ai" data-draft="{{ g.id }}">
+          <i class="fas fa-wand-magic-sparkles"></i>
+          {% if g.suggested_answer %}Andika upya{% else %}Nipe rasimu{% endif %}
+        </button>
+        <button type="submit" name="action" value="approve" class="b b-go">
+          <i class="fas fa-check"></i> Hifadhi — bot ijue
+        </button>
+        <button type="submit" name="action" value="dismiss" class="b b-x">
+          Si muhimu
+        </button>
+      </div>
+    </form>
+  </div>
+  {% endfor %}
+{% else %}
+  <div class="empty">
+    <i class="fas fa-circle-check"></i>
+    <p>
+      Hakuna swali linalosubiri. Bot inajibu kila kitu wateja wanaouliza —
+      likitokea jipya, litaonekana hapa.
+    </p>
+  </div>
+{% endif %}
+
+{% if answered %}
+  <div class="sect">Bot imeshajifunza haya</div>
+  {% for g in answered %}
+  <div class="done">
+    <div class="done-q">{{ g.question }}</div>
+    <div class="done-a">{{ g.suggested_answer|truncatechars:190 }}</div>
+  </div>
+  {% endfor %}
+{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+  const csrf = '{{ csrf_token }}';
+  document.querySelectorAll('[data-draft]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.draft;
+      const box = document.getElementById('a' + id);
+      const original = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Inaandika…';
+
+      fetch(`/chatbot/knowledge/${id}/`, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': csrf, 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ action: 'draft' }),
+      })
+        .then(r => r.json())
+        .then(d => {
+          if (d.success) { box.value = d.answer; box.focus(); }
+          else { alert(d.error || 'Haikufanikiwa.'); }
+        })
+        .catch(() => alert('Haikufanikiwa. Jaribu tena.'))
+        .finally(() => { btn.disabled = false; btn.innerHTML = original; });
+    });
+  });
+})();
+</script>
+{% endblock %}

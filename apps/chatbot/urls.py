@@ -13,11 +13,28 @@ urlpatterns = [
     # ── Portal ──
     path('dashboard/',                          views.chatbot_dashboard,           name='chatbot_dashboard'),
     path('config/',                             views.chatbot_config,              name='chatbot_config'),
+
+    # ── Maarifa ya bot ──
+    path('knowledge/',                   views.chatbot_knowledge,        name='chatbot_knowledge'),
+    path('knowledge/<int:gap_id>/',      views.chatbot_knowledge_action, name='chatbot_knowledge_action'),
+
+    # ── Mteja anajiunganisha mwenyewe ──
+    path('connect/',        views.chatbot_connect,        name='chatbot_connect'),
+    path('connect/qr/',     views.chatbot_connect_qr,     name='chatbot_connect_qr'),
+    path('connect/action/', views.chatbot_connect_action, name='chatbot_connect_action'),
     path('conversations/',                      views.chatbot_conversations,       name='chatbot_conversations'),
-    path('conversations/<int:conv_id>/',        views.chatbot_conversation_detail, name='chatbot_conversation_detail'),
+    # Conversation.id ni UUID, si int. Ikiwa <int:>, ukurasa wa dashboard
+    # unaanguka kwa NoReverseMatch mara tu bot inapopata mazungumzo ya
+    # kwanza — yaani kwa kila mteja halisi.
+    path('conversations/<uuid:conv_id>/',       views.chatbot_conversation_detail, name='chatbot_conversation_detail'),
+    path('conversations/<uuid:conv_id>/resume/', views.chatbot_resume,          name='chatbot_resume'),
     path('billing/',                            views.chatbot_billing,             name='chatbot_billing'),
 
-    # ── Webhook — ONE global URL for ALL bots ──
+    # ── Baileys bridge ──
+    path('webhook/baileys/', views.baileys_webhook, name='baileys_webhook'),
+    path('bridge/sessions/', views.bridge_session_list, name='bridge_session_list'),
+
+    # ── Webhook ya Meta (legacy — haitumiki tena) ──
     path('webhook/', views.whatsapp_webhook_global, name='whatsapp_webhook_global'),
 
     # ── Legacy per-bot webhook ──

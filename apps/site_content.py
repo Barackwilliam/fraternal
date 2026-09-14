@@ -2,7 +2,7 @@
 """
 Content models for the public homepage sliders.
 
-Images are stored as Uploadcare UUIDs (same pattern as Service / Team already
+Images are stored as full Supabase Storage URLs (same pattern as Service / Team
 use in models.py), so the CDN handles resizing, format negotiation and quality.
 Nothing is hardcoded in the template — everything below is editable from admin.
 
@@ -18,45 +18,60 @@ Add to apps/models.py:
 
 from django.db import models
 
-from .uploadcare_widget import cdn_base, extract_uuid
+# (uploadcare_widget imeondolewa — hakuna image za zamani za kubadilisha)
 
 
 # ──────────────────────────────────────────────────────────────
-# Shared Uploadcare helper
+# Shared image helper (Supabase Storage)
 # ──────────────────────────────────────────────────────────────
-class UploadcareImageMixin(models.Model):
-    """Gives a model a `image` UUID field plus responsive CDN helpers."""
+class ImageMixin(models.Model):
+    """
+    Image field + helpers.
+
+    Inahifadhi URL KAMILI ya Supabase Storage.
+
+    Zamani ilikuwa `UploadcareImageMixin` na ilihifadhi UUID pekee;
+    `save()` ilikata kila kitu kuwa UUID. Mixin ni abstract, kwa hiyo
+    kubadilisha jina hakuhitaji migration — models zinabeba fields
+    zao wenyewe.
+    """
 
     image = models.CharField(
         max_length=255, blank=True,
-        help_text='Uploadcare UUID only, e.g. 1a2b3c4d-5e6f-7890-abcd-ef1234567890',
+        help_text='URL kamili ya image. Tumia kitufe cha kupakia.',
     )
 
     class Meta:
         abstract = True
 
     def save(self, *args, **kwargs):
-        # Accept a bare UUID or a full ucarecdn URL — always store the UUID.
-        self.image = extract_uuid(self.image)
+        # URL ya zamani ya Uploadcare (UUID tu) inabadilishwa kuwa URL
+        # kamili ili templates zisiwe na hali mbili za kushughulikia.
+        val = (self.image or '').strip()
+        if val and not val.startswith('http'):
+            uuid = extract_uuid(val)
+            val = f'{cdn_base()}/{uuid}/' if uuid else ''
+        self.image = val
         return super().save(*args, **kwargs)
 
-    # -- CDN builders -------------------------------------------------
-    # Same pattern as Service.get_image_url() / Team.get_image_url()
+    # -- Helpers (majina yamebaki ili templates zisibadilike) ---------
     def cdn(self, width=None, height=None, quality='smart', crop_faces=False):
-        uuid = extract_uuid(self.image)
-        if not uuid:
-            return ''
-        url = f'{cdn_base()}/{uuid}/'
-        if width:
-            url += f'-/resize/{width}x/'
-        url += f'-/format/jpg/-/quality/{quality}/'
-        return url
+        """
+        Inarudisha URL ya image.
+
+        `width` inapuuzwa. Uploadcare ilifanya resize kwenye CDN yake
+        (`-/resize/800x/`). Supabase ina transformation pia, lakini ni
+        ya plan ya kulipia — kwenye free tier inarudisha 400.
+
+        Kwa hiyo tunarudisha image kama ilivyo, na ukubwa unashughulikiwa
+        na CSS. Ikiwa utahamia plan ya kulipia, hapa ndipo pa kuongeza
+        `/render/image/public/...?width=`.
+        """
+        return self.image or ''
 
     def srcset(self, widths, height_ratio=None, crop_faces=False):
-        """Ready-to-use srcset string. Cropping is handled by CSS object-fit."""
-        if not extract_uuid(self.image):
-            return ''
-        return ', '.join(f'{self.cdn(w)} {w}w' for w in widths)
+        """Tupu — hakuna ukubwa tofauti bila transformation."""
+        return ''
 
     # -- Template-friendly properties (no-arg, callable from Django) ---
     @property
@@ -87,7 +102,7 @@ class UploadcareImageMixin(models.Model):
 # ──────────────────────────────────────────────────────────────
 # Hero slider
 # ──────────────────────────────────────────────────────────────
-class HeroSlide(UploadcareImageMixin):
+class HeroSlide(ImageMixin):
     """Full-bleed photo slides at the top of the homepage."""
 
     eyebrow = models.CharField(
@@ -134,7 +149,7 @@ class HeroSlide(UploadcareImageMixin):
 # ──────────────────────────────────────────────────────────────
 # Portfolio / work slider
 # ──────────────────────────────────────────────────────────────
-class PortfolioItem(UploadcareImageMixin):
+class PortfolioItem(ImageMixin):
     """Real client work. Use a screenshot of the live site, 1600x1200 or wider."""
 
     title = models.CharField(max_length=120)
@@ -162,7 +177,7 @@ class PortfolioItem(UploadcareImageMixin):
 # ──────────────────────────────────────────────────────────────
 # Testimonials
 # ──────────────────────────────────────────────────────────────
-class Testimonial(UploadcareImageMixin):
+class Testimonial(ImageMixin):
     """Real client quotes with real photos."""
 
     quote = models.TextField(max_length=400)
