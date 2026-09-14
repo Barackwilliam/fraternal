@@ -254,26 +254,55 @@ class Session {
     }
 
     _onMessages(event) {
-        if (event.type !== 'notify') return;
+        // MACHO KWENYE KILA HATUA.
+        //
+        // Toleo la kwanza lilikuwa na sehemu NNE zinazokata kimyakimya:
+        // type si 'notify', fromMe, status@broadcast, kundi, na _extract
+        // ikirudisha null. Ujumbe ukikufa mojawapo, logs zilikuwa kimya
+        // kabisa — huwezi kutofautisha "haujafika" na "umechujwa".
+        const n = (event.messages || []).length;
+        log(this.name, `messages.upsert: type=${event.type} count=${n}`);
 
-        // MUHIMU: hakuna `await` hapa. Kila ujumbe unaenda kwenye handler
-        // yake; mmoja akichelewa, wengine hawasubiri.
+        if (event.type !== 'notify') {
+            log(this.name, `  imerukwa: type ni '${event.type}', si 'notify'`);
+            return;
+        }
+
+        // Hakuna `await` hapa — kila ujumbe una handler yake; mmoja
+        // akichelewa, wengine hawasubiri.
         for (const message of event.messages) {
             this._handleOne(message).catch((e) =>
-                log(this.name, 'message handler error:', e.message)
+                log(this.name, '  handler error:', e.message)
             );
         }
     }
 
     async _handleOne(message) {
-        if (message.key.fromMe) return;
-
         const remoteJid = message.key.remoteJid || '';
-        if (remoteJid === 'status@broadcast') return;
-        if (remoteJid.endsWith('@g.us')) return;          // makundi — bado
+        const mid = message.key.id || '?';
+
+        if (message.key.fromMe) {
+            log(this.name, `  ${mid}: imerukwa — fromMe`);
+            return;
+        }
+        if (remoteJid === 'status@broadcast') {
+            log(this.name, `  ${mid}: imerukwa — status@broadcast`);
+            return;
+        }
+        if (remoteJid.endsWith('@g.us')) {
+            log(this.name, `  ${mid}: imerukwa — kundi`);
+            return;
+        }
 
         const parsed = await this._extract(message, remoteJid);
-        if (!parsed) return;
+        if (!parsed) {
+            const kinds = Object.keys(message.message || {}).join(',') || '(tupu)';
+            log(this.name, `  ${mid}: imerukwa — aina haijulikani: ${kinds}`);
+            return;
+        }
+
+        log(this.name, `  ${mid}: kutoka ${parsed.phone} [${parsed.msg_type}] `
+                     + `"${(parsed.text || '').slice(0, 60)}"`);
 
         this.lastMessageAt = Date.now();
 

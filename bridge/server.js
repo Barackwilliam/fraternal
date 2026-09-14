@@ -70,7 +70,7 @@ function auth(req, res, next) {
 
 async function forwardToDjango(payload) {
     try {
-        await axios.post(
+        const res = await axios.post(
             `${DJANGO_URL}/chatbot/webhook/baileys/`,
             payload,
             {
@@ -78,16 +78,21 @@ async function forwardToDjango(payload) {
                     'Content-Type': 'application/json',
                     'X-Bridge-Key': BRIDGE_API_KEY,
                 },
-                // Django inaji-ack mara moja na kuendelea nyuma,
-                // kwa hiyo hii ni fupi kwa makusudi.
-                timeout: 15000,
+                // Django inaji-ack mara moja na kuendelea nyuma, kwa hiyo
+                // 15s ingetosha — LAKINI kwenye Render free tier Django
+                // inalala baada ya dakika 15 na inachukua sekunde 30-60
+                // kuamka. Kwa timeout ya 15s, ujumbe wa KWANZA baada ya
+                // kulala unapotea kila mara.
+                timeout: Number(process.env.DJANGO_TIMEOUT_MS || 60000),
             }
         );
+        console.log(`[${payload.session}]   -> Django: ${res.status}`
+                    + ` ${JSON.stringify(res.data).slice(0, 120)}`);
     } catch (e) {
         const detail = e.response
             ? `${e.response.status} ${JSON.stringify(e.response.data).slice(0, 200)}`
-            : e.message;
-        console.error(`[${payload.session}] Django imeshindwa kupokea:`, detail);
+            : `${e.code || ''} ${e.message}`;
+        console.error(`[${payload.session}]   -> Django IMESHINDWA:`, detail);
     }
 }
 
