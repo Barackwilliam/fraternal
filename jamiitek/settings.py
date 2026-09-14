@@ -200,11 +200,22 @@ WEASPRINT_BASEURL = BASE_DIR
 _email_user = os.getenv('EMAIL_HOST_USER', 'info@jamiitek.com')
 _email_pass = os.getenv('EMAIL_HOST_PASSWORD', '')
  
-if _email_user and _email_pass:
+# ── Njia ya kutuma, kwa mpangilio ─────────────────────────────
+# 1. Brevo (HTTPS) — Render free INAZUIA ports 25/465/587 (tangu
+#    26 Sep 2025). HTTPS haiwezi kuzuiliwa, kwa hiyo hii ndiyo pekee
+#    inayofanya kazi hapo.
+# 2. SMTP — inafanya kazi Render ya kulipia, au kwenye kompyuta yako.
+# 3. Console — hakuna kinachotoka; dev pekee.
+BREVO_API_KEY = os.getenv('BREVO_API_KEY', '')
+
+if BREVO_API_KEY:
+    EMAIL_BACKEND      = 'apps.email_backend.BrevoEmailBackend'
+    EMAIL_HOST_USER    = _email_user
+    DEFAULT_FROM_EMAIL = f"JamiiTek <{_email_user}>"
+
+elif _email_user and _email_pass:
     # Host ilikuwa imefungwa kwa 'smtp.gmail.com'. jamiitek.com iko Zoho
-    # (MX: mx.zoho.com), kwa hiyo Gmail haikuweza kutuma kamwe — na
-    # kwa vile nywila haikuwepo, mfumo ulianguka kwenye console bila
-    # mtu kugundua.
+    # (MX: mx.zoho.com), kwa hiyo Gmail haikuweza kutuma kamwe.
     EMAIL_BACKEND       = 'django.core.mail.backends.smtp.EmailBackend'
     EMAIL_HOST          = os.getenv('EMAIL_HOST', 'smtp.zoho.com')
     EMAIL_PORT          = int(os.getenv('EMAIL_PORT', '587'))
@@ -213,6 +224,9 @@ if _email_user and _email_pass:
     EMAIL_HOST_USER     = _email_user
     EMAIL_HOST_PASSWORD = _email_pass
     DEFAULT_FROM_EMAIL  = f"JamiiTek <{_email_user}>"
+    # Bila timeout, SMTP iliyozuiliwa inakwama hadi gunicorn inaua worker:
+    #   Worker (pid:79) was sent SIGKILL!
+    EMAIL_TIMEOUT       = int(os.getenv('EMAIL_TIMEOUT', '10'))
 else:
     # Fallback: log emails to console instead of crashing
     EMAIL_BACKEND   = 'django.core.mail.backends.console.EmailBackend'
