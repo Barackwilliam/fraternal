@@ -432,10 +432,33 @@ class Session {
         if (!this.sock || this.status !== 'connected') {
             throw new Error(`session ${this.name} haijaunganishwa (${this.status})`);
         }
-        const jid = to.includes('@') ? to : `${to.replace(/\D/g, '')}@s.whatsapp.net`;
+
+        // MUHIMU: `to` inaweza kuwa JID kamili au namba.
+        //
+        // WhatsApp sasa inatumia LID (kitambulisho cha tarakimu 15) badala
+        // ya namba kwa wateja wengi. LID inaishia `@lid`, si
+        // `@s.whatsapp.net`. Kuijenga upya kutoka tarakimu kulikuwa
+        // kunazalisha `158351803576497@s.whatsapp.net` — JID isiyo halali,
+        // na jibu halikwenda popote. Django ilidhani imetuma.
+        //
+        // Kwa hiyo Django inatuma JID halisi iliyoipokea, na tunaitumia
+        // kama ilivyo.
+        const jid = this.constructor.toJid(to);
         const res = await this.sock.sendMessage(jid, { text: String(text) });
         await this.sendPresence(jid, 'paused').catch(() => {});
+        log(this.name, `  -> imetumwa kwa ${jid}`);
         return res?.key?.id || '';
+    }
+
+    static toJid(to) {
+        const v = String(to || '').trim();
+        if (v.includes('@')) return v;                 // tayari ni JID
+        const digits = v.replace(/\D/g, '');
+        // LID ni ndefu kuliko namba yoyote ya simu (tarakimu 15+).
+        // Namba ndefu zaidi duniani ni 15, lakini pamoja na kiambishi
+        // cha nchi haizidi 15 kwa vitendo. 15+ bila '+' ni LID.
+        if (digits.length >= 15) return `${digits}@lid`;
+        return `${digits}@s.whatsapp.net`;
     }
 
     async sendPresence(jid, kind) {

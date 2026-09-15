@@ -223,19 +223,25 @@ app.post('/sessions/:name/ping', auth, async (req, res) => {
 });
 
 app.post('/send', auth, async (req, res) => {
-    const { session, to, text } = req.body || {};
+    const { session, to, text, jid } = req.body || {};
 
-    if (!session || !to || !text) {
-        return res.status(400).json({ success: false, error: 'session, to, text zinahitajika' });
+    // `jid` inatangulia `to`. Django inahifadhi JID halisi iliyopokea,
+    // na hiyo ndiyo sahihi daima — hasa kwa LID, ambayo haiwezi
+    // kujengwa upya kutoka tarakimu.
+    const target = jid || to;
+
+    if (!session || !target || !text) {
+        return res.status(400).json({ success: false, error: 'session, to/jid, text zinahitajika' });
     }
 
     const s = getSession(session);
     if (!s) return res.status(404).json({ success: false, error: 'Session haipo' });
 
     try {
-        const id = await s.sendText(to, text);
+        const id = await s.sendText(target, text);
         res.json({ success: true, message_id: id });
     } catch (e) {
+        console.error(`[${session}] /send imeshindwa:`, e.message);
         res.status(503).json({ success: false, error: String(e.message || e) });
     }
 });
