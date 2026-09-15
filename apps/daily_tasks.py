@@ -13,6 +13,7 @@ RATIBA (kila kazi ina alama yake ya cache, hazitegemeani):
   | sync_integrations          | dakika 15   |
   | process_scheduled_actions  | dakika 15   |
   | check_alerts               | dakika 30   |
+  | check_bot_sessions         | dakika 10   |
   | auto_suspend               | siku        |
   | send_expiry_emails         | siku        |
   | send_digest                | siku        |
@@ -58,6 +59,7 @@ SCHEDULE = {
     'sync_integrations':         ('jamiitek:task:sync_integrations',   15 * MINUTE),
     'process_scheduled_actions': ('jamiitek:task:scheduled_actions',   15 * MINUTE),
     'check_alerts':              ('jamiitek:task:check_alerts',        30 * MINUTE),
+    'check_bot_sessions':        ('jamiitek:task:bot_sessions',        10 * MINUTE),
     'send_digest':               ('jamiitek:task:send_digest',         24 * 60 * MINUTE),
     'prune_snapshots':           ('jamiitek:task:prune_snapshots',      7 * 24 * 60 * MINUTE),
     'prune_baileys_keys':        ('jamiitek:task:prune_baileys',        7 * 24 * 60 * MINUTE),
@@ -66,7 +68,8 @@ SCHEDULE = {
     'monthly_report':            ('jamiitek:task:monthly_report',      30 * 24 * 60 * MINUTE),
 }
 
-PERIODIC = ('sync_integrations', 'process_scheduled_actions', 'check_alerts')
+PERIODIC = ('sync_integrations', 'process_scheduled_actions', 'check_alerts',
+            'check_bot_sessions')
 
 _thread_lock = threading.Lock()
 _running = False           # kazi za kila siku
@@ -129,6 +132,11 @@ def _run_periodic_in_background():
         _run_command('sync_integrations', quiet=True)
         _run_command('process_scheduled_actions')
         _run_command('check_alerts')
+
+        # Afya ya sessions za WhatsApp. Hii ndiyo iliyokosekana tarehe
+        # 15 Sep: session ilikufa, dashboard ikaonyesha kijani, na
+        # hakuna aliyejua kwa saa kadhaa.
+        _run_command('check_bot_sessions', quiet=True)
     finally:
         _close_connection()
         with _thread_lock:

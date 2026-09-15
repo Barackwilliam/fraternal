@@ -241,7 +241,10 @@ CLOUDINARY_API_SECRET = os.getenv('CLOUDINARY_API_SECRET', '')
 
 # ── Chatbot / WhatsApp ─────────────────────────────────
 GROQ_API_KEY = os.getenv('GROQ_API_KEY', '')
-SITE_URL     = 'https://jamiitek.com'
+# www ni MUHIMU. `jamiitek.com` ni redirect 301, na 301 kwenye POST
+# inageuzwa kuwa GET — Django inajibu 405. Pia viungo vya email
+# vinapaswa kwenda moja kwa moja, si kupitia redirect.
+SITE_URL     = os.getenv('SITE_URL', 'https://www.jamiitek.com')
 
 WHATSAPP_MASTER_TOKEN         = os.getenv('WHATSAPP_MASTER_TOKEN', '')
 WHATSAPP_WEBHOOK_VERIFY_TOKEN = os.getenv('WHATSAPP_WEBHOOK_VERIFY_TOKEN', 'jamiitek_wh_2025')

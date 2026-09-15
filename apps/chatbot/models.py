@@ -124,6 +124,12 @@ class BotConfig(models.Model):
         max_length=30, blank=True, editable=False,
         help_text="Namba iliyoscan QR, kutoka bridge")
     last_seen_at       = models.DateTimeField(null=True, blank=True, editable=False)
+    down_since         = models.DateTimeField(
+        null=True, blank=True, editable=False,
+        help_text="Tangu lini session imekuwa chini")
+    alerted_at         = models.DateTimeField(
+        null=True, blank=True, editable=False,
+        help_text="Taarifa ya mwisho ilipotumwa — inazuia kurudia")
     autostart          = models.BooleanField(
         default=True,
         help_text="Bridge ikirestart, session hii ianzishwe upya yenyewe")

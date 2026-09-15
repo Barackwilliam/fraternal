@@ -65,7 +65,34 @@ def _strip_html(text):
     return re.sub(r'<[^>]+>', '', text)
 
 
-BACKENDS = [_telegram, _green_api]
+def _email(text):
+    """
+    Email kwa mmiliki.
+
+    Telegram na Green API zinahitaji usanidi wa ziada. Email inafanya
+    kazi tayari (Brevo), kwa hiyo hii ndiyo backend ya uhakika — na
+    taarifa isiyofika si taarifa.
+
+    ALERT_EMAIL ikiwekwa, inatumika. Vinginevyo EMAIL_HOST_USER.
+    """
+    to = (os.getenv('ALERT_EMAIL', '') or os.getenv('EMAIL_HOST_USER', '')).strip()
+    if not to:
+        return False
+    try:
+        from django.core.mail import send_mail
+        from django.conf import settings
+        body = _strip_html(text)
+        subject = body.splitlines()[0][:120] if body.strip() else 'Taarifa ya JamiiTek'
+        send_mail(f'[JamiiTek] {subject}', body,
+                  getattr(settings, 'DEFAULT_FROM_EMAIL', to), [to],
+                  fail_silently=False)
+        return True
+    except Exception as e:
+        logger.warning('notify email: %s', e)
+        return False
+
+
+BACKENDS = [_telegram, _green_api, _email]
 
 
 def notify(text):
@@ -89,4 +116,6 @@ def is_configured():
     return bool(
         (os.getenv('TELEGRAM_BOT_TOKEN') and os.getenv('TELEGRAM_CHAT_ID'))
         or (os.getenv('GREEN_API_ID') and os.getenv('GREEN_API_TOKEN'))
+        or os.getenv('ALERT_EMAIL')
+        or os.getenv('EMAIL_HOST_USER')
     )
