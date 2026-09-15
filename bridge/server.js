@@ -179,6 +179,49 @@ app.post('/sessions/:name/logout', auth, async (req, res) => {
 // KUTUMA UJUMBE
 // ============================================================
 
+// ── UCHUNGUZI ────────────────────────────────────────────────
+// Inatenganisha tatizo katika sehemu mbili:
+//   /sessions/:name/debug — je, WhatsApp inaongea nasi kabisa?
+//   /sessions/:name/ping  — je, tunaweza kutuma?
+// Njia ya kuingia ikiwa imekufa na ya kutoka ikiwa hai, tatizo liko
+// upande mmoja tu. Zote mbili zikiwa zimekufa, session ni maiti.
+
+app.get('/sessions/:name/debug', auth, (req, res) => {
+    const s = getSession(req.params.name);
+    if (!s) return res.status(404).json({ success: false, error: 'Session haipo' });
+
+    const d = s.toJSON();
+    let verdict;
+    if (d.status !== 'connected') {
+        verdict = `Haijaunganishwa (${d.status})`;
+    } else if (d.event_total === 0) {
+        verdict = 'MAITI — imeunganishwa lakini WhatsApp haijatuma tukio hata moja. '
+                + 'Kifaa kimeondolewa upande wa WhatsApp. Scan QR upya.';
+    } else if (d.silent_seconds > 900) {
+        verdict = `Kimya kwa ${Math.round(d.silent_seconds / 60)} dakika — inaweza kuwa imekufa`;
+    } else {
+        verdict = 'HAI — WhatsApp inaongea nasi';
+    }
+    res.json({ success: true, verdict, ...d, qr: undefined });
+});
+
+// Tuma ujumbe wa majaribio ili kupima njia ya kutoka peke yake
+app.post('/sessions/:name/ping', auth, async (req, res) => {
+    const s = getSession(req.params.name);
+    if (!s) return res.status(404).json({ success: false, error: 'Session haipo' });
+
+    const to = req.body?.to;
+    if (!to) return res.status(400).json({ success: false, error: '`to` inahitajika' });
+
+    try {
+        const id = await s.sendText(to, req.body?.text || 'Jaribio la JamiiTek bridge.');
+        res.json({ success: true, message_id: id,
+                   note: 'Imetumwa. Ikiwa haijafika WhatsApp, session ni maiti.' });
+    } catch (e) {
+        res.status(503).json({ success: false, error: String(e.message || e) });
+    }
+});
+
 app.post('/send', auth, async (req, res) => {
     const { session, to, text } = req.body || {};
 

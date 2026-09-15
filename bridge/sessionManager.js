@@ -74,6 +74,19 @@ class Session {
         this._reconnectTimer = null;
         this._watchdog = null;
         this._stopping = false;
+
+        // Hesabu ya KILA tukio linalotoka WhatsApp.
+        //
+        // `connection: open` haimaanishi ujumbe unafika. WhatsApp
+        // inaweza kuondoa kifaa (mtu amebonyeza "Log out from all
+        // devices", au kifaa kipya kimechukua nafasi) na client
+        // ikaendelea kudhani imeunganishwa. Socket inakuwa maiti
+        // inayoonekana hai.
+        //
+        // Socket HAI daima ina kelele: presence, receipts, chats.update.
+        // Ikiwa kimya kabisa, imekufa.
+        this.events = {};
+        this.lastEventAt = null;
         this._clearAuth = null;
     }
 
@@ -92,6 +105,17 @@ class Session {
             started_at: new Date(this.startedAt).toISOString(),
             connected_at: this.connectedAt ? new Date(this.connectedAt).toISOString() : null,
             last_message_at: this.lastMessageAt ? new Date(this.lastMessageAt).toISOString() : null,
+
+            // Uchunguzi
+            wa_id: this.sock?.user?.id || '',
+            wa_name: this.sock?.user?.name || '',
+            ws_state: this.sock?.ws?.socket?.readyState ?? this.sock?.ws?.readyState ?? null,
+            events: this.events,
+            event_total: Object.values(this.events).reduce((a, b) => a + b, 0),
+            last_event_at: this.lastEventAt ? new Date(this.lastEventAt).toISOString() : null,
+            silent_seconds: this.lastEventAt
+                ? Math.round((Date.now() - this.lastEventAt) / 1000)
+                : null,
         };
     }
 
@@ -162,6 +186,14 @@ class Session {
         this.sock = sock;
 
         this._armWatchdog();
+
+        // Hesabu kila tukio kabla ya handlers maalum
+        sock.ev.process(async (events) => {
+            for (const name of Object.keys(events)) {
+                this.events[name] = (this.events[name] || 0) + 1;
+                this.lastEventAt = Date.now();
+            }
+        });
 
         sock.ev.on('creds.update', auth.saveCreds);
         sock.ev.on('connection.update', (u) => this._onConnectionUpdate(u));
