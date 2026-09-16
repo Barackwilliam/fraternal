@@ -5,6 +5,22 @@
 {% block extra_css %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
+/* WANAOSUBIRI BINADAMU */
+.hwait{background:linear-gradient(140deg,rgba(245,158,11,.12),rgba(245,158,11,.02));
+  border:1.5px solid rgba(245,158,11,.3);border-radius:16px;padding:18px 22px;margin-bottom:20px}
+.hwait-h{display:flex;align-items:center;gap:11px;font-size:16px;font-weight:800;
+  color:#fff;margin-bottom:5px;flex-wrap:wrap}
+.hwait-h i{color:#f59e0b}
+.hwait-bad{font-family:var(--mono);font-size:11px;color:#fca5a5;
+  background:rgba(239,68,68,.15);border-radius:6px;padding:3px 9px}
+.hwait-sub{font-size:12.5px;color:rgba(255,255,255,.5);line-height:1.6;margin-bottom:13px}
+.hwait-sub code{background:rgba(255,255,255,.08);padding:2px 6px;border-radius:4px}
+.hwait-row{display:flex;align-items:center;gap:12px;padding:9px 0;
+  border-top:1px solid rgba(245,158,11,.14);font-size:13px}
+.hwait-who{color:#fff;font-weight:600;flex:1;min-width:0}
+.hwait-bot{font-family:var(--mono);font-size:11px;color:rgba(255,255,255,.35)}
+.hwait-t{font-family:var(--mono);font-size:11px;color:#fcd34d;white-space:nowrap}
+.hwait-t.late{color:#fca5a5}
 /* ══ DARK THEME OVERRIDE ══════════════════════════════════ */
 .jt-main{background:#080c18 !important}
 :root{
@@ -125,6 +141,31 @@
 </style>
 {% endblock %}
 {% block content %}
+
+{% if waiting_handoffs %}
+<div class="hwait f0">
+  <div class="hwait-h">
+    <i class="fas fa-hand"></i>
+    <span>Wateja {{ waiting_handoffs }} wanasubiri binadamu</span>
+    {% if waiting_worst >= 60 %}
+      <span class="hwait-bad">mrefu zaidi: saa {{ waiting_worst|divisibleby:1 }}</span>
+    {% endif %}
+  </div>
+  <div class="hwait-sub">
+    Bot imesimama kwa mazungumzo haya. Jibu mteja kwenye WhatsApp,
+    kisha andika <code>endelea &lt;namba&gt;</code>.
+  </div>
+  {% for c in waiting_list %}
+  <div class="hwait-row">
+    <span class="hwait-who">{{ c.customer_name|default:c.wa_contact_name|default:"Hajulikani" }}</span>
+    <span class="hwait-bot">{{ c.bot.bot_name }}</span>
+    <span class="hwait-t {% if c.handoff_waiting_minutes >= 60 %}late{% endif %}">
+      dakika {{ c.handoff_waiting_minutes }}
+    </span>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
 
 <!-- HERO -->
 <div class="page-hero f0">

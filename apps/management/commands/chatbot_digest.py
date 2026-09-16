@@ -117,7 +117,17 @@ class Command(BaseCommand):
 
         # Wanaosubiri — hii ndiyo ya dharura
         if waiting:
+            worst = (bot.conversations
+                     .filter(is_human_handoff=True, handoff_at__isnull=False)
+                     .order_by('handoff_at').first())
             L.append(f"🙋 *Wateja {waiting} bado wanasubiri binadamu*")
+            if worst:
+                m = worst.handoff_waiting_minutes
+                dur = (f"dakika {m}" if m < 60
+                       else f"saa {m // 60}" if m < 1440
+                       else f"siku {m // 1440}")
+                who = worst.customer_name or worst.wa_contact_name or 'Mmoja'
+                L.append(f"{who} amesubiri {dur}.")
             L.append("Andika `orodha` uone ni nani.")
             L.append("")
 

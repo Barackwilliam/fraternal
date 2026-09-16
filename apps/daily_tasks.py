@@ -14,6 +14,7 @@ RATIBA (kila kazi ina alama yake ya cache, hazitegemeani):
   | process_scheduled_actions  | dakika 15   |
   | check_alerts               | dakika 30   |
   | check_bot_sessions         | dakika 10   |
+  | check_handoffs             | dakika 10   |
   | auto_suspend               | siku        |
   | send_expiry_emails         | siku        |
   | send_digest                | siku        |
@@ -60,6 +61,7 @@ SCHEDULE = {
     'process_scheduled_actions': ('jamiitek:task:scheduled_actions',   15 * MINUTE),
     'check_alerts':              ('jamiitek:task:check_alerts',        30 * MINUTE),
     'check_bot_sessions':        ('jamiitek:task:bot_sessions',        10 * MINUTE),
+    'check_handoffs':            ('jamiitek:task:handoffs',            10 * MINUTE),
     'send_digest':               ('jamiitek:task:send_digest',         24 * 60 * MINUTE),
     'prune_snapshots':           ('jamiitek:task:prune_snapshots',      7 * 24 * 60 * MINUTE),
     'prune_baileys_keys':        ('jamiitek:task:prune_baileys',        7 * 24 * 60 * MINUTE),
@@ -69,7 +71,7 @@ SCHEDULE = {
 }
 
 PERIODIC = ('sync_integrations', 'process_scheduled_actions', 'check_alerts',
-            'check_bot_sessions')
+            'check_bot_sessions', 'check_handoffs')
 
 _thread_lock = threading.Lock()
 _running = False           # kazi za kila siku
@@ -137,6 +139,11 @@ def _run_periodic_in_background():
         # 15 Sep: session ilikufa, dashboard ikaonyesha kijani, na
         # hakuna aliyejua kwa saa kadhaa.
         _run_command('check_bot_sessions', quiet=True)
+
+        # Wateja wanaosubiri binadamu. `remind_owner_if_stale` inaita tu
+        # mteja anapoandika tena — lakini ameambiwa "subiri", kwa hiyo
+        # anasubiri kimya. Hii inakimbia kwa saa, si kwa ujumbe.
+        _run_command('check_handoffs', quiet=True)
     finally:
         _close_connection()
         with _thread_lock:

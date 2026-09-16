@@ -877,6 +877,14 @@ def _process_message(bot: BotConfig, msg_data: dict):
     if msg_id:
         wa.mark_as_read(msg_id)
 
+    # JID ihifadhiwe. Kazi za ratiba (`check_handoffs`) zinatuma jumbe
+    # nje ya mazungumzo haya, na LID haiwezi kujengwa upya kutoka
+    # tarakimu — inaishia `@lid`, si `@s.whatsapp.net`.
+    incoming_jid = msg_data.get('jid') or ''
+    if incoming_jid and conv.metadata.get('jid') != incoming_jid:
+        conv.metadata['jid'] = incoming_jid
+        conv.save(update_fields=['metadata'])
+
     # Save incoming message
     Message.objects.create(
         conversation=conv, role='user', content=text, wa_message_id=msg_id

@@ -37,6 +37,7 @@ def manage_context(request):
         return {}
     try:
         pending_payments = SubscriptionPayment.objects.filter(status='pending').count()
+
         pending_bots = BotConfig.objects.filter(status='pending').count()
         return {
             'chatbot_pending_payments': pending_payments,
@@ -73,6 +74,26 @@ def manage_chatbot_overview(request):
 
     pending_payments = SubscriptionPayment.objects.filter(status='pending').count()
 
+    # Wanaosubiri binadamu. Hii ndiyo namba pekee hapa inayogusa mteja
+    # anayesubiri SASA HIVI — inapaswa kuonekana kabla ya nyingine zote.
+    waiting_qs = (Conversation.objects
+                  .filter(is_human_handoff=True, handoff_at__isnull=False)
+                  .select_related('bot')
+                  .order_by('handoff_at'))
+    waiting_handoffs = waiting_qs.count()
+    waiting_list = list(waiting_qs[:6])
+    waiting_worst = waiting_list[0].handoff_waiting_minutes if waiting_list else 0
+
+    # Wanaosubiri binadamu. Hii ndiyo namba pekee hapa inayogusa mteja
+    # anayesubiri SASA HIVI — inapaswa kuonekana kabla ya nyingine zote.
+    waiting_qs = (Conversation.objects
+                  .filter(is_human_handoff=True, handoff_at__isnull=False)
+                  .select_related('bot')
+                  .order_by('handoff_at'))
+    waiting_handoffs = waiting_qs.count()
+    waiting_list = list(waiting_qs[:6])
+    waiting_worst = waiting_list[0].handoff_waiting_minutes if waiting_list else 0
+
     recent_clients = ChatbotClient.objects.select_related('user').order_by('-created_at')[:8]
 
     bots_needing_setup = all_bots.filter(
@@ -103,6 +124,9 @@ def manage_chatbot_overview(request):
         'recent_clients': recent_clients,
         'bots_needing_setup': bots_needing_setup,
         'chart_data': json.dumps(chart_data),
+        'waiting_handoffs': waiting_handoffs,
+        'waiting_list': waiting_list,
+        'waiting_worst': waiting_worst,
     }
     return render(request, 'management/chatbot_overview.html', context)
 
