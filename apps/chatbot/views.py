@@ -1101,6 +1101,18 @@ def _process_message(bot: BotConfig, msg_data: dict):
         handoff.trigger(bot, wa, conv, from_phone, by='ai',
                         reason='Bot iliomba binadamu')
 
+    elif handoff.promised_handoff(reply):
+        # AI imeahidi kumuunganisha mteja kwa maneno yake, bila neno
+        # lolote la TRIGGERS kulingana. Bila hii, bot inaahidi kisha
+        # inaendelea kuongea — na mteja anasubiri mtu ambaye hajaitwa.
+        #
+        # Ujumbe wa ahadi tayari umetumwa, kwa hiyo hatutumi mwingine;
+        # tunasimamisha bot na kumjulisha mmiliki.
+        if conv.start_handoff(by='ai', reason='Bot iliahidi kuunganisha'):
+            handoff.notify_owner(bot, wa, conv, 'Bot iliahidi kuunganisha na binadamu')
+            logger.info('[%s] handoff kutoka ahadi ya bot: %s',
+                        bot.session_name, from_phone)
+
     # ── Bot imeshindwa? Hifadhi swali ili mmiliki alijibu ──────────
     knowledge.watch(bot, conv, final_text, reply, result)
 

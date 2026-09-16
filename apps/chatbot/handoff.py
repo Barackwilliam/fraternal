@@ -63,6 +63,43 @@ FRUSTRATION = [
 ]
 
 
+# ══════════════════════════════════════════════════════════════
+#  AHADI ZA BOT
+# ══════════════════════════════════════════════════════════════
+# Orodha ya maneno haitatosha kamwe. Mteja aliandika "mtu HARISI"
+# badala ya "halisi" — herufi moja — na handoff haikuwaka. AI ikaona
+# swali, ikaahidi kumuunganisha kwa maneno yake, na bot ikaendelea
+# kuongea kwa sababu `is_human_handoff` haikuwekwa.
+#
+# Mteja aliambiwa "nitakupeleka kwa muhudumu" na hakuna aliyekuja.
+#
+# Kwa hiyo hatuangalii swali pekee — tunaangalia JIBU. Bot ikiahidi
+# kuunganisha, tunaunganisha kweli. Hii inashinda makosa ya tahajia,
+# lugha, na njia zote za kuuliza, kwa sababu inapima matokeo.
+
+PROMISES = [
+    # Kiswahili
+    'nitakupeleka', 'nitakuunganisha', 'nimekuunganisha', 'nakuunganisha',
+    'muhudumu', 'nitamwita', 'atakujibu', 'atawasiliana nawe',
+    'timu yetu itakujibu', 'subiri kidogo',
+    # Kiingereza
+    'connect you', 'connecting you', 'transfer you', 'transferring you',
+    'someone will', 'a team member', 'our team will', 'get back to you shortly',
+    'hold on', 'put you through',
+]
+
+
+def promised_handoff(reply):
+    """
+    Je, bot imeahidi kumuunganisha mteja na binadamu?
+
+    Ikirudisha True, handoff inaanzishwa hata kama swali la mteja
+    halikulingana na neno lolote la `TRIGGERS`.
+    """
+    low = (reply or '').lower()
+    return any(kw in low for kw in PROMISES)
+
+
 def detect(text):
     """
     Inarudisha (inahitajika, sababu) au (False, '').
