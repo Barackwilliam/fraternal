@@ -261,15 +261,23 @@ def notify_owner(bot, wa, conv, reason=''):
         return
 
     # Usimtumie mmiliki taarifa kuhusu mazungumzo yake mwenyewe
-    if conv.customer_phone.endswith(owner[-9:]):
+    if bot.is_owner(conv.customer_phone):
         return
 
     who = conv.customer_name or conv.wa_contact_name or 'Mteja'
     recent = conv.get_recent_messages(limit=4)
+
+    # LID (tarakimu 15) si namba ya simu — huwezi kuipigia. Kumwonyesha
+    # mmiliki `158351803576497` kama "namba" kunamdanganya. Tunamwelekeza
+    # kwenye chat badala yake.
+    ident = (conv.customer_phone or '')
+    is_lid = len(ident) >= 15
+    contact = 'fungua chat kwenye WhatsApp ya biashara' if is_lid else ident
+
     lines = [
         "🙋 *Mteja anahitaji binadamu*",
         "",
-        f"*{who}* — {conv.customer_phone}",
+        f"*{who}* — {contact}",
         f"Sababu: {reason or 'Ameomba'}",
         "",
         "*Mazungumzo ya mwisho:*",
@@ -294,9 +302,15 @@ def notify_owner(bot, wa, conv, reason=''):
 
 
 def _send(wa, conv, to, text):
-    """Tuma na hifadhi — sawa na `_send_and_save` ya views."""
+    """
+    Tuma kwa MTEJA na hifadhi.
+
+    `wa.jid` ni ya mazungumzo haya, kwa hiyo ni sahihi hapa. Kwa
+    mmiliki (`notify_owner`) hatuitumii — jid ingepeleka taarifa kwa
+    mteja badala ya mmiliki.
+    """
     from .models import Message
-    res = wa.send_text(to, text)
+    res = wa.send_text(to, text, jid=getattr(wa, 'jid', None))
     Message.objects.create(
         conversation=conv, role='assistant', content=text,
         wa_message_id=res.get('message_id', '') or '',

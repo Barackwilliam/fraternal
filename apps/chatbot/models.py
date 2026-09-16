@@ -143,6 +143,10 @@ class BotConfig(models.Model):
         help_text="Namba ya mmiliki inayopokea taarifa. Mfano: +255750123456")
     notify_handoff     = models.BooleanField(
         default=True, help_text="Tuma taarifa mteja anapohitaji binadamu")
+    owner_lid          = models.CharField(
+        max_length=25, blank=True, editable=False,
+        help_text="LID ya mmiliki, imetafsiriwa kutoka namba. "
+                  "WhatsApp inatumia LID badala ya namba kwa wateja wengi.")
 
     # ── Meta (zimebaki kwa bot za zamani; hazitumiki tena) ────
     whatsapp_phone_id  = models.CharField(max_length=50, blank=True, help_text="Meta Phone Number ID (legacy)")
@@ -189,6 +193,28 @@ class BotConfig(models.Model):
         """Namba ya mmiliki kama tarakimu pekee, kwa kulinganisha."""
         import re as _re
         return _re.sub(r'\D', '', self.owner_whatsapp or '')
+
+    def is_owner(self, sender):
+        """
+        Je, mtumaji huyu ni mmiliki?
+
+        WhatsApp inatumia LID (tarakimu 15) badala ya namba kwa wateja
+        wengi. Kulinganisha namba peke yake kulishindwa kabisa —
+        `255754111222` dhidi ya `158351803576497` hazitalingana kamwe,
+        kwa hiyo amri `orodha` na `endelea` hazikufanya kazi.
+
+        Sasa tunalinganisha pande zote mbili. `owner_lid` inajazwa
+        mara ya kwanza mmiliki anapoandika (angalia
+        `bridge.resolve_owner_lid`).
+        """
+        import re as _re
+        s = _re.sub(r'\D', '', str(sender or ''))
+        if not s:
+            return False
+        if self.owner_lid and s == self.owner_lid:
+            return True
+        d = self.owner_digits
+        return bool(d and len(s) < 15 and (s.endswith(d[-9:]) or d.endswith(s[-9:])))
 
     def _make_session_name(self):
         """

@@ -804,9 +804,18 @@ def _set_conv_state(conv, state: str):
     conv.save(update_fields=['metadata'])
 
 
-def _send_and_save(wa, conv, phone: str, text: str, role='assistant'):
-    """Send a WhatsApp message and save it to Message table."""
-    wa.send_text(phone, text)
+def _send_and_save(wa, conv, phone: str, text: str, role='assistant', jid=None):
+    """
+    Send a WhatsApp message and save it to Message table.
+
+    `jid` ni ya mazungumzo haya. WhatsApp inatumia LID kwa wateja
+    wengi, na LID haiwezi kujengwa upya kutoka tarakimu — inaishia
+    `@lid`, si `@s.whatsapp.net`. Kwa hiyo tunapitisha jid halisi.
+    """
+    res = wa.send_text(phone, text, jid=jid or getattr(wa, 'jid', None))
+    if not res.get('success'):
+        logger.error('[%s] ujumbe haukufika kwa %s: %s',
+                     conv.bot.session_name, phone, res.get('error'))
     Message.objects.create(conversation=conv, role=role, content=text)
 
 
@@ -878,8 +887,18 @@ def _process_message(bot: BotConfig, msg_data: dict):
     # Hii inakaguliwa KABLA ya kila kitu kingine, lakini ujumbe usio
     # amri unapita kama kawaida — mmiliki anaweza kuwa mteja wa bot
     # yake mwenyewe anapoijaribu.
-    owner = bot.owner_digits
-    if owner and from_phone.endswith(owner[-9:]):
+    # `is_owner` inalinganisha namba NA LID. WhatsApp inatumia LID kwa
+    # wateja wengi, kwa hiyo kulinganisha namba peke yake kulishindwa
+    # kabisa — amri `orodha` na `endelea` hazikufanya kazi.
+    if bot.owner_digits and not bot.owner_lid and msg_data.get('is_lid'):
+        # Jaribio moja la kutafsiri, mara ya kwanza tunapoona LID
+        try:
+            from . import bridge as _br
+            _br.resolve_owner_lid(bot)
+        except Exception:
+            logger.warning('[%s] kutafsiri LID ya mmiliki kumeshindwa', bot.session_name)
+
+    if bot.is_owner(from_phone):
         if handoff.handle_owner_command(bot, wa, from_phone, text):
             return
 
@@ -1067,7 +1086,14 @@ def _process_message(bot: BotConfig, msg_data: dict):
         sub.messages_used += 1
         sub.save(update_fields=['messages_used'])
 
-    wa.send_text(from_phone, reply)
+    # Jibu la bridge LAZIMA likaguliwe. Zamani `wa.send_text(...)`
+    # iliitwa bila kuangalia matokeo: bridge ikisema `success: false`,
+    # Django iliendelea kana kwamba imetuma, na dashboard ilionyesha
+    # bot imejibu wakati mteja hakupokea kitu.
+    sent = wa.send_text(from_phone, reply, jid=msg_data.get('jid'))
+    if not sent.get('success'):
+        logger.error('[%s] jibu halikufika kwa %s: %s',
+                     bot.session_name, from_phone, sent.get('error'))
 
     if result.get('is_handoff'):
         # Hii ilikuwa inaweka bendera pekee — mmiliki hakuarifiwa, na bot
@@ -1243,6 +1269,7 @@ def _baileys_to_msg_data(payload: dict) -> dict:
         'media_caption': text if msg_type in ('image', 'video', 'document') else '',
         'filename':     payload.get('filename', ''),
         'jid':          payload.get('jid', ''),
+        'is_lid':       bool(payload.get('is_lid')),
     }
 
     if payload.get('location'):

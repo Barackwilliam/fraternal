@@ -99,6 +99,39 @@ def logout_session(name):
     return _request('POST', f'/sessions/{name}/logout', timeout=40)
 
 
+def resolve_phones(session, phones):
+    """namba -> {exists, jid, lid}. Inahitaji session iwe hai."""
+    return _request('POST', '/resolve',
+                    json={'session': session, 'phones': list(phones)}, timeout=25)
+
+
+def resolve_owner_lid(bot):
+    """
+    Jaza `owner_lid` mara moja. Inarudisha LID au tupu.
+
+    Baileys 6.7.18 haina LID -> namba, lakini ina namba -> LID. Kwa
+    hiyo tunatafsiri upande huu, kisha tunalinganisha LID na LID.
+    """
+    if bot.owner_lid:
+        return bot.owner_lid
+    phone = bot.owner_digits
+    if not phone:
+        return ''
+
+    data = resolve_phones(bot.session_name, [phone])
+    if not data.get('success'):
+        logger.warning('[%s] kutafsiri LID ya mmiliki kumeshindwa: %s',
+                       bot.session_name, data.get('error'))
+        return ''
+
+    lid = (data.get('resolved', {}).get(phone, {}) or {}).get('lid', '')
+    if lid:
+        bot.owner_lid = lid[:25]
+        bot.save(update_fields=['owner_lid'])
+        logger.info('[%s] LID ya mmiliki: %s -> %s', bot.session_name, phone, lid)
+    return lid
+
+
 def prune_keys(days=30):
     return _request('POST', '/prune', json={'days': days}, timeout=60)
 
@@ -123,19 +156,39 @@ class BaileysHandler:
     def is_configured(self):
         return bool(is_configured() and self.session)
 
-    def send_text(self, to, message):
+    def send_text(self, to, message, jid=None):
+        """
+        `jid` inatangulia `to` inapopatikana.
+
+        WhatsApp sasa inatumia LID (tarakimu 15) badala ya namba kwa
+        wateja wengi. LID inaishia `@lid`, si `@s.whatsapp.net`. Bridge
+        ilikuwa inaijenga JID kutoka tarakimu, ikizalisha
+        `158351803576497@s.whatsapp.net` — isiyo halali. Jibu halikwenda
+        popote, na Django ilidhani imetuma.
+
+        JID halisi tuliyoipokea ndiyo sahihi daima.
+        """
         if not self.is_configured():
-            logger.warning('Bot %s: bridge haijasanidiwa', self.bot.bot_name)
+            logger.warning('Bot %s: bridge haijasanidiwa (BRIDGE_URL/BRIDGE_API_KEY)',
+                           self.bot.bot_name)
             return {'success': False, 'error': 'Not configured'}
 
-        data = _request('POST', '/send', json={
-            'session': self.session,
-            'to': to,
-            'text': message,
-        })
+        # `jid` ni ya KILA WITO, si ya handler.
+        #
+        # `self.jid` ni ya mazungumzo yaliyoanzisha wito huu. Kuitumia
+        # kwa kila `send_text` kulipeleka taarifa ya handoff kwa MTEJA
+        # badala ya mmiliki — jid ilishinda `to`.
+        #
+        # Sasa: `_process_message` inapitisha jid inapojibu mteja;
+        # `notify_owner` haipitishi, kwa hiyo `to` inatumika.
+        payload = {'session': self.session, 'to': to, 'text': message}
+        if jid:
+            payload['jid'] = jid
+
+        data = _request('POST', '/send', json=payload)
         if not data.get('success'):
-            logger.error('Bot %s: kutuma kumeshindwa — %s',
-                         self.bot.bot_name, data.get('error'))
+            logger.error('Bot %s: kutuma kwa %s kumeshindwa — %s',
+                         self.bot.bot_name, jid or to, data.get('error'))
         return data
 
     def send_interactive_list(self, to, header, body, button_text, sections):

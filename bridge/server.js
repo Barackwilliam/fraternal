@@ -179,6 +179,48 @@ app.post('/sessions/:name/logout', auth, async (req, res) => {
 // KUTUMA UJUMBE
 // ============================================================
 
+// ── KUTAFSIRI NAMBA -> LID ───────────────────────────────────
+// WhatsApp inatumia LID (tarakimu 15) badala ya namba kwa wateja
+// wengi. Baileys 6.7.18 haina njia ya LID -> namba, LAKINI
+// `onWhatsApp()` inatoa namba -> LID.
+//
+// Hiyo inatosha kwa tatizo halisi: kutambua MMILIKI. Tunatafsiri
+// namba yake mara moja, tunahifadhi LID, kisha tunalinganisha LID
+// na LID. Amri zake zinafanya kazi tena.
+
+app.post('/resolve', auth, async (req, res) => {
+    const { session, phones } = req.body || {};
+    const s = getSession(session);
+    if (!s) return res.status(404).json({ success: false, error: 'Session haipo' });
+    if (!s.sock || s.status !== 'connected') {
+        return res.status(503).json({ success: false, error: `Session ${s.status}` });
+    }
+
+    const list = (Array.isArray(phones) ? phones : [phones])
+        .filter(Boolean)
+        .map((p) => `${String(p).replace(/\D/g, '')}@s.whatsapp.net`);
+
+    if (!list.length) {
+        return res.status(400).json({ success: false, error: '`phones` inahitajika' });
+    }
+
+    try {
+        const out = await s.sock.onWhatsApp(...list);
+        const map = {};
+        for (const r of out || []) {
+            const phone = String(r.jid || '').split('@')[0].split(':')[0];
+            map[phone] = {
+                exists: Boolean(r.exists),
+                jid: r.jid || '',
+                lid: r.lid ? String(r.lid).split('@')[0] : '',
+            };
+        }
+        res.json({ success: true, resolved: map });
+    } catch (e) {
+        res.status(500).json({ success: false, error: String(e.message || e) });
+    }
+});
+
 // ── UCHUNGUZI ────────────────────────────────────────────────
 // Inatenganisha tatizo katika sehemu mbili:
 //   /sessions/:name/debug — je, WhatsApp inaongea nasi kabisa?
