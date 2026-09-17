@@ -38,6 +38,7 @@ from .whatsapp import build_services_menu
 from .bridge import BaileysHandler
 from . import handoff
 from . import knowledge
+from . import ratelimit
 
 logger = logging.getLogger('chatbot.views')
 
@@ -1103,6 +1104,22 @@ def _process_message(bot: BotConfig, msg_data: dict):
                     sub.save(update_fields=['messages_used'])
                 return
             # If interactive fails (e.g. bot not WhatsApp-connected), fall through to AI
+
+    # ── Kikomo cha matumizi ────────────────────────────────────────
+    # Groq ya bure inatoa tokens 6,000/dakika kwa AKAUNTI NZIMA.
+    # Mteja mmoja akituma jumbe kumi mfululizo, bot ZOTE zinanyamaza.
+    #
+    # Hii iko HAPA, si mwanzoni: salamu, majina, na orodha ya huduma
+    # hazitumii AI, kwa hiyo hazipaswi kuhesabiwa.
+    allowed, why = ratelimit.check(bot, from_phone)
+    if not allowed:
+        # Onyo linatumwa MARA MOJA kwa dirisha. Mteja anayebonyeza
+        # mara ishirini asipate onyo mara ishirini.
+        if not ratelimit.already_warned(bot, from_phone, why):
+            _send_and_save(wa, conv, from_phone,
+                           ratelimit.message_for(why, bot),
+                           jid=msg_data.get('jid'))
+        return
 
     # AI response
     ai     = BotAIEngine(bot)
