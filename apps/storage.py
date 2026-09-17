@@ -1,6 +1,20 @@
 """
 Supabase Storage — mahali image zote za JamiiTek zinakaa.
 
+FUNGUO: S3, SI service_role
+
+`service_role` inafungua DATABASE YOTE — wateja, mazungumzo, invoice
+— pamoja na Auth na Edge Functions. Inapitiliza Row Level Security
+kabisa.
+
+S3 access keys zinafungua STORAGE PEKEE. Ikivuja, mtu anapata image.
+Haiwezi kugusa database.
+
+Kwa funguo inayokaa Render ikiwa na kazi moja ya kupakia picha, S3
+ndizo sahihi. Hiyo ni kanuni ya ruhusa ya chini kabisa.
+
+Zinapatikana: Supabase > Storage > S3 Access Keys > New access key.
+
 KWA NINI KUPITIA DJANGO NA SI MOJA KWA MOJA
 
 Browser ingeweza kupakia moja kwa moja Supabase kwa signed URL, na
@@ -32,12 +46,16 @@ import re
 import uuid
 from datetime import datetime
 
-import requests
+import boto3
+from botocore.config import Config
+from botocore.exceptions import ClientError, BotoCoreError
 from django.conf import settings
 
 logger = logging.getLogger('jamiitek.storage')
 
 TIMEOUT = 30
+
+_client = None
 
 # Aina zinazokubalika. Orodha ni fupi kwa makusudi — SVG haimo kwa
 # sababu inaweza kubeba JavaScript, na image ya mteja inaonyeshwa
@@ -57,16 +75,48 @@ def _base():
     return (getattr(settings, 'SUPABASE_URL', '') or '').rstrip('/')
 
 
-def _key():
-    return getattr(settings, 'SUPABASE_SERVICE_KEY', '') or ''
-
-
 def _bucket():
     return getattr(settings, 'SUPABASE_BUCKET', 'media') or 'media'
 
 
+def _access_key():
+    return getattr(settings, 'SUPABASE_S3_ACCESS_KEY', '') or ''
+
+
+def _secret_key():
+    return getattr(settings, 'SUPABASE_S3_SECRET_KEY', '') or ''
+
+
+def _region():
+    return getattr(settings, 'SUPABASE_S3_REGION', 'us-east-1') or 'us-east-1'
+
+
 def is_configured():
-    return bool(_base() and _key())
+    return bool(_base() and _access_key() and _secret_key())
+
+
+def _s3():
+    """
+    Mteja mmoja unaotumika tena. Kuunda mpya kwa kila upload ni
+    gharama isiyo na sababu — boto3 inafungua muunganisho.
+    """
+    global _client
+    if _client is not None:
+        return _client
+    _client = boto3.client(
+        's3',
+        endpoint_url=f"{_base()}/storage/v1/s3",
+        aws_access_key_id=_access_key(),
+        aws_secret_access_key=_secret_key(),
+        region_name=_region(),
+        config=Config(
+            signature_version='s3v4',
+            connect_timeout=10,
+            read_timeout=TIMEOUT,
+            retries={'max_attempts': 2},
+        ),
+    )
+    return _client
 
 
 def public_url(path):
@@ -123,7 +173,7 @@ def upload(file_obj, folder='media', filename=None, content_type=None):
     Kamwe haitupi exception — inayeyusha kila kosa kuwa jibu.
     """
     if not is_configured():
-        return {'success': False, 'error': 'SUPABASE_URL au SUPABASE_SERVICE_KEY haijawekwa'}
+        return {'success': False, 'error': 'SUPABASE_URL au funguo za S3 hazijawekwa'}
 
     filename = filename or getattr(file_obj, 'name', '') or 'file'
     content_type = content_type or getattr(file_obj, 'content_type', '') or ''
@@ -143,32 +193,37 @@ def upload(file_obj, folder='media', filename=None, content_type=None):
     except Exception:
         pass
 
-    url = f"{_base()}/storage/v1/object/{_bucket()}/{path}"
     try:
-        resp = requests.post(
-            url,
-            headers={
-                'Authorization': f'Bearer {_key()}',
-                'Content-Type': content_type or 'application/octet-stream',
-                # Bucket huundwa mara ya kwanza ikiwa haipo? Hapana —
-                # Supabase inadai bucket iwepo. Angalia README.
-                'x-upsert': 'false',
-            },
-            data=file_obj.read(),
-            timeout=TIMEOUT,
+        data = file_obj.read()
+    except Exception as e:
+        return {'success': False, 'error': f'kusoma file kumeshindwa: {e}'}
+
+    if len(data) > MAX_BYTES:
+        return {'success': False,
+                'error': f'File ni kubwa mno ({len(data) // 1024 // 1024}MB). Kikomo ni 10MB.'}
+
+    try:
+        _s3().put_object(
+            Bucket=_bucket(),
+            Key=path,
+            Body=data,
+            ContentType=content_type or 'application/octet-stream',
+            # Image za tovuti hazibadiliki — URL ina UUID, kwa hiyo
+            # file mpya inapata URL mpya. Cache ndefu ni salama.
+            CacheControl='public, max-age=31536000, immutable',
         )
-    except requests.RequestException as e:
+    except ClientError as e:
+        code = e.response.get('Error', {}).get('Code', '')
+        detail = e.response.get('Error', {}).get('Message', str(e))
+        logger.error('S3 %s: %s', code, detail)
+        if code in ('NoSuchBucket', '404'):
+            detail = f"Bucket '{_bucket()}' haipo kwenye Supabase."
+        elif code in ('InvalidAccessKeyId', 'SignatureDoesNotMatch', 'AccessDenied', '403'):
+            detail = 'SUPABASE_S3_ACCESS_KEY au SECRET si sahihi.'
+        return {'success': False, 'error': detail}
+    except BotoCoreError as e:
         logger.exception('upload imeshindwa')
         return {'success': False, 'error': str(e)}
-
-    if resp.status_code not in (200, 201):
-        detail = resp.text[:200]
-        logger.error('Supabase %s: %s', resp.status_code, detail)
-        if resp.status_code == 404:
-            detail = f"Bucket '{_bucket()}' haipo kwenye Supabase."
-        elif resp.status_code in (401, 403):
-            detail = 'SUPABASE_SERVICE_KEY si sahihi au haina ruhusa.'
-        return {'success': False, 'error': detail}
 
     return {'success': True, 'path': path, 'url': public_url(path), 'error': ''}
 
@@ -182,13 +237,9 @@ def delete(path):
     if marker in path:
         path = path.split(marker, 1)[1]
     try:
-        resp = requests.delete(
-            f"{_base()}/storage/v1/object/{_bucket()}/{path.lstrip('/')}",
-            headers={'Authorization': f'Bearer {_key()}'},
-            timeout=TIMEOUT,
-        )
-        return resp.status_code in (200, 204)
-    except requests.RequestException:
+        _s3().delete_object(Bucket=_bucket(), Key=path.lstrip('/'))
+        return True
+    except (ClientError, BotoCoreError):
         logger.exception('delete imeshindwa')
         return False
 
@@ -198,17 +249,15 @@ def health():
     if not is_configured():
         return {'success': False, 'error': 'haijasanidiwa'}
     try:
-        resp = requests.post(
-            f"{_base()}/storage/v1/object/list/{_bucket()}",
-            headers={'Authorization': f'Bearer {_key()}',
-                     'Content-Type': 'application/json'},
-            json={'limit': 1, 'prefix': ''},
-            timeout=15,
-        )
-        if resp.status_code == 200:
-            return {'success': True, 'bucket': _bucket()}
-        if resp.status_code == 404:
+        _s3().list_objects_v2(Bucket=_bucket(), MaxKeys=1)
+        return {'success': True, 'bucket': _bucket(), 'region': _region()}
+    except ClientError as e:
+        code = e.response.get('Error', {}).get('Code', '')
+        if code in ('NoSuchBucket', '404'):
             return {'success': False, 'error': f"Bucket '{_bucket()}' haipo"}
-        return {'success': False, 'error': f'HTTP {resp.status_code}: {resp.text[:150]}'}
-    except requests.RequestException as e:
+        if code in ('InvalidAccessKeyId', 'SignatureDoesNotMatch', 'AccessDenied', '403'):
+            return {'success': False, 'error': 'Funguo za S3 si sahihi'}
+        return {'success': False,
+                'error': f"{code}: {e.response.get('Error', {}).get('Message', '')}"}
+    except BotoCoreError as e:
         return {'success': False, 'error': str(e)}

@@ -256,11 +256,22 @@ WILLIAM_PHONE_NUMBER_ID       = os.getenv('WILLIAM_PHONE_NUMBER_ID', '')
 # muda, kila deploy inafuta kila kitu. Zinakwenda Supabase Storage,
 # na database inahifadhi URL pekee.
 #
-# SUPABASE_SERVICE_KEY ni ya `service_role` — INABAKI SERVER.
-# Ikifika browser, mtu anaweza kufuta storage yako yote.
-SUPABASE_URL         = os.getenv('SUPABASE_URL', '')
-SUPABASE_SERVICE_KEY = os.getenv('SUPABASE_SERVICE_KEY', '')
-SUPABASE_BUCKET      = os.getenv('SUPABASE_BUCKET', 'media')
+# Funguo zinabaki SERVER. Zikifika browser, mtu anaweza kufuta
+# storage yako yote.
+SUPABASE_URL = os.getenv('SUPABASE_URL', '')
+SUPABASE_BUCKET = os.getenv('SUPABASE_BUCKET', 'media')
+
+# Funguo za S3, SI service_role.
+#
+# `service_role` inafungua database yote — wateja, mazungumzo, invoice
+# — pamoja na Auth. S3 keys zinafungua Storage pekee. Kwa funguo
+# inayokaa Render ikiwa na kazi moja ya kupakia picha, hizi ndizo
+# sahihi.
+#
+# Supabase > Storage > S3 Access Keys > New access key
+SUPABASE_S3_ACCESS_KEY = os.getenv('SUPABASE_S3_ACCESS_KEY', '')
+SUPABASE_S3_SECRET_KEY = os.getenv('SUPABASE_S3_SECRET_KEY', '')
+SUPABASE_S3_REGION     = os.getenv('SUPABASE_S3_REGION', 'us-east-1')
 
 # ── Baileys Bridge ─────────────────────────────────────
 # Bridge ni mchakato wa Node unaoshikilia socket za WhatsApp.
