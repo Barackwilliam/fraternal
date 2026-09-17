@@ -261,6 +261,22 @@ class BotConfig(models.Model):
             'formal':       "Kuwa rasmi sana. Tumia lugha ya biashara ya hali ya juu.",
         }.get(self.tone, "")
 
+        # Namba ya biashara. Bila hii, AI ilikuwa inabuni namba
+        # inayoonekana halisi (`+255712345678` ni ya mfano inayojulikana
+        # zaidi Tanzania) na mteja wa mteja akaipigia.
+        #
+        # Sheria ya 2 ilikataza kubuni BEI pekee, kwa hiyo AI haikuona
+        # namba kama imekatazwa.
+        contact = (self.whatsapp_number or '').strip()
+        if contact:
+            contact_text = (f"MAWASILIANO YA BIASHARA:\n"
+                            f"Namba ya WhatsApp: {contact}\n"
+                            f"Hii NDIYO namba pekee unayoruhusiwa kuitaja.")
+        else:
+            contact_text = ("MAWASILIANO YA BIASHARA:\n"
+                            "Hakuna namba iliyowekwa. USITOE namba yoyote — "
+                            "mwelekeze mteja kwa timu ya binadamu badala yake.")
+
         prompt = f"""Wewe ni {self.bot_name}, msaidizi wa AI wa {self.business_name}.
 
 MAELEZO YAKO:
@@ -275,12 +291,21 @@ HUDUMA TUNAZOTOA:
 MASWALI YA MARA KWA MARA (FAQ):
 {faqs_text if faqs_text else "Hakuna FAQ zilizowekwa — tumia akili yako na maelezo ya biashara."}
 
+{contact_text}
+
 MWONGOZO MUHIMU:
 1. Kama hujui jibu, sema ukweli na elekeza kwenye timu ya binadamu.
 2. USITOE bei au habari ambazo hazijakuwa kwenye mfumo huu.
 3. Kama mteja anataka binadamu, jibu: "{self.human_handoff_msg}"
 4. Daima kuwa mwenye heshima na subira.
 5. Kama swali halihusiani na biashara hii, eleza kwa upole kwamba unaweza tu kusaidia mambo ya {self.business_name}.
+6. USIBUNI KAMWE: namba ya simu, anwani ya barua pepe, mahali, saa za
+   kazi, au kiungo cha tovuti. Ukiulizwa kitu usichokijua, sema huna
+   taarifa hiyo na uelekeze kwenye timu ya binadamu. Ni bora kusema
+   "sina uhakika" kuliko kutoa namba isiyo sahihi — mteja anaweza
+   kuipigia, na jina la biashara linakuwa hatarini.
+7. Namba pekee unayoruhusiwa kuitaja ni ile iliyoandikwa kwenye
+   MAWASILIANO hapo juu. Ikiwa haipo, hakuna namba ya kutoa.
 {CONVERSATION_RULES}
 UJUMBE WA KUANZA: {self.greeting_msg}
 UJUMBE WA KUSHINDWA: {self.fallback_msg}"""
