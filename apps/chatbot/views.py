@@ -1010,6 +1010,10 @@ def _process_message(bot: BotConfig, msg_data: dict):
 
     # Check subscription
     sub = getattr(bot, 'subscription', None)
+    if sub:
+        # Kipindi kipya kikifika, hesabu inarudi sifuri. Bila hii,
+        # plan ya kila mwezi ilikuwa inahesabu maisha yote.
+        sub.roll_period_if_due()
     if sub and not sub.is_active:
         _send_and_save(wa, conv, from_phone,
                        "Samahani, huduma hii imesimamishwa. Wasiliana na kampuni moja kwa moja.")
@@ -1049,15 +1053,33 @@ def _process_message(bot: BotConfig, msg_data: dict):
     final_text = locals().get('ai_text', text)
 
     # ── Services menu trigger ──────────────────────────────────────
-    # If user asks for services/menu and bot has 2+ services,
-    # send an interactive list instead of a plain AI answer.
+    # Mteja akiomba orodha ya huduma, tunatuma orodha badala ya jibu
+    # la AI.
+    #
+    # `bei`, `price`, `gharama` na `cost` ZILIONDOLEWA.
+    #
+    # Zilikuwa zinafanya KILA swali la bei kupata orodha ya huduma
+    # badala ya jibu. "bei ya saruji?" — swali mahususi lenye jibu
+    # mahususi — lilikuwa linarudisha menyu ya huduma zote. Mteja
+    # anauliza kitu kimoja na anapewa kila kitu.
+    #
+    # AI tayari inajua bei zote (`build_system_prompt` inaziweka
+    # pamoja na kila huduma), kwa hiyo inaweza kujibu moja kwa moja.
+    #
+    # Neno la bei peke yake — "bei?" bila kitu kingine — bado
+    # linaleta orodha, kwa sababu hapo mteja hajataja huduma.
     menu_keywords = [
         'menu', 'huduma', 'services', 'orodha', 'chaguo', 'options',
         'nini mnafanya', 'mnafanya nini', 'what do you offer', 'what can you do',
-        'bei', 'price', 'gharama', 'cost',
     ]
     text_lower = final_text.lower()
-    if any(kw in text_lower for kw in menu_keywords):
+
+    # "bei?" / "bei zenu?" — swali pana bila huduma mahususi
+    bare_price = text_lower.strip(' ?.!').strip() in (
+        'bei', 'bei?', 'bei zenu', 'bei gani', 'price', 'prices', 'gharama', 'cost',
+    )
+
+    if bare_price or any(kw in text_lower for kw in menu_keywords):
         menu = build_services_menu(bot)
         if menu:
             sent = wa.send_interactive_list(

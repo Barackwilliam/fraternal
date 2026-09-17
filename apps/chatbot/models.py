@@ -500,6 +500,9 @@ class BotSubscription(models.Model):
     end_date     = models.DateField(null=True, blank=True)
     trial_ends   = models.DateField(null=True, blank=True)
     messages_used = models.PositiveIntegerField(default=0)
+    usage_period_start = models.DateField(
+        null=True, blank=True,
+        help_text="Mwanzo wa kipindi cha sasa cha kuhesabu jumbe")
     auto_renew   = models.BooleanField(default=True)
     created_at   = models.DateTimeField(auto_now_add=True)
 
@@ -517,10 +520,62 @@ class BotSubscription(models.Model):
         delta = (self.end_date - timezone.now().date()).days
         return max(delta, 0)
 
+    # ── Kipindi cha kuhesabu ──────────────────────────────────
+    # `messages_used` ilikuwa inaongezeka TU. Hakuna mahali ilirudishwa
+    # sifuri — si kwenye renewal, si mwanzo wa mwezi.
+    #
+    # Maana yake: plan ya jumbe 1,000 KWA MWEZI ilikuwa inaishia
+    # MILELE ikifika 1,000 tangu bot ilipoanzishwa. Mteja akilipa
+    # mwezi ujao, `messages_remaining` inabaki 0 na kila ujumbe
+    # unarudi `fallback_msg`. Plan ni ya kila mwezi; hesabu ilikuwa
+    # ya maisha yote.
+
+    def _period_start(self):
+        """
+        Siku ya kuanza kipindi cha sasa.
+
+        Inafuata siku ya mwezi ya `start_date` — mteja aliyeanza
+        tarehe 17, kipindi chake kinaanza tarehe 17 kila mwezi, si
+        tarehe 1. Kumuanzisha tarehe 1 kungempa jumbe za bure
+        anapojisajili mwishoni mwa mwezi.
+        """
+        from datetime import date
+        import calendar
+        today = timezone.now().date()
+        anchor = (self.start_date or today).day
+
+        # Siku 31 kwenye mwezi wenye siku 30 — tumia ya mwisho
+        last = calendar.monthrange(today.year, today.month)[1]
+        day = min(anchor, last)
+        this_month = date(today.year, today.month, day)
+
+        if today >= this_month:
+            return this_month
+        # Bado hatujafika siku ya kuanza mwezi huu — kipindi ni cha mwezi uliopita
+        y, m = (today.year, today.month - 1) if today.month > 1 else (today.year - 1, 12)
+        last_prev = calendar.monthrange(y, m)[1]
+        return date(y, m, min(anchor, last_prev))
+
+    def roll_period_if_due(self):
+        """
+        Anzisha kipindi kipya kikifika. Inarudisha True ikiwa
+        imerudishwa sifuri.
+        """
+        start = self._period_start()
+        if self.usage_period_start == start:
+            return False
+        self.usage_period_start = start
+        self.messages_used = 0
+        self.save(update_fields=['usage_period_start', 'messages_used'])
+        return True
+
     @property
     def messages_remaining(self):
         if self.plan.is_unlimited:
             return 999999
+        # Kipindi kikiwa kimepita, hesabu ya zamani haihusiki tena
+        if self.usage_period_start and self.usage_period_start != self._period_start():
+            return self.plan.msg_limit
         return max(self.plan.msg_limit - self.messages_used, 0)
 
     @property
