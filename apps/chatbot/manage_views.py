@@ -456,38 +456,47 @@ def manage_bot_clients(request):
 
 @staff_required
 def manage_bot_whatsapp(request, bot_id):
-    """William sets Phone Number ID for a specific bot."""
-    bot      = get_object_or_404(BotConfig, id=bot_id)
-    all_bots = BotConfig.objects.select_related('client').order_by('bot_name')
-    global_token_set = bool(getattr(settings, 'WHATSAPP_MASTER_TOKEN', ''))
+    """
+    Namba za bot: ya biashara na ya mmiliki.
 
-    if request.method == 'POST' and request.POST.get('action') == 'save_whatsapp':
-        phone_number  = request.POST.get('whatsapp_number', '').strip()
-        phone_id      = request.POST.get('whatsapp_phone_id', '').strip()
-        token_override = request.POST.get('whatsapp_token', '').strip()
+    UKURASA HUU ULIKUWA WA META. Ulikuwa unadai Phone Number ID na
+    `WHATSAPP_MASTER_TOKEN`, ukisema "Token haijawekwa! Bots zote
+    hazitafanya kazi" — si kweli tangu tulipohamia Baileys.
 
-        bot.whatsapp_number   = phone_number
-        bot.whatsapp_phone_id = phone_id
-        if token_override:
-            bot.whatsapp_token = token_override
-        bot.save(update_fields=['whatsapp_number', 'whatsapp_phone_id', 'whatsapp_token'])
+    Mbaya zaidi, ulikuwa unaagiza: "Mwambie mteja afute akaunti yake
+    ya WhatsApp kwenye simu kwanza." Kwa Meta hiyo ilikuwa lazima.
+    Kwa Baileys ingevunja bot kabisa — WhatsApp inapaswa KUBAKI
+    kwenye simu ili QR iweze kuscanwa na session ikae hai.
 
-        if phone_id and bot.status == 'pending':
-            bot.status    = 'active'
-            bot.is_active = True
-            bot.save()
-            messages.success(request, f"✅ {bot.bot_name} imeunganishwa na imewashwa!")
-        elif phone_id:
-            messages.success(request, f"✅ {bot.bot_name} imeunganishwa na WhatsApp.")
-        else:
-            messages.warning(request, "Phone Number ID haikuwekwa.")
+    Sasa unashughulikia namba pekee; kuunganisha kunafanyika
+    /manage/chatbot/sessions/.
+    """
+    from apps.chatbot import bridge
 
+    bot = get_object_or_404(BotConfig, id=bot_id)
+
+    if request.method == 'POST':
+        bot.whatsapp_number = request.POST.get('whatsapp_number', '').strip()
+        bot.owner_whatsapp  = request.POST.get('owner_whatsapp', '').strip()
+        bot.notify_handoff  = bool(request.POST.get('notify_handoff'))
+        # Namba ya mmiliki ikibadilika, LID ya zamani haifai tena
+        bot.owner_lid = ''
+        bot.save(update_fields=['whatsapp_number', 'owner_whatsapp',
+                                'notify_handoff', 'owner_lid'])
+        messages.success(request, f"Namba za {bot.bot_name} zimehifadhiwa.")
         return redirect('manage_bot_whatsapp', bot_id=bot_id)
+
+    live = None
+    if bridge.is_configured():
+        data = bridge.session_status(bot.session_name)
+        if data.get('success'):
+            live = data
 
     return render(request, 'management/chatbot_whatsapp.html', {
         'bot': bot,
-        'all_bots': all_bots,
-        'global_token_set': global_token_set,
+        'live': live,
+        'bridge_ok': bridge.is_configured(),
+        'all_bots': BotConfig.objects.select_related('client').order_by('bot_name'),
     })
 
 

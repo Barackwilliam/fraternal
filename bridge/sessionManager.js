@@ -29,6 +29,7 @@ const {
     default: makeWASocket,
     DisconnectReason,
     fetchLatestBaileysVersion,
+    downloadMediaMessage,
 } = require('@whiskeysockets/baileys');
 
 const { Boom } = require('@hapi/boom');
@@ -45,6 +46,11 @@ const log = (session, ...args) => console.log(`[${session}]`, ...args);
 const RECONNECT_BASE_MS = 3000;
 const RECONNECT_MAX_MS  = 5 * 60 * 1000;   // dakika 5
 const MAX_ATTEMPTS      = 20;
+
+// Ukubwa wa juu wa sauti tunayopakua. Voice note ya dakika moja ni
+// ~100KB; dakika tano ni ~500KB. 5MB inatosha kwa ujumbe wowote wa
+// kawaida, na inazuia mtu kutuma faili kubwa kuchoma bandwidth.
+const MAX_AUDIO_BYTES = 5 * 1024 * 1024;
 
 // Baileys haitoi kosa lolote ikishindwa kufikia WhatsApp — inakaa kimya.
 // Bila hii, session inakwama 'starting' milele na dashboard inaonyesha
@@ -379,6 +385,7 @@ class Session {
         let text = '';
         let msgType = 'text';
         let filename = '';
+        let audio = null;
 
         if (m.conversation) {
             text = m.conversation;
@@ -396,6 +403,13 @@ class Session {
             filename = m.documentMessage.fileName || '';
         } else if (m.audioMessage) {
             msgType = 'audio';
+            // Sauti inapakuliwa hapa na kupelekwa Django ikiwa base64.
+            // Django inaipeleka Groq Whisper na kupata maandishi.
+            //
+            // Bila hii, ujumbe wa sauti ulikuwa unakuwa "[Sauti]" na AI
+            // haikuwa na cha kufanya nayo. Wateja wa Tanzania wanatuma
+            // voice note nyingi kuliko maandishi.
+            audio = await this._downloadAudio(message);
         } else if (m.stickerMessage) {
             msgType = 'sticker';
         } else if (m.locationMessage) {
@@ -418,6 +432,9 @@ class Session {
             msg_type: msgType,
             filename,
             contact_name: message.pushName || '',
+            audio_base64: audio ? audio.data : '',
+            audio_mime:   audio ? audio.mime : '',
+            audio_seconds: m.audioMessage?.seconds || 0,
             location: m.locationMessage ? {
                 latitude: m.locationMessage.degreesLatitude,
                 longitude: m.locationMessage.degreesLongitude,
@@ -425,6 +442,28 @@ class Session {
                 address: m.locationMessage.address || '',
             } : null,
         };
+    }
+
+    async _downloadAudio(message) {
+        const info = message.message?.audioMessage;
+        if (!info) return null;
+
+        const size = Number(info.fileLength || 0);
+        if (size && size > MAX_AUDIO_BYTES) {
+            log(this.name, `  sauti ni kubwa mno (${Math.round(size / 1024)}KB) — imerukwa`);
+            return null;
+        }
+
+        try {
+            const buf = await downloadMediaMessage(message, 'buffer', {},
+                { logger, reuploadRequest: this.sock.updateMediaMessage });
+            if (!buf || buf.length > MAX_AUDIO_BYTES) return null;
+            log(this.name, `  sauti imepakuliwa: ${Math.round(buf.length / 1024)}KB`);
+            return { data: buf.toString('base64'), mime: info.mimetype || 'audio/ogg' };
+        } catch (e) {
+            log(this.name, '  kupakua sauti kumeshindwa:', e.message);
+            return null;
+        }
     }
 
     // ── Kutuma ────────────────────────────────────────────────

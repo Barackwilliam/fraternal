@@ -1033,7 +1033,11 @@ def _process_message(bot: BotConfig, msg_data: dict):
         _send_and_save(wa, conv, from_phone, ack)
         ai_text = f"[Mteja alituma faili: {fname}]"
     elif msg_type == 'audio':
-        ack = "Nimepokea ujumbe wa sauti. 🎙️ Samahani siwezi kusikia sauti — tafadhali andika ujumbe wako kwa maandishi."
+        # Tunafika hapa sauti ikishindwa kutafsiriwa tu — ndefu mno,
+        # kubwa mno, au Whisper imeshindwa. Sauti ya kawaida
+        # inabadilishwa kuwa maandishi kwenye `_baileys_to_msg_data`.
+        ack = ("Nimepokea ujumbe wako wa sauti 🎙️ lakini sikuweza kuusikia vizuri. "
+               "Tafadhali uandike kwa maandishi, au tuma sauti fupi zaidi.")
         _send_and_save(wa, conv, from_phone, ack)
         # Save and stop — no AI call for voice without transcription
         Message.objects.create(conversation=conv, role='assistant', content=ack)
@@ -1317,13 +1321,37 @@ def _baileys_to_msg_data(payload: dict) -> dict:
     if payload.get('location'):
         data['location'] = payload['location']
 
+    # ── Sauti -> maandishi ────────────────────────────────────────
+    # Bila hii, voice note ilikuwa inakuwa "[Sauti]" na AI ikijibu
+    # kwamba haielewi. Wateja wa Tanzania wanatuma sauti nyingi
+    # kuliko maandishi, kwa hiyo bot ilikuwa inashindwa kwa sehemu
+    # kubwa ya mazungumzo.
+    if msg_type == 'audio' and payload.get('audio_base64'):
+        from . import transcribe as _tr
+        spoken = _tr.transcribe(
+            payload['audio_base64'],
+            mime=payload.get('audio_mime', 'audio/ogg'),
+            seconds=payload.get('audio_seconds', 0),
+        )
+        if spoken:
+            data['text'] = spoken
+            data['from_voice'] = True
+            # MUHIMU: msg_type inakuwa 'text'.
+            #
+            # `_process_message` ina tawi la `msg_type == 'audio'`
+            # linalokata mara moja na kutuma "siwezi kusikia sauti",
+            # bila kuangalia kama maandishi yapo. Bila mstari huu,
+            # kutafsiri kunafanyika kisha kunatupwa.
+            data['msg_type'] = 'text'
+            return data
+
     # Jumbe zisizo na maandishi zinahitaji lebo ili `_process_message`
     # isiziruke kama tupu (inakagua `if msg_type != 'text' and not text`)
     if not text and msg_type != 'text':
         data['text'] = {
             'image':    '[Picha]',
             'video':    '[Video]',
-            'audio':    '[Sauti]',
+            'audio':    '[Ujumbe wa sauti — sikuweza kuusikia]',
             'document': '[Faili]',
             'sticker':  '[Sticker]',
             'location': '[Mahali]',

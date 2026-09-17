@@ -1,294 +1,136 @@
 {% extends 'management/base.html' %}
-{% block title %}WhatsApp Setup — {{ bot.bot_name }}{% endblock %}
-{% block content %}
+{% block title %}Namba — {{ bot.bot_name }}{% endblock %}
+{% block page_title %}Namba za {{ bot.bot_name }}{% endblock %}
+{% block breadcrumb %}Manage / JamiiBot / Namba{% endblock %}
+
+{% block extra_css %}
 <style>
-@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-.f0{animation:fadeUp .3s ease both}.f1{animation:fadeUp .3s .07s ease both}.f2{animation:fadeUp .3s .14s ease both}
+.jt-main{background:#080c18 !important}
+:root{--c:#0f1629;--b:rgba(255,255,255,.07);--t:rgba(255,255,255,.9);
+  --t2:rgba(255,255,255,.5);--t3:rgba(255,255,255,.28)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.f0{animation:fadeUp .3s ease both}
+@media (prefers-reduced-motion:reduce){.f0{animation:none}}
 
-.wa-hero{background:linear-gradient(135deg,rgba(37,211,102,.12),rgba(37,211,102,.04));border:1.5px solid rgba(37,211,102,.2);border-radius:18px;padding:28px;display:flex;align-items:center;gap:24px;margin-bottom:24px}
-.wa-icon{width:64px;height:64px;border-radius:18px;background:rgba(37,211,102,.15);display:flex;align-items:center;justify-content:center;font-size:30px;flex-shrink:0}
-.wa-title{font-size:22px;font-weight:900;color:var(--text);margin-bottom:4px}
-.wa-sub{font-size:13.5px;color:var(--text-2);line-height:1.6}
+.wrap{max-width:620px}
+.card{background:var(--c);border:1px solid var(--b);border-radius:16px;
+  padding:22px 24px;margin-bottom:16px}
+.card h2{font-size:16px;font-weight:700;color:#fff;margin:0 0 6px}
+.card p{font-size:13px;color:var(--t2);line-height:1.7;margin:0 0 16px}
+.card p code{background:rgba(255,255,255,.07);padding:2px 6px;border-radius:4px;font-size:12px}
 
-.status-ring{width:14px;height:14px;border-radius:50%;flex-shrink:0}
-.ring-ok{background:var(--green);box-shadow:0 0 0 3px rgba(16,185,129,.2)}
-.ring-warn{background:var(--yellow);box-shadow:0 0 0 3px rgba(245,158,11,.2)}
-.ring-off{background:rgba(255,255,255,.15)}
+.st{display:flex;align-items:center;gap:12px;padding:15px 18px;border-radius:14px;
+  border:1.5px solid;margin-bottom:16px;flex-wrap:wrap}
+.st-on{background:rgba(16,185,129,.1);border-color:rgba(16,185,129,.28)}
+.st-off{background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.28)}
+.st-dot{width:9px;height:9px;border-radius:50%;flex:none}
+.st-txt{flex:1;min-width:180px}
+.st-h{font-size:14px;font-weight:700;color:#fff}
+.st-s{font-family:var(--mono);font-size:11px;color:var(--t2);margin-top:3px}
 
-.step-card{border:2px solid var(--border);border-radius:16px;padding:0;overflow:hidden;margin-bottom:16px;transition:border-color .2s}
-.step-card.done{border-color:rgba(16,185,129,.3)}
-.step-card.active{border-color:var(--purple)}
-.step-head{padding:16px 20px;display:flex;align-items:center;gap:14px;cursor:pointer}
-.step-ico{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
-.step-title{font-size:14px;font-weight:800;color:var(--text)}
-.step-sub{font-size:12px;color:var(--text-3);margin-top:1px}
-.step-body{padding:0 20px 20px;border-top:1px solid var(--border)}
+label{display:block;font-family:var(--mono);font-size:10.5px;color:var(--t3);
+  text-transform:uppercase;letter-spacing:.9px;margin-bottom:7px}
+input[type=text]{width:100%;background:rgba(0,0,0,.3);border:1px solid var(--b);
+  border-radius:9px;padding:11px 14px;color:var(--t);font-size:14px;font-family:inherit}
+input[type=text]:focus{outline:2px solid rgba(79,70,229,.5);outline-offset:1px}
+.hint{font-size:11.5px;color:var(--t3);line-height:1.6;margin-top:7px}
+.field{margin-bottom:20px}
 
-.meta-path{display:flex;align-items:center;gap:6px;flex-wrap:wrap;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:9px;padding:10px 14px;font-size:12px;margin:12px 0}
-.meta-path span{color:var(--text-2)}
-.meta-path .arrow{color:var(--purple);font-weight:900}
-.meta-path .node{background:rgba(124,58,237,.1);color:var(--purple);padding:2px 8px;border-radius:5px;font-weight:700;font-family:var(--mono);font-size:11px}
+.chk{display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--t2);
+  line-height:1.6;cursor:pointer}
+.chk input{margin-top:3px;flex:none}
 
-.phone-row{display:flex;align-items:center;gap:12px;padding:12px 16px;background:rgba(255,255,255,.03);border:1.5px solid var(--border);border-radius:12px;margin-bottom:10px;transition:border-color .15s}
-.phone-row:hover{border-color:rgba(124,58,237,.3)}
-.phone-av{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--cyan));display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:16px;flex-shrink:0}
-.phone-num{font-weight:800;color:var(--text);font-size:14px}
-.phone-id{font-family:var(--mono);font-size:11px;color:var(--purple);margin-top:2px}
-
-.f-input-m{background:rgba(255,255,255,.05);border:1.5px solid var(--border);border-radius:10px;padding:10px 14px;font-family:var(--mono);font-size:13px;color:var(--text);outline:none;width:100%;transition:all .2s}
-.f-input-m:focus{border-color:var(--purple);box-shadow:0 0 0 3px rgba(124,58,237,.1)}
-.f-input-m::placeholder{color:var(--text-3)}
-
-.info-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
-.info-row:last-child{border-bottom:none}
-.info-k{color:var(--text-3);font-family:var(--mono);font-size:11px}
-.info-v{font-weight:700;color:var(--text)}
-
-.copy-btn{background:transparent;border:1px solid var(--border);border-radius:6px;padding:3px 9px;font-size:11px;font-family:var(--mono);color:var(--text-2);cursor:pointer;transition:all .15s}
-.copy-btn:hover{border-color:var(--purple);color:var(--purple)}
+.b{border:1px solid var(--b);background:rgba(255,255,255,.05);color:var(--t);
+  border-radius:9px;padding:10px 18px;font-size:13.5px;font-weight:600;
+  font-family:inherit;cursor:pointer;display:inline-flex;align-items:center;
+  gap:7px;text-decoration:none}
+.b:hover{background:rgba(255,255,255,.1)}
+.b:focus-visible{outline:2px solid #4f46e5;outline-offset:2px}
+.b-go{background:rgba(79,70,229,.9);border-color:transparent;color:#fff}
+.b-go:hover{background:#4f46e5}
+.row{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
 </style>
+{% endblock %}
 
-<!-- BREADCRUMB -->
-<div style="display:flex;align-items:center;gap:8px;margin-bottom:20px;font-family:var(--mono);font-size:11px;color:var(--text-3)">
-  <a href="/manage/chatbot/" style="color:var(--text-3);text-decoration:none">JamiiBot</a>
-  <span>›</span>
-  <a href="/manage/chatbot/bots/{{ bot.id }}/" style="color:var(--text-3);text-decoration:none">{{ bot.bot_name }}</a>
-  <span>›</span>
-  <span style="color:var(--purple)">WhatsApp Setup</span>
-</div>
+{% block content %}
+<div class="wrap">
 
-<!-- HERO -->
-<div class="wa-hero f0">
-  <div class="wa-icon">📱</div>
-  <div style="flex:1">
-    <div class="wa-title">WhatsApp Setup — {{ bot.bot_name }}</div>
-    <div class="wa-sub">
-      {{ bot.client.business_name }} &nbsp;·&nbsp;
-      {% if bot.whatsapp_phone_id %}
-        <span style="color:var(--green)"><i class="fas fa-circle-check fa-xs"></i> Imeunganishwa — {{ bot.whatsapp_number }}</span>
-      {% else %}
-        <span style="color:var(--yellow)"><i class="fas fa-triangle-exclamation fa-xs"></i> Haijaunganishwa bado</span>
-      {% endif %}
+  {% if not bridge_ok %}
+  <div class="st st-off f0">
+    <span class="st-dot" style="background:#f59e0b"></span>
+    <div class="st-txt">
+      <div class="st-h">Bridge haijasanidiwa</div>
+      <div class="st-s">Weka BRIDGE_URL na BRIDGE_API_KEY kwenye environment.</div>
     </div>
   </div>
-  {% if bot.whatsapp_phone_id %}
-  <div style="text-align:right">
-    <div class="status-ring ring-ok" style="margin:0 0 6px auto"></div>
-    <div style="font-family:var(--mono);font-size:10px;color:var(--green)">ACTIVE</div>
+  {% elif live.connected %}
+  <div class="st st-on f0">
+    <span class="st-dot" style="background:#10b981"></span>
+    <div class="st-txt">
+      <div class="st-h">WhatsApp imeunganishwa</div>
+      <div class="st-s">{{ live.number }} &middot; {{ bot.session_name }}</div>
+    </div>
+    <a href="{% url 'manage_sessions' %}" class="b">Sessions</a>
   </div>
   {% else %}
-  <div style="text-align:right">
-    <div class="status-ring ring-warn" style="margin:0 0 6px auto"></div>
-    <div style="font-family:var(--mono);font-size:10px;color:var(--yellow)">PENDING</div>
+  <div class="st st-off f0">
+    <span class="st-dot" style="background:#f59e0b"></span>
+    <div class="st-txt">
+      <div class="st-h">Haijaunganishwa</div>
+      <div class="st-s">{{ live.status|default:"haijaanzishwa" }} &middot; {{ bot.session_name }}</div>
+    </div>
+    <a href="{% url 'manage_sessions' %}" class="b b-go">Scan QR</a>
   </div>
   {% endif %}
-</div>
 
-<div class="row g-4">
-<div class="col-lg-7">
+  <form method="post" class="f0">
+    {% csrf_token %}
 
-  <!-- ══════ STEP 1 — ADD NUMBER TO META ══════ -->
-  <div class="step-card {% if bot.whatsapp_phone_id %}done{% else %}active{% endif %} f1">
-    <div class="step-head">
-      <div class="step-ico" style="background:{% if bot.whatsapp_phone_id %}rgba(16,185,129,.1){% else %}rgba(124,58,237,.1){% endif %}">
-        {% if bot.whatsapp_phone_id %}✅{% else %}①{% endif %}
-      </div>
-      <div style="flex:1">
-        <div class="step-title">Ongeza Nambari ya Mteja kwenye Meta yako</div>
-        <div class="step-sub">Ingia Meta account yako → ongeza nambari ya mteja → copy Phone Number ID</div>
-      </div>
-      <a href="https://developers.facebook.com/apps" target="_blank" class="jt-btn btn-ghost btn-sm">
-        Fungua Meta <i class="fas fa-external-link-alt fa-xs"></i>
-      </a>
-    </div>
-    <div class="step-body" style="padding-top:16px">
-
-      <!-- MTEJA INFO -->
-      <div style="background:rgba(0,212,255,.05);border:1px solid rgba(0,212,255,.1);border-radius:12px;padding:14px 16px;margin-bottom:14px">
-        <div style="font-family:var(--mono);font-size:9px;color:var(--cyan);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px">📋 Taarifa za Mteja</div>
-        <div class="info-row"><span class="info-k">Jina</span><span class="info-v">{{ bot.client.full_name }}</span></div>
-        <div class="info-row"><span class="info-k">Biashara</span><span class="info-v">{{ bot.client.business_name }}</span></div>
-        <div class="info-row">
-          <span class="info-k">Nambari ya WhatsApp</span>
-          <span style="display:flex;align-items:center;gap:8px">
-            <span class="info-v" style="color:var(--green)">{{ bot.whatsapp_number|default:"Haijawekwa" }}</span>
-            {% if bot.whatsapp_number %}
-            <button class="copy-btn" onclick="copyText('{{ bot.whatsapp_number }}',this)">Copy</button>
-            {% endif %}
-          </span>
+    <div class="card">
+      <h2>Namba ya biashara</h2>
+      <p>
+        Hii ndiyo namba pekee bot inayoruhusiwa kumpa mteja akiuliza
+        mawasiliano. Ikiwa haipo, bot itasema haina taarifa badala ya
+        kubuni namba.
+      </p>
+      <div class="field">
+        <label for="wn">Namba ya WhatsApp ya biashara</label>
+        <input type="text" id="wn" name="whatsapp_number"
+               value="{{ bot.whatsapp_number }}" placeholder="+255 7XX XXX XXX">
+        <div class="hint">
+          Inaonekana kwenye majibu ya bot, na kwenye ujumbe wa kuomba radhi
+          mteja anaposubiri binadamu zaidi ya saa moja.
         </div>
-        <div class="info-row" style="border:none"><span class="info-k">Bot</span><span class="info-v">{{ bot.bot_name }}</span></div>
-      </div>
-
-      <!-- NJIA YA META -->
-      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px">Fuata njia hii kwenye Meta:</div>
-      <div class="meta-path">
-        <span class="node">App yako</span>
-        <span class="arrow">→</span>
-        <span class="node">Use cases ✏️</span>
-        <span class="arrow">→</span>
-        <span class="node">Customize</span>
-        <span class="arrow">→</span>
-        <span class="node">API Setup</span>
-        <span class="arrow">→</span>
-        <span class="node">Step 5: Add a phone number</span>
-      </div>
-
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
-        <div style="flex:1;min-width:200px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:12px 14px;font-size:12.5px;color:var(--text-2);line-height:1.6">
-          <div style="font-weight:700;color:var(--text);margin-bottom:6px">① Ongeza Nambari</div>
-          Bonyeza "Add phone number" → weka nambari ya mteja → verify kwa SMS/simu
-        </div>
-        <div style="flex:1;min-width:200px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:12px 14px;font-size:12.5px;color:var(--text-2);line-height:1.6">
-          <div style="font-weight:700;color:var(--text);margin-bottom:6px">② Copy Phone Number ID</div>
-          Baada ya verify, nambari itaonekana kwenye dropdown ya "From" — copy ID yake
-        </div>
-      </div>
-
-      <div style="background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:12.5px;color:var(--yellow);display:flex;gap:8px">
-        <i class="fas fa-triangle-exclamation fa-sm" style="flex-shrink:0;margin-top:2px"></i>
-        <div>Nambari ya mteja lazima <strong>ifutwe kwanza kutoka WhatsApp app</strong> ya simu yake kabla ya kuiongeza hapa. Mwambie mteja afute akaunti yake ya WhatsApp kwenye simu kwanza.</div>
       </div>
     </div>
-  </div>
 
-  <!-- ══════ STEP 2 — WEKA PHONE NUMBER ID ══════ -->
-  <div class="step-card f2">
-    <div class="step-head">
-      <div class="step-ico" style="background:rgba(124,58,237,.1)">②</div>
-      <div>
-        <div class="step-title">Weka Phone Number ID hapa</div>
-        <div class="step-sub">Baada ya kuongeza nambari kwenye Meta — paste ID yake hapa chini</div>
-      </div>
-    </div>
-    <div class="step-body" style="padding-top:16px">
-      <form method="post">
-        {% csrf_token %}<input type="hidden" name="action" value="save_whatsapp">
-
-        <div class="mb-3">
-          <label class="f-label">Nambari ya WhatsApp ya Mteja</label>
-          <input type="text" name="whatsapp_number" class="f-input-m" placeholder="+255 7XX XXX XXX" value="{{ bot.whatsapp_number }}">
+    <div class="card">
+      <h2>Namba ya mmiliki</h2>
+      <p>
+        Inapokea taarifa mteja anapohitaji binadamu, na ndiyo inayotumika
+        kutoa amri kwa bot: <code>orodha</code>, <code>endelea &lt;namba&gt;</code>,
+        <code>simamisha &lt;namba&gt;</code>.
+      </p>
+      <div class="field">
+        <label for="ow">Namba ya mmiliki</label>
+        <input type="text" id="ow" name="owner_whatsapp"
+               value="{{ bot.owner_whatsapp }}" placeholder="+255 7XX XXX XXX">
+        <div class="hint">
+          Si lazima iwe ile ile ya biashara. Ikibadilika, bot itatafsiri
+          upya kitambulisho chake mara ya kwanza utakapoandika.
         </div>
-
-        <div class="mb-3">
-          <label class="f-label" style="display:flex;align-items:center;gap:8px">
-            Phone Number ID
-            <span style="font-family:var(--mono);font-size:10px;color:var(--purple);background:rgba(124,58,237,.1);padding:2px 7px;border-radius:4px">Kutoka Meta API Setup</span>
-          </label>
-          <input type="text" name="whatsapp_phone_id" class="f-input-m" placeholder="e.g. 1057453324112615" value="{{ bot.whatsapp_phone_id }}" id="phoneIdInput">
-          <div style="font-family:var(--mono);font-size:10px;color:var(--text-3);margin-top:5px">Nambari ndefu ya tarakimu — ipo kwenye "From" dropdown ya API Setup</div>
-        </div>
-
-        <!-- Token override (optional) -->
-        <details style="margin-bottom:16px">
-          <summary style="font-size:12px;color:var(--text-3);cursor:pointer;font-family:var(--mono);padding:8px 0">⚙️ Token maalum kwa bot hii (optional)</summary>
-          <div style="margin-top:10px">
-            <label class="f-label">Access Token (acha wazi = tumia token ya global)</label>
-            <input type="text" name="whatsapp_token" class="f-input-m" placeholder="EAAxxxxxx... (optional)" value="{{ bot.whatsapp_token }}">
-            <div style="font-family:var(--mono);font-size:10px;color:var(--text-3);margin-top:5px">Kawaida huhitaji hii — token ya global kwenye settings.py itatumika</div>
-          </div>
-        </details>
-
-        <button type="submit" class="jt-btn btn-green" style="width:100%;justify-content:center">
-          <i class="fas fa-plug"></i> Unganisha WhatsApp — {{ bot.bot_name }}
-        </button>
-      </form>
-
-      {% if bot.whatsapp_phone_id %}
-      <div style="background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.2);border-radius:10px;padding:12px 14px;margin-top:12px;font-size:13px;color:var(--green);display:flex;gap:9px">
-        <i class="fas fa-circle-check fa-sm" style="flex-shrink:0;margin-top:2px"></i>
-        <div><strong>Imeunganishwa!</strong> Bot hii inatumia Phone ID: <span style="font-family:var(--mono)">{{ bot.whatsapp_phone_id }}</span></div>
       </div>
-      {% endif %}
+      <label class="chk">
+        <input type="checkbox" name="notify_handoff" {% if bot.notify_handoff %}checked{% endif %}>
+        <span>Nipe taarifa mteja anapohitaji binadamu</span>
+      </label>
     </div>
-  </div>
+
+    <div class="row">
+      <button type="submit" class="b b-go">Hifadhi</button>
+      <a href="{% url 'manage_bot_detail' bot.id %}" class="b">Rudi kwa bot</a>
+    </div>
+  </form>
 
 </div>
-
-<!-- ════ SIDEBAR ════ -->
-<div class="col-lg-5">
-
-  <!-- GLOBAL TOKEN STATUS -->
-  <div class="jt-card f1 mb-3">
-    <div class="jt-card-head"><span class="jt-card-title"><i class="fas fa-key" style="color:var(--yellow)"></i> Token ya Global (Yako)</span></div>
-    <div class="jt-card-body" style="padding:14px 16px">
-      {% if global_token_set %}
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.2);border-radius:10px">
-        <div class="status-ring ring-ok"></div>
-        <div>
-          <div style="font-weight:700;font-size:13px;color:var(--green)">Token imewekwa ✅</div>
-          <div style="font-family:var(--mono);font-size:10px;color:var(--text-3);margin-top:2px">WHATSAPP_MASTER_TOKEN kwenye settings</div>
-        </div>
-      </div>
-      {% else %}
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.2);border-radius:10px;margin-bottom:10px">
-        <div class="status-ring" style="background:var(--red)"></div>
-        <div>
-          <div style="font-weight:700;font-size:13px;color:var(--red)">Token haijawekwa!</div>
-          <div style="font-size:12px;color:var(--text-3);margin-top:2px">Bots zote hazitafanya kazi</div>
-        </div>
-      </div>
-      <div style="font-size:12.5px;color:var(--text-2);line-height:1.6">Weka hii kwenye <strong>settings.py</strong> au Render environment:</div>
-      <div style="background:#0a0d14;border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-top:8px;font-family:var(--mono);font-size:11px;color:var(--cyan)">
-        WHATSAPP_MASTER_TOKEN = "EAAxxxxxx..."
-      </div>
-      {% endif %}
-
-      <div style="margin-top:14px;font-size:12.5px;color:var(--text-2);line-height:1.7">
-        Token hii moja inatumika kwa <strong style="color:var(--text)">bots zote</strong> — huhitaji token tofauti kwa kila mteja. Weka mara moja tu.
-      </div>
-    </div>
-  </div>
-
-  <!-- BOTS ZOTE — STATUS -->
-  <div class="jt-card f2 mb-3" style="padding:0">
-    <div class="jt-card-head"><span class="jt-card-title"><i class="fas fa-robot" style="color:var(--purple)"></i> Hali ya Bots Zote</span></div>
-    {% for b in all_bots %}
-    <div style="display:flex;align-items:center;gap:12px;padding:11px 18px;border-bottom:1px solid var(--border)">
-      <div class="status-ring {% if b.whatsapp_phone_id %}ring-ok{% else %}ring-off{% endif %}"></div>
-      <div style="flex:1;min-width:0">
-        <div style="font-weight:700;font-size:13px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ b.bot_name }}</div>
-        <div style="font-family:var(--mono);font-size:10px;color:var(--text-3)">
-          {% if b.whatsapp_phone_id %}{{ b.whatsapp_number }} · ID: {{ b.whatsapp_phone_id|truncatechars:12 }}{% else %}Haijaunganishwa{% endif %}
-        </div>
-      </div>
-      <a href="/manage/chatbot/bots/{{ b.id }}/whatsapp/" class="jt-btn btn-ghost btn-sm" style="font-size:10px">{% if b.whatsapp_phone_id %}Edit{% else %}Setup{% endif %}</a>
-    </div>
-    {% empty %}
-    <div style="padding:20px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--text-3)">Hakuna bots bado</div>
-    {% endfor %}
-  </div>
-
-  <!-- QUICK LINKS -->
-  <div class="jt-card f2">
-    <div class="jt-card-head"><span class="jt-card-title"><i class="fas fa-external-link-alt" style="color:var(--text-2)"></i> Viungo vya Meta</span></div>
-    <div class="jt-card-body" style="display:flex;flex-direction:column;gap:8px;padding:14px 16px">
-      <a href="https://developers.facebook.com/apps" target="_blank" class="jt-btn btn-ghost" style="justify-content:space-between">
-        <span><i class="fab fa-meta"></i> App Dashboard</span>
-        <i class="fas fa-external-link-alt fa-xs"></i>
-      </a>
-      <a href="https://business.facebook.com/settings/system-users" target="_blank" class="jt-btn btn-ghost" style="justify-content:space-between">
-        <span><i class="fas fa-user-gear"></i> System Users (Token)</span>
-        <i class="fas fa-external-link-alt fa-xs"></i>
-      </a>
-      <a href="https://business.facebook.com/wa/manage/phone-numbers/" target="_blank" class="jt-btn btn-ghost" style="justify-content:space-between">
-        <span><i class="fas fa-phone"></i> WhatsApp Phone Numbers</span>
-        <i class="fas fa-external-link-alt fa-xs"></i>
-      </a>
-    </div>
-  </div>
-
-</div>
-</div>
-
-<script>
-function copyText(text, btn) {
-  navigator.clipboard.writeText(text).then(() => {
-    const orig = btn.textContent;
-    btn.textContent = 'Copied!';
-    btn.style.color = 'var(--green)';
-    setTimeout(() => { btn.textContent = orig; btn.style.color = ''; }, 2000);
-  });
-}
-</script>
 {% endblock %}
