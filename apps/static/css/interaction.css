@@ -1,0 +1,167 @@
+/* ============================================================
+   JamiiTek — mwitikio wa kugusa
+   ============================================================
+
+   TATIZO
+
+   Mtu anabonyeza kitufe mara nne akidhani hakigusi. Hakuna
+   kinachotokea papo hapo: hakuna mwitikio wa kubonyeza, hakuna
+   dalili kwamba ombi limeanza. Kwenye mtandao wa polepole, sekunde
+   mbili za ukimya zinaonekana kama kifaa kimeganda.
+
+   Matokeo si ya muonekano tu — ni rekodi za marudio. Fomu
+   iliyotumwa mara nne ni wateja wanne, invoice nne, bot nne.
+
+   MUUNDO
+
+     0ms      kubonyeza kunaonekana        (scale 0.97 — CSS pekee)
+     ~0ms     kitufe kinazuiwa             (JS)
+     120ms    "Inatuma…" inaonekana        (kuchelewa kidogo ni kwa makusudi)
+     inayofuata: ukurasa unabadilika au jibu linakuja
+
+   Kwa nini 120ms: ombi la haraka linamaliza kabla ya hapo, na
+   spinner inayowaka kwa 80ms inaonekana kama hitilafu. Ukurasa
+   ukiwa wa haraka, mtumiaji haoni spinner kabisa — anaona tu
+   kitufe kikijibu.
+
+   `transform: scale()` inashusha na watoto wake — lebo na icon
+   zinakuja pamoja. Ndiyo inayoifanya isomeke kama kubonyeza
+   halisi badala ya rangi kubadilika.
+   ============================================================ */
+
+:root {
+  --jt-press: cubic-bezier(.22, .61, .36, 1);
+}
+
+/* ── Kubonyeza ─────────────────────────────────────────────
+   :active ni kubonyeza HALISI kwenye simu — hakuna haja ya
+   @media (hover). Hover pekee ndiyo inahitaji kuzuiwa. */
+
+button,
+.btn, .b, .sb, .wait-btn,
+input[type="submit"],
+input[type="button"],
+a.btn, a.b, a.sb,
+[role="button"] {
+  transition: transform 160ms var(--jt-press),
+              opacity 160ms var(--jt-press);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;          /* inaondoa kuchelewa kwa 300ms kwenye simu */
+}
+
+button:active,
+.btn:active, .b:active, .sb:active, .wait-btn:active,
+input[type="submit"]:active,
+input[type="button"]:active,
+a.btn:active, a.b:active, a.sb:active,
+[role="button"]:active {
+  transform: scale(.97);
+}
+
+/* Kitufe kidogo kinahitaji kushuka kidogo zaidi ili kuonekana */
+.btn.sm:active, .b.sm:active, .sb:active {
+  transform: scale(.95);
+}
+
+/* ── Hali ya kusubiri ──────────────────────────────────────
+   Kitufe kinabaki na ukubwa wake ili ukurasa usiruke. Lebo
+   inafichwa kwa opacity, si display — display: none ingebadilisha
+   upana na kila kitu kingehama. */
+
+[data-jt-busy] {
+  position: relative;
+  pointer-events: none;
+  cursor: progress;
+}
+
+[data-jt-busy] > * {
+  opacity: 0;
+  transition: opacity 120ms var(--jt-press);
+}
+
+[data-jt-busy]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  opacity: .85;
+  animation: jt-spin .6s linear infinite;
+}
+
+@keyframes jt-spin { to { transform: rotate(360deg) } }
+
+/* Kitufe chenye maandishi maalum wakati wa kusubiri */
+[data-jt-busy][data-jt-label]::before {
+  content: attr(data-jt-label);
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-left: 22px;                  /* nafasi ya spinner */
+  font: inherit;
+  opacity: .85;
+}
+
+[data-jt-busy][data-jt-label]::after {
+  left: 14px;
+  right: auto;
+}
+
+/* ── Mstari wa maendeleo ───────────────────────────────────
+   Unaonekana ukurasa unapoanza kubadilika. Unafika 90% haraka
+   kisha unasubiri — kuudanganya hadi 100% kabla ukurasa
+   haujafika kungemfanya mtu adhani umeganda. */
+
+#jt-progress {
+  position: fixed;
+  top: 0; left: 0;
+  height: 2px;
+  width: 0;
+  background: currentColor;
+  opacity: .9;
+  z-index: 99999;
+  pointer-events: none;
+  transition: width 240ms var(--jt-press), opacity 200ms linear;
+}
+
+/* ── Kuheshimu mapendeleo ya mtumiaji ──────────────────────
+   Mtu aliyezima mwendo bado ANAHITAJI kujua kitufe kimeguswa.
+   Tunaondoa mwendo, si mwitikio. */
+
+@media (prefers-reduced-motion: reduce) {
+  button, .btn, .b, .sb,
+  input[type="submit"], input[type="button"],
+  a.btn, a.b, a.sb, [role="button"] {
+    transition: none;
+  }
+  button:active, .btn:active, .b:active, .sb:active,
+  input[type="submit"]:active, input[type="button"]:active,
+  a.btn:active, a.b:active, a.sb:active, [role="button"]:active {
+    transform: none;
+    opacity: .7;                       /* mwitikio bila mwendo */
+  }
+  [data-jt-busy]::after { animation-duration: 1.4s }
+  #jt-progress { transition: none }
+}
+
+/* ── Kuguswa kwa kibodi ────────────────────────────────────
+   Ukurasa ulikuwa na hover 24 na focus ring 1. Mtu anayetumia
+   kibodi hakujua yuko wapi. */
+
+button:focus-visible,
+.btn:focus-visible, .b:focus-visible, .sb:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+  border-radius: 6px;
+}

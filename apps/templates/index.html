@@ -612,6 +612,9 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 .wa svg{width:28px;height:28px}
 @media (hover:hover){.wa:hover{transform:scale(1.08)}}
 </style>
+  <link rel="stylesheet" href="{% static 'css/tokens.css' %}">
+  <link rel="stylesheet" href="{% static 'css/interaction.css' %}">
+
 </head>
 <body>
 
@@ -1565,5 +1568,7 @@ carousel('tmTrack', 'tmPrev', 'tmNext', null);
 })();
 })();
 </script>
+<script src="{% static 'js/interaction.js' %}" defer></script>
+
 </body>
 </html>

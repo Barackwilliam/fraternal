@@ -76,6 +76,9 @@
   <link href="{% static 'css/site.css' %}" rel="stylesheet">
 
   {% block extra_css %}{% endblock %}
+  <link rel="stylesheet" href="{% static 'css/tokens.css' %}">
+  <link rel="stylesheet" href="{% static 'css/interaction.css' %}">
+
 </head>
 <body>
 
@@ -248,5 +251,7 @@ document.querySelectorAll('[data-tilt]').forEach(card=>{
 {% if TURNSTILE_ENABLED %}
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 {% endif %}
+<script src="{% static 'js/interaction.js' %}" defer></script>
+
 </body>
 </html>

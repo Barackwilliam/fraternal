@@ -27,6 +27,9 @@
   <link href="{% static 'css/manage.css' %}" rel="stylesheet">
 
   {% block extra_css %}{% endblock %}
+  <link rel="stylesheet" href="{% static 'css/tokens.css' %}">
+  <link rel="stylesheet" href="{% static 'css/interaction.css' %}">
+
 </head>
 <body>
 
@@ -365,6 +368,8 @@ document.addEventListener('keydown', function(e){
   if (e.key === 'Escape') cmdClose();
 });
 </script>
+
+<script src="{% static 'js/interaction.js' %}" defer></script>
 
 </body>
 </html>

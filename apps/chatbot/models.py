@@ -101,8 +101,21 @@ class BotConfig(models.Model):
     description    = models.TextField(help_text="What does this bot do? Describe its main purpose.")
     language       = models.CharField(max_length=10, choices=LANGUAGE_CHOICES, default='sw+en')
     tone           = models.CharField(max_length=20, choices=TONE_CHOICES, default='friendly')
-    greeting_msg   = models.TextField(help_text="First message when user says hi")
-    fallback_msg   = models.TextField(default="Samahani, sijaelewea vizuri. Tafadhali uliza tena au piga simu +255XXX.")
+    # Chaguo-msingi zinazofanya kazi mara moja.
+    #
+    # `greeting_msg` haikuwa na chaguo-msingi, kwa hiyo hatua ya wizard
+    # ilikuwa LAZIMA — mmiliki alilazimika kuandika jumbe tatu kabla
+    # hajaona bot yake ikifanya kazi.
+    #
+    # `fallback_msg` ilikuwa na "piga simu +255XXX" — namba BANDIA
+    # iliyokuwa inatumwa kwa wateja halisi. Ni tatizo lile lile la
+    # AI kubuni namba, lakini hili lilikuwa limeandikwa kwenye code.
+    greeting_msg   = models.TextField(
+        blank=True,
+        default="Karibu {name}! Nitakusaidiaje leo?",
+        help_text="Ujumbe wa kwanza. {name} inabadilishwa na jina la mteja.")
+    fallback_msg   = models.TextField(
+        default="Samahani, sijaelewa vizuri. Tafadhali uliza kwa njia nyingine.")
     human_handoff_msg = models.TextField(
         default="Nitakupeleka kwa mtu wa kweli sasa hivi. Subiri kidogo...",
         help_text="Message when bot cannot handle and transfers to human"

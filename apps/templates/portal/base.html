@@ -27,6 +27,9 @@
   <link href="{% static 'css/portal.css' %}" rel="stylesheet">
 
   {% block extra_css %}{% endblock %}
+  <link rel="stylesheet" href="{% static 'css/tokens.css' %}">
+  <link rel="stylesheet" href="{% static 'css/interaction.css' %}">
+
 </head>
 <body>
 <!-- SIDEBAR -->
@@ -116,5 +119,7 @@ setTimeout(()=>{document.querySelectorAll('.jt-msg').forEach(m=>{m.style.transit
 {% if TURNSTILE_ENABLED %}
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 {% endif %}
+<script src="{% static 'js/interaction.js' %}" defer></script>
+
 </body>
 </html>

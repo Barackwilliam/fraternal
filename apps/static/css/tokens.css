@@ -1,0 +1,213 @@
+/* ============================================================
+   JamiiTek — tokens za utambulisho
+   ============================================================
+
+   TATIZO LILILOKUWEPO
+
+   Mteja alipita kwenye bidhaa nne tofauti:
+
+     tovuti     navy + dhahabu   #F5A623   Sora + Inter
+     kujisajili kijani           #00DC82   Syne + Space Grotesk
+     kuingia    zambarau         #7C3AED
+     wizard     indigo + mwanga  #6366F1   Syne + JetBrains Mono
+     portal     kijani           #00DC82   Syne + Space Grotesk
+
+   Anavutiwa na navy na dhahabu, anabonyeza "Anza", na anajikuta
+   kwenye ukurasa wa kijani wenye fonts tofauti. Hakuna hatua
+   inayomwambia "bado uko JamiiTek".
+
+   Hiyo si ladha ya muonekano — ni imani. Mtu anayeona utambulisho
+   unabadilika kila bonyeza anajiuliza kama ni bidhaa moja.
+
+   Pia: `#6366F1` yenye mwanga ndiyo hasa kile kinachoitwa
+   "AI design fingerprint" — alama ya kawaida ya kitu
+   kilichotengenezwa haraka.
+
+   MSINGI
+
+   Tokens hizi zinatoka `index.html` — navy na dhahabu ndizo za
+   JamiiTek. Kila ukurasa unazitumia badala ya kutengeneza zake.
+
+   NAMNA YA KUTUMIA
+
+   Ukurasa mweupe (tovuti, portal za wateja):
+       <html>  — bila kitu, ndiyo chaguo-msingi
+
+   Ukurasa mweusi (wizard, dashboard, sessions):
+       <html data-theme="dark">
+
+   Zote zina majina yale yale ya tokens. Kubadilisha mandhari ni
+   kubadilisha herufi moja, si kuandika CSS upya.
+   ============================================================ */
+
+:root {
+  /* ── Navy: uti wa mgongo ────────────────────────────── */
+  --jt-navy-950: #04101F;
+  --jt-navy-900: #071A31;
+  --jt-navy-800: #0A2245;
+  --jt-navy-700: #123563;
+  --jt-navy-600: #1B4C8C;
+
+  /* ── Dhahabu: lafudhi PEKEE ─────────────────────────────
+     Rangi moja ya lafudhi, si nne. Ulikuwa na dhahabu, kijani,
+     zambarau na indigo — kila ukurasa na yake. */
+  --jt-gold:      #F5A623;
+  --jt-gold-lift: #FFC456;
+  --jt-gold-soft: rgba(245, 166, 35, .14);
+  --jt-gold-line: rgba(245, 166, 35, .32);
+
+  /* ── Rangi za hali, si za mapambo ───────────────────────
+     Hizi zinabeba maana: imefanikiwa, onyo, kosa. Hazitumiki
+     kupamba. */
+  --jt-ok:    #1FA97A;
+  --jt-warn:  #E8A33D;
+  --jt-bad:   #D8544B;
+  --jt-wa:    #25D366;
+
+  /* ── Maandishi na mistari (mandhari nyeupe) ─────────── */
+  --jt-ink:    #0C1626;
+  --jt-ink-2:  #33445E;
+  --jt-muted:  #66788F;
+  --jt-line:   #E3E9F2;
+  --jt-line-2: #EEF2F7;
+  --jt-bg:     #F6F8FB;
+  --jt-card:   #FFFFFF;
+  --jt-card-2: #FFFFFF;
+
+  /* ── Vivuli vyenye rangi ya navy, si nyeusi ─────────────
+     Kivuli cheusi juu ya navy kinaonekana kama uchafu. Kivuli
+     chenye rangi ya mandhari kinaonekana kama mwanga. */
+  --jt-sh-1: 0 1px 2px rgba(12,22,38,.05), 0 4px 16px rgba(12,22,38,.05);
+  --jt-sh-2: 0 2px 6px rgba(12,22,38,.06), 0 18px 44px rgba(12,22,38,.11);
+  --jt-sh-3: 0 26px 60px rgba(4,16,31,.30);
+
+  /* ── Umbo ───────────────────────────────────────────────
+     Radius inatofautiana: ndogo ndani, kubwa nje. Radius moja
+     kwa kila kitu inaonekana kama template. */
+  --jt-r-sm: 8px;
+  --jt-r:    14px;
+  --jt-r-lg: 20px;
+
+  /* ── Nafasi ─────────────────────────────────────────────
+     Inakua kwa skrini pana badala ya kubaki ile ile. */
+  --jt-wrap:  1240px;
+  --jt-pad:   18px;
+  --jt-sec-y: 52px;
+
+  /* ── Fonts ──────────────────────────────────────────────
+     Sora kwa vichwa, Inter kwa maandishi — zote zimejihifadhi
+     mwenyewe kwenye apps/static/fonts.
+
+     Syne, Space Grotesk na JetBrains Mono zilikuwa zinatumika
+     kwenye portal pekee. Kuwa na familia tano kwenye bidhaa moja
+     ni kuvuta fonts tano kwa mtumiaji mmoja. */
+  --jt-head: 'Sora', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --jt-body: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --jt-mono: ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, monospace;
+
+  /* ── Mwendo ─────────────────────────────────────────────
+     Curve moja kwa kila kitu. Kila kipengele kinasogea kwa
+     mtindo ule ule, na hiyo ndiyo inayofanya bidhaa ionekane
+     imeundwa na mkono mmoja. */
+  --jt-ease:     cubic-bezier(.22, .61, .36, 1);
+  --jt-ease-in:  cubic-bezier(.55, 0, 1, .45);
+  --jt-fast:     160ms;
+  --jt-mid:      240ms;
+  --jt-slow:     380ms;
+}
+
+@media (min-width: 600px)  { :root { --jt-pad: 24px; --jt-sec-y: 64px } }
+@media (min-width: 1000px) { :root { --jt-pad: 28px; --jt-sec-y: 78px } }
+
+
+/* ============================================================
+   MANDHARI NYEUSI
+   ============================================================
+   Majina yale yale, thamani tofauti. Ukurasa wowote unaweza
+   kubadilika kwa `data-theme="dark"` bila CSS mpya.
+
+   Mandhari nyeusi bado ni NAVY, si kijivu. Ndiyo inayoifanya
+   ionekane ni bidhaa ile ile iliyozimwa taa, si bidhaa nyingine.
+   ============================================================ */
+
+[data-theme="dark"] {
+  --jt-bg:     var(--jt-navy-950);
+  --jt-card:   rgba(255, 255, 255, .030);
+  --jt-card-2: rgba(255, 255, 255, .055);
+
+  --jt-ink:    rgba(255, 255, 255, .92);
+  --jt-ink-2:  rgba(255, 255, 255, .62);
+  --jt-muted:  rgba(255, 255, 255, .38);
+
+  --jt-line:   rgba(255, 255, 255, .09);
+  --jt-line-2: rgba(255, 255, 255, .05);
+
+  /* Kivuli kwenye mandhari nyeusi ni giza zaidi, si nyeusi zaidi */
+  --jt-sh-1: 0 1px 2px rgba(0,0,0,.30), 0 4px 16px rgba(0,0,0,.24);
+  --jt-sh-2: 0 2px 6px rgba(0,0,0,.34), 0 18px 44px rgba(0,0,0,.40);
+  --jt-sh-3: 0 26px 60px rgba(0,0,0,.55);
+}
+
+
+/* ============================================================
+   VIPENGELE VYA PAMOJA
+   ============================================================ */
+
+.jt-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 22px;
+  border: 1px solid var(--jt-line);
+  border-radius: var(--jt-r-sm);
+  background: var(--jt-card-2);
+  color: var(--jt-ink);
+  font-family: var(--jt-body);
+  font-size: 14.5px;
+  font-weight: 600;
+  line-height: 1;
+  text-decoration: none;
+  cursor: pointer;
+  /* `transform` inashughulikiwa na interaction.css — hatuirudii
+     hapa, vinginevyo transition mbili zingegongana. */
+  transition: background var(--jt-fast) var(--jt-ease),
+              border-color var(--jt-fast) var(--jt-ease);
+}
+
+/* Hover imezuiwa kwa vifaa vyenye kishale. Simu haina hover —
+   bila kizuizi hiki, kitufe kinabaki "kimeguswa" baada ya
+   kubonyeza. */
+@media (hover: hover) {
+  .jt-btn:hover { background: var(--jt-line-2); border-color: var(--jt-line); }
+  .jt-btn--gold:hover { background: var(--jt-gold-lift) }
+}
+
+.jt-btn--gold {
+  background: var(--jt-gold);
+  border-color: transparent;
+  color: var(--jt-navy-950);
+}
+
+.jt-btn--ghost { background: transparent }
+
+.jt-card {
+  background: var(--jt-card);
+  border: 1px solid var(--jt-line);
+  border-radius: var(--jt-r);
+  box-shadow: var(--jt-sh-1);
+}
+
+.jt-wrap {
+  width: 100%;
+  max-width: var(--jt-wrap);
+  margin-inline: auto;
+  padding-inline: var(--jt-pad);
+}
+
+/* Maandishi marefu yanahitaji kikomo. Mstari wa herufi 120
+   unamfanya msomaji apoteze mstari anaporudi kushoto. */
+.jt-prose { max-width: 65ch; line-height: 1.75 }
+
+/* Namba zinapaswa kupangana wima kwenye jedwali na takwimu */
+.jt-num { font-variant-numeric: tabular-nums; font-feature-settings: "tnum" }

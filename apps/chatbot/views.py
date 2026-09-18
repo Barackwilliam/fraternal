@@ -251,32 +251,62 @@ def chatbot_setup_wizard(request):
     if request.method == 'POST':
         action = request.POST.get('action')
 
-        # ── STEP 1: Basic info ──
+        # ══════════════════════════════════════════════════════
+        # WIZARD: HATUA 3, SI 6
+        # ══════════════════════════════════════════════════════
+        # Zamani: biashara, jumbe, huduma, FAQs, namba, mpango.
+        #
+        # Mbili kati ya hizo zilimtaka mmiliki ABASHIRI kabla hajaona
+        # bot yake ikifanya kazi:
+        #
+        #   Jumbe  — greeting, fallback, handoff. Chaguo-msingi
+        #            zinafanya kazi mara moja; mmiliki anaziboresha
+        #            baada ya kuona bot ikijibu.
+        #   FAQs   — kubashiri maswali ambayo wateja HAWAJAULIZA.
+        #            Mfumo wa maarifa sasa unayajifunza kutoka maswali
+        #            HALISI — kuuliza mbele ni kuuliza abuni.
+        #
+        # Zote mbili zimehamia /chatbot/config/ baada ya kuanza.
+        #
+        # Namba ya WhatsApp imeungana na hatua ya 1 — ni taarifa ya
+        # biashara, si hatua yake mwenyewe.
+
+        # ── HATUA 1: Biashara ──
         if action == 'save_step1':
+            import re as _re
             bot_name    = request.POST.get('bot_name', '').strip()
             business    = request.POST.get('business_name', '').strip()
             description = request.POST.get('description', '').strip()
+            wa_number   = request.POST.get('whatsapp_number', '').strip()
             language    = request.POST.get('language', 'sw+en')
             tone        = request.POST.get('tone', 'friendly')
 
             if not all([bot_name, business, description]):
-                messages.error(request, "Jaza sehemu zote.")
+                messages.error(request, "Jaza jina la bot, biashara na maelezo.")
+                return render(request, 'chatbot/portal/wizard.html', context)
+
+            digits = _re.sub(r'\D', '', wa_number)
+            if wa_number and not (7 <= len(digits) <= 15):
+                messages.error(request, "Namba ya WhatsApp si sahihi.")
+                context.update({'bot': bot, 'step': 1})
                 return render(request, 'chatbot/portal/wizard.html', context)
 
             if bot:
                 bot.bot_name = bot_name; bot.business_name = business
                 bot.description = description; bot.language = language
-                bot.tone = tone; bot.save()
+                bot.tone = tone
+                if wa_number: bot.whatsapp_number = wa_number
+                bot.save()
             else:
                 bot = BotConfig.objects.create(
                     client=client, bot_name=bot_name, business_name=business,
                     description=description, language=language, tone=tone,
-                    greeting_msg=f"Habari! Mimi ni {bot_name}, msaidizi wa {business}. Ninaweza kukusaidiaje? 😊",
-                    fallback_msg="Samahani, sijaelewea vizuri. Tafadhali niandikia tena au wasiliana nasi moja kwa moja."
+                    whatsapp_number=wa_number,
+                    greeting_msg=f"Karibu {{name}}! Mimi ni {bot_name} wa {business}. Nitakusaidiaje?",
                 )
             return redirect('/chatbot/setup/?step=2')
 
-        # ── STEP 2: Messages ──
+        # ── Jumbe: sasa ziko /chatbot/config/, si kwenye wizard ──
         elif action == 'save_step2':
             if not bot: return redirect('/chatbot/setup/?step=1')
             bot.greeting_msg      = request.POST.get('greeting_msg', bot.greeting_msg)
@@ -285,9 +315,9 @@ def chatbot_setup_wizard(request):
             bot.collect_name      = request.POST.get('collect_name') == 'on'
             bot.collect_phone     = request.POST.get('collect_phone') == 'on'
             bot.save()
-            return redirect('/chatbot/setup/?step=3')
+            return redirect('/chatbot/config/')
 
-        # ── STEP 3: Services ──
+        # ── HATUA 2: Huduma ──
         elif action == 'add_service':
             if bot:
                 name  = request.POST.get('service_name', '').strip()
@@ -295,56 +325,36 @@ def chatbot_setup_wizard(request):
                 price = request.POST.get('service_price', '').strip()
                 if name and desc:
                     BotService.objects.create(bot=bot, name=name, description=desc, price=price)
-            return redirect('/chatbot/setup/?step=3')
+            return redirect('/chatbot/setup/?step=2')
 
         elif action == 'delete_service':
             if bot:
                 BotService.objects.filter(id=request.POST.get('service_id'), bot=bot).delete()
+            return redirect('/chatbot/setup/?step=2')
+
+        elif action == 'next_step2':
+            _notify_william(bot)
             return redirect('/chatbot/setup/?step=3')
 
-        elif action == 'next_step3':
-            return redirect('/chatbot/setup/?step=4')
-
-        # ── STEP 4: FAQs ──
+        # ── FAQs: sasa ziko /chatbot/config/ na /chatbot/knowledge/ ──
+        # Kuuliza FAQs kabla mteja hajaanza ni kumtaka abashiri maswali
+        # ambayo wateja HAWAJAULIZA. Mfumo wa maarifa sasa unayajifunza
+        # kutoka maswali halisi — bot ikishindwa, swali linaingia kwenye
+        # orodha na mmiliki analijibu mara moja.
         elif action == 'add_faq':
             if bot:
                 q = request.POST.get('faq_question', '').strip()
                 a = request.POST.get('faq_answer', '').strip()
                 if q and a:
                     BotFAQ.objects.create(bot=bot, question=q, answer=a)
-            return redirect('/chatbot/setup/?step=4')
+            return redirect(request.POST.get('next') or '/chatbot/config/')
 
         elif action == 'delete_faq':
             if bot:
                 BotFAQ.objects.filter(id=request.POST.get('faq_id'), bot=bot).delete()
-            return redirect('/chatbot/setup/?step=4')
+            return redirect(request.POST.get('next') or '/chatbot/config/')
 
-        elif action == 'next_step4':
-            return redirect('/chatbot/setup/?step=5')
-
-        # ── STEP 5: WhatsApp number ONLY ──
-        elif action == 'save_step5':
-            if not bot:
-                messages.error(request, "Tafadhali anza kutoka hatua ya kwanza.")
-                return redirect('/chatbot/setup/?step=1')
-
-            wa_number = request.POST.get('whatsapp_number', '').strip()
-            digits_only = re.sub(r'\D', '', wa_number)
-            if not wa_number:
-                messages.error(request, "Tafadhali weka nambari ya WhatsApp.")
-                context.update({'bot': bot, 'step': 5})
-                return render(request, 'chatbot/portal/wizard.html', context)
-            if len(digits_only) < 7 or len(digits_only) > 15:
-                messages.error(request, "Nambari ya simu si sahihi. Mfano: +255750123456")
-                context.update({'bot': bot, 'step': 5})
-                return render(request, 'chatbot/portal/wizard.html', context)
-
-            bot.whatsapp_number = wa_number
-            bot.save(update_fields=['whatsapp_number'])
-            _notify_william(bot)
-            return redirect('/chatbot/setup/?step=6')
-
-        # ── STEP 6: Plan + Deploy ──
+        # ── HATUA 3: Mpango + kuanza ──
         elif action == 'deploy':
             if not bot:
                 messages.error(request, "Tafadhali anza kutoka hatua ya kwanza.")
