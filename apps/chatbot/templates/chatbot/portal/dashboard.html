@@ -15,8 +15,8 @@
 .f4{animation:fadeUp .4s .24s ease both}
 
 /* HEADER */
-.dash-hero{background:linear-gradient(135deg,rgba(124,58,237,.06),rgba(0,220,130,.04));border:1px solid rgba(124,58,237,.15);border-radius:18px;padding:24px 28px;margin-bottom:22px;position:relative;overflow:hidden}
-.dash-hero::before{content:'';position:absolute;top:-40px;right:-40px;width:200px;height:200px;background:radial-gradient(circle,rgba(124,58,237,.08),transparent 70%)}
+.dash-hero{background:linear-gradient(135deg,rgba(245,166,35,.06),rgba(0,220,130,.04));border:1px solid rgba(245,166,35,.15);border-radius:18px;padding:24px 28px;margin-bottom:22px;position:relative;overflow:hidden}
+.dash-hero::before{content:'';position:absolute;top:-40px;right:-40px;width:200px;height:200px;background:radial-gradient(circle,rgba(245,166,35,.08),transparent 70%)}
 .bot-name{font-family:var(--head);font-size:26px;font-weight:800;background:linear-gradient(135deg,#a855f7,var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px}
 .bot-sub{font-size:14px;color:var(--text-2)}
 
@@ -30,7 +30,7 @@
 
 /* STAT CARDS */
 .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
-.sc2{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;position:relative;overflow:hidden;transition:all .2s}
+.sc2{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;position:relative;overflow:hidden;transition:background .2s var(--jt-ease),border-color .2s var(--jt-ease),transform .2s var(--jt-ease)}
 .sc2::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--ac,var(--green))}
 .sc2:hover{transform:translateY(-3px);box-shadow:0 12px 36px rgba(0,0,0,.3)}
 .sc2-ico{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;margin-bottom:12px}
@@ -45,7 +45,7 @@
 .cc-body{padding:16px 20px 12px}
 
 /* SUBSCRIPTION CARD */
-.sub-card{background:linear-gradient(135deg,rgba(124,58,237,.08),rgba(0,220,130,.05));border:1px solid rgba(124,58,237,.2);border-radius:16px;padding:20px;margin-bottom:20px}
+.sub-card{background:linear-gradient(135deg,rgba(245,166,35,.08),rgba(0,220,130,.05));border:1px solid rgba(245,166,35,.2);border-radius:16px;padding:20px;margin-bottom:20px}
 .sub-plan-name{font-family:var(--head);font-size:18px;font-weight:800;margin-bottom:4px}
 .usage-track{height:8px;background:rgba(255,255,255,.07);border-radius:100px;overflow:hidden;margin:12px 0 6px}
 .usage-fill{height:100%;border-radius:100px;transition:width 1.4s ease}
@@ -64,12 +64,12 @@
 .webhook-card{background:rgba(0,0,0,.3);border:1px solid rgba(0,220,130,.12);border-radius:14px;padding:18px}
 .wh-label{font-family:var(--mono);font-size:9px;color:var(--text-3);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px}
 .wh-url{font-family:var(--mono);font-size:11px;color:var(--green);word-break:break-all;background:rgba(0,220,130,.05);border:1px solid rgba(0,220,130,.12);border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:10px;justify-content:space-between}
-.copy-btn{background:rgba(0,220,130,.1);border:1px solid rgba(0,220,130,.2);border-radius:6px;padding:4px 10px;font-family:var(--mono);font-size:10px;color:var(--green);cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0}
+.copy-btn{background:rgba(0,220,130,.1);border:1px solid rgba(0,220,130,.2);border-radius:6px;padding:4px 10px;font-family:var(--mono);font-size:10px;color:var(--green);cursor:pointer;transition:background .2s var(--jt-ease),border-color .2s var(--jt-ease),transform .2s var(--jt-ease);white-space:nowrap;flex-shrink:0}
 .copy-btn:hover{background:rgba(0,220,130,.2)}
 
 /* QUICK ACTIONS */
 .qa-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
-.qa-btn{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center;cursor:pointer;transition:all .2s;text-decoration:none;display:block}
+.qa-btn{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center;cursor:pointer;transition:background .2s var(--jt-ease),border-color .2s var(--jt-ease),transform .2s var(--jt-ease);text-decoration:none;display:block}
 .qa-btn:hover{border-color:rgba(0,220,130,.2);transform:translateY(-2px)}
 .qa-ico{font-size:22px;margin-bottom:7px}
 .qa-lbl{font-size:12px;font-weight:600;color:var(--text-2)}
@@ -106,7 +106,7 @@
 
 <!-- SUSPENDED / TRIAL / PENDING ALERTS -->
 {% if bot.status == 'pending' %}
-<div class="f0 mb-3" style="background:linear-gradient(135deg,rgba(124,58,237,.08),rgba(37,211,102,.04));border:1.5px solid rgba(124,58,237,.2);border-radius:16px;padding:20px 24px">
+<div class="f0 mb-3" style="background:linear-gradient(135deg,rgba(245,166,35,.08),rgba(37,211,102,.04));border:1.5px solid rgba(245,166,35,.2);border-radius:16px;padding:20px 24px">
   <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
     <i class="fas fa-circle-notch fa-spin" style="color:#a78bfa;font-size:16px"></i>
     <div style="font-size:15px;font-weight:800;color:var(--text)">Bot yako inaunganishwa na WhatsApp</div>
@@ -122,9 +122,9 @@
         <div style="font-family:var(--mono);font-size:9px;color:var(--text-3)">{{ bot.whatsapp_number }}</div>
       </div>
     </div>
-    <div style="flex:1;height:2px;background:linear-gradient(90deg,rgba(0,220,130,.4),rgba(124,58,237,.4));margin-top:17px"></div>
+    <div style="flex:1;height:2px;background:linear-gradient(90deg,rgba(0,220,130,.4),rgba(245,166,35,.4));margin-top:17px"></div>
     <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px">
-      <div style="width:34px;height:34px;border-radius:50%;background:rgba(124,58,237,.15);border:2px solid rgba(124,58,237,.5);display:flex;align-items:center;justify-content:center">
+      <div style="width:34px;height:34px;border-radius:50%;background:rgba(245,166,35,.15);border:2px solid rgba(245,166,35,.5);display:flex;align-items:center;justify-content:center">
         <i class="fas fa-circle-notch fa-spin" style="color:#a78bfa;font-size:13px"></i>
       </div>
       <div style="text-align:center">

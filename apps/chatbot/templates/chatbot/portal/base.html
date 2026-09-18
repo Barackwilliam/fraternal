@@ -4,29 +4,59 @@
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}JamiiBot{% endblock %} — JamiiTek ChatBot</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
   <style>
+    /* ════════════════════════════════════════════════════════
+       Portal inatumia tokens za JamiiTek.
+
+       ILIVYOKUWA: kijani #00dc82, zambarau var(--jt-gold), cyan #00d4ff,
+       bluu #3b82f6 — lafudhi NNE kwenye kurasa nane. Mteja
+       anayetoka kwenye tovuti ya navy na dhahabu, akapita wizard
+       ya navy na dhahabu, alikuwa anajikuta kwenye kijani.
+
+       MAJINA YAMEBAKI YALE YALE. Kurasa nane zinatumia
+       `var(--green)`, `var(--card)` n.k. — kuelekeza majina
+       badala ya kuandika kurasa upya kunabadilisha zote kwa
+       mpigo mmoja, bila kugusa markup.
+
+       KANUNI: lafudhi MOJA (dhahabu) + rangi za HALI.
+       Zambarau, cyan na bluu zilikuwa za mapambo tu — zimekuwa
+       dhahabu. Kijani, njano na nyekundu zinabeba maana
+       (imefanikiwa, onyo, kosa) — zimebaki, kwa vivuli vya
+       JamiiTek.
+       ════════════════════════════════════════════════════════ */
+    /* Rangi za JamiiTek — navy na dhahabu. Zimeandikwa moja kwa
+       moja hapa (si var(--jt-*)) kwa sababu portal ina base yake
+       yenye darasa za .jt-card/.jt-btn zinazogongana na tokens.css.
+       Lafudhi MOJA: dhahabu. Kijani/njano/nyekundu ni za HALI. */
     :root{
-      --bg:#040608;--bg2:#070c14;--card:rgba(255,255,255,.028);--card-s:rgba(255,255,255,.05);
-      --border:rgba(255,255,255,.07);--border-s:rgba(0,220,130,.2);
-      --green:#00dc82;--green-d:rgba(0,220,130,.1);
-      --cyan:#00d4ff;--cyan-d:rgba(0,212,255,.1);
-      --purple:#7c3aed;--purple-d:rgba(124,58,237,.1);
-      --blue:#3b82f6;--blue-d:rgba(59,130,246,.1);
-      --yellow:#f59e0b;--yellow-d:rgba(245,158,11,.1);
-      --red:#ef4444;--red-d:rgba(239,68,68,.1);
-      --orange:#f97316;--orange-d:rgba(249,115,22,.1);
-      --text:rgba(255,255,255,.88);--text-2:rgba(255,255,255,.45);--text-3:rgba(255,255,255,.22);
-      --mono:'JetBrains Mono',monospace;--head:'Syne',sans-serif;--body:'Space Grotesk',sans-serif;
-      --sb:260px;--top:58px;--r:10px;--r-lg:16px;
+      --bg:#04101F; --bg2:#071A31;
+      --card:rgba(255,255,255,.03); --card-s:rgba(255,255,255,.055);
+      --border:rgba(255,255,255,.09); --border-s:rgba(245,166,35,.32);
+
+      /* lafudhi — dhahabu (purple/cyan/blue za mapambo zote hapa) */
+      --gold:#F5A623;   --gold-d:rgba(245,166,35,.14);
+      --purple:#F5A623; --purple-d:rgba(245,166,35,.14);
+      --cyan:#F5A623;   --cyan-d:rgba(245,166,35,.14);
+      --blue:#F5A623;   --blue-d:rgba(245,166,35,.14);
+
+      /* hali — zinabeba maana */
+      --green:#1FA97A;  --green-d:rgba(31,169,122,.12);
+      --yellow:#E8A33D; --yellow-d:rgba(232,163,61,.12);
+      --red:#D8544B;    --red-d:rgba(216,84,75,.12);
+      --orange:#E8A33D; --orange-d:rgba(232,163,61,.12);
+
+      --text:rgba(255,255,255,.92); --text-2:rgba(255,255,255,.62); --text-3:rgba(255,255,255,.38);
+      --mono:ui-monospace,'SF Mono',Menlo,monospace;
+      --head:'Sora',system-ui,sans-serif;
+      --body:'Inter',system-ui,sans-serif;
+      --sb:260px; --top:58px; --r:8px; --r-lg:14px;
     }
     *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
     html{scroll-behavior:smooth}
     body{font-family:var(--body);background:var(--bg);color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
-    body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background-image:radial-gradient(ellipse at 10% 20%,rgba(124,58,237,.04) 0%,transparent 50%),radial-gradient(ellipse at 90% 80%,rgba(0,220,130,.03) 0%,transparent 50%)}
+    body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background-image:radial-gradient(ellipse at 10% 20%,rgba(245,166,35,.04) 0%,transparent 50%),radial-gradient(ellipse at 90% 80%,rgba(0,220,130,.03) 0%,transparent 50%)}
     a{text-decoration:none}
 
     /* SIDEBAR */
@@ -45,11 +75,11 @@
     .sb-nav{flex:1;overflow-y:auto;padding:12px 0;scrollbar-width:none}
     .sb-nav::-webkit-scrollbar{display:none}
     .sb-section{font-family:var(--mono);font-size:9px;font-weight:600;color:var(--text-3);letter-spacing:2.5px;text-transform:uppercase;padding:16px 18px 6px}
-    .sb-link{display:flex;align-items:center;gap:10px;padding:9px 12px;margin:1px 10px;border-radius:10px;color:var(--text-2);font-size:13.5px;font-weight:500;transition:all .15s;position:relative;cursor:pointer}
+    .sb-link{display:flex;align-items:center;gap:10px;padding:9px 12px;margin:1px 10px;border-radius:10px;color:var(--text-2);font-size:13.5px;font-weight:500;transition:background .15s cubic-bezier(.22,.61,.36,1),border-color .15s cubic-bezier(.22,.61,.36,1),color .15s cubic-bezier(.22,.61,.36,1);position:relative;cursor:pointer}
     .sb-link i{width:16px;text-align:center;font-size:13px;flex-shrink:0}
     .sb-link:hover{color:var(--text);background:var(--card-s)}
-    .sb-link.active{color:var(--green);background:var(--green-d);border:1px solid rgba(0,220,130,.15)}
-    .sb-link.active::before{content:'';position:absolute;left:-1px;top:50%;transform:translateY(-50%);width:3px;height:55%;background:var(--green);border-radius:0 3px 3px 0}
+    .sb-link.active{color:var(--gold);background:var(--gold-d);border:1px solid rgba(245,166,35,.32)}
+    .sb-link.active::before{content:'';position:absolute;left:-1px;top:50%;transform:translateY(-50%);width:3px;height:55%;background:var(--gold);border-radius:0 3px 3px 0}
     .sb-badge{background:var(--red-d);color:var(--red);border:1px solid rgba(239,68,68,.2);font-family:var(--mono);font-size:9px;padding:2px 6px;border-radius:5px;margin-left:auto}
 
     .sb-foot{padding:14px 10px;border-top:1px solid var(--border)}
@@ -65,7 +95,7 @@
     .tb-title{font-family:var(--head);font-size:16px;font-weight:700;color:var(--text)}
     .tb-breadcrumb{font-family:var(--mono);font-size:11px;color:var(--text-3)}
     .tb-right{display:flex;align-items:center;gap:8px}
-    .tb-btn{width:34px;height:34px;border-radius:8px;background:var(--card);border:1px solid var(--border);color:var(--text-2);display:flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer;transition:all .15s;text-decoration:none}
+    .tb-btn{width:34px;height:34px;border-radius:8px;background:var(--card);border:1px solid var(--border);color:var(--text-2);display:flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer;transition:background .15s cubic-bezier(.22,.61,.36,1),border-color .15s cubic-bezier(.22,.61,.36,1),color .15s cubic-bezier(.22,.61,.36,1);text-decoration:none}
     .tb-btn:hover{border-color:var(--border-s);color:var(--green)}
     .mob-tog{display:none;background:none;border:none;color:var(--text-2);font-size:20px;cursor:pointer;padding:4px}
 
@@ -75,7 +105,7 @@
     /* MESSAGES */
     .jt-msgs{margin-bottom:18px}
     .jt-msg{display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:10px;font-size:13.5px;margin-bottom:8px}
-    .jt-msg-success{background:var(--green-d);border:1px solid rgba(0,220,130,.25);color:var(--green)}
+    .jt-msg-success{background:var(--green-d);border:1px solid rgba(31,169,122,.28);color:var(--green)}
     .jt-msg-error{background:var(--red-d);border:1px solid rgba(239,68,68,.25);color:var(--red)}
     .jt-msg-warning{background:var(--yellow-d);border:1px solid rgba(245,158,11,.25);color:var(--yellow)}
     .jt-msg-info{background:var(--cyan-d);border:1px solid rgba(0,212,255,.25);color:var(--cyan)}
@@ -87,7 +117,7 @@
     .jt-card-body{padding:20px}
 
     /* STAT CARDS */
-    .stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:20px;position:relative;overflow:hidden;transition:all .2s}
+    .stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:20px;position:relative;overflow:hidden;transition:background .2s cubic-bezier(.22,.61,.36,1),border-color .2s cubic-bezier(.22,.61,.36,1),transform .2s cubic-bezier(.22,.61,.36,1)}
     .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--accent,var(--green)),transparent)}
     .stat-card:hover{transform:translateY(-2px);border-color:var(--accent,rgba(0,220,130,.2))}
     .sc-ico{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;margin-bottom:14px}
@@ -97,7 +127,7 @@
     /* BADGES */
     .jt-badge{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10px;font-weight:600;padding:3px 9px;border-radius:6px}
     .jt-badge::before{content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0}
-    .b-active{background:rgba(0,220,130,.1);color:var(--green);border:1px solid rgba(0,220,130,.2)}
+    .b-active{background:var(--green-d);color:var(--green);border:1px solid rgba(31,169,122,.24)}
     .b-active::before{background:var(--green);animation:pulse 2s infinite}
     .b-draft{background:var(--blue-d);color:var(--blue);border:1px solid rgba(59,130,246,.2)}
     .b-draft::before{background:var(--blue)}
@@ -107,10 +137,10 @@
     .b-trial::before{background:var(--yellow);animation:pulse 1.5s infinite}
 
     /* BUTTONS */
-    .jt-btn{display:inline-flex;align-items:center;gap:7px;font-family:var(--body);font-size:13px;font-weight:600;padding:8px 16px;border-radius:8px;border:none;cursor:pointer;transition:all .15s;text-decoration:none;white-space:nowrap}
+    .jt-btn{display:inline-flex;align-items:center;gap:7px;font-family:var(--body);font-size:13px;font-weight:600;padding:8px 16px;border-radius:8px;border:none;cursor:pointer;transition:background .15s cubic-bezier(.22,.61,.36,1),border-color .15s cubic-bezier(.22,.61,.36,1),color .15s cubic-bezier(.22,.61,.36,1);text-decoration:none;white-space:nowrap}
     .jt-btn:hover{transform:translateY(-1px)}
     .btn-primary{background:linear-gradient(135deg,var(--purple),var(--blue));color:#fff}
-    .btn-primary:hover{box-shadow:0 6px 24px rgba(124,58,237,.35);color:#fff}
+    .btn-primary:hover{box-shadow:0 6px 24px rgba(245,166,35,.30);color:#fff}
     .btn-green{background:linear-gradient(135deg,#00dc82,#00b5d8);color:var(--bg)}
     .btn-green:hover{box-shadow:0 6px 24px rgba(0,220,130,.35);color:var(--bg)}
     .btn-ghost{background:transparent;color:var(--text-2);border:1px solid var(--border)}
@@ -123,7 +153,7 @@
 
     /* FORMS */
     .f-label{display:block;font-family:var(--mono);font-size:10px;font-weight:600;color:var(--text-3);letter-spacing:1px;text-transform:uppercase;margin-bottom:7px}
-    .f-input{width:100%;padding:10px 13px;background:rgba(255,255,255,.04);border:1.5px solid var(--border);border-radius:var(--r);color:var(--text);font-family:var(--body);font-size:13.5px;outline:none;transition:all .2s}
+    .f-input{width:100%;padding:10px 13px;background:rgba(255,255,255,.04);border:1.5px solid var(--border);border-radius:var(--r);color:var(--text);font-family:var(--body);font-size:13.5px;outline:none;transition:background .2s cubic-bezier(.22,.61,.36,1),border-color .2s cubic-bezier(.22,.61,.36,1),transform .2s cubic-bezier(.22,.61,.36,1)}
     .f-input:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(0,220,130,.1);background:rgba(255,255,255,.06)}
     .f-input::placeholder{color:var(--text-3)}
     select.f-input option{background:var(--bg2);color:var(--text)}
@@ -131,7 +161,7 @@
 
     /* ALERTS */
     .jt-alert{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-radius:10px;font-size:13.5px}
-    .jt-alert-success{background:var(--green-d);border:1px solid rgba(0,220,130,.25);color:var(--green)}
+    .jt-alert-success{background:var(--green-d);border:1px solid rgba(31,169,122,.28);color:var(--green)}
     .jt-alert-danger{background:var(--red-d);border:1px solid rgba(239,68,68,.25);color:var(--red)}
     .jt-alert-warning{background:var(--yellow-d);border:1px solid rgba(245,158,11,.25);color:var(--yellow)}
     .jt-alert-info{background:var(--cyan-d);border:1px solid rgba(0,212,255,.25);color:var(--cyan)}
@@ -160,8 +190,6 @@
     @media(max-width:576px){.jt-main{padding:12px}}
   </style>
   {% block extra_css %}{% endblock %}
-  <link rel="stylesheet" href="{% static 'css/tokens.css' %}">
-  <link rel="stylesheet" href="{% static 'css/interaction.css' %}">
 
 </head>
 <body>
@@ -235,8 +263,8 @@
   </nav>
   <div class="sb-foot">
     <!-- SWITCH TO PORTAL -->
-    <a href="/portal/" style="display:flex;align-items:center;gap:10px;padding:9px 12px;margin:0 0 8px;border-radius:11px;background:rgba(0,212,255,.05);border:1px solid rgba(0,212,255,.15);text-decoration:none;transition:all .2s" onmouseenter="this.style.borderColor='rgba(0,212,255,.35)'" onmouseleave="this.style.borderColor='rgba(0,212,255,.15)'">
-      <div style="width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,rgba(0,212,255,.15),rgba(59,130,246,.15));display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="fas fa-globe" style="font-size:12px;color:var(--cyan)"></i></div>
+    <a href="/portal/" style="display:flex;align-items:center;gap:10px;padding:9px 12px;margin:0 0 8px;border-radius:11px;background:rgba(245,166,35,.05);border:1px solid rgba(245,166,35,.15);text-decoration:none;transition:background .2s cubic-bezier(.22,.61,.36,1),border-color .2s cubic-bezier(.22,.61,.36,1),transform .2s cubic-bezier(.22,.61,.36,1)" onmouseenter="this.style.borderColor='rgba(245,166,35,.35)'" onmouseleave="this.style.borderColor='rgba(245,166,35,.15)'">
+      <div style="width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,rgba(245,166,35,.15),rgba(59,130,246,.15));display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="fas fa-globe" style="font-size:12px;color:var(--cyan)"></i></div>
       <div style="min-width:0">
         <div style="font-size:12px;font-weight:700;color:var(--cyan);line-height:1.2">Client Portal</div>
         <div style="font-family:var(--mono);font-size:9px;color:var(--text3)">Hosting & Domains</div>

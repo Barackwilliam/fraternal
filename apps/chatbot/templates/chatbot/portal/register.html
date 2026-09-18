@@ -1,10 +1,10 @@
+{% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="sw" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
   <title>Create Account — JamiiBot</title>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
   <style>
   *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
@@ -14,7 +14,7 @@
     --card:   rgba(255,255,255,.03);
     --border: rgba(255,255,255,.08);
     --green:  #00dc82;
-    --purple: #7c3aed;
+    --purple: var(--jt-gold);
     --red:    #ef4444;
     --text:   rgba(255,255,255,.9);
     --text2:  rgba(255,255,255,.45);
@@ -40,9 +40,9 @@
     content: '';
     position: fixed; inset: 0; z-index: 0; pointer-events: none;
     background:
-      radial-gradient(ellipse 55% 50% at 15% 25%, rgba(124,58,237,.08), transparent 60%),
+      radial-gradient(ellipse 55% 50% at 15% 25%, rgba(245,166,35,.08), transparent 60%),
       radial-gradient(ellipse 45% 45% at 90% 80%, rgba(0,220,130,.06), transparent 55%),
-      radial-gradient(ellipse 35% 40% at 60% 10%, rgba(0,212,255,.04), transparent 55%);
+      radial-gradient(ellipse 35% 40% at 60% 10%, rgba(245,166,35,.04), transparent 55%);
   }
   canvas { position:fixed; inset:0; z-index:0; pointer-events:none; }
 
@@ -65,7 +65,7 @@
   .left::before {
     content: ''; position: absolute; top: -80px; right: -80px;
     width: 300px; height: 300px; border-radius: 50%;
-    background: radial-gradient(circle, rgba(124,58,237,.12), transparent 65%);
+    background: radial-gradient(circle, rgba(245,166,35,.12), transparent 65%);
     pointer-events: none;
   }
   .left::after {
@@ -83,7 +83,7 @@
     width: 42px; height: 42px; border-radius: 12px; font-size: 20px;
     background: linear-gradient(135deg, var(--purple), var(--green));
     display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 4px 18px rgba(124,58,237,.35); flex-shrink: 0;
+    box-shadow: 0 4px 18px rgba(245,166,35,.35); flex-shrink: 0;
   }
   .brand-name {
     font-family: var(--head); font-size: 22px; font-weight: 800;
@@ -257,11 +257,11 @@
     border-radius: 12px; padding: 14px 10px; text-align: center;
     background: rgba(255,255,255,.02); transition: all .2s; position: relative;
   }
-  .plan-card:hover { border-color: rgba(124,58,237,.3); background: rgba(124,58,237,.04); }
+  .plan-card:hover { border-color: rgba(245,166,35,.3); background: rgba(245,166,35,.04); }
   .plan-opt input:checked + .plan-card {
     border-color: var(--purple);
-    background: rgba(124,58,237,.1);
-    box-shadow: 0 0 20px rgba(124,58,237,.15), inset 0 1px 0 rgba(255,255,255,.05);
+    background: rgba(245,166,35,.1);
+    box-shadow: 0 0 20px rgba(245,166,35,.15), inset 0 1px 0 rgba(255,255,255,.05);
   }
   .plan-popular {
     position: absolute; top: -9px; left: 50%; transform: translateX(-50%);
@@ -354,6 +354,8 @@
     .submit-btn { font-size: 14px; padding: 13px; }
   }
   </style>
+  <link rel="stylesheet" href="{% static 'css/tokens.css' %}">
+  <link rel="stylesheet" href="{% static 'css/interaction.css' %}">
 </head>
 <body>
 <canvas id="c"></canvas>
@@ -379,7 +381,7 @@
       <div><div class="feat-t">Swahili + English</div><div class="feat-s">Auto-detects customer language</div></div>
     </div>
     <div class="feat">
-      <div class="feat-ico" style="background:rgba(124,58,237,.1)">🧠</div>
+      <div class="feat-ico" style="background:rgba(245,166,35,.1)">🧠</div>
       <div><div class="feat-t">Groq AI Engine</div><div class="feat-s">llama-3.3-70b — blazing fast</div></div>
     </div>
     <div class="feat">
@@ -557,7 +559,7 @@
     x:Math.random()*2000,y:Math.random()*1200,
     vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,
     r:Math.random()*1.3+.3,o:Math.random()*.25+.04,
-    c:Math.random()>.6?'124,58,237':'0,220,130'
+    c:Math.random()>.6?'245,166,35':'0,220,130'
   });
   (function loop(){
     ctx.clearRect(0,0,W,H);
@@ -625,5 +627,6 @@ document.getElementById('regForm').addEventListener('submit', function(e){
   btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Creating account...';
 });
 </script>
+<script src="{% static 'js/interaction.js' %}" defer></script>
 </body>
 </html>

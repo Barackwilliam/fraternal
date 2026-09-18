@@ -1,26 +1,26 @@
+{% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="sw" data-theme="dark">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Sign In — JamiiBot</title>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
   <style>
   *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-  :root{--bg:#040608;--card:rgba(255,255,255,.028);--border:rgba(255,255,255,.08);--green:#00dc82;--purple:#7c3aed;--text:rgba(255,255,255,.88);--text2:rgba(255,255,255,.45);--text3:rgba(255,255,255,.22);--mono:'JetBrains Mono',monospace;--head:'Syne',sans-serif;--body:'Space Grotesk',sans-serif}
+  :root{--bg:#040608;--card:rgba(255,255,255,.028);--border:rgba(255,255,255,.08);--green:#00dc82;--purple:var(--jt-gold);--text:rgba(255,255,255,.88);--text2:rgba(255,255,255,.45);--text3:rgba(255,255,255,.22);--mono:'JetBrains Mono',monospace;--head:'Syne',sans-serif;--body:'Space Grotesk',sans-serif}
   body{font-family:var(--body);background:var(--bg);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;position:relative;overflow:hidden}
-  body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 70% 60% at 30% 40%,rgba(124,58,237,.07),transparent 60%),radial-gradient(ellipse 50% 50% at 80% 70%,rgba(0,220,130,.04),transparent 55%);pointer-events:none}
+  body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 70% 60% at 30% 40%,rgba(245,166,35,.07),transparent 60%),radial-gradient(ellipse 50% 50% at 80% 70%,rgba(0,220,130,.04),transparent 55%);pointer-events:none}
   canvas{position:fixed;inset:0;z-index:0;pointer-events:none}
 
   .wrap{position:relative;z-index:1;display:grid;grid-template-columns:420px 380px;gap:0;border-radius:24px;overflow:hidden;box-shadow:0 40px 120px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.06)}
 
   /* LEFT PANEL */
   .left{background:linear-gradient(135deg,rgba(12,8,30,.98),rgba(8,12,24,.98));padding:52px 44px;display:flex;flex-direction:column;border-right:1px solid rgba(255,255,255,.05);position:relative;overflow:hidden}
-  .left::before{content:'';position:absolute;top:-60px;left:-60px;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(124,58,237,.12),transparent 65%);pointer-events:none}
+  .left::before{content:'';position:absolute;top:-60px;left:-60px;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(245,166,35,.12),transparent 65%);pointer-events:none}
   .left::after{content:'';position:absolute;bottom:-40px;right:-40px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(0,220,130,.07),transparent 65%);pointer-events:none}
 
   .brand{display:flex;align-items:center;gap:12px;margin-bottom:52px;position:relative;z-index:1}
-  .brand-ico{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,var(--purple),var(--green));display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 4px 16px rgba(124,58,237,.35)}
+  .brand-ico{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,var(--purple),var(--green));display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 4px 16px rgba(245,166,35,.35)}
   .brand-name{font-family:var(--head);font-size:22px;font-weight:800;background:linear-gradient(135deg,#a855f7,var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 
   .left-title{font-family:var(--head);font-size:32px;font-weight:800;color:var(--text);line-height:1.15;margin-bottom:14px;position:relative;z-index:1}
@@ -49,17 +49,17 @@
   .f-label{display:block;font-family:var(--mono);font-size:10px;font-weight:600;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px}
   .f-wrap{position:relative}
   .f-ico{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:14px;pointer-events:none}
-  .f-input{width:100%;padding:12px 14px 12px 42px;background:rgba(255,255,255,.04);border:1.5px solid var(--border);border-radius:11px;color:var(--text);font-family:var(--body);font-size:14px;outline:none;transition:all .2s}
+  .f-input{width:100%;padding:12px 14px 12px 42px;background:rgba(255,255,255,.04);border:1.5px solid var(--border);border-radius:11px;color:var(--text);font-family:var(--body);font-size:14px;outline:none;transition:background .2s var(--jt-ease),border-color .2s var(--jt-ease),transform .2s var(--jt-ease)}
   .f-input:focus{border-color:var(--green);background:rgba(0,220,130,.04);box-shadow:0 0 0 3px rgba(0,220,130,.1)}
   .f-input::placeholder{color:var(--text3);font-size:13px}
 
-  .submit-btn{width:100%;padding:13px;background:linear-gradient(135deg,var(--purple),#5b21b6);color:#fff;border:none;border-radius:11px;font-family:var(--head);font-size:15px;font-weight:800;cursor:pointer;transition:all .25s;margin-top:4px;letter-spacing:.3px;box-shadow:0 6px 24px rgba(124,58,237,.3)}
-  .submit-btn:hover{transform:translateY(-2px);box-shadow:0 10px 36px rgba(124,58,237,.45);opacity:.95}
+  .submit-btn{width:100%;padding:13px;background:linear-gradient(135deg,var(--purple),#5b21b6);color:#fff;border:none;border-radius:11px;font-family:var(--head);font-size:15px;font-weight:800;cursor:pointer;transition:all .25s;margin-top:4px;letter-spacing:.3px;box-shadow:0 6px 24px rgba(245,166,35,.3)}
+  .submit-btn:hover{transform:translateY(-2px);box-shadow:0 10px 36px rgba(245,166,35,.45);opacity:.95}
   .submit-btn i{margin-right:6px}
 
   .divider{border:none;border-top:1px solid rgba(255,255,255,.06);margin:22px 0}
 
-  .register-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;background:rgba(0,220,130,.06);border:1.5px solid rgba(0,220,130,.18);border-radius:11px;color:var(--green);font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;font-family:var(--body)}
+  .register-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;background:rgba(0,220,130,.06);border:1.5px solid rgba(0,220,130,.18);border-radius:11px;color:var(--green);font-size:13px;font-weight:700;text-decoration:none;transition:background .2s var(--jt-ease),border-color .2s var(--jt-ease),transform .2s var(--jt-ease);font-family:var(--body)}
   .register-btn:hover{background:rgba(0,220,130,.12);border-color:rgba(0,220,130,.35);color:var(--green);transform:translateY(-1px)}
 
   .links-row{display:flex;justify-content:space-between;margin-top:16px}
@@ -68,6 +68,8 @@
 
   @media(max-width:840px){.wrap{grid-template-columns:1fr}.left{display:none}}
   </style>
+  <link rel="stylesheet" href="{% static 'css/tokens.css' %}">
+  <link rel="stylesheet" href="{% static 'css/interaction.css' %}">
 </head>
 <body>
 <canvas id="c"></canvas>
@@ -80,8 +82,8 @@
     <div class="left-title">Your business,<br>always <em>online.</em></div>
     <div class="left-sub">AI-powered WhatsApp bot that speaks Swahili & English. Handles customer questions 24/7 so you never miss a message.</div>
     <div class="feature"><div class="feat-ico" style="background:rgba(0,220,130,.1)">🇹🇿</div><div><div class="feat-title">Swahili + English AI</div><div class="feat-sub">Auto-detects & responds in customer's language</div></div></div>
-    <div class="feature"><div class="feat-ico" style="background:rgba(124,58,237,.1)">⚡</div><div><div class="feat-title">Replies in under 2 seconds</div><div class="feat-sub">Powered by Groq llama-3.3-70b</div></div></div>
-    <div class="feature"><div class="feat-ico" style="background:rgba(0,212,255,.1)">📊</div><div><div class="feat-title">Live conversation dashboard</div><div class="feat-sub">See every chat in real time</div></div></div>
+    <div class="feature"><div class="feat-ico" style="background:rgba(245,166,35,.1)">⚡</div><div><div class="feat-title">Replies in under 2 seconds</div><div class="feat-sub">Powered by Groq llama-3.3-70b</div></div></div>
+    <div class="feature"><div class="feat-ico" style="background:rgba(245,166,35,.1)">📊</div><div><div class="feat-title">Live conversation dashboard</div><div class="feat-sub">See every chat in real time</div></div></div>
     <div class="live-badge"><div class="live-dot"></div> 7-day free trial · No card needed</div>
   </div>
   <div class="right">
@@ -111,8 +113,9 @@
 <script>
 const cv=document.getElementById('c'),ctx=cv.getContext('2d');let W,H,pts=[];
 function rs(){W=cv.width=window.innerWidth;H=cv.height=window.innerHeight}rs();window.addEventListener('resize',rs);
-for(let i=0;i<60;i++)pts.push({x:Math.random()*2000,y:Math.random()*1200,vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3,r:Math.random()*1.4+.3,o:Math.random()*.35+.05,c:Math.random()>.6?'124,58,237':'0,220,130'});
+for(let i=0;i<60;i++)pts.push({x:Math.random()*2000,y:Math.random()*1200,vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3,r:Math.random()*1.4+.3,o:Math.random()*.35+.05,c:Math.random()>.6?'245,166,35':'0,220,130'});
 (function loop(){ctx.clearRect(0,0,W,H);pts.forEach(p=>{ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=`rgba(${p.c},${p.o})`;ctx.fill();p.x+=p.vx;p.y+=p.vy;if(p.x<0)p.x=W;if(p.x>W)p.x=0;if(p.y<0)p.y=H;if(p.y>H)p.y=0});requestAnimationFrame(loop)})();
 </script>
+<script src="{% static 'js/interaction.js' %}" defer></script>
 </body>
 </html>

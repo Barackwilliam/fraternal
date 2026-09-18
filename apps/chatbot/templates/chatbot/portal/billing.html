@@ -10,9 +10,9 @@
 /* PLAN CARDS */
 .plan-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:22px}
 .plan-opt{cursor:pointer;position:relative}
-.plan-card{border:1.5px solid var(--border);border-radius:16px;padding:20px 16px;text-align:center;transition:all .2s;background:rgba(255,255,255,.02);position:relative;overflow:hidden}
-.plan-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(124,58,237,.5),transparent);opacity:0;transition:opacity .2s}
-.plan-card:hover{border-color:rgba(124,58,237,.3);transform:translateY(-2px)}
+.plan-card{border:1.5px solid var(--border);border-radius:16px;padding:20px 16px;text-align:center;transition:background .2s var(--jt-ease),border-color .2s var(--jt-ease),transform .2s var(--jt-ease);background:rgba(255,255,255,.02);position:relative;overflow:hidden}
+.plan-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(245,166,35,.5),transparent);opacity:0;transition:opacity .2s}
+.plan-card:hover{border-color:rgba(245,166,35,.3);transform:translateY(-2px)}
 .plan-card:hover::before{opacity:1}
 .plan-card.current{border-color:rgba(0,220,130,.4);background:rgba(0,220,130,.04);box-shadow:0 0 24px rgba(0,220,130,.08)}
 .plan-card.current::before{background:linear-gradient(90deg,transparent,var(--green),transparent);opacity:1}
@@ -23,8 +23,8 @@
 .plan-feat{display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04);font-family:var(--mono);font-size:10px;color:var(--text2);text-align:left}
 .plan-feat:last-child{border-bottom:none}
 .plan-feat i{color:var(--green);font-size:10px;flex-shrink:0}
-.plan-select-btn{display:block;width:100%;padding:8px;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.25);border-radius:9px;font-family:var(--mono);font-size:11px;font-weight:700;color:#a5b4fc;cursor:pointer;transition:all .2s;margin-top:12px}
-.plan-select-btn:hover{background:rgba(124,58,237,.25);color:#c7d2fe}
+.plan-select-btn{display:block;width:100%;padding:8px;background:rgba(245,166,35,.12);border:1px solid rgba(245,166,35,.25);border-radius:9px;font-family:var(--mono);font-size:11px;font-weight:700;color:#F5A623;cursor:pointer;transition:background .2s var(--jt-ease),border-color .2s var(--jt-ease),transform .2s var(--jt-ease);margin-top:12px}
+.plan-select-btn:hover{background:rgba(245,166,35,.25);color:#FFC456}
 .plan-select-btn.current-btn{background:rgba(0,220,130,.08);border-color:rgba(0,220,130,.2);color:var(--green)}
 
 /* USAGE BAR */
@@ -38,7 +38,7 @@
 .pay-form-body{padding:20px}
 
 /* BANK CARD */
-.bank-card{background:linear-gradient(135deg,rgba(0,220,130,.08),rgba(0,212,255,.05));border:1px solid rgba(0,220,130,.18);border-radius:14px;padding:18px}
+.bank-card{background:linear-gradient(135deg,rgba(0,220,130,.08),rgba(245,166,35,.05));border:1px solid rgba(0,220,130,.18);border-radius:14px;padding:18px}
 .bank-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(0,220,130,.08)}
 .bank-row:last-child{border-bottom:none}
 .bank-key{font-family:var(--mono);font-size:10px;color:rgba(0,220,130,.5);text-transform:uppercase;letter-spacing:1px}
@@ -187,7 +187,7 @@
     <div class="jt-card f1 mb-3">
       <div class="jt-card-head"><span class="jt-card-title"><i class="fas fa-robot" style="color:var(--purple)"></i> Bot Status</span></div>
       <div class="jt-card-body" style="text-align:center;padding:20px">
-        <div style="width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,var(--purple),var(--green));margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:0 6px 20px rgba(124,58,237,.3)">{{ bot.bot_name|first|upper }}</div>
+        <div style="width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,var(--purple),var(--green));margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:0 6px 20px rgba(245,166,35,.3)">{{ bot.bot_name|first|upper }}</div>
         <div style="font-family:var(--head);font-size:16px;font-weight:800;color:var(--text)">{{ bot.bot_name }}</div>
         <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-top:3px">{{ bot.business_name }}</div>
         <div style="margin-top:12px"><span class="jt-badge b-{{ bot.status }}">{{ bot.status|capfirst }}</span></div>
