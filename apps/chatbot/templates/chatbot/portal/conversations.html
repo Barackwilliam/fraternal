@@ -55,6 +55,17 @@
 .conv-preview{font-size:12px;color:var(--text2);margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:340px}
 .conv-time{font-family:var(--mono);font-size:10px;color:var(--text3);white-space:nowrap}
 .msg-count{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--purple);background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.2);padding:3px 8px;border-radius:6px}
+
+/* ── MOBILE ── */
+@media(max-width:768px){.stats-row{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){
+  .conv-preview{max-width:52vw}
+  .conv-item{gap:11px;padding:13px 14px}
+  .conv-time,.msg-count{display:none}
+  .wait-row{flex-wrap:wrap}
+  .wait-btn{width:100%}
+}
+@media(max-width:400px){.stats-row{grid-template-columns:1fr}}
 </style>
 
 <!-- STATS -->

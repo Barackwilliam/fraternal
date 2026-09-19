@@ -44,6 +44,21 @@
 
 /* FOOTER */
 .chat-foot{padding:12px 18px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.01)}
+
+/* ── MOBILE ─────────────────────────────────────────────
+   Sidebar ya 260px ilikuwa inabana chat karibu kutoweka kwenye
+   simu. Sasa vinajipanga wima: chat juu, taarifa za mteja chini. */
+@media(max-width:820px){
+  .chat-layout{display:flex;flex-direction:column;height:auto;gap:12px}
+  .chat-main{order:-1;height:calc(100dvh - 220px);min-height:340px}
+  .chat-sidebar{overflow:visible}
+  .bubble{max-width:86%}
+}
+@media(max-width:420px){
+  .chat-body{padding:14px}
+  .chat-topbar{padding:12px 14px}
+  .chat-foot span{font-size:10px}
+}
 </style>
 
 <a href="/chatbot/conversations/" class="jt-btn btn-ghost btn-sm mb-3" style="display:inline-flex;align-items:center"><i class="fas fa-arrow-left"></i> Back to Conversations</a>
