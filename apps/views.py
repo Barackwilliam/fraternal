@@ -169,6 +169,17 @@ def contact(request):
     """
     
     if request.method == 'POST':
+        # ── Honeypot (mtego wa bot) ──────────────────────────────
+        # Sehemu ya siri iliyofichwa kwa CSS. Binadamu haioni, kwa hiyo
+        # haijazi. Bot za spam hujaza KILA sehemu — zikijaza hii,
+        # tunanyamaza (hatutumii email) na kuonyesha "mafanikio" ili
+        # bot isijue imekamatwa. Hii inafanya kazi HATA bila Turnstile
+        # keys, kwa hiyo inazuia spam mara moja.
+        if request.POST.get('company_website', '').strip():
+            logger.info("Contact honeypot tripped — spam dropped silently.")
+            messages.success(request, "Thank you! We'll get back to you within 24 hours.")
+            return render(request, 'contact.html')
+
         # Pata data kutoka POST
         full_name = request.POST.get('full_name', '')
         email = request.POST.get('email', '')

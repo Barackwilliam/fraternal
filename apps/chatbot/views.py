@@ -133,16 +133,25 @@ def chatbot_register(request):
         business  = data.get('business_name', '').strip()
         phone     = data.get('phone', '').strip()
 
+        # Cloudflare Turnstile — anti-bot. Inapita kimyakimya kama
+        # TURNSTILE_ENABLED = False (keys hazijawekwa), kwa hiyo fomu
+        # inaendelea kufanya kazi kabla ya kuweka keys.
+        from apps.turnstile import verify_token, get_client_ip
+        ok, _codes = verify_token(request.POST.get('cf-turnstile-response'),
+                                  get_client_ip(request))
+        if not ok:
+            errors.append("Please complete the security check and try again.")
+
         if not all([username, password, email, full_name, business]):
-            errors.append("Tafadhali jaza sehemu zote zinazohitajika.")
+            errors.append("Please fill in all required fields.")
         if User.objects.filter(username=username).exists():
-            errors.append("Jina hilo la mtumiaji linatumiwa tayari.")
+            errors.append("That username is already taken.")
         if User.objects.filter(email=email).exists():
-            errors.append("Barua pepe hiyo imesajiliwa tayari.")
+            errors.append("That email is already registered.")
         if password != password2:
-            errors.append("Nywila hazifanani.")
+            errors.append("Passwords do not match.")
         if len(password) < 8:
-            errors.append("Nywila lazima iwe na herufi 8 au zaidi.")
+            errors.append("Password must be at least 8 characters.")
 
         if errors:
             for e in errors:
@@ -160,11 +169,11 @@ def chatbot_register(request):
                     email=email, phone=phone
                 )
                 login(request, user)
-                messages.success(request, f"Karibu {full_name}! Sasa unda bot yako ya kwanza.")
+                messages.success(request, f"Welcome {full_name}! Now create your first bot.")
                 return redirect('chatbot_setup_wizard')
         except Exception as e:
             logger.exception(f"Registration error: {e}")
-            messages.error(request, "Tatizo la kiufundi. Jaribu tena.")
+            messages.error(request, "A technical error occurred. Please try again.")
 
     return render(request, 'chatbot/portal/register.html', {'plans': plans})
 
@@ -176,6 +185,14 @@ def chatbot_login(request):
             return redirect('chatbot_dashboard')
 
     if request.method == 'POST':
+        # Cloudflare Turnstile — anti-bot (pass-through kama keys hazijawekwa)
+        from apps.turnstile import verify_token, get_client_ip
+        ok, _codes = verify_token(request.POST.get('cf-turnstile-response'),
+                                  get_client_ip(request))
+        if not ok:
+            messages.error(request, "Please complete the security check and try again.")
+            return render(request, 'chatbot/portal/login.html')
+
         username = request.POST.get('username', '').strip()
         password = request.POST.get('password', '')
         user = authenticate(request, username=username, password=password)

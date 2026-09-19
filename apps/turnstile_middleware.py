@@ -33,7 +33,7 @@ logger = logging.getLogger(__name__)
 # Public forms TU. Kila moja LAZIMA iwe na widget kwenye template yake.
 # Ni exact match kwenye request.path (si prefix) ili /manage/ isiingie kwa bahati mbaya.
 PROTECTED_PATHS = {
-    # "/contact/",
+    "/contact/",
     # "/domain-check/",
 }
 

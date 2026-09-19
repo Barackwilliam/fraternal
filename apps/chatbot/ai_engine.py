@@ -11,12 +11,35 @@ kitu — bot zote zilitumia model ile ile. Sasa field inafanya kazi kweli,
 na kila bot inaweza kuwa na model yake.
 """
 import os
+import re
 import time
 import logging
 import requests
 from django.conf import settings
 
 logger = logging.getLogger('chatbot.ai')
+
+
+def clean_reply(text: str) -> str:
+    """
+    Safisha markdown ya AI ili ionekane vizuri WhatsApp na kwenye widget.
+
+    Model inatoa `**bold**` (markdown) — WhatsApp inaonyesha nyota mbili
+    kama zilivyo, jambo linaloharibu mwonekano. WhatsApp inatumia nyota
+    MOJA `*bold*`. Kwa hiyo tunabadilisha, tunaondoa vichwa vya markdown,
+    na tunasafisha nafasi za ziada.
+    """
+    if not text:
+        return text
+    t = text
+    t = re.sub(r'\*\*(.+?)\*\*', r'*\1*', t, flags=re.S)   # **x** -> *x*
+    t = re.sub(r'__(.+?)__',     r'*\1*', t, flags=re.S)    # __x__ -> *x*
+    t = re.sub(r'^#{1,6}\s*(.+)$', r'*\1*', t, flags=re.M)  # ### Heading -> *Heading*
+    t = re.sub(r'^\s*[-*]\s+', '• ', t, flags=re.M)          # "- item" / "* item" -> "• item"
+    t = t.replace('**', '')                                  # ondoa nyota mbili zilizobaki
+    t = re.sub(r'[ \t]+\n', '\n', t)                         # nafasi mwisho wa mstari
+    t = re.sub(r'\n{3,}', '\n\n', t)                         # mistari mitupu mingi
+    return t.strip()
 
 GROQ_API_URL  = "https://api.groq.com/openai/v1/chat/completions"
 DEFAULT_MODEL = os.getenv('GROQ_MODEL', 'llama-3.3-70b-versatile')
@@ -120,7 +143,7 @@ class BotAIEngine:
                 return {'success': False, 'content': self.bot.fallback_msg, 'tokens': 0, 'latency_ms': latency, 'error': error_msg}
 
             data    = response.json()
-            content = data['choices'][0]['message']['content'].strip()
+            content = clean_reply(data['choices'][0]['message']['content'].strip())
             tokens  = data.get('usage', {}).get('total_tokens', 0)
 
             return {'success': True, 'content': content, 'tokens': tokens, 'latency_ms': latency, 'model': self.model, 'is_handoff': False}

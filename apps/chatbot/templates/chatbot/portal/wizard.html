@@ -1,65 +1,74 @@
 {% load static %}<!DOCTYPE html>
-<html lang="sw" data-theme="dark">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Tengeneza bot yako — JamiiTek</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Create your bot — JamiiTek</title>
 
 <link rel="stylesheet" href="{% static 'css/tokens.css' %}">
 <link rel="stylesheet" href="{% static 'css/interaction.css' %}">
 
 <style>
 /* ============================================================
-   Wizard: hatua 3, si 6.
-   Ilikuwa na tokens zake (--wiz-glow: #6366f1). Sasa inatumia
-   za JamiiTek — mteja anayetoka kwenye tovuti ya navy na dhahabu
-   anabaki kwenye bidhaa ile ile.
+   Wizard: 3 steps. Navy + gold (JamiiTek), mobile-first.
+   English UI; Swahili only in example placeholders.
    ============================================================ */
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--jt-bg);color:var(--jt-ink);font-family:var(--jt-body);
-  -webkit-font-smoothing:antialiased;line-height:1.6;min-height:100dvh}
+  -webkit-font-smoothing:antialiased;line-height:1.6;min-height:100dvh;
+  background-image:
+    radial-gradient(60% 45% at 12% 0%, rgba(245,166,35,.06), transparent 60%),
+    radial-gradient(55% 45% at 100% 8%, rgba(31,169,122,.06), transparent 60%)}
 
 @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 .rise{animation:rise var(--jt-mid) var(--jt-ease) both}
 .rise-2{animation-delay:60ms}
 @media (prefers-reduced-motion:reduce){.rise{animation:none}}
 
-/* ── Kichwa ── */
-.top{border-bottom:1px solid var(--jt-line);padding:16px 0;
-  position:sticky;top:0;background:var(--jt-bg);z-index:20}
-.top-in{display:flex;align-items:center;gap:16px}
-.brand{font-family:var(--jt-head);font-weight:800;font-size:18px;
-  letter-spacing:-.4px;color:var(--jt-ink);text-decoration:none}
+/* ── Header ── */
+.top{border-bottom:1px solid var(--jt-line);padding:15px 0;
+  position:sticky;top:0;background:rgba(4,16,31,.86);backdrop-filter:blur(14px);z-index:20}
+.top-in{display:flex;align-items:center;gap:14px}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--jt-head);font-weight:800;
+  font-size:18px;letter-spacing:-.4px;color:var(--jt-ink);text-decoration:none}
+.brand-ico{width:32px;height:32px;border-radius:9px;overflow:hidden;background:#fff;
+  box-shadow:0 3px 12px rgba(245,166,35,.25);flex:0 0 auto}
+.brand-ico img{width:100%;height:100%;object-fit:cover;display:block}
 .brand span{color:var(--jt-gold)}
 .top-out{margin-left:auto;font-size:13px;color:var(--jt-muted);text-decoration:none}
+@media(hover:hover){.top-out:hover{color:var(--jt-ink-2)}}
 
-/* ── Hatua ── */
-.steps{display:flex;gap:6px;margin:26px 0 30px;max-width:520px}
-.stp{flex:1}
-.stp-bar{height:3px;border-radius:2px;background:var(--jt-line);
+/* ── Steps ── */
+.steps{display:flex;gap:8px;margin:26px 0 30px;max-width:560px}
+.stp{flex:1;min-width:0}
+.stp-bar{height:4px;border-radius:3px;background:var(--jt-line);
   transition:background var(--jt-mid) var(--jt-ease)}
-.stp.on .stp-bar,.stp.done .stp-bar{background:var(--jt-gold)}
-.stp-lbl{font-size:11.5px;margin-top:8px;color:var(--jt-muted);
-  transition:color var(--jt-mid) var(--jt-ease)}
-.stp.on .stp-lbl{color:var(--jt-ink);font-weight:600}
+.stp.on .stp-bar{background:var(--jt-gold)}
+.stp.done .stp-bar{background:var(--jt-green)}
+.stp-lbl{font-size:11.5px;margin-top:9px;color:var(--jt-muted);white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;transition:color var(--jt-mid) var(--jt-ease)}
+.stp.on .stp-lbl{color:var(--jt-ink);font-weight:700}
 .stp.done .stp-lbl{color:var(--jt-ink-2)}
+.stp.done .stp-lbl::before{content:'\2713 ';color:var(--jt-green)}
 
-/* ── Maudhui ── */
-.page{max-width:620px;margin:0 auto;padding:0 var(--jt-pad) 80px}
-h1{font-family:var(--jt-head);font-size:clamp(25px,5.5vw,34px);font-weight:800;
+/* ── Content ── */
+.page{max-width:640px;margin:0 auto;padding:0 var(--jt-pad) 90px}
+.card{background:var(--jt-card);border:1px solid var(--jt-line);border-radius:var(--jt-r-lg);
+  padding:26px 24px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+h1{font-family:var(--jt-head);font-size:clamp(24px,5.5vw,32px);font-weight:800;
   letter-spacing:-1px;line-height:1.15;margin-bottom:10px;text-wrap:balance}
-.sub{color:var(--jt-ink-2);font-size:15px;margin-bottom:30px;max-width:52ch;
-  text-wrap:pretty}
+.sub{color:var(--jt-ink-2);font-size:15px;margin-bottom:26px;max-width:52ch;text-wrap:pretty}
 
-.field{margin-bottom:22px}
+.field{margin-bottom:20px}
 label{display:block;font-size:13.5px;font-weight:600;margin-bottom:6px}
 .help{font-size:12.5px;color:var(--jt-muted);margin-bottom:9px;line-height:1.6}
 input[type=text],input[type=tel],textarea,select{
   width:100%;background:var(--jt-card-2);border:1px solid var(--jt-line);
   border-radius:var(--jt-r-sm);padding:13px 15px;color:var(--jt-ink);
-  font-size:15px;font-family:inherit;
-  transition:border-color var(--jt-fast) var(--jt-ease)}
-input:focus,textarea:focus,select:focus{outline:none;border-color:var(--jt-gold-line)}
+  font-size:16px;font-family:inherit;
+  transition:border-color var(--jt-fast) var(--jt-ease),box-shadow var(--jt-fast) var(--jt-ease)}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--jt-gold-line);
+  box-shadow:0 0 0 3px var(--jt-gold-soft)}
 textarea{min-height:92px;resize:vertical;line-height:1.65}
 select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--jt-muted) 50%),
   linear-gradient(135deg,var(--jt-muted) 50%,transparent 50%);
@@ -67,51 +76,55 @@ select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,va
   background-size:5px 5px,5px 5px;background-repeat:no-repeat;padding-right:44px}
 
 .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-@media (max-width:540px){.two{grid-template-columns:1fr}}
+@media (max-width:560px){.two{grid-template-columns:1fr;gap:0}
+  .page{padding-left:14px;padding-right:14px}.card{padding:20px 16px}}
 
-/* ── Huduma ── */
+/* ── Services ── */
 .svc{display:flex;align-items:flex-start;gap:13px;padding:14px 16px;
-  background:var(--jt-card);border:1px solid var(--jt-line);
+  background:var(--jt-card-2);border:1px solid var(--jt-line);
   border-radius:var(--jt-r-sm);margin-bottom:9px}
 .svc-b{flex:1;min-width:0}
 .svc-n{font-weight:600;font-size:14.5px}
 .svc-d{font-size:13px;color:var(--jt-muted);margin-top:3px}
-.svc-p{font-size:13px;color:var(--jt-gold);font-variant-numeric:tabular-nums;
-  white-space:nowrap}
-.svc-x{background:none;border:none;color:var(--jt-muted);cursor:pointer;
-  font-size:17px;line-height:1;padding:2px 5px}
+.svc-p{font-size:13px;color:var(--jt-gold);font-variant-numeric:tabular-nums;white-space:nowrap}
+.svc-x{background:none;border:none;color:var(--jt-muted);cursor:pointer;font-size:17px;line-height:1;padding:2px 5px}
 @media (hover:hover){.svc-x:hover{color:var(--jt-bad)}}
+.add{border:1px dashed var(--jt-line);border-radius:var(--jt-r-sm);padding:18px;margin-top:14px;background:var(--jt-card-2)}
 
-.add{border:1px dashed var(--jt-line);border-radius:var(--jt-r-sm);
-  padding:18px;margin-top:14px}
-
-/* ── Mipango ── */
-.plans{display:grid;gap:12px;margin-bottom:26px}
-.plan{position:relative;display:block;cursor:pointer;
-  background:var(--jt-card);border:1.5px solid var(--jt-line);
-  border-radius:var(--jt-r);padding:18px 20px;
-  transition:border-color var(--jt-fast) var(--jt-ease),
-             background var(--jt-fast) var(--jt-ease)}
+/* ── Plans ── */
+.plans{display:grid;gap:12px;margin-bottom:24px}
+.plan{position:relative;display:block;cursor:pointer;background:var(--jt-card-2);
+  border:1.5px solid var(--jt-line);border-radius:var(--jt-r);padding:18px 20px;
+  transition:border-color var(--jt-fast) var(--jt-ease),background var(--jt-fast) var(--jt-ease),transform var(--jt-fast) var(--jt-ease)}
 .plan input{position:absolute;opacity:0;pointer-events:none}
 .plan:has(input:checked){border-color:var(--jt-gold);background:var(--jt-gold-soft)}
 .plan:has(input:focus-visible){outline:2px solid var(--jt-gold);outline-offset:2px}
+@media(hover:hover){.plan:hover{transform:translateY(-1px);border-color:var(--jt-gold-line)}}
 .plan-h{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
 .plan-n{font-family:var(--jt-head);font-weight:700;font-size:17px}
-.plan-p{margin-left:auto;font-size:16px;font-weight:700;color:var(--jt-gold);
-  font-variant-numeric:tabular-nums}
+.plan-p{margin-left:auto;font-size:16px;font-weight:700;color:var(--jt-gold);font-variant-numeric:tabular-nums}
 .plan-d{font-size:13px;color:var(--jt-muted);margin-top:6px}
 
-/* ── Vitufe ── */
-.bar{display:flex;gap:10px;align-items:center;margin-top:30px;
-  padding-top:22px;border-top:1px solid var(--jt-line)}
+/* ── Buttons / bar ── */
+.bar{display:flex;gap:10px;align-items:center;margin-top:28px;padding-top:20px;border-top:1px solid var(--jt-line);flex-wrap:wrap}
 .back{margin-right:auto;color:var(--jt-muted);font-size:13.5px;text-decoration:none}
 @media (hover:hover){.back:hover{color:var(--jt-ink-2)}}
+.cta{display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  background:linear-gradient(135deg,var(--jt-gold),#e0762a);color:#04120E;border:none;
+  border-radius:var(--jt-r-sm);padding:13px 22px;font-size:15px;font-weight:800;
+  font-family:var(--jt-head);cursor:pointer;box-shadow:0 8px 24px rgba(245,166,35,.28);
+  transition:transform var(--jt-fast) var(--jt-ease),box-shadow var(--jt-fast) var(--jt-ease)}
+@media(hover:hover){.cta:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(245,166,35,.4)}}
+.cta:active{transform:scale(.97)}
+.add-btn{display:inline-flex;align-items:center;gap:7px;background:var(--jt-card);
+  border:1px solid var(--jt-line);color:var(--jt-ink);border-radius:var(--jt-r-sm);
+  padding:11px 18px;font-size:14px;font-weight:600;cursor:pointer}
+@media(hover:hover){.add-btn:hover{border-color:var(--jt-gold-line)}}
+@media(max-width:440px){.cta{width:100%}.bar{gap:14px}}
 
-.note{background:var(--jt-card);border:1px solid var(--jt-line);
-  border-left:2px solid var(--jt-gold);border-radius:0 var(--jt-r-sm) var(--jt-r-sm) 0;
-  padding:14px 17px;font-size:13px;color:var(--jt-ink-2);line-height:1.7;
-  margin-bottom:24px}
-
+.note{background:var(--jt-card-2);border:1px solid var(--jt-line);border-left:2px solid var(--jt-gold);
+  border-radius:0 var(--jt-r-sm) var(--jt-r-sm) 0;padding:14px 17px;font-size:13px;
+  color:var(--jt-ink-2);line-height:1.7;margin-bottom:22px}
 .msg{padding:12px 16px;border-radius:var(--jt-r-sm);font-size:13.5px;margin-bottom:18px}
 .msg-bad{background:rgba(216,84,75,.12);border:1px solid rgba(216,84,75,.3);color:#ffb4ae}
 .msg-ok{background:rgba(31,169,122,.12);border:1px solid rgba(31,169,122,.3);color:#7fe3bd}
@@ -121,8 +134,11 @@ select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,va
 
 <header class="top">
   <div class="jt-wrap top-in">
-    <a href="/" class="brand">Jamii<span>Tek</span></a>
-    <a href="{% url 'chatbot_logout' %}" class="top-out">Toka</a>
+    <a href="/" class="brand">
+      <span class="brand-ico"><img src="{% static 'img/jamiibot-icon.png' %}" alt=""></span>
+      Jamii<span>Bot</span>
+    </a>
+    <a href="{% url 'chatbot_logout' %}" class="top-out">Sign out</a>
   </div>
 </header>
 
@@ -130,11 +146,11 @@ select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,va
 
   <div class="steps rise">
     <div class="stp {% if step == 1 %}on{% elif step > 1 %}done{% endif %}">
-      <div class="stp-bar"></div><div class="stp-lbl">1 · Biashara</div></div>
+      <div class="stp-bar"></div><div class="stp-lbl">1 · Business</div></div>
     <div class="stp {% if step == 2 %}on{% elif step > 2 %}done{% endif %}">
-      <div class="stp-bar"></div><div class="stp-lbl">2 · Huduma</div></div>
+      <div class="stp-bar"></div><div class="stp-lbl">2 · Services</div></div>
     <div class="stp {% if step == 3 %}on{% endif %}">
-      <div class="stp-bar"></div><div class="stp-lbl">3 · Anza</div></div>
+      <div class="stp-bar"></div><div class="stp-lbl">3 · Launch</div></div>
   </div>
 
   {% for m in messages %}
@@ -144,46 +160,44 @@ select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,va
 
   {% if step == 1 %}
   <div class="rise rise-2">
-    <h1>Bot yako inaitwa nani?</h1>
-    <p class="sub">
-      Mambo matatu tu. Mengine yote yanaweza kubadilishwa baadaye —
-      hutahitaji kuanza upya.
-    </p>
+    <h1>What's your bot's name?</h1>
+    <p class="sub">Just three things. Everything else can be changed later — you won't have to start over.</p>
 
+    <div class="card">
     <form method="post">
       {% csrf_token %}
       <input type="hidden" name="action" value="save_step1">
 
       <div class="two">
         <div class="field">
-          <label for="bn">Jina la bot</label>
-          <div class="help">Mteja atakuwa anaongea naye</div>
+          <label for="bn">Bot name</label>
+          <div class="help">What customers will chat with</div>
           <input type="text" id="bn" name="bot_name" required
-                 value="{{ bot.bot_name|default:'' }}" placeholder="Mke Airtel">
+                 value="{{ bot.bot_name|default:'' }}" placeholder="JamiiBot">
         </div>
         <div class="field">
-          <label for="bz">Jina la biashara</label>
-          <div class="help">Kama linavyojulikana kwa wateja</div>
+          <label for="bz">Business name</label>
+          <div class="help">As your customers know it</div>
           <input type="text" id="bz" name="business_name" required
                  value="{{ bot.business_name|default:'' }}" placeholder="Duka la Juma">
         </div>
       </div>
 
       <div class="field">
-        <label for="ds">Biashara yako inafanya nini?</label>
+        <label for="ds">What does your business do?</label>
         <div class="help">
-          Sentensi mbili au tatu. Hii ndiyo bot inayoitumia kuelewa
-          unachouza — andika kama unavyomwelezea mteja mpya.
+          Two or three sentences. This is what the bot uses to understand what you sell —
+          write it the way you'd explain it to a new customer.
         </div>
         <textarea id="ds" name="description" required
-          placeholder="Tunauza vifaa vya ujenzi Kariakoo — saruji, nondo, mabati. Tunafungua Jumatatu hadi Jumamosi.">{{ bot.description|default:'' }}</textarea>
+          placeholder="We sell building materials in Kariakoo — cement, steel, iron sheets. Open Monday to Saturday.">{{ bot.description|default:'' }}</textarea>
       </div>
 
       <div class="field">
-        <label for="wa">Namba ya WhatsApp ya biashara</label>
+        <label for="wa">Business WhatsApp number</label>
         <div class="help">
-          Bot itampa mteja namba hii akiomba mawasiliano. Ukiiacha tupu,
-          itasema haina taarifa badala ya kubuni namba.
+          The bot gives customers this number when they ask to get in touch. Leave it empty and
+          it will say it has no contact info rather than invent a number.
         </div>
         <input type="tel" id="wa" name="whatsapp_number"
                value="{{ bot.whatsapp_number|default:'' }}" placeholder="+255 7XX XXX XXX">
@@ -191,43 +205,40 @@ select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,va
 
       <div class="two">
         <div class="field">
-          <label for="lg">Lugha</label>
+          <label for="lg">Language</label>
           <select id="lg" name="language">
-            <option value="sw+en" {% if bot.language == 'sw+en' %}selected{% endif %}>Kiswahili na Kiingereza</option>
-            <option value="sw" {% if bot.language == 'sw' %}selected{% endif %}>Kiswahili pekee</option>
-            <option value="en" {% if bot.language == 'en' %}selected{% endif %}>Kiingereza pekee</option>
+            <option value="sw+en" {% if bot.language == 'sw+en' %}selected{% endif %}>Swahili &amp; English</option>
+            <option value="sw" {% if bot.language == 'sw' %}selected{% endif %}>Swahili only</option>
+            <option value="en" {% if bot.language == 'en' %}selected{% endif %}>English only</option>
           </select>
         </div>
         <div class="field">
-          <label for="tn">Mtindo wa kuongea</label>
+          <label for="tn">Tone</label>
           <select id="tn" name="tone">
-            <option value="friendly" {% if bot.tone == 'friendly' %}selected{% endif %}>Kirafiki</option>
-            <option value="professional" {% if bot.tone == 'professional' %}selected{% endif %}>Kitaalamu</option>
-            <option value="casual" {% if bot.tone == 'casual' %}selected{% endif %}>Kawaida</option>
+            <option value="friendly" {% if bot.tone == 'friendly' %}selected{% endif %}>Friendly</option>
+            <option value="professional" {% if bot.tone == 'professional' %}selected{% endif %}>Professional</option>
+            <option value="casual" {% if bot.tone == 'casual' %}selected{% endif %}>Casual</option>
           </select>
         </div>
       </div>
 
       <div class="bar">
-        <button type="submit" class="jt-btn jt-btn--gold" data-jt-wait="Inahifadhi…">
-          Endelea
-        </button>
+        <button type="submit" class="cta" data-jt-wait="Saving…">Continue &rarr;</button>
       </div>
     </form>
+    </div>
   </div>
 
 
   {% elif step == 2 %}
   <div class="rise rise-2">
-    <h1>Unauza nini?</h1>
-    <p class="sub">
-      Ongeza huduma au bidhaa zako. Bot itazitumia kujibu maswali ya bei
-      na upatikanaji.
-    </p>
+    <h1>What do you sell?</h1>
+    <p class="sub">Add your services or products. The bot uses these to answer questions about price and availability.</p>
 
+    <div class="card">
     <div class="note">
-      Hutahitaji kuziweka zote sasa. Anza na tatu au nne za kawaida —
-      utaongeza zingine baada ya kuona bot ikifanya kazi.
+      You don't have to add them all now. Start with three or four of your usual ones —
+      you can add more once you've seen the bot in action.
     </div>
 
     {% for s in services %}
@@ -241,7 +252,7 @@ select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,va
         {% csrf_token %}
         <input type="hidden" name="action" value="delete_service">
         <input type="hidden" name="service_id" value="{{ s.id }}">
-        <button type="submit" class="svc-x" aria-label="Futa {{ s.name }}">&times;</button>
+        <button type="submit" class="svc-x" aria-label="Remove {{ s.name }}">&times;</button>
       </form>
     </div>
     {% endfor %}
@@ -251,40 +262,39 @@ select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,va
       <input type="hidden" name="action" value="add_service">
       <div class="two">
         <div class="field" style="margin-bottom:14px">
-          <label for="sn">Jina</label>
+          <label for="sn">Name</label>
           <input type="text" id="sn" name="service_name" required placeholder="Saruji">
         </div>
         <div class="field" style="margin-bottom:14px">
-          <label for="sp">Bei</label>
+          <label for="sp">Price</label>
           <input type="text" id="sp" name="service_price" placeholder="18,000 TZS">
         </div>
       </div>
       <div class="field" style="margin-bottom:14px">
-        <label for="sd">Maelezo</label>
-        <input type="text" id="sd" name="service_desc" required placeholder="Mfuko wa kilo 50">
+        <label for="sd">Details</label>
+        <input type="text" id="sd" name="service_desc" required placeholder="50 kg bag">
       </div>
-      <button type="submit" class="jt-btn" data-jt-wait="Inaongeza…">Ongeza</button>
+      <button type="submit" class="add-btn" data-jt-wait="Adding…"><i></i>+ Add</button>
     </form>
 
     <form method="post" class="bar">
       {% csrf_token %}
       <input type="hidden" name="action" value="next_step2">
-      <a href="/chatbot/setup/?step=1" class="back">&larr; Rudi</a>
-      <button type="submit" class="jt-btn jt-btn--gold" data-jt-wait="Inaendelea…">
-        {% if services %}Endelea{% else %}Ruka kwa sasa{% endif %}
+      <a href="/chatbot/setup/?step=1" class="back">&larr; Back</a>
+      <button type="submit" class="cta" data-jt-wait="Continuing…">
+        {% if services %}Continue &rarr;{% else %}Skip for now &rarr;{% endif %}
       </button>
     </form>
+    </div>
   </div>
 
 
   {% elif step == 3 %}
   <div class="rise rise-2">
-    <h1>Chagua mpango</h1>
-    <p class="sub">
-      Utaanza na majaribio ya siku 7 bila malipo. Baada ya kubonyeza,
-      utaunganisha WhatsApp yako kwa kuscan QR.
-    </p>
+    <h1>Choose a plan</h1>
+    <p class="sub">You'll start with a 7-day free trial. After this, you'll connect your WhatsApp by scanning a QR code.</p>
 
+    <div class="card">
     <form method="post">
       {% csrf_token %}
       <input type="hidden" name="action" value="deploy">
@@ -299,7 +309,7 @@ select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,va
             <span class="plan-p">{{ p.price_tzs|floatformat:0 }} TZS</span>
           </div>
           <div class="plan-d">
-            {% if p.msg_limit %}Jumbe {{ p.msg_limit }} kwa mwezi{% else %}Jumbe bila kikomo{% endif %}
+            {% if p.msg_limit %}{{ p.msg_limit }} messages / month{% else %}Unlimited messages{% endif %}
             {% if p.description %} &middot; {{ p.description }}{% endif %}
           </div>
         </label>
@@ -307,18 +317,16 @@ select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,va
       </div>
 
       <div class="note">
-        Jumbe za kukaribisha, za kushindwa kuelewa, na za kumwita
-        binadamu zimeshawekwa. Utaziboresha baada ya kuona bot ikijibu
-        wateja halisi — ni rahisi zaidi kuliko kuzibashiri sasa.
+        Your welcome, fallback and human-handoff messages are already set. You'll fine-tune them
+        after you've seen the bot reply to real customers — that's easier than guessing them now.
       </div>
 
       <div class="bar">
-        <a href="/chatbot/setup/?step=2" class="back">&larr; Rudi</a>
-        <button type="submit" class="jt-btn jt-btn--gold" data-jt-wait="Inaanzisha bot…">
-          Anza majaribio ya siku 7
-        </button>
+        <a href="/chatbot/setup/?step=2" class="back">&larr; Back</a>
+        <button type="submit" class="cta" data-jt-wait="Launching your bot…">Start 7-day free trial &rarr;</button>
       </div>
     </form>
+    </div>
   </div>
   {% endif %}
 

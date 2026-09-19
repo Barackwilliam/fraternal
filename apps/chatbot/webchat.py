@@ -584,6 +584,7 @@ _WIDGET_JS = r"""
   function fmt(text) {
     // *bold* na _italic_ za WhatsApp + linebreaks + links salama
     var s = esc(text);
+    s = s.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');   // **x** (kinga)
     s = s.replace(/\*(.+?)\*/g, '<b>$1</b>');
     s = s.replace(/_(.+?)_/g, '<i>$1</i>');
     s = s.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');

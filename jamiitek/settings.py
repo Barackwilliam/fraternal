@@ -27,6 +27,31 @@ CSRF_TRUSTED_ORIGINS = [
     'https://jamiitek.onrender.com',
 ]
 
+# ── Usalama nyuma ya Cloudflare / Render proxy ─────────────────
+# Cloudflare (na Render) zinaishia TLS na kupitisha ombi kwa Django
+# zikiwa na header `X-Forwarded-Proto`. Bila mstari huu, Django
+# ingedhani kila ombi ni http, na `SECURE_SSL_REDIRECT` ingesababisha
+# mzunguko usioisha. IP halisi ya mteja inasomwa na
+# `apps.turnstile.get_client_ip` kupitia `CF-Connecting-IP`.
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Hardening — inawaka kwenye production pekee (DEBUG=False), ili dev ya
+# http isivunjike. Kila moja ina njia ya kuzima kwa env kama ikileta
+# tatizo (mfano bridge ikishindwa kufika webhook, weka SSL_REDIRECT=0).
+if not DEBUG:
+    SECURE_SSL_REDIRECT   = os.getenv('SSL_REDIRECT', 'True').lower() == 'true'
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE    = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
+    X_FRAME_OPTIONS = 'SAMEORIGIN'
+    # HSTS ni "sticky" (browser inaikumbuka), kwa hiyo default ni 0
+    # (imezimwa) mpaka uwe tayari. Weka HSTS_SECONDS=31536000 ukiwa
+    # umehakikisha kila kitu kiko https.
+    SECURE_HSTS_SECONDS = int(os.getenv('HSTS_SECONDS', '0'))
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = os.getenv('HSTS_SUBDOMAINS', 'False').lower() == 'true'
+    SECURE_HSTS_PRELOAD = False
+
 # Kwa DEV tu: ruhusu host yoyote (inarahisisha kutest custom domains kwa hosts file)
 
 
@@ -69,6 +94,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'apps.turnstile_middleware.TurnstileMiddleware',
     'builder.middleware.SubdomainMiddleware',
     'apps.daily_tasks.DailyTasksMiddleware',
 ]
