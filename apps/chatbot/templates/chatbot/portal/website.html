@@ -1,6 +1,6 @@
 {% extends 'chatbot/portal/base.html' %}
-{% block title %}Weka kwenye Website{% endblock %}
-{% block page_title %}Weka kwenye Website{% endblock %}
+{% block title %}Add to Website{% endblock %}
+{% block page_title %}Add to Website{% endblock %}
 {% block breadcrumb %}JamiiBot / Website{% endblock %}
 
 {% block extra_css %}
@@ -58,86 +58,87 @@
 <div class="wrap">
 
   <div class="hero">
-    <h2><i class="fas fa-globe" style="color:var(--gold)"></i>&nbsp; Weka {{ bot.bot_name }} kwenye tovuti yako</h2>
-    <p>Nakili mstari mmoja wa code hapa chini, uweke kwenye tovuti yako, na kitufe cha
-      chat kitaonekana chini kulia — kikijibu wateja wako moja kwa moja, kama WhatsApp.
-      Hakuna ujuzi wa programu unaohitajika.</p>
+    <h2><i class="fas fa-globe" style="color:var(--gold)"></i>&nbsp; Add {{ bot.bot_name }} to your website</h2>
+    <p>Copy the single line of code below, paste it into your website, and a chat button
+      will appear at the bottom-right — answering your customers instantly, just like WhatsApp.
+      No coding skills required.</p>
   </div>
 
   {% if not active %}
   <div class="warn">
     <i class="fas fa-triangle-exclamation"></i>
-    <div>Bot yako bado <strong>haijawashwa</strong>. Code utaiweka sasa, lakini chat
-      itaanza kujibu wateja pindi bot itakapokuwa <strong>active</strong>
-      (baada ya mpango wako kuanza). Kamilisha usanidi kwenye
-      <a href="{% url 'chatbot_connect' %}" style="color:var(--yellow);text-decoration:underline">ukurasa wa kuunganisha</a>.</div>
+    <div>Your bot is <strong>not active yet</strong>. You can add the code now, but the chat
+      will only start replying to customers once the bot becomes <strong>active</strong>
+      (after your plan starts). Finish setup on the
+      <a href="{% url 'chatbot_connect' %}" style="color:var(--yellow);text-decoration:underline">connection page</a>.</div>
   </div>
   {% endif %}
 
   <!-- CODE -->
   <div class="code-card">
-    <span class="code-label"><i class="fas fa-code"></i>&nbsp; Code yako (ni yako pekee)</span>
+    <span class="code-label"><i class="fas fa-code"></i>&nbsp; Your code (unique to you)</span>
     <div class="code-box">
       <code id="snippet">{{ snippet }}</code>
     </div>
     <button class="jt-btn btn-primary copy-btn" id="copyBtn" onclick="copySnippet()">
-      <i class="fas fa-copy"></i>&nbsp; Nakili code
+      <i class="fas fa-copy"></i>&nbsp; Copy code
     </button>
   </div>
 
   <!-- STEPS -->
   <div class="steps-card">
-    <h3><i class="fas fa-list-ol" style="color:var(--gold)"></i> Hatua za kuweka</h3>
+    <h3><i class="fas fa-list-ol" style="color:var(--gold)"></i> How to add it</h3>
 
     <div class="step">
       <div class="step-num">1</div>
-      <div class="step-txt"><strong>Nakili code</strong> iliyo hapo juu (bonyeza kitufe cha <em>Nakili code</em>).</div>
+      <div class="step-txt"><strong>Copy the code</strong> above (click the <em>Copy code</em> button).</div>
     </div>
     <div class="step">
       <div class="step-num">2</div>
-      <div class="step-txt">Fungua faili la tovuti yako lenye jina <code>index.html</code> (au template
-        inayotumika kwenye kila ukurasa). Kama unatumia WordPress, Wix, Shopify au mfumo mwingine,
-        tafuta sehemu ya <strong>“Custom Code”</strong> au <strong>“Header / Footer Code”</strong>.</div>
+      <div class="step-txt">Open your website's <code>index.html</code> file (or the template used on
+        every page). If you use WordPress, Wix, Shopify or a similar platform, look for the
+        <strong>“Custom Code”</strong> or <strong>“Header / Footer Code”</strong> section.</div>
     </div>
     <div class="step">
       <div class="step-num">3</div>
-      <div class="step-txt"><strong>Bandika code</strong> mara moja kabla ya
-        <code>&lt;/body&gt;</code> (au ndani ya <code>&lt;head&gt;</code>). Weka kwenye
-        kila ukurasa unaotaka chat ionekane — au kwenye template ya pamoja ili ionekane kila mahali.</div>
+      <div class="step-txt"><strong>Paste the code</strong> just before the closing
+        <code>&lt;/body&gt;</code> tag (or inside <code>&lt;head&gt;</code>). Add it to every page
+        where you want the chat to appear — or to a shared template so it shows everywhere.</div>
     </div>
     <div class="step">
       <div class="step-num">4</div>
-      <div class="step-txt"><strong>Hifadhi na fungua tovuti yako.</strong> Kitufe cha chat chenye
-        logo ya JamiiBot kitaonekana chini kulia. Bonyeza, andika ujumbe — bot itajibu. Ndio hivyo!</div>
+      <div class="step-txt"><strong>Save and open your website.</strong> The chat button with the
+        JamiiBot logo will appear at the bottom-right. Click it, type a message — the bot replies.
+        That's it!</div>
     </div>
   </div>
 
   <!-- WHAT IT DOES -->
   <div class="steps-card">
-    <h3><i class="fas fa-wand-magic-sparkles" style="color:var(--gold)"></i> Kitakachofanya</h3>
+    <h3><i class="fas fa-wand-magic-sparkles" style="color:var(--gold)"></i> What it does</h3>
     <div class="feat"><i class="fas fa-check-circle"></i>
-      <div>Kitufe kinachoelea chini kulia chenye <strong>logo ya JamiiBot</strong>.</div></div>
+      <div>A floating button at the bottom-right with the <strong>JamiiBot logo</strong>.</div></div>
     <div class="feat"><i class="fas fa-check-circle"></i>
-      <div>Dirisha la chat lenye <strong>mwonekano kama WhatsApp</strong> — majibu ya AI yako ile ile.</div></div>
+      <div>A <strong>WhatsApp-style</strong> chat window — powered by the same AI as your WhatsApp bot.</div></div>
     <div class="feat"><i class="fas fa-check-circle"></i>
-      <div>Mteja akihitaji binadamu, <strong>utaarifiwa</strong> (WhatsApp au email) na
-        mteja atapewa <strong>namba yako aipigie</strong>.</div></div>
+      <div>When a customer needs a human, <strong>you are notified</strong> (WhatsApp or email) and
+        the customer is given <strong>your number to call</strong>.</div></div>
     <div class="feat"><i class="fas fa-check-circle"></i>
-      <div>Inafanya kazi kwenye simu na kompyuta, na haigusi mwonekano wa tovuti yako.</div></div>
+      <div>Works on phone and desktop, and never changes the look of your website.</div></div>
   </div>
 
   <!-- TRY IT -->
   <div class="code-card">
-    <span class="code-label"><i class="fas fa-flask"></i>&nbsp; Jaribu sasa hapa</span>
+    <span class="code-label"><i class="fas fa-flask"></i>&nbsp; Try it now</span>
     <p style="font-size:13.5px;color:var(--text-2);line-height:1.6;margin:0 0 14px">
-      Bonyeza kujaribu chat kama itakavyoonekana kwa wateja wako. (Kitufe kitaonekana chini kulia
-      kwenye ukurasa huu.)</p>
+      Click to preview the chat exactly as your customers will see it. (The button appears at the
+      bottom-right of this page.)</p>
     <div class="try-row">
       <button class="jt-btn btn-green" id="tryBtn" onclick="loadWidget()">
-        <i class="fas fa-play"></i>&nbsp; Onyesha kitufe cha chat
+        <i class="fas fa-play"></i>&nbsp; Show the chat button
       </button>
       <a class="jt-btn btn-ghost" href="{{ bot_page }}" target="_blank" rel="noopener">
-        <i class="fas fa-arrow-up-right-from-square"></i>&nbsp; Kuhusu JamiiBot
+        <i class="fas fa-arrow-up-right-from-square"></i>&nbsp; About JamiiBot
       </a>
     </div>
   </div>
@@ -152,10 +153,10 @@ function copySnippet(){
   var btn  = document.getElementById('copyBtn');
   function ok(){
     btn.classList.add('done');
-    btn.innerHTML = '<i class="fas fa-check"></i>&nbsp; Imenakiliwa!';
+    btn.innerHTML = '<i class="fas fa-check"></i>&nbsp; Copied!';
     setTimeout(function(){
       btn.classList.remove('done');
-      btn.innerHTML = '<i class="fas fa-copy"></i>&nbsp; Nakili code';
+      btn.innerHTML = '<i class="fas fa-copy"></i>&nbsp; Copy code';
     }, 2200);
   }
   if (navigator.clipboard && navigator.clipboard.writeText){
@@ -171,13 +172,13 @@ function copySnippet(){
 function loadWidget(){
   var btn = document.getElementById('tryBtn');
   if (window.__jamiiBotLoaded){
-    btn.innerHTML = '<i class="fas fa-check"></i>&nbsp; Kipo chini kulia ↘';
+    btn.innerHTML = '<i class="fas fa-check"></i>&nbsp; It\'s at the bottom-right ↘';
     return;
   }
   var s = document.createElement('script');
   s.src = "{{ widget_src }}"; s.defer = true;
   document.body.appendChild(s);
-  btn.innerHTML = '<i class="fas fa-check"></i>&nbsp; Angalia chini kulia ↘';
+  btn.innerHTML = '<i class="fas fa-check"></i>&nbsp; Look bottom-right ↘';
   btn.disabled = true;
 }
 </script>

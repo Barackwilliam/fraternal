@@ -540,9 +540,37 @@ def chatbot_conversation_detail(request, conv_id):
     if not bot:
         return redirect('chatbot_setup_wizard')
     conv   = get_object_or_404(Conversation, id=conv_id, bot=bot)
+
+    # ── Namba ya kufungua WhatsApp ─────────────────────────────────
+    # WhatsApp sasa inatumia LID (tarakimu 15) badala ya namba kwa
+    # wateja wengi. LID SI namba ya simu — `wa.me/158351803576497`
+    # inatoa "not a valid phone number". Baileys 6.7.18 haiwezi
+    # kuibadilisha kurudi namba halisi.
+    #
+    # Kwa hiyo: kama customer_phone ni namba halisi, tunaitumia. Kama
+    # ni LID, tunatafuta namba mteja aliyoitoa mwenyewe (collect_phone).
+    # Ikikosekana, hakuna link — tunaonyesha maelezo badala ya kitufe
+    # kibovu.
+    _digits   = re.sub(r'\D', '', conv.customer_phone or '')
+    _provided = re.sub(r'\D', '', (conv.metadata or {}).get('provided_phone', '') or '')
+    is_lid    = len(_digits) >= 15
+
+    wa_phone = ''
+    if not is_lid and 7 <= len(_digits) <= 14:
+        wa_phone = _digits
+    elif 7 <= len(_provided) <= 14:
+        wa_phone = _provided
+
+    contact_display = (conv.customer_name
+                       or (_provided if 7 <= len(_provided) <= 14 else '')
+                       or ('WhatsApp customer' if is_lid else conv.customer_phone))
+
     return render(request, 'chatbot/portal/conversation_detail.html', {
         'client': client, 'bot': bot, 'conv': conv,
         'messages': conv.messages.order_by('created_at'),
+        'wa_phone': wa_phone,
+        'is_lid': is_lid,
+        'contact_display': contact_display,
     })
 
 

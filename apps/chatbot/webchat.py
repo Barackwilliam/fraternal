@@ -34,7 +34,7 @@ from django.http import JsonResponse, HttpResponse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 
-from .models import BotConfig, Conversation
+from .models import BotConfig, Conversation, Message
 
 logger = logging.getLogger('chatbot.webchat')
 
@@ -262,12 +262,39 @@ def web_chat(request, bot_id):
     customer_key = _customer_key(raw)
 
     if not text:
-        # Ombi la kwanza (kufungua dirisha) — rudisha salamu bila AI
+        # Kufungua dirisha. Salamu inatoka HAPA (server) mara MOJA tu, si
+        # kwenye browser — vinginevyo ingeonekana mara mbili: browser
+        # ingeionyesha, kisha injini ingeirudia kwenye ujumbe wa kwanza.
+        conv, is_new = Conversation.objects.get_or_create(
+            bot=bot, customer_phone=customer_key,
+            defaults={'wa_contact_name': contact_name,
+                      'customer_name':   contact_name,
+                      'metadata':        {'state': 'greeting'}},
+        )
+        greeting = _clean_greeting(bot.greeting_msg or 'Karibu! Nitakusaidiaje leo?', contact_name)
+        replies = [greeting]
+
+        if is_new:
+            Message.objects.create(conversation=conv, role='assistant', content=greeting)
+            meta = conv.metadata or {}
+            if bot.collect_name and not conv.customer_name:
+                ask = "Karibu! Niambie jina lako ili nikusaidie vizuri zaidi. 😊"
+                replies.append(ask)
+                Message.objects.create(conversation=conv, role='assistant', content=ask)
+                meta['state'] = 'collect_name'
+            elif bot.collect_phone and not meta.get('phone_collected'):
+                ask = "Tafadhali nipe namba yako ya simu ili tuweze kuwasiliana nawe. 📱"
+                replies.append(ask)
+                Message.objects.create(conversation=conv, role='assistant', content=ask)
+                meta['state'] = 'collect_phone'
+            else:
+                meta['state'] = 'chat'
+            conv.metadata = meta
+            conv.save(update_fields=['metadata'])
+
         return _cors(JsonResponse({
-            'replies': [],
+            'replies': replies,
             'visitor': raw,
-            'greeting': _clean_greeting(bot.greeting_msg or 'Karibu! Nitakusaidiaje leo?',
-                                        contact_name),
             'bot_name': bot.bot_name,
             'business_name': bot.business_name,
             'handoff': False,
@@ -406,7 +433,8 @@ _WIDGET_JS = r"""
   var sendBtn  = root.querySelector('.jt-send');
   var badge    = root.querySelector('.jt-badge');
 
-  var opened = false, greeted = false, busy = false, unread = 0;
+  var opened = false, inited = false, busy = false, unread = 0;
+  var vv = window.visualViewport;
 
   launcher.addEventListener('click', function () { toggle(true); });
   closeBtn.addEventListener('click', function () { toggle(false); });
@@ -428,21 +456,59 @@ _WIDGET_JS = r"""
     }
   });
   input.addEventListener('input', autoGrow);
+  input.addEventListener('focus', function(){ setTimeout(scroll, 300); });
+
+  // ── Keyboard-aware sizing ──────────────────────────────────
+  // Simu ikifungua keyboard, `visualViewport` inapungua. Tunaweka
+  // urefu wa dirisha uwe sawa na sehemu inayoonekana, ili input
+  // ibaki juu ya keyboard na maandishi yasijifiche.
+  function isMobile(){ return window.innerWidth <= 480; }
+  function fit(){
+    if (!panel.classList.contains('open')) return;
+    if (isMobile() && vv){
+      panel.style.height = Math.round(vv.height) + 'px';
+      panel.style.top    = Math.round(vv.offsetTop) + 'px';
+      panel.style.bottom = 'auto';
+      scroll();
+    } else {
+      panel.style.height = ''; panel.style.top = ''; panel.style.bottom = '';
+    }
+  }
+  if (vv){ vv.addEventListener('resize', fit); vv.addEventListener('scroll', fit); }
+  window.addEventListener('resize', fit);
+  window.addEventListener('orientationchange', function(){ setTimeout(fit, 250); });
 
   function toggle(show) {
     opened = show;
     panel.classList.toggle('open', show);
     launcher.classList.toggle('hidden', show);
+    if (isMobile()) document.documentElement.style.overflow = show ? 'hidden' : '';
+    fit();
     if (show) {
       unread = 0; badge.style.display = 'none';
-      setTimeout(function () { input.focus(); }, 250);
-      if (!greeted) { greet(); }
+      if (!inited) { inited = true; initChat(); }
+      setTimeout(function () { input.focus(); }, 300);
     }
   }
 
-  function greet() {
-    greeted = true;
-    if (CFG.greeting) addBubble(CFG.greeting, 'in');
+  // ── Kufungua: salamu inatoka server MARA MOJA ──────────────
+  function initChat() {
+    var typing = showTyping();
+    fetch(CFG.endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ visitor: getVisitor() })
+    })
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      typing.remove();
+      if (d.visitor) setVisitor(d.visitor);
+      renderSequential(d.replies || [CFG.greeting], 0);
+    })
+    .catch(function () {
+      typing.remove();
+      if (CFG.greeting) addBubble(CFG.greeting, 'in');
+    });
   }
 
   // ── Mawasiliano na server ──────────────────────────────────
@@ -575,66 +641,71 @@ _WIDGET_JS = r"""
     + '.jt-wrap{position:fixed;bottom:20px;right:20px;z-index:2147483000}'
     // launcher
     + '.jt-launcher{position:fixed;bottom:20px;right:20px;width:62px;height:62px;border:none;border-radius:50%;'
-    +   'background:#fff;color:#fff;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.28);padding:0;overflow:hidden;'
+    +   'background:#fff;color:#fff;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.4);padding:0;overflow:hidden;'
     +   'display:flex;align-items:center;justify-content:center;transition:transform .18s,box-shadow .18s;animation:jt-pop .4s ease}'
-    + '.jt-launcher:hover{transform:scale(1.08);box-shadow:0 8px 26px rgba(0,0,0,.34)}'
+    + '.jt-launcher:hover{transform:scale(1.08);box-shadow:0 8px 26px rgba(0,0,0,.5)}'
     + '.jt-launcher:active{transform:scale(.94)}'
     + '.jt-launcher.hidden{display:none}'
     + '.jt-logo{width:100%;height:100%;object-fit:cover;display:block}'
     + '.jt-badge{position:absolute;top:-2px;right:-2px;min-width:20px;height:20px;padding:0 5px;border-radius:10px;'
     +   'background:#ff3b30;color:#fff;font-size:12px;font-weight:700;display:none;align-items:center;justify-content:center}'
-    // panel
-    + '.jt-panel{position:fixed;bottom:20px;right:20px;width:370px;max-width:calc(100vw - 32px);height:600px;'
-    +   'max-height:calc(100vh - 40px);background:#efeae2;border-radius:16px;overflow:hidden;display:flex;flex-direction:column;'
-    +   'box-shadow:0 12px 40px rgba(0,0,0,.32);opacity:0;transform:translateY(24px) scale(.96);pointer-events:none;'
+    // panel — WhatsApp DARK, flexible column
+    + '.jt-panel{position:fixed;bottom:20px;right:20px;width:380px;max-width:calc(100vw - 32px);'
+    +   'height:620px;max-height:calc(100vh - 40px);max-height:calc(100dvh - 40px);'
+    +   'background:#0B141A;border-radius:16px;overflow:hidden;display:flex;flex-direction:column;'
+    +   'box-shadow:0 12px 44px rgba(0,0,0,.55);opacity:0;transform:translateY(24px) scale(.96);pointer-events:none;'
     +   'transition:opacity .22s,transform .22s;transform-origin:bottom right}'
     + '.jt-panel.open{opacity:1;transform:translateY(0) scale(1);pointer-events:auto}'
     // header
-    + '.jt-head{background:#075E54;color:#fff;padding:12px 14px;display:flex;align-items:center;gap:10px}'
+    + '.jt-head{background:#202C33;color:#E9EDEF;padding:11px 14px;display:flex;align-items:center;gap:10px;flex:0 0 auto}'
     + '.jt-avatar{width:40px;height:40px;border-radius:50%;background:#fff;overflow:hidden;flex:0 0 auto}'
     + '.jt-head-txt{flex:1;min-width:0}'
     + '.jt-title{font-weight:600;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'
-    + '.jt-status{font-size:12px;opacity:.85;display:flex;align-items:center;gap:5px}'
-    + '.jt-dot{width:8px;height:8px;border-radius:50%;background:#25D366;display:inline-block}'
-    + '.jt-close{background:none;border:none;color:#fff;font-size:16px;cursor:pointer;opacity:.85;padding:6px;border-radius:8px}'
-    + '.jt-close:hover{opacity:1;background:rgba(255,255,255,.12)}'
-    // body
-    + '.jt-body{flex:1;overflow-y:auto;padding:16px 12px;display:flex;flex-direction:column;gap:8px;'
-    +   'background-image:url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'40\' height=\'40\'%3E%3Ccircle cx=\'20\' cy=\'20\' r=\'1\' fill=\'%23d9d2c7\'/%3E%3C/svg%3E")}'
+    + '.jt-status{font-size:12px;color:#8696A0;display:flex;align-items:center;gap:5px}'
+    + '.jt-dot{width:8px;height:8px;border-radius:50%;background:#00A884;display:inline-block}'
+    + '.jt-close{background:none;border:none;color:#AEBAC1;font-size:17px;cursor:pointer;padding:6px;border-radius:8px}'
+    + '.jt-close:hover{color:#E9EDEF;background:rgba(255,255,255,.08)}'
+    // body — dark
+    + '.jt-body{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 12px;'
+    +   'display:flex;flex-direction:column;gap:7px;background:#0B141A;'
+    +   'background-image:radial-gradient(rgba(255,255,255,.02) 1px,transparent 1px);background-size:26px 26px}'
     + '.jt-msg{display:flex;max-width:82%}'
     + '.jt-msg.in{align-self:flex-start}'
     + '.jt-msg.out{align-self:flex-end}'
-    + '.jt-bubble{position:relative;padding:8px 10px 18px;border-radius:10px;font-size:14.5px;line-height:1.4;color:#111b21;'
-    +   'box-shadow:0 1px 1px rgba(0,0,0,.12);word-wrap:break-word;white-space:pre-wrap;animation:jt-in .18s ease}'
-    + '.jt-msg.in .jt-bubble{background:#fff;border-top-left-radius:2px}'
-    + '.jt-msg.out .jt-bubble{background:#d9fdd3;border-top-right-radius:2px}'
-    + '.jt-bubble a{color:#027eb5}'
-    + '.jt-time{position:absolute;right:8px;bottom:4px;font-size:10.5px;color:#667781}'
+    + '.jt-bubble{position:relative;padding:7px 10px 18px;border-radius:9px;font-size:14.5px;line-height:1.42;color:#E9EDEF;'
+    +   'box-shadow:0 1px 1px rgba(0,0,0,.25);word-wrap:break-word;overflow-wrap:anywhere;white-space:pre-wrap;animation:jt-in .18s ease}'
+    + '.jt-msg.in .jt-bubble{background:#202C33;border-top-left-radius:2px}'
+    + '.jt-msg.out .jt-bubble{background:#005C4B;border-top-right-radius:2px}'
+    + '.jt-bubble a{color:#53BDEB}'
+    + '.jt-time{position:absolute;right:8px;bottom:4px;font-size:10.5px;color:#8696A0}'
     // typing
     + '.jt-typing{padding:12px 14px;display:flex;gap:4px;align-items:center}'
-    + '.jt-typing span{width:7px;height:7px;border-radius:50%;background:#9aa5ad;display:inline-block;animation:jt-blink 1.2s infinite}'
+    + '.jt-typing span{width:7px;height:7px;border-radius:50%;background:#8696A0;display:inline-block;animation:jt-blink 1.2s infinite}'
     + '.jt-typing span:nth-child(2){animation-delay:.2s}.jt-typing span:nth-child(3){animation-delay:.4s}'
     // call button
-    + '.jt-callbtn{display:inline-flex;align-items:center;gap:8px;background:#25D366;color:#fff;text-decoration:none;'
-    +   'padding:11px 16px;border-radius:24px;font-weight:600;font-size:14px;box-shadow:0 2px 6px rgba(0,0,0,.2)}'
+    + '.jt-callbtn{display:inline-flex;align-items:center;gap:8px;background:#00A884;color:#04120E;text-decoration:none;'
+    +   'padding:11px 16px;border-radius:24px;font-weight:700;font-size:14px;box-shadow:0 2px 8px rgba(0,0,0,.35)}'
     + '.jt-callbtn:active{transform:scale(.96)}'
     // form
-    + '.jt-form{display:flex;align-items:flex-end;gap:8px;padding:10px;background:#f0f2f5}'
-    + '.jt-input{flex:1;resize:none;border:none;outline:none;background:#fff;border-radius:22px;padding:11px 16px;'
-    +   'font-size:14.5px;max-height:96px;line-height:1.4}'
-    + '.jt-send{width:46px;height:46px;flex:0 0 auto;border:none;border-radius:50%;background:#25D366;color:#fff;'
-    +   'cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .15s}'
-    + '.jt-send:hover{background:#1fb959}.jt-send:active{transform:scale(.9)}'
+    + '.jt-form{display:flex;align-items:flex-end;gap:8px;padding:9px 10px;background:#1F2C34;flex:0 0 auto}'
+    + '.jt-input{flex:1;resize:none;border:none;outline:none;background:#2A3942;color:#E9EDEF;border-radius:22px;'
+    +   'padding:11px 16px;font-size:14.5px;max-height:96px;line-height:1.4}'
+    + '.jt-input::placeholder{color:#8696A0}'
+    + '.jt-send{width:46px;height:46px;flex:0 0 auto;border:none;border-radius:50%;background:#00A884;color:#04120E;'
+    +   'cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .15s,background .15s}'
+    + '.jt-send:hover{background:#06cf9c}.jt-send:active{transform:scale(.9)}'
     + '.jt-send:disabled{opacity:.5;cursor:default}'
-    + '.jt-brand{display:block;text-align:center;font-size:11px;color:#8696a0;padding:6px;background:#f0f2f5;'
-    +   'text-decoration:none;cursor:pointer;transition:color .15s}'
-    + '.jt-brand:hover{color:#075E54}'
-    + '.jt-brand b{color:#075E54}'
+    + '.jt-brand{display:block;text-align:center;font-size:11px;color:#667781;padding:6px;background:#111B21;'
+    +   'text-decoration:none;cursor:pointer;transition:color .15s;flex:0 0 auto}'
+    + '.jt-brand:hover{color:#E9EDEF}'
+    + '.jt-brand b{color:#00A884}'
     // animations
     + '@keyframes jt-pop{from{transform:scale(0)}to{transform:scale(1)}}'
     + '@keyframes jt-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}'
     + '@keyframes jt-blink{0%,60%,100%{opacity:.3}30%{opacity:1}}'
-    + '@media(max-width:480px){.jt-panel{width:100vw;height:100vh;max-height:100vh;max-width:100vw;bottom:0;right:0;border-radius:0}'
+    // mobile: full screen, keyboard-flexible (JS sets exact height via visualViewport)
+    + '@media(max-width:480px){.jt-panel{width:100vw;max-width:100vw;left:0;right:0;top:0;bottom:0;'
+    +   'height:100vh;height:100dvh;max-height:none;border-radius:0}'
     +   '.jt-launcher{bottom:16px;right:16px}}';
   }
 })();

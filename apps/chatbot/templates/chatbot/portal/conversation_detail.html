@@ -1,7 +1,7 @@
 {% extends 'chatbot/portal/base.html' %}
-{% block title %}{{ conv.customer_name|default:conv.customer_phone }}{% endblock %}
+{% block title %}{{ contact_display }}{% endblock %}
 {% block page_title %}Chat{% endblock %}
-{% block breadcrumb %}Conversations / {{ conv.customer_name|default:conv.customer_phone }}{% endblock %}
+{% block breadcrumb %}Conversations / {{ contact_display }}{% endblock %}
 {% block content %}
 <style>
 .chat-layout{display:grid;grid-template-columns:260px 1fr;gap:16px;height:calc(100vh - 148px)}
@@ -55,8 +55,11 @@
     <div class="cust-card">
       <div class="cust-hero">
         <div class="cust-av">{{ conv.customer_name|first|upper|default:"?" }}</div>
-        <div class="cust-name">{{ conv.customer_name|default:"Unknown" }}</div>
-        <div class="cust-phone"><i class="fab fa-whatsapp"></i> {{ conv.customer_phone }}</div>
+        <div class="cust-name">{{ contact_display }}</div>
+        <div class="cust-phone">
+          <i class="fab fa-whatsapp"></i>
+          {% if wa_phone %}+{{ wa_phone }}{% elif is_lid %}Number unavailable{% else %}{{ conv.customer_phone }}{% endif %}
+        </div>
         {% if conv.is_human_handoff %}<div style="margin-top:8px"><span class="jt-badge b-trial">HANDOFF</span></div>{% endif %}
       </div>
       <div class="info-item"><span class="info-key">Messages</span><span class="info-val" style="color:var(--purple)">{{ messages|length }}</span></div>
@@ -71,7 +74,15 @@
         <div class="info-item"><span class="info-key">Status</span><span class="jt-badge b-{{ conv.bot.status }}">{{ conv.bot.status|capfirst }}</span></div>
       </div>
     </div>
-    <a href="https://wa.me/{{ conv.customer_phone|cut:'+' }}" target="_blank" class="jt-btn btn-green" style="justify-content:center"><i class="fab fa-whatsapp"></i> Open in WhatsApp</a>
+    {% if wa_phone %}
+    <a href="https://wa.me/{{ wa_phone }}" target="_blank" class="jt-btn btn-green" style="justify-content:center"><i class="fab fa-whatsapp"></i> Open in WhatsApp</a>
+    {% else %}
+    <div class="jt-alert jt-alert-info" style="display:block">
+      <div style="font-weight:600;margin-bottom:4px"><i class="fas fa-circle-info"></i> Real number unavailable</div>
+      WhatsApp identifies this customer by an internal ID (LID), not a phone number, so the chat can't be opened directly.
+      To reply, open your <strong>business WhatsApp</strong> (the number that scanned the QR) and find this conversation, or ask the customer for their number in the chat.
+    </div>
+    {% endif %}
   </div>
 
   <!-- CHAT MESSAGES -->
@@ -79,8 +90,8 @@
     <div class="chat-topbar">
       <div class="chat-av-sm">{{ conv.customer_name|first|upper|default:"?" }}</div>
       <div>
-        <div class="chat-cname">{{ conv.customer_name|default:conv.customer_phone }}</div>
-        <div class="chat-cmeta"><i class="fab fa-whatsapp" style="color:#25d366"></i> {{ conv.customer_phone }} · {{ messages|length }} messages</div>
+        <div class="chat-cname">{{ contact_display }}</div>
+        <div class="chat-cmeta"><i class="fab fa-whatsapp" style="color:#25d366"></i> {% if wa_phone %}+{{ wa_phone }}{% elif is_lid %}WhatsApp (LID){% else %}{{ conv.customer_phone }}{% endif %} · {{ messages|length }} messages</div>
       </div>
       {% if conv.is_human_handoff %}<span class="jt-badge b-trial" style="margin-left:auto">HANDOFF</span>{% endif %}
     </div>
