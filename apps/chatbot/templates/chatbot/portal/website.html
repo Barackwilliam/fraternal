@@ -1,0 +1,184 @@
+{% extends 'chatbot/portal/base.html' %}
+{% block title %}Weka kwenye Website{% endblock %}
+{% block page_title %}Weka kwenye Website{% endblock %}
+{% block breadcrumb %}JamiiBot / Website{% endblock %}
+
+{% block extra_css %}
+<style>
+.wrap{max-width:720px;margin:0 auto}
+
+.hero{background:linear-gradient(135deg,rgba(245,166,35,.08),rgba(31,169,122,.06));
+  border:1px solid var(--border);border-radius:var(--r-lg);padding:24px 26px;margin-bottom:20px}
+.hero h2{font-family:var(--head);font-size:20px;color:var(--text);margin:0 0 8px}
+.hero p{font-size:14px;color:var(--text-2);line-height:1.7;margin:0}
+
+/* code block + copy */
+.code-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);
+  padding:18px 20px;margin-bottom:20px}
+.code-label{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--text-3);
+  letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;display:block}
+.code-box{position:relative;background:#04101F;border:1px solid var(--border-s);border-radius:10px;
+  padding:16px 16px;overflow-x:auto}
+.code-box code{font-family:var(--mono);font-size:13px;color:#F5A623;white-space:pre;word-break:break-all;line-height:1.6}
+.copy-btn{width:100%;margin-top:14px;justify-content:center;font-size:14px;padding:12px}
+.copy-btn.done{background:var(--green);color:#fff}
+
+/* steps */
+.steps-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);
+  padding:22px 24px;margin-bottom:20px}
+.steps-card h3{font-family:var(--head);font-size:16px;color:var(--text);margin:0 0 18px;
+  display:flex;align-items:center;gap:9px}
+.step{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--border)}
+.step:last-child{border-bottom:none;padding-bottom:0}
+.step:first-child{padding-top:0}
+.step-num{width:30px;height:30px;flex-shrink:0;border-radius:50%;
+  background:var(--gold-d);border:1px solid var(--border-s);color:var(--gold);
+  font-family:var(--head);font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:center}
+.step-txt{font-size:14px;color:var(--text-2);line-height:1.65;padding-top:3px}
+.step-txt strong{color:var(--text)}
+.step-txt code{font-family:var(--mono);font-size:12.5px;background:rgba(245,166,35,.1);
+  color:var(--gold);padding:2px 7px;border-radius:5px}
+
+/* feature list */
+.feat{display:flex;gap:11px;align-items:flex-start;font-size:13.5px;color:var(--text-2);
+  line-height:1.6;margin-bottom:12px}
+.feat:last-child{margin-bottom:0}
+.feat i{color:var(--green);font-size:14px;margin-top:3px;flex-shrink:0}
+
+.warn{background:var(--yellow-d);border:1px solid rgba(245,158,11,.25);color:var(--yellow);
+  border-radius:10px;padding:14px 16px;font-size:13.5px;line-height:1.6;margin-bottom:20px;
+  display:flex;gap:11px;align-items:flex-start}
+.warn i{margin-top:2px;flex-shrink:0}
+
+.try-row{display:flex;gap:10px;flex-wrap:wrap}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="wrap">
+
+  <div class="hero">
+    <h2><i class="fas fa-globe" style="color:var(--gold)"></i>&nbsp; Weka {{ bot.bot_name }} kwenye tovuti yako</h2>
+    <p>Nakili mstari mmoja wa code hapa chini, uweke kwenye tovuti yako, na kitufe cha
+      chat kitaonekana chini kulia — kikijibu wateja wako moja kwa moja, kama WhatsApp.
+      Hakuna ujuzi wa programu unaohitajika.</p>
+  </div>
+
+  {% if not active %}
+  <div class="warn">
+    <i class="fas fa-triangle-exclamation"></i>
+    <div>Bot yako bado <strong>haijawashwa</strong>. Code utaiweka sasa, lakini chat
+      itaanza kujibu wateja pindi bot itakapokuwa <strong>active</strong>
+      (baada ya mpango wako kuanza). Kamilisha usanidi kwenye
+      <a href="{% url 'chatbot_connect' %}" style="color:var(--yellow);text-decoration:underline">ukurasa wa kuunganisha</a>.</div>
+  </div>
+  {% endif %}
+
+  <!-- CODE -->
+  <div class="code-card">
+    <span class="code-label"><i class="fas fa-code"></i>&nbsp; Code yako (ni yako pekee)</span>
+    <div class="code-box">
+      <code id="snippet">{{ snippet }}</code>
+    </div>
+    <button class="jt-btn btn-primary copy-btn" id="copyBtn" onclick="copySnippet()">
+      <i class="fas fa-copy"></i>&nbsp; Nakili code
+    </button>
+  </div>
+
+  <!-- STEPS -->
+  <div class="steps-card">
+    <h3><i class="fas fa-list-ol" style="color:var(--gold)"></i> Hatua za kuweka</h3>
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-txt"><strong>Nakili code</strong> iliyo hapo juu (bonyeza kitufe cha <em>Nakili code</em>).</div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-txt">Fungua faili la tovuti yako lenye jina <code>index.html</code> (au template
+        inayotumika kwenye kila ukurasa). Kama unatumia WordPress, Wix, Shopify au mfumo mwingine,
+        tafuta sehemu ya <strong>“Custom Code”</strong> au <strong>“Header / Footer Code”</strong>.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-txt"><strong>Bandika code</strong> mara moja kabla ya
+        <code>&lt;/body&gt;</code> (au ndani ya <code>&lt;head&gt;</code>). Weka kwenye
+        kila ukurasa unaotaka chat ionekane — au kwenye template ya pamoja ili ionekane kila mahali.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-txt"><strong>Hifadhi na fungua tovuti yako.</strong> Kitufe cha chat chenye
+        logo ya JamiiBot kitaonekana chini kulia. Bonyeza, andika ujumbe — bot itajibu. Ndio hivyo!</div>
+    </div>
+  </div>
+
+  <!-- WHAT IT DOES -->
+  <div class="steps-card">
+    <h3><i class="fas fa-wand-magic-sparkles" style="color:var(--gold)"></i> Kitakachofanya</h3>
+    <div class="feat"><i class="fas fa-check-circle"></i>
+      <div>Kitufe kinachoelea chini kulia chenye <strong>logo ya JamiiBot</strong>.</div></div>
+    <div class="feat"><i class="fas fa-check-circle"></i>
+      <div>Dirisha la chat lenye <strong>mwonekano kama WhatsApp</strong> — majibu ya AI yako ile ile.</div></div>
+    <div class="feat"><i class="fas fa-check-circle"></i>
+      <div>Mteja akihitaji binadamu, <strong>utaarifiwa</strong> (WhatsApp au email) na
+        mteja atapewa <strong>namba yako aipigie</strong>.</div></div>
+    <div class="feat"><i class="fas fa-check-circle"></i>
+      <div>Inafanya kazi kwenye simu na kompyuta, na haigusi mwonekano wa tovuti yako.</div></div>
+  </div>
+
+  <!-- TRY IT -->
+  <div class="code-card">
+    <span class="code-label"><i class="fas fa-flask"></i>&nbsp; Jaribu sasa hapa</span>
+    <p style="font-size:13.5px;color:var(--text-2);line-height:1.6;margin:0 0 14px">
+      Bonyeza kujaribu chat kama itakavyoonekana kwa wateja wako. (Kitufe kitaonekana chini kulia
+      kwenye ukurasa huu.)</p>
+    <div class="try-row">
+      <button class="jt-btn btn-green" id="tryBtn" onclick="loadWidget()">
+        <i class="fas fa-play"></i>&nbsp; Onyesha kitufe cha chat
+      </button>
+      <a class="jt-btn btn-ghost" href="{{ bot_page }}" target="_blank" rel="noopener">
+        <i class="fas fa-arrow-up-right-from-square"></i>&nbsp; Kuhusu JamiiBot
+      </a>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function copySnippet(){
+  var text = document.getElementById('snippet').innerText;
+  var btn  = document.getElementById('copyBtn');
+  function ok(){
+    btn.classList.add('done');
+    btn.innerHTML = '<i class="fas fa-check"></i>&nbsp; Imenakiliwa!';
+    setTimeout(function(){
+      btn.classList.remove('done');
+      btn.innerHTML = '<i class="fas fa-copy"></i>&nbsp; Nakili code';
+    }, 2200);
+  }
+  if (navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(ok).catch(fallback);
+  } else { fallback(); }
+  function fallback(){
+    var r = document.createRange(); r.selectNode(document.getElementById('snippet'));
+    var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+    try{ document.execCommand('copy'); ok(); }catch(e){}
+    s.removeAllRanges();
+  }
+}
+function loadWidget(){
+  var btn = document.getElementById('tryBtn');
+  if (window.__jamiiBotLoaded){
+    btn.innerHTML = '<i class="fas fa-check"></i>&nbsp; Kipo chini kulia ↘';
+    return;
+  }
+  var s = document.createElement('script');
+  s.src = "{{ widget_src }}"; s.defer = true;
+  document.body.appendChild(s);
+  btn.innerHTML = '<i class="fas fa-check"></i>&nbsp; Angalia chini kulia ↘';
+  btn.disabled = true;
+}
+</script>
+{% endblock %}

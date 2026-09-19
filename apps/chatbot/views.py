@@ -1499,6 +1499,33 @@ def chatbot_connect(request):
 
 
 @login_required(login_url='/chatbot/login/')
+def chatbot_website(request):
+    """
+    Ukurasa unaomwonyesha mteja jinsi ya kuweka bot kwenye tovuti yake
+    mwenyewe — link kamili (yenye BOT_ID yake), kitufe cha kunakili, na
+    maelekezo hatua kwa hatua. Mteja anafanya haya bila msaada.
+    """
+    bot = _own_bot(request)
+    if not bot:
+        return redirect('chatbot_setup_wizard')
+
+    sub = getattr(bot, 'subscription', None)
+    origin = request.build_absolute_uri('/').rstrip('/')
+    widget_src = f"{origin}/chatbot/widget/{bot.id}.js"
+    snippet = f'<script src="{widget_src}" defer></script>'
+
+    return render(request, 'chatbot/portal/website.html', {
+        'bot':        bot,
+        'sub':        sub,
+        'active':     bool(sub and sub.is_active) and bot.is_active and bot.status == 'active',
+        'origin':     origin,
+        'widget_src': widget_src,
+        'snippet':    snippet,
+        'bot_page':   f"{origin}/bot/",
+    })
+
+
+@login_required(login_url='/chatbot/login/')
 def chatbot_connect_qr(request):
     """
     JSON kwa ukurasa unaopiga kila sekunde 5. QR ya WhatsApp inaisha

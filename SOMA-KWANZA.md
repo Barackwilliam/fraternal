@@ -1,31 +1,37 @@
-# JamiiBot — Widget ya Chat kwa Website (+ Logo)
+# JamiiBot — Widget ya Chat kwa Website (kamili)
 
-Injini ni ile ile ya WhatsApp — hakuna mfumo mpya, ni mlango mwingine tu.
+Injini ni ile ile ya WhatsApp. Mteja anajiwekea mwenyewe bila msaada:
+anaingia portal → "Weka kwenye Website" → ananakili code → anabandika.
 
-## Faili (weka juu ya zilizopo, hifadhi directory ile ile)
+## Faili (weka juu ya zilizopo, hifadhi njia ile ile)
 
-    apps/chatbot/webchat.py             ← MPYA (handler + views + widget JS/CSS)
-    apps/chatbot/urls.py                ← imebadilika (routes 2 mpya)
-    apps/chatbot/views.py               ← imebadilika (parameter 1 ya hiari: handler)
-    apps/static/img/jamiibot-icon.png   ← MPYA (logo ya roboti — kitufe & avatar)
-    apps/static/img/jamiibot-logo.png   ← MPYA (logo kamili kwa matumizi mengine)
+    apps/chatbot/webchat.py                                   ← MPYA (widget engine)
+    apps/chatbot/urls.py                                      ← imebadilika (routes 3 mpya)
+    apps/chatbot/views.py                                     ← imebadilika (handler param + chatbot_website)
+    apps/chatbot/templates/chatbot/portal/website.html       ← MPYA (ukurasa wa maelekezo)
+    apps/chatbot/templates/chatbot/portal/base.html          ← imebadilika (link ya sidebar)
+    apps/static/img/jamiibot-icon.png                         ← MPYA (logo — kitufe & avatar)
+    apps/static/img/jamiibot-logo.png                         ← MPYA (logo kamili)
 
 Hakuna migration mpya. Hakuna dependency mpya.
-Kwenye build/deploy hakikisha `collectstatic` inaendeshwa (kama kawaida)
-ili picha zipatikane kwenye /static/img/.
+Hakikisha `collectstatic` inaendeshwa kwenye build (kama kawaida).
 
-## Logo
-- Kitufe kinachoelea (floating button) na avatar ya header vinatumia
-  `jamiibot-icon.png`.
-- Maandishi "Inaendeshwa na JamiiBot" ni LINK inayofungua
-  https://www.jamiitek.com/bot/ (tab mpya).
+## Mteja anavyojiwekea (ndani ya portal yake)
 
-## Kuiweka kwenye tovuti ya mteja (mstari mmoja)
+  1. Anaingia JamiiBot portal.
+  2. Sidebar → **"Weka kwenye Website"**.
+  3. Anabonyeza **"Nakili code"** — anapata mstari wake mwenyewe:
 
-    <script src="https://www.jamiitek.com/chatbot/widget/BOT_ID.js" defer></script>
+         <script src="https://www.jamiitek.com/chatbot/widget/BOT_ID.js" defer></script>
 
-## Routes
+     (BOT_ID yake imejaa tayari — kila mteja ana yake.)
+  4. Anabandika kabla ya </body> kwenye tovuti yake, anahifadhi.
+  5. Kitufe cha chat chenye logo ya JamiiBot kinaonekana chini kulia.
 
+  Ukurasa pia una kitufe cha **"Jaribu sasa"** — anaona chat papo hapo.
+
+## Routes zilizoongezwa
+    GET  /chatbot/website/             → ukurasa wa maelekezo (portal, login)
     GET  /chatbot/widget/<BOT_ID>.js   → script (kitufe + UI + logo)
     POST /chatbot/web/<BOT_ID>/        → ujumbe -> injini -> jibu
 
