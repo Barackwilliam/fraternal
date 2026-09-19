@@ -1544,6 +1544,76 @@ def chatbot_connect(request):
 
 
 @login_required(login_url='/chatbot/login/')
+def chatbot_seed_demo(request):
+    """
+    Jaza bot na demo data (Zawadi Electronics) kwa mbonyezo mmoja.
+
+    Ipo kwa sababu Render free tier hairuhusu kuendesha `seed_demo` kwa
+    mkono. Mtumiaji anajaza bot YAKE mwenyewe; staff anaweza kulenga bot
+    nyingine kwa `?email=` au `?bot=`.
+
+    ONYO: inafuta huduma, FAQ na mazungumzo ya bot husika, inaweka demo.
+    Kwa hiyo GET inaonyesha ukurasa wa uthibitisho; POST ndio inatekeleza.
+    """
+    from .demo_seed import seed_demo_bot
+
+    # Lenga bot: staff anaweza kuchagua; wengine ni bot yao wenyewe.
+    bot = None
+    if request.user.is_staff and (request.GET.get('email') or request.GET.get('bot')):
+        if request.GET.get('bot'):
+            bot = BotConfig.objects.filter(id=request.GET['bot']).first()
+        else:
+            c = ChatbotClient.objects.filter(email=request.GET['email']).first()
+            bot = c.bots.first() if c else None
+    else:
+        bot = _own_bot(request)
+
+    if not bot:
+        return HttpResponse('Bot haipatikani. Fungua bot kwanza.', status=404)
+
+    if request.method == 'POST':
+        try:
+            summary = seed_demo_bot(bot)
+        except Exception:
+            logger.exception('seed_demo imeshindwa')
+            messages.error(request, 'Demo seed imeshindwa. Jaribu tena.')
+            return redirect('chatbot_dashboard')
+        messages.success(
+            request,
+            f"Demo imejazwa kwa {summary['business']}: "
+            f"huduma {summary['services']}, FAQ {summary['faqs']}, "
+            f"mazungumzo {summary['conversations']}, jumbe {summary['messages']}."
+        )
+        return redirect('chatbot_dashboard')
+
+    # GET — ukurasa wa uthibitisho (dark, on-brand, hauhitaji template)
+    from django.middleware.csrf import get_token
+    token = get_token(request)
+    html = f"""<!doctype html><html lang="sw"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>Seed demo — JamiiBot</title>
+<style>body{{margin:0;background:#04101F;color:#e9edf3;font-family:system-ui,Segoe UI,Roboto,sans-serif;
+display:flex;min-height:100dvh;align-items:center;justify-content:center;padding:22px}}
+.c{{max-width:440px;width:100%;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.1);
+border-radius:16px;padding:26px}}h1{{font-size:20px;margin:0 0 10px}}p{{color:#9fb0bd;line-height:1.6;font-size:14px}}
+b{{color:#F5A623}}.warn{{background:rgba(232,163,61,.12);border:1px solid rgba(232,163,61,.3);color:#f0c98a;
+border-radius:10px;padding:12px 14px;font-size:13px;margin:14px 0;line-height:1.6}}
+.btn{{display:inline-flex;gap:8px;align-items:center;justify-content:center;width:100%;padding:13px;border:none;
+border-radius:11px;background:linear-gradient(135deg,#F5A623,#e0762a);color:#04120E;font-weight:800;font-size:15px;
+cursor:pointer;margin-top:8px}}a.back{{display:block;text-align:center;color:#9fb0bd;text-decoration:none;margin-top:14px;font-size:13px}}</style>
+</head><body><div class="c">
+<h1>Jaza demo data</h1>
+<p>Bot: <b>{bot.bot_name}</b> — {bot.business_name or 'bila jina'}</p>
+<div class="warn">⚠️ Hii itafuta <b>huduma, FAQ na mazungumzo</b> yaliyopo kwenye bot hii, na kuweka demo ya <b>JamiiBot</b> — bot inayojiuza yenyewe (faida, bei, setup, huduma za JamiiTek, na tips). Itumie kwenye akaunti ya demo tu.</div>
+<form method="post">
+  <input type="hidden" name="csrfmiddlewaretoken" value="{token}">
+  <button class="btn" type="submit">Jaza demo sasa</button>
+</form>
+<a class="back" href="/chatbot/dashboard/">← Rudi kwenye dashboard</a>
+</div></body></html>"""
+    return HttpResponse(html)
+
+
+@login_required(login_url='/chatbot/login/')
 def chatbot_website(request):
     """
     Ukurasa unaomwonyesha mteja jinsi ya kuweka bot kwenye tovuti yake

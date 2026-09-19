@@ -30,7 +30,8 @@
     nav{position:fixed;top:0;left:0;right:0;z-index:999;height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 6%;transition:all .3s;background:rgba(255,255,255,.9);backdrop-filter:blur(20px);border-bottom:1px solid transparent}
     nav.scrolled{border-bottom-color:var(--border);box-shadow:0 1px 12px rgba(0,0,0,.06)}
     .nav-logo{display:flex;align-items:center;gap:9px}
-    .nav-logo-mark{width:32px;height:32px;border-radius:9px;background:var(--ink);display:flex;align-items:center;justify-content:center;font-size:16px}
+    .nav-logo-mark{width:34px;height:34px;border-radius:50%;overflow:hidden;background:#fff;display:flex;align-items:center;justify-content:center}
+    .nav-logo-mark img{width:100%;height:100%;object-fit:cover;display:block}
     .nav-logo-text{font-family:var(--head);font-size:20px;font-weight:700;color:var(--ink)}
     .nav-logo-sup{font-family:var(--mono);font-size:9px;font-weight:500;background:var(--lime);color:var(--ink);padding:2px 7px;border-radius:100px;margin-left:2px;vertical-align:middle}
     .nav-links{display:flex;align-items:center;gap:28px}
@@ -43,8 +44,40 @@
     .btn-nav-start:hover{background:var(--ink2);transform:translateY(-1px)}
     .mob-menu{display:none;background:none;border:none;font-size:20px;color:var(--ink);cursor:pointer}
 
+    /* MOBILE DRAWER (slides in from LEFT) */
+    .mob-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);opacity:0;visibility:hidden;transition:opacity .3s;z-index:1000}
+    .mob-overlay.open{opacity:1;visibility:visible}
+    .mob-drawer{-webkit-tap-highlight-color:transparent;position:fixed;top:0;left:0;bottom:0;width:82%;max-width:310px;z-index:1001;
+      background:linear-gradient(185deg,#0a1c30 0%,#07101d 45%,#06070a 100%);
+      transform:translateX(-100%);transition:transform .34s cubic-bezier(.22,.61,.36,1);
+      display:flex;flex-direction:column;box-shadow:14px 0 50px rgba(0,0,0,.55);overflow-y:auto;position:fixed}
+    .mob-drawer::before{content:'';position:absolute;top:-40px;left:-40px;width:220px;height:220px;border-radius:50%;
+      background:radial-gradient(circle,rgba(184,247,77,.16),transparent 70%);pointer-events:none}
+    .mob-drawer.open{transform:translateX(0)}
+    .md-head{display:flex;align-items:center;justify-content:space-between;padding:18px 18px;border-bottom:1px solid rgba(255,255,255,.08);position:relative;z-index:1}
+    .md-brand{display:flex;align-items:center;gap:10px;font-family:var(--head);font-weight:700;font-size:19px;color:#fff}
+    .md-brand img{width:34px;height:34px;border-radius:50%;object-fit:cover;box-shadow:0 3px 12px rgba(184,247,77,.25)}
+    .md-brand b{color:var(--lime);font-weight:700}
+    .md-close{background:rgba(255,255,255,.06);border:none;font-size:22px;color:rgba(255,255,255,.7);cursor:pointer;line-height:1;
+      width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;transition:background .15s,color .15s}
+    .md-close:hover{background:rgba(255,255,255,.14);color:#fff}
+    .md-links{display:flex;flex-direction:column;padding:16px 12px;gap:3px;position:relative;z-index:1}
+    .md-links a{-webkit-tap-highlight-color:transparent;padding:14px 14px;font-weight:600;color:rgba(255,255,255,.82);font-size:15px;border-radius:12px;
+      transition:background .18s,color .18s,padding-left .18s;display:flex;align-items:center;gap:12px;border:1px solid transparent}
+    .md-links a i{width:18px;text-align:center;color:rgba(255,255,255,.4);transition:color .18s}
+    .md-links a:hover,.md-links a:focus,.md-links a:active{background:var(--lime);color:#000;padding-left:18px;border-color:var(--lime);outline:none}
+    .md-links a:hover i,.md-links a:focus i,.md-links a:active i{color:#000}
+    .md-links a.demo{color:var(--lime)}
+    .md-links a.demo i{color:var(--wa)}
+    .md-cta{margin-top:auto;padding:16px 16px 24px;border-top:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;gap:11px;position:relative;z-index:1}
+    .md-cta .btn-login{text-align:center;font-weight:700;color:#fff;border:1.5px solid rgba(255,255,255,.2);padding:13px;border-radius:12px;transition:border-color .15s,background .15s}
+    .md-cta .btn-login:hover{border-color:rgba(184,247,77,.5);background:rgba(184,247,77,.06)}
+    .md-cta .btn-start{text-align:center;background:var(--lime);color:var(--ink);font-weight:800;padding:14px;border-radius:12px;
+      box-shadow:0 8px 24px rgba(184,247,77,.28);transition:transform .15s,box-shadow .15s}
+    .md-cta .btn-start:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(184,247,77,.4)}
+
     /* HERO */
-    .hero{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:80px 6% 60px;position:relative;overflow:hidden;background:var(--ink)}
+    .hero{min-height:100vh;min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:80px 6% 60px;position:relative;overflow:hidden;background:var(--ink)}
     .hero-bg{position:absolute;inset:0;pointer-events:none}
     .hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);background-size:44px 44px}
     .hero-glow1{position:absolute;top:-10%;left:-5%;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(184,247,77,.12),transparent 70%)}
@@ -195,7 +228,8 @@
 
     /* RESPONSIVE */
     @media(max-width:1024px){.feature-grid,.pricing-grid{grid-template-columns:1fr 1fr}.steps{grid-template-columns:1fr 1fr}.hero-inner{grid-template-columns:1fr;text-align:center}.hero-ctas{justify-content:center}.hero-right{display:none}.footer-top{grid-template-columns:1fr 1fr}.guide-grid{grid-template-columns:1fr}}
-    @media(max-width:768px){.nav-links{display:none}.mob-menu{display:block}.testi-grid,.pricing-grid,.feature-grid,.steps{grid-template-columns:1fr}.section{padding:60px 5%}.footer-top{grid-template-columns:1fr}.btn-cta-sec{margin-left:0;margin-top:10px}.cta-section .btn-cta-sec{display:none}}
+    @media(max-width:768px){.nav-links,.nav-cta{display:none}.mob-menu{display:block}.testi-grid,.pricing-grid,.feature-grid,.steps{grid-template-columns:1fr}.section{padding:56px 5%}.section-inner{padding:0}.footer-top{grid-template-columns:1fr}.btn-cta-sec{margin-left:0;margin-top:10px}.cta-section .btn-cta-sec{display:none}.hero{padding:84px 6% 48px}.hero-ctas .btn-hero-primary,.hero-ctas .btn-hero-wa{flex:1;justify-content:center}}
+    @media(max-width:480px){nav{padding:0 5%}.hero-h1{font-size:33px}.hero-sub{font-size:15px}.section-h2{font-size:26px}.price-card{padding:24px}.brands-row{gap:14px}.footer-top{gap:22px}}
   </style>
 </head>
 <body>
@@ -203,8 +237,8 @@
 <!-- NAV -->
 <nav id="mainNav">
   <a href="/" class="nav-logo">
-    <div class="nav-logo-mark">🏢</div>
-    <span class="nav-logo-text">JamiiTek</span>
+    <div class="nav-logo-mark"><img src="{% static 'img/jamiibot-icon.png' %}" alt="JamiiBot"></div>
+    <span class="nav-logo-text">Jamii</span>
     <span class="nav-logo-sup">Bot</span>
   </a>
   <div class="nav-links">
@@ -220,14 +254,25 @@
   <button class="mob-menu" onclick="toggleNav()"><i class="fas fa-bars"></i></button>
 </nav>
 
-<!-- MOB NAV -->
-<div id="mobNav" style="display:none;position:fixed;top:64px;left:0;right:0;background:#fff;border-bottom:1px solid var(--border);z-index:998;padding:16px;box-shadow:0 8px 30px rgba(0,0,0,.1)">
-  <a href="#how-it-works" onclick="toggleNav()" style="display:block;padding:11px 14px;font-weight:600;color:var(--slate);font-size:14px;border-radius:8px">How It Works</a>
-  <a href="#features" onclick="toggleNav()" style="display:block;padding:11px 14px;font-weight:600;color:var(--slate);font-size:14px;border-radius:8px">Features</a>
-  <a href="#pricing" onclick="toggleNav()" style="display:block;padding:11px 14px;font-weight:600;color:var(--slate);font-size:14px;border-radius:8px">Pricing</a>
-  <hr style="border-color:var(--border);margin:8px 0">
-  <a href="/chatbot/register/" style="display:block;text-align:center;background:var(--ink);color:#fff;font-weight:800;padding:12px;border-radius:10px;font-size:14px;margin-top:8px">Start Free Trial →</a>
-</div>
+<!-- MOB NAV — left drawer -->
+<div class="mob-overlay" id="mobOverlay" onclick="closeNav()"></div>
+<aside class="mob-drawer" id="mobNav" aria-hidden="true">
+  <div class="md-head">
+    <div class="md-brand"><img src="{% static 'img/jamiibot-icon.png' %}" alt="">Jamii<b>Bot</b></div>
+    <button class="md-close" onclick="closeNav()" aria-label="Funga">&times;</button>
+  </div>
+  <nav class="md-links">
+    <a href="#how-it-works" onclick="closeNav()"><i class="fas fa-list-ol fa-sm"></i> How It Works</a>
+    <a href="#features" onclick="closeNav()"><i class="fas fa-star fa-sm"></i> Features</a>
+    <a href="#pricing" onclick="closeNav()"><i class="fas fa-tag fa-sm"></i> Pricing</a>
+    <a href="#setup-guide" onclick="closeNav()"><i class="fas fa-wrench fa-sm"></i> Setup Guide</a>
+    <a href="https://wa.me/255768146230?text=Habari%20JamiiBot%2C%20nataka%20kujaribu%20demo" target="_blank" class="demo" onclick="closeNav()"><i class="fab fa-whatsapp fa-sm"></i> Try the Live Demo</a>
+  </nav>
+  <div class="md-cta">
+    <a href="/chatbot/login/" class="btn-login">Login</a>
+    <a href="/chatbot/register/" class="btn-start">Start Free Trial →</a>
+  </div>
+</aside>
 
 <!-- HERO -->
 <section class="hero">
@@ -243,7 +288,7 @@
       <p class="hero-sub">JamiiBot handles customer questions, showcases your services, and converts leads — automatically. While you focus on running your business.</p>
       <div class="hero-ctas">
         <a href="/chatbot/register/" class="btn-hero-primary"><i class="fas fa-rocket"></i> Start Free 7-Day Trial</a>
-        <a href="https://wa.me/255750910158" target="_blank" class="btn-hero-wa"><i class="fab fa-whatsapp fa-lg"></i> See Demo on WhatsApp</a>
+        <a href="https://wa.me/255768146230?text=Habari%20JamiiBot%2C%20nataka%20kujaribu%20demo" target="_blank" class="btn-hero-wa"><i class="fab fa-whatsapp fa-lg"></i> Try the Live Demo</a>
       </div>
       <div class="hero-trust">
         <div class="hero-trust-stars">★★★★★</div>
@@ -327,13 +372,13 @@
       </div>
       <div class="step">
         <div class="step-num">3<span>🔗</span></div>
-        <div class="step-title">Connect WhatsApp</div>
-        <div class="step-desc">Link your WhatsApp Business number using Meta's free Cloud API. We provide a step-by-step guide.</div>
+        <div class="step-title">Connect WhatsApp — Scan a QR</div>
+        <div class="step-desc">Just scan a QR code with WhatsApp — no Meta account, no waiting for approval. Or add it to your website with one line of code.</div>
       </div>
       <div class="step">
         <div class="step-num">4<span>🚀</span></div>
         <div class="step-title">Go Live!</div>
-        <div class="step-desc">Your AI bot starts responding instantly. Monitor conversations from your dashboard anytime.</div>
+        <div class="step-desc">Your AI bot starts replying instantly on WhatsApp and your website. Monitor every conversation from your dashboard.</div>
       </div>
     </div>
     <div style="text-align:center;margin-top:44px">
@@ -360,10 +405,10 @@
         <span class="f-tag">Auto-detect</span>
       </div>
       <div class="feature-card">
-        <div class="f-ico" style="background:rgba(184,247,77,.1)">🧠</div>
-        <div class="f-title">Powered by Claude AI</div>
-        <div class="f-desc">Uses Anthropic's Claude — one of the world's most advanced AI models — to understand context and give smart answers.</div>
-        <span class="f-tag">Claude AI</span>
+        <div class="f-ico" style="background:rgba(184,247,77,.1)">🌐</div>
+        <div class="f-title">WhatsApp + Your Website</div>
+        <div class="f-desc">One bot, everywhere your customers are. Add a WhatsApp-style chat widget to your website with a single line of code.</div>
+        <span class="f-tag">Website widget</span>
       </div>
       <div class="feature-card">
         <div class="f-ico" style="background:rgba(79,70,229,.15)">⚡</div>
@@ -389,6 +434,12 @@
         <div class="f-desc">See all your conversations, track message counts, and understand your customers. Full visibility into what your bot is doing.</div>
         <span class="f-tag">Real-time</span>
       </div>
+      <div class="feature-card">
+        <div class="f-ico" style="background:rgba(37,211,102,.1)">🙋</div>
+        <div class="f-title">Hands Over to a Human</div>
+        <div class="f-desc">When a customer needs a real person, the bot notifies you instantly (WhatsApp or email) and shares your number — no lead is ever lost.</div>
+        <span class="f-tag">Smart handoff</span>
+      </div>
     </div>
   </div>
 </div>
@@ -398,49 +449,49 @@
   <div class="section-inner">
     <div class="section-tag">Transparent Pricing</div>
     <h2 class="section-h2">Simple plans, no surprises</h2>
-    <p class="section-sub">All plans include a 7-day free trial. Pay via NMB Bank transfer. Cancel anytime.</p>
+    <p class="section-sub">All plans include a 7-day free trial. Pay via M-Pesa, Tigo Pesa, Airtel Money or bank. Cancel anytime.</p>
     <div class="pricing-grid">
       <div class="price-card">
-        <div class="price-plan">Basic</div>
-        <div class="price-amount">15K</div>
+        <div class="price-plan">Starter</div>
+        <div class="price-amount">5,000</div>
         <div class="price-period">TZS / month</div>
-        <div class="price-feature"><i class="fas fa-check"></i> 5000 messages/month</div>
-        <div class="price-feature"><i class="fas fa-check"></i> WhatsApp integration</div>
+        <div class="price-feature"><i class="fas fa-check"></i> 5,000 messages / month</div>
+        <div class="price-feature"><i class="fas fa-check"></i> WhatsApp + website widget</div>
         <div class="price-feature"><i class="fas fa-check"></i> Swahili + English</div>
-        <div class="price-feature"><i class="fas fa-check"></i> Up to 5 services/FAQs</div>
-        <div class="price-feature"><i class="fas fa-check"></i> Basic dashboard</div>
+        <div class="price-feature"><i class="fas fa-check"></i> Up to 5 services / FAQs</div>
+        <div class="price-feature"><i class="fas fa-check"></i> Dashboard</div>
         <div class="price-feature"><i class="fas fa-check"></i> 7-day free trial</div>
         <a href="/chatbot/register/?plan=basic" class="btn-price">Get Started Free</a>
       </div>
       <div class="price-card popular">
-        <div class="price-plan">Pro</div>
-        <div class="price-amount" style="color:var(--lime)">30K</div>
+        <div class="price-plan">Business</div>
+        <div class="price-amount" style="color:var(--lime)">10,000</div>
         <div class="price-period">TZS / month</div>
-        <div class="price-feature"><i class="fas fa-check"></i> 10000 messages/month</div>
-        <div class="price-feature"><i class="fas fa-check"></i> WhatsApp integration</div>
+        <div class="price-feature"><i class="fas fa-check"></i> 10,000 messages / month</div>
+        <div class="price-feature"><i class="fas fa-check"></i> WhatsApp + website widget</div>
         <div class="price-feature"><i class="fas fa-check"></i> Swahili + English</div>
-        <div class="price-feature"><i class="fas fa-check"></i> Up to 20 services/FAQs</div>
+        <div class="price-feature"><i class="fas fa-check"></i> Up to 20 services / FAQs</div>
         <div class="price-feature"><i class="fas fa-check"></i> Full analytics dashboard</div>
-        <div class="price-feature"><i class="fas fa-check"></i> Human handoff feature</div>
+        <div class="price-feature"><i class="fas fa-check"></i> Human handoff (WhatsApp/email)</div>
         <div class="price-feature"><i class="fas fa-check"></i> Priority support</div>
         <a href="/chatbot/register/?plan=pro" class="btn-price">Start Free Trial</a>
       </div>
       <div class="price-card">
-        <div class="price-plan">Business</div>
-        <div class="price-amount">60K</div>
+        <div class="price-plan">Enterprise</div>
+        <div class="price-amount">15,000</div>
         <div class="price-period">TZS / month</div>
         <div class="price-feature"><i class="fas fa-check"></i> Unlimited messages</div>
-        <div class="price-feature"><i class="fas fa-check"></i> WhatsApp integration</div>
+        <div class="price-feature"><i class="fas fa-check"></i> WhatsApp + website widget</div>
         <div class="price-feature"><i class="fas fa-check"></i> Swahili + English</div>
-        <div class="price-feature"><i class="fas fa-check"></i> Unlimited services/FAQs</div>
+        <div class="price-feature"><i class="fas fa-check"></i> Unlimited services / FAQs</div>
         <div class="price-feature"><i class="fas fa-check"></i> Full analytics + exports</div>
         <div class="price-feature"><i class="fas fa-check"></i> Custom AI personality</div>
         <div class="price-feature"><i class="fas fa-check"></i> Dedicated support</div>
-        <a href="/chatbot/register/?plan=business" class="btn-price">Get Started Free</a>
+        <a href="/chatbot/register/?plan=enterprise" class="btn-price">Get Started Free</a>
       </div>
     </div>
     <div style="text-align:center;margin-top:28px">
-      <div style="font-family:var(--mono);font-size:12px;color:var(--muted)">💳 Payment via NMB Bank · Account: 21410034200 · JamiiTek Technologies</div>
+      <div style="font-family:var(--mono);font-size:12px;color:var(--muted)">💳 Pay via M-Pesa · Tigo Pesa · Airtel Money · or bank transfer</div>
     </div>
   </div>
 </section>
@@ -458,19 +509,19 @@
       </div>
       <div class="guide-step">
         <div class="gs-num">2</div>
-        <div><div class="gs-title">Complete the Setup Wizard</div><div class="gs-desc">Name your bot, describe your business, add your services and FAQs. The wizard is 6 simple steps.</div></div>
+        <div><div class="gs-title">Complete the Setup Wizard</div><div class="gs-desc">Name your bot, describe your business, add your services and FAQs. Just 3 simple steps.</div></div>
       </div>
       <div class="guide-step">
         <div class="gs-num">3</div>
-        <div><div class="gs-title">Get your Meta WhatsApp Credentials</div><div class="gs-desc">Go to developers.facebook.com → Create App → WhatsApp. Copy your Phone Number ID and API Token. It's free.</div></div>
+        <div><div class="gs-title">Connect WhatsApp — scan a QR</div><div class="gs-desc">Open the Connect page and scan the QR code with WhatsApp. No Meta account, no Phone Number ID, no waiting for approval.</div></div>
       </div>
       <div class="guide-step">
         <div class="gs-num">4</div>
-        <div><div class="gs-title">Paste credentials into your bot config</div><div class="gs-desc">Enter your Phone Number ID and Token in the WhatsApp step of the wizard. Your webhook URL is auto-generated.</div></div>
+        <div><div class="gs-title">Add it to your website (optional)</div><div class="gs-desc">Copy the one line of code from the "Add to Website" page and paste it into your site. A floating chat button appears instantly.</div></div>
       </div>
       <div class="guide-step">
         <div class="gs-num">5</div>
-        <div><div class="gs-title">Deploy and test</div><div class="gs-desc">Click Deploy. Send a WhatsApp message to your number. Your bot should reply within 2 seconds! 🎉</div></div>
+        <div><div class="gs-title">Go live and test</div><div class="gs-desc">Send a WhatsApp message to your number, or open the chat on your website. Your bot replies within 2 seconds! 🎉</div></div>
       </div>
     </div>
     <div style="position:sticky;top:80px">
@@ -478,15 +529,15 @@
         <div style="font-family:var(--head);font-size:20px;font-weight:700;margin-bottom:6px">Need help setting up?</div>
         <div style="font-size:14px;color:rgba(255,255,255,.5);margin-bottom:22px;line-height:1.6">Our team will help you configure your bot and go live. Just send us a WhatsApp message.</div>
         <a href="https://wa.me/255750910158?text=Habari%20JamiiTek%2C%20nataka%20msaada%20kuweka%20JamiiBot" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:9px;background:var(--wa);color:#fff;font-size:14px;font-weight:800;padding:13px;border-radius:11px;margin-bottom:12px;transition:all .2s;text-decoration:none" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'"><i class="fab fa-whatsapp fa-lg"></i> Chat with Us on WhatsApp</a>
-        <a href="mailto:info@jamiitek.co.tz" style="display:flex;align-items:center;justify-content:center;gap:9px;background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);font-size:13px;font-weight:600;padding:11px;border-radius:11px;transition:all .2s;text-decoration:none" onmouseover="this.style.background='rgba(255,255,255,.12)'" onmouseout="this.style.background='rgba(255,255,255,.08)'"><i class="fas fa-envelope"></i> info@jamiitek.co.tz</a>
+        <a href="mailto:info@jamiitek.com" style="display:flex;align-items:center;justify-content:center;gap:9px;background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);font-size:13px;font-weight:600;padding:11px;border-radius:11px;transition:all .2s;text-decoration:none" onmouseover="this.style.background='rgba(255,255,255,.12)'" onmouseout="this.style.background='rgba(255,255,255,.08)'"><i class="fas fa-envelope"></i> info@jamiitek.com</a>
         <hr style="border-color:rgba(255,255,255,.08);margin:20px 0">
         <div style="font-family:var(--mono);font-size:11px;color:rgba(255,255,255,.3);margin-bottom:10px;letter-spacing:1px">QUICK LINKS</div>
         <div style="display:flex;flex-direction:column;gap:8px">
           <a href="/chatbot/register/" style="color:var(--lime);font-size:13px;font-weight:600;text-decoration:none;display:flex;align-items:center;gap:7px"><i class="fas fa-user-plus fa-sm"></i> Create New Account</a>
           <a href="/chatbot/login/" style="color:rgba(255,255,255,.5);font-size:13px;font-weight:600;text-decoration:none;display:flex;align-items:center;gap:7px"><i class="fas fa-sign-in-alt fa-sm"></i> Login to Portal</a>
           <a href="/chatbot/register/?plan=basic" style="color:rgba(255,255,255,.5);font-size:13px;font-weight:600;text-decoration:none;display:flex;align-items:center;gap:7px"><i class="fas fa-gift fa-sm"></i> Start Basic (Free Trial)</a>
-          <a href="/chatbot/register/?plan=pro" style="color:rgba(255,255,255,.5);font-size:13px;font-weight:600;text-decoration:none;display:flex;align-items:center;gap:7px"><i class="fas fa-star fa-sm"></i> Start Pro (Free Trial)</a>
-          <a href="https://developers.facebook.com/docs/whatsapp" target="_blank" style="color:rgba(255,255,255,.5);font-size:13px;font-weight:600;text-decoration:none;display:flex;align-items:center;gap:7px"><i class="fab fa-meta fa-sm"></i> Meta WhatsApp Docs</a>
+          <a href="/chatbot/register/?plan=pro" style="color:rgba(255,255,255,.5);font-size:13px;font-weight:600;text-decoration:none;display:flex;align-items:center;gap:7px"><i class="fas fa-star fa-sm"></i> Start Business (Free Trial)</a>
+          <a href="https://wa.me/255768146230?text=Habari%20JamiiBot%2C%20nataka%20kujaribu%20demo" target="_blank" style="color:var(--lime);font-size:13px;font-weight:600;text-decoration:none;display:flex;align-items:center;gap:7px"><i class="fab fa-whatsapp fa-sm"></i> Try the Live Demo</a>
         </div>
       </div>
     </div>
@@ -557,16 +608,16 @@
       </div>
       <div>
         <div class="footer-col-title">Support</div>
-        <a href="mailto:info@jamiitek.co.tz" class="footer-link">info@jamiitek.co.tz</a>
+        <a href="mailto:info@jamiitek.com" class="footer-link">info@jamiitek.com</a>
         <a href="https://wa.me/255750910158" target="_blank" class="footer-link">WhatsApp Support</a>
-        <a href="https://developers.facebook.com/docs/whatsapp" target="_blank" class="footer-link">Meta WA Docs</a>
+        <a href="https://wa.me/255768146230?text=Habari%20JamiiBot%2C%20nataka%20kujaribu%20demo" target="_blank" class="footer-link">Try the Live Demo</a>
       </div>
     </div>
     <div class="footer-bottom">
       <div class="footer-copy">© 2026 JamiiTek Technologies. All rights reserved.</div>
       <div class="footer-badges">
-        <span class="f-badge-sm">Powered by Claude AI</span>
-        <span class="f-badge-sm">WhatsApp Business API</span>
+        <span class="f-badge-sm">Powered by Advanced AI</span>
+        <span class="f-badge-sm">WhatsApp + Website</span>
         <span class="f-badge-sm">Made in Tanzania 🇹🇿</span>
       </div>
     </div>
@@ -575,7 +626,9 @@
 
 <script>
 window.addEventListener('scroll',()=>{document.getElementById('mainNav').classList.toggle('scrolled',window.scrollY>20)})
-function toggleNav(){const n=document.getElementById('mobNav');n.style.display=n.style.display==='none'?'block':'none'}
+function toggleNav(){var d=document.getElementById('mobNav'),o=document.getElementById('mobOverlay');var open=d.classList.toggle('open');o.classList.toggle('open',open);document.body.style.overflow=open?'hidden':''}
+function closeNav(){document.getElementById('mobNav').classList.remove('open');document.getElementById('mobOverlay').classList.remove('open');document.body.style.overflow=''}
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeNav()});
 // Animate steps on scroll
 const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.style.opacity='1';e.target.style.transform='translateY(0)'}})},{threshold:.15})
 document.querySelectorAll('.step,.feature-card,.guide-step,.testi-card,.price-card').forEach(el=>{el.style.opacity='0';el.style.transform='translateY(20px)';el.style.transition='all .4s ease';obs.observe(el)})

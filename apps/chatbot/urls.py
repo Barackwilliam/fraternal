@@ -26,6 +26,9 @@ urlpatterns = [
 
     # ── Weka bot kwenye tovuti ya mteja (maelekezo + link) ──
     path('website/',        views.chatbot_website,        name='chatbot_website'),
+
+    # ── Demo seed (jaza demo data kwa mbonyezo mmoja) ──
+    path('seed-demo/',      views.chatbot_seed_demo,      name='chatbot_seed_demo'),
     path('conversations/',                      views.chatbot_conversations,       name='chatbot_conversations'),
     # Conversation.id ni UUID, si int. Ikiwa <int:>, ukurasa wa dashboard
     # unaanguka kwa NoReverseMatch mara tu bot inapopata mazungumzo ya
