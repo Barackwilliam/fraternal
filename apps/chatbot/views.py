@@ -830,9 +830,16 @@ def _send_and_save(wa, conv, phone: str, text: str, role='assistant', jid=None):
     Message.objects.create(conversation=conv, role=role, content=text)
 
 
-def _process_message(bot: BotConfig, msg_data: dict):
+def _process_message(bot: BotConfig, msg_data: dict, handler=None):
     """
     Core message processing pipeline with greeting flow state machine.
+
+    `handler` ni ya hiari. Ikiachwa, tunatumia `BaileysHandler` (WhatsApp).
+    Kituo kingine chochote — chat ya website, simulation — kinaweza
+    kupitisha handler yake yenye interface ile ile (`send_text`,
+    `mark_as_read`, `send_interactive_list`), na injini nzima inabaki
+    ile ile. Hii ndiyo sababu chat ya website si mfumo mpya — ni
+    mlango mwingine tu wa injini hii.
 
     Conversation states:
       greeting      → send greeting; if collect_name → move to collect_name
@@ -865,7 +872,7 @@ def _process_message(bot: BotConfig, msg_data: dict):
         return
 
     # Baileys: `jid` inahitajika kwa mark_as_read (Meta ilihitaji id tu)
-    wa = BaileysHandler(bot, jid=msg_data.get('jid'))
+    wa = handler or BaileysHandler(bot, jid=msg_data.get('jid'))
 
     # Get or create conversation
     conv, is_new = Conversation.objects.get_or_create(

@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from . import webchat
 
 urlpatterns = [
     # ── Auth ──
@@ -29,6 +30,11 @@ urlpatterns = [
     path('conversations/<uuid:conv_id>/',       views.chatbot_conversation_detail, name='chatbot_conversation_detail'),
     path('conversations/<uuid:conv_id>/resume/', views.chatbot_resume,          name='chatbot_resume'),
     path('billing/',                            views.chatbot_billing,             name='chatbot_billing'),
+
+    # ── Chat ya website (embeddable widget) ──
+    # <script src="/chatbot/widget/<BOT_ID>.js"> -> kitufe kinachoelea
+    path('widget/<uuid:bot_id>.js', webchat.web_widget_js, name='web_widget_js'),
+    path('web/<uuid:bot_id>/',      webchat.web_chat,      name='web_chat'),
 
     # ── Baileys bridge ──
     path('webhook/baileys/', views.baileys_webhook, name='baileys_webhook'),
