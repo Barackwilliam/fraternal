@@ -114,6 +114,77 @@ def _notify_william(bot):
         logger.error(f"Failed to notify William: {e}")
 
 
+
+# ════════════════════════════════════════════════════════
+# JE, HILI NI JINA?
+# ════════════════════════════════════════════════════════
+# Awali hatua ya `collect_name` ilikubali CHOCHOTE kama jina. Mteja
+# aliyeuliza "Unafanyaje kazi" alijibiwa "Karibu sana, Unafanyaje kazi!"
+# — swali lake likahifadhiwa kama jina lake, na hakujibiwa.
+#
+# Sasa: kama ujumbe hauonekani kama jina, hatukusanyi jina — tunajibu
+# swali lake. Jina si muhimu kiasi cha kumzuia mteja anayetaka kununua.
+
+_NAME_PREFIXES = re.compile(
+    r"^\s*(?:naitwa|jina\s+langu\s+ni|jina\s+langu|mimi\s+ni|mimi\s+naitwa|ni\s+mimi|"
+    r"my\s+name\s+is|my\s+name'?s|i\s+am|i'?m|call\s+me|it'?s|this\s+is)\s+",
+    re.IGNORECASE)
+
+# Maneno yanayoonyesha swali au ombi, si jina
+_NOT_NAME_WORDS = {
+    # maswali — Kiswahili
+    'nini', 'vipi', 'gani', 'je', 'wapi', 'lini', 'nani', 'kwanini', 'ngapi', 'bei',
+    'unaitwa', 'unafanya', 'unafanyaje', 'inafanyaje', 'inakuwaje', 'unaweza', 'mnaweza',
+    'mnauza', 'unauza', 'mnapatikana', 'mpo', 'upo', 'naweza', 'nawezaje', 'kiasi',
+    # maombi
+    'nataka', 'naomba', 'nahitaji', 'tafadhali', 'msaada', 'nisaidie', 'huduma', 'oda', 'order',
+    # maswali — Kiingereza
+    'what', 'how', 'why', 'where', 'when', 'who', 'which', 'can', 'could', 'do', 'does',
+    'is', 'are', 'price', 'cost', 'much', 'help', 'want', 'need', 'please',
+}
+
+# Salamu na maneno mafupi ya kawaida — si majina
+_GREETINGS = {
+    'habari', 'hujambo', 'jambo', 'mambo', 'salama', 'shikamoo', 'niaje', 'poa', 'sawa',
+    'asante', 'ahsante', 'ndiyo', 'ndio', 'hapana', 'karibu', 'hello', 'hi', 'hey', 'hallo',
+    'ok', 'okay', 'yes', 'no', 'thanks', 'good', 'morning', 'afternoon', 'evening',
+    'habari za asubuhi', 'habari za mchana', 'habari za jioni', 'good morning',
+}
+
+
+def _extract_name(text):
+    """Rudisha jina kama ujumbe unaonekana kuwa jina, vinginevyo None.
+
+    Inakubali: "Salum", "Salum Magere", "Naitwa Salum", "Jina langu ni Salum",
+    "I'm Salum". Inakataa maswali, maombi, salamu, namba, na sentensi ndefu.
+    """
+    raw = (text or '').strip()
+    if not raw or '?' in raw or len(raw) > 60:
+        return None
+    if raw.lower().strip(' .!,') in _GREETINGS:
+        return None
+
+    cand = _NAME_PREFIXES.sub('', raw).strip(' .!,;:')
+    if not cand or re.search(r'\d', cand) or len(cand) > 40:
+        return None
+
+    words = cand.split()
+    if not (1 <= len(words) <= 4):
+        return None
+
+    for w in words:
+        lw = w.lower().strip(" .,!'-")
+        if lw in _NOT_NAME_WORDS or lw in _GREETINGS:
+            return None
+        # Kiswahili: "-je" mwishoni ni swali la "vipi" (unafanyaje, inakuwaje)
+        if len(lw) > 5 and lw.endswith('je'):
+            return None
+        # Herufi pekee (pamoja na herufi za lugha nyingine), ' na -
+        if not re.fullmatch(r"[^\W\d_]+(?:['-][^\W\d_]+)*", w):
+            return None
+
+    return ' '.join(w[:1].upper() + w[1:] for w in words)
+
 # ════════════════════════════════════════════════════════
 # AUTHENTICATION
 # ════════════════════════════════════════════════════════
@@ -1020,7 +1091,7 @@ def _process_message(bot: BotConfig, msg_data: dict, handler=None):
 
         if bot.collect_name and not conv.customer_name:
             # Ask for name
-            ask_name_msg = "Karibu! Niambie jina lako ili nikusaidie vizuri zaidi. 😊"
+            ask_name_msg = "Kwa njia, nikuite nani? 😊"
             _send_and_save(wa, conv, from_phone, ask_name_msg)
             _set_conv_state(conv, 'collect_name')
         elif bot.collect_phone and not conv.metadata.get('phone_collected'):
@@ -1035,20 +1106,25 @@ def _process_message(bot: BotConfig, msg_data: dict, handler=None):
     state = _get_conv_state(conv)
 
     if state == 'collect_name':
-        # Accept anything as a name (1–60 chars)
-        name = text.strip()[:60]
-        conv.customer_name = name
-        conv.save(update_fields=['customer_name'])
+        name = _extract_name(text)
+        if name:
+            conv.customer_name = name
+            conv.save(update_fields=['customer_name'])
 
-        if bot.collect_phone and not conv.metadata.get('phone_collected'):
-            ack = f"Asante, {name}! 😊 Sasa nipe namba yako ya simu. 📱"
-            _send_and_save(wa, conv, from_phone, ack)
-            _set_conv_state(conv, 'collect_phone')
-        else:
-            welcome = f"Karibu sana, {name}! Ninaweza kukusaidiaje leo? 🙏"
-            _send_and_save(wa, conv, from_phone, welcome)
-            _set_conv_state(conv, 'chat')
-        return
+            if bot.collect_phone and not conv.metadata.get('phone_collected'):
+                ack = f"Asante, {name}! 😊 Sasa nipe namba yako ya simu. 📱"
+                _send_and_save(wa, conv, from_phone, ack)
+                _set_conv_state(conv, 'collect_phone')
+            else:
+                welcome = f"Karibu sana, {name}! Ninaweza kukusaidiaje leo? 🙏"
+                _send_and_save(wa, conv, from_phone, welcome)
+                _set_conv_state(conv, 'chat')
+            return
+
+        # Si jina — ni swali au ombi. Tusimlazimishe: tuache kukusanya
+        # jina na tujibu alichouliza, kwa AI kama kawaida.
+        _set_conv_state(conv, 'chat')
+        state = 'chat'
 
     # ── State: COLLECT_PHONE ───────────────────────────────────────
     if state == 'collect_phone':
@@ -1056,12 +1132,22 @@ def _process_message(bot: BotConfig, msg_data: dict, handler=None):
         # (`re` sasa imeimportwa juu ya faili — import ya ndani hapa
         #  ilikuwa inafanya `re` kuwa local kwa function NZIMA)
         digits = re.sub(r'[^\d+\-\s()]', '', text).strip()
-        if len(re.sub(r'\D', '', digits)) < 7:
-            # Doesn't look like a phone number — ask again
-            retry_msg = "Samahani, simu hiyo si sahihi. Tafadhali ingiza namba yako ya simu (mfano: +255712345678). 📱"
+        n_digits = len(re.sub(r'\D', '', digits))
+        n_letters = len(re.findall(r'[^\W\d_]', text))
+        if n_digits < 7 and n_letters >= 4:
+            # Ni ujumbe wa kawaida (swali), si namba. Awali mteja alikwama
+            # hapa — kila swali lilijibiwa "simu hiyo si sahihi". Sasa
+            # tunaacha kukusanya namba na tunajibu swali lake.
+            _set_conv_state(conv, 'chat')
+            state = 'chat'
+        elif n_digits < 7:
+            # Anajaribu kutoa namba lakini haijakamilika — muulize tena mara moja
+            retry_msg = "Samahani, namba hiyo haijakamilika. Tafadhali iandike kamili (mfano: +255712345678). 📱"
             _send_and_save(wa, conv, from_phone, retry_msg)
             return
 
+    # Bado tuko kwenye kukusanya namba (hatukuhamia 'chat' hapo juu)
+    if state == 'collect_phone':
         # Save phone in metadata (avoid overwriting the customer's WA from_phone)
         meta = conv.metadata
         meta['provided_phone']  = digits

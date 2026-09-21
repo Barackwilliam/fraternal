@@ -278,7 +278,7 @@ def web_chat(request, bot_id):
             Message.objects.create(conversation=conv, role='assistant', content=greeting)
             meta = conv.metadata or {}
             if bot.collect_name and not conv.customer_name:
-                ask = "Karibu! Niambie jina lako ili nikusaidie vizuri zaidi. 😊"
+                ask = "Kwa njia, nikuite nani? 😊"
                 replies.append(ask)
                 Message.objects.create(conversation=conv, role='assistant', content=ask)
                 meta['state'] = 'collect_name'
@@ -291,6 +291,16 @@ def web_chat(request, bot_id):
                 meta['state'] = 'chat'
             conv.metadata = meta
             conv.save(update_fields=['metadata'])
+        else:
+            # Mgeni anarudi. Anaona salamu tu — swali la jina au namba
+            # halionyeshwi tena. Kama tungeacha hali ya 'collect_name',
+            # ujumbe wake wa kwanza ungechukuliwa kama jina (ndivyo
+            # "Unafanyaje kazi" ilivyokuwa jina). Tunarudi kwenye mazungumzo.
+            meta = conv.metadata or {}
+            if meta.get('state') in ('collect_name', 'collect_phone', 'greeting'):
+                meta['state'] = 'chat'
+                conv.metadata = meta
+                conv.save(update_fields=['metadata'])
 
         return _cors(JsonResponse({
             'replies': replies,
