@@ -150,7 +150,12 @@
 {% elif bot.status == 'suspended' %}
 <div class="jt-alert jt-alert-danger f0 mb-3"><i class="fas fa-ban" style="flex-shrink:0"></i><div><strong>Bot Suspended</strong><br>{{ bot.admin_suspended_reason|default:"Pay subscription kuendelea." }} <a href="{% url 'chatbot_billing' %}" style="color:var(--red);font-weight:700;text-decoration:underline;margin-left:8px">Pay Sasa →</a></div></div>
 {% elif sub and sub.status == 'trial' %}
-<div class="jt-alert jt-alert-warning f0 mb-3"><i class="fas fa-clock" style="flex-shrink:0"></i><div><strong>Jaribio la Bure</strong> — Siku {{ sub.days_remaining }} remaining. <a href="{% url 'chatbot_billing' %}" style="color:var(--yellow);font-weight:700;margin-left:8px">Pay Sasa →</a></div></div>
+{# Siku za mwanzo za trial: utulivu. Uharaka tu siku 2 za mwisho. #}
+{% if sub.days_remaining <= 2 %}
+<div class="jt-alert jt-alert-warning f0 mb-3"><i class="fas fa-clock" style="flex-shrink:0"></i><div><strong>Your free trial ends in {{ sub.days_remaining }} day{{ sub.days_remaining|pluralize }}.</strong> Choose a plan to keep your bot answering customers. <a href="{% url 'chatbot_billing' %}" style="color:var(--yellow);font-weight:700;margin-left:8px">See plans →</a></div></div>
+{% else %}
+<div class="jt-alert jt-alert-success f0 mb-3"><i class="fas fa-gift" style="flex-shrink:0"></i><div><strong>Free trial active</strong> — {{ sub.days_remaining }} days left, everything unlocked. No payment needed yet.</div></div>
+{% endif %}
 {% endif %}
 
 <!-- STAT CARDS -->
@@ -219,7 +224,24 @@
   <div class="col-lg-4">
 
     <!-- SUBSCRIPTION -->
-    {% if sub %}
+    {% if sub and sub.status == 'trial' %}
+    <div class="sub-card f1">
+      <div style="font-family:var(--mono);font-size:9px;color:var(--text-3);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">YOUR PLAN</div>
+      <div class="sub-plan-name" style="color:var(--green)">Free trial</div>
+      <div style="font-size:12.5px;color:var(--text-2);margin-top:2px">Everything unlocked &middot; nothing to pay yet</div>
+      <div style="margin-top:14px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+          <span style="font-family:var(--mono);font-size:9px;color:var(--text-3)">DAYS LEFT</span>
+          <span style="font-family:var(--mono);font-size:10px;color:var(--text-2)">{{ sub.days_remaining }} of 7</span>
+        </div>
+        <div class="usage-track">
+          <div class="usage-fill" style="width:{% widthratio sub.days_remaining 7 100 %}%;background:{% if sub.days_remaining <= 2 %}var(--yellow){% else %}linear-gradient(90deg,var(--green),var(--cyan)){% endif %}"></div>
+        </div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--text-3)">Trial ends {{ sub.end_date|date:"d M Y" }}</div>
+      </div>
+      <a href="{% url 'chatbot_billing' %}" class="jt-btn" style="width:100%;justify-content:center;margin-top:16px;font-size:12px;background:transparent;border:1px solid var(--border);color:var(--text-2)"><i class="fas fa-tags"></i> See plans for later</a>
+    </div>
+    {% elif sub %}
     <div class="sub-card f1">
       <div style="font-family:var(--mono);font-size:9px;color:var(--text-3);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">SUBSCRIPTION</div>
       <div class="sub-plan-name" style="color:{% if sub.status == 'active' %}var(--green){% elif sub.status == 'trial' %}var(--yellow){% else %}var(--red){% endif %}">{{ sub.plan.name }}</div>

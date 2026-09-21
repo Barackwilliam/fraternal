@@ -91,7 +91,22 @@ select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,va
 @media (hover:hover){.svc-x:hover{color:var(--jt-bad)}}
 .add{border:1px dashed var(--jt-line);border-radius:var(--jt-r-sm);padding:18px;margin-top:14px;background:var(--jt-card-2)}
 
-/* ── Plans ── */
+/* ── Launch (hatua 3) — vifurushi haviko hapa tena ── */
+.launch{border-radius:16px;padding:18px;margin-bottom:22px;
+  background:linear-gradient(180deg,rgba(34,197,94,.08),rgba(34,197,94,.02));border:1px solid rgba(34,197,94,.22)}
+.launch-h{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.launch-badge{display:inline-flex;align-items:center;gap:7px;padding:5px 11px;border-radius:999px;font-size:12px;font-weight:700;
+  background:rgba(34,197,94,.14);border:1px solid rgba(34,197,94,.32);color:#86EFAC}
+.launch-badge .d{width:7px;height:7px;border-radius:50%;background:#22C55E;box-shadow:0 0 8px #22C55E}
+.launch-t{font-family:var(--jt-head);font-weight:700;font-size:15px}
+.launch-list{list-style:none;display:grid;gap:10px;margin:16px 0}
+.launch-list li{display:flex;gap:10px;font-size:14px;color:var(--jt-ink-2,rgba(255,255,255,.72));line-height:1.45}
+.launch-list svg{color:#22C55E;margin-top:3px;flex:0 0 auto}
+.launch-pay{display:flex;gap:10px;align-items:flex-start;padding-top:14px;border-top:1px solid rgba(255,255,255,.08);
+  font-size:13.5px;line-height:1.5;color:var(--jt-ink-2,rgba(255,255,255,.72))}
+.launch-pay svg{color:#86EFAC;margin-top:2px;flex:0 0 auto}
+.launch-pay b{color:#fff}
+/* ── Plans (hazitumiki tena kwenye wizard) ── */
 .plans{display:grid;gap:12px;margin-bottom:24px}
 .plan{position:relative;display:block;cursor:pointer;background:var(--jt-card-2);
   border:1.5px solid var(--jt-line);border-radius:var(--jt-r);padding:18px 20px;
@@ -291,39 +306,39 @@ select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,va
 
   {% elif step == 3 %}
   <div class="rise rise-2">
-    <h1>Choose a plan</h1>
-    <p class="sub">You'll start with a 7-day free trial. After this, you'll connect your WhatsApp by scanning a QR code.</p>
+    <h1>You're ready to launch</h1>
+    <p class="sub">Your bot is set up. Next, you'll connect your WhatsApp by scanning a QR code &mdash; it takes about 30 seconds.</p>
 
     <div class="card">
     <form method="post">
       {% csrf_token %}
       <input type="hidden" name="action" value="deploy">
 
-      <div class="plans">
-        {% for p in plans %}
-        <label class="plan">
-          <input type="radio" name="plan_id" value="{{ p.id }}"
-                 {% if forloop.first %}checked{% endif %}>
-          <div class="plan-h">
-            <span class="plan-n">{{ p.name }}</span>
-            <span class="plan-p">{{ p.price_tzs|floatformat:0 }} TZS</span>
-          </div>
-          <div class="plan-d">
-            {% if p.msg_limit %}{{ p.msg_limit }} messages / month{% else %}Unlimited messages{% endif %}
-            {% if p.description %} &middot; {{ p.description }}{% endif %}
-          </div>
-        </label>
-        {% endfor %}
+      <div class="launch">
+        <div class="launch-h">
+          <span class="launch-badge"><span class="d"></span> 7 days free</span>
+          <span class="launch-t">Everything is included during your trial</span>
+        </div>
+        <ul class="launch-list">
+          <li><svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>AI replies on WhatsApp, in Swahili and English</li>
+          <li><svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Chat widget for your website</li>
+          <li><svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Hands over to you when a customer needs a person</li>
+          <li><svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Learns from the questions your customers ask</li>
+        </ul>
+        <div class="launch-pay">
+          <svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><path d="M8 1.5l5.5 2v4.2c0 3.3-2.4 5.8-5.5 6.8-3.1-1-5.5-3.5-5.5-6.8V3.5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M5.6 8.2l1.7 1.7 3.2-3.3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span><b>No payment today.</b> When your 7 days are up, you'll choose a plan &mdash; or simply stop. Nothing is charged automatically.</span>
+        </div>
       </div>
 
       <div class="note">
         Your welcome, fallback and human-handoff messages are already set. You'll fine-tune them
-        after you've seen the bot reply to real customers — that's easier than guessing them now.
+        after you've seen the bot reply to real customers &mdash; that's easier than guessing them now.
       </div>
 
       <div class="bar">
         <a href="/chatbot/setup/?step=2" class="back">&larr; Back</a>
-        <button type="submit" class="cta" data-jt-wait="Launching your bot…">Start 7-day free trial &rarr;</button>
+        <button type="submit" class="cta" data-jt-wait="Launching your bot…">Launch my bot &rarr;</button>
       </div>
     </form>
     </div>

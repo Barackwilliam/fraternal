@@ -3,188 +3,269 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Create Account — JamiiBot</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;450;500;600;700&display=swap" rel="stylesheet">
+<title>Start your free 7 days — JamiiBot</title>
+<meta name="description" content="Create your JamiiBot account. Free for 7 days, no payment today.">
+<link rel="icon" type="image/png" href="{% static 'img/jamiibot-favicon.png' %}">
+<link rel="preload" as="image" href="{% static 'img/jamiibot-icon.webp' %}" type="image/webp">
+<link rel="preload" as="font" type="font/woff2" href="{% static 'fonts/sora-700.woff2' %}" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="{% static 'fonts/inter-400.woff2' %}" crossorigin>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 {% if TURNSTILE_ENABLED %}<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>{% endif %}
-<link rel="stylesheet" href="{% static 'css/tokens.css' %}">
 <link rel="stylesheet" href="{% static 'css/interaction.css' %}">
 <style>
+/* ── Fonts: kutoka server yetu, si Google ─────────────────────── */
+@font-face{font-family:'Sora';font-weight:600;font-display:swap;src:url("{% static 'fonts/sora-600.woff2' %}") format('woff2')}
+@font-face{font-family:'Sora';font-weight:700;font-display:swap;src:url("{% static 'fonts/sora-700.woff2' %}") format('woff2')}
+@font-face{font-family:'Sora';font-weight:800;font-display:swap;src:url("{% static 'fonts/sora-800.woff2' %}") format('woff2')}
+@font-face{font-family:'Inter';font-weight:400;font-display:swap;src:url("{% static 'fonts/inter-400.woff2' %}") format('woff2')}
+@font-face{font-family:'Inter';font-weight:500;font-display:swap;src:url("{% static 'fonts/inter-500.woff2' %}") format('woff2')}
+@font-face{font-family:'Inter';font-weight:600;font-display:swap;src:url("{% static 'fonts/inter-600.woff2' %}") format('woff2')}
+
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--gold:#F5A623;--gold-lift:#FFC456;--green:#1FA97A;--ink:rgba(255,255,255,.92);
-  --ink2:rgba(255,255,255,.6);--ink3:rgba(255,255,255,.4);--line:rgba(255,255,255,.1);
-  --card:rgba(255,255,255,.04);--card2:rgba(255,255,255,.06);
-  --head:'Sora',system-ui,sans-serif;--body:'Inter',system-ui,sans-serif}
-body{font-family:var(--body);background:#04101F;color:var(--ink);min-height:100dvh;
-  -webkit-font-smoothing:antialiased;line-height:1.55;
-  background-image:
-    radial-gradient(55% 45% at 12% 8%, rgba(245,166,35,.10), transparent 60%),
-    radial-gradient(50% 45% at 92% 92%, rgba(31,169,122,.09), transparent 58%)}
+:root{
+  --navy-950:#04101F; --navy-900:#071A31; --navy-800:#0A2245;
+  --gold:#F5A623; --gold-lift:#FFC456; --gold-soft:rgba(245,166,35,.12); --gold-line:rgba(245,166,35,.34);
+  --wa:#25D366; --ok:#22C55E; --err:#EF5B5B;
+  --ink:#F3F6FA; --ink2:rgba(243,246,250,.68); --ink3:rgba(243,246,250,.44);
+  --line:rgba(255,255,255,.09); --line2:rgba(255,255,255,.16);
+  --field:rgba(255,255,255,.035); --field-f:rgba(255,255,255,.06);
+  --head:'Sora',system-ui,sans-serif; --body:'Inter',system-ui,sans-serif;
+  --ease:cubic-bezier(.22,.61,.36,1);
+}
+html{height:100%}
+body{font-family:var(--body);background:var(--navy-950);color:var(--ink);min-height:100%;
+  -webkit-font-smoothing:antialiased;line-height:1.55;font-size:15px;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 a{color:inherit}
+button{font:inherit;color:inherit}
 
-@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
-@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
-@keyframes ring{0%{transform:scale(.75);opacity:.6}80%,100%{transform:scale(1.5);opacity:0}}
-@keyframes orbit{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
-.rise{animation:rise .4s cubic-bezier(.22,.61,.36,1) both}
-@media(prefers-reduced-motion:reduce){*{animation:none!important}}
+@keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes pop{from{opacity:0;transform:translateY(6px) scale(.97)}to{opacity:1;transform:none}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes dots{0%,80%,100%{opacity:.25;transform:translateY(0)}40%{opacity:1;transform:translateY(-2px)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.typing{display:none!important}}
 
-/* Animated avatar */
-.avatar{position:relative;width:132px;height:132px;margin:6px 0 20px;flex:0 0 auto}
-.avatar .ring{position:absolute;inset:14px;border-radius:50%;border:2px solid rgba(245,166,35,.5)}
-.avatar .ring.r1{animation:ring 3s ease-out infinite}
-.avatar .ring.r2{animation:ring 3s ease-out 1.5s infinite;border-color:rgba(31,169,122,.5)}
-.avatar .orb{position:absolute;inset:14px;border-radius:50%;overflow:hidden;background:#fff;
-  box-shadow:0 12px 34px rgba(245,166,35,.35),0 0 0 4px rgba(255,255,255,.06);
-  animation:float 4s ease-in-out infinite}
-.avatar .orb img{width:100%;height:100%;object-fit:cover;display:block}
-.avatar .sat{position:absolute;inset:0;animation:orbit 7s linear infinite}
-.avatar .sat::before{content:'';position:absolute;top:2px;left:50%;width:12px;height:12px;margin-left:-6px;
-  border-radius:50%;background:var(--gold);box-shadow:0 0 12px var(--gold)}
-.avatar .badge{position:absolute;bottom:8px;right:8px;display:flex;align-items:center;gap:5px;z-index:2;
-  background:#0b1f14;border:1px solid rgba(31,169,122,.4);color:#7fe3bd;font-size:10px;font-weight:700;
-  padding:3px 8px;border-radius:100px;animation:bob 4s ease-in-out infinite}
-.avatar .badge .d{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 7px var(--green);animation:blink 1.6s infinite}
+/* ══════════════ MPANGILIO ══════════════ */
+.page{min-height:100vh;display:grid;grid-template-columns:1fr}
+@media(min-width:1000px){.page{grid-template-columns:minmax(440px,1fr) minmax(520px,1.05fr)}}
 
-/* Layout */
-.shell{min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:22px}
-.card{width:100%;max-width:1000px;display:grid;grid-template-columns:1fr;
-  background:rgba(255,255,255,.025);border:1px solid var(--line);border-radius:22px;overflow:hidden;
-  box-shadow:0 40px 120px rgba(0,0,0,.6)}
-@media(min-width:900px){.card{grid-template-columns:390px 1fr}}
+/* ── Paneli ya chapa (kushoto kwenye desktop) ── */
+.brand{position:relative;overflow:hidden;padding:28px 22px 8px;
+  background:
+    radial-gradient(70% 55% at 0% 0%, rgba(245,166,35,.16), transparent 62%),
+    radial-gradient(60% 50% at 100% 100%, rgba(37,211,102,.10), transparent 60%),
+    linear-gradient(180deg,var(--navy-900),var(--navy-950))}
+.brand::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.5;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:44px 44px;mask-image:radial-gradient(ellipse at 30% 20%,#000 20%,transparent 70%);
+  -webkit-mask-image:radial-gradient(ellipse at 30% 20%,#000 20%,transparent 70%)}
+.brand > *{position:relative;z-index:1}
+@media(min-width:1000px){
+  .brand{min-height:100vh;padding:48px 56px;display:flex;flex-direction:column}
+}
 
-/* Hero (left on desktop / top on mobile) */
-.hero{background:linear-gradient(160deg,rgba(7,26,49,.96),rgba(4,16,31,.96));
-  padding:34px 30px;position:relative;overflow:hidden;display:flex;flex-direction:column;
-  align-items:center;text-align:center}
-.hero::before{content:'';position:absolute;top:-70px;right:-70px;width:260px;height:260px;border-radius:50%;
-  background:radial-gradient(circle,rgba(245,166,35,.14),transparent 65%)}
-.brand{display:flex;align-items:center;gap:11px;position:relative;z-index:1}
-.brand-ico{width:40px;height:40px;border-radius:11px;overflow:hidden;background:#fff;flex:0 0 auto;
-  box-shadow:0 4px 16px rgba(245,166,35,.3)}
-.brand-ico img{width:100%;height:100%;object-fit:cover;display:block}
-.brand-name{font-family:var(--head);font-size:21px;font-weight:800;letter-spacing:-.3px}
-.brand-name span{color:var(--gold)}
-.hero-h{font-family:var(--head);font-size:26px;font-weight:800;line-height:1.2;letter-spacing:-.6px;
-  margin:30px 0 12px;position:relative;z-index:1;text-wrap:balance}
-.hero-h em{font-style:normal;color:var(--gold)}
-.hero-p{font-size:14px;color:var(--ink2);line-height:1.7;margin-bottom:26px;position:relative;z-index:1}
-.benef{display:flex;align-items:center;gap:13px;margin-bottom:14px;position:relative;z-index:1;
-  text-align:left;width:100%;max-width:290px}
-.benef-i{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;
-  font-size:16px;flex:0 0 auto;background:rgba(255,255,255,.05);border:1px solid var(--line)}
-.benef-t{font-size:13.5px;font-weight:600}
-.benef-s{font-size:12px;color:var(--ink3);margin-top:1px}
-.trial{display:inline-flex;align-items:center;gap:8px;margin-top:auto;padding:9px 15px;border-radius:100px;
-  background:rgba(31,169,122,.1);border:1px solid rgba(31,169,122,.25);font-size:12px;color:#7fe3bd;
-  position:relative;z-index:1}
-.trial .d{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:blink 2s infinite}
-@media(max-width:899px){.hero{padding:24px 20px}.hero-h{font-size:20px;margin:16px 0 8px}
-  .avatar{width:104px;height:104px;margin:2px 0 10px}
-  .hero-p,.benef{display:none}          /* compact hero on phones — form is reached faster */
-  .trial{margin-top:14px}}
+.logo-row{display:flex;align-self:flex-start;align-items:center;gap:14px;text-decoration:none}
+.logo{width:56px;height:56px;border-radius:50%;flex:0 0 auto;display:block;
+  box-shadow:0 0 0 1px rgba(255,255,255,.08),0 10px 30px -8px rgba(37,211,102,.45)}
+@media(min-width:1000px){.logo{width:72px;height:72px}}
+.logo-name{font-family:var(--head);font-weight:800;font-size:20px;letter-spacing:-.02em}
+.logo-name b{color:var(--wa);font-weight:800}
+.logo-by{font-size:11.5px;color:var(--ink3);letter-spacing:.02em;margin-top:1px}
 
-/* Form */
-.form{background:rgba(4,16,31,.6);padding:34px 34px}
-@media(max-width:899px){.form{padding:26px 20px}}
-.form-h{font-family:var(--head);font-size:22px;font-weight:800;letter-spacing:-.4px;margin-bottom:5px}
-.form-sub{font-size:13.5px;color:var(--ink2);margin-bottom:24px}
-.form-sub a{color:var(--gold);font-weight:600;text-decoration:none}
+.free-pill{display:inline-flex;align-self:flex-start;align-items:center;gap:8px;margin-top:22px;
+  padding:7px 13px 7px 11px;border-radius:999px;font-size:12.5px;font-weight:600;
+  background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);color:#86EFAC}
+.free-pill .d{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 10px var(--ok);animation:blink 2s infinite}
+
+.brand-h{font-family:var(--head);font-weight:800;letter-spacing:-.035em;line-height:1.08;
+  font-size:clamp(28px,7vw,34px);margin-top:16px;text-wrap:balance}
+.brand-h em{font-style:normal;background:linear-gradient(100deg,var(--gold),var(--gold-lift));
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+@media(min-width:1000px){.brand-h{font-size:clamp(36px,3.4vw,48px)}}
+.brand-p{color:var(--ink2);font-size:15px;margin-top:12px;max-width:44ch;text-wrap:pretty}
+@media(min-width:1000px){.brand-p{font-size:16.5px}}
+
+/* ── Hakikisho la mazungumzo ── */
+.chat{margin-top:26px;border-radius:20px;overflow:hidden;max-width:420px;
+  background:#0B141A;border:1px solid var(--line2);
+  box-shadow:0 30px 60px -24px rgba(0,0,0,.7)}
+.chat-top{display:flex;align-items:center;gap:10px;padding:11px 14px;background:#1F2C34}
+.chat-top img{width:34px;height:34px;border-radius:50%}
+.chat-top .n{font-weight:600;font-size:14px;line-height:1.2}
+.chat-top .s{font-size:11.5px;color:#8FE3B0}
+.chat-top .v{margin-left:auto;color:var(--ink3);font-size:13px}
+.chat-body{padding:14px 12px 16px;display:flex;flex-direction:column;gap:6px;min-height:236px;
+  background-color:#0B141A;
+  background-image:radial-gradient(rgba(255,255,255,.035) 1px,transparent 1px);background-size:16px 16px}
+.b{max-width:82%;padding:7px 10px 18px;border-radius:9px;font-size:13.5px;line-height:1.42;position:relative;
+  animation:pop .35s var(--ease) both}
+.b .t{position:absolute;right:8px;bottom:3px;font-size:10px;color:rgba(255,255,255,.5)}
+.b.in{align-self:flex-start;background:#1F2C34;border-top-left-radius:2px}
+.b.out{align-self:flex-end;background:#005C4B;border-top-right-radius:2px}
+.b.out .t::after{content:" ✓✓";color:#53BDEB}
+.typing{align-self:flex-end;background:#005C4B;border-radius:9px;border-top-right-radius:2px;
+  padding:10px 12px;display:flex;gap:4px;animation:pop .3s var(--ease) both}
+.typing i{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.75);animation:dots 1.2s infinite}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+.m1{animation-delay:.5s}.m2t{animation-delay:1.2s}.m2{animation-delay:2.4s}
+.m3{animation-delay:3.6s}.m4t{animation-delay:4.2s}.m4{animation-delay:5.2s}
+.m2t,.m4t{animation-name:typingLife!important;animation-duration:1.2s,1.2s!important}
+@keyframes typingLife{0%{opacity:0}10%,85%{opacity:1}100%{opacity:0;height:0;padding:0;margin:-3px 0}}
+
+/* ── Faida ── */
+.perks{list-style:none;display:grid;gap:14px;margin-top:26px;max-width:440px}
+.perks li{display:flex;gap:13px;align-items:flex-start}
+.perk-i{width:36px;height:36px;border-radius:11px;flex:0 0 auto;display:grid;place-items:center;
+  background:var(--gold-soft);border:1px solid var(--gold-line);color:var(--gold);font-size:14px}
+.perk-t{font-weight:600;font-size:14.5px}
+.perk-s{font-size:13px;color:var(--ink3);margin-top:1px}
+.brand-foot{margin-top:auto;padding-top:28px;font-size:12px;color:var(--ink3)}
+
+/* Kwenye simu: faida na mazungumzo yanashuka chini ya fomu */
+.brand-extra{display:none}
+@media(min-width:1000px){.brand-extra{display:block}}
+.below{padding:8px 22px 40px}
+@media(min-width:1000px){.below{display:none}}
+
+/* ══════════════ FOMU ══════════════ */
+.side{display:flex;justify-content:center;padding:26px 18px 30px}
+@media(min-width:1000px){.side{align-items:center;padding:56px 48px}}
+.panel{width:100%;max-width:480px;animation:rise .45s var(--ease) both}
+@media(min-width:600px){
+  .panel{padding:34px 34px 30px;border-radius:24px;background:rgba(255,255,255,.025);
+    border:1px solid var(--line);box-shadow:0 40px 80px -40px rgba(0,0,0,.6)}
+}
+
+/* hatua */
+.steps{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink3);margin-bottom:22px;flex-wrap:wrap}
+.step{display:inline-flex;align-items:center;gap:7px}
+.step .n{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:700;
+  border:1px solid var(--line2);color:var(--ink3)}
+.step.on{color:var(--ink)}
+.step.on .n{background:var(--gold);border-color:var(--gold);color:var(--navy-950)}
+.steps .sep{width:18px;height:1px;background:var(--line2)}
+
+.form-h{font-family:var(--head);font-weight:700;font-size:26px;letter-spacing:-.025em;line-height:1.15}
+.form-sub{color:var(--ink2);font-size:14.5px;margin-top:8px}
+.form-sub a{color:var(--gold);text-decoration:none;font-weight:600}
 .form-sub a:hover{text-decoration:underline}
 
-.msgs{margin-bottom:16px}
-.msg{display:flex;align-items:center;gap:9px;padding:11px 14px;border-radius:10px;font-size:13px;margin-bottom:8px}
-.msg-error{background:rgba(216,84,75,.1);border:1px solid rgba(216,84,75,.28);color:#ffb4ae}
-.msg-success{background:rgba(31,169,122,.1);border:1px solid rgba(31,169,122,.28);color:#7fe3bd}
+.msgs{display:grid;gap:8px;margin-top:20px}
+.msg{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:12px;font-size:13.5px;line-height:1.45}
+.msg i{margin-top:2px}
+.msg-error{background:rgba(239,91,91,.1);border:1px solid rgba(239,91,91,.3);color:#FCA5A5}
+.msg-success{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);color:#86EFAC}
 
-.row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-@media(max-width:520px){.row{grid-template-columns:1fr;gap:0}}
-.grp{margin-bottom:16px}
-.lbl{display:block;font-size:12.5px;font-weight:600;color:var(--ink2);margin-bottom:7px}
-.wrap{position:relative}
-.ico{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--ink3);font-size:14px;pointer-events:none}
-.inp{width:100%;padding:12px 14px 12px 40px;background:var(--card);border:1.5px solid var(--line);
-  border-radius:11px;color:var(--ink);font-family:var(--body);font-size:16px;outline:none;
-  transition:border-color .18s,box-shadow .18s,background .18s}
-.inp:focus{border-color:rgba(245,166,35,.55);background:rgba(245,166,35,.05);box-shadow:0 0 0 3px rgba(245,166,35,.14)}
-.inp::placeholder{color:var(--ink3)}
-.inp.error{border-color:rgba(216,84,75,.6)}
-.hint{font-size:11.5px;color:var(--ink3);margin-top:6px}
+form{margin-top:24px;display:grid;gap:18px}
+.two{display:grid;gap:18px}
+@media(min-width:600px){.two{grid-template-columns:1fr 1fr}}
 
-/* Password strength */
-.pw-strength{display:flex;gap:5px;margin-top:9px}
-.pw-bar{height:4px;flex:1;border-radius:3px;background:rgba(255,255,255,.08);transition:background .25s}
-.pw-label{font-size:11px;font-weight:600;margin-top:6px;min-height:14px}
+.grp{display:grid;gap:8px;min-width:0}
+.lbl{font-size:13px;font-weight:600;color:var(--ink);display:flex;justify-content:space-between;align-items:baseline}
+.lbl .opt{font-weight:400;color:var(--ink3);font-size:12px}
+.field{position:relative}
+.field .ico{position:absolute;left:16px;top:50%;transform:translateY(-50%);color:var(--ink3);font-size:15px;
+  pointer-events:none;transition:color .2s}
+.inp{width:100%;height:52px;border-radius:13px;border:1px solid var(--line2);background:var(--field);
+  color:var(--ink);font:500 15px var(--body);padding:0 16px 0 46px;outline:none;
+  transition:border-color .2s,background .2s,box-shadow .2s;-webkit-appearance:none;appearance:none}
+.inp::placeholder{color:rgba(243,246,250,.3);font-weight:400}
+.inp:hover{border-color:rgba(255,255,255,.24)}
+.inp:focus{border-color:var(--gold);background:var(--field-f);box-shadow:0 0 0 4px rgba(245,166,35,.14)}
+.field:focus-within .ico{color:var(--gold)}
+.inp.bad{border-color:var(--err);box-shadow:0 0 0 4px rgba(239,91,91,.12)}
+.inp:-webkit-autofill{-webkit-box-shadow:0 0 0 60px #0C1A2E inset;-webkit-text-fill-color:var(--ink);caret-color:var(--ink)}
+.has-eye .inp{padding-right:52px}
+.eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:40px;height:40px;border:0;
+  background:transparent;border-radius:10px;cursor:pointer;color:var(--ink3);display:grid;place-items:center}
+.eye:hover{color:var(--ink);background:rgba(255,255,255,.05)}
+.eye:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+.hint{font-size:12.5px;color:var(--ink3);line-height:1.45}
 
-/* Plans */
-.plan-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
-@media(max-width:400px){.plan-grid{grid-template-columns:1fr}}
-.plan-opt{cursor:pointer;position:relative}
-.plan-opt input{position:absolute;opacity:0;pointer-events:none}
-.plan-card{border:1.5px solid var(--line);border-radius:13px;padding:15px 12px;text-align:center;
-  background:var(--card);transition:border-color .18s,background .18s,transform .18s;position:relative}
-.plan-opt:hover .plan-card{transform:translateY(-2px);border-color:rgba(245,166,35,.3)}
-.plan-opt input:checked + .plan-card{border-color:var(--gold);background:rgba(245,166,35,.1);box-shadow:0 0 0 3px rgba(245,166,35,.1)}
-.plan-opt input:focus-visible + .plan-card{outline:2px solid var(--gold);outline-offset:2px}
-.plan-popular{position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--gold),#e0762a);
-  color:#04120E;font-size:9px;font-weight:800;letter-spacing:.5px;padding:2px 9px;border-radius:100px;white-space:nowrap}
-.plan-name{font-family:var(--head);font-size:14px;font-weight:700;margin-bottom:5px}
-.plan-price{font-family:var(--head);font-size:22px;font-weight:800;color:var(--gold);line-height:1}
-.plan-msgs{font-size:10.5px;color:var(--ink3);margin-top:3px}
+.meter{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:2px}
+.meter i{height:4px;border-radius:4px;background:rgba(255,255,255,.08);transition:background .25s}
+.meter-l{font-size:12px;min-height:0;color:var(--ink3)}
+.meter-l:empty{display:none}
 
-.trial-line{display:flex;align-items:center;gap:7px;font-size:12px;color:#7fe3bd;margin-top:12px}
-.trial-line .d{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 2s infinite;flex:0 0 auto}
+/* hakikisho la malipo */
+.assure{border-radius:16px;padding:16px 16px 14px;margin-top:4px;
+  background:linear-gradient(180deg,rgba(34,197,94,.08),rgba(34,197,94,.03));
+  border:1px solid rgba(34,197,94,.22)}
+.assure-h{font-weight:700;font-size:14px;display:flex;align-items:center;gap:9px;color:#BBF7D0}
+.assure ul{list-style:none;display:grid;gap:8px;margin-top:11px}
+.assure li{display:flex;gap:10px;font-size:13.5px;color:var(--ink2);line-height:1.4}
+.assure li i{color:var(--ok);margin-top:3px;font-size:12px}
 
-.submit{width:100%;margin-top:22px;padding:14px;border:none;border-radius:12px;cursor:pointer;
-  background:linear-gradient(135deg,var(--gold),#e0762a);color:#04120E;font-family:var(--head);
-  font-size:15px;font-weight:800;letter-spacing:.2px;display:flex;align-items:center;justify-content:center;gap:9px;
-  box-shadow:0 8px 26px rgba(245,166,35,.32);transition:transform .18s,box-shadow .18s}
-.submit:hover{transform:translateY(-2px);box-shadow:0 12px 36px rgba(245,166,35,.46)}
-.submit:active{transform:scale(.98)}
-.submit:disabled{opacity:.65;cursor:default;transform:none}
+.ts{display:flex;justify-content:center;min-height:0}
 
-.tos{font-size:11.5px;color:var(--ink3);text-align:center;margin-top:16px;line-height:1.6}
-.tos a{color:var(--ink2);text-decoration:underline}
-.back{display:block;text-align:center;font-size:12px;color:var(--ink3);text-decoration:none;margin-top:14px}
-.back:hover{color:var(--ink2)}
+.submit{position:relative;width:100%;height:56px;border:0;border-radius:14px;cursor:pointer;
+  font:700 16px var(--head);letter-spacing:-.01em;color:var(--navy-950);
+  background:linear-gradient(100deg,var(--gold),var(--gold-lift));
+  box-shadow:0 14px 30px -12px rgba(245,166,35,.65),inset 0 1px 0 rgba(255,255,255,.35);
+  display:flex;align-items:center;justify-content:center;gap:10px;transition:transform .15s,box-shadow .2s,filter .2s}
+.submit:hover{filter:brightness(1.05);box-shadow:0 18px 36px -12px rgba(245,166,35,.75),inset 0 1px 0 rgba(255,255,255,.35)}
+.submit:active{transform:translateY(1px)}
+.submit:focus-visible{outline:3px solid #fff;outline-offset:3px}
+.submit:disabled{cursor:wait;filter:saturate(.7) brightness(.9)}
+.submit .spin{width:18px;height:18px;border-radius:50%;border:2.5px solid rgba(4,16,31,.25);border-top-color:var(--navy-950);animation:spin .8s linear infinite}
+
+.tos{font-size:12px;color:var(--ink3);text-align:center;line-height:1.6}
+.tos a{color:var(--ink2)}
+.alt{display:flex;justify-content:space-between;gap:12px;font-size:13px;color:var(--ink3);padding-top:4px;flex-wrap:wrap}
+.alt a{text-decoration:none}
+.alt a:hover{color:var(--ink)}
 </style>
 </head>
 <body>
-<div class="shell">
-  <div class="card rise">
 
-    <!-- HERO -->
-    <div class="hero">
-      <div class="avatar" aria-hidden="true">
-        <div class="ring r1"></div>
-        <div class="ring r2"></div>
-        <div class="sat"></div>
-        <div class="orb"><img src="{% static 'img/jamiibot-icon.png' %}" alt=""></div>
-        <div class="badge"><span class="d"></span> Online</div>
+<div class="page">
+
+  <!-- ════════ CHAPA ════════ -->
+  <aside class="brand">
+    <a href="/bot/" class="logo-row" aria-label="JamiiBot home">
+      <picture>
+        <source srcset="{% static 'img/jamiibot-icon.webp' %}" type="image/webp">
+        <img class="logo" src="{% static 'img/jamiibot-icon.png' %}" alt="JamiiBot" width="72" height="72">
+      </picture>
+      <div>
+        <div class="logo-name">Jamii<b>Bot</b></div>
+        <div class="logo-by">by JamiiTek</div>
+      </div>
+    </a>
+
+    <div class="free-pill"><span class="d"></span> Free for 7 days &middot; No payment today</div>
+
+    <h1 class="brand-h">Never miss a customer<br>on <em>WhatsApp</em> again.</h1>
+    <p class="brand-p">Your AI assistant answers customers in Swahili and English, day and night — while you run your business.</p>
+
+    <div class="brand-extra">
+      {% include "chatbot/portal/_register_chat.html" %}
+      {% include "chatbot/portal/_register_perks.html" %}
+      <div class="brand-foot">&copy; JamiiTek Digital Agency &middot; Tanzania</div>
+    </div>
+  </aside>
+
+  <!-- ════════ FOMU ════════ -->
+  <main class="side">
+    <div class="panel">
+
+      <div class="steps" aria-label="Setup steps">
+        <span class="step on"><span class="n">1</span>Your account</span>
+        <span class="sep"></span>
+        <span class="step"><span class="n">2</span>Your business</span>
+        <span class="sep"></span>
+        <span class="step"><span class="n">3</span>Connect WhatsApp</span>
       </div>
 
-      <div class="hero-h">Your business,<br>always <em>online.</em></div>
-      <div class="hero-p">An AI WhatsApp &amp; website bot that speaks Swahili and English, and answers your customers 24/7 — so you never miss a sale.</div>
-      <div class="benef"><div class="benef-i">🇹🇿</div><div><div class="benef-t">Swahili + English AI</div><div class="benef-s">Replies in the customer's language</div></div></div>
-      <div class="benef"><div class="benef-i">⚡</div><div><div class="benef-t">Replies in under 2 seconds</div><div class="benef-s">Fast, reliable answers</div></div></div>
-      <div class="benef"><div class="benef-i">🌐</div><div><div class="benef-t">WhatsApp + your website</div><div class="benef-s">One bot, everywhere your customers are</div></div></div>
-      <div class="trial"><span class="d"></span> 7-day free trial · No card needed</div>
-    </div>
-
-    <!-- FORM -->
-    <div class="form">
-      <div class="form-h">Create your account</div>
-      <div class="form-sub">Already have one? <a href="/chatbot/login/">Sign in →</a></div>
+      <h2 class="form-h">Create your free account</h2>
+      <p class="form-sub">Takes about a minute. Already have one? <a href="/chatbot/login/">Sign in</a></p>
 
       {% if messages %}
-      <div class="msgs">
+      <div class="msgs" role="alert">
         {% for m in messages %}
         <div class="msg msg-{% if m.tags == 'error' %}error{% else %}success{% endif %}">
-          <i class="fas {% if m.tags == 'error' %}fa-circle-xmark{% else %}fa-circle-check{% endif %}"></i>{{ m }}
+          <i class="fas {% if m.tags == 'error' %}fa-circle-exclamation{% else %}fa-circle-check{% endif %}"></i><span>{{ m }}</span>
         </div>
         {% endfor %}
       </div>
@@ -193,119 +274,140 @@ a{color:inherit}
       <form method="post" id="regForm" novalidate>
         {% csrf_token %}
 
-        <div class="row">
+        <div class="two">
           <div class="grp">
-            <label class="lbl">Full name</label>
-            <div class="wrap"><i class="fas fa-user ico"></i>
-              <input type="text" name="full_name" class="inp" placeholder="Your full name" required autocomplete="name" value="{{ request.POST.full_name }}"></div>
+            <label class="lbl" for="full_name">Your name</label>
+            <div class="field"><i class="fas fa-user ico"></i>
+              <input class="inp" id="full_name" type="text" name="full_name" placeholder="Juma Hassan"
+                     required autocomplete="name" value="{{ request.POST.full_name }}"></div>
           </div>
           <div class="grp">
-            <label class="lbl">Business name</label>
-            <div class="wrap"><i class="fas fa-building ico"></i>
-              <input type="text" name="business_name" class="inp" placeholder="Company / shop" required autocomplete="organization" value="{{ request.POST.business_name }}"></div>
+            <label class="lbl" for="business_name">Business name</label>
+            <div class="field"><i class="fas fa-store ico"></i>
+              <input class="inp" id="business_name" type="text" name="business_name" placeholder="Juma Electronics"
+                     required autocomplete="organization" value="{{ request.POST.business_name }}"></div>
           </div>
         </div>
 
         <div class="grp">
-          <label class="lbl">Email address</label>
-          <div class="wrap"><i class="fas fa-envelope ico"></i>
-            <input type="email" name="email" class="inp" placeholder="email@example.com" required autocomplete="email" value="{{ request.POST.email }}"></div>
+          <label class="lbl" for="email">Email</label>
+          <div class="field"><i class="fas fa-envelope ico"></i>
+            <input class="inp" id="email" type="email" name="email" placeholder="you@example.com"
+                   required autocomplete="email" inputmode="email" value="{{ request.POST.email }}"></div>
         </div>
 
         <div class="grp">
-          <label class="lbl">WhatsApp number</label>
-          <div class="wrap"><i class="fab fa-whatsapp ico" style="color:#25d366"></i>
-            <input type="tel" name="phone" class="inp" placeholder="+255 7XX XXX XXX" autocomplete="tel" value="{{ request.POST.phone }}" inputmode="tel"></div>
-          <div class="hint">Optional — used to contact you about your bot</div>
+          <label class="lbl" for="phone">WhatsApp number <span class="opt">Optional</span></label>
+          <div class="field"><i class="fab fa-whatsapp ico" style="color:var(--wa)"></i>
+            <input class="inp" id="phone" type="tel" name="phone" placeholder="+255 7XX XXX XXX"
+                   autocomplete="tel" inputmode="tel" value="{{ request.POST.phone }}"></div>
+          <div class="hint">So we can help you if you get stuck setting up.</div>
         </div>
 
-        <div class="row">
+        <div class="two">
           <div class="grp">
-            <label class="lbl">Username</label>
-            <div class="wrap"><i class="fas fa-at ico"></i>
-              <input type="text" name="username" id="username" class="inp" placeholder="juma123" required autocomplete="username" value="{{ request.POST.username }}" autocorrect="off" autocapitalize="none" spellcheck="false"></div>
+            <label class="lbl" for="username">Username</label>
+            <div class="field"><i class="fas fa-at ico"></i>
+              <input class="inp" id="username" type="text" name="username" placeholder="juma123"
+                     required autocomplete="username" autocorrect="off" autocapitalize="none" spellcheck="false"
+                     value="{{ request.POST.username }}"></div>
           </div>
           <div class="grp">
-            <label class="lbl">Password</label>
-            <div class="wrap"><i class="fas fa-lock ico"></i>
-              <input type="password" name="password" id="password" class="inp" placeholder="Min. 8 characters" required autocomplete="new-password"></div>
-            <div class="pw-strength"><div class="pw-bar" id="pb1"></div><div class="pw-bar" id="pb2"></div><div class="pw-bar" id="pb3"></div><div class="pw-bar" id="pb4"></div></div>
-            <div class="pw-label" id="pwLabel"></div>
+            <label class="lbl" for="password">Password</label>
+            <div class="field has-eye"><i class="fas fa-lock ico"></i>
+              <input class="inp" id="password" type="password" name="password" placeholder="8+ characters"
+                     required minlength="8" autocomplete="new-password">
+              <button type="button" class="eye" id="eye" aria-label="Show password" aria-pressed="false">
+                <i class="fas fa-eye"></i></button>
+            </div>
           </div>
         </div>
-
-        <div class="grp">
-          <label class="lbl">Confirm password</label>
-          <div class="wrap"><i class="fas fa-shield-halved ico"></i>
-            <input type="password" name="password2" id="password2" class="inp" placeholder="Repeat password" required autocomplete="new-password"></div>
-          <div class="hint" id="pw2Hint"></div>
+        <div class="grp" style="margin-top:-8px">
+          <div class="meter" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+          <div class="meter-l" id="meterL" aria-live="polite"></div>
         </div>
 
-        <div class="grp">
-          <label class="lbl">Choose your plan</label>
-          <div class="plan-grid">
-            {% for plan in plans %}
-            <label class="plan-opt">
-              <input type="radio" name="plan" value="{{ plan.slug }}" {% if request.GET.plan == plan.slug or forloop.first %}checked{% endif %}>
-              <div class="plan-card">
-                {% if plan.slug == 'pro' %}<div class="plan-popular">POPULAR</div>{% endif %}
-                <div class="plan-name">{{ plan.name }}</div>
-                <div class="plan-price">{{ plan.price_tzs|floatformat:0 }}</div>
-                <div class="plan-msgs">TZS / month</div>
-                <div class="plan-msgs" style="margin-top:2px">{% if plan.is_unlimited %}∞ Unlimited{% else %}{{ plan.msg_limit }} msgs{% endif %}</div>
-              </div>
-            </label>
-            {% endfor %}
-          </div>
-          <div class="trial-line"><span class="d"></span> 7-day free trial on all plans — no payment required</div>
+        <div class="assure">
+          <div class="assure-h"><i class="fas fa-shield-heart"></i> You pay nothing today</div>
+          <ul>
+            <li><i class="fas fa-check"></i><span>Your bot is fully working for 7 days — free.</span></li>
+            <li><i class="fas fa-check"></i><span>No card and no M-Pesa needed to start.</span></li>
+            <li><i class="fas fa-check"></i><span>After 7 days, you choose whether to continue.</span></li>
+          </ul>
         </div>
 
         {% if TURNSTILE_ENABLED %}
-        <div class="grp" style="display:flex;justify-content:center;margin-top:4px">
-          <div class="cf-turnstile" data-sitekey="{{ TURNSTILE_SITEKEY }}" data-theme="dark"></div>
-        </div>
+        <div class="ts"><div class="cf-turnstile" data-sitekey="{{ TURNSTILE_SITEKEY }}" data-theme="dark"></div></div>
         {% endif %}
 
         <button type="submit" class="submit" id="submitBtn">
-          <i class="fas fa-rocket"></i> Create account &amp; start free trial
+          <span>Start my free 7 days</span><i class="fas fa-arrow-right"></i>
         </button>
 
-        <div class="tos">By registering you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.</div>
-        <a href="/bot/" class="back">← Back to JamiiBot</a>
+        <p class="tos">By continuing you agree to our <a href="#">Terms</a> and <a href="#">Privacy Policy</a>.</p>
+
+        <div class="alt">
+          <a href="/bot/">&larr; Back to JamiiBot</a>
+          <a href="https://wa.me/255750910158" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i> Need help?</a>
+        </div>
       </form>
     </div>
+  </main>
 
-  </div>
+  <!-- Kwenye simu: mazungumzo na faida chini ya fomu -->
+  <section class="below" aria-label="What JamiiBot does">
+    {% include "chatbot/portal/_register_chat.html" %}
+    {% include "chatbot/portal/_register_perks.html" %}
+  </section>
+
 </div>
 
 <script>
-/* Password strength */
-var pwInput=document.getElementById('password');
-var bars=[document.getElementById('pb1'),document.getElementById('pb2'),document.getElementById('pb3'),document.getElementById('pb4')];
-var pwLabel=document.getElementById('pwLabel');
-pwInput.addEventListener('input',function(){
-  var v=this.value,score=0;
-  if(v.length>=8)score++;if(v.length>=12)score++;
-  if(/[A-Z]/.test(v)&&/[a-z]/.test(v))score++;
-  if(/[0-9]/.test(v)||/[^A-Za-z0-9]/.test(v))score++;
-  var colors=['#D8544B','#E8A33D','#3b82f6','#1FA97A'],labels=['Too short','Weak','Good','Strong'];
-  bars.forEach(function(b,i){b.style.background=i<score?colors[score-1]:'rgba(255,255,255,.08)';});
-  pwLabel.textContent=v.length>0?labels[Math.max(score-1,0)]:'';
-  pwLabel.style.color=v.length>0?colors[Math.max(score-1,0)]:'transparent';
-});
-/* Password match */
-var pw2=document.getElementById('password2'),hint=document.getElementById('pw2Hint');
-pw2.addEventListener('input',function(){
-  if(!this.value){hint.textContent='';return;}
-  if(this.value===pwInput.value){hint.textContent='✓ Passwords match';hint.style.color='#1FA97A';this.classList.remove('error');}
-  else{hint.textContent='✗ Passwords do not match';hint.style.color='#D8544B';this.classList.add('error');}
-});
-/* Submit */
-document.getElementById('regForm').addEventListener('submit',function(e){
-  var btn=document.getElementById('submitBtn');
-  if(pw2.value&&pw2.value!==pwInput.value){e.preventDefault();hint.textContent='✗ Passwords do not match';hint.style.color='#D8544B';pw2.classList.add('error');pw2.focus();return;}
-  btn.disabled=true;btn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i> Creating account...';
-});
+(function(){
+  var pw=document.getElementById('password'), eye=document.getElementById('eye');
+  var bars=document.querySelectorAll('.meter i'), lbl=document.getElementById('meterL');
+
+  /* Onyesha / ficha nenosiri — inachukua nafasi ya "rudia nenosiri" */
+  eye.addEventListener('click',function(){
+    var show=pw.type==='password';
+    pw.type=show?'text':'password';
+    eye.setAttribute('aria-pressed',show);
+    eye.setAttribute('aria-label',show?'Hide password':'Show password');
+    eye.innerHTML='<i class="fas '+(show?'fa-eye-slash':'fa-eye')+'"></i>';
+  });
+
+  /* Nguvu ya nenosiri */
+  var colors=['#EF5B5B','#F5A623','#60A5FA','#22C55E'], names=['Too short','Okay','Good','Strong'];
+  pw.addEventListener('input',function(){
+    var v=pw.value, s=0;
+    if(v.length>=8)s++; if(v.length>=12)s++;
+    if(/[A-Z]/.test(v)&&/[a-z]/.test(v))s++;
+    if(/[0-9]/.test(v)||/[^A-Za-z0-9]/.test(v))s++;
+    if(v.length<8)s=Math.min(s,1);
+    bars.forEach(function(b,i){b.style.background=(v&&i<s)?colors[s-1]:'rgba(255,255,255,.08)'});
+    lbl.textContent=v?names[Math.max(s-1,0)]:'';
+    lbl.style.color=v?colors[Math.max(s-1,0)]:'';
+    pw.classList.remove('bad');
+  });
+
+  /* Ukaguzi wa haraka kabla ya kutuma */
+  var form=document.getElementById('regForm'), btn=document.getElementById('submitBtn');
+  form.addEventListener('submit',function(e){
+    var first=null;
+    form.querySelectorAll('[required]').forEach(function(el){
+      var bad=!el.value.trim() || (el.type==='email'&&!/^\S+@\S+\.\S+$/.test(el.value)) ||
+              (el.id==='password'&&el.value.length<8);
+      el.classList.toggle('bad',bad);
+      if(bad&&!first)first=el;
+    });
+    if(first){e.preventDefault();first.focus();return;}
+    btn.disabled=true;
+    btn.innerHTML='<span class="spin"></span><span>Creating your account…</span>';
+  });
+  form.querySelectorAll('.inp').forEach(function(el){
+    el.addEventListener('input',function(){el.classList.remove('bad')});
+  });
+})();
 </script>
 <script src="{% static 'js/interaction.js' %}" defer></script>
 </body>

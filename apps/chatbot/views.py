@@ -119,15 +119,20 @@ def _notify_william(bot):
 # ════════════════════════════════════════════════════════
 
 def chatbot_register(request):
-    plans = SubscriptionPlan.objects.filter(is_active=True)
-
+    # Vifurushi HAVIONYESHWI hapa kwa makusudi. Watu wengi walifika kwenye
+    # fomu na kuacha wakidhani watakatwa pesa mara moja. Mteja anaanza
+    # trial ya siku 7 kwenye kifurushi cha kwanza (angalia action 'deploy'
+    # kwenye setup wizard), na anachagua kifurushi pale anapoamua kulipia.
     if request.method == 'POST':
         data = request.POST
         errors = []
 
         username  = data.get('username', '').strip().lower()
         password  = data.get('password', '')
-        password2 = data.get('password2', '')
+        # Fomu mpya haina "rudia nenosiri" — ina kitufe cha kuonyesha
+        # nenosiri badala yake (sehemu moja pungufu). Ikitumwa, bado
+        # inakaguliwa, ili fomu za zamani zilizo kwenye cache zisivunjike.
+        password2 = data.get('password2')
         email     = data.get('email', '').strip()
         full_name = data.get('full_name', '').strip()
         business  = data.get('business_name', '').strip()
@@ -148,7 +153,7 @@ def chatbot_register(request):
             errors.append("That username is already taken.")
         if User.objects.filter(email=email).exists():
             errors.append("That email is already registered.")
-        if password != password2:
+        if password2 is not None and password != password2:
             errors.append("Passwords do not match.")
         if len(password) < 8:
             errors.append("Password must be at least 8 characters.")
@@ -156,7 +161,7 @@ def chatbot_register(request):
         if errors:
             for e in errors:
                 messages.error(request, e)
-            return render(request, 'chatbot/portal/register.html', {'plans': plans})
+            return render(request, 'chatbot/portal/register.html')
 
         try:
             with transaction.atomic():
@@ -175,7 +180,7 @@ def chatbot_register(request):
             logger.exception(f"Registration error: {e}")
             messages.error(request, "A technical error occurred. Please try again.")
 
-    return render(request, 'chatbot/portal/register.html', {'plans': plans})
+    return render(request, 'chatbot/portal/register.html')
 
 
 def chatbot_login(request):
@@ -386,7 +391,8 @@ def chatbot_setup_wizard(request):
                 plan = SubscriptionPlan.objects.filter(is_active=True).order_by('sort_order').first()
             if not plan:
                 messages.error(request, "Hakuna mpango uliowekwa. Wasiliana na timu yetu.")
-                context.update({'step': 6})
+                # Ilikuwa step 6 — hatua isiyokuwepo; template ilionyesha ukurasa mtupu.
+                context.update({'step': 3})
                 return render(request, 'chatbot/portal/wizard.html', context)
 
             sub, created = BotSubscription.objects.get_or_create(
