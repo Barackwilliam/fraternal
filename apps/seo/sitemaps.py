@@ -49,7 +49,10 @@ class ServiceSitemap(Sitemap):
         from apps.models import Service
         # Bila ordering, pagination ya sitemap inaweza kutoa matokeo
         # yasiyolingana kila ombi (UnorderedObjectListWarning).
-        return Service.objects.order_by('pk')
+        # Kila huduma ilikuwa na location ile ile (/service/), kwa hiyo
+        # huduma 8 = URL moja iliyorudiwa mara 8 kwenye sitemap. Google
+        # inaona nakala. Moja inatosha.
+        return Service.objects.order_by('pk')[:1]
 
     def location(self, item):
         return reverse('service')

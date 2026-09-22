@@ -32,7 +32,7 @@
 <meta name="theme-color" content="#04101F">
 <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
 <link rel="manifest" href="/manifest.json">
-<link rel="preload" as="image" href="{% static 'images/hero/hero-1.webp' %}" type="image/webp" fetchpriority="high">
+{% if hero_slides and hero_slides.0.image %}<link rel="preload" as="image" href="{{ hero_slides.0.image }}" fetchpriority="high">{% endif %}
 
 {{ schema_markup|safe }}
 
@@ -480,7 +480,7 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 .wk__link:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
 .wk__noimg{position:absolute;inset:0;display:grid;place-items:center;
   background:radial-gradient(80% 70% at 30% 20%,rgba(245,166,35,.22),transparent 60%),linear-gradient(160deg,var(--navy-800),var(--navy-950))}
-.wk__noimg span{font:800 72px/1 var(--f-head,inherit);color:rgba(255,255,255,.14);letter-spacing:-.04em}
+.wk__noimg{align-items:start;padding-top:18%}.wk__noimg span{font-family:'Sora',system-ui,sans-serif;font-weight:800;font-size:clamp(84px,9vw,128px);line-height:1;letter-spacing:-.05em;background:linear-gradient(160deg,rgba(255,255,255,.34),rgba(245,166,35,.18));-webkit-background-clip:text;background-clip:text;color:transparent}
 .wk__foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px;
   padding-top:12px;border-top:1px solid rgba(255,255,255,.08);font-size:12.5px;color:#8EA3BD}
 .wk__visit{display:inline-flex;align-items:center;gap:6px;color:var(--gold);font-weight:600;white-space:nowrap}
@@ -697,118 +697,36 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 <!-- ═══════════════════════════════════════════════════════════
      HERO SLIDER — 5 slides, images from static/images/hero/
      ═══════════════════════════════════════════════════════════ -->
+{% if hero_slides %}
 <section class="hs" id="hero" aria-roledescription="carousel" aria-label="JamiiTek highlights">
 
-  <!-- 1 · Websites -->
-  <article class="hs__slide is-on" aria-roledescription="slide" aria-label="1 of 5">
-    <picture>
-      <source srcset="{% static 'images/hero/hero-1.webp' %}" type="image/webp">
-      <img class="hs__img" src="{% static 'images/hero/hero-1.jpg' %}"
-         alt="A JamiiTek client website on a laptop" fetchpriority="high" decoding="async">
-    </picture>
+  {# Kutoka Django admin → Hero slides. Hakuna slaidi zilizoandikwa hapa kwa mkono. #}
+  {% for h in hero_slides %}
+  <article class="hs__slide{% if forloop.first %} is-on{% endif %}" aria-roledescription="slide" aria-label="{{ forloop.counter }} of {{ hero_slides|length }}"{% if not forloop.first %} aria-hidden="true"{% endif %}>
+    {% if h.image %}<img class="hs__img" src="{{ h.image }}" alt="{{ h.eyebrow|default:h.headline|striptags }}"
+         style="object-position:{{ h.focal|default:'center' }}"
+         {% if forloop.first %}fetchpriority="high"{% else %}loading="lazy"{% endif %} decoding="async">{% endif %}
     <div class="hs__scrim"></div><div class="hs__grid"></div>
     <div class="wrap hs__body">
-      <span class="hs__eyebrow"><i></i>Website Development</span>
-      <h1 class="hs__title">We Build Websites That <em>Win Customers</em></h1>
-      <p class="hs__sub">Fast, secure and mobile-first sites designed to turn visitors into paying customers. Delivered in 2&ndash;6 weeks, from TZS 150,000.</p>
-      <div class="hs__btns">
-        <a class="btn btn--gold" href="{% url 'get_started' %}">Start Your Project
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 11h12.2l-4.6-4.6L13 5l7 7-7 7-1.4-1.4 4.6-4.6H4z"/></svg></a>
-        <a class="btn btn--glass" href="#work">See Our Work</a>
-      </div>
+      {% if h.eyebrow %}<span class="hs__eyebrow"><i></i>{{ h.eyebrow }}</span>{% endif %}
+      {# Slaidi ya kwanza pekee ni <h1> — ukurasa unatakiwa kuwa na h1 moja tu #}
+      {% if forloop.first %}<h1 class="hs__title">{{ h.headline_html }}</h1>{% else %}<p class="hs__title">{{ h.headline_html }}</p>{% endif %}
+      {% if h.subheadline %}<p class="hs__sub">{{ h.subheadline }}</p>{% endif %}
+      {% if h.cta_label or h.cta2_label %}<div class="hs__btns">
+        {% if h.cta_label %}<a class="btn btn--gold" href="{{ h.cta_url|default:'#' }}"{% if h.cta_url|slice:":4" == "http" %} target="_blank" rel="noopener"{% endif %}>{{ h.cta_label }}
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 11h12.2l-4.6-4.6L13 5l7 7-7 7-1.4-1.4 4.6-4.6H4z"/></svg></a>{% endif %}
+        {% if h.cta2_label %}<a class="btn btn--glass" href="{{ h.cta2_url|default:'#' }}"{% if h.cta2_url|slice:":4" == "http" %} target="_blank" rel="noopener"{% endif %}>{{ h.cta2_label }}</a>{% endif %}
+      </div>{% endif %}
     </div>
   </article>
+  {% endfor %}
 
-  <!-- 2 · JamiiBot -->
-  <article class="hs__slide" aria-roledescription="slide" aria-label="2 of 5" aria-hidden="true">
-    <picture>
-      <source srcset="{% static 'images/hero/hero-2.webp' %}" type="image/webp">
-      <img class="hs__img" src="{% static 'images/hero/hero-2.jpg' %}"
-         alt="JamiiBot WhatsApp chatbot dashboard" loading="lazy" decoding="async">
-    </picture>
-    <div class="hs__scrim"></div><div class="hs__grid"></div>
-    <div class="wrap hs__body">
-      <span class="hs__eyebrow"><i></i>AI WhatsApp Chatbot</span>
-      <p class="hs__title">Answer Every Customer, <em>Even at 2am</em></p>
-      <p class="hs__sub">JamiiBot replies to your WhatsApp customers in Swahili and English, 24 hours a day — and on your website too. Live in 10 minutes, from TZS 5,000 a month.</p>
-      <div class="hs__btns">
-        <a class="btn btn--gold" href="{% url 'jamiibot_landing' %}">Get Free Trial
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 11h12.2l-4.6-4.6L13 5l7 7-7 7-1.4-1.4 4.6-4.6H4z"/></svg></a>
-        <a class="btn btn--glass" href="https://wa.me/255629712678" target="_blank" rel="noopener">Try It on WhatsApp</a>
-      </div>
-    </div>
-  </article>
-
-  <!-- 3 · Hosting & domains -->
-  <article class="hs__slide" aria-roledescription="slide" aria-label="3 of 5" aria-hidden="true">
-    <picture>
-      <source srcset="{% static 'images/hero/hero-3.webp' %}" type="image/webp">
-      <img class="hs__img" src="{% static 'images/hero/hero-3.jpg' %}"
-         alt="Server infrastructure powering JamiiTek hosting" loading="lazy" decoding="async">
-    </picture>
-    <div class="hs__scrim"></div><div class="hs__grid"></div>
-    <div class="wrap hs__body">
-      <span class="hs__eyebrow"><i></i>Hosting &amp; Domains</span>
-      <p class="hs__title">Hosting That <em>Never Sleeps</em></p>
-      <p class="hs__sub">99.9% uptime, free SSL, daily backups and renewal reminders before anything expires. Domains from TZS 15,000 a year.</p>
-      <div class="hs__btns">
-        <a class="btn btn--gold" href="#domains">Check a Domain
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 11h12.2l-4.6-4.6L13 5l7 7-7 7-1.4-1.4 4.6-4.6H4z"/></svg></a>
-        <a class="btn btn--glass" href="#hosting">View Hosting</a>
-      </div>
-    </div>
-  </article>
-
-  <!-- 4 · Builder & templates -->
-  <article class="hs__slide" aria-roledescription="slide" aria-label="4 of 5" aria-hidden="true">
-    <picture>
-      <source srcset="{% static 'images/hero/hero-4.webp' %}" type="image/webp">
-      <img class="hs__img" src="{% static 'images/hero/hero-4.jpg' %}"
-         alt="Business owner building a website on the JamiiTek builder" loading="lazy" decoding="async">
-    </picture>
-    <div class="hs__scrim"></div><div class="hs__grid"></div>
-    <div class="wrap hs__body">
-      <span class="hs__eyebrow"><i></i>Website Builder</span>
-      <p class="hs__title">Your Website Live in <em>10 Minutes</em></p>
-      <p class="hs__sub">Pick a template, let AI write your content, and publish on a free jamiitek.com subdomain. Orders go straight to your WhatsApp.</p>
-      <div class="hs__btns">
-        <a class="btn btn--gold" href="/builder/">Start Building Free
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 11h12.2l-4.6-4.6L13 5l7 7-7 7-1.4-1.4 4.6-4.6H4z"/></svg></a>
-        <a class="btn btn--glass" href="{% url 'templates_marketplace' %}">Browse Templates</a>
-      </div>
-    </div>
-  </article>
-
-  <!-- 5 · Custom systems & apps -->
-  <article class="hs__slide" aria-roledescription="slide" aria-label="5 of 5" aria-hidden="true">
-    <picture>
-      <source srcset="{% static 'images/hero/hero-5.webp' %}" type="image/webp">
-      <img class="hs__img" src="{% static 'images/hero/hero-5.jpg' %}"
-         alt="The JamiiTek team building custom software" loading="lazy" decoding="async">
-    </picture>
-    <div class="hs__scrim"></div><div class="hs__grid"></div>
-    <div class="wrap hs__body">
-      <span class="hs__eyebrow"><i></i>Custom Software &amp; Mobile Apps</span>
-      <p class="hs__title">Systems Built <em>Around Your Business</em></p>
-      <p class="hs__sub">POS, school management, booking, inventory &mdash; Android and iOS apps engineered for Tanzanian networks and real workloads.</p>
-      <div class="hs__btns">
-        <a class="btn btn--gold" href="{% url 'get_started' %}">Discuss Your System
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 11h12.2l-4.6-4.6L13 5l7 7-7 7-1.4-1.4 4.6-4.6H4z"/></svg></a>
-        <a class="btn btn--glass" href="{% url 'service' %}">Explore Services</a>
-      </div>
-    </div>
-  </article>
-
-  <div class="hs__ui">
+  {% if hero_slides|length > 1 %}<div class="hs__ui">
     <div class="wrap">
       <div class="hs__dots" id="hsDots" role="tablist" aria-label="Choose slide">
-        <button class="hs__dot is-on" role="tab" aria-label="Slide 1" aria-selected="true"></button>
-        <button class="hs__dot" role="tab" aria-label="Slide 2" aria-selected="false"></button>
-        <button class="hs__dot" role="tab" aria-label="Slide 3" aria-selected="false"></button>
-        <button class="hs__dot" role="tab" aria-label="Slide 4" aria-selected="false"></button>
-        <button class="hs__dot" role="tab" aria-label="Slide 5" aria-selected="false"></button>
+        {% for h in hero_slides %}<button class="hs__dot{% if forloop.first %} is-on{% endif %}" role="tab" aria-label="Slide {{ forloop.counter }}" aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"></button>{% endfor %}
       </div>
-      <span class="hs__count"><b id="hsNow">01</b> / 05</span>
+      <span class="hs__count"><b id="hsNow">01</b> / {{ hero_slides|length|stringformat:"02d" }}</span>
       <div class="hs__arrows">
         <button class="hs__arrow" id="hsPrev" aria-label="Previous slide">
           <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.8l4.6-4.6L11 5l-7 7 7 7 1.4-1.4L7.8 13H20z"/></svg></button>
@@ -817,7 +735,9 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
       </div>
     </div>
   </div>
+  {% endif %}
 </section>
+{% endif %}
 
 <!-- ═══ DOMAIN SEARCH ═══ -->
 <section class="dom" id="domains">
@@ -893,6 +813,7 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 </section>
 
 <!-- ═══ SERVICES ═══ -->
+{% if services %}
 <section class="sec" id="services">
   <div class="wrap">
     <div class="sec__hd rv">
@@ -902,104 +823,24 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
     </div>
 
     <div class="svcs">
-      <a class="svc rv" href="{% url 'service' %}">
+      {# Kutoka Django admin → Services (zenye tiki ya "Show on home"). #}
+      {% for sv in services %}
+      <a class="svc rv" href="{{ sv.home_url }}"{% if sv.home_url|slice:":4" == "http" %} target="_blank" rel="noopener"{% endif %}>
         <div class="svc__media ph">
-          <picture><source srcset="{% static 'images/services/web-development.webp' %}" type="image/webp"><img src="{% static 'images/services/web-development.jpg' %}" alt="Website development" loading="lazy" decoding="async"></picture>
-          <span class="svc__badge" style="background:#2E7BF6"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9.4 16.6 4.8 12l4.6-4.6L8 6l-6 6 6 6zm5.2 0 4.6-4.6-4.6-4.6L16 6l6 6-6 6z"/></svg></span>
+          {% if sv.image %}<img src="{{ sv.image }}" alt="{{ sv.service_type }}" width="1600" height="1000" loading="lazy" decoding="async">{% endif %}
+          <span class="svc__badge" style="background:{{ sv.accent|default:'#2E7BF6' }}"><svg viewBox="0 0 24 24" fill="currentColor"><path d="{{ sv.icon_path }}"/></svg></span>
         </div>
         <div class="svc__b">
-          <h3>Website Development</h3>
-          <p>Modern responsive websites built for speed, security and conversion. From TZS 150,000.</p>
-          <span class="svc__more">Learn more <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 11h12.2l-4.6-4.6L13 5l7 7-7 7-1.4-1.4 4.6-4.6H4z"/></svg></span>
+          <h3>{{ sv.service_type }}</h3>
+          <p>{% if sv.summary %}{{ sv.summary }}{% else %}{{ sv.description|striptags|truncatewords:22 }}{% endif %}</p>
+          <span class="svc__more">{{ sv.link_label|default:"Learn more" }} <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 11h12.2l-4.6-4.6L13 5l7 7-7 7-1.4-1.4 4.6-4.6H4z"/></svg></span>
         </div>
       </a>
-
-      <a class="svc rv" href="{% url 'jamiibot_landing' %}">
-        <div class="svc__media ph">
-          <picture><source srcset="{% static 'images/services/jamiibot.webp' %}" type="image/webp"><img src="{% static 'images/services/jamiibot.jpg' %}" alt="AI WhatsApp chatbot" loading="lazy" decoding="async"></picture>
-          <span class="svc__badge" style="background:#1FA97A"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a2 2 0 0 1 2 2v1h3a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V8a3 3 0 0 1 3-3h3V4a2 2 0 0 1 2-2M9 11a1.5 1.5 0 1 0 1.5 1.5A1.5 1.5 0 0 0 9 11m6 0a1.5 1.5 0 1 0 1.5 1.5A1.5 1.5 0 0 0 15 11m-6 5h6v1.5H9z"/></svg></span>
-        </div>
-        <div class="svc__b">
-          <h3>AI WhatsApp Bot</h3>
-          <p>JamiiBot answers customers 24/7 in Swahili and English, on WhatsApp and your website. From TZS 5,000/month.</p>
-          <span class="svc__more">Learn more <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 11h12.2l-4.6-4.6L13 5l7 7-7 7-1.4-1.4 4.6-4.6H4z"/></svg></span>
-        </div>
-      </a>
-
-      <a class="svc rv" href="#hosting">
-        <div class="svc__media ph">
-          <picture><source srcset="{% static 'images/services/hosting.webp' %}" type="image/webp"><img src="{% static 'images/services/hosting.jpg' %}" alt="Web hosting and servers" loading="lazy" decoding="async"></picture>
-          <span class="svc__badge" style="background:#7431C4"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 4h16a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1m2 3.5h2v-1H6zM4 14h16a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-4a1 1 0 0 1 1-1m2 3.5h2v-1H6z"/></svg></span>
-        </div>
-        <div class="svc__b">
-          <h3>Hosting &amp; Servers</h3>
-          <p>99.9% uptime, free SSL, daily backups and proactive monitoring on every plan.</p>
-          <span class="svc__more">Learn more <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 11h12.2l-4.6-4.6L13 5l7 7-7 7-1.4-1.4 4.6-4.6H4z"/></svg></span>
-        </div>
-      </a>
-
-      <a class="svc rv" href="#domains">
-        <div class="svc__media ph">
-          <picture><source srcset="{% static 'images/services/domains.webp' %}" type="image/webp"><img src="{% static 'images/services/domains.jpg' %}" alt="Domain registration" loading="lazy" decoding="async"></picture>
-          <span class="svc__badge" style="background:#16A34A"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2m0 2.04A14 14 0 0 1 13.9 8h-3.8A14 14 0 0 1 12 4.04M4.26 14a7.8 7.8 0 0 1 0-4h3.4a17 17 0 0 0 0 4m10.08 0H9.66a15 15 0 0 1 0-4h4.68a15 15 0 0 1 0 4m2.02 0a17 17 0 0 0 0-4h3.4a7.8 7.8 0 0 1 0 4z"/></svg></span>
-        </div>
-        <div class="svc__b">
-          <h3>Domain Registration</h3>
-          <p>Register .com, .co.tz and .tz domains &mdash; we handle the registry paperwork.</p>
-          <span class="svc__more">Check availability <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 11h12.2l-4.6-4.6L13 5l7 7-7 7-1.4-1.4 4.6-4.6H4z"/></svg></span>
-        </div>
-      </a>
-
-      <a class="svc rv" href="{% url 'service' %}">
-        <div class="svc__media ph">
-          <picture><source srcset="{% static 'images/services/mobile-apps.webp' %}" type="image/webp"><img src="{% static 'images/services/mobile-apps.jpg' %}" alt="Mobile app development" loading="lazy" decoding="async"></picture>
-          <span class="svc__badge" style="background:#F5A623"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2m0 4v12h10V6zm4 13h2v1h-2z"/></svg></span>
-        </div>
-        <div class="svc__b">
-          <h3>Mobile App Development</h3>
-          <p>Android and iOS apps designed for scale, offline resilience and low data use.</p>
-          <span class="svc__more">Learn more <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 11h12.2l-4.6-4.6L13 5l7 7-7 7-1.4-1.4 4.6-4.6H4z"/></svg></span>
-        </div>
-      </a>
-
-      <a class="svc rv" href="{% url 'service' %}">
-        <div class="svc__media ph">
-          <picture><source srcset="{% static 'images/services/ui-ux-design.webp' %}" type="image/webp"><img src="{% static 'images/services/ui-ux-design.jpg' %}" alt="UI and UX design" loading="lazy" decoding="async"></picture>
-          <span class="svc__badge" style="background:#14B8A6"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.7 3.3a2.5 2.5 0 0 0-3.5 0l-1.4 1.4 3.5 3.5 1.4-1.4a2.5 2.5 0 0 0 0-3.5M14.4 6.1 3 17.5V21h3.5L17.9 9.6z"/></svg></span>
-        </div>
-        <div class="svc__b">
-          <h3>UI/UX Design</h3>
-          <p>Interfaces people actually understand &mdash; and that turn visitors into customers.</p>
-          <span class="svc__more">Learn more <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 11h12.2l-4.6-4.6L13 5l7 7-7 7-1.4-1.4 4.6-4.6H4z"/></svg></span>
-        </div>
-      </a>
-
-      <a class="svc rv" href="/builder/">
-        <div class="svc__media ph">
-          <picture><source srcset="{% static 'images/services/website-builder.webp' %}" type="image/webp"><img src="{% static 'images/services/website-builder.jpg' %}" alt="JamiiTek website builder" loading="lazy" decoding="async"></picture>
-          <span class="svc__badge" style="background:#F97316"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 3h8v8H3zm10 0h8v5h-8zm0 7h8v11h-8zM3 13h8v8H3z"/></svg></span>
-        </div>
-        <div class="svc__b">
-          <h3>Website Builder</h3>
-          <p>Build your own site in 10 minutes with a free subdomain on jamiitek.com.</p>
-          <span class="svc__more">Try it free <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 11h12.2l-4.6-4.6L13 5l7 7-7 7-1.4-1.4 4.6-4.6H4z"/></svg></span>
-        </div>
-      </a>
-
-      <a class="svc rv" href="{% url 'templates_marketplace' %}">
-        <div class="svc__media ph">
-          <picture><source srcset="{% static 'images/services/templates.webp' %}" type="image/webp"><img src="{% static 'images/services/templates.jpg' %}" alt="Ready-made website templates" loading="lazy" decoding="async"></picture>
-          <span class="svc__badge" style="background:#EF4444"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 18a2 2 0 1 0 2 2 2 2 0 0 0-2-2m10 0a2 2 0 1 0 2 2 2 2 0 0 0-2-2M6.2 6H21l-2.5 8H8.1L6.2 6M3 2h2.3l.6 2H3z"/></svg></span>
-        </div>
-        <div class="svc__b">
-          <h3>Ready-Made Templates</h3>
-          <p>Launch in hours, not weeks. Hosted from TZS 15,000/month.</p>
-          <span class="svc__more">Browse templates <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 11h12.2l-4.6-4.6L13 5l7 7-7 7-1.4-1.4 4.6-4.6H4z"/></svg></span>
-        </div>
-      </a>
+      {% endfor %}
     </div>
   </div>
 </section>
+{% endif %}
 
 <!-- ═══ PROMOS ═══ -->
 <section class="sec--sm" id="hosting" style="padding-top:0">
@@ -1052,6 +893,7 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 </section>
 
 <!-- ═══ WORK SLIDER ═══ -->
+{% if portfolio %}
 <section class="wk" id="work">
   <div class="wrap">
     <div class="wk__hd">
@@ -1069,9 +911,7 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
     </div>
 
     <div class="wk__track" id="wkTrack" tabindex="0" aria-label="Project gallery, scrollable">
-      {% if portfolio %}
-      {# Kutoka Django admin → Site content → Portfolio items. Kadi za chini #}
-      {# ni akiba tu, zinaonekana pale ambapo hakuna project iliyoongezwa.  #}
+      {# Kutoka Django admin → Portfolio items. Hakuna kadi zilizoandikwa hapa kwa mkono. #}
       {% for p in portfolio %}
       <article class="wk__card">
         {% if p.live_url %}<a class="wk__link" href="{{ p.live_url }}" target="_blank" rel="noopener" aria-label="Fungua {{ p.title }} (inafunguka dirisha jipya)"></a>{% endif %}
@@ -1090,67 +930,13 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
         </div>
       </article>
       {% endfor %}
-      {% else %}
-      <article class="wk__card">
-        <div class="wk__media ph"><picture><source srcset="{% static 'images/work/work-1.webp' %}" type="image/webp"><img src="{% static 'images/work/work-1.jpg' %}" alt="Mudandaza POS and marketplace platform" loading="lazy" decoding="async"></picture></div>
-        <div class="wk__meta">
-          <span class="wk__cat">POS &amp; Marketplace</span>
-          <h3>Mudandaza</h3>
-          <p>Multi-branch point of sale with inventory, loans and four languages.</p>
-        </div>
-      </article>
-
-      <article class="wk__card">
-        <div class="wk__media ph"><picture><source srcset="{% static 'images/work/work-2.webp' %}" type="image/webp"><img src="{% static 'images/work/work-2.jpg' %}" alt="Safari Travels tourism website" loading="lazy" decoding="async"></picture></div>
-        <div class="wk__meta">
-          <span class="wk__cat">Tourism</span>
-          <h3>Safari Travels</h3>
-          <p>Tour packages, enquiry forms and booking flow for inbound travellers.</p>
-        </div>
-      </article>
-
-      <article class="wk__card">
-        <div class="wk__media ph"><picture><source srcset="{% static 'images/work/work-3.webp' %}" type="image/webp"><img src="{% static 'images/work/work-3.jpg' %}" alt="NyumbaChap real estate marketplace" loading="lazy" decoding="async"></picture></div>
-        <div class="wk__meta">
-          <span class="wk__cat">Real Estate</span>
-          <h3>NyumbaChap</h3>
-          <p>Property listings with search, agent dashboards and lead capture.</p>
-        </div>
-      </article>
-
-      <article class="wk__card">
-        <div class="wk__media ph"><picture><source srcset="{% static 'images/work/work-4.webp' %}" type="image/webp"><img src="{% static 'images/work/work-4.jpg' %}" alt="Charles Academy school management system" loading="lazy" decoding="async"></picture></div>
-        <div class="wk__meta">
-          <span class="wk__cat">School System</span>
-          <h3>Charles Academy</h3>
-          <p>Students, fees, results and PDF report cards in one system.</p>
-        </div>
-      </article>
-
-      <article class="wk__card">
-        <div class="wk__media ph"><picture><source srcset="{% static 'images/work/work-5.webp' %}" type="image/webp"><img src="{% static 'images/work/work-5.jpg' %}" alt="Kilimoni AI agricultural WhatsApp assistant" loading="lazy" decoding="async"></picture></div>
-        <div class="wk__meta">
-          <span class="wk__cat">AI Assistant</span>
-          <h3>Kilimoni AI</h3>
-          <p>WhatsApp advisor giving farmers crop guidance in Swahili.</p>
-        </div>
-      </article>
-
-      <article class="wk__card">
-        <div class="wk__media ph"><picture><source srcset="{% static 'images/work/work-6.webp' %}" type="image/webp"><img src="{% static 'images/work/work-6.jpg' %}" alt="Rode Poultry bilingual online store" loading="lazy" decoding="async"></picture></div>
-        <div class="wk__meta">
-          <span class="wk__cat">E-Commerce</span>
-          <h3>Rode Poultry</h3>
-          <p>Bilingual online store with orders routed straight to WhatsApp.</p>
-        </div>
-      </article>
-      {% endif %}
     </div>
 
     <div class="wk__bar"><i id="wkBar"></i></div>
     <p class="wk__swipe">← Swipe to see more →</p>
   </div>
 </section>
+{% endif %}
 
 
 <!-- ═══ TESTIMONIALS ═══ -->
