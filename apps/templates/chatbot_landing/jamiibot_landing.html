@@ -270,6 +270,8 @@
   </style>
   <!-- JamiiBot widget: mgeni anaijaribu bidhaa yenyewe kabla ya kujisajili -->
   <script src="https://www.jamiitek.com/chatbot/widget/b785f732-5c0d-4cc0-af87-dfcbfb100dbf.js" defer></script>
+  <link rel="stylesheet" href="{% static 'css/interaction.css' %}">
+  <link rel="icon" type="image/png" href="{% static 'img/jamiibot-favicon.png' %}">
 </head>
 <body>
 
@@ -642,5 +644,6 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')closeNav()})
 const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.style.opacity='1';e.target.style.transform='translateY(0)'}})},{threshold:.15})
 document.querySelectorAll('.step,.feature-card,.guide-step,.testi-card,.price-card').forEach(el=>{el.style.opacity='0';el.style.transform='translateY(20px)';el.style.transition='all .4s ease';obs.observe(el)})
 </script>
+<script src="{% static 'js/interaction.js' %}" defer></script>
 </body>
 </html>

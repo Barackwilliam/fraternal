@@ -46,17 +46,23 @@ def management_dashboard(request):
     websites = ManagedWebsite.objects.select_related('client').all()
     today = date.today()
 
-    stats = {
-        'total': websites.count(),
-        'active': websites.filter(status='active').count(),
-        'suspended': websites.filter(status='suspended').count(),
-        'maintenance': websites.filter(status='maintenance').count(),
-        'terminated': websites.filter(status='terminated').count(),
-        'revenue_month': HostingPayment.objects.filter(
-            payment_date__month=today.month, payment_date__year=today.year
-        ).aggregate(total=Sum('amount'))['total'] or 0,
-        'revenue_total': HostingPayment.objects.aggregate(total=Sum('amount'))['total'] or 0,
-    }
+    # Hesabu zote kwa swali MOJA kwa kila jedwali (conditional aggregation).
+    # Awali zilikuwa maswali 7 tofauti — kila moja safari ya kwenda
+    # Supabase. Matokeo ni yale yale.
+    from django.db.models import Count, Q
+    w = ManagedWebsite.objects.aggregate(
+        total=Count('pk'),
+        active=Count('pk', filter=Q(status='active')),
+        suspended=Count('pk', filter=Q(status='suspended')),
+        maintenance=Count('pk', filter=Q(status='maintenance')),
+        terminated=Count('pk', filter=Q(status='terminated')),
+    )
+    rev = HostingPayment.objects.aggregate(
+        month=Sum('amount', filter=Q(payment_date__month=today.month,
+                                     payment_date__year=today.year)),
+        total=Sum('amount'),
+    )
+    stats = dict(w, revenue_month=rev['month'] or 0, revenue_total=rev['total'] or 0)
 
     overdue = [w for w in websites if w.is_overdue and w.status == 'active']
     expiring_soon = [w for w in websites
@@ -74,16 +80,23 @@ def management_dashboard(request):
     try:
         from apps.chatbot.models import BotConfig, BotSubscription, SubscriptionPayment, Message, Conversation
         from django.db.models import Sum as DSum
-        bot_stats = {
-            'total':     BotConfig.objects.count(),
-            'active':    BotConfig.objects.filter(status='active').count(),
-            'pending':   BotConfig.objects.filter(status='pending').count(),
-            'suspended': BotConfig.objects.filter(status='suspended').count(),
-            'revenue':   SubscriptionPayment.objects.filter(status='verified').aggregate(t=DSum('amount'))['t'] or 0,
-            'pending_payments': SubscriptionPayment.objects.filter(status='pending').count(),
-            'total_msgs': Message.objects.count(),
-            'today_msgs': Message.objects.filter(created_at__date=today).count(),
-        }
+        from django.db.models import Count as DCount, Q as DQ
+        b = BotConfig.objects.aggregate(
+            total=DCount('pk'),
+            active=DCount('pk', filter=DQ(status='active')),
+            pending=DCount('pk', filter=DQ(status='pending')),
+            suspended=DCount('pk', filter=DQ(status='suspended')),
+        )
+        pay = SubscriptionPayment.objects.aggregate(
+            revenue=DSum('amount', filter=DQ(status='verified')),
+            pending_payments=DCount('pk', filter=DQ(status='pending')),
+        )
+        msg = Message.objects.aggregate(
+            total_msgs=DCount('pk'),
+            today_msgs=DCount('pk', filter=DQ(created_at__date=today)),
+        )
+        bot_stats = dict(b, revenue=pay['revenue'] or 0,
+                         pending_payments=pay['pending_payments'], **msg)
         bots_pending_setup = BotConfig.objects.filter(status='pending').select_related('client')[:5]
     except Exception:
         bot_stats = {}

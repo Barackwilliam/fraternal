@@ -101,11 +101,8 @@ def manage_chatbot_overview(request):
     ).select_related('client')
 
     # Chart data — last 30 days
-    chart_data = []
-    for i in range(29, -1, -1):
-        day = date.today() - timedelta(days=i)
-        count = Message.objects.filter(created_at__date=day).count()
-        chart_data.append({'date': day.strftime('%d %b'), 'count': count})
+    from .stats import daily_counts
+    chart_data = daily_counts(Message.objects.all(), 30)
 
     import json
     context = {

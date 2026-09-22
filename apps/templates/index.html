@@ -475,6 +475,17 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
   transition:transform .35s var(--ease),border-color .3s}
 @media (min-width:768px){.wk__card{flex:0 0 clamp(300px,38vw,432px);scroll-snap-align:start}}
 @media (hover:hover){.wk__card:hover{transform:translateY(-7px);border-color:rgba(245,166,35,.4)}}
+/* Kadi nzima inabonyezeka kama kuna live_url (stretched link) */
+.wk__link{position:absolute;inset:0;z-index:3;border-radius:inherit}
+.wk__link:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+.wk__noimg{position:absolute;inset:0;display:grid;place-items:center;
+  background:radial-gradient(80% 70% at 30% 20%,rgba(245,166,35,.22),transparent 60%),linear-gradient(160deg,var(--navy-800),var(--navy-950))}
+.wk__noimg span{font:800 72px/1 var(--f-head,inherit);color:rgba(255,255,255,.14);letter-spacing:-.04em}
+.wk__foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px;
+  padding-top:12px;border-top:1px solid rgba(255,255,255,.08);font-size:12.5px;color:#8EA3BD}
+.wk__visit{display:inline-flex;align-items:center;gap:6px;color:var(--gold);font-weight:600;white-space:nowrap}
+.wk__visit svg{width:13px;height:13px;transition:transform .25s var(--ease)}
+@media (hover:hover){.wk__card:hover .wk__visit svg{transform:translate(2px,-2px)}}
 .wk__media{aspect-ratio:4/3}
 .wk__media>img{object-position:top center;transition:transform .7s var(--ease)}
 @media (hover:hover){.wk__card:hover .wk__media>img{transform:scale(1.05)}}
@@ -1058,6 +1069,28 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
     </div>
 
     <div class="wk__track" id="wkTrack" tabindex="0" aria-label="Project gallery, scrollable">
+      {% if portfolio %}
+      {# Kutoka Django admin → Site content → Portfolio items. Kadi za chini #}
+      {# ni akiba tu, zinaonekana pale ambapo hakuna project iliyoongezwa.  #}
+      {% for p in portfolio %}
+      <article class="wk__card">
+        {% if p.live_url %}<a class="wk__link" href="{{ p.live_url }}" target="_blank" rel="noopener" aria-label="Fungua {{ p.title }} (inafunguka dirisha jipya)"></a>{% endif %}
+        <div class="wk__media ph">
+          {% if p.image %}<img src="{{ p.image }}" alt="{{ p.title }}{% if p.client %} — {{ p.client }}{% endif %}" width="1600" height="1200" loading="lazy" decoding="async">
+          {% else %}<div class="wk__noimg"><span>{{ p.title|slice:":1" }}</span></div>{% endif %}
+        </div>
+        <div class="wk__meta">
+          {% if p.category %}<span class="wk__cat">{{ p.category }}</span>{% endif %}
+          <h3>{{ p.title }}</h3>
+          {% if p.summary %}<p>{{ p.summary }}</p>{% endif %}
+          {% if p.client or p.year or p.live_url %}<div class="wk__foot">
+            <span>{% if p.client %}{{ p.client }}{% endif %}{% if p.client and p.year %} &middot; {% endif %}{% if p.year %}{{ p.year }}{% endif %}</span>
+            {% if p.live_url %}<span class="wk__visit">Live site <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3h7v7h-2V6.4l-9.3 9.3-1.4-1.4L17.6 5H14V3zM5 5h6v2H5v12h12v-6h2v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z" fill="currentColor"/></svg></span>{% endif %}
+          </div>{% endif %}
+        </div>
+      </article>
+      {% endfor %}
+      {% else %}
       <article class="wk__card">
         <div class="wk__media ph"><picture><source srcset="{% static 'images/work/work-1.webp' %}" type="image/webp"><img src="{% static 'images/work/work-1.jpg' %}" alt="Mudandaza POS and marketplace platform" loading="lazy" decoding="async"></picture></div>
         <div class="wk__meta">
@@ -1111,6 +1144,7 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
           <p>Bilingual online store with orders routed straight to WhatsApp.</p>
         </div>
       </article>
+      {% endif %}
     </div>
 
     <div class="wk__bar"><i id="wkBar"></i></div>

@@ -327,6 +327,7 @@ body.scifi .card:hover::after{opacity:1}
 }
 </style>
 {% block head %}{% endblock %}
+  <link rel="stylesheet" href="{% static 'css/interaction.css' %}">
 </head>
 <body class="scifi">
 {% include 'builder/_scifi_bg.html' %}
@@ -459,5 +460,6 @@ body.scifi .card:hover::after{opacity:1}
 })();
 </script>
 {% block scripts %}{% endblock %}
+<script src="{% static 'js/interaction.js' %}" defer></script>
 </body>
 </html>

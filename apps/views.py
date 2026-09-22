@@ -97,7 +97,9 @@ def home(request):
     context = {
         # ── slider content (all admin-managed) ──────────────────
         'hero_slides':  HeroSlide.objects.filter(is_active=True).exclude(image=''),
-        'portfolio':    PortfolioItem.objects.filter(is_featured=True).exclude(image='')[:12],
+        # Project bila picha bado inaonekana (kadi ina herufi ya kwanza),
+        # badala ya kupotea kimya na kukufanya udhani admin haifanyi kazi.
+        'portfolio':    PortfolioItem.objects.filter(is_featured=True)[:12],
         'testimonials': Testimonial.objects.filter(is_active=True)[:9],
         'services':     Service.objects.all()[:8],
         'team':         Team.objects.all(),

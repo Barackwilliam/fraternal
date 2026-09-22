@@ -606,13 +606,9 @@ def chatbot_dashboard(request):
     today_msgs   = Message.objects.filter(conversation__bot=bot, created_at__date=date.today()).count()
     unique_users = bot.conversations.values('customer_phone').distinct().count()
 
-    analytics_7d = []
-    for i in range(6, -1, -1):
-        d = date.today() - timedelta(days=i)
-        analytics_7d.append({
-            'date': d.strftime('%d %b'),
-            'count': Message.objects.filter(conversation__bot=bot, created_at__date=d, role='user').count()
-        })
+    from .stats import daily_counts
+    analytics_7d = daily_counts(
+        Message.objects.filter(conversation__bot=bot, role='user'), 7)
 
     context = {
         'client': client, 'bot': bot,
