@@ -115,6 +115,84 @@ def _notify_william(bot):
 
 
 
+
+# ════════════════════════════════════════════════════════
+# SALAMU TUPU / OMBI LA ORODHA / TAARIFA YA BOT KUSIMAMA
+# ════════════════════════════════════════════════════════
+
+_GREET_WORDS = {
+    'habari', 'hujambo', 'jambo', 'mambo', 'salama', 'shikamoo', 'niaje', 'vipi', 'poa',
+    'za', 'yako', 'zako', 'gani', 'asubuhi', 'mchana', 'jioni', 'usiku', 'leo', 'ya',
+    'kaka', 'dada', 'bro', 'boss', 'mkuu', 'ndugu', 'rafiki', 'sir', 'madam', 'mama', 'baba',
+    'hello', 'hi', 'hey', 'hallo', 'hellow', 'good', 'morning', 'afternoon', 'evening', 'there',
+    'salaam', 'salam', 'assalaam', 'assalamu', 'asalaam', 'alaikum', 'aleikum', 'aleykum',
+    'karibu', 'sasa', 'mzima', 'mzuri', 'uko', 'upo', 'hapo',
+}
+
+
+def _is_bare_greeting(text):
+    """Kweli kama ujumbe ni salamu tu, bila swali wala ombi."""
+    words = re.sub(r'[^\w\s]', ' ', (text or '').lower()).split()
+    if not words:
+        return True          # emoji au alama tu — tuichukulie kama salamu
+    if len(words) > 6:
+        return False
+    return all(w in _GREET_WORDS for w in words)
+
+
+_MENU_EXACT = {
+    'menu', 'huduma', 'huduma zenu', 'huduma zako', 'huduma gani', 'huduma zenu ni zipi',
+    'mna huduma gani', 'mnatoa huduma gani', 'orodha', 'orodha ya huduma', 'chaguo',
+    'services', 'your services', 'options', 'list', 'mnafanya nini', 'unafanya nini',
+    'nini mnafanya', 'mnauza nini', 'bidhaa', 'bidhaa zenu', 'bidhaa gani',
+    'what do you offer', 'what can you do', 'what services', 'what services do you offer',
+}
+_MENU_ASK = re.compile(
+    r'^(?:nionyeshe|naomba|nipe|nitumie|tuma|show me|send)\s+(?:the\s+)?'
+    r'(?:orodha|huduma|menu|bidhaa|services|list)(?:\s+(?:zenu|zako|ya huduma|your))?$')
+
+
+def _is_menu_request(text_lower):
+    norm = ' '.join(re.sub(r'[^\w\s]', ' ', text_lower).split())
+    return norm in _MENU_EXACT or bool(_MENU_ASK.match(norm))
+
+
+_PAUSE_TEXT = {
+    'trial_ended': 'siku 7 za majaribio zimeisha',
+    'plan_ended':  'kifurushi chako kimeisha muda wake',
+    'suspended':   'huduma imesimamishwa',
+    'limit':       'jumbe za kifurushi chako za mwezi huu zimekwisha',
+}
+
+
+def _notify_owner_paused(bot, wa, reason):
+    """Taarifa MOJA kwa siku kwa mmiliki kwamba bot imeacha kujibu.
+
+    `cache.add` ni atomic — ikiwa key ipo tayari, haitumi tena. Hivyo
+    wateja 50 wakiandika leo, mmiliki anapata ujumbe mmoja, si 50.
+    """
+    from django.core.cache import cache
+    owner = getattr(bot, 'owner_digits', '')
+    if not owner:
+        return
+    key = f'bot_paused_notice:{bot.pk}:{timezone.now().date()}'
+    if not cache.add(key, 1, timeout=60 * 60 * 26):
+        return
+    from django.urls import reverse
+    base = getattr(settings, 'SITE_URL', 'https://www.jamiitek.com').rstrip('/')
+    try:
+        link = base + reverse('chatbot_billing')
+    except Exception:
+        link = base + '/chatbot/billing/'
+    msg = (f"⚠️ *{bot.bot_name}* imeacha kujibu wateja kwa sababu "
+           f"{_PAUSE_TEXT.get(reason, 'huduma imesimama')}.\n\n"
+           f"Wateja wako wanaendelea kukuandikia — wajibu mwenyewe, au "
+           f"iwashe tena bot hapa:\n{link}")
+    try:
+        wa.send_text(owner, msg)
+    except Exception:
+        logger.exception('[%s] taarifa ya bot kusimama haikutumwa', bot.session_name)
+
 # ════════════════════════════════════════════════════════
 # JE, HILI NI JINA?
 # ════════════════════════════════════════════════════════
@@ -1007,6 +1085,10 @@ def _process_message(bot: BotConfig, msg_data: dict, handler=None):
         }
     )
 
+    # Muda wa ujumbe uliopita — unahitajika kujua kama mteja amerudi
+    # baada ya muda mrefu (handoff iliyosahaulika, angalia chini).
+    prev_message_at = None if is_new else conv.last_message_at
+
     # Update timestamps and WA profile name
     conv.last_message_at = timezone.now()
     conv.message_count  += 1
@@ -1050,6 +1132,35 @@ def _process_message(bot: BotConfig, msg_data: dict, handler=None):
         if handoff.handle_owner_command(bot, wa, from_phone, text):
             return
 
+    # ── HUDUMA IMESIMAMA (trial imeisha / haijalipiwa / jumbe zimeisha) ──
+    # Awali bot ilimwandikia KILA mteja: "Samahani, huduma hii
+    # imesimamishwa. Wasiliana na kampuni moja kwa moja." Kwa Baileys,
+    # ujumbe huo unatoka kwenye NAMBA YA MMILIKI mwenyewe — wateja wake
+    # wanaona biashara yake ikijitangaza kuwa imefungwa. Na ukaguzi
+    # ulikuwa ndani ya hali ya 'chat' tu, kwa hiyo bot iliyosimama bado
+    # ilisalimia wateja wapya kwanza.
+    #
+    # Sasa: kimya kwa mteja (mmiliki anaona ujumbe kwenye simu yake na
+    # anajibu mwenyewe), na taarifa MOJA kwa siku kwa mmiliki.
+    sub = getattr(bot, 'subscription', None)
+    if sub:
+        sub.roll_period_if_due()
+        reason = sub.pause_reason
+        if reason:
+            _notify_owner_paused(bot, wa, reason)
+            if hasattr(wa, 'paused'):
+                wa.paused = True
+            return
+
+    # ── HANDOFF ILIYOSAHAULIKA ─────────────────────────────────────
+    # Handoff haikuwa na mwisho. Mteja aliyekabidhiwa kwa mtu, kisha
+    # mmiliki akasahau kusema `endelea`, alinyamaziwa MILELE — hata
+    # akirudi wiki ijayo na swali jipya. Akirudi baada ya saa 24 za
+    # ukimya, ni mazungumzo mapya: bot inarudi.
+    if (conv.is_human_handoff and prev_message_at
+            and timezone.now() - prev_message_at > timedelta(hours=24)):
+        conv.resume_bot()
+
     # ── BOT IMESIMAMA ──────────────────────────────────────────────
     # Mteja ameambiwa "nakuunganisha na mtu halisi". Kuandika chochote
     # baada ya hapo kungefanya ahadi ile kuwa uongo.
@@ -1077,6 +1188,19 @@ def _process_message(bot: BotConfig, msg_data: dict, handler=None):
         return
 
     # ── State: GREETING (brand new conversation) ───────────────────
+    # Awali ujumbe wa kwanza ulijibiwa kwa salamu PEKEE, kisha `return`.
+    # "Habari, bei ya website ni ngapi?" ilijibiwa "Karibu! Unapenda
+    # kujua kuhusu nini?" — mteja ameshasema anachotaka, na
+    # anaulizwa tena. Kwenye WhatsApp, ujumbe wa kwanza mara nyingi
+    # NDIO swali lenyewe.
+    #
+    # Sasa: salamu tupu ("habari", "mambo") inapata salamu ya bot.
+    # Ujumbe wenye swali unajibiwa moja kwa moja na AI (inayosalimia
+    # ndani ya jibu lake), bila kukusanya jina kwanza.
+    if is_new and not _is_bare_greeting(text):
+        _set_conv_state(conv, 'chat')
+        is_new = False
+
     if is_new:
         # Replace {name} placeholder if we already know the WA profile name.
         # Bila jina, "Karibu {name}!" ilikuwa inatoa "Karibu !" — .strip()
@@ -1163,39 +1287,30 @@ def _process_message(bot: BotConfig, msg_data: dict, handler=None):
 
     # ── State: CHAT (normal AI flow) ──────────────────────────────
 
-    # Check subscription
+    # Subscription imeshakaguliwa juu kabisa (lango la "HUDUMA IMESIMAMA").
     sub = getattr(bot, 'subscription', None)
-    if sub:
-        # Kipindi kipya kikifika, hesabu inarudi sifuri. Bila hii,
-        # plan ya kila mwezi ilikuwa inahesabu maisha yote.
-        sub.roll_period_if_due()
-    if sub and not sub.is_active:
-        _send_and_save(wa, conv, from_phone,
-                       "Samahani, huduma hii imesimamishwa. Wasiliana na kampuni moja kwa moja.")
-        return
 
     # ── Media-aware pre-processing ─────────────────────────────────
     # For non-text messages without a caption, acknowledge receipt and
     # optionally ask the user to describe what they need.
+    # Awali picha/faili bila maelezo zilipata MAJIBU MAWILI: shukrani ya
+    # kupokea, kisha AI ikajibu tena "[Mteja alituma picha]". Sasa ni moja.
     if msg_type == 'image' and not media_caption:
-        ack = "Nimepokea picha yako. 📷 Tafadhali nieleze zaidi unachohitaji ili nikusaidie vizuri."
+        ack = "Nimepokea picha yako 📷 Nieleze kidogo unachohitaji nikusaidie."
         _send_and_save(wa, conv, from_phone, ack)
-        # Still pass "[Picha]" to AI context so it's aware
-        ai_text = "[Mteja alituma picha bila maelezo]"
+        return
     elif msg_type == 'document' and not media_caption:
         fname = msg_data.get('filename', 'faili')
-        ack   = f"Nimepokea faili: *{fname}* 📄 Je, ungependa nikusaidie nini kuhusu faili hili?"
+        ack   = f"Nimepokea *{fname}* 📄 Ungependa nikusaidie nini kuhusu faili hili?"
         _send_and_save(wa, conv, from_phone, ack)
-        ai_text = f"[Mteja alituma faili: {fname}]"
+        return
     elif msg_type == 'audio':
         # Tunafika hapa sauti ikishindwa kutafsiriwa tu — ndefu mno,
         # kubwa mno, au Whisper imeshindwa. Sauti ya kawaida
         # inabadilishwa kuwa maandishi kwenye `_baileys_to_msg_data`.
         ack = ("Nimepokea ujumbe wako wa sauti 🎙️ lakini sikuweza kuusikia vizuri. "
                "Tafadhali uandike kwa maandishi, au tuma sauti fupi zaidi.")
-        _send_and_save(wa, conv, from_phone, ack)
-        # Save and stop — no AI call for voice without transcription
-        Message.objects.create(conversation=conv, role='assistant', content=ack)
+        _send_and_save(wa, conv, from_phone, ack)   # inahifadhi tayari
         return
     elif msg_type == 'location':
         loc   = msg_data.get('location', {})
@@ -1203,7 +1318,9 @@ def _process_message(bot: BotConfig, msg_data: dict, handler=None):
         ai_text = f"Mteja alituma mahali: {label} (lat={loc.get('latitude')}, lng={loc.get('longitude')})"
         text  = ai_text   # override text for AI
     elif msg_type == 'sticker':
-        _send_and_save(wa, conv, from_phone, "😊 Asante kwa sticker! Ninaweza kukusaidiaje?")
+        # Sticker mara nyingi inamaanisha "sawa", "asante" au kucheka —
+        # mwisho wa mazungumzo. Kujibu "Asante kwa sticker!" kila mara
+        # (stickers tatu = majibu matatu yale yale) ni alama ya mashine.
         return
     else:
         ai_text = text   # normal text or media with caption
@@ -1227,18 +1344,18 @@ def _process_message(bot: BotConfig, msg_data: dict, handler=None):
     #
     # Neno la bei peke yake — "bei?" bila kitu kingine — bado
     # linaleta orodha, kwa sababu hapo mteja hajataja huduma.
-    menu_keywords = [
-        'menu', 'huduma', 'services', 'orodha', 'chaguo', 'options',
-        'nini mnafanya', 'mnafanya nini', 'what do you offer', 'what can you do',
-    ]
+    #
+    # Neno lilikuwa likitafutwa NDANI ya ujumbe. "huduma" ni neno la
+    # kawaida mno kwa Kiswahili, kwa hiyo "Asante kwa huduma nzuri" na
+    # "Mnatoa huduma ya delivery?" zote zilijibiwa kwa orodha nzima ya
+    # huduma. Sasa ujumbe MZIMA lazima uwe ombi la orodha.
     text_lower = final_text.lower()
 
-    # "bei?" / "bei zenu?" — swali pana bila huduma mahususi
     bare_price = text_lower.strip(' ?.!').strip() in (
         'bei', 'bei?', 'bei zenu', 'bei gani', 'price', 'prices', 'gharama', 'cost',
     )
 
-    if bare_price or any(kw in text_lower for kw in menu_keywords):
+    if bare_price or _is_menu_request(text_lower):
         menu = build_services_menu(bot)
         if menu:
             sent = wa.send_interactive_list(
@@ -1275,10 +1392,19 @@ def _process_message(bot: BotConfig, msg_data: dict, handler=None):
                            jid=msg_data.get('jid'))
         return
 
+    # Ujumbe mrefu kupita kiasi (mtu amebandika makala nzima) ungetumia
+    # tokens nyingi — na Groq ina kikomo cha AKAUNTI NZIMA kwa dakika,
+    # kwa hiyo mteja mmoja angenyamazisha bot za wateja wote. Ujumbe
+    # kamili umeshahifadhiwa; AI inapata sehemu ya kwanza tu.
+    if len(final_text) > 1500:
+        final_text = final_text[:1500] + ' …'
+
     # AI response
     ai     = BotAIEngine(bot)
     result = ai.get_response(conv, final_text)
     reply  = result['content']
+    if not reply:
+        return       # hakuna cha kutuma — usimtumie mteja ujumbe mtupu
 
     Message.objects.create(
         conversation=conv, role='assistant', content=reply,

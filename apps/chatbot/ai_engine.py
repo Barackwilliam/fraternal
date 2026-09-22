@@ -45,6 +45,12 @@ GROQ_API_URL  = "https://api.groq.com/openai/v1/chat/completions"
 DEFAULT_MODEL = os.getenv('GROQ_MODEL', 'llama-3.3-70b-versatile')
 
 
+# Hitilafu ya kiufundi (mtandao, Groq) — si kosa la mteja. Tofauti na
+# `bot.fallback_msg`, ambayo ni ya "sielewi swali lako".
+TECH_ERROR_MSG = ("Samahani, nimechelewa kidogo kukujibu. "
+                  "Tafadhali tuma ujumbe wako tena baada ya dakika moja. 🙏")
+
+
 class BotAIEngine:
 
     def __init__(self, bot_config):
@@ -98,7 +104,7 @@ class BotAIEngine:
         try:
             sub = self.bot.subscription
             if not sub.is_active:
-                return {'success': False, 'content': "This service has been suspended. Please contact the business directly.", 'tokens': 0, 'latency_ms': 0, 'error': 'Subscription inactive'}
+                return {'success': False, 'content': '', 'tokens': 0, 'latency_ms': 0, 'error': 'Subscription inactive'}
             if sub.messages_remaining <= 0 and not sub.plan.is_unlimited:
                 return {'success': False, 'content': self.bot.fallback_msg, 'tokens': 0, 'latency_ms': 0, 'error': 'Message limit reached'}
         except Exception:
@@ -133,14 +139,35 @@ class BotAIEngine:
                 "Content-Type":  "application/json",
             }
 
-            response = requests.post(GROQ_API_URL, json=payload, headers=headers, timeout=30)
+            # Jaribu mara mbili. Groq ikirudisha 429 (kikomo cha dakika) au
+            # 5xx (hitilafu yao), subiri kidogo ujaribu tena. Awali jaribio
+            # moja likishindwa, mteja alijibiwa `fallback_msg` — kwa kawaida
+            # "Samahani, sijaelewa" — wakati tatizo halikuwa lake. Alirudia
+            # swali, akapata jibu lile lile, akaondoka.
+            response = None
+            for attempt in (1, 2):
+                try:
+                    response = requests.post(GROQ_API_URL, json=payload, headers=headers, timeout=25)
+                except requests.Timeout:
+                    if attempt == 2:
+                        raise
+                    time.sleep(1.5)
+                    continue
+                if response.status_code in (429, 500, 502, 503, 504) and attempt == 1:
+                    time.sleep(1.5)
+                    continue
+                break
 
             latency = int((time.time() - start_time) * 1000)
 
             if response.status_code != 200:
-                error_msg = response.json().get('error', {}).get('message', 'Unknown error')
+                try:
+                    error_msg = response.json().get('error', {}).get('message', 'Unknown error')
+                except ValueError:
+                    # Cloudflare/proxy mara nyingi inarudisha HTML, si JSON
+                    error_msg = f'HTTP {response.status_code}'
                 logger.error(f"Groq API error {response.status_code}: {error_msg}")
-                return {'success': False, 'content': self.bot.fallback_msg, 'tokens': 0, 'latency_ms': latency, 'error': error_msg}
+                return {'success': False, 'content': TECH_ERROR_MSG, 'tokens': 0, 'latency_ms': latency, 'error': error_msg}
 
             data    = response.json()
             content = clean_reply(data['choices'][0]['message']['content'].strip())
@@ -150,10 +177,10 @@ class BotAIEngine:
 
         except requests.Timeout:
             latency = int((time.time() - start_time) * 1000)
-            return {'success': False, 'content': self.bot.fallback_msg, 'tokens': 0, 'latency_ms': latency, 'error': 'Request timeout'}
+            return {'success': False, 'content': TECH_ERROR_MSG, 'tokens': 0, 'latency_ms': latency, 'error': 'Request timeout'}
         except Exception as e:
             logger.exception(f"Unexpected AI error for bot {self.bot.id}: {e}")
-            return {'success': False, 'content': self.bot.fallback_msg, 'tokens': 0, 'latency_ms': 0, 'error': str(e)}
+            return {'success': False, 'content': TECH_ERROR_MSG, 'tokens': 0, 'latency_ms': 0, 'error': str(e)}
 
     def get_greeting(self, customer_name: str = "") -> str:
         if customer_name:

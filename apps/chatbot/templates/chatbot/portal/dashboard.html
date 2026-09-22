@@ -149,6 +149,12 @@
 </div>
 {% elif bot.status == 'suspended' %}
 <div class="jt-alert jt-alert-danger f0 mb-3"><i class="fas fa-ban" style="flex-shrink:0"></i><div><strong>Bot Suspended</strong><br>{{ bot.admin_suspended_reason|default:"Pay subscription kuendelea." }} <a href="{% url 'chatbot_billing' %}" style="color:var(--red);font-weight:700;text-decoration:underline;margin-left:8px">Pay Sasa →</a></div></div>
+{% elif sub and sub.pause_reason %}
+{# Bot imeacha kujibu wateja. Hapa ndipo uharaka ni sahihi — si siku ya kwanza. #}
+<div class="jt-alert jt-alert-danger f0 mb-3"><i class="fas fa-circle-pause" style="flex-shrink:0"></i><div>
+  <strong>{% if sub.pause_reason == 'trial_ended' %}Your 7-day free trial has ended{% elif sub.pause_reason == 'limit' %}You've used all your messages for this month{% else %}Your plan has ended{% endif %} — your bot has stopped replying to customers.</strong>
+  Customers can still message you; reply to them yourself, or choose a plan to switch the bot back on.
+  <a href="{% url 'chatbot_billing' %}" style="color:var(--red);font-weight:700;margin-left:8px">Choose a plan →</a></div></div>
 {% elif sub and sub.status == 'trial' %}
 {# Siku za mwanzo za trial: utulivu. Uharaka tu siku 2 za mwisho. #}
 {% if sub.days_remaining <= 2 %}
@@ -224,7 +230,7 @@
   <div class="col-lg-4">
 
     <!-- SUBSCRIPTION -->
-    {% if sub and sub.status == 'trial' %}
+    {% if sub and sub.status == 'trial' and not sub.is_expired %}
     <div class="sub-card f1">
       <div style="font-family:var(--mono);font-size:9px;color:var(--text-3);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">YOUR PLAN</div>
       <div class="sub-plan-name" style="color:var(--green)">Free trial</div>

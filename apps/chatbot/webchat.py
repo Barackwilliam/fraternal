@@ -63,6 +63,7 @@ class WebHandler:
         self.jid = None
         self.replies = []
         self.owner_notified = False
+        self.paused = False      # injini inaiweka True bot ikiwa imesimama
 
     # -- interface inayotarajiwa na injini --------------------------
 
@@ -146,7 +147,12 @@ class WebHandler:
 
         from django.core.mail import send_mail
         body = _strip_md(message)
-        subject = f"[JamiiTek] Mteja wa tovuti anahitaji binadamu — {self.bot.business_name}"
+        # Njia hii inatumiwa na taarifa mbili tofauti: mteja anahitaji
+        # binadamu, na bot imeacha kujibu. Kichwa kilikuwa cha kwanza tu.
+        if 'imeacha kujibu' in (message or ''):
+            subject = f"[JamiiTek] {self.bot.bot_name} imeacha kujibu wateja — {self.bot.business_name}"
+        else:
+            subject = f"[JamiiTek] Mteja wa tovuti anahitaji binadamu — {self.bot.business_name}"
         send_mail(
             subject, body,
             getattr(settings, 'DEFAULT_FROM_EMAIL', to), [to],
@@ -339,6 +345,16 @@ def web_chat(request, bot_id):
 
     replies = list(handler.replies)
     call_number = ''
+
+    # Bot imesimama (trial imeisha, haijalipiwa). Kwenye WhatsApp tunanyamaza
+    # kwa sababu mmiliki anaona ujumbe kwenye simu yake. Kwenye tovuti
+    # hakuna anayeuona — ukimya ungeonekana kama site imeharibika.
+    if getattr(handler, 'paused', False) and not replies:
+        call_number = _owner_call_number(bot)
+        if call_number:
+            replies.append(f"Asante kwa ujumbe wako! Kwa msaada wa haraka, wasiliana nasi moja kwa moja: 📞 {call_number}")
+        else:
+            replies.append("Asante kwa ujumbe wako! Tafadhali jaribu tena baadaye kidogo.")
 
     if in_handoff:
         call_number = _owner_call_number(bot)
