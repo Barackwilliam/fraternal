@@ -110,37 +110,43 @@ def render_pdf(receipt):
         return None
 
 
-def _body(tx, receipt):
-    name = tx.first_name or 'mteja'
-    verify = getattr(receipt, 'verify_url', '')
-    text = (
-        f"Habari {name},\n\n"
-        f"Asante! Tumepokea malipo yako ya {tx.currency} "
-        f"{float(tx.amount):,.0f} kupitia Pesapal.\n\n"
-        f"Risiti: {receipt.receipt_number}\n"
-        f"Kumbukumbu: {receipt.payment_reference}\n"
-        f"Huduma: {_title_for(tx)}\n\n"
-        f"Risiti yako imeambatishwa kama PDF."
-    )
-    if verify:
-        text += f"\nUnaweza kuithibitisha hapa: {verify}"
-    text += "\n\nJamiiTek\ninfo@jamiitek.com"
-    return text
+def _email_context(tx, receipt):
+    return {
+        'subject': f'Payment Receipt — {receipt.receipt_number}',
+        'customer_name': tx.first_name or receipt.client_name_manual or 'there',
+        'receipt_number': receipt.receipt_number,
+        'service': _title_for(tx),
+        'currency': tx.currency or 'TZS',
+        'amount': tx.amount,
+        'payment_method': receipt.get_payment_method_display(),
+        'reference': receipt.payment_reference,
+        'payment_date': receipt.payment_date,
+        'verify_url': getattr(receipt, 'verify_url', ''),
+    }
 
 
 def email_receipt(tx, receipt, pdf_bytes=None):
-    """Tuma risiti kwa mteja (na nakala kwa mmiliki). Best-effort."""
+    """
+    Tuma risiti kwa mteja (na nakala kwa mmiliki) kwa template nzuri ya HTML,
+    na plain-text fallback + PDF ambatanisho. Best-effort.
+    """
+    from django.utils.html import strip_tags
+
     to = tx.email or OWNER_EMAIL
     bcc = [OWNER_EMAIL] if (tx.email and OWNER_EMAIL and tx.email != OWNER_EMAIL) else None
+    ctx = _email_context(tx, receipt)
 
     try:
+        html_body = render_to_string('emails/payment_receipt.html', ctx)
+        plain_body = strip_tags(html_body)
         msg = EmailMultiAlternatives(
-            subject=f'Risiti ya malipo — {receipt.receipt_number} | JamiiTek',
-            body=_body(tx, receipt),
+            subject=f'Payment Receipt — {receipt.receipt_number} | JamiiTek',
+            body=plain_body,
             from_email=FROM_EMAIL,
             to=[to],
             bcc=bcc,
         )
+        msg.attach_alternative(html_body, 'text/html')
         if pdf_bytes:
             msg.attach(f'{receipt.receipt_number}.pdf', pdf_bytes, 'application/pdf')
         msg.send(fail_silently=True)

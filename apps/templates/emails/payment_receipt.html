@@ -1,0 +1,46 @@
+{% extends 'emails/base_email.html' %}
+{% block content %}
+<p class="greeting">Hi {{ customer_name }} 🎉</p>
+
+<div class="alert alert-success">
+  <strong>✅ Payment Received</strong>
+  Thank you! We have received your payment of <strong>{{ currency }} {{ amount|floatformat:0 }}</strong>. Your service is now active.
+</div>
+
+<p>This is your official receipt. A PDF copy is attached to this email.</p>
+
+<div class="info-box">
+  <div class="info-row">
+    <span class="info-label">Receipt No.</span>
+    <span class="info-value">{{ receipt_number }}</span>
+  </div>
+  <div class="info-row">
+    <span class="info-label">Service</span>
+    <span class="info-value">{{ service }}</span>
+  </div>
+  <div class="info-row">
+    <span class="info-label">Amount Paid</span>
+    <span class="info-value" style="color:#22c55e;font-size:16px">{{ currency }} {{ amount|floatformat:0 }}</span>
+  </div>
+  <div class="info-row">
+    <span class="info-label">Payment Method</span>
+    <span class="info-value">{{ payment_method }}</span>
+  </div>
+  <div class="info-row">
+    <span class="info-label">Reference</span>
+    <span class="info-value">{{ reference }}</span>
+  </div>
+  <div class="info-row">
+    <span class="info-label">Date</span>
+    <span class="info-value">{{ payment_date }}</span>
+  </div>
+</div>
+
+{% if verify_url %}
+<div class="btn-wrap">
+  <a href="{{ verify_url }}" class="btn">Verify Receipt</a>
+</div>
+{% endif %}
+
+<p>If you have any questions about this payment, just reply to this email or contact us. Thank you for choosing JamiiTek! 💙</p>
+{% endblock %}

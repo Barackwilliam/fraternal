@@ -1,9 +1,9 @@
 {% load static %}<!DOCTYPE html>
-<html lang="sw">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hali ya Malipo — JamiiTek</title>
+  <title>Payment Status — JamiiTek</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
@@ -55,39 +55,39 @@
   <div class="card">
     {% if not_found or not tx %}
       <div class="badge bad">✕</div>
-      <h1>Malipo hayakupatikana</h1>
-      <p>Hatukuweza kupata rekodi ya malipo haya. Kama ulilipa, subiri dakika chache kisha angalia tena au wasiliana nasi.</p>
-      <a class="btn" href="/">Rudi Mwanzo</a>
+      <h1>Payment Not Found</h1>
+      <p>We couldn't find a record of this payment. If you have paid, wait a few minutes and check again, or contact us.</p>
+      <a class="btn" href="/">Back to Home</a>
 
     {% elif tx.status == 'completed' %}
       <div class="badge ok">✓</div>
-      <h1>Malipo Yamefanikiwa!</h1>
-      <p>Asante. Malipo yako yamepokelewa na huduma yako imeanzishwa.</p>
+      <h1>Payment Successful!</h1>
+      <p>Thank you. Your payment has been received and your service is now active.</p>
       <div class="amount">{{ tx.currency }} {{ tx.amount|floatformat:0 }}</div>
       <div class="meta">
-        {% if tx.confirmation_code %}<div><span>Namba ya uthibitisho</span><span>{{ tx.confirmation_code }}</span></div>{% endif %}
-        {% if tx.payment_method %}<div><span>Njia ya malipo</span><span>{{ tx.payment_method }}</span></div>{% endif %}
-        <div><span>Kumbukumbu</span><span>{{ tx.merchant_reference }}</span></div>
+        {% if tx.confirmation_code %}<div><span>Confirmation code</span><span>{{ tx.confirmation_code }}</span></div>{% endif %}
+        {% if tx.payment_method %}<div><span>Payment method</span><span>{{ tx.payment_method }}</span></div>{% endif %}
+        <div><span>Reference</span><span>{{ tx.merchant_reference }}</span></div>
       </div>
-      <a class="btn" href="{{ continue_url }}">Endelea</a>
+      <a class="btn" href="{{ continue_url }}">Continue</a>
 
     {% elif tx.status == 'pending' %}
       <div class="badge wait">⏳</div>
-      <h1>Malipo Yanasubiri</h1>
-      <p>Malipo yako bado yanachakatwa. Ukikamilisha kwenye simu yako, ukurasa huu utasasishwa. Unaweza kupakia upya baada ya dakika moja.</p>
+      <h1>Payment Pending</h1>
+      <p>Your payment is still being processed. Once you complete it on your phone, this page will update. You can refresh after a minute.</p>
       <div class="amount">{{ tx.currency }} {{ tx.amount|floatformat:0 }}</div>
       <div class="ref">{{ tx.merchant_reference }}</div>
-      <a class="btn" href="{{ continue_url }}">Angalia Tena</a>
+      <a class="btn" href="{{ continue_url }}">Check Again</a>
 
     {% else %}
       <div class="badge bad">✕</div>
-      <h1>Malipo Hayakukamilika</h1>
-      <p>Malipo haya hayakufanikiwa ({{ tx.get_status_display }}). Hakuna pesa iliyokatwa kama muamala haukukamilika. Tafadhali jaribu tena.</p>
+      <h1>Payment Not Completed</h1>
+      <p>This payment did not go through ({{ tx.get_status_display }}). No money is charged when a transaction doesn't complete. Please try again.</p>
       <div class="ref">{{ tx.merchant_reference }}</div>
-      <a class="btn" href="{{ continue_url }}">Jaribu Tena</a>
+      <a class="btn" href="{{ continue_url }}">Try Again</a>
     {% endif %}
 
-    <div class="foot">Inalindwa na <a href="https://www.pesapal.com" target="_blank" rel="noopener">Pesapal</a> · JamiiTek</div>
+    <div class="foot">Secure payment · JamiiTek</div>
   </div>
 </body>
 </html>
