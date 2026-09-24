@@ -17,8 +17,16 @@ from . import receipt_views
 from . import bulk_actions
 from django.views.generic import TemplateView
 from . import sw_views
+from . import pesapal_views
 
 urlpatterns = [
+    # ── PESAPAL PAYMENTS (mfumo mzima) ──────────────────────
+    path('pay/subscription/', pesapal_views.pay_subscription, name='pesapal_pay_subscription'),
+    path('pay/hosting/<int:website_pk>/', pesapal_views.pay_hosting, name='pesapal_pay_hosting'),
+    path('pay/invoice/<str:token>/', pesapal_views.pay_invoice, name='pesapal_pay_invoice'),
+    path('pay/callback/', pesapal_views.pesapal_callback, name='pesapal_callback'),
+    path('pay/ipn/', pesapal_views.pesapal_ipn, name='pesapal_ipn'),
+
 
 
     path('offline.html', TemplateView.as_view(template_name='offline.html'), name='offline'),

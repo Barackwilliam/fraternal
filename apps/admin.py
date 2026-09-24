@@ -52,25 +52,7 @@ class ServiceAdmin(admin.ModelAdmin):
 
     image_preview.short_description = "Preview"
 
-    list_display = ("service_type", "image_preview", "show_on_home", "order")
-    list_editable = ("show_on_home", "order")
-    list_filter = ("show_on_home",)
-    search_fields = ("service_type", "summary", "description")
-    ordering = ("-show_on_home", "order", "created_at")
-    fieldsets = (
-        ("Service", {
-            'fields': ('service_type', 'image', 'description'),
-            'description': 'Picha bora: mlalo, angalau 1600&times;1000. '
-                           'Maelezo kamili yanaonekana kwenye ukurasa wa /service/.',
-        }),
-        ('Homepage card — "What we build"', {
-            'fields': ('show_on_home', 'order', 'summary', 'link_url', 'link_label', 'icon', 'accent'),
-            'description': 'Weka tiki ya <b>Show on home</b> huduma ionekane homepage. '
-                           '<b>Order</b>: namba ndogo inaonekana kwanza. '
-                           '<b>Link</b>: mfano <code>/bot/</code>, <code>#hosting</code> au link kamili; '
-                           'ukiacha tupu inaenda /service/.',
-        }),
-    )
+    list_display = ("service_type", "image_preview")
 
 
 admin.site.register(Service, ServiceAdmin)
@@ -851,3 +833,19 @@ class InvoiceAdmin(admin.ModelAdmin):
 
 # ── Integrations admin ──
 from .integration_admin import *  # noqa: E402,F401,F403
+
+
+# ── Pesapal transactions ──
+from .pesapal_models import PesapalTransaction  # noqa: E402
+
+
+@admin.register(PesapalTransaction)
+class PesapalTransactionAdmin(admin.ModelAdmin):
+    list_display = ('merchant_reference', 'purpose', 'amount', 'currency',
+                    'status', 'fulfilled', 'payment_method', 'created_at')
+    list_filter = ('purpose', 'status', 'fulfilled', 'currency')
+    search_fields = ('merchant_reference', 'order_tracking_id', 'confirmation_code',
+                     'email', 'phone', 'target_id')
+    readonly_fields = ('merchant_reference', 'order_tracking_id', 'raw_status',
+                       'created_at', 'updated_at', 'completed_at')
+    ordering = ('-created_at',)

@@ -342,3 +342,17 @@ else:
 TURNSTILE_SITEKEY = os.getenv('TURNSTILE_SITEKEY', '')
 TURNSTILE_SECRET  = os.getenv('TURNSTILE_SECRET', '')
 TURNSTILE_ENABLED = bool(TURNSTILE_SITEKEY and TURNSTILE_SECRET)
+
+
+# ── Pesapal (Malipo — API 3.0) ─────────────────────────
+# Weka hizi kwenye env. PESAPAL_ENV: 'sandbox' (default) au 'live'.
+# PESAPAL_IPN_ID ni hiari — ikikosekana tunasajili IPN moja kwa moja.
+# PESAPAL_BASE_URL: root ya tovuti kwa callback/IPN (mfano https://www.jamiitek.com)
+PESAPAL_CONSUMER_KEY    = os.getenv('PESAPAL_CONSUMER_KEY', '')
+PESAPAL_CONSUMER_SECRET = os.getenv('PESAPAL_CONSUMER_SECRET', '')
+PESAPAL_ENV             = os.getenv('PESAPAL_ENV', 'sandbox')
+PESAPAL_IPN_ID          = os.getenv('PESAPAL_IPN_ID', '')
+PESAPAL_BASE_URL        = os.getenv('PESAPAL_BASE_URL', 'https://www.jamiitek.com')
+PESAPAL_ENABLED         = bool(PESAPAL_CONSUMER_KEY and PESAPAL_CONSUMER_SECRET)
+# Nakala ya risiti/arifa za malipo humwendea mmiliki
+PAYMENTS_OWNER_EMAIL    = os.getenv('PAYMENTS_OWNER_EMAIL', 'info@jamiitek.com')

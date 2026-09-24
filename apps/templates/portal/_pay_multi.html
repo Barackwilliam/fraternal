@@ -47,6 +47,12 @@
             {% endfor %}
           </div>
           <input type="hidden" name="months_{{ l.website.pk }}" value="1" data-role="months">
+          {% if PESAPAL_ENABLED and l.payable %}
+          <button type="button" class="jt-btn btn-green" style="margin-top:8px;padding:8px 14px;font-size:12px"
+                  onclick="payHostRowPesapal('{{ l.website.pk }}')">
+            <i class="fas fa-bolt"></i> Pay this site now — Pesapal
+          </button>
+          {% endif %}
         </div>
         {% endfor %}
       </div>
@@ -235,5 +241,20 @@
   });
 
   recalc();
+
+  window.payHostRowPesapal = function(pk){
+    var card = document.querySelector('.pw[data-pk="'+pk+'"]');
+    var months = card ? (card.querySelector('[data-role=months]').value || 1) : 1;
+    var f = document.getElementById('pspHostRowForm');
+    f.action = '{% url "pesapal_pay_hosting" website_pk=0 %}'.replace('/0/', '/'+pk+'/');
+    document.getElementById('pspHostRowMonths').value = months;
+    f.submit();
+  };
 })();
 </script>
+{% if PESAPAL_ENABLED %}
+<form method="post" id="pspHostRowForm" style="display:none">
+  {% csrf_token %}
+  <input type="hidden" name="months" id="pspHostRowMonths" value="1">
+</form>
+{% endif %}

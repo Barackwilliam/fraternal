@@ -250,6 +250,20 @@
         <span style="font-family:var(--mono);font-size:10px;color:var(--green)">Verified in 24hrs</span>
       </div>
       <div class="sec-body">
+        {% if PESAPAL_ENABLED %}
+        <div style="background:rgba(0,255,136,.05);border:1.5px solid rgba(0,255,136,.22);border-radius:14px;padding:16px 18px;margin-bottom:20px">
+          <div style="display:flex;align-items:center;gap:9px;margin-bottom:6px">
+            <i class="fas fa-bolt" style="color:var(--green)"></i>
+            <span style="font-size:14px;font-weight:800;color:var(--text)">Pay Instantly — Pesapal</span>
+          </div>
+          <div style="font-family:var(--mono);font-size:10.5px;color:var(--text-3);line-height:1.6;margin-bottom:12px">Card, M-Pesa, Airtel Money, Tigo Pesa & Halopesa. Hosting is extended automatically the moment payment clears — no 24hr wait.</div>
+          <button type="button" class="jt-btn btn-green" style="width:100%;justify-content:center;padding:12px 20px;font-size:14px" onclick="payHostingPesapal()">
+            <i class="fas fa-lock"></i> Pay <span id="pspHostAmount"></span> with Pesapal
+          </button>
+          <div style="font-family:var(--mono);font-size:9.5px;color:var(--text-3);text-align:center;margin-top:8px">Select a website & duration below first.</div>
+        </div>
+        <div style="text-align:center;font-family:var(--mono);font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:18px">— or submit a manual bank transfer —</div>
+        {% endif %}
         <div class="jt-alert jt-alert-info" style="margin-bottom:20px;font-size:13px">
           <i class="fas fa-circle-info fa-sm" style="flex-shrink:0;margin-top:2px"></i>
           After paying to the NMB account on the right, fill in the details below and submit. We verify every payment within <strong>24 hours</strong> and activate your hosting immediately.
@@ -488,6 +502,17 @@ setTimeout(()=>{document.getElementById('bf1').style.width='100%'},400);
     hint.textContent = chosen.saving > 0
       ? `Covers ${chosen.months} months — you save TZS ${fmt(chosen.saving)}`
       : `Covers ${chosen.months} month${chosen.months>1?'s':''}`;
+    const pha = document.getElementById('pspHostAmount');
+    if(pha) pha.textContent = 'TZS ' + fmt(chosen.total);
+  };
+
+  window.payHostingPesapal = function(){
+    const wid = sel.value;
+    if(!wid){ alert('Please select a website first.'); return; }
+    const f = document.getElementById('pspHostForm');
+    f.action = '{% url "pesapal_pay_hosting" website_pk=0 %}'.replace('/0/', '/'+wid+'/');
+    document.getElementById('pspHostMonths').value = monthsInput.value || 1;
+    f.submit();
   };
 
   amountInput?.addEventListener('input', function(){
@@ -522,6 +547,13 @@ setTimeout(()=>{document.getElementById('bf1').style.width='100%'},400);
   <input type="hidden" name="website" id="invWebsite">
   <input type="hidden" name="months" id="invMonths">
 </form>
+
+{% if PESAPAL_ENABLED %}
+<form method="post" id="pspHostForm" style="display:none">
+  {% csrf_token %}
+  <input type="hidden" name="months" id="pspHostMonths" value="1">
+</form>
+{% endif %}
 
 
     <!-- PAYMENT PHASES (full) -->

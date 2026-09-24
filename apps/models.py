@@ -8,64 +8,18 @@ from .receipt_models import DevelopmentReceipt
 from .integration_models import ResolverMixin
 import secrets
 from .site_content import HeroSlide, PortfolioItem, Testimonial  # noqa: F401
+from .pesapal_models import PesapalTransaction  # noqa: F401
 
 
 # ============================================================
 # SERVICES
 # ============================================================
 
-# Icons za beji kwenye kadi za huduma za homepage (SVG path, viewBox 0 0 24 24).
-# Zimechukuliwa kutoka template ya zamani ili muonekano usibadilike.
-SERVICE_ICONS = {
-    'code': 'M9.4 16.6 4.8 12l4.6-4.6L8 6l-6 6 6 6zm5.2 0 4.6-4.6-4.6-4.6L16 6l6 6-6 6z',
-    'bot': 'M12 2a2 2 0 0 1 2 2v1h3a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V8a3 3 0 0 1 3-3h3V4a2 2 0 0 1 2-2M9 11a1.5 1.5 0 1 0 1.5 1.5A1.5 1.5 0 0 0 9 11m6 0a1.5 1.5 0 1 0 1.5 1.5A1.5 1.5 0 0 0 15 11m-6 5h6v1.5H9z',
-    'server': 'M4 4h16a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1m2 3.5h2v-1H6zM4 14h16a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-4a1 1 0 0 1 1-1m2 3.5h2v-1H6z',
-    'globe': 'M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2m0 2.04A14 14 0 0 1 13.9 8h-3.8A14 14 0 0 1 12 4.04M4.26 14a7.8 7.8 0 0 1 0-4h3.4a17 17 0 0 0 0 4m10.08 0H9.66a15 15 0 0 1 0-4h4.68a15 15 0 0 1 0 4m2.02 0a17 17 0 0 0 0-4h3.4a7.8 7.8 0 0 1 0 4z',
-    'mobile': 'M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2m0 4v12h10V6zm4 13h2v1h-2z',
-    'design': 'M20.7 3.3a2.5 2.5 0 0 0-3.5 0l-1.4 1.4 3.5 3.5 1.4-1.4a2.5 2.5 0 0 0 0-3.5M14.4 6.1 3 17.5V21h3.5L17.9 9.6z',
-    'builder': 'M3 3h8v8H3zm10 0h8v5h-8zm0 7h8v11h-8zM3 13h8v8H3z',
-    'layout': 'M7 18a2 2 0 1 0 2 2 2 2 0 0 0-2-2m10 0a2 2 0 1 0 2 2 2 2 0 0 0-2-2M6.2 6H21l-2.5 8H8.1L6.2 6M3 2h2.3l.6 2H3z',
-}
-SERVICE_ICON_CHOICES = [
-    ('code', 'Code — websites'), ('bot', 'Robot — chatbot'), ('server', 'Server — hosting'),
-    ('globe', 'Globe — domains'), ('mobile', 'Phone — mobile apps'), ('design', 'Palette — design'),
-    ('builder', 'Builder — site builder'), ('layout', 'Layout — templates'),
-]
-
-
 class Service(models.Model):
-    service_type = models.CharField('Name', max_length=255, db_column='Service_type')
+    service_type = models.CharField(max_length=255, db_column='Service_type')
     image = models.CharField(max_length=255, blank=True, null=True)
-    description = models.TextField(help_text='Full description (shown on the /service/ page).')
+    description = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
-
-    # ── Kadi ya homepage ("What we build") ──
-    # Awali kadi hizi ziliandikwa ndani ya index.html na hazikuwa na
-    # uhusiano wowote na model hii — kubadilisha huduma kwenye admin
-    # hakukubadilisha homepage.
-    show_on_home = models.BooleanField(
-        default=False, help_text='Show this service in the homepage "What we build" section.')
-    order = models.IntegerField(default=0, help_text='Smaller numbers appear first.')
-    summary = models.CharField(
-        max_length=200, blank=True,
-        help_text='One or two short sentences for the homepage card. '
-                  'Leave empty to use the start of the description.')
-    link_url = models.CharField(
-        max_length=300, blank=True,
-        help_text='Where the card goes, e.g. /bot/ or #hosting. Empty = the /service/ page.')
-    link_label = models.CharField(max_length=40, default='Learn more')
-    icon = models.CharField(max_length=20, choices=SERVICE_ICON_CHOICES, default='code')
-    accent = models.CharField(
-        max_length=7, default='#2E7BF6',
-        help_text='Badge colour as a hex code, e.g. #2E7BF6')
-
-    @property
-    def icon_path(self):
-        return SERVICE_ICONS.get(self.icon, SERVICE_ICONS['code'])
-
-    @property
-    def home_url(self):
-        return self.link_url or '/service/'
 
     def __str__(self):
         return self.service_type

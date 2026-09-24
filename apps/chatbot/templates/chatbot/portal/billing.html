@@ -128,6 +128,25 @@
         <span style="font-family:var(--head);font-size:15px;font-weight:700;color:var(--text)">Submit Payment — <span id="payPlanName" style="color:var(--green)"></span></span>
       </div>
       <div class="pay-form-body">
+        {% if PESAPAL_ENABLED %}
+        <!-- PESAPAL — instant -->
+        <div style="background:rgba(198,242,78,.06);border:1.5px solid rgba(198,242,78,.25);border-radius:14px;padding:16px 18px;margin-bottom:18px">
+          <div style="display:flex;align-items:center;gap:9px;margin-bottom:6px">
+            <i class="fas fa-bolt" style="color:#c6f24e"></i>
+            <span style="font-family:var(--head);font-size:14px;font-weight:800;color:var(--text)">Lipa Papo Hapo — Pesapal</span>
+          </div>
+          <div style="font-family:var(--mono);font-size:10.5px;color:var(--text3);line-height:1.6;margin-bottom:12px">Kadi, M-Pesa, Airtel Money, Tigo Pesa & Halopesa. Bot inaanzishwa mara moja — hakuna kusubiri.</div>
+          <form method="post" action="{% url 'pesapal_pay_subscription' %}">
+            {% csrf_token %}
+            <input type="hidden" name="plan_id" id="pspPlanId">
+            <input type="hidden" name="months" id="pspMonths" value="1">
+            <button type="submit" class="jt-btn" style="width:100%;justify-content:center;background:#c6f24e;color:#06131f;font-weight:800;border:none">
+              <i class="fas fa-lock"></i> Lipa <span id="pspAmount"></span> na Pesapal
+            </button>
+          </form>
+        </div>
+        <div style="text-align:center;font-family:var(--mono);font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:16px">— au lipa kwa benki kwa mkono —</div>
+        {% endif %}
         <div class="jt-alert jt-alert-info mb-4" style="font-size:13px"><i class="fas fa-circle-info" style="flex-shrink:0"></i><div>Pay via <strong>NMB Bank</strong>, then enter your transaction reference below. Bot reactivated within a few hours after verification.</div></div>
         <form method="post">
           {% csrf_token %}<input type="hidden" name="action" value="submit_payment">
@@ -216,6 +235,7 @@ function selectPlan(id,name,price){
   selectedPrice=parseInt(price);
   document.getElementById('selectedPlanId').value=id;
   document.getElementById('payPlanName').textContent=name;
+  const psp=document.getElementById('pspPlanId'); if(psp) psp.value=id;
   const pf=document.getElementById('payForm');
   pf.style.display='block';
   pf.scrollIntoView({behavior:'smooth',block:'nearest'});
@@ -224,7 +244,10 @@ function selectPlan(id,name,price){
 function updateAmount(){
   const m=parseInt(document.getElementById('monthsSelect').value);
   const d={1:1,3:.95,6:.90,12:.85};
-  document.getElementById('amountField').value=Math.round(selectedPrice*m*d[m]);
+  const amt=Math.round(selectedPrice*m*d[m]);
+  document.getElementById('amountField').value=amt;
+  const pm=document.getElementById('pspMonths'); if(pm) pm.value=m;
+  const pa=document.getElementById('pspAmount'); if(pa) pa.textContent='TZS '+amt.toLocaleString();
 }
 </script>
 {% endblock %}

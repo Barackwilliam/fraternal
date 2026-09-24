@@ -14,6 +14,7 @@ def turnstile_context(request):
     return {
         "TURNSTILE_ENABLED": settings.TURNSTILE_ENABLED,
         "TURNSTILE_SITEKEY": settings.TURNSTILE_SITEKEY if settings.TURNSTILE_ENABLED else "",
+        "PESAPAL_ENABLED": getattr(settings, "PESAPAL_ENABLED", False),
     }
 
 # ── Sidebar: ni kipengele kipi kimewashwa ────────────────────────────────
