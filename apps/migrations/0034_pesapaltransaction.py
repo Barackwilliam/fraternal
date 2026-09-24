@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("apps", "0030_supabase_image"),
+        ("apps", "0033_seed_hero_services"),
     ]
 
     operations = [
