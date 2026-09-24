@@ -251,22 +251,23 @@
       </div>
       <div class="sec-body">
         {% if PESAPAL_ENABLED %}
-        <div style="background:rgba(0,255,136,.05);border:1.5px solid rgba(0,255,136,.22);border-radius:14px;padding:16px 18px;margin-bottom:20px">
+        <div style="background:linear-gradient(135deg,rgba(0,255,136,.12),rgba(0,212,255,.05));border:1.5px solid rgba(0,255,136,.4);border-radius:16px;padding:20px;margin-bottom:16px;position:relative;overflow:hidden">
+          <span style="position:absolute;top:12px;right:14px;background:var(--green);color:#04121e;font-family:var(--mono);font-size:9px;font-weight:800;padding:3px 10px;border-radius:100px;letter-spacing:.5px">RECOMMENDED</span>
           <div style="display:flex;align-items:center;gap:9px;margin-bottom:6px">
-            <i class="fas fa-bolt" style="color:var(--green)"></i>
-            <span style="font-size:14px;font-weight:800;color:var(--text)">Pay Instantly — Pesapal</span>
+            <i class="fas fa-bolt" style="color:var(--green);font-size:16px"></i>
+            <span style="font-size:17px;font-weight:900;color:var(--text)">Pay Online — Instant</span>
           </div>
-          <div style="font-family:var(--mono);font-size:10.5px;color:var(--text-3);line-height:1.6;margin-bottom:12px">Card, M-Pesa, Airtel Money, Tigo Pesa & Halopesa. Hosting is extended automatically the moment payment clears — no 24hr wait.</div>
-          <button type="button" class="jt-btn btn-green" style="width:100%;justify-content:center;padding:12px 20px;font-size:14px" onclick="payHostingPesapal()">
-            <i class="fas fa-lock"></i> Pay <span id="pspHostAmount"></span> with Pesapal
+          <div style="font-family:var(--mono);font-size:11px;color:var(--text-2);line-height:1.6;margin-bottom:16px">Card · M-Pesa · Airtel Money · Tigo Pesa · Halopesa.<br>Hosting is extended automatically the moment payment clears — no 24hr wait.</div>
+          <button type="button" class="jt-btn btn-green" style="width:100%;justify-content:center;padding:15px;font-size:16px;font-weight:900;box-shadow:0 6px 20px rgba(0,255,136,.22)" onclick="payHostingPesapal()">
+            <i class="fas fa-lock"></i> Pay <span id="pspHostAmount"></span> Now
           </button>
-          <div style="font-family:var(--mono);font-size:9.5px;color:var(--text-3);text-align:center;margin-top:8px">Select a website & duration below first.</div>
+          <div style="font-family:var(--mono);font-size:9.5px;color:var(--text-3);text-align:center;margin-top:10px">Pick a website & duration below, then tap Pay.</div>
         </div>
-        <div style="text-align:center;font-family:var(--mono);font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:18px">— or submit a manual bank transfer —</div>
+        <div style="text-align:center;font-family:var(--mono);font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:18px">— or pay by bank transfer below —</div>
         {% endif %}
         <div class="jt-alert jt-alert-info" style="margin-bottom:20px;font-size:13px">
           <i class="fas fa-circle-info fa-sm" style="flex-shrink:0;margin-top:2px"></i>
-          After paying to the NMB account on the right, fill in the details below and submit. We verify every payment within <strong>24 hours</strong> and activate your hosting immediately.
+          {% if PESAPAL_ENABLED %}Pick a website &amp; duration below to pay online, or {% endif %}pay to the NMB account on the right, fill in the details below and submit. We verify manual payments within <strong>24 hours</strong>.
         </div>
         <form method="post" action="{% url 'portal_submit_payment' %}">
           {% csrf_token %}
