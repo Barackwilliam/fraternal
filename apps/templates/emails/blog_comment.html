@@ -1,0 +1,13 @@
+{% extends 'emails/base_email.html' %}
+{% block content %}
+<p class="greeting">New {% if is_reply %}reply{% else %}comment{% endif %} 💬</p>
+
+<p><b>{{ name }}</b> wrote on <b>{{ post_title }}</b>:</p>
+
+<div class="info-box" style="white-space:pre-wrap;font-size:15px;line-height:1.6">{{ body }}</div>
+
+<div class="btn-wrap">
+  <a href="{{ post_url }}" class="btn">View &amp; reply</a>
+</div>
+<p style="font-size:13px;color:#718096;text-align:center">Not appropriate? <a href="{{ moderate_url }}">Hide it in the admin</a>.</p>
+{% endblock %}

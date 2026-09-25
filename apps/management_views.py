@@ -1019,15 +1019,7 @@ def news_blog_endpoint(request):
     def _bg():
         try:
             from apps import news_blog
-            from apps.utils.email_notifications import send_blog_review_reminder
-            result = news_blog.run()
-            if result['created']:
-                try:
-                    send_blog_review_reminder(result['created'])
-                except Exception:
-                    logger.exception('news review email failed')
-            logger.info('AI newsroom: created=%d skipped=%d errors=%d',
-                        len(result['created']), result['skipped'], len(result['errors']))
+            news_blog.run_and_notify()      # email ya rasimu, au ripoti ikishindwa
         except Exception:
             logger.exception('AI newsroom background run failed')
 

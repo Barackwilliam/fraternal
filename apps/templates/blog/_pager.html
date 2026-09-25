@@ -1,0 +1,10 @@
+{% if page.paginator.num_pages > 1 %}
+<nav class="pager" aria-label="Pages">
+  {% if page.has_previous %}<a href="?{% if active_cat %}category={{ active_cat.slug }}&{% endif %}{% if q %}q={{ q|urlencode }}&{% endif %}page={{ page.previous_page_number }}" rel="prev"><i class="fa-solid fa-arrow-left"></i></a>{% endif %}
+  {% for n in page.paginator.page_range %}
+    {% if n == page.number %}<span class="cur">{{ n }}</span>
+    {% elif n > page.number|add:"-3" and n < page.number|add:"3" %}<a href="?{% if active_cat %}category={{ active_cat.slug }}&{% endif %}{% if q %}q={{ q|urlencode }}&{% endif %}page={{ n }}">{{ n }}</a>{% endif %}
+  {% endfor %}
+  {% if page.has_next %}<a href="?{% if active_cat %}category={{ active_cat.slug }}&{% endif %}{% if q %}q={{ q|urlencode }}&{% endif %}page={{ page.next_page_number }}" rel="next"><i class="fa-solid fa-arrow-right"></i></a>{% endif %}
+</nav>
+{% endif %}

@@ -92,3 +92,22 @@ Ukiwa na terminal: `python manage.py daily_news_blog` (au `--tz 5 --world 5`).
   cards, `article:published_time/modified_time`, canonical, alt za picha,
   reading time.
 - Blog index: JSON-LD ya `Blog`, RSS `<link rel="alternate">`.
+
+## 8. Kuthibitisha kwa mkono (kitufe cha admin)
+
+Admin → **Blog posts** → **📰 Run AI newsroom now**. Inaendesha newsroom sasa
+hivi (nyuma, dakika 3–8). Utapokea email **kwa vyovyote**:
+- **"📝 N news drafts ready for your review"** — rasimu ziko tayari (Status: Draft), au
+- **"⚠️ AI newsroom: no drafts created today"** — pamoja na sababu (mf. GROQ_API_KEY
+  haipo, Groq rate limit, au feeds hazipatikani).
+
+Groq free tier ina kikomo cha tokens kwa dakika. Mfumo sasa unasubiri na kujaribu
+tena kwa 429, na unahamia model mbadala kama model imeondolewa.
+
+## 9. Maoni (comments)
+
+Wasomaji wanaweza kuandika maoni na kujibizana (majibu ngazi moja). Ulinzi:
+honeypot, Turnstile (ikiwa imewashwa), kikomo cha sekunde 20 kwa IP, na viungo
+visivyozidi 2. Kila maoni mapya yanakuletea email yenye link ya kujibu au kuficha.
+Ukijibu ukiwa umeingia kama staff, jibu lako linapata beji **JAMIITEK**.
+Kusimamia: Admin → **Blog comments** (ficha/onyesha).

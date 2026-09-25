@@ -530,8 +530,34 @@ class BlogPostAdmin(admin.ModelAdmin):
         custom = [
             path('ai-write/', self.admin_site.admin_view(self.ai_write_view),
                  name='blog_ai_write'),
+            path('news-run/', self.admin_site.admin_view(self.news_run_view),
+                 name='blog_news_run'),
         ]
         return custom + urls
+
+    def news_run_view(self, request):
+        """Kitufe: endesha AI newsroom sasa hivi (nyuma). Email inakuja ikimaliza."""
+        import threading
+        from django.shortcuts import redirect
+        from django.contrib import messages
+        from apps import news_blog
+
+        if request.method != 'POST':
+            return redirect('admin:apps_blogpost_changelist')
+
+        def _bg():
+            try:
+                news_blog.run_and_notify()
+            except Exception:
+                import logging
+                logging.getLogger(__name__).exception('admin news run failed')
+
+        threading.Thread(target=_bg, name='jamiitek-news-admin', daemon=True).start()
+        messages.success(request,
+            '📰 AI newsroom imeanza. Inachukua dakika 3–8. Utapokea email: rasimu za '
+            'kukagua zikiwa tayari, au ripoti ya sababu ikishindwa. Refresh ukurasa huu '
+            'kuona rasimu mpya (Status: Draft).')
+        return redirect('admin:apps_blogpost_changelist')
 
     def ai_write_view(self, request):
         """Button ya admin: AI inaandika rasimu papo hapo."""
@@ -572,6 +598,35 @@ class BlogPostAdmin(admin.ModelAdmin):
             f'✓ AI imeandika rasimu: "{post.title}" ({result["language"].upper()}). '
             f'Kagua na uweke Published ukiridhika.')
         return redirect('admin:apps_blogpost_change', post.pk)
+
+
+from .models import BlogComment
+
+
+@admin.register(BlogComment)
+class BlogCommentAdmin(admin.ModelAdmin):
+    list_display = ('name', 'short_body', 'post', 'is_reply', 'is_approved', 'created_at')
+    list_filter = ('is_approved', 'is_staff_reply', 'created_at')
+    list_editable = ('is_approved',)
+    search_fields = ('name', 'email', 'body', 'post__title')
+    readonly_fields = ('post', 'parent', 'ip', 'created_at')
+    actions = ('approve', 'hide')
+
+    @admin.display(description='Comment')
+    def short_body(self, obj):
+        return (obj.body[:80] + '…') if len(obj.body) > 80 else obj.body
+
+    @admin.display(boolean=True, description='Reply')
+    def is_reply(self, obj):
+        return bool(obj.parent_id)
+
+    @admin.action(description='Show selected comments')
+    def approve(self, request, queryset):
+        queryset.update(is_approved=True)
+
+    @admin.action(description='Hide selected comments')
+    def hide(self, request, queryset):
+        queryset.update(is_approved=False)
 
 
 # ============================================================

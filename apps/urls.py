@@ -100,6 +100,7 @@ urlpatterns = [
     path('blog/', blog_views.blog_list, name='blog_list'),
     path('blog/feed/', BlogFeed(), name='blog_feed'),
     path('blog/<slug:slug>/', blog_views.blog_detail, name='blog_detail'),
+    path('blog/<slug:slug>/comment/', blog_views.blog_comment, name='blog_comment'),
 
     # ── PUBLIC SITE ───────────────────────────────────────
     path('', views.home, name='home'),

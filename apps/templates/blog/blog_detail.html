@@ -1,217 +1,373 @@
 {% extends 'base.html' %}
+{% load blog_extras %}
 
-{% block title %}{{ post.meta_title|default:post.title }} | JamiiTek{% endblock %}
+{% block title %}{{ post.meta_title|default:post.title }} | JamiiTek Insights{% endblock %}
 {% block meta_desc %}{{ post.meta_description|default:post.excerpt }}{% endblock %}
-{% block meta_keywords %}{{ post.focus_keyword }}{% if post.focus_keyword %}, {% endif %}web developer Tanzania, JamiiTek, WhatsApp bot Tanzania{% endblock %}
+{% block meta_keywords %}{{ post.focus_keyword }}{% if post.focus_keyword %}, {% endif %}Tanzania news, JamiiTek, web developer Tanzania{% endblock %}
 {% block canonical %}{{ canonical }}{% endblock %}
-
 {% block og_type %}article{% endblock %}
 {% block og_title %}{{ post.title }}{% endblock %}
 {% block og_desc %}{{ post.meta_description|default:post.excerpt }}{% endblock %}
 {% block og_url %}{{ canonical }}{% endblock %}
-{% if post.cover_image %}{% block og_image %}{{ post.cover_image }}{% endblock %}{% endif %}
+{% block og_image %}{% if post.cover_image %}{{ post.cover_image }}{% else %}https://jamiitek.com/static/images/og-image.jpg{% endif %}{% endblock %}
 {% block og_image_alt %}{{ post.title }}{% endblock %}
 {% block tw_title %}{{ post.title }}{% endblock %}
 {% block tw_desc %}{{ post.meta_description|default:post.excerpt }}{% endblock %}
-{% if post.cover_image %}{% block tw_image %}{{ post.cover_image }}{% endblock %}{% endif %}
+{% block tw_image %}{% if post.cover_image %}{{ post.cover_image }}{% else %}https://jamiitek.com/static/images/og-image.jpg{% endif %}{% endblock %}
 
 {% block extra_css %}
 <meta property="article:published_time" content="{{ post.published_at|date:'c' }}">
 <meta property="article:modified_time" content="{{ post.updated_at|date:'c' }}">
 {% if post.category %}<meta property="article:section" content="{{ post.category.name }}">{% endif %}
-<link rel="alternate" type="application/rss+xml" title="JamiiTek Insights" href="/blog/feed/">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+{% include 'blog/_styles.html' %}
 <style>
-  .art{--red:#c8102e;--ink:#16181d;--muted:#70757e;--line:#e6e6e6;--soft:#f6f6f4;
-    background:#fff;color:var(--ink);font-family:'Inter',system-ui,sans-serif}
-  .art *{box-sizing:border-box}
-  .art a{color:inherit}
-  .art-wrap{max-width:720px;margin:0 auto;padding:104px 22px 60px}
+.art-layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:48px;align-items:start;padding:28px 0 20px}
+.art{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:34px 44px 30px}
+.crumbs{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);margin-bottom:16px;flex-wrap:wrap}
+.crumbs a:hover{color:var(--blue)}
+.art h1{font-family:var(--serif);font-weight:700;font-size:clamp(30px,4.2vw,48px);line-height:1.1;letter-spacing:-.5px;color:var(--ink);margin:14px 0 14px}
+.standfirst{font-family:var(--serif);font-size:21px;line-height:1.5;color:var(--ink2);margin:0 0 22px}
+.byline{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:14px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin-bottom:24px}
+.who{display:flex;align-items:center;gap:12px}
+.av{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:17px;flex-shrink:0}
+.who b{display:block;font-size:14.5px;color:var(--ink)}
+.who small{font-size:12.5px;color:var(--muted)}
+.shares{display:flex;gap:8px;flex-wrap:wrap}
+.sh{width:38px;height:38px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);
+  color:var(--ink2);background:#fff;font-size:16px;cursor:pointer;transition:all .15s}
+.sh:hover{transform:translateY(-2px);color:#fff;border-color:transparent}
+.sh.wa:hover{background:#25d366}.sh.fb:hover{background:#1877f2}.sh.x:hover{background:#000}.sh.li:hover{background:#0a66c2}.sh.tg:hover{background:#229ed9}.sh.cp:hover{background:var(--blue)}
+.sh.done{background:#16a34a;color:#fff;border-color:transparent}
+figure.cover{margin:0 0 26px}
+figure.cover .frame{aspect-ratio:16/9;border-radius:4px}
+figure.cover figcaption{font-size:12.5px;color:var(--muted);margin-top:8px}
 
-  .art-back{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:13px;
-    font-weight:600;margin-bottom:26px}
-  .art-back:hover{color:var(--red)}
-  .art-kicker{display:inline-block;font-size:12px;font-weight:700;letter-spacing:2px;
-    text-transform:uppercase;color:var(--red);margin-bottom:14px}
-  .art-wrap h1{font-family:'Playfair Display',Georgia,serif;font-weight:800;
-    font-size:clamp(28px,5vw,44px);line-height:1.14;letter-spacing:-.01em;margin:0 0 18px;color:var(--ink)}
-  .art-standfirst{font-size:19px;line-height:1.6;color:#3a3d44;margin:0 0 22px;font-family:'Lora',Georgia,serif}
-  .art-meta{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;font-size:13px;color:var(--muted);
-    padding-bottom:22px;margin-bottom:26px;border-bottom:1px solid var(--line)}
-  .art-meta .who{font-weight:700;color:var(--ink)}
-  .art-meta .dot{width:3px;height:3px;border-radius:50%;background:var(--muted);display:inline-block}
-  .art-cover{width:100%;border-radius:4px;margin:0 0 8px;display:block}
-  .art-caption{font-size:12.5px;color:var(--muted);margin:0 0 30px}
+/* Body — serif, inasomeka */
+.body{font-family:var(--serif);font-size:19.5px;line-height:1.78;color:#1d2530}
+.body p{margin:0 0 1.15em}
+.body h2{font-family:var(--serif);font-size:27px;font-weight:700;line-height:1.25;color:var(--ink);margin:1.6em 0 .55em}
+.body h3{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--ink);margin:1.4em 0 .5em}
+.body ul,.body ol{margin:0 0 1.15em;padding-left:1.4em}
+.body li{margin:0 0 .45em}
+.body a{color:var(--blue);text-decoration:underline;text-underline-offset:3px}
+.body strong{font-weight:700;color:var(--ink)}
+.body blockquote{margin:1.4em 0;padding:4px 0 4px 20px;border-left:4px solid var(--blue);font-size:21px;font-style:italic;color:var(--ink2)}
+.body img{border-radius:4px;margin:1.2em 0;height:auto}
+.body table{display:block;overflow-x:auto;border-collapse:collapse;margin:0 0 1.2em;font-family:var(--sans);font-size:15px}
+.body td,.body th{border:1px solid var(--line);padding:8px 10px}
+.body code{font-family:ui-monospace,monospace;font-size:.85em;background:var(--sky);padding:2px 6px;border-radius:4px}
+.source{display:flex;gap:12px;align-items:flex-start;background:var(--blue-l);border:1px solid #cfe2f4;border-radius:6px;padding:14px 16px;margin:26px 0 6px;font-size:14.5px;color:var(--ink2)}
+.source i{color:var(--blue);margin-top:3px}
+.source a{color:var(--blue);font-weight:600}
+.share-end{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-top:28px;padding-top:18px;border-top:1px solid var(--line)}
+.share-end span{font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
 
-  /* Body — readable serif, newspaper measure */
-  .art-body{font-family:'Lora',Georgia,serif;font-size:18.5px;line-height:1.85;color:#23262c}
-  .art-body>p:first-of-type::first-letter{font-family:'Playfair Display',Georgia,serif;
-    float:left;font-size:66px;line-height:.82;font-weight:800;color:var(--red);
-    padding:6px 12px 0 0;}
-  .art-body h2{font-family:'Playfair Display',Georgia,serif;font-size:27px;color:var(--ink);margin:40px 0 14px;font-weight:800}
-  .art-body h3{font-family:'Playfair Display',Georgia,serif;font-size:22px;color:var(--ink);margin:30px 0 12px;font-weight:700}
-  .art-body p{margin:0 0 22px}
-  .art-body a{color:var(--red);text-decoration:underline;text-underline-offset:2px}
-  .art-body ul,.art-body ol{margin:0 0 22px;padding-left:24px}
-  .art-body li{margin-bottom:9px}
-  .art-body img{max-width:100%;border-radius:4px;margin:22px 0}
-  .art-body blockquote{border-left:4px solid var(--red);padding:4px 22px;margin:26px 0;
-    font-style:italic;color:#3a3d44;font-size:20px}
-  .art-body code{background:var(--soft);padding:2px 7px;border-radius:4px;font-size:.9em;font-family:monospace}
+/* Comments */
+.cm{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:28px 44px;margin-top:22px}
+.cm-h{font-family:var(--serif);font-size:25px;font-weight:700;color:var(--ink);margin:0 0 18px;display:flex;align-items:center;gap:10px}
+.cm-h small{font-family:var(--sans);font-size:14px;font-weight:600;color:#fff;background:var(--blue);border-radius:999px;padding:2px 10px}
+.notice{border-radius:6px;padding:12px 14px;font-size:14.5px;margin:0 0 16px}
+.notice.ok{background:#e9f8ef;color:#14632f;border:1px solid #bfe8cd}
+.notice.err{background:#fdecec;color:#8a1c1c;border:1px solid #f6c9c9}
+.cform{background:var(--sky);border:1px solid var(--line);border-radius:6px;padding:18px}
+.cform .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.cform label{display:block;font-size:12.5px;font-weight:600;color:var(--ink2);margin-bottom:5px}
+.cform input,.cform textarea{width:100%;border:1px solid #c9d7e4;border-radius:6px;background:#fff;padding:11px 12px;font-size:15px;color:var(--ink);outline:0;transition:border-color .15s,box-shadow .15s}
+.cform input:focus,.cform textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,99,177,.15)}
+.cform textarea{min-height:110px;resize:vertical;font-family:var(--sans);line-height:1.5}
+.cform .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.cform .foot{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:12px}
+.cform .foot small{color:var(--muted);font-size:12.5px}
+.replying{display:none;align-items:center;justify-content:space-between;gap:10px;background:#fff;border:1px solid var(--line);border-left:4px solid var(--blue);border-radius:4px;padding:8px 12px;margin-bottom:12px;font-size:14px;color:var(--ink2)}
+.replying.on{display:flex}
+.replying button{border:0;background:transparent;color:var(--blue);font-weight:600;cursor:pointer;font-size:13.5px}
+.clist{margin-top:22px}
+.c{display:grid;grid-template-columns:42px 1fr;gap:12px;padding:18px 0;border-top:1px solid var(--line)}
+.c .av{width:40px;height:40px;font-size:16px}
+.c-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.c-top b{font-size:15px;color:var(--ink)}
+.team{font-size:10.5px;font-weight:700;letter-spacing:.8px;background:var(--blue);color:#fff;padding:2px 7px;border-radius:3px}
+.c-top time{font-size:12px;color:var(--muted);font-weight:500}
+.c-body{font-size:15.5px;line-height:1.6;color:var(--ink2);margin:5px 0 8px;white-space:pre-line;overflow-wrap:anywhere}
+.c-act{font-size:13px;font-weight:600;color:var(--blue);background:none;border:0;padding:0;cursor:pointer}
+.replies{margin-top:6px;padding-left:16px;border-left:2px solid var(--chip)}
+.replies .c{border-top:0;padding:12px 0 4px}
+.replies .c .av{width:32px;height:32px;font-size:13px}
+.replies .c{grid-template-columns:34px 1fr}
+.c.flash{animation:cflash 2.2s ease}
+@keyframes cflash{0%{background:#fff7d6}100%{background:transparent}}
+.no-c{color:var(--muted);text-align:center;padding:18px 0 4px}
 
-  /* Share */
-  .share{margin:40px 0;padding-top:24px;border-top:1px solid var(--line)}
-  .share h4{margin:0 0 14px;font-size:13px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted)}
-  .share-btns{display:flex;flex-wrap:wrap;gap:9px}
-  .sbtn{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:6px;
-    font-weight:600;font-size:13.5px;color:#fff;border:none;cursor:pointer;transition:transform .15s,filter .15s;font-family:inherit}
-  .sbtn:hover{transform:translateY(-2px);filter:brightness(1.05)}
-  .sbtn svg{width:17px;height:17px;fill:currentColor}
-  .sbtn.wa{background:#25d366;color:#04120a}
-  .sbtn.fb{background:#1877f2}
-  .sbtn.x{background:#000}
-  .sbtn.li{background:#0a66c2}
-  .sbtn.tg{background:#0088cc}
-  .sbtn.copy{background:#fff;color:var(--ink);border:1px solid var(--line)}
-  .sbtn.copy:hover{border-color:var(--red);color:var(--red)}
-  .sbtn.copy.done{background:#e9f9ef;border-color:#16a34a;color:#16a34a}
+.rel{margin:40px 0 0}
+.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px}
+.card .frame{aspect-ratio:16/10;margin-bottom:12px}
+.card .hl{font-size:18.5px;margin:9px 0 8px}
+.cta{margin:44px 0 0;background:linear-gradient(120deg,var(--blue-d),var(--blue));color:#fff;border-radius:8px;padding:32px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.cta h3{font-family:var(--serif);font-size:26px;margin:0 0 6px;color:#fff}
+.cta p{margin:0;color:rgba(255,255,255,.85)}
+.cta a{background:#fff;color:var(--blue) !important;font-weight:700;padding:12px 20px;border-radius:6px;white-space:nowrap}
+.side{position:sticky;top:calc(var(--navh) + 70px)}
+.side .rail-box+.rail-box{margin-top:18px}
+.bz-bottom{height:56px}
 
-  /* CTA */
-  .art-cta{margin:44px 0;padding:32px;border-radius:6px;text-align:center;background:var(--ink);color:#fff}
-  .art-cta h3{font-family:'Playfair Display',Georgia,serif;font-size:24px;margin:0 0 10px}
-  .art-cta p{color:#c9ccd2;margin:0 0 20px;font-size:15px}
-  .art-cta a{display:inline-block;background:var(--red);color:#fff;padding:13px 30px;border-radius:6px;font-weight:700}
-
-  /* Related */
-  .rel{margin-top:52px;border-top:3px solid var(--ink);padding-top:20px}
-  .rel h3{font-family:'Playfair Display',Georgia,serif;font-size:22px;margin:0 0 20px}
-  .rel-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,200px),1fr));gap:22px}
-  .rel-card .ri{width:100%;aspect-ratio:16/10;object-fit:cover;background:var(--soft);border-radius:4px;margin-bottom:10px;display:block}
-  .rel-card .rk{font-size:10.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--red)}
-  .rel-card h4{font-family:'Playfair Display',Georgia,serif;font-size:16px;margin:4px 0 0;line-height:1.3}
-  .rel-card:hover h4{color:var(--red)}
+@media(max-width:1080px){
+  .art-layout{grid-template-columns:1fr;gap:24px}
+  .side{position:static}
+  .grid4{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:700px){
+  .art-layout{padding-top:14px}
+  .art{border:0;border-radius:0;margin:0 -14px;padding:18px 16px 22px}
+  .art h1{font-size:30px}
+  .standfirst{font-size:18px}
+  .body{font-size:18px;line-height:1.72}
+  .body h2{font-size:23px}
+  figure.cover{margin:0 -16px 20px}
+  figure.cover .frame{border-radius:0}
+  figure.cover figcaption{padding:0 16px}
+  .byline{flex-direction:column;align-items:flex-start}
+  .cm{border:0;border-radius:0;margin:14px -14px 0;padding:22px 16px}
+  .cform .row2{grid-template-columns:1fr}
+  .grid4{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:14px;margin:0 -14px;padding:0 14px 6px;scrollbar-width:none}
+  .grid4::-webkit-scrollbar{display:none}
+  .grid4 .card{flex:0 0 76%;scroll-snap-align:start}
+  .cta{padding:24px 18px}
+}
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="art">
-<article class="art-wrap">
-  <a class="art-back" href="{% url 'blog_list' %}">← Back to Blog</a>
+<div class="bz">
+  {% include 'blog/_masthead.html' %}
 
-  {% if post.category %}<span class="art-kicker">{{ post.category.name }}</span>{% endif %}
-  <h1>{{ post.title }}</h1>
-  <p class="art-standfirst">{{ post.excerpt }}</p>
-  <div class="art-meta">
-    <span class="who">{{ post.author_name }}</span><span class="dot"></span>
-    <span>{{ post.published_at|date:'F j, Y' }}</span><span class="dot"></span>
-    <span>{{ post.read_minutes }} min read</span><span class="dot"></span>
-    <span>{{ post.views }} views</span>
-  </div>
+  <div class="bz-wrap">
+    <div class="art-layout">
+      <div>
+        <article class="art">
+          <nav class="crumbs" aria-label="Breadcrumb">
+            <a href="{% url 'blog_list' %}">Insights</a><i class="fa-solid fa-chevron-right" style="font-size:10px"></i>
+            {% if post.category %}<a class="chip" href="{% url 'blog_list' %}?category={{ post.category.slug }}">{{ post.category.name }}</a>{% endif %}
+          </nav>
 
-  {% if post.cover_image %}<img class="art-cover" src="{{ post.cover_image }}" alt="{{ post.title }}">{% endif %}
+          <h1>{{ post.title }}</h1>
+          <p class="standfirst">{{ post.excerpt }}</p>
 
-  <div class="art-body">{{ post.body|safe }}</div>
+          <div class="byline">
+            <div class="who">
+              <span class="av" style="background:hsl({{ post.author_name|avatar_hue }},55%,42%)">{{ post.author_name|initial }}</span>
+              <div>
+                <b>By {{ post.author_name }}</b>
+                <small><time datetime="{{ post.published_at|date:'c' }}">{{ post.published_at|date:'M j, Y · H:i' }}</time> · {{ post.read_minutes }} min read · {{ post.views }} views</small>
+              </div>
+            </div>
+            <div class="shares" aria-label="Share">
+              <a class="sh wa" href="{{ share.whatsapp }}" target="_blank" rel="noopener" aria-label="Share on WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+              <a class="sh fb" href="{{ share.facebook }}" target="_blank" rel="noopener" aria-label="Share on Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+              <a class="sh x" href="{{ share.twitter }}" target="_blank" rel="noopener" aria-label="Share on X"><i class="fa-brands fa-x-twitter"></i></a>
+              <a class="sh li" href="{{ share.linkedin }}" target="_blank" rel="noopener" aria-label="Share on LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
+              <a class="sh tg" href="{{ share.telegram }}" target="_blank" rel="noopener" aria-label="Share on Telegram"><i class="fa-brands fa-telegram"></i></a>
+              <button class="sh cp" type="button" onclick="copyLink(this)" aria-label="Copy link"><i class="fa-solid fa-link"></i></button>
+            </div>
+          </div>
 
-  <!-- SHARE -->
-  <div class="share">
-    <h4>Share this article</h4>
-    <div class="share-btns">
-      <a class="sbtn wa" href="{{ share.whatsapp }}" target="_blank" rel="noopener">
-        <svg viewBox="0 0 24 24"><path d="M17.5 14.4c-.3-.1-1.7-.9-2-1-.3-.1-.5-.1-.6.1-.2.3-.7.9-.8 1-.2.2-.3.2-.6.1-1.5-.8-2.5-1.4-3.5-3.1-.3-.5.3-.4.8-1.4.1-.2 0-.3 0-.5-.1-.1-.6-1.5-.9-2-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.3.3-1 1-1 2.3 0 1.4 1 2.7 1.1 2.9.1.2 2 3 4.8 4.2 1.8.8 2.5.8 3.4.7.5-.1 1.7-.7 1.9-1.4.2-.6.2-1.2.2-1.4-.1 0-.3-.1-.6-.2M12 2a10 10 0 00-10 10c0 1.8.5 3.4 1.3 4.9L2 22l5.3-1.4c1.4.8 3 1.2 4.7 1.2a10 10 0 000-20"/></svg>
-        WhatsApp
-      </a>
-      <a class="sbtn fb" href="{{ share.facebook }}" target="_blank" rel="noopener">
-        <svg viewBox="0 0 24 24"><path d="M22 12a10 10 0 10-11.6 9.9v-7H8v-3h2.4V9.8c0-2.3 1.4-3.6 3.5-3.6 1 0 2 .2 2 .2v2.3h-1.2c-1.1 0-1.5.7-1.5 1.5V12h2.6l-.4 3h-2.2v7A10 10 0 0022 12"/></svg>
-        Facebook
-      </a>
-      <a class="sbtn x" href="{{ share.twitter }}" target="_blank" rel="noopener">
-        <svg viewBox="0 0 24 24"><path d="M18.2 2h3.3l-7.2 8.3L23 22h-6.6l-5.2-6.8L5.2 22H1.9l7.7-8.8L1 2h6.8l4.7 6.2L18.2 2m-1.2 18h1.8L7.1 3.9H5.2z"/></svg>
-        X
-      </a>
-      <a class="sbtn li" href="{{ share.linkedin }}" target="_blank" rel="noopener">
-        <svg viewBox="0 0 24 24"><path d="M20.5 2h-17A1.5 1.5 0 002 3.5v17A1.5 1.5 0 003.5 22h17a1.5 1.5 0 001.5-1.5v-17A1.5 1.5 0 0020.5 2M8 19H5v-9h3zM6.5 8.3a1.8 1.8 0 110-3.5 1.8 1.8 0 010 3.5M19 19h-3v-4.7c0-1.1 0-2.5-1.5-2.5s-1.8 1.2-1.8 2.4V19h-3v-9h2.9v1.3a3.1 3.1 0 012.8-1.5c3 0 3.6 2 3.6 4.5z"/></svg>
-        LinkedIn
-      </a>
-      <a class="sbtn tg" href="{{ share.telegram }}" target="_blank" rel="noopener">
-        <svg viewBox="0 0 24 24"><path d="M22 3L2 10.5l6 2.3L18 6l-8 8.5v5l3-3 4.5 3.3z"/></svg>
-        Telegram
-      </a>
-      <button class="sbtn copy" id="copyBtn" onclick="copyLink()" type="button">
-        <svg viewBox="0 0 24 24"><path d="M16 1H4a2 2 0 00-2 2v14h2V3h12zm3 4H8a2 2 0 00-2 2v14a2 2 0 002 2h11a2 2 0 002-2V7a2 2 0 00-2-2m0 16H8V7h11z"/></svg>
-        <span id="copyLbl">Copy link</span>
-      </button>
+          {% if post.cover_image %}
+          <figure class="cover">
+            <div class="frame"><img class="img" src="{{ post.cover_image }}" alt="{{ post.title }}" fetchpriority="high"></div>
+            <figcaption>{% if post.is_news %}Illustrative photo{% if 'unsplash' in post.cover_image %} · Unsplash{% endif %}{% else %}{{ post.title }}{% endif %}</figcaption>
+          </figure>
+          {% endif %}
+
+          <div class="body">{{ post.body|safe }}</div>
+
+          {% if post.is_news and post.source_url %}
+          <div class="source"><i class="fa-solid fa-circle-info"></i>
+            <div>This report is based on information from <b>{{ post.source_name|default:"the original outlet" }}</b>. For developing details, <a href="{{ post.source_url }}" target="_blank" rel="noopener nofollow">read the original report</a>.</div>
+          </div>
+          {% endif %}
+
+          <div class="share-end">
+            <span>Share this story</span>
+            <div class="shares">
+              <a class="sh wa" href="{{ share.whatsapp }}" target="_blank" rel="noopener" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+              <a class="sh fb" href="{{ share.facebook }}" target="_blank" rel="noopener" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+              <a class="sh x" href="{{ share.twitter }}" target="_blank" rel="noopener" aria-label="X"><i class="fa-brands fa-x-twitter"></i></a>
+              <button class="sh cp" type="button" onclick="copyLink(this)" aria-label="Copy link"><i class="fa-solid fa-link"></i></button>
+            </div>
+          </div>
+        </article>
+
+        {# ── COMMENTS ── #}
+        <section class="cm" id="comments">
+          <h2 class="cm-h">Comments {% if comment_count %}<small>{{ comment_count }}</small>{% endif %}</h2>
+
+          {% if notice == 'posted' %}<div class="notice ok"><i class="fa-solid fa-circle-check"></i> Thanks — your comment is live.</div>
+          {% elif notice == 'empty' %}<div class="notice err">Please write your name and a comment.</div>
+          {% elif notice == 'long' %}<div class="notice err">That comment is too long (2,000 characters max).</div>
+          {% elif notice == 'links' %}<div class="notice err">Too many links in one comment. Please keep it to two.</div>
+          {% elif notice == 'slow' %}<div class="notice err">You're commenting a bit fast. Wait a few seconds and try again.</div>
+          {% elif notice == 'captcha' %}<div class="notice err">We couldn't confirm you're human. Please try again.</div>{% endif %}
+
+          <form class="cform" id="comment-form" method="post" action="{% url 'blog_comment' post.slug %}"
+                onsubmit="var b=this.querySelector('button[type=submit]');b.disabled=true;b.innerHTML='Posting…';">
+            {% csrf_token %}
+            <input type="hidden" name="parent" id="c-parent" value="{{ reply_to.pk|default:'' }}">
+            <div class="replying {% if reply_to %}on{% endif %}" id="c-replying">
+              <span><i class="fa-solid fa-reply"></i> Replying to <b id="c-reply-name">{{ reply_to.name }}</b></span>
+              <button type="button" onclick="cancelReply()">Cancel</button>
+            </div>
+            <div class="row2">
+              <div><label for="c-name">Name *</label><input id="c-name" name="name" maxlength="60" required autocomplete="name"></div>
+              <div><label for="c-email">Email (optional, never shown)</label><input id="c-email" type="email" name="email" maxlength="254" autocomplete="email"></div>
+            </div>
+            <label for="c-body">Your comment *</label>
+            <textarea id="c-body" name="body" maxlength="2000" required placeholder="Join the conversation…"></textarea>
+            <div class="hp" aria-hidden="true"><label>Website <input name="website" tabindex="-1" autocomplete="off"></label></div>
+            {% if TURNSTILE_ENABLED %}<div class="cf-turnstile" data-sitekey="{{ TURNSTILE_SITEKEY }}" data-theme="light" style="margin-top:12px"></div>{% endif %}
+            <div class="foot">
+              <small>Be respectful. Comments may be removed if they break our rules.</small>
+              <button class="btn-blue" type="submit"><i class="fa-solid fa-paper-plane"></i> Post comment</button>
+            </div>
+          </form>
+
+          <div class="clist">
+            {% for c in comments %}
+            <div class="c" id="comment-{{ c.pk }}">
+              <span class="av" style="background:{% if c.is_staff_reply %}var(--blue){% else %}hsl({{ c.name|avatar_hue }},55%,45%){% endif %}">{{ c.name|initial }}</span>
+              <div>
+                <div class="c-top"><b>{{ c.name }}</b>{% if c.is_staff_reply %}<span class="team">JAMIITEK</span>{% endif %}<time datetime="{{ c.created_at|date:'c' }}">{{ c.created_at|ago }}</time></div>
+                <div class="c-body">{{ c.body }}</div>
+                <a class="c-act" href="?reply={{ c.pk }}#comment-form" onclick="return startReply({{ c.pk }}, '{{ c.name|escapejs }}')"><i class="fa-solid fa-reply"></i> Reply</a>
+                {% if c.replies.all %}
+                <div class="replies">
+                  {% for r in c.replies.all %}
+                  <div class="c" id="comment-{{ r.pk }}">
+                    <span class="av" style="background:{% if r.is_staff_reply %}var(--blue){% else %}hsl({{ r.name|avatar_hue }},55%,45%){% endif %}">{{ r.name|initial }}</span>
+                    <div>
+                      <div class="c-top"><b>{{ r.name }}</b>{% if r.is_staff_reply %}<span class="team">JAMIITEK</span>{% endif %}<time datetime="{{ r.created_at|date:'c' }}">{{ r.created_at|ago }}</time></div>
+                      <div class="c-body">{{ r.body }}</div>
+                      <a class="c-act" href="?reply={{ c.pk }}#comment-form" onclick="return startReply({{ c.pk }}, '{{ r.name|escapejs }}')"><i class="fa-solid fa-reply"></i> Reply</a>
+                    </div>
+                  </div>
+                  {% endfor %}
+                </div>
+                {% endif %}
+              </div>
+            </div>
+            {% empty %}
+            <p class="no-c">No comments yet. Start the conversation.</p>
+            {% endfor %}
+          </div>
+        </section>
+      </div>
+
+      {# ── Rail ── #}
+      <aside class="side">
+        {% if most_read %}
+        <div class="rail-box">
+          <h3>Most read</h3>
+          {% for m in most_read %}
+          <a class="mr" href="{% url 'blog_detail' m.slug %}"><b>{{ forloop.counter }}</b><div class="hl">{{ m.title }}</div></a>
+          {% endfor %}
+        </div>
+        {% endif %}
+        <div class="quote">
+          <div class="qm">&ldquo;</div>
+          <p>Get your business online this week — website, hosting and an AI WhatsApp bot.</p>
+          <a class="btn-blue" href="/get-started/">Start your project <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+      </aside>
+    </div>
+
+    {% if related %}
+    <section class="rel">
+      <div class="sec-h"><h2>More stories</h2><a href="{% url 'blog_list' %}">All stories <i class="fa-solid fa-arrow-right"></i></a></div>
+      <div class="grid4">
+        {% for r in related %}
+        <a class="card" href="{% url 'blog_detail' r.slug %}">
+          <div class="frame">
+            {% if r.cover_image %}<img class="img" src="{{ r.cover_image }}" alt="{{ r.title }}" loading="lazy">
+            {% else %}<div class="img ph">{{ r.category.name|default:"J"|initial }}</div>{% endif %}
+          </div>
+          {% if r.category %}<span class="chip">{{ r.category.name }}</span>{% endif %}
+          <h3 class="hl">{{ r.title }}</h3>
+          <div class="meta"><span>{{ r.published_at|ago }}</span><span class="sep">·</span><span>{{ r.read_minutes }} min</span></div>
+        </a>
+        {% endfor %}
+      </div>
+    </section>
+    {% endif %}
+
+    <div class="cta">
+      <div><h3>Ready to get your business online?</h3><p>JamiiTek builds websites and AI WhatsApp bots for businesses across Tanzania.</p></div>
+      <a href="/get-started/">Start your project <i class="fa-solid fa-arrow-right"></i></a>
     </div>
   </div>
-
-  <!-- CTA -->
-  <div class="art-cta">
-    <h3>Ready to get your business online?</h3>
-    <p>JamiiTek builds websites and AI WhatsApp bots for businesses across Tanzania.</p>
-    <a href="/get-started/">Start your project →</a>
-  </div>
-
-  {% if related %}
-  <div class="rel">
-    <h3>Related articles</h3>
-    <div class="rel-grid">
-      {% for r in related %}
-      <a class="rel-card" href="{% url 'blog_detail' r.slug %}">
-        {% if r.cover_image %}<img class="ri" src="{{ r.cover_image }}" alt="{{ r.title }}" loading="lazy">{% else %}<span class="ri"></span>{% endif %}
-        {% if r.category %}<span class="rk">{{ r.category.name }}</span>{% endif %}
-        <h4>{{ r.title|truncatewords:12 }}</h4>
-      </a>
-      {% endfor %}
-    </div>
-  </div>
-  {% endif %}
-</article>
+  <div class="bz-bottom"></div>
 </div>
 
-<!-- Article JSON-LD (rich results kwenye Google) -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "BlogPosting",
+  "@type": "{% if post.is_news %}NewsArticle{% else %}BlogPosting{% endif %}",
   "headline": "{{ post.title|escapejs }}",
   "description": "{{ post.excerpt|escapejs }}",
-  {% if post.cover_image %}"image": "{{ post.cover_image }}",{% endif %}
+  {% if post.cover_image %}"image": ["{{ post.cover_image }}"],{% endif %}
   "author": {"@type": "Organization", "name": "{{ post.author_name|escapejs }}"},
   "publisher": {"@type": "Organization", "name": "JamiiTek",
     "logo": {"@type": "ImageObject", "url": "https://jamiitek.com/static/images/og-image.jpg"}},
   "datePublished": "{{ post.published_at|date:'c' }}",
   "dateModified": "{{ post.updated_at|date:'c' }}",
+  "commentCount": {{ comment_count }},
+  {% if post.category %}"articleSection": "{{ post.category.name|escapejs }}",{% endif %}
   "mainEntityOfPage": "{{ canonical }}"
 }
 </script>
-
-<!-- Breadcrumb JSON-LD -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
   "itemListElement": [
     {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.jamiitek.com/"},
-    {"@type": "ListItem", "position": 2, "name": "Blog", "item": "https://www.jamiitek.com/blog/"},
+    {"@type": "ListItem", "position": 2, "name": "Insights", "item": "https://www.jamiitek.com/blog/"},
     {"@type": "ListItem", "position": 3, "name": "{{ post.title|escapejs }}", "item": "{{ canonical }}"}
   ]
 }
 </script>
-
+{% if TURNSTILE_ENABLED %}<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>{% endif %}
 <script>
-function copyLink(){
-  const url = "{{ canonical }}";
-  const btn = document.getElementById('copyBtn');
-  const lbl = document.getElementById('copyLbl');
-  navigator.clipboard.writeText(url).then(() => {
-    btn.classList.add('done'); lbl.textContent = 'Copied!';
-    setTimeout(() => { btn.classList.remove('done'); lbl.textContent = 'Copy link'; }, 2000);
-  }).catch(() => {
-    const t = document.createElement('textarea'); t.value = url; document.body.appendChild(t);
-    t.select(); document.execCommand('copy'); document.body.removeChild(t);
-    lbl.textContent = 'Copied!';
-  });
+function copyLink(btn){
+  var url = "{{ canonical|escapejs }}";
+  var done = function(){ btn.classList.add('done'); btn.innerHTML='<i class="fa-solid fa-check"></i>';
+    setTimeout(function(){ btn.classList.remove('done'); btn.innerHTML='<i class="fa-solid fa-link"></i>'; }, 1800); };
+  if (navigator.clipboard) { navigator.clipboard.writeText(url).then(done, done); }
+  else { var t=document.createElement('textarea'); t.value=url; document.body.appendChild(t); t.select();
+    try{document.execCommand('copy');}catch(e){} document.body.removeChild(t); done(); }
 }
+function startReply(id, name){
+  document.getElementById('c-parent').value = id;
+  document.getElementById('c-reply-name').textContent = name;
+  document.getElementById('c-replying').classList.add('on');
+  var f = document.getElementById('comment-form');
+  f.scrollIntoView({behavior:'smooth', block:'center'});
+  var body = document.getElementById('c-body');
+  if (!body.value) body.value = '@' + name + ' ';
+  setTimeout(function(){ (document.getElementById('c-name').value ? body : document.getElementById('c-name')).focus(); }, 350);
+  return false;
+}
+function cancelReply(){
+  document.getElementById('c-parent').value = '';
+  document.getElementById('c-replying').classList.remove('on');
+}
+(function(){
+  // Onyesha maoni mapya yaliyotumwa
+  var m = location.hash.match(/^#comment-(\d+)$/);
+  if (m) { var el = document.getElementById('comment-' + m[1]); if (el) el.classList.add('flash'); }
+  // Kumbuka jina la msomaji kwa maoni yajayo
+  try {
+    var n = document.getElementById('c-name'), saved = localStorage.getItem('jt_c_name');
+    if (saved && !n.value) n.value = saved;
+    document.getElementById('comment-form').addEventListener('submit', function(){ localStorage.setItem('jt_c_name', n.value); });
+  } catch(e){}
+})();
 </script>
 {% endblock %}

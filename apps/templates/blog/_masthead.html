@@ -1,0 +1,35 @@
+{# Bar ya bluu ya sehemu + ticker ya habari mpya. Inahitaji nav_categories, ticker. #}
+<div class="bz-bar" id="bzBar">
+  <div class="bz-wrap">
+    <a href="{% url 'blog_list' %}" class="bz-brand">JamiiTek <span>Insights</span></a>
+    <nav class="bz-sections" aria-label="Blog sections">
+      <a href="{% url 'blog_list' %}" class="{% if not active_cat and not q and not post %}on{% endif %}">Home</a>
+      {% for c in nav_categories %}
+        <a href="{% url 'blog_list' %}?category={{ c.slug }}"
+           class="{% if active_cat.pk == c.pk or post.category_id == c.pk %}on{% endif %}">{{ c.name }}</a>
+      {% endfor %}
+    </nav>
+    <form class="bz-search" action="{% url 'blog_list' %}" method="get" role="search">
+      <input type="search" name="q" value="{{ q }}" placeholder="Search stories…" aria-label="Search stories">
+      <button type="submit" aria-label="Search"><i class="fa-solid fa-magnifying-glass"></i></button>
+    </form>
+    <button class="bz-search-toggle" type="button" aria-label="Search"
+            onclick="var b=document.getElementById('bzBar');b.classList.toggle('searching');if(b.classList.contains('searching'))b.querySelector('.bz-search input').focus();">
+      <i class="fa-solid fa-magnifying-glass"></i>
+    </button>
+  </div>
+</div>
+
+{% if ticker %}
+<div class="bz-ticker">
+  <div class="bz-wrap">
+    <span class="bz-live"><i></i>LATEST</span>
+    <div class="bz-tick-viewport">
+      <div class="bz-tick-track">
+        {% for t in ticker %}<a href="{% url 'blog_detail' t.slug %}">{{ t.title }}</a>{% endfor %}
+        {% for t in ticker %}<a href="{% url 'blog_detail' t.slug %}" aria-hidden="true" tabindex="-1">{{ t.title }}</a>{% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}

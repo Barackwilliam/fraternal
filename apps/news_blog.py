@@ -132,13 +132,10 @@ def select_top(headlines, n, region_label):
     user = (f'Region: {region_label}\nN = {n}\n\nHeadlines:\n{listing}\n\n'
             f'Pick the {n} biggest distinct stories. Return ONLY the JSON.')
     try:
-        resp = client.chat.completions.create(
-            model=MODEL, temperature=0.3, max_tokens=700,
-            messages=[{"role": "system", "content": _SELECT_SYS},
-                      {"role": "user", "content": user}],
-            timeout=TIMEOUT,
-        )
-        data = _json(resp.choices[0].message.content)
+        raw = _chat(client, temperature=0.3, max_tokens=700,
+                    messages=[{"role": "system", "content": _SELECT_SYS},
+                              {"role": "user", "content": user}])
+        data = _json(raw)
         picks = (data or {}).get('picks', [])
         chosen, used = [], set()
         for p in picks:
@@ -201,16 +198,13 @@ def write_article(event, region_label):
         f'Write the news article now. Return ONLY the JSON object.'
     )
     try:
-        resp = client.chat.completions.create(
-            model=MODEL, temperature=0.6, max_tokens=2200,
-            messages=[{"role": "system", "content": _WRITE_SYS},
-                      {"role": "user", "content": user}],
-            timeout=TIMEOUT,
-        )
-        data = _json(resp.choices[0].message.content)
+        raw = _chat(client, temperature=0.6, max_tokens=2200,
+                    messages=[{"role": "system", "content": _WRITE_SYS},
+                              {"role": "user", "content": user}])
+        data = _json(raw)
     except Exception as e:
         logger.exception('write_article imeshindikana')
-        return False, f'AI error ({type(e).__name__})'
+        return False, f'AI error ({type(e).__name__}: {str(e)[:120]})'
 
     if not data:
         return False, 'AI did not return valid JSON'
@@ -303,6 +297,7 @@ def run(tz_count=5, world_count=5):
                 continue
 
             ok, art = write_article(ev, label)
+            import time as _t; _t.sleep(2)   # pumzi fupi — kikomo cha Groq kwa dakika
             if not ok:
                 errors.append(f'{label}: {art}')
                 continue
@@ -332,7 +327,79 @@ def run(tz_count=5, world_count=5):
     return {'created': created, 'skipped': skipped, 'errors': errors}
 
 
+def run_and_notify(tz_count=5, world_count=5):
+    """
+    Endesha newsroom kisha mjulishe mmiliki KWA VYOVYOTE:
+      • zikiandaliwa → email ya kukagua rasimu
+      • zisipoandaliwa → email ya ripoti yenye sababu (ili ujue kwa nini)
+    Inatumiwa na cron endpoint, management command, na kitufe cha admin.
+    """
+    from apps.utils import email_notifications as en
+    try:
+        result = run(tz_count=tz_count, world_count=world_count)
+    except Exception as e:
+        logger.exception('AI newsroom run failed')
+        result = {'created': [], 'skipped': 0, 'errors': [f'Crash: {type(e).__name__}: {e}']}
+
+    try:
+        if result['created']:
+            en.send_blog_review_reminder(result['created'])
+        else:
+            en.send_news_run_report(result)
+    except Exception:
+        logger.exception('AI newsroom notification failed')
+
+    logger.info('AI newsroom: created=%d skipped=%d errors=%d',
+                len(result['created']), result['skipped'], len(result['errors']))
+    return result
+
+
 # ── helpers ───────────────────────────────────
+FALLBACK_MODELS = ['llama-3.3-70b-versatile', 'openai/gpt-oss-120b', 'llama-3.1-8b-instant']
+
+
+def _chat(client, messages, temperature=0.5, max_tokens=1500, attempts=4):
+    """
+    Groq chat yenye uimara:
+      • 429 (kikomo cha tokens/dakika) → subiri kisha jaribu tena
+      • model imeondolewa/haipo → jaribu model mbadala
+    Groq free tier ina kikomo cha tokens kwa dakika; makala 10 mfululizo
+    zingeigonga bila hii.
+    """
+    import time
+    models = [MODEL] + [m for m in FALLBACK_MODELS if m != MODEL]
+    last = None
+    for model in models:
+        for attempt in range(attempts):
+            try:
+                resp = client.chat.completions.create(
+                    model=model, temperature=temperature, max_tokens=max_tokens,
+                    messages=messages, timeout=TIMEOUT)
+                return resp.choices[0].message.content
+            except Exception as e:
+                last = e
+                status = getattr(e, 'status_code', None)
+                text = str(e).lower()
+                if status == 429 or 'rate limit' in text or 'rate_limit' in text:
+                    wait = 20 * (attempt + 1)
+                    try:
+                        ra = e.response.headers.get('retry-after')
+                        if ra:
+                            wait = min(90, max(wait, int(float(ra)) + 1))
+                    except Exception:
+                        pass
+                    logger.warning('Groq 429 (%s) — nasubiri %ss', model, wait)
+                    time.sleep(wait)
+                    continue
+                if status in (400, 404) and ('model' in text and
+                                             ('decommission' in text or 'not found' in text
+                                              or 'does not exist' in text)):
+                    logger.warning('Groq model %s haipatikani — najaribu nyingine', model)
+                    break           # nenda model inayofuata
+                raise
+    raise last or RuntimeError('Groq call failed')
+
+
 def _json(raw):
     raw = (raw or '').strip()
     if raw.startswith('```'):

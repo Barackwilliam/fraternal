@@ -1,0 +1,20 @@
+{% extends 'emails/base_email.html' %}
+{% block content %}
+<p class="greeting">Newsroom report</p>
+
+<div class="alert alert-warning">
+  <strong>No drafts were created this run</strong>
+  The AI newsroom ran but did not produce any new articles. Here is what happened:
+</div>
+
+<div class="info-box">
+  {% for e in errors %}
+  <div class="info-row"><span class="info-label" style="max-width:100%">{{ e }}</span></div>
+  {% endfor %}
+  {% if skipped %}<div class="info-row"><span class="info-label">Skipped (already covered)</span><span class="info-value">{{ skipped }}</span></div>{% endif %}
+</div>
+
+<p style="font-size:14px">Common causes: <b>GROQ_API_KEY</b> missing or expired, Groq rate limits, or news feeds temporarily unreachable. You can run it again from the admin with <b>“Run AI newsroom now”</b>.</p>
+
+<div class="btn-wrap"><a href="{{ admin_url }}" class="btn">Open blog admin</a></div>
+{% endblock %}

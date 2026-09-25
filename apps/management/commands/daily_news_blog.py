@@ -23,7 +23,10 @@ class Command(BaseCommand):
         from apps import news_blog
 
         self.stdout.write('AI newsroom inaanza kukusanya na kuandika habari…')
-        result = news_blog.run(tz_count=opts['tz'], world_count=opts['world'])
+        if opts['no_email']:
+            result = news_blog.run(tz_count=opts['tz'], world_count=opts['world'])
+        else:
+            result = news_blog.run_and_notify(tz_count=opts['tz'], world_count=opts['world'])
 
         created = result['created']
         self.stdout.write(self.style.SUCCESS(
@@ -33,14 +36,5 @@ class Command(BaseCommand):
             self.stdout.write(f'  • [{p.category.name if p.category else "—"}] {p.title}')
         for e in result['errors']:
             self.stdout.write(self.style.WARNING(f'  ! {e}'))
-
-        if created and not opts['no_email']:
-            try:
-                from apps.utils.email_notifications import send_blog_review_reminder
-                sent = send_blog_review_reminder(created)
-                self.stdout.write('Email ya kukagua imetumwa.' if sent
-                                  else self.style.WARNING('Email haikutumwa.'))
-            except Exception as e:
-                self.stdout.write(self.style.WARNING(f'Email imeshindikana: {e}'))
 
         return

@@ -244,6 +244,49 @@ def send_blog_review_reminder(posts, to_email=None) -> bool:
     )
 
 
+def _owner_email():
+    from django.conf import settings as _s
+    return (getattr(_s, 'BLOG_REVIEW_EMAIL', None)
+            or getattr(_s, 'PAYMENTS_OWNER_EMAIL', 'info@jamiitek.com'))
+
+
+def _site_base():
+    from django.conf import settings as _s
+    return getattr(_s, 'SITE_BASE_URL', 'https://www.jamiitek.com').rstrip('/')
+
+
+def send_news_run_report(result) -> bool:
+    """AI newsroom haikuandaa rasimu — mweleze mmiliki sababu."""
+    return _send(
+        subject='⚠️ AI newsroom: no drafts created today — JamiiTek',
+        template='blog_news_report.html',
+        context={
+            'errors': result.get('errors') or ['No new stories found.'],
+            'skipped': result.get('skipped', 0),
+            'admin_url': f'{_site_base()}/admin/apps/blogpost/',
+        },
+        to_email=_owner_email(),
+    )
+
+
+def send_blog_comment_notice(comment) -> bool:
+    """Maoni mapya kwenye makala — mmiliki ajibu au aifiche."""
+    base = _site_base()
+    return _send(
+        subject=f'💬 New comment on "{comment.post.title[:60]}"',
+        template='blog_comment.html',
+        context={
+            'name': comment.name,
+            'body': comment.body,
+            'is_reply': bool(comment.parent_id),
+            'post_title': comment.post.title,
+            'post_url': f'{base}/blog/{comment.post.slug}/#comment-{comment.pk}',
+            'moderate_url': f'{base}/admin/apps/blogcomment/{comment.pk}/change/',
+        },
+        to_email=_owner_email(),
+    )
+
+
 # ══════════════════════════════════════════════════════════════════════════════
 # 7. BULK — Run all expiry checks (call from management command or cron)
 # ══════════════════════════════════════════════════════════════════════════════

@@ -1032,6 +1032,28 @@ class BlogPost(models.Model):
         return max(1, round(words / 200))
 
 
+class BlogComment(models.Model):
+    """Maoni ya wasomaji kwenye makala. Majibu yana ngazi moja (parent)."""
+    post = models.ForeignKey(BlogPost, on_delete=models.CASCADE, related_name='comments')
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True,
+                               related_name='replies')
+    name = models.CharField(max_length=60)
+    email = models.EmailField(blank=True, help_text='Not shown publicly.')
+    body = models.TextField(max_length=2000)
+    is_approved = models.BooleanField(default=True,
+                                      help_text='Untick to hide this comment from the public page.')
+    is_staff_reply = models.BooleanField(default=False,
+                                         help_text='Written by the JamiiTek team (shows a badge).')
+    ip = models.GenericIPAddressField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['created_at']
+
+    def __str__(self):
+        return f'{self.name} on {self.post.title[:40]}'
+
+
 # ============================================================
 # CONTRACTS (mikataba + e-signature)
 # ============================================================

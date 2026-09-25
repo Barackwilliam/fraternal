@@ -3,5 +3,12 @@
   <li>
     <a href="ai-write/" class="addlink" style="background:#6c63ff;">✨ AI: Andika rasimu mpya</a>
   </li>
+  <li>
+    <form method="post" action="news-run/" style="display:inline"
+          onsubmit="this.querySelector('button').disabled=true;this.querySelector('button').innerText='⏳ Inaanza…';">
+      {% csrf_token %}
+      <button type="submit" class="addlink" style="background:#0a66c2;color:#fff;border:0;cursor:pointer;padding:.375rem .75rem;border-radius:.25rem;">📰 Run AI newsroom now</button>
+    </form>
+  </li>
   {{ block.super }}
 {% endblock %}
