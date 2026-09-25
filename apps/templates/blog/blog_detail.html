@@ -10,8 +10,16 @@
 {% block og_desc %}{{ post.meta_description|default:post.excerpt }}{% endblock %}
 {% block og_url %}{{ canonical }}{% endblock %}
 {% if post.cover_image %}{% block og_image %}{{ post.cover_image }}{% endblock %}{% endif %}
+{% block og_image_alt %}{{ post.title }}{% endblock %}
+{% block tw_title %}{{ post.title }}{% endblock %}
+{% block tw_desc %}{{ post.meta_description|default:post.excerpt }}{% endblock %}
+{% if post.cover_image %}{% block tw_image %}{{ post.cover_image }}{% endblock %}{% endif %}
 
 {% block extra_css %}
+<meta property="article:published_time" content="{{ post.published_at|date:'c' }}">
+<meta property="article:modified_time" content="{{ post.updated_at|date:'c' }}">
+{% if post.category %}<meta property="article:section" content="{{ post.category.name }}">{% endif %}
+<link rel="alternate" type="application/rss+xml" title="JamiiTek Insights" href="/blog/feed/">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
@@ -175,6 +183,19 @@
   "datePublished": "{{ post.published_at|date:'c' }}",
   "dateModified": "{{ post.updated_at|date:'c' }}",
   "mainEntityOfPage": "{{ canonical }}"
+}
+</script>
+
+<!-- Breadcrumb JSON-LD -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.jamiitek.com/"},
+    {"@type": "ListItem", "position": 2, "name": "Blog", "item": "https://www.jamiitek.com/blog/"},
+    {"@type": "ListItem", "position": 3, "name": "{{ post.title|escapejs }}", "item": "{{ canonical }}"}
+  ]
 }
 </script>
 

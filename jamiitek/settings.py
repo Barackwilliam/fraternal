@@ -209,6 +209,15 @@ JAZZMIN_SETTINGS = {
         {"model": "auth.User"},
         {"app":   "JamiiTek System"},
     ],
+    # Default ya Jazzmin (horizontal_tabs) inaweka kitufe cha Save kwenye column
+    # ya pembeni — kwenye simu kinajificha/kiko mbali. "single" inaweka fomu na
+    # Save wazi kwa mstari mmoja unaosomeka simuni. Tumeiwasha kwa BlogPost
+    # (na Service) ambazo zina fomu ndefu; nyingine zinabaki kama zilivyo.
+    "changeform_format": "horizontal_tabs",
+    "changeform_format_overrides": {
+        "apps.blogpost": "single",
+        "apps.service": "single",
+    },
 }
 
 JAZZMIN_UI_TWEAKS = {
@@ -356,3 +365,8 @@ PESAPAL_BASE_URL        = os.getenv('PESAPAL_BASE_URL', 'https://www.jamiitek.co
 PESAPAL_ENABLED         = bool(PESAPAL_CONSUMER_KEY and PESAPAL_CONSUMER_SECRET)
 # Nakala ya risiti/arifa za malipo humwendea mmiliki
 PAYMENTS_OWNER_EMAIL    = os.getenv('PAYMENTS_OWNER_EMAIL', 'info@jamiitek.com')
+
+# ── AI Newsroom (rasimu za habari za kila siku) ────────
+SITE_BASE_URL        = os.getenv('SITE_BASE_URL', 'https://www.jamiitek.com')
+BLOG_REVIEW_EMAIL    = os.getenv('BLOG_REVIEW_EMAIL', 'info@jamiitek.com')
+UNSPLASH_ACCESS_KEY  = os.getenv('UNSPLASH_ACCESS_KEY', '')

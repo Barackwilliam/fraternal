@@ -61,8 +61,45 @@ class ServiceSitemap(Sitemap):
         return date.today()
 
 
+class BlogSitemap(Sitemap):
+    """Published blog posts + the blog index."""
+    protocol = 'https'
+    changefreq = 'weekly'
+    priority = 0.7
+
+    def items(self):
+        from apps.models import BlogPost
+        return list(BlogPost.objects.filter(status='published').order_by('-published_at'))
+
+    def location(self, item):
+        return reverse('blog_detail', kwargs={'slug': item.slug})
+
+    def lastmod(self, item):
+        return item.updated_at or item.published_at
+
+
+class BlogIndexSitemap(Sitemap):
+    """The /blog/ landing page."""
+    protocol = 'https'
+    changefreq = 'daily'
+    priority = 0.8
+
+    def items(self):
+        return ['blog_list']
+
+    def location(self, item):
+        return reverse(item)
+
+    def lastmod(self, item):
+        from apps.models import BlogPost
+        latest = BlogPost.objects.filter(status='published').order_by('-published_at').first()
+        return latest.published_at if latest else date.today()
+
+
 # Combine all sitemaps
 sitemaps = {
-    'static':   StaticPageSitemap(),
-    'services': ServiceSitemap(),
+    'static':     StaticPageSitemap(),
+    'services':   ServiceSitemap(),
+    'blog_index': BlogIndexSitemap(),
+    'blog':       BlogSitemap(),
 }

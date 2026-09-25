@@ -213,6 +213,37 @@ def send_welcome_email(client) -> bool:
     )
 
 
+def send_blog_review_reminder(posts, to_email=None) -> bool:
+    """
+    Arifa mmiliki kuwa AI imeandaa rasimu za habari za kukagua na kuthibitisha.
+    `posts` = orodha ya BlogPost (drafts). Rudisha True ikitumwa.
+    """
+    from django.conf import settings as _s
+    to = to_email or getattr(_s, 'BLOG_REVIEW_EMAIL', None) \
+        or getattr(_s, 'PAYMENTS_OWNER_EMAIL', 'info@jamiitek.com')
+    base = getattr(_s, 'SITE_BASE_URL', 'https://www.jamiitek.com').rstrip('/')
+
+    rows = []
+    for p in posts:
+        rows.append({
+            'title': p.title,
+            'category': p.category.name if p.category else '—',
+            'source': p.source_name or '',
+            'edit_url': f'{base}/admin/apps/blogpost/{p.pk}/change/',
+        })
+
+    return _send(
+        subject=f'📝 {len(rows)} news drafts ready for your review — JamiiTek',
+        template='blog_review.html',
+        context={
+            'count': len(rows),
+            'rows': rows,
+            'review_all_url': f'{base}/admin/apps/blogpost/?status__exact=draft',
+        },
+        to_email=to,
+    )
+
+
 # ══════════════════════════════════════════════════════════════════════════════
 # 7. BULK — Run all expiry checks (call from management command or cron)
 # ══════════════════════════════════════════════════════════════════════════════

@@ -18,6 +18,7 @@ from . import bulk_actions
 from django.views.generic import TemplateView
 from . import sw_views
 from . import pesapal_views
+from apps.seo.feeds import BlogFeed
 
 urlpatterns = [
     # ── PESAPAL PAYMENTS (mfumo mzima) ──────────────────────
@@ -97,6 +98,7 @@ urlpatterns = [
 
     # ── BLOG ──────────────────────────────────────────────
     path('blog/', blog_views.blog_list, name='blog_list'),
+    path('blog/feed/', BlogFeed(), name='blog_feed'),
     path('blog/<slug:slug>/', blog_views.blog_detail, name='blog_detail'),
 
     # ── PUBLIC SITE ───────────────────────────────────────
@@ -125,6 +127,7 @@ urlpatterns = [
     path('manage/websites/', management_views.website_list, name='website_list'),
     path('manage/websites/auto-suspend/', management_views.run_auto_suspend_view, name='run_auto_suspend'),
     path('tasks/daily/', management_views.daily_tasks_endpoint, name='daily_tasks_endpoint'),
+    path('tasks/news/', management_views.news_blog_endpoint, name='news_blog_endpoint'),
     path('manage/websites/add/', management_views.website_add, name='website_add'),
     path('manage/websites/<int:pk>/', management_views.website_detail, name='website_detail'),
     path('manage/websites/<int:pk>/edit/', management_views.website_edit, name='website_edit'),

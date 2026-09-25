@@ -1001,6 +1001,14 @@ class BlogPost(models.Model):
     status = models.CharField(max_length=10, choices=STATUS, default='draft')
     is_featured = models.BooleanField(default=False, help_text='Show at top of blog')
 
+    # ── AI newsroom (auto-drafted daily news) ─────────────
+    is_news = models.BooleanField(default=False,
+                                  help_text='Auto-generated news article (AI newsroom).')
+    source_url = models.URLField(max_length=600, blank=True,
+                                 help_text='Original news source (for attribution + dedup).')
+    source_name = models.CharField(max_length=120, blank=True,
+                                   help_text='Original news outlet, e.g. BBC, The Citizen.')
+
     views = models.PositiveIntegerField(default=0)
     published_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)

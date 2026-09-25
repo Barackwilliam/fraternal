@@ -1,0 +1,26 @@
+{% extends 'emails/base_email.html' %}
+{% block content %}
+<p class="greeting">Newsroom update ✍️</p>
+
+<div class="alert alert-info">
+  <strong>{{ count }} draft{{ count|pluralize }} ready</strong>
+  The AI newsroom has drafted today's top Tanzania &amp; world stories. Please review, edit and publish the ones you approve.
+</div>
+
+<p>Nothing is public yet — every article stays a <strong>draft</strong> until you approve it in the admin.</p>
+
+<div class="info-box">
+  {% for r in rows %}
+  <div class="info-row">
+    <span class="info-label" style="max-width:70%">{{ r.title }}<br><span style="color:#a0aec0;font-size:12px">{{ r.category }}{% if r.source %} · {{ r.source }}{% endif %}</span></span>
+    <span class="info-value"><a href="{{ r.edit_url }}" style="color:#5b6ef5">Review →</a></span>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="btn-wrap">
+  <a href="{{ review_all_url }}" class="btn">Open all drafts</a>
+</div>
+
+<p style="font-size:13px;color:#718096">Tip: check facts against the original source before publishing. Add or swap the cover image if needed.</p>
+{% endblock %}

@@ -6,8 +6,11 @@
 {% block og_title %}JamiiTek Blog — Digital Tips for Tanzanian Businesses{% endblock %}
 {% block og_desc %}Guides on websites, WhatsApp bots, SEO and going digital — for businesses across Tanzania.{% endblock %}
 {% block og_url %}https://jamiitek.com/blog/{% endblock %}
+{% block tw_title %}JamiiTek Insights — Tanzania & World News, Digital Tips{% endblock %}
+{% block tw_desc %}Daily Tanzania & world news plus practical digital guides for businesses.{% endblock %}
 
 {% block extra_css %}
+<link rel="alternate" type="application/rss+xml" title="JamiiTek Insights" href="/blog/feed/">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
@@ -127,4 +130,16 @@
 
 </div>
 </div>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Blog",
+  "name": "JamiiTek Insights",
+  "url": "https://www.jamiitek.com/blog/",
+  "description": "Daily Tanzania & world news plus digital tips for businesses, from JamiiTek.",
+  "publisher": {"@type": "Organization", "name": "JamiiTek",
+    "logo": {"@type": "ImageObject", "url": "https://jamiitek.com/static/images/og-image.jpg"}}
+}
+</script>
 {% endblock %}

@@ -974,6 +974,68 @@ def daily_tasks_endpoint(request):
 
 
 # ══════════════════════════════════════════════════════════════
+#  AI NEWSROOM — rasimu za habari za kila siku (cron endpoint)
+# ══════════════════════════════════════════════════════════════
+
+def news_blog_endpoint(request):
+    """
+    Endesha AI newsroom kupitia URL yenye token (cron-job.org / UptimeRobot):
+
+        https://jamiitek.com/tasks/news/?token=XXXXX
+
+    Inafanya kazi MARA MOJA kwa siku. Kazi halisi (AI + RSS) inafanyika kwenye
+    thread ya nyuma; jibu linarudi mara moja. ?force=1 kulazimisha.
+    """
+    import os
+    import threading
+    from datetime import date as _date
+    from django.core.cache import cache
+    from django.http import JsonResponse
+
+    expected = os.getenv('TASKS_TOKEN', '')
+    if not expected:
+        return JsonResponse({'ok': False, 'error': 'Endpoint disabled — TASKS_TOKEN not set.'}, status=503)
+
+    given = request.GET.get('token') or request.headers.get('X-Tasks-Token', '')
+    if not secrets.compare_digest(str(given), str(expected)):
+        return JsonResponse({'ok': False, 'error': 'Invalid token.'}, status=403)
+
+    today = _date.today().isoformat()
+    force = request.GET.get('force') in ('1', 'true', 'yes')
+    CACHE_KEY = 'news_blog_ran_date'
+
+    try:
+        already = cache.get(CACHE_KEY) == today
+    except Exception:
+        already = False
+    if already and not force:
+        return JsonResponse({'ok': True, 'status': 'already_ran_today', 'date': today})
+
+    try:
+        cache.set(CACHE_KEY, today, 60 * 60 * 26)
+    except Exception:
+        pass
+
+    def _bg():
+        try:
+            from apps import news_blog
+            from apps.utils.email_notifications import send_blog_review_reminder
+            result = news_blog.run()
+            if result['created']:
+                try:
+                    send_blog_review_reminder(result['created'])
+                except Exception:
+                    logger.exception('news review email failed')
+            logger.info('AI newsroom: created=%d skipped=%d errors=%d',
+                        len(result['created']), result['skipped'], len(result['errors']))
+        except Exception:
+            logger.exception('AI newsroom background run failed')
+
+    threading.Thread(target=_bg, name='jamiitek-news-blog', daemon=True).start()
+    return JsonResponse({'ok': True, 'status': 'started', 'date': today})
+
+
+# ══════════════════════════════════════════════════════════════
 #  KUPAKIA IMAGE (Supabase Storage)
 # ══════════════════════════════════════════════════════════════
 
