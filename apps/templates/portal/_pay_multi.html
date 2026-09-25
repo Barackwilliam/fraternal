@@ -14,7 +14,7 @@
       and renewed separately.
     </div>
 
-    <form method="post" action="{% url 'portal_submit_payment' %}" id="multiPayForm">
+    <form method="post" action="{% url 'portal_submit_payment' %}" id="multiPayForm" onsubmit="return jtLoad(this,'Submitting…')">
       {% csrf_token %}
 
       <div class="f-section">
@@ -49,7 +49,7 @@
           <input type="hidden" name="months_{{ l.website.pk }}" value="1" data-role="months">
           {% if PESAPAL_ENABLED and l.payable %}
           <button type="button" class="jt-btn btn-green" style="margin-top:8px;padding:8px 14px;font-size:12px"
-                  onclick="payHostRowPesapal('{{ l.website.pk }}')">
+                  onclick="payHostRowPesapal('{{ l.website.pk }}', this)">
             <i class="fas fa-bolt"></i> Pay this site now — Pesapal
           </button>
           {% endif %}
@@ -242,12 +242,17 @@
 
   recalc();
 
-  window.payHostRowPesapal = function(pk){
+  window.payHostRowPesapal = function(pk, btn){
     var card = document.querySelector('.pw[data-pk="'+pk+'"]');
     var months = card ? (card.querySelector('[data-role=months]').value || 1) : 1;
     var f = document.getElementById('pspHostRowForm');
     f.action = '{% url "pesapal_pay_hosting" website_pk=0 %}'.replace('/0/', '/'+pk+'/');
     document.getElementById('pspHostRowMonths').value = months;
+    if(btn && !btn.disabled){
+      btn.disabled=true;
+      btn.innerHTML='<span class="jt-spin"></span> Redirecting…';
+      btn.style.opacity='.9'; btn.style.cursor='wait';
+    }
     f.submit();
   };
 })();

@@ -16,10 +16,37 @@ from .pesapal_models import PesapalTransaction  # noqa: F401
 # ============================================================
 
 class Service(models.Model):
-    service_type = models.CharField(max_length=255, db_column='Service_type')
+    ICON_CHOICES = [
+        ('code', 'Code — websites'),
+        ('bot', 'Robot — chatbot'),
+        ('server', 'Server — hosting'),
+        ('globe', 'Globe — domains'),
+        ('mobile', 'Phone — mobile apps'),
+        ('design', 'Palette — design'),
+        ('builder', 'Builder — site builder'),
+        ('layout', 'Layout — templates'),
+    ]
+
+    service_type = models.CharField('Name', max_length=255, db_column='Service_type')
     image = models.CharField(max_length=255, blank=True, null=True)
-    description = models.TextField()
+    description = models.TextField(help_text='Full description (shown on the /service/ page).')
     created_at = models.DateTimeField(auto_now_add=True)
+
+    # ── Homepage "What we build" card ─────────────────────
+    summary = models.CharField(
+        max_length=200, blank=True,
+        help_text='One or two short sentences for the homepage card. Leave empty to use the start of the description.')
+    icon = models.CharField(max_length=20, choices=ICON_CHOICES, default='code')
+    accent = models.CharField(max_length=7, default='#2E7BF6',
+                              help_text='Badge colour as a hex code, e.g. #2E7BF6')
+    link_label = models.CharField(max_length=40, default='Learn more')
+    link_url = models.CharField(
+        max_length=300, blank=True,
+        help_text='Where the card goes, e.g. /bot/ or #hosting. Empty = the /service/ page.')
+    order = models.IntegerField(default=0, help_text='Smaller numbers appear first.')
+    show_on_home = models.BooleanField(
+        default=False,
+        help_text='Show this service in the homepage "What we build" section.')
 
     def __str__(self):
         return self.service_type

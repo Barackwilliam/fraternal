@@ -57,6 +57,8 @@
   .bank-val{font-size:13px}
   .pay-item{gap:10px;padding:12px 14px}
 }
+.jt-spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(0,0,0,.25);border-top-color:currentColor;border-radius:50%;animation:jtspin .6s linear infinite;vertical-align:-2px}
+@keyframes jtspin{to{transform:rotate(360deg)}}
 </style>
 
 <!-- ALERTS -->
@@ -148,7 +150,7 @@
             <span style="font-family:var(--head);font-size:17px;font-weight:900;color:var(--text)">Pay Online — Instant</span>
           </div>
           <div style="font-family:var(--mono);font-size:11px;color:var(--text2);line-height:1.6;margin-bottom:16px">Card · M-Pesa · Airtel Money · Tigo Pesa · Halopesa.<br>Your bot activates the moment payment clears — no waiting, no verification.</div>
-          <form method="post" action="{% url 'pesapal_pay_subscription' %}">
+          <form method="post" action="{% url 'pesapal_pay_subscription' %}" onsubmit="return jtLoad(this,'Redirecting to payment…')">
             {% csrf_token %}
             <input type="hidden" name="plan_id" id="pspPlanId">
             <input type="hidden" name="months" id="pspMonths" value="1">
@@ -166,7 +168,7 @@
         <div id="manualWrap" style="display:none">
         {% endif %}
         <div class="jt-alert jt-alert-info mb-4" style="font-size:13px"><i class="fas fa-circle-info" style="flex-shrink:0"></i><div>Pay via <strong>NMB Bank</strong>, then enter your transaction reference below. Bot reactivated within a few hours after verification.</div></div>
-        <form method="post">
+        <form method="post" onsubmit="return jtLoad(this,'Submitting…')">
           {% csrf_token %}<input type="hidden" name="action" value="submit_payment">
           <input type="hidden" name="plan_id" id="selectedPlanId">
           <input type="hidden" name="months" id="manualMonths" value="1">
@@ -269,6 +271,16 @@ function toggleManual(){
   const open=w.style.display==='block';
   w.style.display=open?'none':'block';
   if(c) c.textContent=open?'▾':'▴';
+}
+// Loading state on pay submit — prevents double-clicks + shows progress
+function jtLoad(form,text){
+  const b=form.querySelector('button[type=submit]');
+  if(b && !b.disabled){
+    b.disabled=true;
+    b.innerHTML='<span class="jt-spin"></span> '+(text||'Please wait…');
+    b.style.opacity='.9'; b.style.cursor='wait';
+  }
+  return true;
 }
 </script>
 {% endblock %}

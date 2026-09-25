@@ -124,6 +124,8 @@
 .ph-badge.ok{background:var(--green-d);color:var(--green);border:1px solid rgba(0,255,136,.2)}
 .ph-badge.bad{background:var(--red-d);color:var(--red);border:1px solid rgba(255,59,92,.2)}
 
+.jt-spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(0,0,0,.25);border-top-color:currentColor;border-radius:50%;animation:jtspin .6s linear infinite;vertical-align:-2px}
+@keyframes jtspin{to{transform:rotate(360deg)}}
 </style>
 
 <div class="pg-head f0">
@@ -258,7 +260,7 @@
             <span style="font-size:17px;font-weight:900;color:var(--text)">Pay Online — Instant</span>
           </div>
           <div style="font-family:var(--mono);font-size:11px;color:var(--text-2);line-height:1.6;margin-bottom:16px">Card · M-Pesa · Airtel Money · Tigo Pesa · Halopesa.<br>Hosting is extended automatically the moment payment clears — no 24hr wait.</div>
-          <button type="button" class="jt-btn btn-green" style="width:100%;justify-content:center;padding:15px;font-size:16px;font-weight:900;box-shadow:0 6px 20px rgba(0,255,136,.22)" onclick="payHostingPesapal()">
+          <button type="button" class="jt-btn btn-green" id="pspHostBtn" style="width:100%;justify-content:center;padding:15px;font-size:16px;font-weight:900;box-shadow:0 6px 20px rgba(0,255,136,.22)" onclick="payHostingPesapal(this)">
             <i class="fas fa-lock"></i> Pay <span id="pspHostAmount"></span> Now
           </button>
           <div style="font-family:var(--mono);font-size:9.5px;color:var(--text-3);text-align:center;margin-top:10px">Pick a website & duration below, then tap Pay.</div>
@@ -269,7 +271,7 @@
           <i class="fas fa-circle-info fa-sm" style="flex-shrink:0;margin-top:2px"></i>
           {% if PESAPAL_ENABLED %}Pick a website &amp; duration below to pay online, or {% endif %}pay to the NMB account on the right, fill in the details below and submit. We verify manual payments within <strong>24 hours</strong>.
         </div>
-        <form method="post" action="{% url 'portal_submit_payment' %}">
+        <form method="post" action="{% url 'portal_submit_payment' %}" onsubmit="return jtLoad(this,'Submitting…')">
           {% csrf_token %}
           <div class="f-section">
             <div class="f-section-title">Website Details</div>
@@ -507,12 +509,26 @@ setTimeout(()=>{document.getElementById('bf1').style.width='100%'},400);
     if(pha) pha.textContent = 'TZS ' + fmt(chosen.total);
   };
 
-  window.payHostingPesapal = function(){
+  window.jtLoad = function(form,text){
+    const b=form.querySelector('button[type=submit]');
+    if(b && !b.disabled){
+      b.disabled=true;
+      b.innerHTML='<span class="jt-spin"></span> '+(text||'Please wait…');
+      b.style.opacity='.9'; b.style.cursor='wait';
+    }
+    return true;
+  };
+  window.payHostingPesapal = function(btn){
     const wid = sel.value;
     if(!wid){ alert('Please select a website first.'); return; }
     const f = document.getElementById('pspHostForm');
     f.action = '{% url "pesapal_pay_hosting" website_pk=0 %}'.replace('/0/', '/'+wid+'/');
     document.getElementById('pspHostMonths').value = monthsInput.value || 1;
+    if(btn && !btn.disabled){
+      btn.disabled=true;
+      btn.innerHTML='<span class="jt-spin"></span> Redirecting to payment…';
+      btn.style.opacity='.9'; btn.style.cursor='wait';
+    }
     f.submit();
   };
 
