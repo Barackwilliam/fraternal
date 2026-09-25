@@ -4,12 +4,48 @@
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="alternate" type="application/rss+xml" title="JamiiTek Insights" href="/blog/feed/">
 <style>
-/* Navbar ya site ni transparent juu ya ukurasa (imeundwa kwa kurasa nyeusi).
-   Blog ni nyeupe — iwe solid daima ili menyu ionekane. */
-#site-nav .nav-inner{padding:14px 48px;background:rgba(0,1,10,.96);
+/* ── Blog light chrome ──
+   Site nzima imeundwa kwa mandhari nyeusi. Kwenye blog (gazeti jeupe) navbar,
+   menyu ya simu na footer zinapata mandhari nyeupe/bluu — hakuna vipande vyeusi. */
+body{background:#eef5fb}
+#site-nav .nav-inner,#site-nav.pinned .nav-inner{padding:14px 48px;background:rgba(255,255,255,.97);
   backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);
-  border-bottom:1px solid rgba(255,255,255,.08)}
-@media(max-width:991px){#site-nav .nav-inner{padding:14px 20px}}
+  border-bottom:1px solid #d9e4ee;box-shadow:none}
+@media(max-width:991px){#site-nav .nav-inner,#site-nav.pinned .nav-inner{padding:14px 20px}}
+#site-nav .nav-logo{color:#0f1720}
+#site-nav .nav-logo em{color:#0063b1}
+#site-nav .nav-logo-mark{background:#0063b1;border-color:#0063b1;color:#fff}
+#site-nav .nav-menu a{color:#4a5563}
+#site-nav .nav-menu a:hover,#site-nav .nav-menu a.active{color:#0063b1}
+#site-nav .nav-menu a::after{background:#0063b1;height:2px}
+#site-nav .nav-portal{color:#0063b1;border-color:#b9d4ec}
+#site-nav .nav-portal:hover{background:#e3effa;border-color:#0063b1;color:#0063b1}
+#site-nav .nav-cta{background:#0063b1;color:#fff !important;box-shadow:none}
+#site-nav .nav-cta::before{background:#004a86}
+#site-nav .nav-cta:hover{color:#fff !important;box-shadow:0 6px 18px rgba(0,99,177,.3)}
+#site-nav .nav-burger{border-color:#d9e4ee}
+#site-nav .nav-burger span{background:#0f1720}
+#mob-nav{background:rgba(255,255,255,.98);border-left:1px solid #d9e4ee}
+#mob-nav a{color:#2b3440;border-bottom-color:#e3ebf2}
+#mob-nav a:hover{color:#0063b1}
+#mob-nav .mob-cta-btn{background:#0063b1;color:#fff !important}
+#cursor-outer{border-color:#0063b1}
+#cursor-inner{background:#0063b1;box-shadow:none}
+
+/* Footer: bluu iliyokolea (kama magazeti) badala ya nyeusi */
+#site-footer{background:#0b2d4f;border-top:4px solid #0063b1}
+#site-footer::before{display:none}
+#site-footer .footer-logo{color:#fff}
+#site-footer .footer-logo em,#site-footer .footer-heading{color:#7cc0f5}
+#site-footer .footer-desc{color:rgba(255,255,255,.7)}
+#site-footer .footer-links a{color:rgba(255,255,255,.78)}
+#site-footer .footer-links a::before{content:none}
+#site-footer .footer-links a:hover{color:#fff}
+#site-footer .footer-socials a{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18);color:#fff}
+#site-footer .footer-socials a:hover{background:#0063b1;border-color:#0063b1;box-shadow:none}
+#site-footer .footer-bottom{border-top-color:rgba(255,255,255,.14)}
+#site-footer .footer-bottom p{color:rgba(255,255,255,.55)}
+#site-footer .footer-status{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18);color:rgba(255,255,255,.75)}
 
 .bz{--blue:#0063b1;--blue-d:#004a86;--blue-l:#e3effa;--sky:#eef5fb;--chip:#d8e9f8;--chip-t:#0b4f8a;
   --ink:#0f1720;--ink2:#2b3440;--muted:#687383;--line:#d9e4ee;--card:#fff;--navh:69px;
