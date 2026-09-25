@@ -473,7 +473,36 @@ class WebsiteTemplateAdmin(admin.ModelAdmin):
 # ============================================================
 # BLOG ADMIN
 # ============================================================
-from .models import BlogPost, BlogCategory
+from .models import BlogPost, BlogCategory, BlogAuthor, EDITOR_MARKER
+
+
+@admin.register(BlogAuthor)
+class BlogAuthorAdmin(admin.ModelAdmin):
+    list_display = ('name', 'role', 'user', 'post_count', 'is_active')
+    list_editable = ('is_active',)
+    prepopulated_fields = {'slug': ('name',)}
+    search_fields = ('name', 'role', 'bio')
+    fieldsets = (
+        (None, {'fields': ('name', 'slug', 'role', 'photo', 'bio'),
+                'description': 'Wasifu halisi wa mwandishi unaonyeshwa kwenye kila makala yake '
+                               'na kwenye ukurasa wake (/blog/author/…). Google inautumia kupima '
+                               'uaminifu (E-E-A-T).'}),
+        ('Links (sameAs)', {'fields': ('x_url', 'linkedin_url', 'website')}),
+        ('Account', {'fields': ('user', 'is_active'),
+                     'description': 'Ukiunganisha account ya admin, makala anazohariri '
+                                    'zinapewa jina lake moja kwa moja.'}),
+    )
+
+    @admin.display(description='Posts')
+    def post_count(self, obj):
+        return obj.posts.filter(status='published').count()
+
+    def formfield_for_dbfield(self, db_field, **kwargs):
+        formfield = super().formfield_for_dbfield(db_field, **kwargs)
+        if db_field.name == 'photo':
+            from .supabase_widget import SupabaseImageWidget
+            formfield.widget = SupabaseImageWidget(folder='authors', max_px=800)
+        return formfield
 
 
 @admin.register(BlogCategory)
@@ -485,8 +514,8 @@ class BlogCategoryAdmin(admin.ModelAdmin):
 @admin.register(BlogPost)
 class BlogPostAdmin(admin.ModelAdmin):
     save_on_top = True
-    list_display = ('title', 'status', 'category', 'is_featured', 'views', 'published_at')
-    list_filter = ('status', 'is_featured', 'category')
+    list_display = ('title', 'status', 'insight', 'category', 'author', 'is_featured', 'views', 'published_at')
+    list_filter = ('status', 'is_featured', 'category', 'author', 'is_news')
     search_fields = ('title', 'excerpt', 'body', 'focus_keyword')
     prepopulated_fields = {'slug': ('title',)}
     list_editable = ('status', 'is_featured')
@@ -501,7 +530,9 @@ class BlogPostAdmin(admin.ModelAdmin):
             'description': 'Leave meta fields blank to auto-use the title and excerpt.'
         }),
         ('Publishing', {
-            'fields': ('author_name', 'status', 'is_featured', 'published_at')
+            'fields': ('author', 'author_name', 'status', 'is_featured', 'published_at'),
+            'description': 'Author = mtu halisi (wasifu wake unaonyeshwa). Ukiacha tupu, '
+                           'wewe (kama una Blog author profile) unapewa makala hii.'
         }),
         ('Stats', {
             'fields': ('views', 'read_minutes', 'created_at', 'updated_at'),
@@ -509,12 +540,62 @@ class BlogPostAdmin(admin.ModelAdmin):
         }),
     )
 
+    actions = ['optimize_cover_images']
+
+    @admin.display(description='Insight')
+    def insight(self, obj):
+        # ✍️ = rasimu ya AI bado inasubiri uchambuzi wa mhariri
+        return '✍️ Needed' if EDITOR_MARKER in (obj.body or '') else '✓'
+
+    def save_model(self, request, obj, form, change):
+        # Mpe mhariri makala kama hakuna mwandishi aliyechaguliwa
+        if not obj.author_id:
+            prof = BlogAuthor.objects.filter(user=request.user, is_active=True).first()
+            if prof:
+                obj.author = prof
+        super().save_model(request, obj, form, change)
+
+        from django.contrib import messages
+        if obj.cover_image and (not change or 'cover_image' in form.changed_data):
+            from .blog_images import image_width
+            w = image_width(obj.cover_image)
+            if w and w < 1200:
+                messages.warning(request, (
+                    f'⚠️ Picha ya cover ina upana wa {w}px tu. Google Discover inahitaji '
+                    f'angalau 1200px ili kuonyesha picha kubwa — weka picha kubwa zaidi.'))
+        if obj.status == 'published' and not obj.author_id:
+            messages.warning(request, (
+                'Makala hii haina mwandishi halisi (Author). Tengeneza wasifu wako kwenye '
+                '"Blog authors" ili Google iione makala kama yenye mwandishi anayeaminika.'))
+
+    @admin.action(description='⚡ Optimize cover images (faster loading)')
+    def optimize_cover_images(self, request, queryset):
+        from django.contrib import messages
+        from .blog_images import optimize_cover
+        from .blog_views import bump_cache_version
+        done, skipped, errors = [], 0, []
+        for post in queryset[:40]:
+            status, note = optimize_cover(post)
+            if status == 'ok':
+                done.append(note)
+            elif status == 'error':
+                errors.append(f'{post.title[:40]}: {note}')
+            else:
+                skipped += 1
+        bump_cache_version()
+        if done:
+            self.message_user(request, f'⚡ Picha {len(done)} zimepunguzwa: ' + ', '.join(done[:8]))
+        if skipped:
+            self.message_user(request, f'Picha {skipped} zimerukwa (tayari ndogo / Unsplash / hakuna picha).')
+        for e in errors[:5]:
+            self.message_user(request, e, level=messages.ERROR)
+
     def formfield_for_dbfield(self, db_field, **kwargs):
         formfield = super().formfield_for_dbfield(db_field, **kwargs)
         if db_field.name == 'cover_image':
             # Kitufe cha kupakia picha (Supabase kupitia /manage/upload/)
             from .supabase_widget import SupabaseImageWidget
-            formfield.widget = SupabaseImageWidget(folder='blog')
+            formfield.widget = SupabaseImageWidget(folder='blog', max_px=1600, min_px=1200)
         if db_field.name == 'meta_title' and formfield is not None:
             # Help text ya model ina "<title>". Django admin inaonyesha help text
             # bila kuiescape, hivyo browser ilikuwa inaona tag halisi ya <title>

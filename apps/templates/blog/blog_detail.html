@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 {% load blog_extras %}
+{# Kasi: fonts za site (navbar/footer) hazizuii blog kuonekana #}
+{% block site_fonts %}<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;800&family=Exo+2:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" onload="this.onload=null;this.rel='stylesheet'"><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;800&family=Exo+2:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap"></noscript>{% endblock %}
 
 {% block title %}{{ post.meta_title|default:post.title }} | JamiiTek Insights{% endblock %}
 {% block meta_desc %}{{ post.meta_description|default:post.excerpt }}{% endblock %}
@@ -9,13 +11,20 @@
 {% block og_title %}{{ post.title }}{% endblock %}
 {% block og_desc %}{{ post.meta_description|default:post.excerpt }}{% endblock %}
 {% block og_url %}{{ canonical }}{% endblock %}
-{% block og_image %}{% if post.cover_image %}{{ post.cover_image }}{% else %}https://jamiitek.com/static/images/og-image.jpg{% endif %}{% endblock %}
+{% block og_image %}{% if post.cover_image %}{{ post.cover_image|img_ratio:"1.91:1" }}{% else %}https://jamiitek.com/static/images/og-image.jpg{% endif %}{% endblock %}
 {% block og_image_alt %}{{ post.title }}{% endblock %}
 {% block tw_title %}{{ post.title }}{% endblock %}
 {% block tw_desc %}{{ post.meta_description|default:post.excerpt }}{% endblock %}
-{% block tw_image %}{% if post.cover_image %}{{ post.cover_image }}{% else %}https://jamiitek.com/static/images/og-image.jpg{% endif %}{% endblock %}
+{% block tw_image %}{% if post.cover_image %}{{ post.cover_image|img_ratio:"1.91:1" }}{% else %}https://jamiitek.com/static/images/og-image.jpg{% endif %}{% endblock %}
 
 {% block extra_css %}
+{% if post.cover_image %}{# LCP: picha ya makala ianze kupakuliwa mapema kabisa #}
+<link rel="preconnect" href="{{ post.cover_image|img_host }}">
+<link rel="preload" as="image" href="{{ post.cover_image|img:900 }}"{% with ss=post.cover_image|srcset:"480,900,1400" %}{% if ss %} imagesrcset="{{ ss }}" imagesizes="(max-width:991px) 100vw, 820px"{% endif %}{% endwith %} fetchpriority="high">
+{% endif %}
+{% if post.focus_keyword %}<meta name="news_keywords" content="{{ post.focus_keyword }}">
+<meta property="article:tag" content="{{ post.focus_keyword }}">{% endif %}
+<meta property="article:publisher" content="https://jamiitek.com/">
 <meta property="article:published_time" content="{{ post.published_at|date:'c' }}">
 <meta property="article:modified_time" content="{{ post.updated_at|date:'c' }}">
 {% if post.category %}<meta property="article:section" content="{{ post.category.name }}">{% endif %}
@@ -59,6 +68,20 @@ figure.cover figcaption{font-size:12.5px;color:var(--muted);margin-top:8px}
 .source{display:flex;gap:12px;align-items:flex-start;background:var(--blue-l);border:1px solid #cfe2f4;border-radius:6px;padding:14px 16px;margin:26px 0 6px;font-size:14.5px;color:var(--ink2)}
 .source i{color:var(--blue);margin-top:3px}
 .source a{color:var(--blue);font-weight:600}
+.av-img{object-fit:cover;background:var(--sky)}
+.au-link{color:var(--ink);border-bottom:1px solid var(--line)}
+.au-link:hover{color:var(--blue);border-color:var(--blue)}
+.au-role{font-weight:500;color:var(--muted)}
+.au-box{display:flex;gap:16px;align-items:flex-start;margin:28px 0 0;padding:18px;border:1px solid var(--line);border-radius:6px;background:var(--sky)}
+.au-box img{width:72px;height:72px;border-radius:50%;object-fit:cover;flex-shrink:0}
+.au-box small{display:block;font-size:11.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+.au-box b{font-family:var(--serif);font-size:19px;color:var(--ink)}
+.au-box p{font-size:14.5px;color:var(--ink2);margin:6px 0 8px;line-height:1.55}
+.au-more{font-size:13.5px;font-weight:600;color:var(--blue)}
+.policy-note{font-size:13px;color:var(--muted);margin:18px 0 0;line-height:1.5}
+.policy-note i{color:var(--blue);margin-right:4px}
+.policy-note a{color:var(--blue);font-weight:600}
+@media(max-width:600px){.au-box{padding:14px;gap:12px}.au-box img,.au-box .av{width:56px!important;height:56px!important}}
 .share-end{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-top:28px;padding-top:18px;border-top:1px solid var(--line)}
 .share-end span{font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
 
@@ -154,10 +177,11 @@ figure.cover figcaption{font-size:12.5px;color:var(--muted);margin-top:8px}
 
           <div class="byline">
             <div class="who">
-              <span class="av" style="background:hsl({{ post.author_name|avatar_hue }},55%,42%)">{{ post.author_name|initial }}</span>
+              {% if post.author and post.author.photo %}<img class="av av-img" src="{{ post.author.photo }}" alt="{{ post.author.name }}" width="42" height="42">
+              {% else %}<span class="av" style="background:hsl({{ post.byline|avatar_hue }},55%,42%)">{{ post.byline|initial }}</span>{% endif %}
               <div>
-                <b>By {{ post.author_name }}</b>
-                <small><time datetime="{{ post.published_at|date:'c' }}">{{ post.published_at|date:'M j, Y · H:i' }}</time> · {{ post.read_minutes }} min read · {{ post.views }} views</small>
+                <b>By {% if post.author %}<a class="au-link" href="{% url 'blog_author' post.author.slug %}" rel="author">{{ post.author.name }}</a>{% if post.author.role %}<span class="au-role"> · {{ post.author.role }}</span>{% endif %}{% else %}{{ post.author_name }}{% endif %}</b>
+                <small><time datetime="{{ post.published_at|date:'c' }}">{{ post.published_at|date:'M j, Y · H:i' }}</time>{% if post.updated_at and post.published_at and post.updated_at|date:"U"|add:0 > post.published_at|date:"U"|add:3600 %} · Updated <time datetime="{{ post.updated_at|date:'c' }}">{{ post.updated_at|date:'M j, H:i' }}</time>{% endif %} · {{ post.read_minutes }} min read · {{ post.views }} views</small>
               </div>
             </div>
             <div class="shares" aria-label="Share">
@@ -172,7 +196,7 @@ figure.cover figcaption{font-size:12.5px;color:var(--muted);margin-top:8px}
 
           {% if post.cover_image %}
           <figure class="cover">
-            <div class="frame"><img class="img" src="{{ post.cover_image }}" alt="{{ post.title }}" fetchpriority="high"></div>
+            <div class="frame"><img class="img" src="{{ post.cover_image|img:900 }}"{% with ss=post.cover_image|srcset:"480,900,1400" %}{% if ss %} srcset="{{ ss }}" sizes="(max-width:991px) 100vw, 820px"{% endif %}{% endwith %} alt="{{ post.title }}" width="900" height="506" fetchpriority="high" decoding="async"></div>
             <figcaption>{% if post.is_news %}Illustrative photo{% if 'unsplash' in post.cover_image %} · Unsplash{% endif %}{% else %}{{ post.title }}{% endif %}</figcaption>
           </figure>
           {% endif %}
@@ -184,6 +208,21 @@ figure.cover figcaption{font-size:12.5px;color:var(--muted);margin-top:8px}
             <div>This report is based on information from <b>{{ post.source_name|default:"the original outlet" }}</b>. For developing details, <a href="{{ post.source_url }}" target="_blank" rel="noopener nofollow">read the original report</a>.</div>
           </div>
           {% endif %}
+
+          {% if post.author %}
+          <aside class="au-box" aria-label="About the author">
+            {% if post.author.photo %}<img src="{{ post.author.photo }}" alt="{{ post.author.name }}" width="72" height="72" loading="lazy">
+            {% else %}<span class="av" style="width:72px;height:72px;font-size:28px;background:hsl({{ post.author.name|avatar_hue }},55%,42%)">{{ post.author.name|initial }}</span>{% endif %}
+            <div>
+              <small>About the author</small>
+              <a href="{% url 'blog_author' post.author.slug %}" rel="author"><b>{{ post.author.name }}</b></a>{% if post.author.role %} <span class="au-role">· {{ post.author.role }}</span>{% endif %}
+              <p>{{ post.author.bio|truncatewords:60 }}</p>
+              <a class="au-more" href="{% url 'blog_author' post.author.slug %}">More from {{ post.author.name }} →</a>
+            </div>
+          </aside>
+          {% endif %}
+
+          <p class="policy-note"><i class="fa-solid fa-shield-halved"></i> Reviewed by a JamiiTek editor before publishing. {% if post.is_news %}AI tools help with research and first drafts; people check the facts and write the analysis. {% endif %}<a href="{% url 'blog_editorial' %}">Our editorial policy &amp; corrections</a></p>
 
           <div class="share-end">
             <span>Share this story</span>
@@ -285,7 +324,7 @@ figure.cover figcaption{font-size:12.5px;color:var(--muted);margin-top:8px}
         {% for r in related %}
         <a class="card" href="{% url 'blog_detail' r.slug %}">
           <div class="frame">
-            {% if r.cover_image %}<img class="img" src="{{ r.cover_image }}" alt="{{ r.title }}" loading="lazy">
+            {% if r.cover_image %}<img class="img" src="{{ r.cover_image|img:400 }}" alt="{{ r.title }}" width="400" height="250" loading="lazy" decoding="async">
             {% else %}<div class="img ph">{{ r.category.name|default:"J"|initial }}</div>{% endif %}
           </div>
           {% if r.category %}<span class="chip">{{ r.category.name }}</span>{% endif %}
@@ -302,7 +341,7 @@ figure.cover figcaption{font-size:12.5px;color:var(--muted);margin-top:8px}
       <a href="/get-started/">Start your project <i class="fa-solid fa-arrow-right"></i></a>
     </div>
   </div>
-  <div class="bz-bottom"></div>
+  {% include 'blog/_blogfoot.html' %}
 </div>
 
 <script type="application/ld+json">
@@ -311,10 +350,21 @@ figure.cover figcaption{font-size:12.5px;color:var(--muted);margin-top:8px}
   "@type": "{% if post.is_news %}NewsArticle{% else %}BlogPosting{% endif %}",
   "headline": "{{ post.title|escapejs }}",
   "description": "{{ post.excerpt|escapejs }}",
-  {% if post.cover_image %}"image": ["{{ post.cover_image }}"],{% endif %}
-  "author": {"@type": "Organization", "name": "{{ post.author_name|escapejs }}"},
-  "publisher": {"@type": "Organization", "name": "JamiiTek",
-    "logo": {"@type": "ImageObject", "url": "https://jamiitek.com/static/images/og-image.jpg"}},
+  {% if post.cover_image %}"image": ["{{ post.cover_image|img_ratio:'1:1' }}", "{{ post.cover_image|img_ratio:'4:3' }}", "{{ post.cover_image|img_ratio:'16:9' }}"],
+  "thumbnailUrl": "{{ post.cover_image|img:400 }}",{% endif %}
+  {% if post.author %}"author": {"@type": "Person", "name": "{{ post.author.name|escapejs }}",
+    "url": "{{ site_root }}{% url 'blog_author' post.author.slug %}"{% if post.author.role %}, "jobTitle": "{{ post.author.role|escapejs }}"{% endif %}{% if post.author.photo %}, "image": "{{ post.author.photo|escapejs }}"{% endif %}{% if post.author.same_as %},
+    "sameAs": [{% for u in post.author.same_as %}"{{ u|escapejs }}"{% if not forloop.last %}, {% endif %}{% endfor %}]{% endif %},
+    "worksFor": {"@id": "https://jamiitek.com/#org"}},
+  {% else %}"author": {"@type": "Organization", "name": "{{ post.author_name|default:'JamiiTek'|escapejs }}", "url": "https://jamiitek.com/About/"},{% endif %}
+  "publishingPrinciples": "{{ site_root }}{% url 'blog_editorial' %}",
+  "publisher": {"@type": "Organization", "@id": "https://jamiitek.com/#org", "name": "JamiiTek", "url": "https://jamiitek.com/",
+    "logo": {"@type": "ImageObject", "url": "https://jamiitek.com/static/images/apple-touch-icon.png", "width": 180, "height": 180}},
+  "inLanguage": "en",
+  "isAccessibleForFree": true,
+  "wordCount": {{ word_count }},
+  {% if post.focus_keyword %}"keywords": "{{ post.focus_keyword|escapejs }}",{% endif %}
+  {% if post.is_news and post.source_url %}"isBasedOn": "{{ post.source_url|escapejs }}",{% endif %}
   "datePublished": "{{ post.published_at|date:'c' }}",
   "dateModified": "{{ post.updated_at|date:'c' }}",
   "commentCount": {{ comment_count }},
@@ -327,13 +377,12 @@ figure.cover figcaption{font-size:12.5px;color:var(--muted);margin-top:8px}
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
   "itemListElement": [
-    {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.jamiitek.com/"},
-    {"@type": "ListItem", "position": 2, "name": "Insights", "item": "https://www.jamiitek.com/blog/"},
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": "{{ site_root }}/"},
+    {"@type": "ListItem", "position": 2, "name": "Insights", "item": "{{ site_root }}/blog/"},
     {"@type": "ListItem", "position": 3, "name": "{{ post.title|escapejs }}", "item": "{{ canonical }}"}
   ]
 }
 </script>
-{% if TURNSTILE_ENABLED %}<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>{% endif %}
 <script>
 function copyLink(btn){
   var url = "{{ canonical|escapejs }}";

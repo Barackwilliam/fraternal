@@ -1,7 +1,11 @@
 """
-AI Newsroom — kila siku inakagua matukio makubwa ya dunia, inachagua
-matano makubwa ya Tanzania na matano ya kimataifa, kisha inaandika RASIMU
-za makala za ubora wa juu (status='draft'). Mmiliki anakagua + Publish.
+AI Newsroom — kila siku inakagua habari za TEKNOLOJIA NA BIASHARA (Tanzania,
+Afrika Mashariki, dunia), inachagua chache muhimu zaidi (default 3), kisha
+inaandika RASIMU (status='draft'). Mhariri LAZIMA aandike sehemu ya
+"What this means for Tanzanian businesses" kabla ya kuchapisha — hiyo ndiyo
+thamani ya kipekee (original insight) ambayo Google Discover na sera ya Google
+dhidi ya "scaled content" zinahitaji. Makala yenye alama EDITOR_MARKER
+haiwezi kuchapishwa.
 
 Njia:
   1. fetch_headlines()  — kusanya vichwa vya habari kutoka RSS (TZ + dunia)
@@ -31,6 +35,20 @@ TIMEOUT = 60
 MODEL = os.getenv('GROQ_MODEL', 'llama-3.3-70b-versatile')
 
 # ── Vyanzo vya RSS ────────────────────────────────────────
+# Dawati kuu: teknolojia + biashara (eneo ambalo JamiiTek ina utaalamu).
+DESK_FEEDS = [
+    'https://techcabal.com/feed/',                         # Africa tech & fintech
+    'https://techpoint.africa/feed/',
+    'https://disrupt-africa.com/feed/',                    # African startups
+    'https://allafrica.com/tools/headlines/rdf/tanzania/headlines.rdf',
+    'https://dailynews.co.tz/feed/',
+    'https://feeds.bbci.co.uk/news/technology/rss.xml',
+    'https://feeds.bbci.co.uk/news/business/rss.xml',
+]
+DAILY_COUNT = int(os.getenv('NEWSROOM_DAILY', '3') or 3)
+DESK_LABEL = 'Tech & Business (Tanzania / East Africa focus)'
+
+# (Feeds za zamani — bado zinapatikana kwa --tz/--world kama utazihitaji)
 TZ_FEEDS = [
     'https://allafrica.com/tools/headlines/rdf/tanzania/headlines.rdf',
     'https://dailynews.co.tz/feed/',
@@ -110,10 +128,15 @@ def _domain(url):
 # ─────────────────────────────────────────────
 # 2. SELECT TOP N (Groq)
 # ─────────────────────────────────────────────
-_SELECT_SYS = """You are a senior news editor. From a list of headlines you will
-pick the N biggest, most newsworthy and distinct stories. Prefer major, widely
-significant events (politics, economy, major incidents, business, tech) over
-minor or duplicate items. Avoid choosing two headlines about the same event.
+_SELECT_SYS = """You are the senior editor of a Tanzanian technology & business
+publication read by business owners and entrepreneurs. From a list of headlines
+pick the N most important, distinct stories FOR THAT AUDIENCE: technology,
+digital economy, mobile money & fintech, telecoms, startups & funding, e-commerce,
+AI, cybersecurity, government policy/regulation or economic news that affects
+businesses in Tanzania / East Africa. Strongly prefer Tanzania and East Africa;
+include a global story only if it clearly affects local businesses.
+Skip crime, celebrity, sport, and general politics without a business angle.
+Avoid choosing two headlines about the same event.
 
 Output ONLY valid JSON, no markdown, schema:
 {"picks":[{"i": <index int>, "why": "<max 15 words why it's big>"}]}
@@ -163,7 +186,7 @@ not marketing.
 
 STRICT RULES:
 1. Output ONLY valid JSON, no markdown fences. Schema:
-   {"title","excerpt","body","meta_title","meta_description","focus_keyword","tags"}
+   {"title","excerpt","body","meta_title","meta_description","focus_keyword","tags","editor_questions"}
 2. "body" = clean HTML using ONLY <h2>,<h3>,<p>,<ul>,<li>,<strong>,<blockquote>.
    NO <html>,<head>,<style>,<script>,<img>, no inline styles. 450-800 words.
 3. Base every claim on the provided facts. DO NOT invent quotes, statistics,
@@ -178,7 +201,11 @@ STRICT RULES:
 8. "meta_title" max 60 chars. "meta_description" max 155 chars with keyword.
 9. "focus_keyword" = the main search term for this story.
 10. "tags" = array of 3-6 short topical tags.
-11. End the body with a short italic line noting readers should follow the
+11. Do NOT write analysis of what the story means for Tanzanian businesses —
+    a human editor writes that section. Instead return "editor_questions":
+    an array of 2-3 short, specific questions the editor could answer in that
+    section (e.g. "Will this change mobile money fees for small shops?").
+12. End the body with a short italic line noting readers should follow the
     original source for developing details.
 """
 
@@ -217,11 +244,16 @@ def write_article(event, region_label):
     if isinstance(tags, list):
         tags = ', '.join(str(t) for t in tags[:6])
 
+    qs = data.get('editor_questions') or []
+    if not isinstance(qs, list):
+        qs = [str(qs)]
+    body = _clean_html(body) + _editor_block([str(q)[:200] for q in qs[:3]])
+
     return True, {
         'title': title,
         'slug': _slug(title),
         'excerpt': (data.get('excerpt') or '').strip()[:320],
-        'body': _clean_html(body),
+        'body': body,
         'meta_title': (data.get('meta_title') or '').strip()[:70],
         'meta_description': (data.get('meta_description') or '').strip()[:170],
         'focus_keyword': (data.get('focus_keyword') or title).strip()[:100],
@@ -258,25 +290,33 @@ def unsplash_cover(query):
 # ─────────────────────────────────────────────
 # 5. ORCHESTRATE
 # ─────────────────────────────────────────────
-def run(tz_count=5, world_count=5):
+def run(count=None, tz_count=None, world_count=None):
     """
     Tengeneza rasimu za habari. Rudisha dict:
       {'created': [BlogPost,...], 'skipped': int, 'errors': [str,...]}
+
+    Default: dawati moja la Tech & Business, rasimu `NEWSROOM_DAILY` (3).
+    tz_count/world_count (hiari) = mtindo wa zamani wa Tanzania + World News.
     """
     from apps.models import BlogPost, BlogCategory
 
     created, errors = [], []
     skipped = 0
 
-    tz_cat, _ = BlogCategory.objects.get_or_create(
-        slug='tanzania-news', defaults={'name': 'Tanzania News'})
-    world_cat, _ = BlogCategory.objects.get_or_create(
-        slug='world-news', defaults={'name': 'World News'})
-
-    plan = [
-        ('Tanzania', tz_count, tz_cat, TZ_FEEDS),
-        ('International', world_count, world_cat, WORLD_FEEDS),
-    ]
+    if tz_count or world_count:
+        tz_cat, _ = BlogCategory.objects.get_or_create(
+            slug='tanzania-news', defaults={'name': 'Tanzania News'})
+        world_cat, _ = BlogCategory.objects.get_or_create(
+            slug='world-news', defaults={'name': 'World News'})
+        plan = [
+            ('Tanzania', tz_count or 0, tz_cat, TZ_FEEDS),
+            ('International', world_count or 0, world_cat, WORLD_FEEDS),
+        ]
+    else:
+        desk_cat, _ = BlogCategory.objects.get_or_create(
+            slug='tech-business', defaults={'name': 'Tech & Business'})
+        plan = [(DESK_LABEL, count or DAILY_COUNT, desk_cat, DESK_FEEDS)]
+    plan = [p for p in plan if p[1] > 0]
 
     recent_titles = set(
         BlogPost.objects.filter(created_at__gte=timezone.now() - timedelta(days=7))
@@ -327,7 +367,7 @@ def run(tz_count=5, world_count=5):
     return {'created': created, 'skipped': skipped, 'errors': errors}
 
 
-def run_and_notify(tz_count=5, world_count=5):
+def run_and_notify(count=None, tz_count=None, world_count=None):
     """
     Endesha newsroom kisha mjulishe mmiliki KWA VYOVYOTE:
       • zikiandaliwa → email ya kukagua rasimu
@@ -336,7 +376,7 @@ def run_and_notify(tz_count=5, world_count=5):
     """
     from apps.utils import email_notifications as en
     try:
-        result = run(tz_count=tz_count, world_count=world_count)
+        result = run(count=count, tz_count=tz_count, world_count=world_count)
     except Exception as e:
         logger.exception('AI newsroom run failed')
         result = {'created': [], 'skipped': 0, 'errors': [f'Crash: {type(e).__name__}: {e}']}
@@ -355,6 +395,20 @@ def run_and_notify(tz_count=5, world_count=5):
 
 
 # ── helpers ───────────────────────────────────
+def _editor_block(questions):
+    """Sehemu ambayo mhariri LAZIMA aijaze kabla ya kuchapisha."""
+    from django.utils.html import escape
+    from apps.models import EDITOR_MARKER
+    items = ''.join(f'<li>{escape(q)}</li>' for q in questions if q.strip())
+    return (
+        '<h2>What this means for Tanzanian businesses</h2>\n'
+        f'<p>{EDITOR_MARKER} Replace this paragraph with your own analysis: the local '
+        'impact, numbers you know, advice for business owners, or your expert view. '
+        'Delete this note and the questions below when done.</p>\n'
+        + (f'<ul>{items}</ul>\n' if items else '')
+    )
+
+
 FALLBACK_MODELS = ['llama-3.3-70b-versatile', 'openai/gpt-oss-120b', 'llama-3.1-8b-instant']
 
 

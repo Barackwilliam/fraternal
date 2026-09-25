@@ -31,9 +31,16 @@ class SupabaseImageWidget(forms.TextInput):
                 widgets = {'image': SupabaseImageWidget(folder='services')}
     """
 
-    def __init__(self, attrs=None, folder='media', help_text=''):
+    def __init__(self, attrs=None, folder='media', help_text='', max_px=None, min_px=None):
         self.folder = folder
         self.extra_help = help_text
+        # max_px: picha inapunguzwa kwenye browser KABLA ya kupakia (upande mrefu
+        # usizidi max_px, WebP ~82%). Picha ya simu ya 4MB inakuwa ~150-250KB →
+        # ukurasa unafunguka haraka. None = pakia kama ilivyo (tabia ya zamani).
+        self.max_px = int(max_px or 0)
+        # min_px: onyo (si kizuizi) picha ikiwa nyembamba kuliko hii — mf. 1200 kwa
+        # Google Discover.
+        self.min_px = int(min_px or 0)
         super().__init__(attrs)
 
     class Media:
@@ -67,7 +74,7 @@ class SupabaseImageWidget(forms.TextInput):
         }, renderer)
 
         return mark_safe(f'''
-<div class="sb-up" data-folder="{self.folder}" style="display:grid;gap:10px;max-width:520px">
+<div class="sb-up" data-folder="{self.folder}" data-max="{self.max_px}" data-min="{self.min_px}" style="display:grid;gap:10px;max-width:520px">
   <div id="{field_id}_preview">{preview}</div>
 
   <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
@@ -104,17 +111,60 @@ class SupabaseImageWidget(forms.TextInput):
     return el ? el.value : '';
   }}
 
+  var maxPx = parseInt(file.closest('.sb-up').dataset.max || '0', 10);
+  var minPx = parseInt(file.closest('.sb-up').dataset.min || '0', 10);
+  var origW = 0;
+
+  function measure(f) {{
+    return new Promise(function (resolve) {{
+      if (!minPx || !/^image\//i.test(f.type)) return resolve(0);
+      var u = URL.createObjectURL(f), im = new Image();
+      im.onload = function () {{ URL.revokeObjectURL(u); resolve(im.naturalWidth); }};
+      im.onerror = function () {{ URL.revokeObjectURL(u); resolve(0); }};
+      im.src = u;
+    }});
+  }}
+
+  // Punguza picha kwenye browser (canvas → WebP/JPEG). GIF/PDF/SVG haziguswi.
+  function shrink(f) {{
+    return new Promise(function (resolve) {{
+      if (!maxPx || !/^image\/(jpeg|png|webp)$/i.test(f.type)) return resolve(f);
+      var url = URL.createObjectURL(f), im = new Image();
+      im.onload = function () {{
+        var w = im.naturalWidth, h = im.naturalHeight, k = Math.min(1, maxPx / Math.max(w, h));
+        if (k === 1 && f.size < 400 * 1024) {{ URL.revokeObjectURL(url); return resolve(f); }}
+        var c = document.createElement('canvas');
+        c.width = Math.round(w * k); c.height = Math.round(h * k);
+        var ctx = c.getContext('2d');
+        ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height);   // PNG yenye uwazi
+        ctx.drawImage(im, 0, 0, c.width, c.height);
+        URL.revokeObjectURL(url);
+        c.toBlob(function (b) {{
+          if (!b || b.size >= f.size) return resolve(f);
+          var ext = b.type === 'image/webp' ? 'webp' : 'jpg';
+          resolve(new File([b], (f.name || 'image').replace(/\.[^.]+$/, '') + '.' + ext, {{ type: b.type }}));
+        }}, 'image/webp', 0.82);
+      }};
+      im.onerror = function () {{ URL.revokeObjectURL(url); resolve(f); }};
+      im.src = url;
+    }});
+  }}
+
   file.addEventListener('change', function () {{
-    var f = file.files[0];
-    if (!f) return;
-    msg.textContent = 'Inapakia…';
+    var original = file.files[0];
+    if (!original) return;
+    msg.textContent = maxPx ? 'Inaandaa picha…' : 'Inapakia…';
     msg.style.color = '#666';
+
+    measure(original).then(function (w) {{ origW = w; return shrink(original); }}).then(function (f) {{
+    if (f !== original) msg.textContent = 'Inapakia… (' + Math.round(original.size / 1024) + 'KB → ' + Math.round(f.size / 1024) + 'KB)';
+    else msg.textContent = 'Inapakia…';
 
     var fd = new FormData();
     fd.append('file', f);
     fd.append('folder', folder);
 
-    fetch('/manage/upload/', {{
+    return fetch('/manage/upload/', {{
       method: 'POST',
       headers: {{ 'X-CSRFToken': csrf() }},
       body: fd,
@@ -129,6 +179,10 @@ class SupabaseImageWidget(forms.TextInput):
         input.value = d.url;
         msg.textContent = 'Imepakiwa';
         msg.style.color = '#059669';
+        if (minPx && origW && origW < minPx) {{
+          msg.textContent = 'Imepakiwa — ⚠️ upana ni ' + origW + 'px; Google Discover inahitaji angalau ' + minPx + 'px. Tumia picha kubwa zaidi.';
+          msg.style.color = '#b45309';
+        }}
         if (d.url.toLowerCase().endsWith('.pdf')) {{
           preview.innerHTML = '<a href="' + d.url + '" target="_blank" rel="noopener">Fungua PDF</a>';
         }} else {{
@@ -142,6 +196,7 @@ class SupabaseImageWidget(forms.TextInput):
         msg.style.color = '#dc2626';
       }})
       .finally(function () {{ file.value = ''; }});
+    }});
   }});
 }})();
 </script>

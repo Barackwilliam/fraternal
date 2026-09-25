@@ -69,13 +69,31 @@ class BlogSitemap(Sitemap):
 
     def items(self):
         from apps.models import BlogPost
-        return list(BlogPost.objects.filter(status='published').order_by('-published_at'))
+        # .only(): bila kupakia body ya kila makala (sitemap ingekuwa nzito sana)
+        return list(BlogPost.objects.filter(status='published').order_by('-published_at')
+                    .only('slug', 'updated_at', 'published_at'))
 
     def location(self, item):
         return reverse('blog_detail', kwargs={'slug': item.slug})
 
     def lastmod(self, item):
         return item.updated_at or item.published_at
+
+
+class BlogAuthorSitemap(Sitemap):
+    """Kurasa za waandishi + sera ya uhariri (E-E-A-T)."""
+    protocol = 'https'
+    changefreq = 'weekly'
+    priority = 0.5
+
+    def items(self):
+        from apps.models import BlogAuthor
+        return ['__policy__'] + list(BlogAuthor.objects.filter(is_active=True).order_by('pk'))
+
+    def location(self, item):
+        if item == '__policy__':
+            return reverse('blog_editorial')
+        return reverse('blog_author', args=[item.slug])
 
 
 class BlogIndexSitemap(Sitemap):
@@ -102,4 +120,5 @@ sitemaps = {
     'services':   ServiceSitemap(),
     'blog_index': BlogIndexSitemap(),
     'blog':       BlogSitemap(),
+    'blog-authors': BlogAuthorSitemap(),
 }

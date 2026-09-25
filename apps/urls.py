@@ -99,6 +99,8 @@ urlpatterns = [
     # ── BLOG ──────────────────────────────────────────────
     path('blog/', blog_views.blog_list, name='blog_list'),
     path('blog/feed/', BlogFeed(), name='blog_feed'),
+    path('blog/editorial-policy/', blog_views.editorial_policy, name='blog_editorial'),
+    path('blog/author/<slug:slug>/', blog_views.blog_author, name='blog_author'),
     path('blog/<slug:slug>/', blog_views.blog_detail, name='blog_detail'),
     path('blog/<slug:slug>/comment/', blog_views.blog_comment, name='blog_comment'),
 

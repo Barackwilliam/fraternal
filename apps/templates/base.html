@@ -62,7 +62,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
 
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;800&family=Exo+2:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  {% block site_fonts %}<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;800&family=Exo+2:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">{% endblock %}
 
   <!-- grid only: ~70 KB instead of the full ~230 KB -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap-grid.min.css" rel="stylesheet">
@@ -248,9 +248,9 @@ document.querySelectorAll('[data-tilt]').forEach(card=>{
 {% block extra_js %}{% endblock %}
 {% include 'includes/skeleton_boot.html' %}
 {% include 'includes/offline_guard.html' %}
-{% if TURNSTILE_ENABLED %}
+{% block turnstile_js %}{% if TURNSTILE_ENABLED %}
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-{% endif %}
+{% endif %}{% endblock %}
 <script src="{% static 'js/interaction.js' %}" defer></script>
 
 </body>

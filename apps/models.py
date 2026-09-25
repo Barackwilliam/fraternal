@@ -975,6 +975,43 @@ class BlogCategory(models.Model):
         return self.name
 
 
+# Alama inayowekwa na AI newsroom mahali ambapo mhariri LAZIMA aandike uchambuzi
+# wake. Makala yenye alama hii haiwezi kuchapishwa (BlogPost.clean).
+EDITOR_MARKER = '[[EDITOR-INSIGHT]]'
+
+
+class BlogAuthor(models.Model):
+    """Mwandishi/mhariri halisi — jina, wasifu na picha (E-E-A-T kwa Google)."""
+    name = models.CharField(max_length=80)
+    slug = models.SlugField(max_length=90, unique=True)
+    role = models.CharField(max_length=100, blank=True,
+                            help_text='E.g. "Founder & Editor", "Tech Reporter".')
+    bio = models.TextField(max_length=1200,
+                           help_text='2-4 sentences: experience, what you cover, why readers can trust you.')
+    photo = models.URLField(blank=True, help_text='Square photo of the real person (400x400+).')
+    user = models.OneToOneField('auth.User', on_delete=models.SET_NULL, null=True, blank=True,
+                                related_name='blog_author',
+                                help_text='Admin account of this author — their edits are credited automatically.')
+    x_url = models.URLField('X / Twitter URL', blank=True)
+    linkedin_url = models.URLField('LinkedIn URL', blank=True)
+    website = models.URLField(blank=True)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
+
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('blog_author', args=[self.slug])
+
+    @property
+    def same_as(self):
+        return [u for u in (self.x_url, self.linkedin_url, self.website) if u]
+
+
 class BlogPost(models.Model):
     STATUS = [('draft', 'Draft'), ('published', 'Published')]
 
@@ -998,6 +1035,10 @@ class BlogPost(models.Model):
                                      help_text='Main keyword this post targets, e.g. "website builder Tanzania"')
 
     author_name = models.CharField(max_length=80, default='JamiiTek')
+    author = models.ForeignKey(BlogAuthor, on_delete=models.SET_NULL, null=True, blank=True,
+                               related_name='posts',
+                               help_text='Real author shown on the article (with bio). '
+                                         'Leave empty to credit yourself automatically.')
     status = models.CharField(max_length=10, choices=STATUS, default='draft')
     is_featured = models.BooleanField(default=False, help_text='Show at top of blog')
 
@@ -1026,8 +1067,23 @@ class BlogPost(models.Model):
             self.published_at = timezone.now()
         super().save(*args, **kwargs)
 
+    def clean(self):
+        from django.core.exceptions import ValidationError
+        if self.status == 'published' and EDITOR_MARKER in (self.body or ''):
+            raise ValidationError({'body': (
+                'Andika uchambuzi wako kwenye sehemu ya "What this means for Tanzanian '
+                'businesses" (futa alama ' + EDITOR_MARKER + ') kabla ya kuchapisha.')})
+
+    @property
+    def byline(self):
+        return self.author.name if self.author_id else (self.author_name or 'JamiiTek')
+
     @property
     def read_minutes(self):
+        # Orodha za blog hazipakii `body` (kasi) — zinaleta `body_len` badala yake.
+        n = getattr(self, 'body_len', None)
+        if n is not None:
+            return max(1, round(n / 6 / 200))     # ~6 herufi kwa neno (pamoja na HTML)
         words = len(self.body.split())
         return max(1, round(words / 200))
 

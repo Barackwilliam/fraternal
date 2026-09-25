@@ -2,7 +2,7 @@
 AI Newsroom — kila siku inaandika RASIMU za habari kubwa (TZ + dunia).
 
     python manage.py daily_news_blog
-    python manage.py daily_news_blog --tz 5 --world 5 --no-email
+    python manage.py daily_news_blog --count 3 --no-email
 
 Inatengeneza BlogPost status='draft'. Baada ya kumaliza, inatuma email
 kwa mmiliki kukumbusha kukagua na kuthibitisha. Endesha kwa cron/scheduler
@@ -15,8 +15,10 @@ class Command(BaseCommand):
     help = 'AI inaandika rasimu za habari kubwa za siku (Tanzania + kimataifa)'
 
     def add_arguments(self, parser):
-        parser.add_argument('--tz', type=int, default=5, help='Idadi ya habari za Tanzania (default 5)')
-        parser.add_argument('--world', type=int, default=5, help='Idadi ya habari za kimataifa (default 5)')
+        parser.add_argument('--count', type=int, default=None,
+                            help='Rasimu ngapi za Tech & Business (default NEWSROOM_DAILY au 3)')
+        parser.add_argument('--tz', type=int, default=None, help='(Mtindo wa zamani) habari za Tanzania')
+        parser.add_argument('--world', type=int, default=None, help='(Mtindo wa zamani) habari za kimataifa')
         parser.add_argument('--no-email', action='store_true', help='Usitume email ya kukagua')
 
     def handle(self, *args, **opts):
@@ -24,9 +26,9 @@ class Command(BaseCommand):
 
         self.stdout.write('AI newsroom inaanza kukusanya na kuandika habari…')
         if opts['no_email']:
-            result = news_blog.run(tz_count=opts['tz'], world_count=opts['world'])
+            result = news_blog.run(count=opts['count'], tz_count=opts['tz'], world_count=opts['world'])
         else:
-            result = news_blog.run_and_notify(tz_count=opts['tz'], world_count=opts['world'])
+            result = news_blog.run_and_notify(count=opts['count'], tz_count=opts['tz'], world_count=opts['world'])
 
         created = result['created']
         self.stdout.write(self.style.SUCCESS(

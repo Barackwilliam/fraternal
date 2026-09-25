@@ -1,17 +1,26 @@
 {# Shared blog styles — mtindo wa gazeti (The Citizen), mobile-first. #}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+{# Fonts hazizuii ukurasa: maandishi yanaonekana papo hapo, font za blog zinaingia zikifika. #}
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Inter:wght@400;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Inter:wght@400;600;700&display=swap"></noscript>
 <link rel="alternate" type="application/rss+xml" title="JamiiTek Insights" href="/blog/feed/">
 <style>
 /* ── Blog light chrome ──
    Site nzima imeundwa kwa mandhari nyeusi. Kwenye blog (gazeti jeupe) navbar,
    menyu ya simu na footer zinapata mandhari nyeupe/bluu — hakuna vipande vyeusi. */
-body{background:#eef5fb}
+html,body{background:#eef5fb}
+/* site.css ina overflow-x:hidden kwenye html/body — hiyo inageuza body kuwa scroll
+   container na kuvunja position:sticky (bar ya bluu haikubaki juu). `clip` inazuia
+   horizontal scroll bila kuvunja sticky. */
+html,body{overflow-x:clip}
+/* Loader nyeusi ya site ("INITIALIZING · JAMIITEK") inasubiri kila picha ipakie —
+   kwenye blog inaonekana kama flash nyeusi. Habari zionekane mara moja. */
+#q-loader{display:none !important}
 #site-nav .nav-inner,#site-nav.pinned .nav-inner{padding:14px 48px;background:rgba(255,255,255,.97);
   backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);
   border-bottom:1px solid #d9e4ee;box-shadow:none}
-@media(max-width:991px){#site-nav .nav-inner,#site-nav.pinned .nav-inner{padding:14px 20px}}
+@media(max-width:991px){ #site-nav .nav-inner,#site-nav.pinned .nav-inner{padding:14px 20px}}
 #site-nav .nav-logo{color:#0f1720}
 #site-nav .nav-logo em{color:#0063b1}
 #site-nav .nav-logo-mark{background:#0063b1;border-color:#0063b1;color:#fff}
@@ -138,6 +147,14 @@ a:hover .frame .img{transform:scale(1.035)}
 .li .frame{aspect-ratio:1/1}
 .li .hl{font-size:20px;margin:7px 0 7px}
 @media(max-width:600px){.li{grid-template-columns:96px 1fr;gap:12px;padding:14px 0}.li .hl{font-size:17px;margin:6px 0}}
+
+/* Strip ya chini ya blog (sera ya uhariri, waandishi, RSS) */
+.bz-foot{border-top:1px solid var(--line);background:#fff;padding:16px 0;margin-top:40px}
+.bz-foot .bz-wrap{display:flex;align-items:center;justify-content:space-between;gap:10px 20px;flex-wrap:wrap;font-size:13.5px;color:var(--muted)}
+.bz-foot b{color:var(--ink)}
+.bz-foot nav{display:flex;gap:6px 16px;flex-wrap:wrap}
+.bz-foot a{font-weight:600;color:var(--ink2)}
+.bz-foot a:hover{color:var(--blue)}
 
 /* Pagination */
 .pager{display:flex;justify-content:center;align-items:center;gap:8px;margin:34px 0 10px;flex-wrap:wrap}

@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+{% load blog_extras %}
+{% block site_fonts %}<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;800&family=Exo+2:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" onload="this.onload=null;this.rel='stylesheet'"><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;800&family=Exo+2:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap"></noscript>{% endblock %}
+{% block turnstile_js %}{% endblock %}
+
+{% block title %}{{ author.name }}{% if author.role %}, {{ author.role }}{% endif %}{% if page.number > 1 %} (Page {{ page.number }}){% endif %} | JamiiTek Insights{% endblock %}
+{% block meta_desc %}{{ author.bio|truncatechars:155 }}{% endblock %}
+{% block meta_keywords %}{{ author.name }}, JamiiTek Insights, Tanzania tech news, Tanzania business news{% endblock %}
+{% block canonical %}{{ canonical }}{% endblock %}
+{% block og_type %}profile{% endblock %}
+{% block og_title %}{{ author.name }} — JamiiTek Insights{% endblock %}
+{% block og_desc %}{{ author.bio|truncatechars:200 }}{% endblock %}
+{% block og_url %}{{ canonical }}{% endblock %}
+{% block og_image %}{% if author.photo %}{{ author.photo }}{% else %}https://jamiitek.com/static/images/og-image.jpg{% endif %}{% endblock %}
+{% block tw_title %}{{ author.name }} — JamiiTek Insights{% endblock %}
+{% block tw_desc %}{{ author.bio|truncatechars:200 }}{% endblock %}
+
+{% block extra_css %}
+{% include 'blog/_styles.html' %}
+<style>
+.au-page{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:36px;align-items:start;padding:28px 0 20px}
+.au-card{display:flex;gap:22px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:6px;padding:26px 28px;margin-bottom:22px}
+.au-card .ph-img{width:112px;height:112px;border-radius:50%;object-fit:cover;flex-shrink:0;background:var(--sky)}
+.au-card .av{width:112px;height:112px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:42px;flex-shrink:0}
+.au-card h1{font-family:var(--serif);font-size:clamp(28px,3.6vw,38px);font-weight:700;color:var(--ink);margin:0 0 4px;line-height:1.1}
+.au-card .role{font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--blue);margin:0 0 12px}
+.au-card p{font-family:var(--serif);font-size:18px;line-height:1.6;color:var(--ink2);margin:0 0 14px}
+.au-links{display:flex;gap:8px;flex-wrap:wrap}
+.au-links a{display:inline-flex;align-items:center;gap:7px;font-size:13.5px;font-weight:600;padding:7px 12px;border:1px solid var(--line);border-radius:999px;color:var(--ink2);background:#fff}
+.au-links a:hover{border-color:var(--blue);color:var(--blue)}
+.results-list{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:4px 22px}
+.list-h{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--ink);margin:0 0 12px}
+.empty{background:var(--card);border:1px dashed var(--line);border-radius:8px;padding:40px 20px;text-align:center;color:var(--muted)}
+@media(max-width:860px){.au-page{grid-template-columns:1fr}}
+@media(max-width:600px){.au-card{flex-direction:column;gap:14px;padding:20px 16px}.au-card .ph-img,.au-card .av{width:88px;height:88px}.results-list{padding:2px 14px}}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="bz">
+  {% include 'blog/_masthead.html' %}
+  <div class="bz-wrap">
+    <div class="au-page">
+      <div>
+        <section class="au-card">
+          {% if author.photo %}<img class="ph-img" src="{{ author.photo }}" alt="{{ author.name }}" width="112" height="112">
+          {% else %}<span class="av" style="background:hsl({{ author.name|avatar_hue }},55%,42%)">{{ author.name|initial }}</span>{% endif %}
+          <div>
+            <h1>{{ author.name }}</h1>
+            {% if author.role %}<div class="role">{{ author.role }}</div>{% endif %}
+            <p>{{ author.bio|linebreaksbr }}</p>
+            <div class="au-links">
+              {% if author.x_url %}<a href="{{ author.x_url }}" target="_blank" rel="noopener me"><i class="fa-brands fa-x-twitter"></i> X</a>{% endif %}
+              {% if author.linkedin_url %}<a href="{{ author.linkedin_url }}" target="_blank" rel="noopener me"><i class="fa-brands fa-linkedin-in"></i> LinkedIn</a>{% endif %}
+              {% if author.website %}<a href="{{ author.website }}" target="_blank" rel="noopener me"><i class="fa-solid fa-globe"></i> Website</a>{% endif %}
+              <a href="{% url 'blog_editorial' %}"><i class="fa-solid fa-shield-halved"></i> Editorial policy</a>
+            </div>
+          </div>
+        </section>
+
+        <h2 class="list-h">{{ post_count }} {% if post_count == 1 %}story{% else %}stories{% endif %} by {{ author.name }}</h2>
+        {% if posts %}
+        <div class="results-list">
+          {% for p in posts %}
+          <a class="li" href="{% url 'blog_detail' p.slug %}">
+            <div class="frame">
+              {% if p.cover_image %}<img class="img" src="{{ p.cover_image|img:400 }}" alt="{{ p.title }}" width="400" height="250" loading="lazy" decoding="async">
+              {% else %}<div class="img ph" style="font-size:28px">{{ p.category.name|default:"J"|initial }}</div>{% endif %}
+            </div>
+            <div>
+              {% if p.category %}<span class="chip">{{ p.category.name }}</span>{% endif %}
+              <h3 class="hl">{{ p.title }}</h3>
+              <div class="meta"><span>{{ p.published_at|ago }}</span><span class="sep">·</span><span>{{ p.read_minutes }} min read</span></div>
+            </div>
+          </a>
+          {% endfor %}
+        </div>
+        {% include 'blog/_pager.html' %}
+        {% else %}
+        <div class="empty">No published stories yet.</div>
+        {% endif %}
+      </div>
+
+      <aside class="rail">
+        {% if most_read %}
+        <div class="rail-box">
+          <h3>Most read</h3>
+          {% for m in most_read %}
+          <a class="mr" href="{% url 'blog_detail' m.slug %}"><b>{{ forloop.counter }}</b><div class="hl">{{ m.title }}</div></a>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </aside>
+    </div>
+  </div>
+  {% include 'blog/_blogfoot.html' %}
+</div>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ProfilePage",
+  "url": "{{ canonical }}",
+  "mainEntity": {
+    "@type": "Person",
+    "name": "{{ author.name|escapejs }}",
+    "url": "{{ site_root }}{% url 'blog_author' author.slug %}",
+    {% if author.role %}"jobTitle": "{{ author.role|escapejs }}",{% endif %}
+    {% if author.photo %}"image": "{{ author.photo|escapejs }}",{% endif %}
+    "description": "{{ author.bio|escapejs }}",
+    {% if author.same_as %}"sameAs": [{% for u in author.same_as %}"{{ u|escapejs }}"{% if not forloop.last %}, {% endif %}{% endfor %}],{% endif %}
+    "worksFor": {"@type": "Organization", "@id": "https://jamiitek.com/#org", "name": "JamiiTek", "url": "https://jamiitek.com/"}
+  }
+}
+</script>
+{% endblock %}

@@ -983,8 +983,10 @@ def news_blog_endpoint(request):
 
         https://jamiitek.com/tasks/news/?token=XXXXX
 
-    Inafanya kazi MARA MOJA kwa siku. Kazi halisi (AI + RSS) inafanyika kwenye
-    thread ya nyuma; jibu linarudi mara moja. ?force=1 kulazimisha.
+    Inafanya kazi MARA MOJA kwa siku, baada ya saa NEWSROOM_HOUR (default 05:00 EAT).
+    Inafaa kwa cron-job.org (mara moja kwa siku) au UptimeRobot (kila dakika 5 —
+    pia inazuia Render isilale). Kazi halisi (AI + RSS) inafanyika kwenye thread
+    ya nyuma; jibu linarudi mara moja. ?force=1 kulazimisha.
     """
     import os
     import threading
@@ -1000,9 +1002,22 @@ def news_blog_endpoint(request):
     if not secrets.compare_digest(str(given), str(expected)):
         return JsonResponse({'ok': False, 'error': 'Invalid token.'}, status=403)
 
-    today = _date.today().isoformat()
+    from django.utils import timezone as _tz
+    now = _tz.localtime()                      # saa za Tanzania (TIME_ZONE)
+    today = now.date().isoformat()
     force = request.GET.get('force') in ('1', 'true', 'yes')
     CACHE_KEY = 'news_blog_ran_date'
+
+    # Saa ya kuanza (default 05:00). Inaruhusu monitor inayopiga kila dakika 5
+    # (UptimeRobot) — maombi kabla ya saa hii yanajibiwa 'waiting' bila kazi yoyote,
+    # na ombi la kwanza baada yake ndilo linaloanzisha newsroom (mara moja kwa siku).
+    try:
+        start_hour = int(os.getenv('NEWSROOM_HOUR', '5'))
+    except ValueError:
+        start_hour = 5
+    if not force and now.hour < start_hour:
+        return JsonResponse({'ok': True, 'status': 'waiting',
+                             'runs_at': f'{start_hour:02d}:00', 'date': today})
 
     try:
         already = cache.get(CACHE_KEY) == today

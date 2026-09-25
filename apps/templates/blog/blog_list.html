@@ -1,18 +1,29 @@
 {% extends 'base.html' %}
 {% load blog_extras %}
+{# Kasi: fonts za site (navbar/footer) hazizuii blog kuonekana #}
+{% block site_fonts %}<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;800&family=Exo+2:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" onload="this.onload=null;this.rel='stylesheet'"><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;800&family=Exo+2:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap"></noscript>{% endblock %}
 
-{% block title %}{% if active_cat %}{{ active_cat.name }} — {% elif q %}Search: {{ q }} — {% endif %}JamiiTek Insights: Tanzania & World News, Digital Tips{% endblock %}
-{% block meta_desc %}JamiiTek Insights: daily Tanzania and world news, plus practical guides on websites, WhatsApp bots, SEO and going digital for Tanzanian businesses.{% endblock %}
-{% block canonical %}https://jamiitek.com/blog/{% if active_cat %}?category={{ active_cat.slug }}{% endif %}{% endblock %}
+{% block title %}{% if active_cat %}{{ active_cat.name }}: Latest {{ active_cat.name }} Today{% if page.number > 1 %} (Page {{ page.number }}){% endif %} | JamiiTek Insights{% elif q %}Search: {{ q }} | JamiiTek Insights{% else %}JamiiTek Insights: Tanzania Tech &amp; Business News Today{% if page.number > 1 %} (Page {{ page.number }}){% endif %}{% endif %}{% endblock %}
+{% block meta_desc %}{% if active_cat %}Latest {{ active_cat.name }} stories from JamiiTek Insights: breaking updates, analysis and what it means for Tanzania. Updated daily.{% else %}Tanzania and East Africa tech &amp; business news with analysis for business owners: fintech, mobile money, startups, telecoms, AI and practical digital guides.{% endif %}{% endblock %}
+{% block meta_keywords %}{% if active_cat %}{{ active_cat.name }}, {{ active_cat.name }} today, {% endif %}Tanzania tech news, Tanzania business news, fintech Tanzania, mobile money, East Africa startups, habari za teknolojia, JamiiTek Insights{% endblock %}
+{% block canonical %}https://jamiitek.com/blog/{% if active_cat %}?category={{ active_cat.slug }}{% if page.number > 1 %}&page={{ page.number }}{% endif %}{% elif page.number > 1 %}?page={{ page.number }}{% endif %}{% endblock %}
 {% block meta_robots %}{% if q %}noindex, follow{% else %}index, follow, max-image-preview:large, max-snippet:-1{% endif %}{% endblock %}
-{% block og_title %}JamiiTek Insights — Tanzania & World News, Digital Tips{% endblock %}
-{% block og_desc %}Daily Tanzania & world news plus practical digital guides for businesses.{% endblock %}
+{% block og_title %}JamiiTek Insights — Tanzania Tech &amp; Business News{% endblock %}
+{% block og_desc %}Tanzania tech & business news with analysis for business owners.{% endblock %}
 {% block og_url %}https://jamiitek.com/blog/{% endblock %}
-{% block og_image %}{% if lead.cover_image %}{{ lead.cover_image }}{% else %}https://jamiitek.com/static/images/og-image.jpg{% endif %}{% endblock %}
-{% block tw_title %}JamiiTek Insights — Tanzania & World News, Digital Tips{% endblock %}
-{% block tw_desc %}Daily Tanzania & world news plus practical digital guides for businesses.{% endblock %}
+{% block og_image %}{% if lead.cover_image %}{{ lead.cover_image|img:1200 }}{% else %}https://jamiitek.com/static/images/og-image.jpg{% endif %}{% endblock %}
+{% block tw_title %}JamiiTek Insights — Tanzania Tech &amp; Business News{% endblock %}
+{% block tw_desc %}Tanzania tech & business news with analysis for business owners.{% endblock %}
+
+{# Ukurasa wa orodha hauna form — hauhitaji script ya Turnstile (~100KB) #}
+{% block turnstile_js %}{% endblock %}
 
 {% block extra_css %}
+{% if lead.cover_image %}{# LCP: picha kuu ianze kupakuliwa mapema kabisa #}
+<link rel="preconnect" href="{{ lead.cover_image|img_host }}">
+<link rel="preload" as="image" href="{{ lead.cover_image|img:800 }}"{% with ss=lead.cover_image|srcset:"480,800,1200" %}{% if ss %} imagesrcset="{{ ss }}" imagesizes="(max-width:860px) 100vw, 45vw"{% endif %}{% endwith %} fetchpriority="high">
+{% endif %}
+{% if page.has_next %}<link rel="next" href="?{% if active_cat %}category={{ active_cat.slug }}&{% endif %}page={{ page.next_page_number }}">{% endif %}
 {% include 'blog/_styles.html' %}
 <style>
 .front{padding:26px 0 10px}
@@ -83,7 +94,7 @@
         <article class="lead">
           <a href="{% url 'blog_detail' lead.slug %}">
             <div class="frame">
-              {% if lead.cover_image %}<img class="img" src="{{ lead.cover_image }}" alt="{{ lead.title }}" fetchpriority="high">
+              {% if lead.cover_image %}<img class="img" src="{{ lead.cover_image|img:800 }}"{% with ss=lead.cover_image|srcset:"480,800,1200" %}{% if ss %} srcset="{{ ss }}" sizes="(max-width:860px) 100vw, 45vw"{% endif %}{% endwith %} alt="{{ lead.title }}" width="800" height="500" fetchpriority="high" decoding="async">
               {% else %}<div class="img ph">{{ lead.category.name|default:"J"|initial }}</div>{% endif %}
             </div>
           </a>
@@ -102,7 +113,7 @@
           {% for p in top_stack %}
           <a class="li" href="{% url 'blog_detail' p.slug %}">
             <div class="frame">
-              {% if p.cover_image %}<img class="img" src="{{ p.cover_image }}" alt="{{ p.title }}" loading="lazy">
+              {% if p.cover_image %}<img class="img" src="{{ p.cover_image|img:400 }}" alt="{{ p.title }}" width="400" height="250" loading="lazy" decoding="async">
               {% else %}<div class="img ph" style="font-size:30px">{{ p.category.name|default:"J"|initial }}</div>{% endif %}
             </div>
             <div>
@@ -149,7 +160,7 @@
           {% for p in s.posts %}
           <a class="card" href="{% url 'blog_detail' p.slug %}">
             <div class="frame">
-              {% if p.cover_image %}<img class="img" src="{{ p.cover_image }}" alt="{{ p.title }}" loading="lazy">
+              {% if p.cover_image %}<img class="img" src="{{ p.cover_image|img:400 }}" alt="{{ p.title }}" width="400" height="250" loading="lazy" decoding="async">
               {% else %}<div class="img ph">{{ p.category.name|default:"J"|initial }}</div>{% endif %}
             </div>
             <h3 class="hl">{{ p.title }}</h3>
@@ -170,7 +181,7 @@
         {% for p in posts %}
         <a class="li" href="{% url 'blog_detail' p.slug %}">
           <div class="frame">
-            {% if p.cover_image %}<img class="img" src="{{ p.cover_image }}" alt="{{ p.title }}" loading="lazy">
+            {% if p.cover_image %}<img class="img" src="{{ p.cover_image|img:400 }}" alt="{{ p.title }}" width="400" height="250" loading="lazy" decoding="async">
             {% else %}<div class="img ph" style="font-size:28px">{{ p.category.name|default:"J"|initial }}</div>{% endif %}
           </div>
           <div>
@@ -205,7 +216,7 @@
           {% for p in posts %}
           <a class="li" href="{% url 'blog_detail' p.slug %}">
             <div class="frame">
-              {% if p.cover_image %}<img class="img" src="{{ p.cover_image }}" alt="{{ p.title }}" loading="lazy">
+              {% if p.cover_image %}<img class="img" src="{{ p.cover_image|img:400 }}" alt="{{ p.title }}" width="400" height="250" loading="lazy" decoding="async">
               {% else %}<div class="img ph" style="font-size:28px">{{ p.category.name|default:"J"|initial }}</div>{% endif %}
             </div>
             <div>
@@ -234,18 +245,52 @@
     </div>
   {% endif %}
   </div>
-  <div class="bz-bottom"></div>
+  {% include 'blog/_blogfoot.html' %}
 </div>
 
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "Blog",
-  "name": "JamiiTek Insights",
-  "url": "https://www.jamiitek.com/blog/",
-  "description": "Daily Tanzania & world news plus digital tips for businesses, from JamiiTek.",
-  "publisher": {"@type": "Organization", "name": "JamiiTek",
-    "logo": {"@type": "ImageObject", "url": "https://jamiitek.com/static/images/og-image.jpg"}}
+  "@graph": [
+    {
+      "@type": "Organization", "@id": "https://jamiitek.com/#org",
+      "name": "JamiiTek", "url": "https://jamiitek.com/",
+      "logo": {"@type": "ImageObject", "url": "https://jamiitek.com/static/images/apple-touch-icon.png", "width": 180, "height": 180},
+      "publishingPrinciples": "https://jamiitek.com/blog/editorial-policy/",
+      "sameAs": ["https://twitter.com/JamiiTek"]
+    },
+    {
+      "@type": "WebSite", "@id": "https://jamiitek.com/#website",
+      "name": "JamiiTek", "url": "https://jamiitek.com/", "publisher": {"@id": "https://jamiitek.com/#org"},
+      "inLanguage": "en",
+      "potentialAction": {"@type": "SearchAction",
+        "target": {"@type": "EntryPoint", "urlTemplate": "https://jamiitek.com/blog/?q={search_term_string}"},
+        "query-input": "required name=search_term_string"}
+    },
+    {
+      "@type": "{% if active_cat %}CollectionPage{% else %}Blog{% endif %}",
+      "name": "{% if active_cat %}{{ active_cat.name|escapejs }} — {% endif %}JamiiTek Insights",
+      "url": "https://jamiitek.com/blog/{% if active_cat %}?category={{ active_cat.slug }}{% endif %}",
+      "description": "Tanzania and East Africa tech & business news with analysis for business owners, from JamiiTek.",
+      "publishingPrinciples": "https://jamiitek.com/blog/editorial-policy/",
+      "inLanguage": "en",
+      "isPartOf": {"@id": "https://jamiitek.com/#website"},
+      "publisher": {"@id": "https://jamiitek.com/#org"}
+    }{% with items=posts %}{% if front and lead %},
+    {
+      "@type": "ItemList",
+      "itemListElement": [
+        {"@type": "ListItem", "position": 1, "url": "https://jamiitek.com{% url 'blog_detail' lead.slug %}"}{% for p in top_stack %},
+        {"@type": "ListItem", "position": {{ forloop.counter|add:1 }}, "url": "https://jamiitek.com{% url 'blog_detail' p.slug %}"}{% endfor %}
+      ]
+    }{% elif items %},
+    {
+      "@type": "ItemList",
+      "itemListElement": [{% for p in items %}
+        {"@type": "ListItem", "position": {{ forloop.counter }}, "url": "https://jamiitek.com{% url 'blog_detail' p.slug %}"}{% if not forloop.last %},{% endif %}{% endfor %}
+      ]
+    }{% endif %}{% endwith %}
+  ]
 }
 </script>
 {% endblock %}

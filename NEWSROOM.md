@@ -111,3 +111,57 @@ honeypot, Turnstile (ikiwa imewashwa), kikomo cha sekunde 20 kwa IP, na viungo
 visivyozidi 2. Kila maoni mapya yanakuletea email yenye link ya kujibu au kuficha.
 Ukijibu ukiwa umeingia kama staff, jibu lako linapata beji **JAMIITEK**.
 Kusimamia: Admin → **Blog comments** (ficha/onyesha).
+
+## 10. Kasi + SEO ya blog
+
+**Kasi**
+- Wageni wanapata ukurasa wa blog kutoka cache (Redis) kwa dakika 5. Makala au maoni
+  yakibadilika, cache inafutwa papo hapo. Header `X-Blog-Cache: HIT/MISS` inaonyesha hali.
+- Orodha hazipakii maandishi kamili ya makala, na ukurasa wa mbele unajengwa kutoka
+  makala 60 za karibuni tu (hata zikiwa maelfu).
+- Picha za Unsplash zinaletwa kwa ukubwa unaohitajika (WebP/AVIF). Picha kuu inaanza
+  kupakuliwa mapema (preload).
+- Picha unazopakia kwenye admin zinapunguzwa kwenye browser kabla ya kupakiwa
+  (≤1600px, WebP). Picha za zamani: chagua posts → action
+  **⚡ Optimize cover images**.
+- Fonts hazizuii ukurasa kuonekana, na Turnstile haipakiwi kwenye orodha ya blog.
+- **Render free tier inalala baada ya dakika 15 bila wageni** (kuamka ni sekunde 30-60).
+  Weka job kwenye cron-job.org: `GET https://jamiitek.com/blog/` **kila dakika 10**.
+
+**SEO**
+- `/news-sitemap.xml`: Google News sitemap (makala za siku 2). Iko kwenye robots.txt.
+  Iongeze pia kwenye Google Search Console → Sitemaps.
+- IndexNow: makala ikichapishwa, Bing, Yandex, ChatGPT search na DuckDuckGo zinajulishwa
+  papo hapo. Funguo iko `/indexnow.txt` na haihitaji env yoyote.
+- Canonical moja (`https://jamiitek.com`) kwa kila makala. Ukitaka domain nyingine,
+  weka env `CANONICAL_BASE_URL`.
+- JSON-LD: Organization, WebSite + SearchAction, ItemList, NewsArticle (picha 3 za
+  uwiano, wordCount, keywords, isBasedOn). Pia news_keywords na article:tag.
+- Kurasa za category na za pagination zina title, description na canonical zake.
+- `Crawl-delay` imeondolewa kwenye robots.txt, kwa hiyo Bing inaweza ku-crawl bila kuchelewa.
+
+## 11. Google Discover: waandishi, sera ya uhariri, dawati la Tech & Business
+
+**Newsroom mpya (default):** rasimu **3 kwa siku** za *Tech & Business*
+(TechCabal, Techpoint, Disrupt Africa, allAfrica TZ, Daily News, BBC Tech/Business),
+kwa kuipa Tanzania na Afrika Mashariki kipaumbele. Idadi inabadilishwa kwa env
+`NEWSROOM_DAILY`. Mtindo wa zamani bado unapatikana: `daily_news_blog --tz 5 --world 5`.
+
+**Uchambuzi wa mhariri ni lazima:** kila rasimu ina sehemu
+"What this means for Tanzanian businesses" yenye alama `[[EDITOR-INSIGHT]]` na
+maswali 2-3 ya kukuongoza. Makala **haiwezi kuchapishwa** mpaka uandike uchambuzi
+wako na kufuta alama hiyo. Kwenye admin, safu ya **Insight** inaonyesha ✍️ Needed.
+
+**Waandishi (E-E-A-T):**
+1. Admin → **Blog authors** → Add: jina, role, picha halisi, bio, LinkedIn/X, na
+   uunganishe **User** (account yako ya admin).
+2. Kila makala unayohifadhi bila Author inapewa jina lako moja kwa moja.
+3. Makala inaonyesha jina lako lenye link, kisanduku "About the author", na
+   JSON-LD `Person`. Ukurasa wako ni `/blog/author/<slug>/`.
+
+**Sera ya uhariri:** `/blog/editorial-policy/` inaeleza jinsi mnavyoripoti, matumizi
+ya AI, marekebisho (corrections), picha na uhuru wa uhariri. Ina link kutoka kila
+makala na kutoka chini ya kila ukurasa wa blog, na iko kwenye sitemap.
+
+**Picha:** ukipakia picha ya cover yenye upana chini ya 1200px, admin inakuonya
+(Google Discover inahitaji ≥1200px).

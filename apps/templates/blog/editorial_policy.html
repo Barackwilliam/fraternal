@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% load blog_extras %}
+{% block site_fonts %}<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;800&family=Exo+2:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" onload="this.onload=null;this.rel='stylesheet'"><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;800&family=Exo+2:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap"></noscript>{% endblock %}
+{% block turnstile_js %}{% endblock %}
+
+{% block title %}Editorial Policy, AI Use &amp; Corrections | JamiiTek Insights{% endblock %}
+{% block meta_desc %}How JamiiTek Insights reports, checks facts, uses AI tools, credits sources and corrects mistakes, and who our editors are.{% endblock %}
+{% block meta_keywords %}JamiiTek Insights editorial policy, corrections, AI policy, Tanzania tech news{% endblock %}
+{% block canonical %}{{ canonical }}{% endblock %}
+{% block og_title %}Editorial Policy — JamiiTek Insights{% endblock %}
+{% block og_desc %}How we report, check facts, use AI tools and correct mistakes.{% endblock %}
+{% block og_url %}{{ canonical }}{% endblock %}
+{% block tw_title %}Editorial Policy — JamiiTek Insights{% endblock %}
+{% block tw_desc %}How we report, check facts, use AI tools and correct mistakes.{% endblock %}
+
+{% block extra_css %}
+{% include 'blog/_styles.html' %}
+<style>
+.pol{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:40px;align-items:start;padding:28px 0 20px}
+.pol-card{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:34px 44px}
+.pol-card h1{font-family:var(--serif);font-size:clamp(30px,4vw,44px);font-weight:700;color:var(--ink);margin:0 0 8px;line-height:1.1}
+.pol-card .upd{font-size:13px;color:var(--muted);margin:0 0 22px}
+.pol-card h2{font-family:var(--serif);font-size:25px;font-weight:700;color:var(--ink);margin:30px 0 10px}
+.pol-card p,.pol-card li{font-family:var(--serif);font-size:18px;line-height:1.7;color:#1d2530}
+.pol-card p{margin:0 0 14px}
+.pol-card ul{margin:0 0 14px;padding-left:1.3em}
+.pol-card li{margin:0 0 6px}
+.pol-card a{color:var(--blue);text-decoration:underline;text-underline-offset:3px}
+.toc a{display:block;padding:8px 0;border-bottom:1px solid var(--line);font-size:14.5px;font-weight:600;color:var(--ink2)}
+.toc a:last-child{border-bottom:0}
+.toc a:hover{color:var(--blue)}
+.eds{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:6px}
+.ed{display:flex;gap:12px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:6px;text-decoration:none !important}
+.ed img,.ed .av{width:48px;height:48px;border-radius:50%;object-fit:cover;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700}
+.ed b{display:block;font-family:var(--sans);font-size:15px;color:var(--ink)}
+.ed small{font-family:var(--sans);font-size:12.5px;color:var(--muted)}
+@media(max-width:860px){.pol{grid-template-columns:1fr}.pol .rail{display:none}}
+@media(max-width:600px){.pol-card{padding:22px 16px}.pol-card p,.pol-card li{font-size:17px}}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="bz">
+  {% include 'blog/_masthead.html' %}
+  <div class="bz-wrap">
+    <div class="pol">
+      <article class="pol-card">
+        <h1>Editorial policy</h1>
+        <p class="upd">How JamiiTek Insights reports, uses AI tools and corrects mistakes · Last updated {% now "F Y" %}</p>
+
+        <h2 id="who">Who we are</h2>
+        <p>JamiiTek Insights is the publication of <a href="https://jamiitek.com/">JamiiTek</a>, a technology company in Dar es Salaam, Tanzania. We cover technology, the digital economy, mobile money and fintech, startups, telecoms and business news that matters to business owners in Tanzania and East Africa.</p>
+
+        <h2 id="how">How our stories are made</h2>
+        <ul>
+          <li><strong>A person approves every story.</strong> Nothing is published automatically. An editor reviews, edits and approves each article before it goes live.</li>
+          <li><strong>We credit our sources.</strong> When a story builds on reporting by another outlet, we name it and link to the original report so readers can check it.</li>
+          <li><strong>We add our own analysis.</strong> News articles include a section on what the story means for Tanzanian businesses, written by our editors from their own experience.</li>
+          <li><strong>We don't make things up.</strong> We do not invent quotes, figures, names or events. If a detail is not confirmed, we say so.</li>
+        </ul>
+
+        <h2 id="ai">How we use AI</h2>
+        <p>We use AI tools to help monitor news sources, summarise reports and prepare first drafts. AI does not publish anything. An editor checks the facts against the original sources, rewrites where needed, and writes the analysis before an article is published. The editor named on the article is responsible for it.</p>
+
+        <h2 id="corrections">Accuracy and corrections</h2>
+        <p>If you find an error, email <a href="mailto:{{ contact_email }}?subject=Correction%20request">{{ contact_email }}</a> with the article link. We check every correction request. When we fix a factual error, we update the article and show the updated time on the page.</p>
+
+        <h2 id="images">Images</h2>
+        <p>Where we use stock photos (for example from Unsplash), they are labelled as illustrative and do not show the people or places in the story unless the caption says so.</p>
+
+        <h2 id="independence">Independence and disclosure</h2>
+        <p>JamiiTek sells websites, hosting and WhatsApp bots. When an article mentions our own products or clients, we say so clearly. Paid or sponsored content is always labelled "Sponsored", and advertisers do not influence our news coverage.</p>
+
+        <h2 id="comments">Comments</h2>
+        <p>We welcome respectful discussion. We remove spam, personal attacks, hate speech and content that breaks the law. Replies from our team carry a JAMIITEK badge.</p>
+
+        <h2 id="team">Our editors</h2>
+        {% if authors %}
+        <div class="eds">
+          {% for a in authors %}
+          <a class="ed" href="{% url 'blog_author' a.slug %}">
+            {% if a.photo %}<img src="{{ a.photo }}" alt="{{ a.name }}" width="48" height="48" loading="lazy">
+            {% else %}<span class="av" style="background:hsl({{ a.name|avatar_hue }},55%,42%)">{{ a.name|initial }}</span>{% endif %}
+            <span><b>{{ a.name }}</b><small>{{ a.role|default:"Editor" }}</small></span>
+          </a>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p>Our editorial team is led by JamiiTek's founders in Dar es Salaam.</p>
+        {% endif %}
+
+        <h2 id="contact">Contact</h2>
+        <p>Email <a href="mailto:{{ contact_email }}">{{ contact_email }}</a> or use our <a href="{% url 'contact' %}">contact page</a>.</p>
+      </article>
+
+      <aside class="rail">
+        <div class="rail-box toc">
+          <h3>On this page</h3>
+          <a href="#how">How our stories are made</a>
+          <a href="#ai">How we use AI</a>
+          <a href="#corrections">Corrections</a>
+          <a href="#independence">Independence</a>
+          <a href="#team">Our editors</a>
+          <a href="#contact">Contact</a>
+        </div>
+      </aside>
+    </div>
+  </div>
+  {% include 'blog/_blogfoot.html' %}
+</div>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "Editorial policy — JamiiTek Insights",
+  "url": "{{ canonical }}",
+  "about": {"@type": "Organization", "@id": "https://jamiitek.com/#org", "name": "JamiiTek",
+    "url": "https://jamiitek.com/", "publishingPrinciples": "{{ canonical }}",
+    "correctionsPolicy": "{{ canonical }}#corrections", "ethicsPolicy": "{{ canonical }}#independence"}
+}
+</script>
+{% endblock %}
