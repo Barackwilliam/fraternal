@@ -127,8 +127,10 @@ class SupabaseImageWidget(forms.TextInput):
           return;
         }}
         input.value = d.url;
-        msg.textContent = 'Imepakiwa';
+        msg.innerHTML = '✅ Imepakiwa — <b>bonyeza SAVE kuhifadhi</b>';
         msg.style.color = '#059669';
+        // Ashiria mabadiliko hayajahifadhiwa (onyo la browser ukiondoka bila Save)
+        try {{ input.dispatchEvent(new Event('change', {{bubbles:true}})); }} catch(e) {{}}
         if (d.url.toLowerCase().endsWith('.pdf')) {{
           preview.innerHTML = '<a href="' + d.url + '" target="_blank" rel="noopener">Fungua PDF</a>';
         }} else {{
