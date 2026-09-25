@@ -41,6 +41,15 @@ class PesapalClient:
         else:
             self.base = 'https://cybqa.pesapal.com/pesapalv3'
 
+    # ── cache keys (env-scoped: sandbox na live zisichanganyike) ──
+    def _tok_key(self):
+        return f'{_TOKEN_CACHE_KEY}:{self.env}'
+
+    def _ipn_key(self, ipn_url=''):
+        import hashlib
+        h = hashlib.md5(ipn_url.encode()).hexdigest()[:8] if ipn_url else 'x'
+        return f'{_IPN_CACHE_KEY}:{self.env}:{h}'
+
     # ── ndani ─────────────────────────────────────────────
     @property
     def configured(self):
@@ -87,7 +96,7 @@ class PesapalClient:
         if not self.configured:
             raise PesapalError('PESAPAL_CONSUMER_KEY / PESAPAL_CONSUMER_SECRET hazijawekwa.')
         if not force:
-            cached = cache.get(_TOKEN_CACHE_KEY)
+            cached = cache.get(self._tok_key())
             if cached:
                 return cached
         data = self._post('/api/Auth/RequestToken', {
@@ -98,23 +107,27 @@ class PesapalClient:
         if not token:
             raise PesapalError(f'Hakuna token kwenye jibu: {data}')
         # Token huisha baada ya dakika 5 — tunacache dakika 4
-        cache.set(_TOKEN_CACHE_KEY, token, 240)
+        cache.set(self._tok_key(), token, 240)
         return token
 
     # ── IPN ───────────────────────────────────────────────
-    def get_ipn_id(self, ipn_url):
+    def get_ipn_id(self, ipn_url, force=False):
         """
-        Rudisha notification_id. Kipaumbele:
-          1) settings.PESAPAL_IPN_ID (env — imesajiliwa mara moja)
-          2) cache
+        Rudisha notification_id. Kipaumbele (force=False):
+          1) settings.PESAPAL_IPN_ID (env)
+          2) cache (env-scoped)
           3) sajili sasa hivi na uweke kwenye cache
+        force=True: puuza env + cache, sajili IPN mpya kabisa (self-heal
+        pale ipn ya zamani ikiwa batili).
         """
-        env_id = getattr(settings, 'PESAPAL_IPN_ID', '')
-        if env_id:
-            return env_id
-        cached = cache.get(_IPN_CACHE_KEY)
-        if cached:
-            return cached
+        key = self._ipn_key(ipn_url)
+        if not force:
+            env_id = getattr(settings, 'PESAPAL_IPN_ID', '')
+            if env_id:
+                return env_id
+            cached = cache.get(key)
+            if cached:
+                return cached
         token = self.get_token()
         data = self._post('/api/URLSetup/RegisterIPN', {
             'url': ipn_url,
@@ -123,7 +136,7 @@ class PesapalClient:
         ipn_id = data.get('ipn_id')
         if not ipn_id:
             raise PesapalError(f'Kusajili IPN kumeshindikana: {data}')
-        cache.set(_IPN_CACHE_KEY, ipn_id, 60 * 60 * 24 * 30)
+        cache.set(key, ipn_id, 60 * 60 * 24 * 30)
         return ipn_id
 
     def register_ipn(self, ipn_url, notification_type='POST'):

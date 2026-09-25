@@ -47,20 +47,33 @@ def _start(tx, request):
         return redirect(request.META.get('HTTP_REFERER', '/'))
 
     tx.save()
-    try:
-        ipn_id = client.get_ipn_id(_abs(reverse('pesapal_ipn')))
-        data = client.submit_order(
+    ipn_url = _abs(reverse('pesapal_ipn'))
+    callback_url = _abs(reverse('pesapal_callback'))
+
+    def _submit(ipn_id):
+        return client.submit_order(
             merchant_reference=tx.merchant_reference,
             amount=tx.amount,
             currency=tx.currency,
             description=tx.description,
-            callback_url=_abs(reverse('pesapal_callback')),
+            callback_url=callback_url,
             ipn_id=ipn_id,
             email=tx.email,
             phone=tx.phone,
             first_name=tx.first_name,
             last_name=tx.last_name,
         )
+
+    try:
+        try:
+            data = _submit(client.get_ipn_id(ipn_url))
+        except PesapalError as first:
+            # Self-heal: ipn ya zamani/env ikiwa batili, sajili mpya na jaribu tena
+            if 'ipn' in str(first).lower():
+                logger.warning('Pesapal IPN batili — nasajili upya: %s', first)
+                data = _submit(client.get_ipn_id(ipn_url, force=True))
+            else:
+                raise
     except PesapalError as e:
         logger.error('Pesapal submit_order imeshindikana: %s', e)
         tx.status = 'failed'
