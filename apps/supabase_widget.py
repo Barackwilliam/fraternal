@@ -127,21 +127,8 @@ class SupabaseImageWidget(forms.TextInput):
           return;
         }}
         input.value = d.url;
-        try {{ input.dispatchEvent(new Event('change', {{bubbles:true}})); }} catch(e) {{}}
-        // Hifadhi kiotomatiki mara picha inapomaliza kupakia —
-        // "Save and continue editing" ili picha ihifadhiwe na ubaki hapa.
-        var form = input.closest('form');
-        var saveBtn = form && (form.querySelector('input[name=_continue]')
-                               || form.querySelector('button[name=_continue]')
-                               || form.querySelector('input[name=_save]'));
-        if (form && saveBtn) {{
-          msg.innerHTML = '✅ Imepakiwa — inahifadhi…';
-          msg.style.color = '#059669';
-          setTimeout(function () {{ saveBtn.click(); }}, 600);
-        }} else {{
-          msg.innerHTML = '✅ Imepakiwa — <b>bonyeza SAVE kuhifadhi</b>';
-          msg.style.color = '#059669';
-        }}
+        msg.textContent = 'Imepakiwa';
+        msg.style.color = '#059669';
         if (d.url.toLowerCase().endsWith('.pdf')) {{
           preview.innerHTML = '<a href="' + d.url + '" target="_blank" rel="noopener">Fungua PDF</a>';
         }} else {{

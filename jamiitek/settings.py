@@ -209,15 +209,12 @@ JAZZMIN_SETTINGS = {
         {"model": "auth.User"},
         {"app":   "JamiiTek System"},
     ],
-    # Default ya Jazzmin (horizontal_tabs) inaweka kitufe cha Save kwenye column
-    # ya pembeni — kwenye simu kinajificha/kiko mbali. "single" inaweka fomu na
-    # Save wazi kwa mstari mmoja unaosomeka simuni. Tumeiwasha kwa BlogPost
-    # (na Service) ambazo zina fomu ndefu; nyingine zinabaki kama zilivyo.
-    "changeform_format": "horizontal_tabs",
-    "changeform_format_overrides": {
-        "apps.blogpost": "single",
-        "apps.service": "single",
-    },
+    # BlogPost ina fieldsets 4 (Content/SEO/Publishing/Stats). Kwa default ya
+    # Jazzmin (horizontal_tabs) fieldsets nyingi hugeuzwa kuwa TABS, na kitufe
+    # cha Save kinahamia mbali — tofauti na models zingine (fieldset moja)
+    # zinazoonyesha fomu moja yenye Save wazi. "single" inairejesha BlogPost
+    # iwe fomu moja kama zingine, na Save inaonekana ukurasa ule ule.
+    "changeform_format_overrides": {"apps.blogpost": "single"},
 }
 
 JAZZMIN_UI_TWEAKS = {
