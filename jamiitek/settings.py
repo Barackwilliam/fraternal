@@ -209,11 +209,8 @@ JAZZMIN_SETTINGS = {
         {"model": "auth.User"},
         {"app":   "JamiiTek System"},
     ],
-    # BlogPost ina fieldsets 4 (Content/SEO/Publishing/Stats). Kwa default ya
-    # Jazzmin (horizontal_tabs) fieldsets nyingi hugeuzwa kuwa TABS, na kitufe
-    # cha Save kinahamia mbali — tofauti na models zingine (fieldset moja)
-    # zinazoonyesha fomu moja yenye Save wazi. "single" inairejesha BlogPost
-    # iwe fomu moja kama zingine, na Save inaonekana ukurasa ule ule.
+    # BlogPost ina fieldsets 4 (Content/SEO/Publishing/Stats). Tunaionyesha
+    # kama ukurasa mmoja (sio tabs) ili ifanane na fomu zingine kama Client.
     "changeform_format_overrides": {"apps.blogpost": "single"},
 }
 

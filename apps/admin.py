@@ -515,6 +515,13 @@ class BlogPostAdmin(admin.ModelAdmin):
             # Kitufe cha kupakia picha (Supabase kupitia /manage/upload/)
             from .supabase_widget import SupabaseImageWidget
             formfield.widget = SupabaseImageWidget(folder='blog')
+        if db_field.name == 'meta_title' and formfield is not None:
+            # Help text ya model ina "<title>". Django admin inaonyesha help text
+            # bila kuiescape, hivyo browser ilikuwa inaona tag halisi ya <title>
+            # na kumeza kila kitu kilichofuata — ikiwemo vitufe vya Save,
+            # Meta description, Status na Published at. Maandishi salama hapa.
+            formfield.help_text = ('Custom page title for Google (defaults to the '
+                                   'post title). Keep under 60 characters.')
         return formfield
 
     def get_urls(self):
