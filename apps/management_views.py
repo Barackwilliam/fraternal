@@ -569,20 +569,38 @@ def management_logout(request):
 # ── HELPER ─────────────────────────────────────────────────────────
 
 def _send_notification(website, notification_type, subject, message, sent_by=None):
+    """Rekodi ya taarifa kwenye portal, pamoja na barua pepe.
+
+    Kusitishwa (`suspension`) ni tofauti: barua yake inatumwa na
+    `apps/suspension_signals.py` mara tu status inapobadilika, kwa
+    template kamili ya HTML — na inatumwa kwa NJIA ZOTE za kusitisha,
+    si hii pekee. Hapa tunaweka rekodi ya portal tu, ili mteja
+    asipokee barua mbili.
+
+    `fail_silently=True`: barua isiyotoka haipaswi kuvunja kitendo cha
+    admin wala kumpa mtumiaji ukurasa wa hitilafu. Kosa linaingia
+    kwenye logs.
+    """
     n = ClientNotification.objects.create(
         website=website, client=website.client,
         notification_type=notification_type,
         subject=subject, message=message,
         sent_by=sent_by, email_sent=False)
+
+    if notification_type == 'suspension':
+        return n
+
     if website.client.email:
         try:
-            send_mail(subject=subject, message=message,
-                      from_email=getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@jamiitek.com'),
-                      recipient_list=[website.client.email], fail_silently=False)
-            n.email_sent = True
-            n.save()
-        except Exception as e:
-            print(f'[JamiiTek] Email failed: {e}')
+            sent = send_mail(
+                subject=subject, message=message,
+                from_email=getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@jamiitek.com'),
+                recipient_list=[website.client.email], fail_silently=True)
+            if sent:
+                n.email_sent = True
+                n.save(update_fields=['email_sent'])
+        except Exception:
+            logger.exception('[JamiiTek] barua ya taarifa imeshindwa: %s', website.pk)
     return n
 
 

@@ -67,22 +67,12 @@ class Command(BaseCommand):
             if msg:
                 website.suspension_message = msg
             website.save()
-            
-            if data.get('notify_client') and website.client.email:
-                self._send_email(
-                    website,
-                    'suspended',
-                    f'Huduma ya Website Yako Imesimamishwa - {website.name}',
-                    f"""Habari {website.client.name},
 
-Website yako ({website.name}) imesimamishwa kiotomatiki.
-
-Sababu: {data.get('reason', 'Malipo ya hosting hayajalipwa')}
-
-Wasiliana nasi kwa msaada zaidi.
-
-JamiiTek Team"""
-                )
+            # Barua ya kusitishwa inatumwa na apps/suspension_signals.py
+            # mara tu `status` inapobadilika hapo juu — kwa njia ZOTE za
+            # kusitisha, si hii pekee, na bila kutegemea tiki ya
+            # `notify_client`. Mteja hawezi tena kukuta website yake
+            # imezimwa bila kupata taarifa.
 
         elif action.action_type == 'restore':
             website.status = 'active'
@@ -167,21 +157,10 @@ JamiiTek Team"""
                 self.style.WARNING(f'  ⚠️  Auto-suspended: {website.name} (expired {website.hosting_end_date})')
             )
 
-            if website.client.email and website.send_expiry_warnings:
-                self._send_email(
-                    website,
-                    'suspension_warning',
-                    f'Huduma ya Website Imesimamishwa - Malipo Inahitajika',
-                    f"""Habari {website.client.name},
-
-Hosting ya website yako ({website.name}) imemalizika tarehe {website.hosting_end_date.strftime('%d/%m/%Y')} na huduma imesimamishwa.
-
-Ili kuendelea kutumia huduma yetu, tafadhali lipa ankara yako haraka.
-
-Wasiliana nasi kwa maelezo zaidi.
-
-JamiiTek Team"""
-                )
+            # Taarifa inatumwa na apps/suspension_signals.py mara tu
+            # `status` inapobadilika hapo juu. Awali sharti lilikuwa
+            # `send_expiry_warnings` — bendera ya MAONYO, si ya
+            # kusitishwa; mteja aliyezima maonyo alisitishwa kimya.
 
     def _send_expiry_warnings(self):
         """Tuma onyo kwa websites zinazokaribia kuisha"""

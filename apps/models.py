@@ -243,6 +243,22 @@ class ManagedWebsite(ResolverMixin, models.Model):
     auto_suspend_on_expiry = models.BooleanField(default=True)
     send_expiry_warnings = models.BooleanField(default=True)
 
+    # ── Kumbukumbu ya barua zilizotumwa ──────────────────────────
+    # Awali onyo lilitumwa kwa usawa kamili: `raw_days == 7`. Kazi ya
+    # siku moja ikikosa kukimbia (server chini, deploy), siku inayofuata
+    # raw_days = 6 na onyo la siku 7 halikutumwa KAMWE. Sasa tunatumia
+    # madirisha (<=) pamoja na kumbukumbu hii, ili onyo lisirudiwe.
+    #
+    # 7 = onyo la kirafiki, 3 = onyo la haraka, 1 = onyo la mwisho.
+    last_warning_stage = models.PositiveSmallIntegerField(
+        null=True, blank=True, editable=False,
+        help_text='Hatua ya mwisho ya onyo iliyotumwa (7, 3 au 1).')
+    last_warning_at = models.DateTimeField(null=True, blank=True, editable=False)
+
+    # Inazuia barua ya kusitishwa kutumwa mara mbili kwa kusitishwa
+    # kumoja. Inafutwa website inaporejeshwa.
+    suspension_notified_at = models.DateTimeField(null=True, blank=True, editable=False)
+
     warning_days_before = models.IntegerField(default=7)
 
     notes = models.TextField(blank=True)

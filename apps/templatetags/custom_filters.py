@@ -7,10 +7,6 @@ def startswith(value, arg):
     return str(value).startswith(arg)
 
 
-
-
-
-
 # apps/templatetags/custom_filters.py
 from django import template
 import re

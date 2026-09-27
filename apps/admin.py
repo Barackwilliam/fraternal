@@ -200,7 +200,11 @@ class ManagedWebsiteAdmin(admin.ModelAdmin):
 
     @admin.action(description='✓ Restore to active')
     def action_restore(self, request, queryset):
-        n = queryset.update(status='active', suspension_reason='', suspension_message='')
+        # `suspension_notified_at` LAZIMA ifutwe hapa. `.update()`
+        # haipitii signals, kwa hiyo alama ingebaki — na website hii
+        # ikisitishwa tena baadaye, mteja asingepata barua yoyote.
+        n = queryset.update(status='active', suspension_reason='',
+                            suspension_message='', suspension_notified_at=None)
         self.message_user(request, f'{n} website(s) restored to active.')
 
     list_display = (

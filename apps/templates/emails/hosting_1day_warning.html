@@ -1,0 +1,103 @@
+{% extends 'emails/base_email.html' %}
+{% block content %}
+
+{% comment %}
+Onyo la MWISHO — siku moja (au chini) kabla website kusitishwa.
+
+Awali hakukuwa na template ya hatua hii: `send_hosting_expiry_warning`
+ilikuwa na `if days <= 3` pekee, kwa hiyo mteja aliyebakiwa na siku moja
+alipokea barua ya siku 3, yenye kichwa kinachosema "expires in 3 days".
+Hapa hakuna namba iliyoandikwa kwa mkono — kila kitu kinatoka
+`days_left`, kwa hiyo ujumbe ni wa kweli daima.
+{% endcomment %}
+
+<!-- ONYO LA MWISHO -->
+<div style="background:linear-gradient(135deg,#450a0a,#7f1d1d);border-radius:12px;padding:20px;margin-bottom:24px;text-align:center">
+  <div style="font-size:11px;font-weight:800;color:#fca5a5;text-transform:uppercase;letter-spacing:2px">Final Notice</div>
+  <div style="font-size:19px;font-weight:800;color:#ffffff;margin-top:8px;line-height:1.4">
+    {% if days_left <= 0 %}
+      {{ website_name }} will be suspended today
+    {% else %}
+      {{ website_name }} will be suspended {% if days_left == 1 %}tomorrow{% else %}in {{ days_left }} days{% endif %}
+    {% endif %}
+  </div>
+</div>
+
+<p class="greeting">Hello, {{ client_name }}</p>
+
+<p>This is the <strong>last reminder</strong> before your website goes offline. We have not received your hosting renewal payment, and your hosting expires on <strong>{{ expiry_date }}</strong>.</p>
+
+<p>If payment does not reach us in time, <strong>{{ website_name }}</strong> will be suspended automatically. Visitors will see a suspension page instead of your website, and any enquiries or orders that would have come through it will be lost.</p>
+
+<!-- HESABU -->
+<div style="background:#1a1a2e;border-radius:12px;padding:20px;text-align:center;margin:20px 0">
+  <div style="font-size:48px;font-weight:900;color:#ef4444;line-height:1;letter-spacing:-2px">{{ days_left }}</div>
+  <div style="font-size:11px;color:rgba(255,255,255,0.5);letter-spacing:3px;text-transform:uppercase;margin-top:4px">
+    {% if days_left == 1 %}Day Remaining{% else %}Days Remaining{% endif %}
+  </div>
+  <div style="font-size:13px;color:rgba(255,255,255,0.7);margin-top:10px">
+    Suspension date <strong style="color:#ef4444">{{ expiry_date }}</strong>
+  </div>
+</div>
+
+<!-- MAELEZO -->
+<div class="info-box">
+  <div class="info-row">
+    <span class="info-label">Website Name</span>
+    <span class="info-value">{{ website_name }}</span>
+  </div>
+  <div class="info-row">
+    <span class="info-label">Website URL</span>
+    <span class="info-value"><a href="{{ website_url }}" style="color:#5b6ef5">{{ website_url }}</a></span>
+  </div>
+  <div class="info-row">
+    <span class="info-label">Expiry Date</span>
+    <span class="info-value" style="color:#ef4444;font-weight:700">{{ expiry_date }}</span>
+  </div>
+  <div class="info-row">
+    <span class="info-label">Amount Due</span>
+    <span class="info-value" style="color:#22c55e;font-weight:700">TZS {{ monthly_cost|floatformat:0 }} (1 month)</span>
+  </div>
+</div>
+
+<div class="alert alert-danger">
+  <strong>Your data is safe</strong><br>
+  Suspension does not delete anything. Your website, files, database and emails stay exactly as they are. Once payment is confirmed, we restore access — usually within a few hours.
+</div>
+
+<!-- MALIPO -->
+<p style="font-size:15px;font-weight:700;color:#1a1a2e;margin-bottom:8px">Pay today to stay online</p>
+
+<div class="info-box">
+  <div style="font-size:11px;font-weight:700;color:#ef4444;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:12px">Payment Details — NMB Bank</div>
+  <div class="info-row">
+    <span class="info-label">Bank</span>
+    <span class="info-value">NMB Bank</span>
+  </div>
+  <div class="info-row">
+    <span class="info-label">Account Name</span>
+    <span class="info-value">JamiiTek Technologies</span>
+  </div>
+  <div class="info-row">
+    <span class="info-label">Account Number</span>
+    <span class="info-value" style="font-size:17px;font-weight:800;color:#1a1a2e">21410034200</span>
+  </div>
+  <div class="info-row">
+    <span class="info-label">Amount</span>
+    <span class="info-value" style="color:#22c55e;font-weight:700">TZS {{ monthly_cost|floatformat:0 }}</span>
+  </div>
+</div>
+
+<div class="alert alert-info">
+  <strong>Already paid?</strong><br>
+  Send us the confirmation now so we can process it before the deadline:<br><br>
+  <strong>WhatsApp:</strong> +255 750 910 158<br>
+  <strong>Email:</strong> info@jamiitek.com<br><br>
+  If your payment is already on its way, reply to this email and we will hold the suspension while we confirm it.
+</div>
+
+<div class="btn-wrap">
+  <a href="{{ portal_url }}" class="btn" style="background:linear-gradient(135deg,#ef4444,#dc2626)">Renew Now — Go to Portal</a>
+</div>
+
+{% endblock %}

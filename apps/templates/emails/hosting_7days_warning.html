@@ -6,13 +6,13 @@
   <div style="font-size:28px;line-height:1;flex-shrink:0">⏰</div>
   <div>
     <div style="font-size:13px;font-weight:800;color:#92400e;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">7-Day Hosting Expiry Notice</div>
-    <div style="font-size:14px;color:#78350f;line-height:1.6">Your hosting for <strong>{{ website_name }}</strong> will expire in <strong>7 days</strong>. Please renew before it expires to keep your website online.</div>
+    <div style="font-size:14px;color:#78350f;line-height:1.6">Your hosting for <strong>{{ website_name }}</strong> will expire in <strong>{{ days_left }} {% if days_left == 1 %}day{% else %}days{% endif %}</strong>. Please renew before it expires to keep your website online.</div>
   </div>
 </div>
 
 <p class="greeting">Hello, {{ client_name }}</p>
 
-<p>This is a friendly reminder that your website hosting is expiring in <strong>7 days</strong>. After expiry, your website will be automatically suspended and visitors will no longer be able to access it.</p>
+<p>This is a friendly reminder that your website hosting is expiring in <strong>{{ days_left }} {% if days_left == 1 %}day{% else %}days{% endif %}</strong>. After expiry, your website will be automatically suspended and visitors will no longer be able to access it.</p>
 <p>You still have time to renew — please make a payment at your earliest convenience to avoid any interruption.</p>
 
 <!-- HOSTING DETAILS -->
@@ -30,8 +30,8 @@
     <span class="info-value" style="color:#d97706;font-weight:700">{{ expiry_date }}</span>
   </div>
   <div class="info-row">
-    <span class="info-label">Days Remaining</span>
-    <span class="info-value" style="color:#d97706;font-weight:700">7 days</span>
+    <span class="info-label">{% if days_left == 1 %}Day Remaining{% else %}Days Remaining{% endif %}</span>
+    <span class="info-value" style="color:#d97706;font-weight:700">{{ days_left }} {% if days_left == 1 %}day{% else %}days{% endif %}</span>
   </div>
   <div class="info-row">
     <span class="info-label">Monthly Cost</span>

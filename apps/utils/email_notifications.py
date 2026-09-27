@@ -68,24 +68,46 @@ def _send(subject: str, template: str, context: dict, to_email: str) -> bool:
 # 1. HOSTING EXPIRY WARNING
 # ══════════════════════════════════════════════════════════════════════════════
 
+# Hatua za onyo: siku 7 (kirafiki), 3 (haraka), 1 (mwisho).
+# Kila hatua ina template yake — barua isiseme "siku 3" wakati imebaki moja.
+WARNING_STAGES = (
+    (7, 'hosting_7days_warning.html', '⏰ Hosting Expiry Notice — {site} expires in {days} {dw}'),
+    (3, 'hosting_3days_warning.html', '🚨 URGENT — {site} suspends in {days} {dw}. Renew now'),
+    (1, 'hosting_1day_warning.html',  '🔴 FINAL NOTICE — {site} suspends {when}'),
+)
+
+
+def stage_for(days_left: int):
+    """Hatua inayostahili kwa siku zilizobaki, au None ikiwa bado ni mapema.
+
+    Tunatumia MADIRISHA (<=), si usawa kamili. Awali ilikuwa
+    `raw_days == 7`; kazi ya siku moja ikikosa kukimbia, siku inayofuata
+    ni 6 na onyo hilo halikutumwa kamwe. Sasa siku 6 bado inaingia
+    kwenye dirisha la 7.
+    """
+    if days_left <= 0:
+        return None          # imeshaisha — hii ni kazi ya kusitisha, si onyo
+    for stage, _tpl, _subj in reversed(WARNING_STAGES):   # 1, 3, 7
+        if days_left <= stage:
+            return stage
+    return None
+
+
 def send_hosting_expiry_warning(website, days: int = None) -> bool:
-    """
-    Send the correct expiry warning email based on days remaining.
-      - 7 days  → hosting_7days_warning.html  (friendly reminder)
-      - 3 days  → hosting_3days_warning.html  (urgent notice)
-      - other   → hosting_7days_warning.html  (fallback)
-    """
+    """Tuma onyo la kuisha kwa hosting kwa hatua sahihi."""
     client = website.client
     raw_days = (website.hosting_end_date - timezone.now().date()).days
     if days is None:
         days = raw_days
+    days = max(int(days), 0)
 
-    if days <= 3:
-        template  = 'hosting_3days_warning.html'
-        subject   = f"🚨 URGENT — {website.name} suspends in 3 days! Renew now"
-    else:
-        template  = 'hosting_7days_warning.html'
-        subject   = f"⏰ Hosting Expiry Notice — {website.name} expires in 7 days"
+    stage = stage_for(days) or WARNING_STAGES[-1][0]
+    template, subject_fmt = next(
+        (t, subj) for st, t, subj in WARNING_STAGES if st == stage)
+
+    dw = 'day' if days == 1 else 'days'
+    when = 'today' if days <= 0 else ('tomorrow' if days == 1 else f'in {days} days')
+    subject = subject_fmt.format(site=website.name, days=days, dw=dw, when=when)
 
     return _send(
         subject=subject,
@@ -95,7 +117,7 @@ def send_hosting_expiry_warning(website, days: int = None) -> bool:
             'website_name': website.name,
             'website_url':  website.url,
             'expiry_date':  website.hosting_end_date.strftime('%d %B %Y'),
-            'days_left':    max(days, 0),
+            'days_left':    days,
             'monthly_cost': website.monthly_cost,
         },
         to_email=client.email,
@@ -320,34 +342,52 @@ def send_bulk_expiry_warnings():
         # ── Auto-suspend: day 0 or past ───────────────────────────
         if raw_days <= 0 and site.auto_suspend_on_expiry:
             site.status = 'suspended'
+            site.suspension_reason = 'Hosting expired'
             site.suspension_message = (
                 'Your hosting has expired. Please make a payment to restore your website.'
             )
-            site.save(update_fields=['status', 'suspension_message'])
-            ok = send_website_suspended(site, reason='Hosting expired')
+            # Barua ya kusitishwa inatumwa na signal (apps/signals.py)
+            # mara tu status inapobadilika — bila kujali njia iliyotumika.
+            site.save(update_fields=['status', 'suspension_reason', 'suspension_message'])
             suspended += 1
-            sent += 1 if ok else 0
-            errors += 0 if ok else 1
+            sent += 1
             logger.info(f"[AutoSuspend] {site.name} — expired {site.hosting_end_date}")
             continue
 
-        # ── Expiry warnings for still-active sites ─────────────────
-        # 7 days: friendly reminder | 3 days: urgent | 1 day: final
-        if site.send_expiry_warnings:
-            if raw_days == 7:
-                ok = send_hosting_expiry_warning(site, days=7)
-                sent += 1 if ok else 0
-                errors += 0 if ok else 1
-            elif raw_days == 3:
-                ok = send_hosting_expiry_warning(site, days=3)
-                sent += 1 if ok else 0
-                errors += 0 if ok else 1
-            elif raw_days == 1:
-                ok = send_hosting_expiry_warning(site, days=1)
-                sent += 1 if ok else 0
-                errors += 0 if ok else 1
-            else:
-                skipped += 1
+        # ── Onyo kwa tovuti zilizo hai bado ────────────────────────
+        # Madirisha, si usawa kamili: siku 6 bado ni dirisha la 7.
+        # `last_warning_stage` inazuia onyo lile lile kurudiwa kila siku.
+        if not site.send_expiry_warnings:
+            skipped += 1
+            continue
+
+        stage = stage_for(raw_days)
+        if stage is None:
+            # Bado ni mapema (au imeshaisha). Tovuti ikilipiwa na tarehe
+            # kusogezwa mbele, kumbukumbu inafutwa ili mzunguko ujao
+            # uanze upya.
+            if site.last_warning_stage is not None and raw_days > WARNING_STAGES[0][0]:
+                site.last_warning_stage = None
+                site.last_warning_at = None
+                site.save(update_fields=['last_warning_stage', 'last_warning_at'])
+            skipped += 1
+            continue
+
+        # Tuma hatua ya kwanza, au hatua yenye uharaka ZAIDI kuliko
+        # iliyotumwa mwisho (7 -> 3 -> 1). Hatua ile ile hairudiwi.
+        already = site.last_warning_stage
+        if already is not None and stage >= already:
+            skipped += 1
+            continue
+
+        ok = send_hosting_expiry_warning(site, days=raw_days)
+        if ok:
+            site.last_warning_stage = stage
+            site.last_warning_at = timezone.now()
+            site.save(update_fields=['last_warning_stage', 'last_warning_at'])
+            sent += 1
+        else:
+            errors += 1
 
     # ══════════════════════════════════════════════════════════════
     # EMAIL HOSTING

@@ -17,11 +17,7 @@ def turnstile_context(request):
         "PESAPAL_ENABLED": getattr(settings, "PESAPAL_ENABLED", False),
     }
 
-# ── Sidebar: ni kipengele kipi kimewashwa ────────────────────────────────
-# Awali sidebar ilitumia `{% if 'website' in request.resolver_match.url_name %}`.
-# Hiyo ni mechi ya sehemu ya jina, kwa hiyo url_name kama 'websitetemplate_edit'
-# au 'client_portal_home' zilikuwa zinawasha kipengele kisicho sahihi. Ramani
-# hii ni wazi: url_name -> kipengele.
+
 _NAV_EXACT = {
     'management_dashboard': 'dashboard',
     'manage_builder': 'builder',
