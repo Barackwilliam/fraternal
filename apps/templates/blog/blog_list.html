@@ -6,12 +6,12 @@
 {% block title %}{% if active_cat %}{{ active_cat.name }}: Latest {{ active_cat.name }} Today{% if page.number > 1 %} (Page {{ page.number }}){% endif %} | JamiiTek Insights{% elif q %}Search: {{ q }} | JamiiTek Insights{% else %}JamiiTek Insights: Tanzania Tech &amp; Business News Today{% if page.number > 1 %} (Page {{ page.number }}){% endif %}{% endif %}{% endblock %}
 {% block meta_desc %}{% if active_cat %}Latest {{ active_cat.name }} stories from JamiiTek Insights: breaking updates, analysis and what it means for Tanzania. Updated daily.{% else %}Tanzania and East Africa tech &amp; business news with analysis for business owners: fintech, mobile money, startups, telecoms, AI and practical digital guides.{% endif %}{% endblock %}
 {% block meta_keywords %}{% if active_cat %}{{ active_cat.name }}, {{ active_cat.name }} today, {% endif %}Tanzania tech news, Tanzania business news, fintech Tanzania, mobile money, East Africa startups, habari za teknolojia, JamiiTek Insights{% endblock %}
-{% block canonical %}https://jamiitek.com/blog/{% if active_cat %}?category={{ active_cat.slug }}{% if page.number > 1 %}&page={{ page.number }}{% endif %}{% elif page.number > 1 %}?page={{ page.number }}{% endif %}{% endblock %}
+{% block canonical %}https://www.jamiitek.com/blog/{% if active_cat %}?category={{ active_cat.slug }}{% if page.number > 1 %}&page={{ page.number }}{% endif %}{% elif page.number > 1 %}?page={{ page.number }}{% endif %}{% endblock %}
 {% block meta_robots %}{% if q %}noindex, follow{% else %}index, follow, max-image-preview:large, max-snippet:-1{% endif %}{% endblock %}
 {% block og_title %}JamiiTek Insights — Tanzania Tech &amp; Business News{% endblock %}
 {% block og_desc %}Tanzania tech & business news with analysis for business owners.{% endblock %}
-{% block og_url %}https://jamiitek.com/blog/{% endblock %}
-{% block og_image %}{% if lead.cover_image %}{{ lead.cover_image|img:1200 }}{% else %}https://jamiitek.com/static/images/og-image.jpg{% endif %}{% endblock %}
+{% block og_url %}https://www.jamiitek.com/blog/{% endblock %}
+{% block og_image %}{% if lead.cover_image %}{{ lead.cover_image|img:1200 }}{% else %}https://www.jamiitek.com/static/images/og-image.jpg{% endif %}{% endblock %}
 {% block tw_title %}JamiiTek Insights — Tanzania Tech &amp; Business News{% endblock %}
 {% block tw_desc %}Tanzania tech & business news with analysis for business owners.{% endblock %}
 
@@ -253,41 +253,41 @@
   "@context": "https://schema.org",
   "@graph": [
     {
-      "@type": "Organization", "@id": "https://jamiitek.com/#org",
-      "name": "JamiiTek", "url": "https://jamiitek.com/",
-      "logo": {"@type": "ImageObject", "url": "https://jamiitek.com/static/images/apple-touch-icon.png", "width": 180, "height": 180},
-      "publishingPrinciples": "https://jamiitek.com/blog/editorial-policy/",
+      "@type": "Organization", "@id": "https://www.jamiitek.com/#org",
+      "name": "JamiiTek", "url": "https://www.jamiitek.com/",
+      "logo": {"@type": "ImageObject", "url": "https://www.jamiitek.com/static/images/apple-touch-icon.png", "width": 180, "height": 180},
+      "publishingPrinciples": "https://www.jamiitek.com/blog/editorial-policy/",
       "sameAs": ["https://twitter.com/JamiiTek"]
     },
     {
-      "@type": "WebSite", "@id": "https://jamiitek.com/#website",
-      "name": "JamiiTek", "url": "https://jamiitek.com/", "publisher": {"@id": "https://jamiitek.com/#org"},
+      "@type": "WebSite", "@id": "https://www.jamiitek.com/#website",
+      "name": "JamiiTek", "url": "https://www.jamiitek.com/", "publisher": {"@id": "https://www.jamiitek.com/#org"},
       "inLanguage": "en",
       "potentialAction": {"@type": "SearchAction",
-        "target": {"@type": "EntryPoint", "urlTemplate": "https://jamiitek.com/blog/?q={search_term_string}"},
+        "target": {"@type": "EntryPoint", "urlTemplate": "https://www.jamiitek.com/blog/?q={search_term_string}"},
         "query-input": "required name=search_term_string"}
     },
     {
       "@type": "{% if active_cat %}CollectionPage{% else %}Blog{% endif %}",
       "name": "{% if active_cat %}{{ active_cat.name|escapejs }} — {% endif %}JamiiTek Insights",
-      "url": "https://jamiitek.com/blog/{% if active_cat %}?category={{ active_cat.slug }}{% endif %}",
+      "url": "https://www.jamiitek.com/blog/{% if active_cat %}?category={{ active_cat.slug }}{% endif %}",
       "description": "Tanzania and East Africa tech & business news with analysis for business owners, from JamiiTek.",
-      "publishingPrinciples": "https://jamiitek.com/blog/editorial-policy/",
+      "publishingPrinciples": "https://www.jamiitek.com/blog/editorial-policy/",
       "inLanguage": "en",
-      "isPartOf": {"@id": "https://jamiitek.com/#website"},
-      "publisher": {"@id": "https://jamiitek.com/#org"}
+      "isPartOf": {"@id": "https://www.jamiitek.com/#website"},
+      "publisher": {"@id": "https://www.jamiitek.com/#org"}
     }{% with items=posts %}{% if front and lead %},
     {
       "@type": "ItemList",
       "itemListElement": [
-        {"@type": "ListItem", "position": 1, "url": "https://jamiitek.com{% url 'blog_detail' lead.slug %}"}{% for p in top_stack %},
-        {"@type": "ListItem", "position": {{ forloop.counter|add:1 }}, "url": "https://jamiitek.com{% url 'blog_detail' p.slug %}"}{% endfor %}
+        {"@type": "ListItem", "position": 1, "url": "https://www.jamiitek.com{% url 'blog_detail' lead.slug %}"}{% for p in top_stack %},
+        {"@type": "ListItem", "position": {{ forloop.counter|add:1 }}, "url": "https://www.jamiitek.com{% url 'blog_detail' p.slug %}"}{% endfor %}
       ]
     }{% elif items %},
     {
       "@type": "ItemList",
       "itemListElement": [{% for p in items %}
-        {"@type": "ListItem", "position": {{ forloop.counter }}, "url": "https://jamiitek.com{% url 'blog_detail' p.slug %}"}{% if not forloop.last %},{% endif %}{% endfor %}
+        {"@type": "ListItem", "position": {{ forloop.counter }}, "url": "https://www.jamiitek.com{% url 'blog_detail' p.slug %}"}{% if not forloop.last %},{% endif %}{% endfor %}
       ]
     }{% endif %}{% endwith %}
   ]

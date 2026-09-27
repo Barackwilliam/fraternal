@@ -5,9 +5,9 @@ These make Google understand WHO you are and WHAT you offer.
 import json
 
 
-SITE_URL = "https://jamiitek.com"
+SITE_URL = "https://www.jamiitek.com"
 SITE_NAME = "JamiiTek"
-SITE_LOGO = "https://jamiitek.com/static/images/logo.png"
+SITE_LOGO = "https://www.jamiitek.com/static/images/logo.png"
 PHONE = "+255750910158"
 EMAIL = "info@jamiitek.com"
 ADDRESS = "Dar es Salaam, Tanzania"

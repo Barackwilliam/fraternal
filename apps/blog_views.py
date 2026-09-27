@@ -21,9 +21,9 @@ from .models import BlogPost, BlogCategory, BlogComment, BlogAuthor
 logger = logging.getLogger(__name__)
 
 PER_PAGE = 12
-# Domain moja rasmi kwa SEO (jamiitek.com na www.jamiitek.com zote zinafunguka —
-# canonical moja inazuia Google kuona nakala mbili). Inalingana na base.html.
-CANONICAL_BASE = (getattr(settings, 'CANONICAL_BASE_URL', '') or 'https://jamiitek.com').rstrip('/')
+# Domain rasmi kwa SEO: jamiitek.com inaelekeza (301) kwenda www.jamiitek.com, kwa hiyo
+# canonical, sitemap na IndexNow zote zitumie www (canonical isielekeze kwingine).
+CANONICAL_BASE = (getattr(settings, 'CANONICAL_BASE_URL', '') or 'https://www.jamiitek.com').rstrip('/')
 FRONT_WINDOW = 60          # ukurasa wa mbele unajengwa kutoka makala 60 za karibuni tu
 CACHE_SECONDS = 300        # dakika 5; inafutwa papo hapo makala/maoni yakibadilika
 

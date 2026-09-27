@@ -37,7 +37,7 @@ def key_file(request):
 
 def _site_base():
     # Lazima ilingane na canonical za blog (apps/blog_views.CANONICAL_BASE)
-    return (getattr(settings, 'CANONICAL_BASE_URL', '') or 'https://jamiitek.com').rstrip('/')
+    return (getattr(settings, 'CANONICAL_BASE_URL', '') or 'https://www.jamiitek.com').rstrip('/')
 
 
 def ping(paths):

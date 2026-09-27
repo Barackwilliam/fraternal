@@ -11,7 +11,7 @@
 {% block og_title %}{{ author.name }} — JamiiTek Insights{% endblock %}
 {% block og_desc %}{{ author.bio|truncatechars:200 }}{% endblock %}
 {% block og_url %}{{ canonical }}{% endblock %}
-{% block og_image %}{% if author.photo %}{{ author.photo }}{% else %}https://jamiitek.com/static/images/og-image.jpg{% endif %}{% endblock %}
+{% block og_image %}{% if author.photo %}{{ author.photo }}{% else %}https://www.jamiitek.com/static/images/og-image.jpg{% endif %}{% endblock %}
 {% block tw_title %}{{ author.name }} — JamiiTek Insights{% endblock %}
 {% block tw_desc %}{{ author.bio|truncatechars:200 }}{% endblock %}
 
@@ -109,7 +109,7 @@
     {% if author.photo %}"image": "{{ author.photo|escapejs }}",{% endif %}
     "description": "{{ author.bio|escapejs }}",
     {% if author.same_as %}"sameAs": [{% for u in author.same_as %}"{{ u|escapejs }}"{% if not forloop.last %}, {% endif %}{% endfor %}],{% endif %}
-    "worksFor": {"@type": "Organization", "@id": "https://jamiitek.com/#org", "name": "JamiiTek", "url": "https://jamiitek.com/"}
+    "worksFor": {"@type": "Organization", "@id": "https://www.jamiitek.com/#org", "name": "JamiiTek", "url": "https://www.jamiitek.com/"}
   }
 }
 </script>

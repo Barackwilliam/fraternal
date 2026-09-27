@@ -116,7 +116,7 @@ def home(request):
             "(JamiiBot), web hosting & domains. Serving Dar es Salaam and all Tanzania. "
             "Tunajenga website Tanzania. Bot WhatsApp Tanzania."
         ),
-        'canonical': 'https://jamiitek.com/',
+        'canonical': 'https://www.jamiitek.com/',
     }
     return render(request, 'index.html', context)
 
@@ -148,7 +148,7 @@ def service(request):
         'schema_markup': schema_html,
         'page_title': 'Our Services — Web Development, AI Bots & Hosting | JamiiTek Tanzania',
         'page_desc': 'JamiiTek services: website development, AI WhatsApp bots, web hosting, domain registration, mobile apps, UI/UX design. Best web developer in Tanzania.',
-        'canonical': 'https://jamiitek.com/service/',
+        'canonical': 'https://www.jamiitek.com/service/',
         'page_keywords': 'web development services Tanzania, AI WhatsApp bot, website design Tanzania, web hosting Tanzania, domain registration Tanzania, mobile app Tanzania',
     }
     return render(request, 'service.html', context)

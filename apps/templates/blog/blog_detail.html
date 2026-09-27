@@ -11,11 +11,11 @@
 {% block og_title %}{{ post.title }}{% endblock %}
 {% block og_desc %}{{ post.meta_description|default:post.excerpt }}{% endblock %}
 {% block og_url %}{{ canonical }}{% endblock %}
-{% block og_image %}{% if post.cover_image %}{{ post.cover_image|img_ratio:"1.91:1" }}{% else %}https://jamiitek.com/static/images/og-image.jpg{% endif %}{% endblock %}
+{% block og_image %}{% if post.cover_image %}{{ post.cover_image|img_ratio:"1.91:1" }}{% else %}https://www.jamiitek.com/static/images/og-image.jpg{% endif %}{% endblock %}
 {% block og_image_alt %}{{ post.title }}{% endblock %}
 {% block tw_title %}{{ post.title }}{% endblock %}
 {% block tw_desc %}{{ post.meta_description|default:post.excerpt }}{% endblock %}
-{% block tw_image %}{% if post.cover_image %}{{ post.cover_image|img_ratio:"1.91:1" }}{% else %}https://jamiitek.com/static/images/og-image.jpg{% endif %}{% endblock %}
+{% block tw_image %}{% if post.cover_image %}{{ post.cover_image|img_ratio:"1.91:1" }}{% else %}https://www.jamiitek.com/static/images/og-image.jpg{% endif %}{% endblock %}
 
 {% block extra_css %}
 {% if post.cover_image %}{# LCP: picha ya makala ianze kupakuliwa mapema kabisa #}
@@ -24,7 +24,7 @@
 {% endif %}
 {% if post.focus_keyword %}<meta name="news_keywords" content="{{ post.focus_keyword }}">
 <meta property="article:tag" content="{{ post.focus_keyword }}">{% endif %}
-<meta property="article:publisher" content="https://jamiitek.com/">
+<meta property="article:publisher" content="https://www.jamiitek.com/">
 <meta property="article:published_time" content="{{ post.published_at|date:'c' }}">
 <meta property="article:modified_time" content="{{ post.updated_at|date:'c' }}">
 {% if post.category %}<meta property="article:section" content="{{ post.category.name }}">{% endif %}
@@ -355,11 +355,11 @@ figure.cover figcaption{font-size:12.5px;color:var(--muted);margin-top:8px}
   {% if post.author %}"author": {"@type": "Person", "name": "{{ post.author.name|escapejs }}",
     "url": "{{ site_root }}{% url 'blog_author' post.author.slug %}"{% if post.author.role %}, "jobTitle": "{{ post.author.role|escapejs }}"{% endif %}{% if post.author.photo %}, "image": "{{ post.author.photo|escapejs }}"{% endif %}{% if post.author.same_as %},
     "sameAs": [{% for u in post.author.same_as %}"{{ u|escapejs }}"{% if not forloop.last %}, {% endif %}{% endfor %}]{% endif %},
-    "worksFor": {"@id": "https://jamiitek.com/#org"}},
-  {% else %}"author": {"@type": "Organization", "name": "{{ post.author_name|default:'JamiiTek'|escapejs }}", "url": "https://jamiitek.com/About/"},{% endif %}
+    "worksFor": {"@id": "https://www.jamiitek.com/#org"}},
+  {% else %}"author": {"@type": "Organization", "name": "{{ post.author_name|default:'JamiiTek'|escapejs }}", "url": "https://www.jamiitek.com/About/"},{% endif %}
   "publishingPrinciples": "{{ site_root }}{% url 'blog_editorial' %}",
-  "publisher": {"@type": "Organization", "@id": "https://jamiitek.com/#org", "name": "JamiiTek", "url": "https://jamiitek.com/",
-    "logo": {"@type": "ImageObject", "url": "https://jamiitek.com/static/images/apple-touch-icon.png", "width": 180, "height": 180}},
+  "publisher": {"@type": "Organization", "@id": "https://www.jamiitek.com/#org", "name": "JamiiTek", "url": "https://www.jamiitek.com/",
+    "logo": {"@type": "ImageObject", "url": "https://www.jamiitek.com/static/images/apple-touch-icon.png", "width": 180, "height": 180}},
   "inLanguage": "en",
   "isAccessibleForFree": true,
   "wordCount": {{ word_count }},
