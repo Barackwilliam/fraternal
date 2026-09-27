@@ -114,6 +114,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'apps.context_processors.turnstile_context',
                 'apps.context_processors.sidebar_nav',
+                'apps.context_processors.social_links',
 
             ],
         },
@@ -333,13 +334,39 @@ if os.getenv('REDIS_URL'):
         }
     }
 else:
+    # Bila Redis, cache INABIDI iwe ya database — si ya kumbukumbu.
+    #
+    # Ratiba yote ya mfumo (DailyTasksMiddleware) inatambua "kazi hii
+    # imeshafanyika" kwa alama zilizohifadhiwa kwenye cache. LocMemCache
+    # inakaa kwenye RAM ya process moja, kwa hiyo:
+    #   • kila deploy au restart -> alama zinapotea -> digest, chatbot_digest
+    #     na monthly_report zinatumwa TENA siku ile ile
+    #   • gunicorn ikiwa na worker zaidi ya mmoja -> kila worker ina cache
+    #     yake -> kazi ile ile inakimbia mara kadhaa kwa wakati mmoja
+    #
+    # DatabaseCache inashirikiwa na workers wote na inadumu baada ya
+    # restart. Jedwali linaundwa na migration (createcachetable).
     CACHES = {
         'default': {
-            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-            'LOCATION': 'jamiitek-builder',
+            'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+            'LOCATION': 'jamiitek_cache',
+            'TIMEOUT': 3600,
+            'OPTIONS': {'MAX_ENTRIES': 5000, 'CULL_FREQUENCY': 4},
         }
     }
 
+
+# ── Mitandao ya kijamii ───────────────────────────────
+# Vitufe vya footer vilikuwa href="#" — mtu anabonyeza, hakuna kinachotokea.
+# Sasa kitufe kinaonekana TU kama link yake imewekwa hapa au kwenye Render.
+SOCIAL_LINKS = {
+    'facebook':  os.getenv('SOCIAL_FACEBOOK', ''),
+    'linkedin':  os.getenv('SOCIAL_LINKEDIN', ''),
+    'instagram': os.getenv('SOCIAL_INSTAGRAM', ''),
+    'github':    os.getenv('SOCIAL_GITHUB', 'https://github.com/Barackwilliam'),
+    'twitter':   os.getenv('SOCIAL_TWITTER', ''),
+    'youtube':   os.getenv('SOCIAL_YOUTUBE', ''),
+}
 
 # ── Cloudflare Turnstile (Bot Protection) ──────────────
 TURNSTILE_SITEKEY = os.getenv('TURNSTILE_SITEKEY', '')

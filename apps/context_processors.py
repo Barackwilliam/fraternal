@@ -59,3 +59,9 @@ def sidebar_nav(request):
             return {'nav': key}
 
     return {'nav': ''}
+
+
+def social_links(request):
+    """Links za mitandao ya kijamii — zilizowekwa pekee."""
+    from django.conf import settings
+    return {'SOCIAL': {k: v for k, v in getattr(settings, 'SOCIAL_LINKS', {}).items() if v}}
