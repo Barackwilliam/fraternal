@@ -2,258 +2,368 @@
 {% block content %}
 
 <style>
-  .el-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:22px}
-  .el-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px 18px}
-  .el-card .n{font-family:var(--head);font-size:26px;font-weight:800;line-height:1;letter-spacing:-.02em}
-  .el-card .l{font-family:var(--mono);font-size:10px;color:var(--text-3);letter-spacing:1.4px;
-    text-transform:uppercase;margin-top:7px}
-  .el-card .s{font-size:11.5px;color:var(--text-3);margin-top:3px}
+  .ed{--ok:#10d98a;--okd:rgba(16,217,138,.1);--blue:#38bdf8;--blued:rgba(56,189,248,.1);
+      --bad:#ff5a6e;--badd:rgba(255,90,110,.1);--warn:#fbbf24;--warnd:rgba(251,191,36,.1)}
 
-  .el-filters{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:18px}
-  .el-filters select,.el-filters input{height:40px;border-radius:10px;border:1px solid var(--border);
-    background:var(--card);color:var(--text);padding:0 12px;font:inherit;font-size:13px;outline:none}
-  .el-filters input{min-width:210px}
-  .el-filters select:focus,.el-filters input:focus{border-color:var(--cyan)}
-  .el-chip{display:inline-flex;align-items:center;gap:6px;height:40px;padding:0 14px;border-radius:10px;
-    border:1px solid var(--border);background:var(--card);color:var(--text-2);font-size:12.5px;text-decoration:none}
-  .el-chip.on{border-color:var(--red);color:var(--red);background:var(--red-d)}
+  /* ── Juu: kichwa ── */
+  .ed-top{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+  .ed-top h1{font-family:var(--head);font-size:22px;font-weight:800;letter-spacing:-.02em;margin:0}
+  .ed-top p{color:var(--text-3);font-size:13px;margin:4px 0 0}
+  .ed-lead{color:var(--text-3);font-size:13px;margin:0 0 18px}
 
-  .el-tbl{width:100%;border-collapse:collapse;background:var(--card);
-    border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden}
-  .el-tbl th{font-family:var(--mono);font-size:10px;letter-spacing:1.2px;text-transform:uppercase;
-    color:var(--text-3);text-align:left;padding:12px 14px;border-bottom:1px solid var(--border);white-space:nowrap}
-  .el-tbl td{padding:13px 14px;border-bottom:1px solid var(--border);font-size:13.5px;vertical-align:top}
-  .el-tbl tr:last-child td{border-bottom:0}
-  .el-tbl tr:hover td{background:var(--card-s)}
-  .el-sub{font-size:11.5px;color:var(--text-3);margin-top:3px}
+  .ed-msg{padding:12px 16px;border-radius:12px;margin-bottom:16px;font-size:13.5px;display:flex;gap:10px;align-items:flex-start}
+  .ed-msg.success{background:var(--okd);color:var(--ok);border:1px solid rgba(16,217,138,.22)}
+  .ed-msg.error{background:var(--badd);color:var(--bad);border:1px solid rgba(255,90,110,.25)}
 
-  .el-pill{display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border-radius:999px;
-    font-family:var(--mono);font-size:10px;letter-spacing:.6px;text-transform:uppercase;white-space:nowrap}
-  .el-pill i{width:6px;height:6px;border-radius:50%;background:currentColor}
-  .p-sent{background:rgba(255,255,255,.06);color:var(--text-2)}
-  .p-deferred{background:var(--yellow-d);color:var(--yellow)}
-  .p-delivered{background:var(--green-d);color:var(--green)}
-  .p-opened,.p-clicked{background:var(--cyan-d);color:var(--cyan)}
-  .p-bounced,.p-blocked,.p-error{background:var(--red-d);color:var(--red)}
-  .p-spam{background:var(--yellow-d);color:var(--yellow)}
+  /* ── Usanidi ── */
+  .ed-setup{background:var(--card);border:1px solid var(--border);border-radius:16px;margin-bottom:20px;overflow:hidden}
+  .ed-setup summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;padding:14px 18px;
+    font-size:13.5px;font-weight:600}
+  .ed-setup summary::-webkit-details-marker{display:none}
+  .ed-setup summary .sum{margin-left:auto;display:flex;gap:6px;align-items:center;font-weight:500;font-size:12.5px;color:var(--text-3)}
+  .ed-setup summary .car{transition:transform .2s;color:var(--text-3)}
+  .ed-setup[open] summary .car{transform:rotate(180deg)}
+  .ed-dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+  .ed-setup-body{padding:4px 18px 18px;border-top:1px solid var(--border)}
+  .ed-cfg{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:14px 0 16px}
+  .ed-c{display:flex;gap:10px;padding:11px 12px;border-radius:11px;background:var(--bg2);border:1px solid var(--border)}
+  .ed-c .i{font-size:14px;margin-top:1px;width:16px;text-align:center}
+  .ed-c .k{font-family:var(--mono);font-size:9.5px;letter-spacing:1px;text-transform:uppercase;color:var(--text-3)}
+  .ed-c .v{font-size:12.5px;margin-top:2px;word-break:break-all}
+  .ed-c .h{font-size:11px;color:var(--text-3);margin-top:3px}
+  .ed-c.ok .i{color:var(--ok)} .ed-c.bad .i,.ed-c.bad .v{color:var(--bad)} .ed-c.warn .i,.ed-c.warn .v{color:var(--warn)}
+  .ed-test{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .ed-test input{height:38px;border-radius:10px;border:1px solid var(--border);background:var(--bg2);color:var(--text);
+    padding:0 12px;font:inherit;font-size:13px;min-width:240px;outline:none}
+  .ed-test input:focus{border-color:var(--cyan)}
+  .ed-test small{color:var(--text-3);font-size:12px}
 
-  .el-cat{font-family:var(--mono);font-size:10px;color:var(--text-3);letter-spacing:.6px}
-  .el-empty{padding:48px 20px;text-align:center;color:var(--text-3)}
-  .el-note{display:flex;gap:11px;padding:14px 16px;border-radius:var(--r-lg);margin-bottom:20px;
-    background:var(--yellow-d);border:1px solid rgba(255,184,0,.22);color:var(--yellow);font-size:13px;line-height:1.55}
-  .el-bad{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
-  .el-bad a{display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border-radius:999px;
-    background:var(--red-d);border:1px solid rgba(255,59,92,.25);color:var(--red);
-    font-size:12.5px;text-decoration:none}
-  .el-page{display:flex;gap:8px;justify-content:center;margin-top:20px}
-  .el-page a,.el-page span{padding:8px 14px;border-radius:9px;border:1px solid var(--border);
-    color:var(--text-2);font-size:13px;text-decoration:none}
-  .el-page .cur{background:var(--cyan-d);border-color:rgba(0,212,255,.3);color:var(--cyan)}
-  @media(max-width:860px){.el-hide{display:none}}
-  .el-diag{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);
-    padding:16px 18px;margin-bottom:20px}
-  .el-diag-h{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
-  .el-diag-h b{font-family:var(--head);font-size:14px}
-  .el-diag-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px 18px}
-  .el-d{display:flex;gap:9px;align-items:flex-start;font-size:12.5px;line-height:1.45}
-  .el-d .i{width:18px;flex:0 0 auto;text-align:center;margin-top:1px}
-  .el-d .k{font-family:var(--mono);font-size:9.5px;letter-spacing:1px;text-transform:uppercase;color:var(--text-3)}
-  .el-d .v{color:var(--text);word-break:break-all}
-  .el-d.ok .i{color:var(--green)} .el-d.bad .i{color:var(--red)} .el-d.warn .i{color:var(--yellow)}
-  .el-d.bad .v{color:var(--red)} .el-d.warn .v{color:var(--yellow)}
-  .el-test{display:flex;gap:8px;flex-wrap:wrap}
-  .el-test input{height:36px;border-radius:9px;border:1px solid var(--border);background:var(--bg2);
-    color:var(--text);padding:0 11px;font:inherit;font-size:12.5px;min-width:220px;outline:none}
-  .el-test input:focus{border-color:var(--cyan)}
-  .el-msg{padding:11px 14px;border-radius:10px;margin-bottom:14px;font-size:13px}
-  .el-msg.success{background:var(--green-d);color:var(--green);border:1px solid rgba(0,255,136,.2)}
-  .el-msg.error{background:var(--red-d);color:var(--red);border:1px solid rgba(255,59,92,.25)}
+  /* ── Takwimu ── */
+  .ed-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:18px}
+  .ed-s{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px 18px;position:relative;overflow:hidden}
+  .ed-s .t{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-3);font-weight:500}
+  .ed-s .t i{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;font-size:11.5px}
+  .ed-s .n{font-family:var(--head);font-size:28px;font-weight:800;letter-spacing:-.03em;margin-top:10px;line-height:1}
+  .ed-s .n small{font-size:14px;font-weight:600;color:var(--text-3);margin-left:4px}
+  .ed-bar{height:5px;border-radius:5px;background:rgba(255,255,255,.06);margin-top:12px;overflow:hidden}
+  .ed-bar i{display:block;height:100%;border-radius:5px}
+
+  /* ── Tahadhari ── */
+  .ed-alert{display:flex;gap:14px;padding:14px 16px;border-radius:14px;margin-bottom:18px;
+    background:var(--badd);border:1px solid rgba(255,90,110,.22)}
+  .ed-alert .ic{width:34px;height:34px;border-radius:10px;flex:0 0 auto;display:grid;place-items:center;
+    background:rgba(255,90,110,.15);color:var(--bad)}
+  .ed-alert b{color:var(--bad);font-size:13.5px}
+  .ed-alert p{margin:3px 0 8px;font-size:12.5px;color:var(--text-2);line-height:1.5}
+  .ed-chips{display:flex;flex-wrap:wrap;gap:6px}
+  .ed-chips a{display:inline-flex;gap:6px;align-items:center;padding:5px 11px;border-radius:999px;font-size:12px;
+    text-decoration:none;background:rgba(255,90,110,.12);color:var(--bad);border:1px solid rgba(255,90,110,.25)}
+  .ed-chips a:hover{background:rgba(255,90,110,.2)}
+
+  /* ── Kuchuja ── */
+  .ed-bar-f{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+  .ed-search{position:relative;flex:1 1 240px}
+  .ed-search i{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--text-3);font-size:13px}
+  .ed-search input{width:100%;height:40px;border-radius:11px;border:1px solid var(--border);background:var(--card);
+    color:var(--text);padding:0 12px 0 36px;font:inherit;font-size:13px;outline:none}
+  .ed-bar-f select{height:40px;border-radius:11px;border:1px solid var(--border);background:var(--card);color:var(--text);
+    padding:0 12px;font:inherit;font-size:13px;outline:none}
+  .ed-search input:focus,.ed-bar-f select:focus{border-color:var(--cyan)}
+  .ed-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+  .ed-tabs a{padding:6px 12px;border-radius:999px;font-size:12.5px;text-decoration:none;color:var(--text-2);
+    border:1px solid var(--border);background:var(--card)}
+  .ed-tabs a.on{color:var(--cyan);border-color:rgba(0,212,255,.35);background:var(--cyan-d)}
+  .ed-tabs a b{margin-left:4px;font-weight:700}
+
+  /* ── Orodha ── */
+  .ed-list{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden}
+  .ed-row{border-bottom:1px solid var(--border)}
+  .ed-row:last-child{border-bottom:0}
+  .ed-row summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:40px minmax(0,1.1fr) minmax(0,2fr) 130px 90px 18px;
+    gap:14px;align-items:center;padding:13px 18px;transition:background .15s}
+  .ed-row summary::-webkit-details-marker{display:none}
+  .ed-row summary:hover{background:var(--card-s)}
+  .ed-row[open] summary{background:var(--card-s)}
+  .ed-av{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;font-weight:700;font-size:13px;
+    background:rgba(255,255,255,.06);color:var(--text-2)}
+  .ed-who b{display:block;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ed-who span{display:block;font-size:11.5px;color:var(--text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ed-subj{font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ed-cat{display:inline-block;margin-top:4px;font-family:var(--mono);font-size:9.5px;letter-spacing:.8px;
+    text-transform:uppercase;color:var(--text-3);padding:2px 7px;border-radius:5px;background:rgba(255,255,255,.04)}
+  .ed-time{font-size:12.5px;color:var(--text-2);text-align:right}
+  .ed-time span{display:block;font-size:11px;color:var(--text-3)}
+  .ed-car{color:var(--text-3);font-size:11px;transition:transform .2s}
+  .ed-row[open] .ed-car{transform:rotate(180deg)}
+
+  .ed-pill{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;font-size:11.5px;font-weight:600;white-space:nowrap}
+  .ed-pill i{font-size:9.5px}
+  .st-sent,.st-deferred{background:rgba(255,255,255,.06);color:var(--text-2)}
+  .st-deferred{background:var(--warnd);color:var(--warn)}
+  .st-delivered{background:var(--okd);color:var(--ok)}
+  .st-opened,.st-clicked{background:var(--blued);color:var(--blue)}
+  .st-bounced,.st-blocked,.st-error{background:var(--badd);color:var(--bad)}
+  .st-spam{background:var(--warnd);color:var(--warn)}
+
+  /* ── Maelezo ya barua ── */
+  .ed-det{padding:4px 18px 20px 72px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px}
+  .ed-det h4{font-family:var(--mono);font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:var(--text-3);margin:0 0 12px}
+  .ed-tl{list-style:none;margin:0;padding:0;position:relative}
+  .ed-tl li{position:relative;padding:0 0 14px 22px;font-size:13px}
+  .ed-tl li:last-child{padding-bottom:0}
+  .ed-tl li::before{content:"";position:absolute;left:4px;top:14px;bottom:-2px;width:2px;background:var(--border)}
+  .ed-tl li:last-child::before{display:none}
+  .ed-tl .d{position:absolute;left:0;top:4px;width:10px;height:10px;border-radius:50%;background:var(--text-3);
+    box-shadow:0 0 0 3px var(--card-s)}
+  .ed-tl .d.ok{background:var(--ok)} .ed-tl .d.blue{background:var(--blue)} .ed-tl .d.bad{background:var(--bad)} .ed-tl .d.warn{background:var(--warn)}
+  .ed-tl small{display:block;color:var(--text-3);font-size:11.5px;margin-top:1px}
+  .ed-why{padding:13px 14px;border-radius:12px;background:var(--badd);border:1px solid rgba(255,90,110,.2);
+    font-size:12.5px;line-height:1.55;color:var(--text-2);margin-bottom:12px}
+  .ed-why b{display:block;color:var(--bad);margin-bottom:4px;font-size:13px}
+  .ed-why code{display:block;margin-top:7px;font-size:11.5px;color:var(--bad);word-break:break-word}
+  .ed-meta{font-size:12.5px;display:grid;gap:7px}
+  .ed-meta div{display:flex;gap:10px}
+  .ed-meta span{color:var(--text-3);min-width:78px}
+  .ed-meta code{font-size:11px;color:var(--text-3);word-break:break-all}
+
+  .ed-empty{padding:56px 20px;text-align:center;color:var(--text-3)}
+  .ed-empty i{font-size:34px;opacity:.3}
+  .ed-page{display:flex;gap:8px;justify-content:center;margin-top:18px}
+  .ed-page a,.ed-page span{padding:8px 14px;border-radius:10px;border:1px solid var(--border);color:var(--text-2);font-size:13px;text-decoration:none}
+  .ed-page .cur{background:var(--cyan-d);border-color:rgba(0,212,255,.3);color:var(--cyan)}
+
+  @media(max-width:900px){
+    .ed-row summary{grid-template-columns:36px minmax(0,1fr) auto;gap:10px}
+    .ed-row summary .ed-subjc,.ed-row summary .ed-time,.ed-row summary .ed-car{display:none}
+    .ed-det{grid-template-columns:1fr;padding:4px 16px 18px}
+  }
+  .ed-who .ed-mob-subj{display:none;font-size:12px;color:var(--text-2);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  @media(max-width:900px){.ed-who .ed-mob-subj{display:block}}
 </style>
 
+<div class="ed">
+
+{# Kichwa kiko tayari kwenye topbar — hapa ni maelezo tu #}
+<p class="ed-lead">Kila barua inayotoka kwenye mfumo — imetumwa, imefika, imefunguliwa, au imekwama.</p>
 
 {% if messages %}
-  {% for m in messages %}<div class="el-msg {{ m.tags }}">{{ m }}</div>{% endfor %}
+  {% for m in messages %}
+  <div class="ed-msg {{ m.tags }}"><i class="fas {% if m.tags == 'error' %}fa-circle-exclamation{% else %}fa-circle-check{% endif %}" style="margin-top:2px"></i><span>{{ m }}</span></div>
+  {% endfor %}
 {% endif %}
 
-<!-- UCHUNGUZI WA USANIDI -->
-<div class="el-diag">
-  <div class="el-diag-h">
-    <b><i class="fas fa-stethoscope"></i> Usanidi wa barua pepe</b>
-    <form class="el-test" method="post" action="{% url 'email_send_test' %}">
-      {% csrf_token %}
-      <input type="email" name="to" placeholder="email yako ya majaribio" value="{{ request.user.email }}" required>
-      <button type="submit" class="jt-btn"><i class="fas fa-paper-plane"></i> Tuma barua ya majaribio</button>
-    </form>
-  </div>
-  <div class="el-diag-grid">
-    <div class="el-d {% if diag.is_brevo %}ok{% else %}bad{% endif %}">
-      <span class="i"><i class="fas {% if diag.is_brevo %}fa-circle-check{% else %}fa-circle-xmark{% endif %}"></i></span>
-      <div><div class="k">Backend</div><div class="v">{{ diag.backend }}{% if not diag.is_brevo %} — barua HAZIHIFADHIWI{% endif %}</div></div>
-    </div>
-    <div class="el-d {% if diag.api_key %}ok{% else %}bad{% endif %}">
-      <span class="i"><i class="fas {% if diag.api_key %}fa-circle-check{% else %}fa-circle-xmark{% endif %}"></i></span>
-      <div><div class="k">BREVO_API_KEY</div><div class="v">{% if diag.api_key %}imewekwa{% else %}HAIPO{% endif %}</div></div>
-    </div>
-    <div class="el-d {% if not diag.webhook_token %}bad{% elif diag.token_has_space %}warn{% else %}ok{% endif %}">
-      <span class="i"><i class="fas {% if diag.webhook_token and not diag.token_has_space %}fa-circle-check{% else %}fa-triangle-exclamation{% endif %}"></i></span>
-      <div><div class="k">BREVO_WEBHOOK_TOKEN</div>
-        <div class="v">{% if diag.webhook_token %}{{ diag.webhook_token }} ({{ diag.token_len }} herufi){% if diag.token_has_space %} — ina nafasi!{% endif %}{% else %}HAIPO — matukio yote yanakubaliwa bila ulinzi{% endif %}</div>
-        {% if diag.webhook_token %}<div class="k" style="margin-top:3px;text-transform:none;letter-spacing:0">linganisha na: <code>python manage.py brevo_webhook --list</code></div>{% endif %}
+<!-- USANIDI (unaweza kukunjwa) -->
+{% with d=diag %}
+<details class="ed-setup" {% if not d.is_brevo or not d.api_key or not d.webhook_token or d.token_has_space or d.alert_suspicious %}open{% endif %}>
+  <summary>
+    <i class="fas fa-sliders" style="color:var(--text-3)"></i> Usanidi na majaribio
+    <span class="sum">
+      {% if d.is_brevo and d.api_key and d.webhook_token and not d.token_has_space and not d.alert_suspicious %}
+        <span class="ed-dot" style="background:var(--ok)"></span> Kila kitu kiko sawa
+      {% else %}
+        <span class="ed-dot" style="background:var(--warn)"></span> Kuna cha kurekebisha
+      {% endif %}
+      <i class="fas fa-chevron-down car"></i>
+    </span>
+  </summary>
+  <div class="ed-setup-body">
+    <div class="ed-cfg">
+      <div class="ed-c {% if d.is_brevo %}ok{% else %}bad{% endif %}">
+        <i class="i fas {% if d.is_brevo %}fa-circle-check{% else %}fa-circle-xmark{% endif %}"></i>
+        <div><div class="k">Njia ya kutuma</div><div class="v">{{ d.backend }}</div>
+          {% if not d.is_brevo %}<div class="h">Barua hazihifadhiwi hapa — weka BREVO_API_KEY</div>{% endif %}</div>
+      </div>
+      <div class="ed-c {% if d.api_key %}ok{% else %}bad{% endif %}">
+        <i class="i fas {% if d.api_key %}fa-circle-check{% else %}fa-circle-xmark{% endif %}"></i>
+        <div><div class="k">Brevo API key</div><div class="v">{% if d.api_key %}Imewekwa{% else %}Haipo{% endif %}</div></div>
+      </div>
+      <div class="ed-c {% if not d.webhook_token %}bad{% elif d.token_has_space %}warn{% else %}ok{% endif %}">
+        <i class="i fas {% if d.webhook_token and not d.token_has_space %}fa-circle-check{% else %}fa-triangle-exclamation{% endif %}"></i>
+        <div><div class="k">Webhook token</div>
+          <div class="v">{% if d.webhook_token %}{{ d.webhook_token }}{% else %}Haipo{% endif %}</div>
+          <div class="h">{% if d.token_has_space %}Ina nafasi — iondoe kwenye Render{% elif d.webhook_token %}Linganisha na: brevo_webhook --list{% else %}Matukio hayalindwi{% endif %}</div></div>
+      </div>
+      <div class="ed-c ok">
+        <i class="i fas fa-at"></i>
+        <div><div class="k">Barua zinatoka kwa</div><div class="v">{{ d.from_email|default:"—" }}</div></div>
+      </div>
+      <div class="ed-c {% if d.alert_suspicious %}warn{% elif d.alert_email %}ok{% else %}bad{% endif %}">
+        <i class="i fas {% if d.alert_suspicious %}fa-triangle-exclamation{% else %}fa-bell{% endif %}"></i>
+        <div><div class="k">Alert za mfumo zinaenda</div><div class="v">{{ d.alert_email|default:"Haipo" }}</div>
+          {% if d.alert_suspicious %}<div class="h">Sifuri badala ya herufi O? Rekebisha ALERT_EMAIL</div>{% endif %}</div>
       </div>
     </div>
-    <div class="el-d ok">
-      <span class="i"><i class="fas fa-at"></i></span>
-      <div><div class="k">Kutoka</div><div class="v">{{ diag.from_email|default:"—" }}</div></div>
-    </div>
-    <div class="el-d {% if diag.alert_suspicious %}warn{% elif diag.alert_email %}ok{% else %}bad{% endif %}">
-      <span class="i"><i class="fas {% if diag.alert_suspicious %}fa-triangle-exclamation{% else %}fa-bell{% endif %}"></i></span>
-      <div><div class="k">ALERT_EMAIL (taarifa za mfumo)</div>
-        <div class="v">{{ diag.alert_email|default:"HAIPO" }}{% if diag.alert_suspicious %} — sifuri badala ya herufi O?{% endif %}</div></div>
-    </div>
+    <form class="ed-test" method="post" action="{% url 'email_send_test' %}">
+      {% csrf_token %}
+      <input type="email" name="to" placeholder="email ya kupokea majaribio" value="{{ request.user.email }}" required>
+      <button type="submit" class="jt-btn" data-jt-wait="Inatuma…"><i class="fas fa-paper-plane"></i> Tuma barua ya majaribio</button>
+      <small>Inatoka production moja kwa moja. Ndani ya dakika moja, hali yake itabadilika hapa chini.</small>
+    </form>
   </div>
-</div>
-
-{% if not webhook_ready %}
-<div class="el-note">
-  <i class="fas fa-circle-info" style="margin-top:2px"></i>
-  <div>
-    <strong>Hatima ya barua bado haijaunganishwa.</strong><br>
-    Kwa sasa unaona "imetumwa" pekee — si kama imefika kwa mteja. Kwenye Brevo nenda
-    <em>Settings &rarr; Webhooks &rarr; Add a webhook</em>, weka URL
-    <code>https://www.jamiitek.com/webhooks/brevo/?token=&lt;BREVO_WEBHOOK_TOKEN&gt;</code>
-    na uchague matukio: Sent, Delivered, Opened, Clicked, Soft bounce, Hard bounce, Invalid email, Spam, Blocked, Error.
-  </div>
-</div>
-{% endif %}
+</details>
+{% endwith %}
 
 <!-- TAKWIMU -->
-<div class="el-stats">
-  <div class="el-card">
-    <div class="n">{{ stats.total }}</div>
-    <div class="l">Zimetumwa</div>
-    <div class="s">siku {{ f.days }} zilizopita</div>
+<div class="ed-stats">
+  <div class="ed-s">
+    <div class="t"><i class="fas fa-paper-plane" style="background:rgba(255,255,255,.06);color:var(--text-2)"></i> Zimetumwa</div>
+    <div class="n">{{ stats.total }}<small>{% if f.days != '0' %}siku {{ f.days }}{% else %}jumla{% endif %}</small></div>
   </div>
-  <div class="el-card">
-    <div class="n" style="color:var(--green)">{{ stats.delivered_pct }}%</div>
-    <div class="l">Zimefika</div>
-    <div class="s">{{ stats.delivered }} kati ya {{ stats.total }}</div>
+  <div class="ed-s">
+    <div class="t"><i class="fas fa-inbox" style="background:var(--okd);color:var(--ok)"></i> Zimefika</div>
+    <div class="n" style="color:var(--ok)">{{ stats.delivered_pct }}%<small>{{ stats.delivered }}/{{ stats.total }}</small></div>
+    <div class="ed-bar"><i style="width:{{ stats.delivered_pct }}%;background:var(--ok)"></i></div>
   </div>
-  <div class="el-card">
-    <div class="n" style="color:var(--cyan)">{{ stats.opened_pct }}%</div>
-    <div class="l">Zimefunguliwa</div>
-    <div class="s">{{ stats.opened }} barua</div>
+  <div class="ed-s">
+    <div class="t"><i class="fas fa-envelope-open" style="background:var(--blued);color:var(--blue)"></i> Zimefunguliwa</div>
+    <div class="n" style="color:var(--blue)">{{ stats.opened_pct }}%<small>{{ stats.opened }}</small></div>
+    <div class="ed-bar"><i style="width:{{ stats.opened_pct }}%;background:var(--blue)"></i></div>
   </div>
-  <div class="el-card">
-    <div class="n" style="color:{% if stats.problem %}var(--red){% else %}var(--text-3){% endif %}">{{ stats.problem }}</div>
-    <div class="l">Zenye tatizo</div>
-    <div class="s">bounce &middot; spam &middot; error</div>
+  <div class="ed-s">
+    <div class="t"><i class="fas fa-triangle-exclamation" style="background:var(--badd);color:var(--bad)"></i> Zenye tatizo</div>
+    <div class="n" style="color:{% if stats.problem %}var(--bad){% else %}var(--text-3){% endif %}">{{ stats.problem }}</div>
   </div>
-  <div class="el-card">
+  <div class="ed-s">
+    <div class="t"><i class="fas fa-hourglass-half" style="background:rgba(255,255,255,.06);color:var(--text-2)"></i> Zinasubiri jibu</div>
     <div class="n" style="color:var(--text-2)">{{ stats.pending }}</div>
-    <div class="l">Zinasubiri</div>
-    <div class="s">bado hakuna jibu</div>
   </div>
 </div>
 
 {% if problem_addresses %}
-<div class="el-bad">
-  <span style="font-size:12.5px;color:var(--text-3);align-self:center">Anwani zenye matatizo:</span>
-  {% for p in problem_addresses %}
-  <a href="?q={{ p.to_email|urlencode }}&days={{ f.days }}">
-    <i class="fas fa-triangle-exclamation"></i> {{ p.to_email }} <strong>&times;{{ p.n }}</strong>
-  </a>
-  {% endfor %}
+<div class="ed-alert">
+  <div class="ic"><i class="fas fa-user-xmark"></i></div>
+  <div>
+    <b>Anwani {{ problem_addresses|length }} hazipokei barua</b>
+    <p>Barua zinazokwenda hapa zinarudi au zinazuiwa. Mteja au mfumo hauwezi kupokea taarifa hadi anwani irekebishwe.</p>
+    <div class="ed-chips">
+      {% for p in problem_addresses %}
+      <a href="?q={{ p.to_email|urlencode }}&days={{ f.days }}"><i class="fas fa-magnifying-glass"></i> {{ p.to_email }} <b>&times;{{ p.n }}</b></a>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endif %}
+
+{% if not webhook_ready %}
+<div class="ed-msg" style="background:var(--warnd);color:var(--warn);border:1px solid rgba(251,191,36,.22)">
+  <i class="fas fa-circle-info" style="margin-top:2px"></i>
+  <span>Hatima ya barua bado haijaunganishwa — unaona "imetumwa" pekee. Endesha <code>python manage.py brevo_webhook --create</code>.</span>
 </div>
 {% endif %}
 
 <!-- KUCHUJA -->
-<form class="el-filters" method="get">
-  <input type="search" name="q" value="{{ f.q }}" placeholder="Tafuta email, mteja, website…">
-  <select name="status">
-    <option value="">Hali zote</option>
-    <option value="problem" {% if f.status == 'problem' %}selected{% endif %}>Zenye tatizo tu</option>
-    <option value="sent" {% if f.status == 'sent' %}selected{% endif %}>Imetumwa</option>
-    <option value="delivered" {% if f.status == 'delivered' %}selected{% endif %}>Imefika</option>
-    <option value="opened" {% if f.status == 'opened' %}selected{% endif %}>Imefunguliwa</option>
-    <option value="bounced" {% if f.status == 'bounced' %}selected{% endif %}>Imerudi</option>
-    <option value="error" {% if f.status == 'error' %}selected{% endif %}>Imeshindwa</option>
-  </select>
-  <select name="category">
+<div class="ed-tabs">
+  <a href="?days={{ f.days }}" class="{% if not f.status %}on{% endif %}">Zote</a>
+  <a href="?status=problem&days={{ f.days }}" class="{% if f.status == 'problem' %}on{% endif %}">Zenye tatizo{% if stats.problem %}<b>{{ stats.problem }}</b>{% endif %}</a>
+  <a href="?status=delivered&days={{ f.days }}" class="{% if f.status == 'delivered' %}on{% endif %}">Zimefika</a>
+  <a href="?status=opened&days={{ f.days }}" class="{% if f.status == 'opened' %}on{% endif %}">Zimefunguliwa</a>
+  <a href="?status=sent&days={{ f.days }}" class="{% if f.status == 'sent' %}on{% endif %}">Zinasubiri</a>
+</div>
+
+<form class="ed-bar-f" method="get">
+  <input type="hidden" name="status" value="{{ f.status }}">
+  <div class="ed-search"><i class="fas fa-magnifying-glass"></i>
+    <input type="search" name="q" value="{{ f.q }}" placeholder="Tafuta email, mteja au website…"></div>
+  <select name="category" onchange="this.form.submit()">
     <option value="">Aina zote</option>
-    {% for c in categories %}
-    <option value="{{ c }}" {% if f.category == c %}selected{% endif %}>{{ c }}</option>
-    {% endfor %}
+    {% for c in categories %}<option value="{{ c }}" {% if f.category == c %}selected{% endif %}>{{ c }}</option>{% endfor %}
   </select>
-  <select name="days">
+  <select name="days" onchange="this.form.submit()">
     <option value="7" {% if f.days == '7' %}selected{% endif %}>Siku 7</option>
     <option value="30" {% if f.days == '30' %}selected{% endif %}>Siku 30</option>
     <option value="90" {% if f.days == '90' %}selected{% endif %}>Siku 90</option>
     <option value="0" {% if f.days == '0' %}selected{% endif %}>Zote</option>
   </select>
-  <button type="submit" class="jt-btn"><i class="fas fa-filter"></i> Chuja</button>
-  {% if f.q or f.status or f.category %}
-  <a href="{% url 'email_log_list' %}" class="el-chip on"><i class="fas fa-xmark"></i> Ondoa</a>
-  {% endif %}
+  {% if f.q or f.category %}<a href="?status={{ f.status }}&days={{ f.days }}" class="jt-btn" style="background:transparent;border:1px solid var(--border);color:var(--text-2)"><i class="fas fa-xmark"></i> Ondoa</a>{% endif %}
 </form>
 
 <!-- ORODHA -->
 {% if logs %}
-<table class="el-tbl">
-  <thead>
-    <tr>
-      <th>Kwa nani</th>
-      <th>Barua</th>
-      <th class="el-hide">Aina</th>
-      <th>Hali</th>
-      <th class="el-hide">Muda</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for e in logs %}
-    <tr>
-      <td>
-        <strong>{{ e.client.name|default:e.to_email }}</strong>
-        {% if e.client %}<div class="el-sub">{{ e.to_email }}</div>{% endif %}
-        {% if e.website %}<div class="el-sub"><i class="fas fa-globe"></i> {{ e.website.name }}</div>{% endif %}
-      </td>
-      <td>
-        {{ e.subject|truncatechars:70 }}
-        {% if e.error %}<div class="el-sub" style="color:var(--red)">{{ e.error|truncatechars:90 }}</div>{% endif %}
-      </td>
-      <td class="el-hide"><span class="el-cat">{{ e.category|default:"—" }}</span></td>
-      <td>
-        <span class="el-pill p-{{ e.status }}"><i></i>{{ e.get_status_display }}</span>
-        {% if e.opened_at %}<div class="el-sub">imefunguliwa {{ e.opened_at|date:"d M H:i" }}</div>
-        {% elif e.delivered_at %}<div class="el-sub">imefika {{ e.delivered_at|date:"d M H:i" }}</div>{% endif %}
-      </td>
-      <td class="el-hide">
-        {{ e.created_at|date:"d M Y" }}
-        <div class="el-sub">{{ e.created_at|date:"H:i" }}</div>
-      </td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+<div class="ed-list">
+  {% for e in logs %}
+  <details class="ed-row">
+    <summary>
+      <div class="ed-av" {% if e.is_problem %}style="background:var(--badd);color:var(--bad)"{% endif %}>
+        {% if e.client %}{{ e.client.name|slice:":1"|upper }}{% else %}{{ e.to_email|slice:":1"|upper }}{% endif %}
+      </div>
+      <div class="ed-who">
+        <b>{{ e.client.name|default:e.to_email }}</b>
+        <span>{% if e.website %}{{ e.website.name }}{% elif e.client %}{{ e.to_email }}{% else %}&nbsp;{% endif %}</span>
+        <span class="ed-mob-subj">{{ e.clean_subject }}</span>
+      </div>
+      <div class="ed-subjc">
+        <div class="ed-subj">{{ e.clean_subject }}</div>
+        {% if e.category %}<span class="ed-cat">{{ e.category }}</span>{% endif %}
+      </div>
+      <div>
+        <span class="ed-pill st-{{ e.status }}">
+          <i class="fas {% if e.status == 'delivered' %}fa-check{% elif e.status == 'opened' %}fa-envelope-open{% elif e.status == 'clicked' %}fa-arrow-pointer{% elif e.is_problem %}fa-xmark{% elif e.status == 'deferred' %}fa-clock{% else %}fa-paper-plane{% endif %}"></i>
+          {{ e.get_status_display }}
+        </span>
+      </div>
+      <div class="ed-time">{{ e.created_at|date:"d M" }}<span>{{ e.created_at|date:"H:i" }}</span></div>
+      <i class="fas fa-chevron-down ed-car"></i>
+    </summary>
+
+    <div class="ed-det">
+      <div>
+        <h4>Safari ya barua</h4>
+        <ul class="ed-tl">
+          <li><span class="d"></span>Imetumwa na mfumo<small>{{ e.created_at|date:"d M Y, H:i" }}</small></li>
+          {% for ev in e.events %}
+            {% if ev.event != 'request' and ev.event != 'sent' %}
+            <li><span class="d {% if ev.event == 'delivered' %}ok{% elif ev.event in 'opened unique_opened click clicked proxy_open unique_proxy_open' %}blue{% elif ev.event in 'soft_bounce deferred' %}warn{% else %}bad{% endif %}"></span>
+              {% if ev.event == 'delivered' %}Imefika kwenye inbox
+              {% elif ev.event == 'opened' or ev.event == 'unique_opened' %}Imefunguliwa
+              {% elif ev.event == 'proxy_open' or ev.event == 'unique_proxy_open' %}Imefunguliwa (kupitia proxy ya barua)
+              {% elif ev.event == 'click' or ev.event == 'clicked' %}Amebonyeza link
+              {% elif ev.event == 'hard_bounce' %}Imerudi — anwani haipo
+              {% elif ev.event == 'soft_bounce' %}Imerudi kwa muda — Brevo atajaribu tena
+              {% elif ev.event == 'deferred' %}Imecheleweshwa
+              {% elif ev.event == 'blocked' %}Imezuiliwa na Brevo
+              {% elif ev.event == 'spam' %}Imewekwa kama spam
+              {% elif ev.event == 'invalid_email' %}Anwani si sahihi
+              {% else %}{{ ev.event }}{% endif %}
+              <small>{{ ev.at|slice:":10" }} {{ ev.at|slice:"11:16" }}</small></li>
+            {% endif %}
+          {% empty %}
+            {% if e.status == 'sent' %}<li><span class="d warn"></span>Inasubiri jibu kutoka Brevo<small>kwa kawaida ndani ya dakika moja</small></li>{% endif %}
+          {% endfor %}
+        </ul>
+      </div>
+      <div>
+        {% if e.is_problem %}
+        <div class="ed-why">
+          <b>Kwa nini haikufika</b>
+          {{ e.explanation }}
+          {% if e.error %}<code>{{ e.error|truncatechars:200 }}</code>{% endif %}
+        </div>
+        {% endif %}
+        <h4>Maelezo</h4>
+        <div class="ed-meta">
+          <div><span>Kwa</span>{{ e.to_email }}</div>
+          {% if e.client %}<div><span>Mteja</span>{{ e.client.name }}</div>{% endif %}
+          {% if e.website %}<div><span>Website</span>{{ e.website.name }}</div>{% endif %}
+          <div><span>Kichwa</span>{{ e.clean_subject }}</div>
+          {% if e.message_id %}<div><span>Brevo ID</span><code>{{ e.message_id }}</code></div>{% endif %}
+        </div>
+      </div>
+    </div>
+  </details>
+  {% endfor %}
+</div>
 
 {% if page_obj.has_other_pages %}
-<div class="el-page">
-  {% if page_obj.has_previous %}
-    <a href="?page={{ page_obj.previous_page_number }}&q={{ f.q|urlencode }}&status={{ f.status }}&category={{ f.category }}&days={{ f.days }}">&larr;</a>
-  {% endif %}
+<div class="ed-page">
+  {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}&q={{ f.q|urlencode }}&status={{ f.status }}&category={{ f.category }}&days={{ f.days }}">&larr;</a>{% endif %}
   <span class="cur">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
-  {% if page_obj.has_next %}
-    <a href="?page={{ page_obj.next_page_number }}&q={{ f.q|urlencode }}&status={{ f.status }}&category={{ f.category }}&days={{ f.days }}">&rarr;</a>
-  {% endif %}
+  {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}&q={{ f.q|urlencode }}&status={{ f.status }}&category={{ f.category }}&days={{ f.days }}">&rarr;</a>{% endif %}
 </div>
 {% endif %}
 
 {% else %}
-<div class="el-tbl">
-  <div class="el-empty">
-    <i class="fas fa-inbox" style="font-size:30px;opacity:.35"></i>
-    <p style="margin-top:12px">Hakuna barua inayolingana na uchujaji huu.</p>
-  </div>
-</div>
+<div class="ed-list"><div class="ed-empty"><i class="fas fa-inbox"></i><p style="margin-top:12px">Hakuna barua inayolingana na uchujaji huu.</p></div></div>
 {% endif %}
 
+</div>
 {% endblock %}

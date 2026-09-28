@@ -61,6 +61,12 @@ _CATEGORY_HINTS = (
     ('habari', 'news'),
     ('imeacha kujibu', 'bot_paused'),
     ('binadamu', 'handoff'),
+    # Alert za mfumo (apps/notify.py) — "[JamiiTek] 🔴 *SSL inakaribia kuisha*"
+    ('ssl', 'alert'),
+    ('tatizo', 'alert'),
+    ('down', 'alert'),
+    ('[jamiitek]', 'alert'),
+    ('jaribio', 'test'),
 )
 
 

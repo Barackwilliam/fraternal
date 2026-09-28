@@ -1725,16 +1725,49 @@ class EmailLog(models.Model):
     def is_problem(self):
         return self.status in ('bounced', 'spam', 'blocked', 'error')
 
+    @property
+    def clean_subject(self):
+        """Kichwa bila alama za WhatsApp (*bold*) zinazotoka kwenye alerts."""
+        return (self.subject or '').replace('*', '').strip()
+
+    @property
+    def explanation(self):
+        """Tatizo kwa lugha ya kawaida, pamoja na hatua ya kuchukua."""
+        low = (self.error or '').lower()
+        if self.status == 'blocked' and 'blacklist' in low:
+            return ('Brevo ameweka anwani hii kwenye orodha ya kuzuiwa — kwa kawaida '
+                    'kwa sababu barua za awali zilirudi (anwani haipo). Rekebisha '
+                    'anwani, kisha iondoe Brevo → Contacts → Blocklist.')
+        if self.status == 'blocked':
+            return 'Brevo amezuia barua hii. Angalia sababu hapo juu.'
+        if self.status == 'bounced':
+            if 'mx' in low or 'domain' in low:
+                return 'Domain ya anwani hii haipokei barua. Huenda imeandikwa vibaya.'
+            return 'Anwani haipo au sanduku lake limejaa. Thibitisha na mteja.'
+        if self.status == 'spam':
+            return 'Mpokeaji aliiweka kama spam. Brevo huenda akazuia barua zijazo kwake.'
+        if self.status == 'error':
+            return 'Barua haikutoka kwetu kabisa. Kosa kamili liko hapo juu.'
+        if self.status == 'deferred':
+            return 'Server ya mpokeaji imeichelewesha. Brevo atajaribu tena mwenyewe.'
+        return ''
+
     def apply_event(self, event, at=None, reason=''):
         """Weka tukio jipya. Salama kurudiwa — Brevo hurudia matukio."""
         from django.utils import timezone as tz
         at = at or tz.now()
-        event = (event or '').lower().replace(' ', '_')
+        # Brevo anatumia snake_case kwenye payload ("hard_bounce") lakini
+        # camelCase kwenye API ("hardBounce"). Kubali zote mbili.
+        import re as _re
+        event = _re.sub(r'(?<!^)(?=[A-Z])', '_', (event or '').strip())
+        event = event.lower().replace(' ', '_')
 
         mapping = {
             'request': 'sent', 'sent': 'sent',
             'delivered': 'delivered',
             'opened': 'opened', 'unique_opened': 'opened', 'open': 'opened',
+            # Apple Mail na baadhi ya huduma hufungua barua kupitia proxy
+            'proxy_open': 'opened', 'unique_proxy_open': 'opened',
             'click': 'clicked', 'clicked': 'clicked',
             'deferred': 'deferred',
             'soft_bounce': 'deferred',      # Brevo inajaribu tena
@@ -1759,7 +1792,10 @@ class EmailLog(models.Model):
             self.opened_at = at
         if new in ('bounced', 'spam', 'blocked', 'error') and not self.failed_at:
             self.failed_at = at
-        if reason:
+        # Sababu ni ya MATATIZO pekee. Brevo anatuma `reason` hata kwa
+        # tukio la kawaida ("sent"), na tulikuwa tukiionyesha kwa rangi
+        # nyekundu chini ya kila barua kana kwamba ni kosa.
+        if reason and new in ('bounced', 'spam', 'blocked', 'error', 'deferred'):
             self.error = reason[:2000]
 
         # Panda tu — "delivered" inayofika baada ya "opened" isishushe hali
