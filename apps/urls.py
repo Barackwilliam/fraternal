@@ -135,6 +135,7 @@ urlpatterns = [
     # Brevo inatuambia hatima ya kila barua (delivered, bounced, opened)
     # Kufuatilia barua: imetumwa? imefika? imefunguliwa?
     path('manage/emails/', email_log_views.email_log_list, name='email_log_list'),
+    path('manage/emails/test/', email_log_views.email_send_test, name='email_send_test'),
 
     path('webhooks/brevo/', email_webhook.brevo_webhook, name='brevo_webhook'),
 
