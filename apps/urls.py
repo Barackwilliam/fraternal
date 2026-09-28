@@ -3,6 +3,8 @@
 from django.urls import path
 from . import views
 from . import blog_views
+from . import email_webhook
+from . import email_log_views
 from . import contract_views
 from . import proposal_views
 from . import docs_views
@@ -130,6 +132,12 @@ urlpatterns = [
     path('manage/websites/', management_views.website_list, name='website_list'),
     path('manage/websites/auto-suspend/', management_views.run_auto_suspend_view, name='run_auto_suspend'),
     path('tasks/daily/', management_views.daily_tasks_endpoint, name='daily_tasks_endpoint'),
+    # Brevo inatuambia hatima ya kila barua (delivered, bounced, opened)
+    # Kufuatilia barua: imetumwa? imefika? imefunguliwa?
+    path('manage/emails/', email_log_views.email_log_list, name='email_log_list'),
+
+    path('webhooks/brevo/', email_webhook.brevo_webhook, name='brevo_webhook'),
+
     path('tasks/news/', management_views.news_blog_endpoint, name='news_blog_endpoint'),
     path('manage/websites/add/', management_views.website_add, name='website_add'),
     path('manage/websites/<int:pk>/', management_views.website_detail, name='website_detail'),

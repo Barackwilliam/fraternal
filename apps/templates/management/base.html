@@ -140,6 +140,8 @@
       <div class="sb-items">
         <a href="{% url 'home' %}" target="_blank" class="sb-link">
           <i class="fas fa-arrow-up-right-from-square"></i> View Public Site</a>
+        <a href="{% url 'email_log_list' %}" class="sb-link {% if nav == 'emails' %}active{% endif %}">
+          <i class="fas fa-envelope-open-text"></i> Email Delivery</a>
         <a href="/admin/" target="_blank" class="sb-link">
           <i class="fas fa-database"></i> Django Admin</a>
         <a href="{% url 'management_logout' %}" class="sb-link sb-danger"

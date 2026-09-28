@@ -1004,3 +1004,25 @@ class PesapalTransactionAdmin(admin.ModelAdmin):
     readonly_fields = ('merchant_reference', 'order_tracking_id', 'raw_status',
                        'created_at', 'updated_at', 'completed_at')
     ordering = ('-created_at',)
+
+
+# ══════════════════════════════════════════════════════════════════
+#  KUMBUKUMBU YA BARUA
+# ══════════════════════════════════════════════════════════════════
+from .models import EmailLog  # noqa: E402
+
+
+@admin.register(EmailLog)
+class EmailLogAdmin(admin.ModelAdmin):
+    """Ni ya kusoma tu — ukurasa wa /manage/emails/ ndio wa matumizi ya kila siku."""
+    list_display = ('created_at', 'to_email', 'subject', 'category', 'status')
+    list_filter = ('status', 'category', 'created_at')
+    search_fields = ('to_email', 'subject', 'message_id', 'client__name', 'website__name')
+    date_hierarchy = 'created_at'
+    readonly_fields = [f.name for f in EmailLog._meta.fields]
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False

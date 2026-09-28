@@ -28,6 +28,7 @@ _NAV_EXACT = {
     'infra_audit': 'infra_audit',
     'lead_list': 'leads',
     'profile_builder': 'profile',
+    'email_log_list': 'emails',
 }
 
 _NAV_PREFIX = (

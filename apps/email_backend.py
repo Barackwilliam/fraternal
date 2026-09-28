@@ -41,6 +41,36 @@ logger = logging.getLogger('jamiitek.email')
 BREVO_URL = 'https://api.brevo.com/v3/smtp/email'
 TIMEOUT = 20
 
+# Aina ya barua inakisiwa kutoka kichwa, kwa zile zisizotuma
+# `X-JT-Category` yenyewe. Inatumika kuchuja kwenye /manage/emails/.
+_CATEGORY_HINTS = (
+    ('suspend', 'suspension'),
+    ('restored', 'restored'),
+    ('final notice', 'expiry_warning'),
+    ('expiry', 'expiry_warning'),
+    ('expires', 'expiry_warning'),
+    ('renewal', 'renewal'),
+    ('receipt', 'receipt'),
+    ('payment', 'payment'),
+    ('support', 'support'),
+    ('registration', 'registration'),
+    ('contact form', 'contact'),
+    ('welcome', 'welcome'),
+    ('karibu', 'welcome'),
+    ('blog', 'blog'),
+    ('habari', 'news'),
+    ('imeacha kujibu', 'bot_paused'),
+    ('binadamu', 'handoff'),
+)
+
+
+def _guess_category(subject):
+    low = (subject or '').lower()
+    for needle, name in _CATEGORY_HINTS:
+        if needle in low:
+            return name
+    return 'other'
+
 
 class BrevoEmailBackend(BaseEmailBackend):
     """Inatuma kila EmailMessage kupitia HTTPS."""
@@ -150,12 +180,51 @@ class BrevoEmailBackend(BaseEmailBackend):
             return False
 
         if resp.status_code in (200, 201, 202):
+            # `messageId` ndiyo inayounganisha barua hii na matukio
+            # yatakayorudi kwenye webhook (delivered, bounced...).
+            # Bila kuihifadhi, hatuwezi kamwe kujua hatima ya barua.
+            try:
+                message_id = (resp.json() or {}).get('messageId', '')
+            except ValueError:
+                message_id = ''
+            self._log(message, recipients, 'sent', message_id=message_id)
             logger.info('Email imetumwa kwa %s: %s',
                         ', '.join(recipients), (message.subject or '')[:60])
             return True
 
         detail = resp.text[:300]
         logger.error('Brevo %s: %s', resp.status_code, detail)
+        self._log(message, recipients, 'error', error=f'Brevo {resp.status_code}: {detail}')
         if not self.fail_silently:
             raise RuntimeError(f'Brevo imekataa ({resp.status_code}): {detail}')
         return False
+
+    # ── Kumbukumbu ────────────────────────────────────────────
+
+    @staticmethod
+    def _log(message, recipients, status, message_id='', error=''):
+        """Hifadhi barua kwenye EmailLog. Kamwe isivunje utumaji."""
+        try:
+            from apps.models import Client, EmailLog, ManagedWebsite
+
+            headers = getattr(message, 'extra_headers', {}) or {}
+            category = headers.get('X-JT-Category', '') or _guess_category(message.subject)
+            site_pk = headers.get('X-JT-Website') or None
+
+            for addr in recipients:
+                client = Client.objects.filter(email__iexact=addr).first()
+                website = None
+                if site_pk:
+                    website = ManagedWebsite.objects.filter(pk=site_pk).first()
+                EmailLog.objects.create(
+                    to_email=addr,
+                    subject=(message.subject or '')[:255],
+                    category=category[:40],
+                    message_id=str(message_id)[:255],
+                    status=status,
+                    error=error[:2000],
+                    client=client,
+                    website=website or (client.websites.first() if client and hasattr(client, 'websites') else None),
+                )
+        except Exception:
+            logger.exception('EmailLog haikuhifadhiwa (barua yenyewe haijaathirika)')

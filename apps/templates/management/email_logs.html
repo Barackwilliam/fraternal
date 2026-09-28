@@ -1,0 +1,198 @@
+{% extends 'management/base.html' %}
+{% block content %}
+
+<style>
+  .el-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:22px}
+  .el-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px 18px}
+  .el-card .n{font-family:var(--head);font-size:26px;font-weight:800;line-height:1;letter-spacing:-.02em}
+  .el-card .l{font-family:var(--mono);font-size:10px;color:var(--text-3);letter-spacing:1.4px;
+    text-transform:uppercase;margin-top:7px}
+  .el-card .s{font-size:11.5px;color:var(--text-3);margin-top:3px}
+
+  .el-filters{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:18px}
+  .el-filters select,.el-filters input{height:40px;border-radius:10px;border:1px solid var(--border);
+    background:var(--card);color:var(--text);padding:0 12px;font:inherit;font-size:13px;outline:none}
+  .el-filters input{min-width:210px}
+  .el-filters select:focus,.el-filters input:focus{border-color:var(--cyan)}
+  .el-chip{display:inline-flex;align-items:center;gap:6px;height:40px;padding:0 14px;border-radius:10px;
+    border:1px solid var(--border);background:var(--card);color:var(--text-2);font-size:12.5px;text-decoration:none}
+  .el-chip.on{border-color:var(--red);color:var(--red);background:var(--red-d)}
+
+  .el-tbl{width:100%;border-collapse:collapse;background:var(--card);
+    border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden}
+  .el-tbl th{font-family:var(--mono);font-size:10px;letter-spacing:1.2px;text-transform:uppercase;
+    color:var(--text-3);text-align:left;padding:12px 14px;border-bottom:1px solid var(--border);white-space:nowrap}
+  .el-tbl td{padding:13px 14px;border-bottom:1px solid var(--border);font-size:13.5px;vertical-align:top}
+  .el-tbl tr:last-child td{border-bottom:0}
+  .el-tbl tr:hover td{background:var(--card-s)}
+  .el-sub{font-size:11.5px;color:var(--text-3);margin-top:3px}
+
+  .el-pill{display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border-radius:999px;
+    font-family:var(--mono);font-size:10px;letter-spacing:.6px;text-transform:uppercase;white-space:nowrap}
+  .el-pill i{width:6px;height:6px;border-radius:50%;background:currentColor}
+  .p-sent{background:rgba(255,255,255,.06);color:var(--text-2)}
+  .p-deferred{background:var(--yellow-d);color:var(--yellow)}
+  .p-delivered{background:var(--green-d);color:var(--green)}
+  .p-opened,.p-clicked{background:var(--cyan-d);color:var(--cyan)}
+  .p-bounced,.p-blocked,.p-error{background:var(--red-d);color:var(--red)}
+  .p-spam{background:var(--yellow-d);color:var(--yellow)}
+
+  .el-cat{font-family:var(--mono);font-size:10px;color:var(--text-3);letter-spacing:.6px}
+  .el-empty{padding:48px 20px;text-align:center;color:var(--text-3)}
+  .el-note{display:flex;gap:11px;padding:14px 16px;border-radius:var(--r-lg);margin-bottom:20px;
+    background:var(--yellow-d);border:1px solid rgba(255,184,0,.22);color:var(--yellow);font-size:13px;line-height:1.55}
+  .el-bad{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+  .el-bad a{display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border-radius:999px;
+    background:var(--red-d);border:1px solid rgba(255,59,92,.25);color:var(--red);
+    font-size:12.5px;text-decoration:none}
+  .el-page{display:flex;gap:8px;justify-content:center;margin-top:20px}
+  .el-page a,.el-page span{padding:8px 14px;border-radius:9px;border:1px solid var(--border);
+    color:var(--text-2);font-size:13px;text-decoration:none}
+  .el-page .cur{background:var(--cyan-d);border-color:rgba(0,212,255,.3);color:var(--cyan)}
+  @media(max-width:860px){.el-hide{display:none}}
+</style>
+
+{% if not webhook_ready %}
+<div class="el-note">
+  <i class="fas fa-circle-info" style="margin-top:2px"></i>
+  <div>
+    <strong>Hatima ya barua bado haijaunganishwa.</strong><br>
+    Kwa sasa unaona "imetumwa" pekee — si kama imefika kwa mteja. Kwenye Brevo nenda
+    <em>Settings &rarr; Webhooks &rarr; Add a webhook</em>, weka URL
+    <code>https://www.jamiitek.com/webhooks/brevo/?token=&lt;BREVO_WEBHOOK_TOKEN&gt;</code>
+    na uchague matukio: Sent, Delivered, Opened, Clicked, Soft bounce, Hard bounce, Invalid email, Spam, Blocked, Error.
+  </div>
+</div>
+{% endif %}
+
+<!-- TAKWIMU -->
+<div class="el-stats">
+  <div class="el-card">
+    <div class="n">{{ stats.total }}</div>
+    <div class="l">Zimetumwa</div>
+    <div class="s">siku {{ f.days }} zilizopita</div>
+  </div>
+  <div class="el-card">
+    <div class="n" style="color:var(--green)">{{ stats.delivered_pct }}%</div>
+    <div class="l">Zimefika</div>
+    <div class="s">{{ stats.delivered }} kati ya {{ stats.total }}</div>
+  </div>
+  <div class="el-card">
+    <div class="n" style="color:var(--cyan)">{{ stats.opened_pct }}%</div>
+    <div class="l">Zimefunguliwa</div>
+    <div class="s">{{ stats.opened }} barua</div>
+  </div>
+  <div class="el-card">
+    <div class="n" style="color:{% if stats.problem %}var(--red){% else %}var(--text-3){% endif %}">{{ stats.problem }}</div>
+    <div class="l">Zenye tatizo</div>
+    <div class="s">bounce &middot; spam &middot; error</div>
+  </div>
+  <div class="el-card">
+    <div class="n" style="color:var(--text-2)">{{ stats.pending }}</div>
+    <div class="l">Zinasubiri</div>
+    <div class="s">bado hakuna jibu</div>
+  </div>
+</div>
+
+{% if problem_addresses %}
+<div class="el-bad">
+  <span style="font-size:12.5px;color:var(--text-3);align-self:center">Anwani zenye matatizo:</span>
+  {% for p in problem_addresses %}
+  <a href="?q={{ p.to_email|urlencode }}&days={{ f.days }}">
+    <i class="fas fa-triangle-exclamation"></i> {{ p.to_email }} <strong>&times;{{ p.n }}</strong>
+  </a>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- KUCHUJA -->
+<form class="el-filters" method="get">
+  <input type="search" name="q" value="{{ f.q }}" placeholder="Tafuta email, mteja, website…">
+  <select name="status">
+    <option value="">Hali zote</option>
+    <option value="problem" {% if f.status == 'problem' %}selected{% endif %}>Zenye tatizo tu</option>
+    <option value="sent" {% if f.status == 'sent' %}selected{% endif %}>Imetumwa</option>
+    <option value="delivered" {% if f.status == 'delivered' %}selected{% endif %}>Imefika</option>
+    <option value="opened" {% if f.status == 'opened' %}selected{% endif %}>Imefunguliwa</option>
+    <option value="bounced" {% if f.status == 'bounced' %}selected{% endif %}>Imerudi</option>
+    <option value="error" {% if f.status == 'error' %}selected{% endif %}>Imeshindwa</option>
+  </select>
+  <select name="category">
+    <option value="">Aina zote</option>
+    {% for c in categories %}
+    <option value="{{ c }}" {% if f.category == c %}selected{% endif %}>{{ c }}</option>
+    {% endfor %}
+  </select>
+  <select name="days">
+    <option value="7" {% if f.days == '7' %}selected{% endif %}>Siku 7</option>
+    <option value="30" {% if f.days == '30' %}selected{% endif %}>Siku 30</option>
+    <option value="90" {% if f.days == '90' %}selected{% endif %}>Siku 90</option>
+    <option value="0" {% if f.days == '0' %}selected{% endif %}>Zote</option>
+  </select>
+  <button type="submit" class="jt-btn"><i class="fas fa-filter"></i> Chuja</button>
+  {% if f.q or f.status or f.category %}
+  <a href="{% url 'email_log_list' %}" class="el-chip on"><i class="fas fa-xmark"></i> Ondoa</a>
+  {% endif %}
+</form>
+
+<!-- ORODHA -->
+{% if logs %}
+<table class="el-tbl">
+  <thead>
+    <tr>
+      <th>Kwa nani</th>
+      <th>Barua</th>
+      <th class="el-hide">Aina</th>
+      <th>Hali</th>
+      <th class="el-hide">Muda</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for e in logs %}
+    <tr>
+      <td>
+        <strong>{{ e.client.name|default:e.to_email }}</strong>
+        {% if e.client %}<div class="el-sub">{{ e.to_email }}</div>{% endif %}
+        {% if e.website %}<div class="el-sub"><i class="fas fa-globe"></i> {{ e.website.name }}</div>{% endif %}
+      </td>
+      <td>
+        {{ e.subject|truncatechars:70 }}
+        {% if e.error %}<div class="el-sub" style="color:var(--red)">{{ e.error|truncatechars:90 }}</div>{% endif %}
+      </td>
+      <td class="el-hide"><span class="el-cat">{{ e.category|default:"—" }}</span></td>
+      <td>
+        <span class="el-pill p-{{ e.status }}"><i></i>{{ e.get_status_display }}</span>
+        {% if e.opened_at %}<div class="el-sub">imefunguliwa {{ e.opened_at|date:"d M H:i" }}</div>
+        {% elif e.delivered_at %}<div class="el-sub">imefika {{ e.delivered_at|date:"d M H:i" }}</div>{% endif %}
+      </td>
+      <td class="el-hide">
+        {{ e.created_at|date:"d M Y" }}
+        <div class="el-sub">{{ e.created_at|date:"H:i" }}</div>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% if page_obj.has_other_pages %}
+<div class="el-page">
+  {% if page_obj.has_previous %}
+    <a href="?page={{ page_obj.previous_page_number }}&q={{ f.q|urlencode }}&status={{ f.status }}&category={{ f.category }}&days={{ f.days }}">&larr;</a>
+  {% endif %}
+  <span class="cur">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+  {% if page_obj.has_next %}
+    <a href="?page={{ page_obj.next_page_number }}&q={{ f.q|urlencode }}&status={{ f.status }}&category={{ f.category }}&days={{ f.days }}">&rarr;</a>
+  {% endif %}
+</div>
+{% endif %}
+
+{% else %}
+<div class="el-tbl">
+  <div class="el-empty">
+    <i class="fas fa-inbox" style="font-size:30px;opacity:.35"></i>
+    <p style="margin-top:12px">Hakuna barua inayolingana na uchujaji huu.</p>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}

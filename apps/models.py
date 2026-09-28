@@ -1653,3 +1653,120 @@ from .integration_models import (  # noqa: E402,F401
     IntegrationSnapshot,
     IntegrationAuditLog,
 )
+
+# ══════════════════════════════════════════════════════════════════
+#  KUMBUKUMBU YA BARUA PEPE
+# ══════════════════════════════════════════════════════════════════
+class EmailLog(models.Model):
+    """Kila barua inayotoka kwenye mfumo, pamoja na hatima yake.
+
+    KWA NINI
+
+    Awali njia pekee ya kujua barua imetumwa ilikuwa logs za Render —
+    ambazo zinafutwa, na huwezi kuzitafuta kwa jina la mteja. Na hata
+    hizo zilikuambia tu kwamba Brevo ameipokea; si kwamba imemfikia
+    mteja.
+
+    Brevo anajua hatima halisi (delivered, bounced, spam) na anatuapa
+    taarifa kwa webhook. `message_id` ndiyo inayounganisha barua
+    tuliyoituma na tukio linalorudi.
+    """
+
+    STATUS = [
+        ('sent',      'Imetumwa'),        # Brevo ameipokea
+        ('delivered', 'Imefika'),         # imeingia kwenye inbox
+        ('opened',    'Imefunguliwa'),
+        ('clicked',   'Amebonyeza link'),
+        ('deferred',  'Imecheleweshwa'),
+        ('bounced',   'Imerudi'),         # anwani mbaya / imejaa
+        ('spam',      'Spam'),
+        ('blocked',   'Imezuiliwa'),
+        ('error',     'Imeshindwa'),      # haikutoka kwetu kabisa
+    ]
+
+    # Hatua inayopanda: tukio la chini halishushi hali ya juu.
+    # (Brevo inaweza kutuma "delivered" baada ya "opened".)
+    RANK = {'error': 0, 'sent': 1, 'deferred': 2, 'delivered': 3,
+            'opened': 4, 'clicked': 5, 'bounced': 6, 'spam': 7, 'blocked': 8}
+
+    to_email   = models.EmailField(db_index=True)
+    subject    = models.CharField(max_length=255)
+    category   = models.CharField(max_length=40, blank=True, db_index=True,
+                                  help_text='Aina ya barua, mfano suspension au expiry_warning')
+    message_id = models.CharField(max_length=255, blank=True, db_index=True,
+                                  help_text='messageId kutoka Brevo — inaunganisha na matukio')
+
+    status     = models.CharField(max_length=12, choices=STATUS, default='sent', db_index=True)
+    error      = models.TextField(blank=True)
+
+    client  = models.ForeignKey('Client', null=True, blank=True,
+                                on_delete=models.SET_NULL, related_name='email_logs')
+    website = models.ForeignKey('ManagedWebsite', null=True, blank=True,
+                                on_delete=models.SET_NULL, related_name='email_logs')
+
+    created_at   = models.DateTimeField(auto_now_add=True, db_index=True)
+    delivered_at = models.DateTimeField(null=True, blank=True)
+    opened_at    = models.DateTimeField(null=True, blank=True)
+    failed_at    = models.DateTimeField(null=True, blank=True)
+
+    # Ratiba kamili ya matukio: [{'event': 'delivered', 'at': '...', 'reason': ''}]
+    events = models.JSONField(default=list, blank=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Email log'
+        verbose_name_plural = 'Email logs'
+        indexes = [models.Index(fields=['-created_at', 'status'])]
+
+    def __str__(self):
+        return f'{self.to_email} — {self.subject[:50]} [{self.status}]'
+
+    @property
+    def is_problem(self):
+        return self.status in ('bounced', 'spam', 'blocked', 'error')
+
+    def apply_event(self, event, at=None, reason=''):
+        """Weka tukio jipya. Salama kurudiwa — Brevo hurudia matukio."""
+        from django.utils import timezone as tz
+        at = at or tz.now()
+        event = (event or '').lower().replace(' ', '_')
+
+        mapping = {
+            'request': 'sent', 'sent': 'sent',
+            'delivered': 'delivered',
+            'opened': 'opened', 'unique_opened': 'opened', 'open': 'opened',
+            'click': 'clicked', 'clicked': 'clicked',
+            'deferred': 'deferred',
+            'soft_bounce': 'deferred',      # Brevo inajaribu tena
+            'hard_bounce': 'bounced', 'bounce': 'bounced', 'invalid_email': 'bounced',
+            'spam': 'spam', 'complaint': 'spam', 'unsubscribed': 'spam',
+            'blocked': 'blocked',
+            'error': 'error',
+        }
+        new = mapping.get(event)
+        if not new:
+            return False
+
+        # Ratiba inakua daima, hata kama hali haibadiliki
+        stamp = at.isoformat() if hasattr(at, 'isoformat') else str(at)
+        if not any(e.get('event') == event and e.get('at') == stamp for e in self.events):
+            self.events = list(self.events) + [
+                {'event': event, 'at': stamp, 'reason': reason or ''}]
+
+        if new == 'delivered' and not self.delivered_at:
+            self.delivered_at = at
+        if new == 'opened' and not self.opened_at:
+            self.opened_at = at
+        if new in ('bounced', 'spam', 'blocked', 'error') and not self.failed_at:
+            self.failed_at = at
+        if reason:
+            self.error = reason[:2000]
+
+        # Panda tu — "delivered" inayofika baada ya "opened" isishushe hali
+        if self.RANK.get(new, 0) >= self.RANK.get(self.status, 0):
+            self.status = new
+
+        self.save(update_fields=['status', 'events', 'delivered_at',
+                                 'opened_at', 'failed_at', 'error'])
+        return True
+
