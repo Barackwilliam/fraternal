@@ -214,9 +214,11 @@ def render_page_html(site, page):
     inapanda na cache inajipoteza yenyewe PAPO HAPO. Wageni wanapata
     page kutoka cache moja kwa moja bila queries za collections.
     """
-    cache_key = f'jtpage:{site.id}:{page.id}:v{site.content_version}'
+    cache_key = f'jtpage:{site.id}:{page.id}:{page.mode}:v{site.content_version}'
     result = cache.get(cache_key)
     if result is None:
-        result = render_shortcodes(site, page.html_cache)
+        # Hali ya code: code ya mteja kama ilivyo — shortcodes pekee zinajazwa
+        source = page.code_html if page.mode == 'code' else page.html_cache
+        result = render_shortcodes(site, source)
         cache.set(cache_key, result, 3600)  # saa 1 — version ndiyo invalidator
     return result

@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Code — {{ page.title }} · {{ site.site_name }}</title>
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material-darker.min.css">
+<style>
+:root{--bg:#040918;--bg2:#071022;--panel:#0a1424;--panel2:#0e1a30;--line:rgba(120,180,255,.1);--line2:rgba(120,180,255,.18);
+  --ink:#e8f0f6;--muted:#8a99ad;--dim:#56647a;--green:#25d366;--cyan:#00d4ff;--red:#ff5470;--amber:#fbbf24;
+  --ff:'Inter',system-ui,-apple-system,sans-serif;--mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font:14px/1.45 var(--ff);display:flex;flex-direction:column;overflow:hidden}
+a{color:inherit}
+button{font:inherit;color:inherit;cursor:pointer}
+
+/* ── Juu ── */
+.top{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--bg2);flex-wrap:wrap}
+.back{display:inline-flex;align-items:center;gap:6px;color:var(--muted);text-decoration:none;font-size:13px;padding:7px 10px;border-radius:9px}
+.back:hover{background:var(--panel);color:var(--ink)}
+.pg{display:flex;align-items:center;gap:8px;min-width:0}
+.pg select{height:36px;border-radius:9px;border:1px solid var(--line2);background:var(--panel);color:var(--ink);padding:0 10px;font:inherit;font-size:13px;max-width:220px}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:11.5px;font-weight:600;white-space:nowrap}
+.b-full{background:rgba(0,212,255,.1);color:var(--cyan)}
+.b-frag{background:rgba(37,211,102,.1);color:var(--green)}
+.status{font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:6px;white-space:nowrap}
+.status .d{width:7px;height:7px;border-radius:50%;background:var(--green)}
+.status.dirty .d{background:var(--amber)}
+.status.err{color:var(--red)} .status.err .d{background:var(--red)}
+.sp{flex:1}
+.btn{display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 13px;border-radius:9px;border:1px solid var(--line2);background:var(--panel);font-size:13px;white-space:nowrap;text-decoration:none}
+.btn:hover{border-color:rgba(120,180,255,.35);background:var(--panel2)}
+.btn.pri{background:linear-gradient(135deg,#25d366,#1fb557);border-color:transparent;color:#04110a;font-weight:700}
+.btn.pri:hover{filter:brightness(1.06)}
+.btn:disabled{opacity:.55;cursor:wait}
+.btn svg{width:15px;height:15px;flex:0 0 auto}
+.menu{position:relative}
+.menu-pop{position:absolute;right:0;top:42px;z-index:20;min-width:260px;background:var(--panel2);border:1px solid var(--line2);border-radius:12px;
+  padding:6px;box-shadow:0 20px 50px -10px rgba(0,0,0,.6);display:none}
+.menu.on .menu-pop{display:block}
+.menu-pop button{display:flex;justify-content:space-between;gap:12px;width:100%;padding:8px 10px;border:0;background:transparent;border-radius:8px;text-align:left;font-size:13px}
+.menu-pop button:hover{background:rgba(255,255,255,.05)}
+.menu-pop code{font:11px var(--mono);color:var(--cyan)}
+.menu-pop .h{padding:6px 10px 4px;font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.08em}
+
+/* ── Kazi ── */
+.work{flex:1;display:grid;grid-template-columns:minmax(0,1fr) 6px minmax(0,1fr);min-height:0}
+.pane{display:flex;flex-direction:column;min-height:0;min-width:0}
+.tabs{display:flex;align-items:center;gap:4px;padding:8px 10px;border-bottom:1px solid var(--line);background:var(--bg2)}
+.tab{padding:6px 12px;border-radius:8px;border:0;background:transparent;color:var(--muted);font-size:12.5px;font-weight:600}
+.tab.on{background:var(--panel2);color:var(--ink)}
+.tab small{font-weight:500;color:var(--dim);margin-left:4px}
+.tabs .sp{flex:1}
+.tabs .hint{font-size:11.5px;color:var(--dim)}
+.ed{flex:1;min-height:0;position:relative}
+.ed .CodeMirror,.ed textarea{position:absolute;inset:0;height:100%;width:100%}
+.ed textarea{background:#212121;color:#eee;border:0;padding:12px;font:13px/1.55 var(--mono);resize:none;outline:none;tab-size:2}
+.CodeMirror{font:13px/1.55 var(--mono)}
+.hide{display:none!important}
+
+.split{background:var(--line);cursor:col-resize}
+.split:hover,.split.on{background:rgba(0,212,255,.4)}
+
+.pv-bar{justify-content:space-between}
+.devs{display:flex;gap:4px;background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:3px}
+.devs button{border:0;background:transparent;padding:5px 9px;border-radius:6px;color:var(--muted)}
+.devs button.on{background:var(--panel2);color:var(--ink)}
+.devs svg{width:15px;height:15px;display:block}
+.pv{flex:1;min-height:0;background:#0b1220;display:flex;justify-content:center;overflow:auto;padding:0}
+.pv iframe{border:0;background:#fff;width:100%;height:100%;transition:width .25s}
+.pv.tab-dev iframe{width:768px;margin:14px 0;height:calc(100% - 28px);border-radius:10px;box-shadow:0 0 0 1px var(--line2)}
+.pv.mob-dev iframe{width:390px;margin:14px 0;height:calc(100% - 28px);border-radius:18px;box-shadow:0 0 0 1px var(--line2)}
+.pv-load{position:absolute;top:10px;right:14px;font-size:11.5px;color:var(--muted);opacity:0;transition:opacity .2s}
+.pv-load.on{opacity:1}
+
+/* ── Karibu ── */
+.intro{margin:10px;padding:12px 14px;border-radius:12px;background:rgba(0,212,255,.06);border:1px solid rgba(0,212,255,.18);
+  font-size:12.5px;line-height:1.55;color:#bfe9f5;display:flex;gap:12px}
+.intro b{color:#fff}
+.intro button{margin-left:auto;align-self:flex-start;border:0;background:transparent;color:var(--muted);font-size:18px;line-height:1}
+
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(20px);opacity:0;background:var(--panel2);
+  border:1px solid var(--line2);padding:11px 16px;border-radius:12px;font-size:13px;transition:all .25s;z-index:50;
+  display:flex;gap:10px;align-items:center;box-shadow:0 16px 40px -10px rgba(0,0,0,.6);max-width:92vw}
+.toast.on{opacity:1;transform:translateX(-50%)}
+.toast a{color:var(--cyan)}
+.toast.err{border-color:rgba(255,84,112,.4);color:#ffc2cc}
+
+/* Simu: code na hakikisho kwa vichupo */
+.mob-switch{display:none}
+@media(max-width:900px){
+  .work{grid-template-columns:1fr}
+  .split{display:none}
+  .work .pane.m-hide{display:none}
+  .mob-switch{display:flex;gap:4px;padding:6px 10px;background:var(--bg2);border-bottom:1px solid var(--line)}
+  .mob-switch button{flex:1;padding:8px;border-radius:8px;border:1px solid var(--line);background:transparent;font-size:13px}
+  .mob-switch button.on{background:var(--panel2);border-color:var(--line2)}
+  .lbl-hide{display:none}
+  .pg select{max-width:140px}
+}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <a class="back" href="{% url 'builder:site_dashboard' site.id %}">
+    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+    <span class="lbl-hide">Dashboard</span></a>
+  <div class="pg">
+    <select id="pageSel" aria-label="Chagua ukurasa">
+      {% for p in pages %}<option value="{% url 'builder:code_studio' site.id p.id %}" {% if p.id == page.id %}selected{% endif %}>{{ p.title }}{% if p.mode == 'code' %} · code{% endif %}</option>{% endfor %}
+    </select>
+    <span class="badge b-frag" id="kind">Sehemu</span>
+  </div>
+  <span class="status" id="status"><span class="d"></span><span id="statusTxt">{% if page.mode == 'code' %}Imehifadhiwa{% else %}Bado haijahifadhiwa kama code{% endif %}</span></span>
+  <span class="sp"></span>
+
+  <label class="btn" title="Ingiza faili la .html au .css">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M7 8l5-5 5 5M5 21h14"/></svg>
+    <span class="lbl-hide">Ingiza faili</span>
+    <input type="file" id="fileIn" accept=".html,.htm,.css,text/html,text/css" hidden>
+  </label>
+  <div class="menu" id="scMenu">
+    <button class="btn" type="button" id="scBtn" title="Weka taarifa za biashara ndani ya code">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6H5v12h3M16 6h3v12h-3"/></svg>
+      <span class="lbl-hide">Taarifa</span></button>
+    <div class="menu-pop">
+      <div class="h">Zinabadilika zenyewe ukibadilisha taarifa</div>
+      {% for code, label in shortcodes %}<button type="button" data-sc="{{ code }}">{{ label }} <code>{{ code }}</code></button>{% endfor %}
+    </div>
+  </div>
+  <button class="btn" type="button" id="fmtBtn" title="Panga code vizuri">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h10M4 18h13"/></svg>
+    <span class="lbl-hide">Panga</span></button>
+  <a class="btn" id="liveBtn" href="{{ site.public_url }}" target="_blank" rel="noopener" title="Fungua website">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 4h6v6M20 4l-9 9M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/></svg>
+    <span class="lbl-hide">Live</span></a>
+  <button class="btn pri" type="button" id="saveBtn" title="Hifadhi (Ctrl+S)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l5 5L20 7"/></svg>
+    Hifadhi</button>
+</div>
+
+<div class="mob-switch">
+  <button type="button" class="on" data-show="code">Code</button>
+  <button type="button" data-show="preview">Hakikisho</button>
+</div>
+
+<div class="work" id="work">
+  <!-- CODE -->
+  <section class="pane" id="codePane">
+    <div class="tabs">
+      <button class="tab on" type="button" data-tab="html">HTML</button>
+      <button class="tab" type="button" data-tab="css">CSS <small>hiari</small></button>
+      <span class="sp"></span>
+      <span class="hint">Ctrl+S kuhifadhi</span>
+    </div>
+    {% if page.mode != 'code' and not page.code_html %}
+    <div class="intro" id="intro">
+      <div>
+        <b>Bandika code yako hapa.</b> Tumeanza na muundo wa sasa wa ukurasa huu ili usianze na kitu kitupu.<br>
+        Ukibandika <b>ukurasa kamili</b> (unaoanza na <code>&lt;!DOCTYPE html&gt;</code>), utaonyeshwa kama ulivyo — pamoja na script zako.
+        Ukibandika <b>sehemu</b> tu, itaingia ndani ya navbar na footer ya website yako.
+      </div>
+      <button type="button" aria-label="Funga" onclick="this.parentElement.remove()">×</button>
+    </div>
+    {% endif %}
+    <div class="ed" id="edHtml"><textarea id="taHtml" spellcheck="false"></textarea></div>
+    <div class="ed hide" id="edCss"><textarea id="taCss" spellcheck="false"></textarea></div>
+  </section>
+
+  <div class="split" id="split" aria-hidden="true"></div>
+
+  <!-- HAKIKISHO -->
+  <section class="pane m-hide" id="pvPane" style="position:relative">
+    <div class="tabs pv-bar">
+      <div class="devs" role="group" aria-label="Ukubwa wa skrini">
+        <button type="button" class="on" data-dev="" title="Kompyuta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8"/></svg></button>
+        <button type="button" data-dev="tab-dev" title="Tablet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="3" width="14" height="18" rx="2"/></svg></button>
+        <button type="button" data-dev="mob-dev" title="Simu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="7" y="3" width="10" height="18" rx="2"/></svg></button>
+      </div>
+      <span class="hint">Hakikisho — kama itakavyoonekana live</span>
+    </div>
+    <div class="pv" id="pv"><iframe id="frame" title="Hakikisho" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe></div>
+    <span class="pv-load" id="pvLoad">Inasasisha…</span>
+  </section>
+</div>
+
+<div class="toast" id="toast"></div>
+
+{{ start_html|json_script:"startHtml" }}
+{{ start_css|json_script:"startCss" }}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/xml/xml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/css/css.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/htmlmixed/htmlmixed.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closetag.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.15.1/beautify-html.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.15.1/beautify-css.min.js"></script>
+<script>
+(function(){
+  var SAVE_URL = "{% url 'builder:code_save' site.id page.id %}";
+  var PREVIEW_URL = "{% url 'builder:code_preview' site.id page.id %}";
+  var CSRF = "{{ csrf_token }}";
+  var MAX = {{ max_code }};
+
+  var startHtml = JSON.parse(document.getElementById('startHtml').textContent || '""');
+  var startCss  = JSON.parse(document.getElementById('startCss').textContent || '""');
+
+  // ── Editor: CodeMirror, au kisanduku cha kawaida ikishindwa kupakia ──
+  // CDN ikizuiliwa (mtandao wa ofisi, VPN), mteja bado anaweza kufanya kazi.
+  var taH = document.getElementById('taHtml'), taC = document.getElementById('taCss');
+  taH.value = startHtml; taC.value = startCss;
+  var cmH = null, cmC = null;
+  if (window.CodeMirror) {
+    var opts = {theme:'material-darker', lineNumbers:true, lineWrapping:true, tabSize:2, indentUnit:2,
+                autoCloseTags:true, autoCloseBrackets:true, viewportMargin:40};
+    cmH = CodeMirror.fromTextArea(taH, Object.assign({mode:'htmlmixed'}, opts));
+    cmC = CodeMirror.fromTextArea(taC, Object.assign({mode:'css'}, opts));
+  }
+  function getH(){ return cmH ? cmH.getValue() : taH.value; }
+  function getC(){ return cmC ? cmC.getValue() : taC.value; }
+  function setH(v){ cmH ? cmH.setValue(v) : (taH.value = v); }
+  function setC(v){ cmC ? cmC.setValue(v) : (taC.value = v); }
+  function onChange(fn){
+    if (cmH){ cmH.on('change', fn); cmC.on('change', fn); }
+    else { taH.addEventListener('input', fn); taC.addEventListener('input', fn); }
+  }
+
+  // ── Vichupo HTML / CSS ──
+  var active = 'html';
+  document.querySelectorAll('.tab[data-tab]').forEach(function(t){
+    t.addEventListener('click', function(){
+      active = t.dataset.tab;
+      document.querySelectorAll('.tab[data-tab]').forEach(function(x){ x.classList.toggle('on', x === t); });
+      document.getElementById('edHtml').classList.toggle('hide', active !== 'html');
+      document.getElementById('edCss').classList.toggle('hide', active !== 'css');
+      (active === 'html' ? cmH : cmC) && (active === 'html' ? cmH : cmC).refresh();
+    });
+  });
+
+  // ── Hali: ukurasa kamili au sehemu ──
+  var kind = document.getElementById('kind');
+  function isFull(h){ var s = h.replace(/^\s+/, '').slice(0,600).toLowerCase(); return s.indexOf('<!doctype')===0 || s.indexOf('<html')>-1; }
+  function showKind(){
+    var f = isFull(getH());
+    kind.textContent = f ? 'Ukurasa kamili' : 'Sehemu ndani ya navbar';
+    kind.className = 'badge ' + (f ? 'b-full' : 'b-frag');
+    kind.title = f ? 'Unaonyeshwa kama ulivyo, bila navbar na footer ya website'
+                   : 'Unaingia ndani ya navbar na footer ya website yako';
+  }
+
+  // ── Hali ya kuhifadhi ──
+  var st = document.getElementById('status'), stT = document.getElementById('statusTxt');
+  var saved = getH() + '\u0000' + getC(), dirty = false;
+  function setStatus(txt, cls){ st.className = 'status ' + (cls||''); stT.textContent = txt; }
+  function markDirty(){
+    var now = getH() + '\u0000' + getC();
+    dirty = now !== saved;
+    if (dirty) setStatus('Mabadiliko hayajahifadhiwa', 'dirty');
+  }
+
+  // ── Hakikisho ──
+  var frame = document.getElementById('frame'), pvLoad = document.getElementById('pvLoad'), pvTimer = null, pvSeq = 0;
+  function refreshPreview(){
+    var seq = ++pvSeq;
+    pvLoad.classList.add('on');
+    fetch(PREVIEW_URL, {method:'POST', headers:{'Content-Type':'application/json','X-CSRFToken':CSRF},
+                        body: JSON.stringify({html:getH(), css:getC()})})
+      .then(function(r){ return r.text(); })
+      .then(function(html){
+        if (seq !== pvSeq) return;            // jibu la zamani — puuza
+        frame.srcdoc = html;
+        pvLoad.classList.remove('on');
+      })
+      .catch(function(){ pvLoad.textContent = 'Hakikisho limeshindwa'; });
+  }
+  onChange(function(){ markDirty(); showKind(); clearTimeout(pvTimer); pvTimer = setTimeout(refreshPreview, 800); });
+
+  // ── Kuhifadhi ──
+  var saveBtn = document.getElementById('saveBtn'), toast = document.getElementById('toast'), tT = null;
+  function say(html, err){
+    toast.innerHTML = html; toast.className = 'toast on' + (err ? ' err' : '');
+    clearTimeout(tT); tT = setTimeout(function(){ toast.className = 'toast'; }, err ? 7000 : 4500);
+  }
+  function save(){
+    var h = getH(), c = getC();
+    if (!h.trim()){ say('Ukurasa hauwezi kuwa mtupu.', true); return; }
+    if (h.length + c.length > MAX){ say('Code ni kubwa mno. Picha ziweke kama link, si ndani ya code.', true); return; }
+    saveBtn.disabled = true; setStatus('Inahifadhi…', 'dirty');
+    fetch(SAVE_URL, {method:'POST', headers:{'Content-Type':'application/json','X-CSRFToken':CSRF},
+                     body: JSON.stringify({html:h, css:c})})
+      .then(function(r){ return r.json().then(function(d){ return {ok:r.ok, d:d}; }); })
+      .then(function(res){
+        saveBtn.disabled = false;
+        if (!res.ok || !res.d.ok){ setStatus('Haikuhifadhiwa', 'err'); say(res.d.error || 'Imeshindwa kuhifadhi.', true); return; }
+        saved = h + '\u0000' + c; dirty = false;
+        setStatus('Imehifadhiwa ' + res.d.saved_at, '');
+        document.getElementById('liveBtn').href = res.d.url;
+        say(res.d.published
+          ? '✓ Imehifadhiwa — iko live sasa. <a href="' + res.d.url + '" target="_blank" rel="noopener">Fungua ↗</a>'
+          : '✓ Imehifadhiwa. Website bado ni draft — ichapishe kutoka dashboard iwe live.');
+      })
+      .catch(function(){ saveBtn.disabled = false; setStatus('Haikuhifadhiwa', 'err'); say('Mtandao umekatika. Code yako bado iko hapa — jaribu tena.', true); });
+  }
+  saveBtn.addEventListener('click', save);
+  document.addEventListener('keydown', function(e){
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's'){ e.preventDefault(); save(); }
+  });
+  window.addEventListener('beforeunload', function(e){ if (dirty){ e.preventDefault(); e.returnValue = ''; } });
+
+  // ── Ingiza faili ──
+  document.getElementById('fileIn').addEventListener('change', function(){
+    var f = this.files && this.files[0]; if (!f) return;
+    if (f.size > MAX){ say('Faili ni kubwa mno.', true); return; }
+    var rd = new FileReader();
+    rd.onload = function(){
+      if (/\.css$/i.test(f.name)){ setC(rd.result); document.querySelector('.tab[data-tab=css]').click(); }
+      else { setH(rd.result); document.querySelector('.tab[data-tab=html]').click(); }
+      say('✓ ' + f.name + ' imeingizwa. Bonyeza Hifadhi ukiridhika.');
+    };
+    rd.readAsText(f); this.value = '';
+  });
+
+  // ── Panga ──
+  document.getElementById('fmtBtn').addEventListener('click', function(){
+    try {
+      if (active === 'html' && window.html_beautify) setH(html_beautify(getH(), {indent_size:2, wrap_line_length:120, extra_liners:[]}));
+      if (active === 'css' && window.css_beautify) setC(css_beautify(getC(), {indent_size:2}));
+      say('✓ Code imepangwa');
+    } catch(e){ say('Haikuweza kupanga: ' + e.message, true); }
+  });
+
+  // ── Shortcodes ──
+  var menu = document.getElementById('scMenu');
+  document.getElementById('scBtn').addEventListener('click', function(e){ e.stopPropagation(); menu.classList.toggle('on'); });
+  document.addEventListener('click', function(){ menu.classList.remove('on'); });
+  menu.querySelectorAll('[data-sc]').forEach(function(b){
+    b.addEventListener('click', function(){
+      var code = b.dataset.sc;
+      if (active !== 'html') document.querySelector('.tab[data-tab=html]').click();
+      if (cmH){ cmH.replaceSelection(code); cmH.focus(); }
+      else { var s = taH.selectionStart; taH.value = taH.value.slice(0,s) + code + taH.value.slice(taH.selectionEnd); taH.focus(); }
+      markDirty(); refreshPreview(); menu.classList.remove('on');
+    });
+  });
+
+  // ── Ukubwa wa skrini ──
+  var pv = document.getElementById('pv');
+  document.querySelectorAll('.devs button').forEach(function(b){
+    b.addEventListener('click', function(){
+      document.querySelectorAll('.devs button').forEach(function(x){ x.classList.toggle('on', x === b); });
+      pv.className = 'pv ' + (b.dataset.dev || '');
+    });
+  });
+
+  // ── Kubadilisha ukurasa ──
+  document.getElementById('pageSel').addEventListener('change', function(){ location.href = this.value; });
+
+  // ── Kigawanyo kinachosogezwa ──
+  var split = document.getElementById('split'), work = document.getElementById('work'), drag = false;
+  split.addEventListener('mousedown', function(){ drag = true; split.classList.add('on'); document.body.style.userSelect = 'none'; frame.style.pointerEvents = 'none'; });
+  window.addEventListener('mouseup', function(){ if (!drag) return; drag = false; split.classList.remove('on'); document.body.style.userSelect = ''; frame.style.pointerEvents = ''; cmH && cmH.refresh(); });
+  window.addEventListener('mousemove', function(e){
+    if (!drag) return;
+    var r = work.getBoundingClientRect(), x = Math.min(Math.max(e.clientX - r.left, 280), r.width - 280);
+    work.style.gridTemplateColumns = x + 'px 6px minmax(0,1fr)';
+  });
+
+  // ── Simu: code au hakikisho ──
+  document.querySelectorAll('.mob-switch button').forEach(function(b){
+    b.addEventListener('click', function(){
+      document.querySelectorAll('.mob-switch button').forEach(function(x){ x.classList.toggle('on', x === b); });
+      var code = b.dataset.show === 'code';
+      document.getElementById('codePane').classList.toggle('m-hide', !code);
+      document.getElementById('pvPane').classList.toggle('m-hide', code);
+      if (!code) refreshPreview(); else cmH && cmH.refresh();
+    });
+  });
+
+  showKind();
+  refreshPreview();
+})();
+</script>
+</body>
+</html>

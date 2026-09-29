@@ -4,7 +4,7 @@ kupitia subdomain ya mteja (SubdomainMiddleware ime-set request.client_site
 na request.urlconf = 'builder.public_urls').
 """
 from builder.images import image_url
-from django.http import Http404, JsonResponse, HttpResponseBadRequest
+from django.http import Http404, HttpResponse, JsonResponse, HttpResponseBadRequest
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
@@ -74,6 +74,20 @@ def _check_published(request, site):
                   {'site': site}, status=200)
 
 
+def _render_page(request, site, page, extra):
+    """Ukurasa wa umma — visual au code.
+
+    Code yenye ukurasa kamili (<!DOCTYPE html>) inarudishwa kama ilivyo:
+    ni muundo wa mteja mwenyewe, pamoja na <head> na <script> zake, na
+    kuiweka ndani ya navbar yetu kungeiharibu.
+    """
+    html = render_page_html(site, page)
+    if page.mode == 'code' and page.is_full_document:
+        return HttpResponse(html)
+    ctx = _ctx(site, dict(extra, page=page, page_html=html))
+    return render(request, 'builder/public/page.html', ctx)
+
+
 def home(request):
     site = _get_site(request)
     blocked = _check_published(request, site)
@@ -82,10 +96,7 @@ def home(request):
     page = site.pages.filter(slug='home').first() or site.pages.first()
     if page is None:
         raise Http404
-    return render(request, 'builder/public/page.html', _ctx(site, {
-        'page': page,
-        'page_html': render_page_html(site, page),
-    }))
+    return _render_page(request, site, page, {})
 
 
 def page_view(request, slug):
@@ -94,13 +105,12 @@ def page_view(request, slug):
     if blocked:
         return blocked
     page = get_object_or_404(site.pages, slug=slug)
-    return render(request, 'builder/public/page.html', _ctx(site, {
-        'page': page,
-        'page_html': render_page_html(site, page),
+    source = page.code_html if page.mode == 'code' else page.html_cache
+    return _render_page(request, site, page, {
         'meta_title': f'{page.title} · {site.site_name}',
-        'meta_description': _strip_html(page.html_cache) or _strip_html(site.tagline or site.site_name),
+        'meta_description': _strip_html(source) or _strip_html(site.tagline or site.site_name),
         'meta_url': f'{_base_url(site)}/p/{page.slug}/',
-    }))
+    })
 
 
 def collection_list(request, col_slug):

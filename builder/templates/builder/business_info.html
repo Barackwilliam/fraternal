@@ -1,0 +1,259 @@
+{% extends 'builder/base_panel.html' %}
+{% load builder_images %}
+{% block title %}Taarifa za biashara — {{ site.site_name }}{% endblock %}
+
+{% block head %}
+<style>
+.bi-wrap{max-width:1080px}
+.bi-crumb{font:11px var(--ff-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin-bottom:6px}
+.bi-crumb a{color:var(--muted);text-decoration:none}
+.bi-h{font-family:var(--ff-display);font-size:26px;font-weight:700;margin:0 0 4px}
+.bi-sub{color:var(--muted);font-size:14px;margin:0 0 22px;max-width:640px;line-height:1.55}
+
+.bi-msg{padding:12px 16px;border-radius:12px;margin-bottom:16px;font-size:14px}
+.bi-msg.success{background:rgba(37,211,102,.1);color:var(--green);border:1px solid rgba(37,211,102,.25)}
+.bi-msg.error{background:rgba(255,84,112,.1);color:var(--red);border:1px solid rgba(255,84,112,.25)}
+
+.bi-grid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:22px;align-items:start}
+@media(max-width:980px){.bi-grid{grid-template-columns:1fr}}
+
+.bi-card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:22px;margin-bottom:18px}
+.bi-card h3{display:flex;align-items:center;gap:10px;font-family:var(--ff-display);font-size:16px;margin:0 0 4px}
+.bi-card h3 i{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-style:normal;font-size:15px;background:rgba(0,212,255,.1)}
+.bi-card .desc{color:var(--muted);font-size:13px;margin:0 0 18px;line-height:1.5}
+
+.bi-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:620px){.bi-row{grid-template-columns:1fr}}
+.bi-f{display:grid;gap:6px;margin-bottom:14px}
+.bi-f label{font-size:13px;font-weight:600;color:var(--ink);display:flex;justify-content:space-between}
+.bi-f label span{font-weight:400;color:var(--dim);font-size:12px}
+.bi-f input,.bi-f textarea{width:100%;border-radius:12px;border:1px solid var(--line);background:var(--bg-2);color:var(--ink);
+  padding:12px 14px;font:inherit;font-size:14.5px;outline:none;transition:border-color .2s,box-shadow .2s}
+.bi-f input{height:48px}
+.bi-f textarea{min-height:84px;resize:vertical;line-height:1.5}
+.bi-f input:focus,.bi-f textarea:focus{border-color:var(--cyan);box-shadow:0 0 0 4px rgba(0,212,255,.1)}
+.bi-f .help{font-size:12px;color:var(--dim);line-height:1.45}
+
+/* Logo */
+.bi-logo{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.bi-logo-box{width:92px;height:92px;border-radius:18px;border:2px dashed var(--line-2);display:grid;place-items:center;
+  background:var(--bg-2);overflow:hidden;flex:0 0 auto;cursor:pointer;transition:border-color .2s}
+.bi-logo-box:hover{border-color:var(--green)}
+.bi-logo-box img{width:100%;height:100%;object-fit:contain;padding:8px}
+.bi-logo-box span{font-size:28px;opacity:.5}
+.bi-up{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:11px;border:1px solid var(--line-2);
+  background:rgba(37,211,102,.08);color:var(--green);font-weight:600;font-size:13.5px;cursor:pointer}
+.bi-up:hover{background:rgba(37,211,102,.14)}
+.bi-rm{background:none;border:0;color:var(--muted);font-size:13px;cursor:pointer;text-decoration:underline}
+.bi-up-st{font-size:12.5px;color:var(--muted)}
+
+/* Rangi */
+.bi-colors{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
+.bi-sw{width:34px;height:34px;border-radius:10px;border:2px solid transparent;cursor:pointer;transition:transform .15s}
+.bi-sw:hover{transform:scale(1.08)}
+.bi-sw.on{border-color:#fff;box-shadow:0 0 0 2px var(--bg)}
+.bi-colors input[type=color]{width:34px;height:34px;border:0;padding:0;background:none;cursor:pointer}
+
+.bi-save{position:sticky;bottom:0;display:flex;gap:12px;align-items:center;justify-content:flex-end;padding:14px 0;
+  background:linear-gradient(transparent,var(--bg) 35%)}
+.bi-save button{height:50px;padding:0 28px;border-radius:13px;border:0;font:700 15px var(--ff-display);color:#04110a;cursor:pointer;
+  background:linear-gradient(135deg,#25d366,#1fb557);box-shadow:0 14px 30px -12px rgba(37,211,102,.7)}
+.bi-save .note{font-size:12.5px;color:var(--muted)}
+
+/* Hakikisho */
+.bi-side{position:sticky;top:20px}
+.bi-prog{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:16px}
+.bi-prog b{font-family:var(--ff-display);font-size:15px}
+.bi-bar{height:7px;border-radius:7px;background:rgba(255,255,255,.07);margin:10px 0 8px;overflow:hidden}
+.bi-bar i{display:block;height:100%;border-radius:7px;background:linear-gradient(90deg,var(--cyan),var(--green))}
+.bi-prog p{font-size:12.5px;color:var(--muted);margin:0;line-height:1.5}
+
+.bi-pv{border-radius:18px;overflow:hidden;border:1px solid var(--line);background:#fff;color:#1a1a1a}
+.bi-pv-top{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid #eee}
+.bi-pv-top img{width:34px;height:34px;object-fit:contain}
+.bi-pv-top b{font:700 15px system-ui}
+.bi-pv-hero{padding:22px 16px;text-align:center}
+.bi-pv-hero h4{font:800 20px system-ui;margin:0 0 6px}
+.bi-pv-hero p{font:14px system-ui;color:#666;margin:0 0 14px}
+.bi-pv-btn{display:inline-block;padding:9px 16px;border-radius:9px;color:#fff;font:600 13px system-ui}
+.bi-pv-foot{background:#f6f7f9;padding:14px 16px;font:13px/1.7 system-ui;color:#555}
+.bi-pv-lbl{font:11px var(--ff-mono);color:var(--dim);letter-spacing:.12em;text-transform:uppercase;margin:0 0 8px}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="bi-wrap">
+  <div class="bi-crumb"><a href="{% url 'builder:site_dashboard' site.id %}">{{ site.site_name }}</a> / Taarifa za biashara</div>
+  <h1 class="bi-h">Taarifa za biashara</h1>
+  <p class="bi-sub">Andika hapa mara moja. Zinaonekana zenyewe kila mahali kwenye website yako — navbar, footer, kitufe cha WhatsApp, na fomu ya mawasiliano. Ukizibadilisha, zinabadilika kila mahali.</p>
+
+  {% for m in messages %}<div class="bi-msg {{ m.tags }}">{{ m }}</div>{% endfor %}
+
+  <form method="post" id="biForm">
+    {% csrf_token %}
+    <div class="bi-grid">
+      <div>
+        <div class="bi-card">
+          <h3><i>🏷️</i> Biashara yako</h3>
+          <p class="desc">Jina na maelezo mafupi yanayoonekana juu ya website.</p>
+          <div class="bi-f">
+            <label for="f_name">Jina la biashara</label>
+            <input id="f_name" name="site_name" value="{{ site.site_name }}" required maxlength="120">
+          </div>
+          <div class="bi-f">
+            <label for="f_tag">Kauli mbiu <span>hiari</span></label>
+            <input id="f_tag" name="tagline" value="{{ site.tagline|default:'' }}" maxlength="200" placeholder="Mfano: Maziwa safi kutoka shambani kwetu">
+            <div class="help">Sentensi moja inayoeleza unachofanya. Inaonekana pia Google na WhatsApp ukishiriki link.</div>
+          </div>
+
+          <div class="bi-f">
+            <label>Logo</label>
+            <div class="bi-logo">
+              <div class="bi-logo-box" id="logoBox" title="Bonyeza kupakia">
+                {% if site.logo_url %}<img id="logoImg" src="{{ site.logo_url|img:200 }}" alt="Logo">{% else %}<span id="logoPh">🖼️</span>{% endif %}
+              </div>
+              <div style="display:grid;gap:8px">
+                <label class="bi-up">⬆ Pakia logo<input type="file" id="logoFile" accept="image/*" hidden></label>
+                <div><button type="button" class="bi-rm" id="logoRm" {% if not site.logo_url %}style="display:none"{% endif %}>Ondoa logo</button>
+                  <span class="bi-up-st" id="logoSt">PNG yenye uwazi inaonekana vizuri zaidi</span></div>
+              </div>
+            </div>
+            <input type="hidden" name="logo_url" id="logoUrl" value="{{ site.logo_url|default:'' }}">
+          </div>
+        </div>
+
+        <div class="bi-card">
+          <h3><i>📞</i> Mawasiliano</h3>
+          <p class="desc">Jinsi wateja watakavyokupata. Weka angalau namba moja — bila hiyo, wateja hawana njia ya kukufikia.</p>
+          <div class="bi-row">
+            <div class="bi-f">
+              <label for="f_phone">Simu</label>
+              <input id="f_phone" name="contact_phone" value="{{ site.contact_phone|default:'' }}" inputmode="tel" placeholder="+255 7XX XXX XXX">
+            </div>
+            <div class="bi-f">
+              <label for="f_wa">WhatsApp</label>
+              <input id="f_wa" name="whatsapp_number" value="{{ site.whatsapp_number|default:'' }}" inputmode="tel" placeholder="+255 7XX XXX XXX">
+              <div class="help">Inaweka kitufe cha WhatsApp kwenye website.</div>
+            </div>
+          </div>
+          <div class="bi-f">
+            <label for="f_email">Email <span>hiari</span></label>
+            <input id="f_email" name="contact_email" type="email" value="{{ site.contact_email|default:'' }}" placeholder="info@biashara.co.tz">
+            <div class="help">Maswali yanayojazwa kwenye fomu ya website yanatumwa hapa.</div>
+          </div>
+          <div class="bi-f">
+            <label for="f_addr">Anwani <span>hiari</span></label>
+            <textarea id="f_addr" name="contact_address" placeholder="Mtaa, eneo, mji">{{ site.contact_address|default:'' }}</textarea>
+          </div>
+        </div>
+
+        <div class="bi-card">
+          <h3><i>🎨</i> Rangi kuu</h3>
+          <p class="desc">Rangi ya vitufe na viungo kwenye website yako.</p>
+          <div class="bi-colors" id="colors"></div>
+          <input type="hidden" name="accent_color" id="accent" value="{{ site.accent_color|default:'#25d366' }}">
+        </div>
+
+        <div class="bi-save">
+          <span class="note" id="dirtyNote"></span>
+          <button type="submit">Hifadhi taarifa</button>
+        </div>
+      </div>
+
+      <!-- Upande: maendeleo na hakikisho -->
+      <aside class="bi-side">
+        <div class="bi-prog">
+          <b>{{ filled }} kati ya 6 zimejazwa</b>
+          <div class="bi-bar"><i style="width:{{ filled_pct }}%"></i></div>
+          <p>{% if filled_pct == 100 %}Taarifa zote zimekamilika — wateja wana kila njia ya kukufikia.{% else %}Website zenye taarifa kamili zinaaminika zaidi na wateja wanaziwasiliana mara nyingi zaidi.{% endif %}</p>
+        </div>
+        <p class="bi-pv-lbl">Hakikisho</p>
+        <div class="bi-pv">
+          <div class="bi-pv-top"><img id="pvLogo" src="{{ site.logo_url|img:120 }}" alt="" {% if not site.logo_url %}style="display:none"{% endif %}><b id="pvName">{{ site.site_name }}</b></div>
+          <div class="bi-pv-hero">
+            <h4 id="pvName2">{{ site.site_name }}</h4>
+            <p id="pvTag">{{ site.tagline|default:'Kauli mbiu yako itaonekana hapa' }}</p>
+            <span class="bi-pv-btn" id="pvBtn" style="background:{{ site.accent_color|default:'#25d366' }}">💬 WhatsApp</span>
+          </div>
+          <div class="bi-pv-foot">
+            <div id="pvPhone">{% if site.contact_phone %}📞 {{ site.contact_phone }}{% endif %}</div>
+            <div id="pvEmail">{% if site.contact_email %}✉️ {{ site.contact_email }}{% endif %}</div>
+            <div id="pvAddr">{% if site.contact_address %}📍 {{ site.contact_address }}{% endif %}</div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function(){
+  var UPLOAD = "{% url 'builder:asset_upload' site.id %}", CSRF = "{{ csrf_token }}";
+  var $ = function(id){ return document.getElementById(id); };
+
+  // ── Rangi ──
+  var palette = ['#25d366','#1a73e8','#0f766e','#b45309','#dc2626','#7c3aed','#db2777','#111827'];
+  var box = $('colors'), accent = $('accent');
+  function paint(){
+    box.innerHTML = '';
+    palette.forEach(function(c){
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'bi-sw' + (accent.value.toLowerCase() === c ? ' on' : '');
+      b.style.background = c; b.title = c; b.onclick = function(){ accent.value = c; paint(); sync(); };
+      box.appendChild(b);
+    });
+    var pick = document.createElement('input'); pick.type = 'color'; pick.value = accent.value || '#25d366'; pick.title = 'Chagua rangi nyingine';
+    pick.oninput = function(){ accent.value = pick.value; paint(); sync(); };
+    box.appendChild(pick);
+  }
+  paint();
+
+  // ── Hakikisho linalofuata unachoandika ──
+  function sync(){
+    var n = $('f_name').value || 'Jina la biashara';
+    $('pvName').textContent = n; $('pvName2').textContent = n;
+    $('pvTag').textContent = $('f_tag').value || 'Kauli mbiu yako itaonekana hapa';
+    $('pvPhone').textContent = $('f_phone').value ? '📞 ' + $('f_phone').value : '';
+    $('pvEmail').textContent = $('f_email').value ? '✉️ ' + $('f_email').value : '';
+    $('pvAddr').textContent = $('f_addr').value ? '📍 ' + $('f_addr').value : '';
+    $('pvBtn').style.background = accent.value;
+    $('pvBtn').style.display = $('f_wa').value ? '' : 'none';
+    $('dirtyNote').textContent = 'Mabadiliko hayajahifadhiwa';
+  }
+  ['f_name','f_tag','f_phone','f_wa','f_email','f_addr'].forEach(function(id){ $(id).addEventListener('input', sync); });
+  $('pvBtn').style.display = $('f_wa').value ? '' : 'none';
+
+  // ── Logo ──
+  function setLogo(url){
+    $('logoUrl').value = url;
+    var lb = $('logoBox');
+    lb.innerHTML = url ? '<img id="logoImg" src="' + url + '" alt="Logo">' : '<span>🖼️</span>';
+    $('pvLogo').src = url; $('pvLogo').style.display = url ? '' : 'none';
+    $('logoRm').style.display = url ? '' : 'none';
+    sync();
+  }
+  $('logoBox').onclick = function(){ $('logoFile').click(); };
+  $('logoRm').onclick = function(){ setLogo(''); $('logoSt').textContent = 'Logo itaondolewa ukihifadhi'; };
+  $('logoFile').addEventListener('change', function(){
+    var f = this.files && this.files[0]; if (!f) return;
+    if (f.size > 5 * 1024 * 1024){ $('logoSt').textContent = 'Picha ni kubwa mno (zaidi ya 5 MB).'; return; }
+    var st = $('logoSt'); st.textContent = 'Inapakia…';
+    var fd = new FormData(); fd.append('file', f);
+    fetch(UPLOAD, {method:'POST', headers:{'X-CSRFToken':CSRF}, body:fd})
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        if (!d.url){ st.textContent = d.error || 'Imeshindwa kupakia'; return; }
+        setLogo(d.url); st.textContent = '✓ Imepakiwa — bonyeza Hifadhi';
+      })
+      .catch(function(){ st.textContent = 'Mtandao umekatika — jaribu tena'; });
+    this.value = '';
+  });
+
+  var dirty = false;
+  document.querySelectorAll('#biForm input,#biForm textarea').forEach(function(el){ el.addEventListener('input', function(){ dirty = true; }); });
+  $('biForm').addEventListener('submit', function(){ dirty = false; });
+  window.addEventListener('beforeunload', function(e){ if (dirty){ e.preventDefault(); e.returnValue=''; } });
+})();
+</script>
+{% endblock %}

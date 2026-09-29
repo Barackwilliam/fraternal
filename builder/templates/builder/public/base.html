@@ -137,7 +137,7 @@ body.has-side .jt-body{margin-left:250px;flex:1;min-width:0}
 {% block extra_css %}{% endblock %}
 </style>
 {% if site.global_css %}<style id="jt-global-css">{{ site.global_css|safe }}</style>{% endif %}
-{% if page.css_cache %}<style>{{ page.css_cache|safe }}</style>{% endif %}
+{% if page.mode == "code" %}{% if page.code_css %}<style>{{ page.code_css|safe }}</style>{% endif %}{% elif page.css_cache %}<style>{{ page.css_cache|safe }}</style>{% endif %}
 </head>
 <body class="has-{{ site.nav_style|default:'glass' }}">
 <div id="jt-load"></div>

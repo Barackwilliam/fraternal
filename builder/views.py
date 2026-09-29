@@ -393,7 +393,7 @@ def site_dashboard(request, site_id):
     first_page = pages[0] if pages else None
     steps = [
         {'done': has_contact,
-         'label': 'Fill in your contact details (phone / WhatsApp)', 'url': '#settings'},
+         'label': 'Fill in your contact details (phone / WhatsApp)', 'url': f'/builder/site/{site.id}/info/'},
         {'done': has_items,
          'label': f'Add your first {first_col.name_singular if first_col else "content item"}',
          'url': (f'/builder/site/{site.id}/collections/{first_col.id}/new/' if first_col else '#')},
@@ -439,37 +439,30 @@ def site_settings_save(request, site_id):
             setattr(site, field, request.POST[field].strip())
     site.dark_nav = request.POST.get('dark_nav') == 'on'
 
-    domain_changed = False
-    old_domain = site.custom_domain
+    new_domain = None
     if site.is_premium and 'custom_domain' in request.POST:
-        new_domain = (request.POST['custom_domain'].strip().lower()
-                      .replace('https://', '').replace('http://', '')
-                      .rstrip('/')) or None
-        if new_domain != old_domain:
-            site.custom_domain = new_domain
-            domain_changed = True
+        from . import domains
+        new_domain = domains.normalize(request.POST['custom_domain']) or None
 
     site.save()
     site.bump_version()
     messages.success(request, 'Website details saved.')
 
-    # ── Auto-registration ya custom domain kwenye Render (bila dashboard) ──
-    if domain_changed:
-        from . import render_api
-        if old_domain:
-            render_api.remove_custom_domain(old_domain)
-        if site.custom_domain:
-            ok, msg = render_api.add_custom_domain(site.custom_domain)
-            (messages.success if ok else messages.warning)(request, msg)
-            if render_api.check_dns(site.custom_domain):
-                messages.success(request,
-                    f'DNS check: "{site.custom_domain}" is already pointing to our '
-                    'servers — your domain should be live within minutes. ✅')
-            else:
-                messages.info(request,
-                    f'DNS check: "{site.custom_domain}" is not pointing to us yet. '
-                    'Add a CNAME record at your registrar: '
-                    f'{site.custom_domain} → jamiitek.onrender.com')
+    # Domain inapitia moduli ile ile ya /manage/site-domains/: maelekezo
+    # sahihi ya DNS (A kwa domain kuu, CNAME kwa www), kuzuia nakala, na
+    # hali inayoonekana kwenye paneli ya JamiiTek.
+    if site.is_premium and 'custom_domain' in request.POST and new_domain != site.custom_domain:
+        from . import domains
+        if new_domain:
+            ok, msg = domains.connect(site, new_domain)
+            (messages.success if ok else messages.error)(request, msg)
+            if ok:
+                recs = '; '.join(f"{r['type']} {r['name']} → {r['value']}" for r in domains.dns_records(site.custom_domain))
+                messages.info(request, f'Weka rekodi hizi kwa mtoa huduma wa domain yako: {recs}. '
+                                       'Futa rekodi zote za AAAA kama zipo.')
+        else:
+            domains.disconnect(site)
+            messages.success(request, 'Domain imeondolewa.')
     return redirect('builder:site_dashboard', site_id=site.id)
 
 
