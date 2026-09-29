@@ -57,6 +57,9 @@ body{font-family:var(--font-body);color:#20261f;line-height:1.65;overflow-x:hidd
 h1,h2,h3{font-family:var(--font-head)}
 img{max-width:100%}
 a{color:inherit}
+/* Vitufe vya templates na AI ni <a style="padding:..."> — bila inline-block
+   vinapandana vikishuka mstari kwenye simu (padding ya inline haisukumi mistari). */
+.jt-body a[style*="padding"]{display:inline-block;margin-block:5px;vertical-align:middle}
 
 /* ── Loading bar ── */
 #jt-load{position:fixed;top:0;left:0;height:3px;width:0;z-index:999;
