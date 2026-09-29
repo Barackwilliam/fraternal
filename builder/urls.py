@@ -1,6 +1,6 @@
 """URLs za dashboard (zinaingia kwenye jamiitek/urls.py kama /builder/)."""
 from django.urls import path
-from . import views, ai
+from . import views, ai, studio
 
 app_name = 'builder'
 
@@ -36,6 +36,10 @@ urlpatterns = [
     path('site/<int:site_id>/publish/', views.toggle_publish, name='toggle_publish'),
     path('site/<int:site_id>/template/', views.change_template, name='change_template'),
 
+    # Website Studio — hatua kwa hatua (builder/studio.py)
+    path('site/<int:site_id>/studio/', studio.studio, name='studio'),
+    path('site/<int:site_id>/studio/preview/', studio.studio_preview, name='studio_preview'),
+    path('site/<int:site_id>/studio/<slug:step>/', studio.studio, name='studio_step'),
     path('site/<int:site_id>/import/', views.site_import, name='site_import'),
     path('site/<int:site_id>/import/confirm/', views.site_import_confirm, name='site_import_confirm'),
     path('site/<int:site_id>/pages/new/', views.page_create, name='page_create'),

@@ -8,6 +8,7 @@
 {% block mobnav %}
 <a href="{% url 'builder:my_sites' %}"><span class="ic">⬅</span>Sites</a>
 <a href="{% url 'builder:site_dashboard' site.id %}" class="active"><span class="ic">📊</span>Dash</a>
+<a href="{% url 'builder:studio' site.id %}"><span class="ic">🪄</span>Studio</a>
 <a href="{% url 'builder:inquiries_list' site.id %}"><span class="ic">📥</span>Inquiries</a>
 <a href="{% url 'builder:site_import' site.id %}"><span class="ic">📦</span>Upload</a>
 {% for c in collections %}
@@ -19,6 +20,7 @@
 {% block sidenav %}
 <a href="{% url 'builder:my_sites' %}">⬅ My Websites</a>
 <a href="{% url 'builder:site_dashboard' site.id %}" class="active">📊 Dashboard</a>
+<a href="{% url 'builder:studio' site.id %}">🪄 Website Studio</a>
 <a href="{% url 'builder:inquiries_list' site.id %}">📥 Inquiries{% if new_inquiries %} ({{ new_inquiries }}){% endif %}</a>
 <a href="{% url 'builder:site_import' site.id %}">📦 Upload Website (ZIP)</a>
 {% for c in collections %}
@@ -48,6 +50,26 @@
     </form>
   </div>
 </div>
+
+<a class="card studio-cta" href="{% url 'builder:studio_step' site.id studio_next %}">
+  <span class="studio-ic">🪄</span>
+  <span class="studio-tx">
+    <b>Website Studio</b>
+    <span class="hint">{% if studio_done == studio_total %}All {{ studio_total }} steps done — revisit any step to change your design.{% else %}Build your site step by step · {{ studio_done }}/{{ studio_total }} done · next: <b>{{ studio_next_title }}</b>{% endif %}</span>
+    <span class="studio-bar"><i style="width:{{ studio_pct }}%"></i></span>
+  </span>
+  <span class="btn amber">{% if studio_done %}Continue{% else %}Start{% endif %} →</span>
+</a>
+<style>
+.studio-cta{display:flex;align-items:center;gap:16px;flex-wrap:wrap;text-decoration:none;border-color:rgba(0,212,255,.35);
+  background:linear-gradient(120deg,rgba(0,212,255,.08),rgba(37,211,102,.06))}
+.studio-cta:hover{border-color:var(--cyan)}
+.studio-ic{font-size:34px}
+.studio-tx{flex:1;min-width:220px;display:flex;flex-direction:column;gap:6px}
+.studio-tx>b{font-family:var(--ff-display);font-size:19px;color:#fff}
+.studio-bar{height:6px;background:rgba(255,255,255,.06);border-radius:6px;overflow:hidden;max-width:420px}
+.studio-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--green),var(--cyan))}
+</style>
 
 {% if onb_done < onb_total %}
 <div class="card onb">
@@ -168,9 +190,9 @@
   <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
     <div style="flex:1;min-width:220px">
       <h2 style="margin:0 0 6px">🧭 Navbar &amp; Footer</h2>
-      <p class="hint" style="margin:0">Change your navbar and footer style — pick a preset or write your own HTML. Applies to every page.</p>
+      <p class="hint" style="margin:0">14 headers (sidebars and top bars) and 12 footers — pick one, let AI design it, or write your own code. Applies to every page.</p>
     </div>
-    <a class="btn amber" href="{% url 'builder:nav_editor' site.id %}">Customize Nav &amp; Footer →</a>
+    <a class="btn amber" href="{% url 'builder:studio_step' site.id 'header' %}">Choose Header &amp; Footer →</a>
   </div>
 </div>
 
@@ -229,13 +251,20 @@
     <h2 style="margin-top:26px">🎨 Website Appearance</h2>
     <div class="grid c2">
       <div>
-        <label>Navbar Style / Layout</label>
+        <label>Menu / Header</label>
+        {% if site.nav_preset or site.custom_nav_html %}
+        {# Design ya Studio inashinda nav_style — kuonyesha select hapa kungedanganya #}
+        <p class="hint" style="margin-top:4px">Your menu uses a Website Studio design.
+          <a href="{% url 'builder:studio_step' site.id 'header' %}" style="color:var(--cyan)">Change it in the Studio →</a></p>
+        {% else %}
         <select name="nav_style">
           {% for val, label in site.NAV_STYLES %}
           <option value="{{ val }}" {% if site.nav_style == val %}selected{% endif %}>{{ label }}</option>
           {% endfor %}
         </select>
-        <p class="hint">Glass = floating blurred navbar · Side = sidebar menu (dashboard style) · Top = classic · Centered = minimal centered.</p>
+        <p class="hint">Glass = floating blurred navbar · Side = sidebar menu (dashboard style) · Top = classic · Centered = minimal centered.
+          Want more? <a href="{% url 'builder:studio_step' site.id 'header' %}" style="color:var(--cyan)">14 designs in the Studio →</a></p>
+        {% endif %}
       </div>
       <div>
         <label>Accent Color</label>

@@ -330,7 +330,7 @@ body.scifi .card:hover::after{opacity:1}
   <link rel="stylesheet" href="{% static 'css/interaction.css' %}">
 </head>
 <body class="scifi">
-{% include 'builder/_scifi_bg.html' %}
+{% block background %}{% include 'builder/_scifi_bg.html' %}{% endblock %}
 <div id="jt-progress"></div>
 <aside class="side">
   <div class="brand">
