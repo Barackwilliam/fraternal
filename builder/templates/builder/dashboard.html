@@ -107,7 +107,7 @@
       <tr><th>Page</th><th>URL</th><th></th></tr>
       {% for p in pages %}
       <tr>
-        <td><strong>{{ p.title }}</strong></td>
+        <td><strong>{{ p.title }}</strong>{% if p.raw_document %} <span class="pill" title="Uploaded from a ZIP">📦 uploaded</span>{% endif %}</td>
         <td class="hint">{% if p.slug == 'home' %}/{% else %}/p/{{ p.slug }}{% endif %}</td>
         <td style="text-align:right;white-space:nowrap">
           <a class="btn sm amber" href="{% url 'builder:page_editor' site.id p.id %}">✏️ Edit Design</a>
@@ -126,6 +126,10 @@
       <input type="text" name="title" placeholder="New page name (e.g. Gallery)" required style="flex:1">
       <button class="btn">➕ Add</button>
     </form>
+    <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--line);display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <span class="hint" style="flex:1;min-width:200px">Have a finished website folder from a designer? Upload it as a ZIP.</span>
+      <a class="btn sm" href="{% url 'builder:site_import' site.id %}">📦 Upload Website (ZIP)</a>
+    </div>
   </div>
 
   <!-- Collections -->

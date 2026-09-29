@@ -199,6 +199,10 @@ class SitePage(models.Model):
     grapes_data = models.JSONField(default=dict, blank=True)  # project data ya GrapesJS
     html_cache = models.TextField(blank=True)   # HTML iliyo-render (kwa speed)
     css_cache = models.TextField(blank=True)    # CSS ya page
+    # HTML kamili (<html><head>...</html>) ya page iliyopakiwa kwa ZIP.
+    # Ikiwa na kitu, inatolewa kama ilivyo — bila navbar/footer ya JamiiTek.
+    # Tazama builder/site_import.py.
+    raw_document = models.TextField(blank=True)
     sort_order = models.PositiveIntegerField(default=0)
     show_in_nav = models.BooleanField(default=True)
     updated_at = models.DateTimeField(auto_now=True)

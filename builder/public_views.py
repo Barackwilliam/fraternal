@@ -4,12 +4,13 @@ kupitia subdomain ya mteja (SubdomainMiddleware ime-set request.client_site
 na request.urlconf = 'builder.public_urls').
 """
 from builder.images import image_url
-from django.http import Http404, JsonResponse, HttpResponseBadRequest
+from django.http import Http404, HttpResponse, JsonResponse, HttpResponseBadRequest
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
-from .rendering import render_page_html, render_shortcodes, render_inquiry_form
+from .rendering import (render_page_html, render_raw_document, render_shortcodes,
+                        render_inquiry_form)
 
 
 def _get_site(request):
@@ -82,6 +83,8 @@ def home(request):
     page = site.pages.filter(slug='home').first() or site.pages.first()
     if page is None:
         raise Http404
+    if page.raw_document:
+        return HttpResponse(render_raw_document(site, page))
     return render(request, 'builder/public/page.html', _ctx(site, {
         'page': page,
         'page_html': render_page_html(site, page),
@@ -94,6 +97,8 @@ def page_view(request, slug):
     if blocked:
         return blocked
     page = get_object_or_404(site.pages, slug=slug)
+    if page.raw_document:
+        return HttpResponse(render_raw_document(site, page))
     return render(request, 'builder/public/page.html', _ctx(site, {
         'page': page,
         'page_html': render_page_html(site, page),
