@@ -199,6 +199,10 @@ class SitePage(models.Model):
     grapes_data = models.JSONField(default=dict, blank=True)  # project data ya GrapesJS
     html_cache = models.TextField(blank=True)   # HTML iliyo-render (kwa speed)
     css_cache = models.TextField(blank=True)    # CSS ya page
+    # HTML kamili (<html><head>...</html>) ya page iliyopakiwa kwa ZIP.
+    # Ikiwa na kitu, inatolewa kama ilivyo — bila navbar/footer ya JamiiTek.
+    # Tazama builder/site_import.py.
+    raw_document = models.TextField(blank=True)
     sort_order = models.PositiveIntegerField(default=0)
     show_in_nav = models.BooleanField(default=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -339,3 +343,34 @@ class AiUsageLog(models.Model):
 
     class Meta:
         indexes = [models.Index(fields=['user', 'created_at'])]
+
+
+class SiteImport(models.Model):
+    """
+    ZIP iliyopakiwa ambayo mteja bado hajaithibitisha (builder/site_import.py).
+
+    Iko kwenye database, si cache: bila Redis kila worker wa gunicorn
+    ana cache yake, na hakikisho lingepotea ombi la kuthibitisha
+    likiangukia worker mwingine.
+
+    `uploaded` ina URL za kila file lililopakiwa Supabase. Command ya
+    `prune_site_imports` inazifuta mteja asipothibitisha ndani ya
+    IMPORT_TTL_HOURS, au baadaye site isipozitaja tena (ZIP mpya
+    imechukua nafasi ya kurasa zote za import hii).
+    """
+    # SET_NULL, si CASCADE: site ikifutwa, rekodi inabaki ili prune
+    # ifute files zake Supabase (vinginevyo zingebaki bila mwenyewe).
+    website = models.ForeignKey(
+        ClientWebsite, on_delete=models.SET_NULL, null=True, related_name='imports')
+    token = models.CharField(max_length=32, unique=True)
+    result = models.JSONField(default=dict, blank=True)   # pages, skipped, missing
+    uploaded = models.JSONField(default=list, blank=True)
+    images = models.JSONField(default=list, blank=True)   # zinaingia SiteAsset zikithibitishwa
+    confirmed_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'{self.website.subdomain if self.website else "(site imefutwa)"} import {self.token[:8]}'

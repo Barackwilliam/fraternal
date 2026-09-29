@@ -1,0 +1,55 @@
+{% extends 'builder/base_panel.html' %}
+{% block title %}Upload Website — {{ site.site_name }}{% endblock %}
+
+{% block mobnav %}
+<a href="{% url 'builder:site_dashboard' site.id %}"><span class="ic">⬅</span>Dash</a>
+{% endblock %}
+
+{% block sidenav %}
+<a href="{% url 'builder:my_sites' %}">⬅ My Websites</a>
+<a href="{% url 'builder:site_dashboard' site.id %}">📊 Dashboard</a>
+{% endblock %}
+
+{% block content %}
+<div class="topbar">
+  <div>
+    <div class="crumb"><a href="{% url 'builder:site_dashboard' site.id %}">{{ site.site_name }}</a> / Upload website</div>
+    <h1>📦 Upload a Whole Website</h1>
+    <p class="hint" style="font-size:14px">Got a website folder from a designer? Zip it and upload it here — every page, image and style goes live in one step.</p>
+  </div>
+</div>
+
+{% if error %}
+<div class="card" style="border-color:rgba(255,90,90,.45);background:rgba(255,90,90,.07)">
+  <strong style="color:#ff9b9b">⚠ {{ error }}</strong>
+</div>
+{% endif %}
+
+<div class="grid c2">
+  <div class="card">
+    <h2>1. Upload your ZIP</h2>
+    <form method="post" enctype="multipart/form-data"
+          onsubmit="const b=this.querySelector('button');b.disabled=true;b.textContent='⏳ Uploading & processing…'">
+      {% csrf_token %}
+      <label>Website ZIP file</label>
+      <input type="file" name="zip" accept=".zip,application/zip" required>
+      <p class="hint">Up to {{ limits.zip_mb }}MB · {{ limits.pages }} pages · {{ limits.files }} files.</p>
+      <button class="btn amber" style="margin-top:14px">📤 Upload &amp; Preview</button>
+    </form>
+    <p class="hint" style="margin-top:14px">Nothing changes on your website yet — you will see a preview of every page first.</p>
+  </div>
+
+  <div class="card">
+    <h2>How it works</h2>
+    <ul class="hint" style="line-height:1.9;padding-left:18px;margin:0">
+      <li><b>index.html</b> becomes your Home page</li>
+      <li>Other pages like <b>about.html</b> become <b>/p/about/</b></li>
+      <li>Links between your pages are fixed automatically</li>
+      <li>Images, CSS, JavaScript and fonts are uploaded and linked for you</li>
+      <li>You can still edit every page later with the design editor</li>
+    </ul>
+    <p class="hint" style="margin-top:14px"><b>Allowed:</b> HTML, CSS, JS, JSON, images (JPG, PNG, WEBP, GIF, SVG, ICO, AVIF), fonts, PDF, MP4/WEBM, MP3.<br>
+    Server code like <b>.php</b> or programs like <b>.exe</b> are skipped — this hosts static websites only.</p>
+  </div>
+</div>
+{% endblock %}

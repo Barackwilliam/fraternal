@@ -663,6 +663,7 @@ const SITE_ID = {{ site.id }};
 </script>
 {{ page.html_cache|json_script:"starter-html" }}
 {{ page.css_cache|json_script:"starter-css" }}
+{% if canvas_head %}{{ canvas_head|json_script:"canvas-head" }}{% endif %}
 <script>
 const starterHtml = JSON.parse(document.getElementById('starter-html').textContent || '""');
 const starterCss = JSON.parse(document.getElementById('starter-css').textContent || '""');
@@ -692,6 +693,15 @@ const editor = grapesjs.init({
   },
   assetManager: { custom: true },
 });
+
+// Page iliyopakiwa kwa ZIP: CSS za <head> yake (link/style) zinaingizwa
+// kwenye canvas ili design ionekane kama ilivyo kwenye site.
+{% if canvas_head %}
+editor.on('load', () => {
+  const head = JSON.parse(document.getElementById('canvas-head').textContent || '""');
+  editor.Canvas.getDocument().head.insertAdjacentHTML('beforeend', head);
+});
+{% endif %}
 
 // Device switcher
 document.querySelectorAll('.devs button').forEach(b=>{

@@ -202,6 +202,31 @@ def upload(file_obj, folder='media', filename=None, content_type=None):
         return {'success': False,
                 'error': f'File ni kubwa mno ({len(data) // 1024 // 1024}MB). Kikomo ni 10MB.'}
 
+    return _put(path, data, content_type)
+
+
+def upload_bytes(data, folder, ext, content_type):
+    """
+    Pakia bytes ambazo aina yake IMESHAKAGULIWA na anayeita.
+
+    Inatumiwa na ZIP import ya Builder, inayohitaji CSS, JS na fonts —
+    aina ambazo `ALLOWED` haiziruhusu kwa upload za kawaida. Anayeita
+    ndiye mwenye orodha yake ya aina salama (builder/site_import.py).
+    """
+    if not is_configured():
+        return {'success': False, 'error': 'SUPABASE_URL au funguo za S3 hazijawekwa'}
+    ext = re.sub(r'[^a-z0-9]', '', (ext or '').lower())[:8]
+    if not ext:
+        return {'success': False, 'error': 'Aina ya file haijulikani'}
+    if len(data) > MAX_BYTES:
+        return {'success': False,
+                'error': f'File ni kubwa mno ({len(data) // 1024 // 1024}MB). Kikomo ni 10MB.'}
+    now = datetime.utcnow()
+    path = f"{_safe_folder(folder)}/{now:%Y/%m}/{uuid.uuid4().hex[:16]}.{ext}"
+    return _put(path, data, content_type)
+
+
+def _put(path, data, content_type):
     try:
         _s3().put_object(
             Bucket=_bucket(),

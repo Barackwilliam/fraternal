@@ -36,6 +36,8 @@ urlpatterns = [
     path('site/<int:site_id>/publish/', views.toggle_publish, name='toggle_publish'),
     path('site/<int:site_id>/template/', views.change_template, name='change_template'),
 
+    path('site/<int:site_id>/import/', views.site_import, name='site_import'),
+    path('site/<int:site_id>/import/confirm/', views.site_import_confirm, name='site_import_confirm'),
     path('site/<int:site_id>/pages/new/', views.page_create, name='page_create'),
     path('site/<int:site_id>/pages/<int:page_id>/edit/', views.page_editor, name='page_editor'),
     path('site/<int:site_id>/pages/<int:page_id>/delete/', views.page_delete, name='page_delete'),

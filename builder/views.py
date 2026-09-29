@@ -18,7 +18,8 @@ from django.urls import reverse
 from django.views.decorators.http import require_POST
 
 from .models import (
-    ClientWebsite, SitePage, SiteCollection, SiteItem, SiteAsset, SiteInquiry, AiUsageLog,
+    ClientWebsite, SitePage, SiteCollection, SiteItem, SiteAsset, SiteImport, SiteInquiry,
+    AiUsageLog,
     available_website_types, validate_subdomain,
 )
 from .site_templates import all_templates, apply_template
@@ -490,9 +491,14 @@ def toggle_publish(request, site_id):
 def page_editor(request, site_id, page_id):
     site = _my_site(request, site_id)
     page = get_object_or_404(SitePage, id=page_id, website=site)
+    canvas_head = ''
+    if page.raw_document:
+        from .site_import import canvas_head as _canvas_head
+        canvas_head = _canvas_head(page.raw_document)
     return render(request, 'builder/editor.html', {
         'site': site, 'page': page,
         'collections': site.collections.all(),
+        'canvas_head': canvas_head,
     })
 
 
@@ -551,8 +557,142 @@ def page_save(request, site_id, page_id):
     page.grapes_data = data.get('project', {})
     page.html_cache = data.get('html', '')
     page.css_cache = data.get('css', '')
+    if page.raw_document:
+        # Page iliyopakiwa kwa ZIP: body mpya inarudi ndani ya document
+        # yake, <head> (CSS, fonts, meta) na scripts zinabaki.
+        from .site_import import merge_editor_save
+        page.raw_document = merge_editor_save(
+            page.raw_document, page.html_cache, page.css_cache)
     page.save()
     return JsonResponse({'status': 'ok'})
+
+
+# ── Kupakia website nzima kwa ZIP ───────────────────────
+
+IMPORT_TTL_HOURS = 24      # hakikisho lisipothibitishwa, files zinafutwa baada ya hapo
+
+
+@login_required
+def site_import(request, site_id):
+    """
+    Hatua 1: mteja anapakia ZIP. Assets zinapakiwa Supabase papo hapo,
+    kurasa zinakaa kwenye SiteImport mpaka athibitishe kwenye hakikisho.
+    Kila URL iliyopakiwa inarekodiwa — hata upakiaji ukishindwa katikati —
+    ili `prune_site_imports` izifute mteja asipothibitisha.
+    """
+    import logging
+    import uuid
+    from apps import storage
+    from . import site_import as si
+
+    site = _my_site(request, site_id)
+    ctx = {'site': site, 'limits': {
+        'zip_mb': si.MAX_ZIP_BYTES // 1024 // 1024, 'pages': si.MAX_PAGES,
+        'files': si.MAX_FILES,
+    }}
+    if request.method != 'POST':
+        return render(request, 'builder/site_import.html', ctx)
+
+    f = request.FILES.get('zip')
+    if not f:
+        ctx['error'] = 'Choose a .zip file first.'
+        return render(request, 'builder/site_import.html', ctx)
+    if not storage.is_configured():
+        ctx['error'] = 'File storage is not configured on the server yet. Please contact JamiiTek support.'
+        return render(request, 'builder/site_import.html', ctx)
+
+    uploaded, images = [], []     # list.append ni salama kwa threads
+
+    def uploader(data, ext, content_type):
+        r = storage.upload_bytes(data, f'sites/{site.id}/import', ext, content_type)
+        if not r.get('success'):
+            raise si.ImportRejected(f'Uploading a file failed: {r.get("error", "unknown error")}')
+        uploaded.append(r['url'])
+        if content_type.startswith('image/'):
+            images.append(r['url'])
+        return r['url']
+
+    imp = SiteImport(website=site, token=uuid.uuid4().hex)
+    try:
+        result = si.prepare(f, uploader)
+    except Exception as e:
+        if not isinstance(e, si.ImportRejected):
+            logging.getLogger(__name__).exception('site import failed (site %s)', site.id)
+        ctx['error'] = str(e) if isinstance(e, si.ImportRejected) else \
+            'Something went wrong while processing the ZIP. Please try again.'
+        if uploaded:              # files zilizokwisha pakiwa zitafutwa na prune
+            imp.uploaded = uploaded
+            imp.save()
+        return render(request, 'builder/site_import.html', ctx)
+
+    imp.result, imp.uploaded, imp.images = result, uploaded, images
+    imp.save()
+
+    existing = set(site.pages.values_list('slug', flat=True))
+    imported = {p['slug'] for p in result['pages']}
+    for p in result['pages']:
+        p['url'] = si.page_url(p['slug'])
+        p['replaces'] = p['slug'] in existing
+    return render(request, 'builder/site_import_preview.html', {
+        'site': site, 'token': imp.token, 'result': result,
+        'others': site.pages.exclude(slug__in=imported),
+        'docs': [p['document'] for p in result['pages']],
+    })
+
+
+@login_required
+@require_POST
+def site_import_confirm(request, site_id):
+    """Hatua 2: andika kurasa kwenye database."""
+    from datetime import timedelta
+    from django.utils import timezone
+    from .site_import import editable_body
+
+    site = _my_site(request, site_id)
+    with transaction.atomic():
+        # select_for_update: kubonyeza "Import" mara mbili hakuandiki mara mbili
+        imp = SiteImport.objects.select_for_update().filter(
+            website=site, token=(request.POST.get('token') or '')[:32],
+            confirmed_at__isnull=True,
+            created_at__gte=timezone.now() - timedelta(hours=IMPORT_TTL_HOURS),
+        ).exclude(result={}).first()
+        if imp is None:
+            messages.error(request, 'This import has expired. Please upload the ZIP again.')
+            return redirect('builder:site_import', site_id=site.id)
+
+        pages = imp.result['pages']
+        slugs = []
+        for order, p in enumerate(pages):
+            SitePage.objects.update_or_create(
+                website=site, slug=p['slug'],
+                defaults={
+                    'title': p['title'],
+                    'raw_document': p['document'],
+                    'html_cache': editable_body(p['document']),
+                    'css_cache': '',
+                    'grapes_data': {},       # editor ianze na HTML mpya
+                    'sort_order': order,
+                },
+            )
+            slugs.append(p['slug'])
+        if request.POST.get('remove_others'):
+            for page in site.pages.exclude(slug__in=slugs):
+                page.delete()
+        # Picha zinaingia kwenye maktaba ya picha ya editor pia
+        SiteAsset.objects.bulk_create([
+            SiteAsset(website=site, url=u, file_name=u.rsplit('/', 1)[-1][:200])
+            for u in imp.images
+        ])
+        # Documents hazihitajiki tena. `uploaded` inabaki: prune inaitumia kujua
+        # files za kufuta ZIP mpya ikichukua nafasi ya kurasa hizi.
+        imp.confirmed_at = timezone.now()
+        imp.result = {'pages': len(pages)}
+        imp.save(update_fields=['confirmed_at', 'result'])
+
+    n = len(pages)
+    messages.success(request, f'Your website has been imported — {n} page{"s" if n != 1 else ""} '
+                              f'are ready. Open your site to check it, then publish.')
+    return redirect('builder:site_dashboard', site_id=site.id)
 
 
 # ── Collections (Packages, Trips, Destinations, Products...) ──
