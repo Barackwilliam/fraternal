@@ -1,4 +1,5 @@
 {% extends 'builder/base_panel.html' %}
+{% load builder_images %}
 {% block title %}{{ collection.name }} — {{ site.site_name }}{% endblock %}
 
 {% block mobnav %}
@@ -40,7 +41,7 @@
     {% for item in items %}
     <tr>
       <td>{% if item.image_url %}
-        <img src="{{ item.image_url }}-/resize/100x/" style="width:56px;height:42px;object-fit:cover;border-radius:6px" alt="">
+        <img src="{{ item.image_url|img:100 }}" style="width:56px;height:42px;object-fit:cover;border-radius:6px" alt="">
         {% else %}<span class="hint">—</span>{% endif %}</td>
       <td><strong>{{ item.title }}</strong>
         {% if item.is_featured %}<span class="pill on">⭐</span>{% endif %}</td>

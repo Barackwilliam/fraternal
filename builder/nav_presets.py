@@ -20,6 +20,7 @@ Placeholders zinamwezesha mteja kubadilisha MUUNDO bila kuvunja links za
 pages (ambazo ni dynamic). Custom HTML bila {{nav_links}} pia inaruhusiwa —
 mteja anaweza kuandika links zake mwenyewe kwa mkono.
 """
+from builder.images import image_url
 from datetime import datetime
 import re
 
@@ -172,7 +173,7 @@ def _nav_links_html(site, page_slug=None):
 def _placeholders(site, page_slug=None):
     logo = ''
     if site.logo_url:
-        logo = f'<img src="{site.logo_url}-/resize/80x/" alt="" loading="eager">'
+        logo = f'<img src="{image_url(site.logo_url, 80)}" alt="" loading="eager">'
     wa = ''
     if site.whatsapp_number:
         digits = re.sub(r'\D', '', site.whatsapp_number)

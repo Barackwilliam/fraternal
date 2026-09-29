@@ -1,11 +1,12 @@
 {% extends 'builder/public/base.html' %}
+{% load builder_images %}
 {% block title %}{{ item.title }} · {{ site.site_name }}{% endblock %}
 {% block body %}
 <article style="max-width:860px;margin:0 auto;padding:clamp(20px,6vw,40px) 20px">
   <p style="font-size:13px"><a href="/c/{{ collection.slug }}/" style="color:#8a6a2a;text-decoration:none">← {{ collection.name }}</a></p>
   <h1 style="font-size:clamp(26px,6vw,38px);margin:8px 0 18px;line-height:1.2">{{ item.title }}</h1>
   {% if item.image_url %}
-    <img src="{{ item.image_url }}-/resize/1200x/" alt="{{ item.title }}"
+    <img src="{{ item.image_url|img:1200 }}" alt="{{ item.title }}"
          style="width:100%;border-radius:14px;margin-bottom:26px">
   {% endif %}
 

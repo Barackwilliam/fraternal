@@ -11,6 +11,7 @@ Wakati wa kuserve page, shortcodes zinabadilishwa na content halisi
 kutoka database — kwa hiyo mteja akiongeza package mpya, inaonekana
 kila mahali alipoweka block hiyo, bila kugusa design.
 """
+from builder.images import image_url
 import re
 import html as html_lib
 
@@ -81,7 +82,7 @@ def render_collection(site, slug):
         img = ''
         if item.image_url:
             # Uploadcare inline resize — hakuna processing server-side
-            src = item.image_url.rstrip('/') + '/-/resize/600x/'
+            src = image_url(item.image_url, 600)
             img = (f'<div class="jt-card-img-wrap"><img class="jt-card-img" src="{_esc(src)}" alt="{_esc(item.title)}" loading="lazy"></div>')
 
         desc = _esc(item.data.get('description', ''))[:150]

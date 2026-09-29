@@ -3,6 +3,7 @@ Public site rendering — views hizi zinatumika TU wakati request imekuja
 kupitia subdomain ya mteja (SubdomainMiddleware ime-set request.client_site
 na request.urlconf = 'builder.public_urls').
 """
+from builder.images import image_url
 from django.http import Http404, JsonResponse, HttpResponseBadRequest
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
@@ -42,7 +43,7 @@ def _ctx(site, extra=None):
         # ── SEO defaults (views zina-override kwa page husika) ──
         'meta_title': site.site_name,
         'meta_description': _strip_html(site.tagline or site.site_name),
-        'meta_image': (site.logo_url + '-/resize/1200x/') if site.logo_url else '',
+        'meta_image': image_url(site.logo_url, 1200),
         'meta_url': _base_url(site),
         'base_url': _base_url(site),
     }
@@ -152,7 +153,7 @@ def item_detail(request, col_slug, item_slug):
         'booking_form': render_inquiry_form(site, item),
         'meta_title': f'{item.title} · {site.site_name}',
         'meta_description': _strip_html(item_desc) or _strip_html(site.tagline or site.site_name),
-        'meta_image': (item.image_url + '-/resize/1200x/') if item.image_url else ((site.logo_url + '-/resize/1200x/') if site.logo_url else ''),
+        'meta_image': image_url(item.image_url or site.logo_url, 1200),
         'meta_url': f'{_base_url(site)}/c/{collection.slug}/{item.slug}/',
     }))
 

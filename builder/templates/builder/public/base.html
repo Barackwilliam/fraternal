@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+{% load builder_images %}<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -35,7 +35,7 @@
   "url": "{{ base_url }}"
 }
 </script>
-{% if site.logo_url %}<link rel="icon" href="{{ site.logo_url }}-/resize/64x64/">
+{% if site.logo_url %}<link rel="icon" href="{{ site.logo_url|img:"64x64" }}">
 {% endif %}
 <style>
 :root{
@@ -150,7 +150,7 @@ body.has-side .jt-body{margin-left:250px;flex:1;min-width:0}
 {% with nav=site.nav_style|default:'glass' %}
 <nav class="nav-{{ nav }}">
   <a class="jt-logo" href="/">
-    {% if site.logo_url %}<img src="{{ site.logo_url }}-/resize/80x/" alt="" loading="eager">{% endif %}
+    {% if site.logo_url %}<img src="{{ site.logo_url|img:80 }}" alt="" loading="eager">{% endif %}
     {{ site.site_name }}
   </a>
   {% if nav != 'side' and nav != 'center' %}<button class="jt-burger" onclick="jtMenu(true)">☰</button>{% endif %}
