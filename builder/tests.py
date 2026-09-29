@@ -516,3 +516,41 @@ class StudioTest(TestCase):
         r = self.c.get(f'/builder/site/{self.site.id}/')
         self.assertContains(r, f'{self.base}style/')
         self.assertContains(r, '1/6 done')
+
+    # ── Studio bila kupakia ukurasa upya (fetch + JSON) ──
+    def _ajax(self, step, data):
+        return self.c.post(f'{self.base}{step}/', data, HTTP_X_REQUESTED_WITH='fetch')
+
+    def test_ajax_save_returns_json_and_never_redirects(self):
+        r = self._ajax('header', {'mode': 'preset', 'preset': 'side_midnight'})
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(r.json()['ok'], True)
+        self.assertIn('header', r.json()['done'])
+        r = self._ajax('header', {'mode': 'preset', 'preset': 'nope'})
+        self.assertEqual(r.status_code, 400)
+        self.assertIn('Pick a header', r.json()['error'])
+        # Biashara inarudisha design zilizojazwa upya kwa jina jipya
+        r = self._ajax('business', {'site_name': 'Jina & Jipya'})
+        self.assertIn('Jina &amp; Jipya', r.json()['layout']['headers']['top_glass']['html'])
+
+    def test_add_page_from_studio_stays_in_studio(self):
+        r = self._ajax('pages', {'action': 'add_page', 'title': 'Gallery <b>'})
+        self.assertEqual(r.status_code, 200)
+        page = r.json()['page']
+        self.assertEqual(page['slug'], 'gallery-b')
+        self.assertTrue(page['edit'].endswith(f"/pages/{page['id']}/edit/"))
+        created = self.site.pages.get(slug='gallery-b')
+        self.assertIn('&lt;b&gt;', created.html_cache)          # jina lime-escape-iwa
+        self.assertEqual(self._ajax('pages', {'action': 'add_page', 'title': ' '}).status_code, 400)
+        # Editor ya ukurasa mpya inafunguka
+        self.assertEqual(self.c.get(page['edit']).status_code, 200)
+
+    def test_studio_page_ships_all_designs_and_preview_has_slots(self):
+        r = self.c.get(self.base)
+        layout = r.context['layout']
+        self.assertEqual(len(layout['headers']), 14)
+        self.assertEqual(len(layout['footers']), 12)
+        self.assertContains(r, 'id="sd-layout"')
+        r = self.c.get(f'{self.base}preview/')
+        for slot in ('id="jt-nav-slot"', 'id="jt-nav-css"', 'id="jt-foot-slot"', 'id="jt-foot-css"', 'id="jt-font"'):
+            self.assertContains(r, slot)

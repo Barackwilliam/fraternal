@@ -9,9 +9,14 @@ lilihitaji kuhifadhi kisha kufungua site kwenye tab nyingine kuona matokeo.
 
 SULUHISHO
 
-Hatua 6, moja baada ya nyingine, kila moja na hakikisho la moja kwa moja
-(iframe ya /studio/preview/) linalobadilika papo hapo mteja akibonyeza
-chaguo — kabla hajahifadhi:
+Hatua 6 kwenye ukurasa MMOJA, na hakikisho la moja kwa moja pembeni (juu
+kwenye simu). Hakuna kupakia ukurasa upya:
+
+  - design zote zinatumwa pamoja na ukurasa (layout_bundle), na JavaScript
+    inazibadilisha ndani ya iframe ya preview papo hapo mteja akibonyeza
+  - chaguo zinahifadhiwa nyuma kwa fetch(); kuhamia hatua nyingine ni JS tu
+
+Hatua:
 
   1. Biashara  — jina, tagline (✨ AI), logo, mawasiliano
   2. Mtindo    — rangi tayari au yako mwenyewe, nav nyeusi/nyeupe, font
@@ -23,17 +28,19 @@ chaguo — kabla hajahifadhi:
 Hatua zilizokamilika zinahifadhiwa kwenye theme_settings['studio_done'].
 Studio haitumii three.js wala background ya WebGL — inafunguka haraka.
 """
+import html as html_lib
 import re
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import Http404, HttpResponse
+from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.decorators.clickjacking import xframe_options_sameorigin
 
-from .layouts import FONTS, PALETTES
-from .nav_presets import FOOTERS, HEADERS, get_preset_catalog
+from .layouts import (FONTS, PALETTES, HEADER_COMMON_CSS, SIDE_COMMON_CSS, FOOTER_COMMON_CSS,
+                      font_for)
+from .nav_presets import FOOTERS, HEADERS, get_preset_catalog, _placeholders, _fill
 from .views import _my_site
 
 STEPS = [
@@ -126,46 +133,110 @@ def _save_step(request, site, step):
     return None
 
 
+def _add_page(site, title):
+    """Ukurasa mpya kutoka Studio (kama views.page_create, bila kuondoka Studio)."""
+    from django.utils.text import slugify
+    from .models import SitePage
+    base = slugify(title)[:70] or 'page'
+    slug, n = base, 2
+    while site.pages.filter(slug=slug).exists():
+        slug = f'{base}-{n}'
+        n += 1
+    return SitePage.objects.create(
+        website=site, slug=slug, title=title[:200], sort_order=site.pages.count(),
+        html_cache=(f'<section style="padding:60px 20px;max-width:900px;margin:0 auto;">'
+                    f'<h1>{html_lib.escape(title)}</h1><p>Start editing this page.</p></section>'),
+    )
+
+
+def layout_bundle(site):
+    """
+    Design zote zikiwa zimejazwa taarifa za site — Studio inazibadilisha ndani
+    ya preview kwa JavaScript, bila kwenda server kila mteja anapobonyeza.
+    """
+    ph = _placeholders(site, 'home')
+    return {
+        'headerCommon': HEADER_COMMON_CSS,
+        'sideCommon': SIDE_COMMON_CSS,
+        'footerCommon': FOOTER_COMMON_CSS,
+        'headers': {k: {'html': _fill(h['html'], ph), 'css': h['css'], 'side': h['kind'] == 'side'}
+                    for k, h in HEADERS.items()},
+        'footers': {k: {'html': _fill(f['html'], ph), 'css': f['css']} for k, f in FOOTERS.items()},
+        # Kwa code ya mteja mwenyewe: placeholders zinajazwa upande wa browser
+        'placeholders': ph,
+        'fonts': {k: dict(zip(('href', 'body', 'head'), font_for(site, k))) for k in FONTS},
+    }
+
+
+def _wants_json(request):
+    return request.headers.get('X-Requested-With') == 'fetch'
+
+
 @login_required
 def studio(request, site_id, step=None):
+    """
+    Studio yote ni ukurasa MMOJA: hatua zinabadilishwa kwa JavaScript na
+    kuhifadhiwa kwa fetch(). URL /studio/<step>/ inafungua hatua husika
+    moja kwa moja (links, refresh, kitufe cha nyuma cha browser).
+    """
     site = _my_site(request, site_id)
     step = step or studio_progress(site)[2]
     if step not in STEP_KEYS:
         raise Http404
 
     if request.method == 'POST':
+        if step == 'pages' and request.POST.get('action') == 'add_page':
+            title = (request.POST.get('title') or '').strip()
+            if not title:
+                return JsonResponse({'ok': False, 'error': 'Enter a page name.'}, status=400)
+            page = _add_page(site, title)
+            return JsonResponse({'ok': True, 'page': {
+                'id': page.id, 'slug': page.slug, 'title': page.title,
+                'edit': reverse('builder:page_editor', args=[site.id, page.id])}})
+
         error = _save_step(request, site, step)
+        if _wants_json(request):
+            if error:
+                return JsonResponse({'ok': False, 'error': error}, status=400)
+            data = {'ok': True, 'done': sorted(_done(site)), 'published': site.is_published}
+            if step == 'business':
+                # Jina/logo/mawasiliano yamebadilika — design zijazwe upya
+                data['layout'] = layout_bundle(site)
+            return JsonResponse(data)
+        # Browser bila JavaScript: tabia ya zamani ya fomu
         if error:
             messages.error(request, error)
             return redirect('builder:studio_step', site_id=site.id, step=step)
-        if step == 'publish':
-            messages.success(request, 'Your website is live! 🎉')
-            return redirect('builder:studio_step', site_id=site.id, step='publish')
-        nxt = STEP_KEYS[STEP_KEYS.index(step) + 1]
+        nxt = STEP_KEYS[min(STEP_KEYS.index(step) + 1, len(STEP_KEYS) - 1)]
         return redirect('builder:studio_step', site_id=site.id, step=nxt)
 
-    idx = STEP_KEYS.index(step)
     done = _done(site)
     catalog = get_preset_catalog()
+    ts = site.theme_settings or {}
     return render(request, 'builder/studio.html', {
         'site': site,
         'step': step,
-        'step_num': idx + 1,
-        'step_title': STEPS[idx][1],
-        'steps': [{'key': k, 'title': t, 'sub': s, 'num': i + 1, 'done': k in done,
-                   'current': k == step} for i, (k, t, s) in enumerate(STEPS)],
-        'prev_step': STEP_KEYS[idx - 1] if idx else None,
-        'next_step': STEP_KEYS[idx + 1] if idx + 1 < len(STEPS) else None,
-        'progress_pct': int(len(done & set(STEP_KEYS)) / len(STEPS) * 100),
+        'steps': [{'key': k, 'title': t, 'sub': s, 'num': i + 1, 'done': k in done}
+                  for i, (k, t, s) in enumerate(STEPS)],
+        'steps_json': [{'key': k, 'title': t} for k, t, _ in STEPS],
+        'parts': ['header', 'footer'],
+        'done_json': sorted(done),
         'headers_side': [h for h in catalog['nav'] if h['kind'] == 'side'],
         'headers_top': [h for h in catalog['nav'] if h['kind'] == 'top'],
         'footers': catalog['footer'],
         'palettes': PALETTES,
         'fonts': [(k, v[0]) for k, v in FONTS.items()],
-        'current_font': (site.theme_settings or {}).get('font', 'system'),
+        'current_font': ts.get('font', 'system'),
         'pages': site.pages.all(),
         'collections': site.collections.all(),
         'preview_url': reverse('builder:studio_preview', args=[site.id]),
+        'layout': layout_bundle(site),
+        'initial_state': {
+            'accent': site.accent_color, 'dark': site.dark_nav, 'font': ts.get('font', 'system'),
+            'header': site.nav_preset if site.nav_preset in HEADERS else '',
+            'footer': site.footer_preset if site.footer_preset in FOOTERS else '',
+            'headerCode': site.custom_nav_html, 'footerCode': site.custom_footer_html,
+        },
     })
 
 
