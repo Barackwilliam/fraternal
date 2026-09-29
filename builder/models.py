@@ -99,6 +99,18 @@ class ClientWebsite(models.Model):
     custom_domain = models.CharField(
         max_length=120, unique=True, null=True, blank=True,
         help_text='e.g. www.mybusiness.co.tz — bila http://')
+
+    # ── Hali ya domain ya mteja (/manage/domains/) ─────────────
+    # pending -> DNS bado haijaelekezwa kwetu
+    # dns_ok  -> DNS iko sawa, Render bado inatengeneza SSL
+    # active  -> https://domain inafunguka na inaonyesha website hii
+    # error   -> kuna tatizo (angalia domain_message)
+    DOMAIN_STATUS = [('pending', 'Inasubiri DNS'), ('dns_ok', 'DNS sawa — SSL inatengenezwa'),
+                     ('active', 'Live'), ('error', 'Tatizo')]
+    domain_status = models.CharField(max_length=10, choices=DOMAIN_STATUS, blank=True, default='')
+    domain_message = models.CharField(max_length=300, blank=True, default='')
+    domain_added_at = models.DateTimeField(null=True, blank=True)
+    domain_checked_at = models.DateTimeField(null=True, blank=True)
     template_key = models.CharField(max_length=50, default='clean_start')
     nav_layout = models.CharField(
         max_length=10, default='topnav',

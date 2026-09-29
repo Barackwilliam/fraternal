@@ -1,0 +1,203 @@
+{% extends 'management/base.html' %}
+{% block content %}
+
+<style>
+  .dm{--ok:#10d98a;--okd:rgba(16,217,138,.1);--blue:#38bdf8;--blued:rgba(56,189,248,.1);
+      --bad:#ff5a6e;--badd:rgba(255,90,110,.1);--warn:#fbbf24;--warnd:rgba(251,191,36,.1)}
+  .dm-lead{color:var(--text-3);font-size:13px;margin:0 0 18px}
+  .dm-msg{padding:12px 16px;border-radius:12px;margin-bottom:14px;font-size:13.5px;display:flex;gap:10px}
+  .dm-msg.success{background:var(--okd);color:var(--ok);border:1px solid rgba(16,217,138,.22)}
+  .dm-msg.error{background:var(--badd);color:var(--bad);border:1px solid rgba(255,90,110,.25)}
+  .dm-msg.info{background:var(--blued);color:var(--blue);border:1px solid rgba(56,189,248,.22)}
+
+  .dm-grid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:18px;align-items:start}
+  @media(max-width:1100px){.dm-grid{grid-template-columns:1fr}}
+
+  .dm-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px}
+  .dm-card h3{font-family:var(--head);font-size:15px;margin:0 0 4px}
+  .dm-card .sub{color:var(--text-3);font-size:12.5px;margin:0 0 14px;line-height:1.5}
+  .dm-f{display:grid;gap:10px}
+  .dm-f label{font-size:12px;font-weight:600;color:var(--text-2)}
+  .dm-f input,.dm-f select{width:100%;height:42px;border-radius:11px;border:1px solid var(--border);background:var(--bg2);
+    color:var(--text);padding:0 12px;font:inherit;font-size:13.5px;outline:none}
+  .dm-f input:focus,.dm-f select:focus{border-color:var(--cyan)}
+  .dm-f .hint{font-size:11.5px;color:var(--text-3);margin-top:-4px}
+
+  .dm-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+  .dm-s{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:13px 15px}
+  .dm-s .n{font-family:var(--head);font-size:24px;font-weight:800;line-height:1}
+  .dm-s .l{font-size:11.5px;color:var(--text-3);margin-top:6px}
+  @media(max-width:700px){.dm-stats{grid-template-columns:repeat(2,1fr)}}
+
+  .dm-item{background:var(--card);border:1px solid var(--border);border-radius:16px;margin-bottom:12px;overflow:hidden}
+  .dm-head{display:flex;align-items:center;gap:14px;padding:15px 18px;flex-wrap:wrap}
+  .dm-ic{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;flex:0 0 auto;font-size:15px}
+  .dm-dom{font-family:var(--head);font-size:15.5px;font-weight:700;word-break:break-all}
+  .dm-dom a{color:inherit;text-decoration:none}
+  .dm-dom a:hover{color:var(--cyan)}
+  .dm-site{font-size:12px;color:var(--text-3);margin-top:2px}
+  .dm-pill{margin-left:auto;display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:999px;font-size:11.5px;font-weight:600;white-space:nowrap}
+  .st-active{background:var(--okd);color:var(--ok)}
+  .st-dns_ok{background:var(--blued);color:var(--blue)}
+  .st-pending,.st-{background:rgba(255,255,255,.06);color:var(--text-2)}
+  .st-error{background:var(--badd);color:var(--bad)}
+
+  .dm-body{padding:0 18px 16px}
+  .dm-why{font-size:12.5px;line-height:1.55;color:var(--text-2);padding:10px 12px;border-radius:10px;background:var(--bg2);margin-bottom:12px}
+  .dm-why.bad{background:var(--badd);color:var(--bad)}
+  .dm-rec{width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:12px}
+  .dm-rec th{font-family:var(--mono);font-size:9.5px;letter-spacing:1px;text-transform:uppercase;color:var(--text-3);text-align:left;padding:6px 8px}
+  .dm-rec td{padding:8px;border-top:1px solid var(--border);vertical-align:top}
+  .dm-rec code{font-family:var(--mono);font-size:12px;color:var(--text);background:var(--bg2);padding:3px 7px;border-radius:6px;cursor:pointer}
+  .dm-rec code:hover{color:var(--cyan)}
+  .dm-rec .n{font-size:11px;color:var(--text-3);margin-top:4px}
+  .dm-acts{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .dm-acts form{margin:0}
+  .dm-ghost{background:transparent!important;border:1px solid var(--border)!important;color:var(--text-2)!important}
+  .dm-danger{background:transparent!important;border:1px solid rgba(255,90,110,.3)!important;color:var(--bad)!important}
+  .dm-meta{margin-left:auto;font-size:11.5px;color:var(--text-3)}
+
+  .dm-steps{counter-reset:s;list-style:none;margin:0;padding:0;display:grid;gap:12px}
+  .dm-steps li{counter-increment:s;display:flex;gap:11px;font-size:12.5px;line-height:1.5;color:var(--text-2)}
+  .dm-steps li::before{content:counter(s);flex:0 0 22px;height:22px;border-radius:50%;display:grid;place-items:center;
+    font-size:11px;font-weight:700;background:var(--cyan-d);color:var(--cyan)}
+  .dm-steps b{color:var(--text)}
+  .dm-empty{padding:40px 20px;text-align:center;color:var(--text-3);font-size:13px}
+  .dm-copied{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--border);
+    padding:9px 16px;border-radius:10px;font-size:13px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:99}
+  .dm-copied.on{opacity:1}
+</style>
+
+<div class="dm">
+<p class="dm-lead">Unganisha website ya mteja na domain yake mwenyewe, kisha mpe rekodi za DNS za kuweka.</p>
+
+{% for m in messages %}
+<div class="dm-msg {{ m.tags }}"><i class="fas {% if m.tags == 'error' %}fa-circle-exclamation{% elif m.tags == 'success' %}fa-circle-check{% else %}fa-circle-info{% endif %}" style="margin-top:2px"></i><span>{{ m }}</span></div>
+{% endfor %}
+
+<div class="dm-grid">
+
+  <!-- ORODHA -->
+  <div>
+    <div class="dm-stats">
+      <div class="dm-s"><div class="n" style="color:var(--ok)">{{ counts.active }}</div><div class="l">Live</div></div>
+      <div class="dm-s"><div class="n" style="color:var(--blue)">{{ counts.dns_ok }}</div><div class="l">SSL inatengenezwa</div></div>
+      <div class="dm-s"><div class="n" style="color:var(--text-2)">{{ counts.pending }}</div><div class="l">Inasubiri DNS</div></div>
+      <div class="dm-s"><div class="n" style="color:{% if counts.error %}var(--bad){% else %}var(--text-3){% endif %}">{{ counts.error }}</div><div class="l">Tatizo</div></div>
+    </div>
+
+    {% for r in rows %}{% with s=r.site %}
+    <div class="dm-item">
+      <div class="dm-head">
+        <div class="dm-ic st-{{ s.domain_status }}">
+          <i class="fas {% if s.domain_status == 'active' %}fa-lock{% elif s.domain_status == 'dns_ok' %}fa-hourglass-half{% elif s.domain_status == 'error' %}fa-triangle-exclamation{% else %}fa-globe{% endif %}"></i>
+        </div>
+        <div style="min-width:0">
+          <div class="dm-dom"><a href="https://{{ s.custom_domain }}" target="_blank" rel="noopener">{{ s.custom_domain }} <i class="fas fa-arrow-up-right-from-square" style="font-size:10px;opacity:.5"></i></a></div>
+          <div class="dm-site">{{ s.site_name }} &middot; {{ s.subdomain }}.jamiitek.com &middot; {{ s.owner.email|default:s.owner.username }}</div>
+        </div>
+        <span class="dm-pill st-{{ s.domain_status }}">{{ s.get_domain_status_display|default:"Haijakaguliwa" }}</span>
+      </div>
+      <div class="dm-body">
+        {% if s.domain_message %}<div class="dm-why {% if s.domain_status == 'error' %}bad{% endif %}">{{ s.domain_message }}</div>{% endif %}
+
+        {% if s.domain_status != 'active' %}
+        <table class="dm-rec">
+          <thead><tr><th>Aina</th><th>Jina</th><th>Thamani</th></tr></thead>
+          <tbody>
+            {% for rec in r.records %}
+            <tr>
+              <td><code>{{ rec.type }}</code></td>
+              <td><code data-copy="{{ rec.name }}">{{ rec.name }}</code></td>
+              <td><code data-copy="{{ rec.value }}">{{ rec.value }}</code>{% if rec.note %}<div class="n">{{ rec.note }}</div>{% endif %}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% endif %}
+
+        <div class="dm-acts">
+          <form method="post" action="{% url 'site_domain_check' s.pk %}">{% csrf_token %}
+            <button class="jt-btn" data-jt-wait="Inakagua…"><i class="fas fa-rotate"></i> Kagua sasa</button></form>
+          {% if s.domain_status != 'active' %}
+          <button type="button" class="jt-btn dm-ghost" data-share="{{ s.custom_domain }}"
+                  data-records="{% for rec in r.records %}{{ rec.type }}  {{ rec.name }}  →  {{ rec.value }}{% if not forloop.last %}|{% endif %}{% endfor %}">
+            <i class="fab fa-whatsapp"></i> Nakili maelekezo kwa mteja</button>
+          <form method="post" action="{% url 'site_domain_reregister' s.pk %}">{% csrf_token %}
+            <button class="jt-btn dm-ghost" data-jt-wait="Inasajili…"><i class="fas fa-server"></i> Sajili tena Render</button></form>
+          {% endif %}
+          <form method="post" action="{% url 'site_domain_disconnect' s.pk %}" onsubmit="return confirm('Ondoa {{ s.custom_domain }}? Website itaendelea kwenye {{ s.subdomain }}.jamiitek.com.')">{% csrf_token %}
+            <button class="jt-btn dm-danger"><i class="fas fa-link-slash"></i> Ondoa</button></form>
+          <span class="dm-meta">{% if s.domain_checked_at %}imekaguliwa {{ s.domain_checked_at|timesince }} iliyopita{% else %}bado haijakaguliwa{% endif %}</span>
+        </div>
+      </div>
+    </div>
+    {% endwith %}{% empty %}
+    <div class="dm-item"><div class="dm-empty"><i class="fas fa-link" style="font-size:28px;opacity:.3"></i><p style="margin-top:10px">Bado hakuna website iliyounganishwa na domain yake. Anza upande wa kulia.</p></div></div>
+    {% endfor %}
+  </div>
+
+  <!-- KUUNGANISHA -->
+  <div style="display:grid;gap:18px">
+    <div class="dm-card">
+      <h3>Unganisha domain mpya</h3>
+      <p class="sub">Chagua website, andika domain ya mteja. Mfumo utaisajili Render na kukupa rekodi za DNS.</p>
+      <form class="dm-f" method="get" style="margin-bottom:10px">
+        <label>Tafuta website</label>
+        <input type="search" name="q" value="{{ q }}" placeholder="jina, subdomain au email ya mteja">
+      </form>
+      <form class="dm-f" method="post" action="{% url 'site_domain_connect' %}">
+        {% csrf_token %}
+        <label>Website</label>
+        <select name="site" required>
+          <option value="">— chagua —</option>
+          {% for s in sites %}
+          <option value="{{ s.pk }}">{{ s.site_name }} ({{ s.subdomain }}){% if s.custom_domain %} — {{ s.custom_domain }}{% endif %}</option>
+          {% endfor %}
+        </select>
+        <label>Domain ya mteja</label>
+        <input type="text" name="domain" required placeholder="biashara.co.tz" autocomplete="off" autocapitalize="none" spellcheck="false">
+        <div class="hint">Bila https://. Unaweza kubandika link nzima — mfumo utaisafisha.</div>
+        <button type="submit" class="jt-btn" data-jt-wait="Inaunganisha…"><i class="fas fa-link"></i> Unganisha</button>
+      </form>
+    </div>
+
+    <div class="dm-card">
+      <h3>Hatua zinavyokwenda</h3>
+      <ol class="dm-steps" style="margin-top:12px">
+        <li><span><b>Unaunganisha hapa.</b> Domain inasajiliwa Render yenyewe.</span></li>
+        <li><span><b>Mteja anaweka rekodi za DNS</b> kwa mtoa huduma wake wa domain. Bonyeza "Nakili maelekezo" umtumie WhatsApp.</span></li>
+        <li><span><b>Anaondoa rekodi zote za AAAA.</b> Render ni IPv4 pekee — AAAA inazuia SSL. Hili ndilo kosa la kawaida zaidi.</span></li>
+        <li><span><b>Mfumo unakagua wenyewe</b> kila baada ya muda, hadi hali iwe <b style="color:var(--ok)">Live</b>. DNS inaweza kuchukua hadi saa 24.</span></li>
+      </ol>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="dm-copied" id="dmCopied">Imenakiliwa</div>
+<script>
+(function(){
+  var toast=document.getElementById('dmCopied');
+  function copy(t){
+    (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).catch(function(){
+      var a=document.createElement('textarea'); a.value=t; document.body.appendChild(a); a.select();
+      try{document.execCommand('copy')}catch(e){} a.remove();
+    });
+    toast.classList.add('on'); setTimeout(function(){toast.classList.remove('on')},1400);
+  }
+  document.querySelectorAll('[data-copy]').forEach(function(el){
+    el.addEventListener('click',function(){copy(el.getAttribute('data-copy'))});
+  });
+  document.querySelectorAll('[data-share]').forEach(function(b){
+    b.addEventListener('click',function(){
+      var d=b.getAttribute('data-share'), recs=b.getAttribute('data-records').split('|');
+      copy('Habari! Ili website yako ifunguke kwenye '+d+', tafadhali weka rekodi hizi za DNS kwa mtoa huduma wa domain yako:\n\n'
+        +recs.join('\n')
+        +'\n\nMuhimu: futa rekodi zote za AAAA (IPv6) kama zipo — zinazuia SSL.\n\n'
+        +'Mabadiliko yanaweza kuchukua hadi saa 24. Tutakujulisha ikiwa live. — JamiiTek');
+    });
+  });
+})();
+</script>
+{% endblock %}

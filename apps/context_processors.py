@@ -29,6 +29,7 @@ _NAV_EXACT = {
     'lead_list': 'leads',
     'profile_builder': 'profile',
     'email_log_list': 'emails',
+    'site_domain_list': 'site_domains',
 }
 
 _NAV_PREFIX = (

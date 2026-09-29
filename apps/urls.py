@@ -5,6 +5,7 @@ from . import views
 from . import blog_views
 from . import email_webhook
 from . import email_log_views
+from builder import domain_views as site_domain_views
 from . import contract_views
 from . import proposal_views
 from . import docs_views
@@ -136,6 +137,13 @@ urlpatterns = [
     # Kufuatilia barua: imetumwa? imefika? imefunguliwa?
     path('manage/emails/', email_log_views.email_log_list, name='email_log_list'),
     path('manage/emails/test/', email_log_views.email_send_test, name='email_send_test'),
+    # Domain za WEBSITE za wateja wa builder (tofauti na /manage/domains/,
+    # ambayo ni domain unazosajili na kuuza kwa wateja)
+    path('manage/site-domains/', site_domain_views.domain_list, name='site_domain_list'),
+    path('manage/site-domains/connect/', site_domain_views.domain_connect, name='site_domain_connect'),
+    path('manage/site-domains/<int:pk>/check/', site_domain_views.domain_check, name='site_domain_check'),
+    path('manage/site-domains/<int:pk>/register/', site_domain_views.domain_reregister, name='site_domain_reregister'),
+    path('manage/site-domains/<int:pk>/disconnect/', site_domain_views.domain_disconnect, name='site_domain_disconnect'),
 
     path('webhooks/brevo/', email_webhook.brevo_webhook, name='brevo_webhook'),
 

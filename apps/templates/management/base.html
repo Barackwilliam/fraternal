@@ -122,6 +122,8 @@
       <div class="sb-items">
         <a href="{% url 'manage_builder' %}" class="sb-link {% if nav == 'builder' %}active{% endif %}">
           <i class="fas fa-shield-halved"></i> Builder Sites</a>
+        <a href="{% url 'site_domain_list' %}" class="sb-link {% if nav == 'site_domains' %}active{% endif %}">
+          <i class="fas fa-link"></i> Site Domains</a>
         <a href="{% url 'manage_chatbot' %}" class="sb-link {% if nav == 'chatbot' %}active{% endif %}">
           <i class="fas fa-robot"></i> JamiiBot</a>
         <a href="{% url 'manage_bot_clients' %}" class="sb-link {% if nav == 'bot_clients' %}active{% endif %}">

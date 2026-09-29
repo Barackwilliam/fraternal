@@ -62,6 +62,7 @@ SCHEDULE = {
     'check_alerts':              ('jamiitek:task:check_alerts',        30 * MINUTE),
     'check_bot_sessions':        ('jamiitek:task:bot_sessions',        10 * MINUTE),
     'check_handoffs':            ('jamiitek:task:handoffs',            10 * MINUTE),
+    'check_custom_domains':      ('jamiitek:task:custom_domains',      15 * MINUTE),
     'send_digest':               ('jamiitek:task:send_digest',         24 * 60 * MINUTE),
     'prune_snapshots':           ('jamiitek:task:prune_snapshots',      7 * 24 * 60 * MINUTE),
     'prune_baileys_keys':        ('jamiitek:task:prune_baileys',        7 * 24 * 60 * MINUTE),
@@ -71,7 +72,7 @@ SCHEDULE = {
 }
 
 PERIODIC = ('sync_integrations', 'process_scheduled_actions', 'check_alerts',
-            'check_bot_sessions', 'check_handoffs')
+            'check_bot_sessions', 'check_handoffs', 'check_custom_domains')
 
 _thread_lock = threading.Lock()
 _running = False           # kazi za kila siku
@@ -144,6 +145,10 @@ def _run_periodic_in_background():
         # mteja anapoandika tena — lakini ameambiwa "subiri", kwa hiyo
         # anasubiri kimya. Hii inakimbia kwa saa, si kwa ujumbe.
         _run_command('check_handoffs', quiet=True)
+
+        # Domain za wateja zinazosubiri DNS/SSL. Mteja anapoweka DNS
+        # usiku, website inakuwa Live bila mtu kubonyeza "Kagua".
+        _run_command('check_custom_domains', quiet=True)
     finally:
         _close_connection()
         with _thread_lock:
