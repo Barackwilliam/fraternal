@@ -343,3 +343,31 @@ class AiUsageLog(models.Model):
 
     class Meta:
         indexes = [models.Index(fields=['user', 'created_at'])]
+
+
+class SiteImport(models.Model):
+    """
+    ZIP iliyopakiwa ambayo mteja bado hajaithibitisha (builder/site_import.py).
+
+    Iko kwenye database, si cache: bila Redis kila worker wa gunicorn
+    ana cache yake, na hakikisho lingepotea ombi la kuthibitisha
+    likiangukia worker mwingine.
+
+    `uploaded` ina URL za kila file lililopakiwa Supabase. Mteja
+    asipothibitisha (au upakiaji ukishindwa katikati), command ya
+    `prune_site_imports` inazifuta baada ya IMPORT_TTL_HOURS.
+    """
+    website = models.ForeignKey(
+        ClientWebsite, on_delete=models.CASCADE, related_name='imports')
+    token = models.CharField(max_length=32, unique=True)
+    result = models.JSONField(default=dict, blank=True)   # pages, skipped, missing
+    uploaded = models.JSONField(default=list, blank=True)
+    images = models.JSONField(default=list, blank=True)   # zinaingia SiteAsset zikithibitishwa
+    confirmed_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'{self.website.subdomain} import {self.token[:8]}'

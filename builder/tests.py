@@ -291,3 +291,53 @@ class SiteImportFlowTest(TestCase):
         c.login(username='mwingine', password='Siri#123456')
         r = c.get(f'/builder/site/{self.site.id}/import/')
         self.assertEqual(r.status_code, 404)
+
+    def test_failed_upload_is_recorded_for_cleanup(self):
+        from builder.models import SiteImport
+        calls = itertools.count()
+
+        def flaky(data, folder, ext, content_type):
+            if next(calls) >= 2:
+                return {'success': False, 'error': 'boom'}
+            return {'success': True, 'url': f'https://cdn.test/{ext}/{next(calls)}'}
+        with mock.patch('apps.storage.is_configured', return_value=True), \
+                mock.patch('apps.storage.upload_bytes', side_effect=flaky):
+            zf = SimpleUploadedFile('site.zip', _zip(SAMPLE_SITE).read(), 'application/zip')
+            r = self.c.post(f'/builder/site/{self.site.id}/import/', {'zip': zf})
+        self.assertContains(r, 'Uploading a file failed')
+        imp = SiteImport.objects.get(website=self.site)
+        self.assertTrue(imp.uploaded)                 # files za kufuta zimerekodiwa
+        self.assertEqual(imp.result, {})
+        self.assertFalse(self.site.pages.exclude(raw_document='').exists())
+
+    def test_prune_deletes_stale_unconfirmed_imports(self):
+        from datetime import timedelta
+        from django.core.management import call_command
+        from django.utils import timezone
+        from builder.models import SiteImport
+
+        r = self._upload()
+        fresh = SiteImport.objects.get(token=r.context['token'])
+        stale = SiteImport.objects.create(website=self.site, token='a' * 32,
+                                          uploaded=['https://cdn.test/x.png', 'https://cdn.test/y.css'])
+        SiteImport.objects.filter(pk=stale.pk).update(created_at=timezone.now() - timedelta(days=2))
+        done = SiteImport.objects.create(website=self.site, token='b' * 32, uploaded=['https://cdn.test/z.png'],
+                                         confirmed_at=timezone.now() - timedelta(days=2))
+        SiteImport.objects.filter(pk=done.pk).update(created_at=timezone.now() - timedelta(days=2))
+
+        deleted = []
+        with mock.patch('apps.storage.is_configured', return_value=True), \
+                mock.patch('apps.storage.delete', side_effect=lambda u: deleted.append(u) or True):
+            call_command('prune_site_imports', quiet=True)
+
+        self.assertEqual(sorted(deleted), ['https://cdn.test/x.png', 'https://cdn.test/y.css'])
+        self.assertFalse(SiteImport.objects.filter(pk=stale.pk).exists())
+        self.assertTrue(SiteImport.objects.filter(pk=fresh.pk).exists())   # bado ndani ya saa 24
+        self.assertTrue(SiteImport.objects.filter(pk=done.pk).exists())    # imethibitishwa: files ni za site
+
+        # Kufuta kukishindwa, rekodi inabaki kwa jaribio lijalo
+        SiteImport.objects.filter(pk=fresh.pk).update(created_at=timezone.now() - timedelta(days=2))
+        with mock.patch('apps.storage.is_configured', return_value=True), \
+                mock.patch('apps.storage.delete', return_value=False):
+            call_command('prune_site_imports', quiet=True)
+        self.assertTrue(SiteImport.objects.get(pk=fresh.pk).uploaded)
