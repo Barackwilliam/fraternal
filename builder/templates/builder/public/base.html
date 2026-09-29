@@ -37,8 +37,8 @@
 </script>
 {% if site.logo_url %}<link rel="icon" href="{{ site.logo_url|img:"64x64" }}">
 {% endif %}
-{% if font_href %}<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="{{ font_href }}">{% endif %}
+{% if font_href %}<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>{% endif %}
+{% if font_href or is_preview %}<link rel="stylesheet" id="jt-font" {% if font_href %}href="{{ font_href }}"{% endif %}>{% endif %}
 <style>
 :root{
   --accent:{{ site.accent_color|default:'#e8a13c' }};
@@ -154,8 +154,12 @@ ingeongeza padding-top ya 86px isiyo na sababu juu ya ukurasa.{% endcomment %}
 <body class="{% if custom_nav_html %}has-custom{% else %}has-{{ site.nav_style|default:'glass' }}{% endif %}">
 <div id="jt-load"></div>
 
-{% if custom_nav_css %}<style>{{ custom_nav_css|safe }}</style>{% endif %}
-{% if custom_footer_css %}<style>{{ custom_footer_css|safe }}</style>{% endif %}
+{% comment %}id za jt-nav-css / jt-nav-slot / jt-foot-* zinaruhusu Studio kubadilisha
+header na footer ndani ya preview papo hapo, bila kupakia ukurasa upya.
+display:contents: kishikio hakina sanduku lake, kwa hiyo sticky/fixed hazibadiliki.{% endcomment %}
+<style id="jt-nav-css">{{ custom_nav_css|default:''|safe }}</style>
+<style id="jt-foot-css">{{ custom_footer_css|default:''|safe }}</style>
+<div id="jt-nav-slot" style="display:contents">
 {% if custom_nav_html %}
 {{ custom_nav_html|safe }}
 {% else %}
@@ -176,10 +180,12 @@ ingeongeza padding-top ya 86px isiyo na sababu juu ya ukurasa.{% endcomment %}
 </nav>
 {% endwith %}
 {% endif %}
+</div>
 
 <div class="jt-body">
 {% block body %}{% endblock %}
 
+<div id="jt-foot-slot" style="display:contents">
 {% if custom_footer_html %}
 {{ custom_footer_html|safe }}
 {% else %}
@@ -197,6 +203,7 @@ ingeongeza padding-top ya 86px isiyo na sababu juu ya ukurasa.{% endcomment %}
   </div>
 </footer>
 {% endif %}
+</div>
 </div>
 
 {% if is_preview %}
@@ -218,9 +225,11 @@ document.addEventListener('submit', e => e.preventDefault(), true);
     setTimeout(()=>{bar.style.opacity='0'; bar.style.width='0';}, 320); });
 })();
 // Mobile menu
-function jtMenu(open){ document.getElementById('jt-links').classList.toggle('open', open); }
-document.getElementById('jt-links').addEventListener('click', e=>{
-  if (e.target.tagName === 'A') jtMenu(false);
+// #jt-links inatafutwa kila mara: Studio inaweza kubadilisha nav baada ya ukurasa kufunguka,
+// na nav ya mteja isiyo na #jt-links isivunje scroll reveal iliyo chini.
+function jtMenu(open){ const l = document.getElementById('jt-links'); if (l) l.classList.toggle('open', open); }
+document.addEventListener('click', e=>{
+  if (e.target.tagName === 'A' && e.target.closest('#jt-links')) jtMenu(false);
 });
 // Scroll reveal — sections zote za content zinaingia kwa animation
 const io = new IntersectionObserver(entries=>{

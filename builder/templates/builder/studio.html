@@ -1,15 +1,15 @@
 {% extends 'builder/base_panel.html' %}
-{% block title %}Studio · {{ step_title }} — {{ site.site_name }}{% endblock %}
+{% block title %}Website Studio — {{ site.site_name }}{% endblock %}
 
-{# Studio haipakii WebGL/three.js ya background — inafunguka haraka #}
+{# Studio haipakii background ya 3D — preview tayari inachorwa pembeni #}
 {% block background %}{% endblock %}
 
 {% block sidenav %}
 <a href="{% url 'builder:site_dashboard' site.id %}">⬅ Dashboard</a>
 <div class="sd-steps">
   {% for s in steps %}
-  <a href="{% url 'builder:studio_step' site.id s.key %}" class="{% if s.current %}active{% endif %}">
-    <span class="sd-n {% if s.done %}ok{% endif %}">{% if s.done %}✓{% else %}{{ s.num }}{% endif %}</span>
+  <a href="{% url 'builder:studio_step' site.id s.key %}" data-go="{{ s.key }}">
+    <span class="sd-n" data-num="{{ s.num }}">{{ s.num }}</span>
     <span class="sd-st">{{ s.title }}<small>{{ s.sub }}</small></span>
   </a>
   {% endfor %}
@@ -17,260 +17,269 @@
 {% endblock %}
 
 {% block mobnav %}
-<a href="{% url 'builder:site_dashboard' site.id %}"><span class="ic">⬅</span>Dash</a>
-{% for s in steps %}
-<a href="{% url 'builder:studio_step' site.id s.key %}" {% if s.current %}class="active"{% endif %}><span class="ic">{% if s.done %}✓{% else %}{{ s.num }}{% endif %}</span>{{ s.title|truncatewords:1 }}</a>
-{% endfor %}
+<a href="{% url 'builder:site_dashboard' site.id %}"><span class="ic">⬅</span>Dashboard</a>
+<a href="{{ site.public_url }}" target="_blank" rel="noopener"><span class="ic">↗</span>View site</a>
 {% endblock %}
 
 {% block content %}
-<div class="sd-head">
-  <div class="crumb"><a href="{% url 'builder:site_dashboard' site.id %}">{{ site.site_name }}</a> / Website Studio</div>
-  <div class="sd-title">
-    <span class="sd-badge">Step {{ step_num }} of {{ steps|length }}</span>
-    <h1>{{ step_title }}</h1>
-  </div>
-  <div class="sd-bar"><i style="width:{{ progress_pct }}%"></i></div>
-</div>
-
 <div class="sd">
-<section class="sd-panel card">
-<form method="post" id="sd-form" autocomplete="off">
-  {% csrf_token %}
 
-  {% if step == 'business' %}
-  {# ═════════════ 1. BIASHARA ═════════════ #}
-  <p class="hint sd-lead">Tell us about your business. Tap <b>✨</b> on any field and AI writes it for you.</p>
-  <label>Business name *</label>
-  <input type="text" name="site_name" value="{{ site.site_name }}" data-ai="site_name" required maxlength="120">
-  <label>Tagline / slogan</label>
-  <input type="text" name="tagline" value="{{ site.tagline }}" data-ai="tagline" maxlength="200" placeholder="e.g. Fresh bread every morning in Arusha">
-
-  <label>Logo</label>
-  <div class="sd-logo">
-    <div class="sd-logo-box" id="logo-box">{% if site.logo_url %}<img src="{{ site.logo_url }}" alt="">{% else %}<span>No logo</span>{% endif %}</div>
-    <div style="flex:1;min-width:0">
-      <input type="file" id="logo-file" accept="image/png,image/jpeg,image/webp" hidden>
-      <button type="button" class="btn sm" onclick="document.getElementById('logo-file').click()">⬆ Upload logo</button>
-      <span class="hint" id="logo-status"></span>
-      <input type="text" name="logo_url" id="logo-url" value="{{ site.logo_url }}" placeholder="…or paste an image link" style="margin-top:8px">
-    </div>
-  </div>
-
-  <div class="grid c2">
-    <div><label>Phone</label><input type="text" inputmode="tel" name="contact_phone" value="{{ site.contact_phone }}" placeholder="+255 7XX XXX XXX"></div>
-    <div><label>WhatsApp</label><input type="text" inputmode="tel" name="whatsapp_number" value="{{ site.whatsapp_number }}" placeholder="+2557XXXXXXXX"></div>
-    <div><label>Email</label><input type="email" name="contact_email" value="{{ site.contact_email }}"></div>
-    <div><label>Address</label><input type="text" name="contact_address" value="{{ site.contact_address }}" placeholder="e.g. Sokoine Rd, Arusha"></div>
-  </div>
-
-  {% elif step == 'style' %}
-  {# ═════════════ 2. RANGI NA FONT ═════════════ #}
-  <p class="hint sd-lead">Pick a ready palette or your own color. The preview changes instantly.</p>
-  <h3 class="sd-h">Color palette</h3>
-  <div class="sd-pal">
-    {% for name, color, dark in palettes %}
-    <button type="button" class="sd-sw {% if site.accent_color|lower == color %}sel{% endif %}" style="--c:{{ color }}"
-            data-color="{{ color }}" data-dark="{{ dark|yesno:'1,0' }}" onclick="pickPalette(this)">
-      <i class="{% if dark %}dk{% endif %}"></i><span>{{ name }}</span>
-    </button>
-    {% endfor %}
-  </div>
-  <div class="sd-row">
-    <label class="sd-inline">Your own color <input type="color" name="accent_color" id="accent" value="{{ site.accent_color }}"></label>
-    <label class="sd-inline"><input type="checkbox" name="dark_nav" id="dark" {% if site.dark_nav %}checked{% endif %}> Dark menu</label>
-  </div>
-
-  <h3 class="sd-h">Font</h3>
-  <div class="sd-fonts">
-    {% for key, label in fonts %}
-    <label class="sd-font {% if current_font == key %}sel{% endif %}">
-      <input type="radio" name="font" value="{{ key }}" {% if current_font == key %}checked{% endif %} onchange="pickFont(this)">
-      <span>{{ label }}</span>
-    </label>
-    {% endfor %}
-  </div>
-  <p class="hint">“System” loads nothing extra — the fastest option for customers on mobile data.</p>
-
-  {% elif step == 'header' or step == 'footer' %}
-  {# ═════════════ 3–4. HEADER / FOOTER ═════════════ #}
-  <p class="hint sd-lead">{% if step == 'header' %}Choose how your menu looks. <b>Sidebar</b> keeps the menu on the left; <b>top bar</b> puts it above your content.{% else %}The footer appears at the bottom of every page with your contact details and links.{% endif %}</p>
-
-  <div class="sd-tabs" role="tablist">
-    <button type="button" class="on" data-tab="pick" onclick="sdTab('pick',this)">🎨 Choose a design</button>
-    <button type="button" data-tab="ai" onclick="sdTab('ai',this)">✨ AI</button>
-    <button type="button" data-tab="code" onclick="sdTab('code',this)">💻 Code</button>
-  </div>
-  <input type="hidden" name="mode" id="mode" value="preset">
-
-  <div class="sd-pane" id="pane-pick">
-    {% if step == 'header' %}
-      <h3 class="sd-h">Sidebars <span class="pill on">Recommended</span></h3>
-      <div class="sd-grid">{% for h in headers_side %}{% include 'builder/_studio_card.html' with item=h current=site.nav_preset kind='header' %}{% endfor %}</div>
-      <h3 class="sd-h">Top bars</h3>
-      <div class="sd-grid">{% for h in headers_top %}{% include 'builder/_studio_card.html' with item=h current=site.nav_preset kind='header' %}{% endfor %}</div>
-    {% else %}
-      <div class="sd-grid">{% for f in footers %}{% include 'builder/_studio_card.html' with item=f current=site.footer_preset kind='footer' %}{% endfor %}</div>
-    {% endif %}
-  </div>
-
-  <div class="sd-pane" id="pane-ai" hidden>
-    <p class="hint">Describe the {{ step }} you want. AI writes the code, then you can preview and tweak it.</p>
-    <textarea id="ai-brief" class="sd-brief" maxlength="800" placeholder="{% if step == 'header' %}e.g. Dark sidebar with my logo on top, big links and a green WhatsApp button at the bottom{% else %}e.g. Three columns: about us, quick links and contact, with a big WhatsApp button{% endif %}"></textarea>
-    <button type="button" class="btn sd-ai" id="ai-go" onclick="aiGen()">✨ Generate {{ step }}</button>
-    <div class="hint" id="ai-status" style="margin-top:8px"></div>
-  </div>
-
-  <div class="sd-pane" id="pane-code" hidden>
-    <p class="hint">Write your own HTML with a <code>&lt;style&gt;</code> block. Placeholders fill in automatically:
-      {% verbatim %}<code>{{site_name}}</code> <code>{{logo}}</code> <code>{{nav_links}}</code> <code>{{whatsapp}}</code> <code>{{phone}}</code> <code>{{year}}</code>{% endverbatim %}</p>
-    <textarea name="html" id="code" class="sd-code" spellcheck="false">{% if step == 'header' %}{{ site.custom_nav_html }}{% else %}{{ site.custom_footer_html }}{% endif %}</textarea>
-    <button type="button" class="btn sm" onclick="previewCode()" style="margin-top:10px">▶ Preview this code</button>
-  </div>
-
-  {% elif step == 'pages' %}
-  {# ═════════════ 5. KURASA ═════════════ #}
-  <p class="hint sd-lead">Build each page your way: drag & drop blocks, edit the code, or let AI write it.</p>
-  <div class="sd-pages">
-    {% for p in pages %}
-    <div class="sd-page">
-      <div class="sd-page-t"><b>{{ p.title }}</b><span class="hint">{% if p.slug == 'home' %}/{% else %}/p/{{ p.slug }}/{% endif %}</span></div>
-      <div class="sd-page-a">
-        <a class="btn sm amber" href="{% url 'builder:page_editor' site.id p.id %}">🖱 Drag &amp; drop</a>
-        <a class="btn sm" href="{% url 'builder:page_editor' site.id p.id %}?open=code">💻 Code</a>
-        <a class="btn sm sd-ai-btn" href="{% url 'builder:page_editor' site.id p.id %}?open=ai">✨ AI</a>
-        <button type="button" class="btn sm ghost" onclick="previewPage('{{ p.slug }}')">👁</button>
-      </div>
-    </div>
-    {% endfor %}
-  </div>
-
-  <div class="sd-add">
-    <input type="text" id="new-page" placeholder="New page name, e.g. Gallery" maxlength="80">
-    <button type="button" class="btn sm" onclick="addPage()">➕ Add page</button>
-  </div>
-
-  {% if collections %}
-  <h3 class="sd-h">Your content</h3>
-  <p class="hint">Items you add here show up automatically wherever the matching block is on your pages.</p>
-  <div class="sd-cols">
-    {% for c in collections %}
-    <a class="sd-col" href="{% url 'builder:collection_items' site.id c.id %}">{{ c.icon }} <b>{{ c.name }}</b><span>{{ c.items.count }} added →</span></a>
-    {% endfor %}
-  </div>
-  {% endif %}
-
-  <a class="sd-zip" href="{% url 'builder:site_import' site.id %}">📦 <span><b>Already have a website?</b> Upload the whole folder as a ZIP</span> →</a>
-
-  {% elif step == 'publish' %}
-  {# ═════════════ 6. PUBLISH ═════════════ #}
-  {% if site.is_published %}
-    <div class="sd-live">
-      <div style="font-size:42px">🎉</div>
-      <h2>Your website is live</h2>
-      <p class="hint">Share this link with your customers:</p>
-      <a class="sd-url" href="{{ site.public_url }}" target="_blank" rel="noopener">{{ site.subdomain }}.jamiitek.com ↗</a>
-      <p class="hint" style="margin-top:14px">You can come back to any step to change your design — updates go live immediately.</p>
-    </div>
-  {% else %}
-    <p class="hint sd-lead">Everything looks good? Publish and your website goes live for everyone.</p>
-    <ul class="sd-check">
-      {% for s in steps %}{% if s.key != 'publish' %}
-      <li class="{% if s.done %}ok{% endif %}"><span>{% if s.done %}✓{% else %}○{% endif %}</span>{{ s.title }}
-        {% if not s.done %}<a href="{% url 'builder:studio_step' site.id s.key %}">Do it →</a>{% endif %}</li>
-      {% endif %}{% endfor %}
-    </ul>
-  {% endif %}
-  {% endif %}
-
-  <div class="sd-actions">
-    {% if prev_step %}<a class="btn ghost" href="{% url 'builder:studio_step' site.id prev_step %}">← Back</a>{% else %}<span></span>{% endif %}
-    {% if step == 'publish' %}
-      {% if site.is_published %}<a class="btn amber" href="{% url 'builder:site_dashboard' site.id %}">Go to dashboard →</a>
-      {% else %}<button class="btn amber">🚀 Publish my website</button>{% endif %}
-    {% else %}
-      <button class="btn amber">Save &amp; continue →</button>
-    {% endif %}
-  </div>
-</form>
-</section>
-
-<section class="sd-prev">
+{# ═══════════════ PREVIEW ═══════════════ #}
+<section class="sd-prev" id="sd-prev">
   <div class="sd-prev-bar">
-    <span class="sd-dots"><i></i><i></i><i></i></span>
-    <select id="pv-page" onchange="previewPage(this.value)" aria-label="Page to preview">
+    <div class="sd-dev" role="group" aria-label="Screen size">
+      <button type="button" data-dev="desk" title="Desktop">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg><span>Desktop</span></button>
+      <button type="button" data-dev="tab" title="Tablet">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M11 18h2"/></svg><span>Tablet</span></button>
+      <button type="button" data-dev="mob" title="Mobile">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg><span>Mobile</span></button>
+    </div>
+    <select id="pv-page" aria-label="Page to preview">
       {% for p in pages %}<option value="{{ p.slug }}">{{ p.title }}</option>{% endfor %}
     </select>
-    <span class="sd-dev">
-      <button type="button" class="on" onclick="device('desk',this)" title="Desktop">🖥</button>
-      <button type="button" onclick="device('mob',this)" title="Mobile">📱</button>
-    </span>
-    <a href="{{ site.public_url }}" target="_blank" rel="noopener" class="sd-open" title="Open live site">↗</a>
+    <button type="button" class="sd-icon" id="pv-full" title="Full screen">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
   </div>
-  <div class="sd-frame" id="frame-wrap"><iframe id="pv" name="pv" title="Live preview" src="{{ preview_url }}"></iframe></div>
+  <div class="sd-frame" id="frame-wrap">
+    <iframe id="pv" title="Live preview of your website" src="{{ preview_url }}"></iframe>
+    <div class="sd-load" id="pv-load">Loading preview…</div>
+  </div>
+</section>
+
+{# ═══════════════ CONTROLS ═══════════════ #}
+<section class="sd-panel">
+  <div class="sd-top">
+    <nav class="sd-stepper" aria-label="Steps">
+      {% for s in steps %}<button type="button" data-go="{{ s.key }}"><i data-num="{{ s.num }}">{{ s.num }}</i>{{ s.title }}</button>{% endfor %}
+    </nav>
+    <div class="sd-save" id="sd-save" aria-live="polite"></div>
+  </div>
+
+  {# ── 1. BIASHARA ── #}
+  <form class="sd-step" data-step="business" hidden>
+    {% csrf_token %}
+    <h1>Tell us about your business</h1>
+    <p class="hint sd-lead">Tap <b>✨ AI</b> on a field and AI writes it for you. Your name updates in the preview as you type.</p>
+    <label>Business name *</label>
+    <input type="text" name="site_name" id="f-name" value="{{ site.site_name }}" data-ai="site_name" required maxlength="120">
+    <label>Tagline / slogan</label>
+    <input type="text" name="tagline" value="{{ site.tagline }}" data-ai="tagline" maxlength="200" placeholder="e.g. Fresh bread every morning in Arusha">
+    <label>Logo</label>
+    <div class="sd-logo">
+      <div class="sd-logo-box" id="logo-box">{% if site.logo_url %}<img src="{{ site.logo_url }}" alt="">{% else %}<span>No logo</span>{% endif %}</div>
+      <div style="flex:1;min-width:0">
+        <input type="file" id="logo-file" accept="image/png,image/jpeg,image/webp" hidden>
+        <button type="button" class="btn sm" id="logo-btn">⬆ Upload logo</button>
+        <span class="hint" id="logo-status"></span>
+        <input type="text" name="logo_url" id="logo-url" value="{{ site.logo_url }}" placeholder="…or paste an image link" style="margin-top:8px">
+      </div>
+    </div>
+    <div class="grid c2">
+      <div><label>Phone</label><input type="text" inputmode="tel" name="contact_phone" value="{{ site.contact_phone }}" placeholder="+255 7XX XXX XXX"></div>
+      <div><label>WhatsApp</label><input type="text" inputmode="tel" name="whatsapp_number" value="{{ site.whatsapp_number }}" placeholder="+2557XXXXXXXX"></div>
+      <div><label>Email</label><input type="email" name="contact_email" value="{{ site.contact_email }}"></div>
+      <div><label>Address</label><input type="text" name="contact_address" value="{{ site.contact_address }}" placeholder="e.g. Sokoine Rd, Arusha"></div>
+    </div>
+  </form>
+
+  {# ── 2. RANGI NA FONT ── #}
+  <form class="sd-step" data-step="style" hidden>
+    {% csrf_token %}
+    <h1>Colors &amp; font</h1>
+    <p class="hint sd-lead">Tap a color — the preview changes instantly and saves by itself.</p>
+    <div class="sd-pal">
+      {% for name, color, dark in palettes %}
+      <button type="button" class="sd-sw" style="--c:{{ color }}" data-color="{{ color }}" data-dark="{{ dark|yesno:'1,0' }}">
+        <i class="{% if dark %}dk{% endif %}"></i><span>{{ name }}</span>
+      </button>
+      {% endfor %}
+    </div>
+    <div class="sd-row">
+      <label class="sd-inline">Your own color <input type="color" name="accent_color" id="accent" value="{{ site.accent_color }}"></label>
+      <label class="sd-inline"><input type="checkbox" name="dark_nav" id="dark" {% if site.dark_nav %}checked{% endif %}> Dark menu</label>
+    </div>
+    <h3 class="sd-h">Font</h3>
+    <div class="sd-fonts">
+      {% for key, label in fonts %}
+      <label class="sd-font"><input type="radio" name="font" value="{{ key }}" {% if current_font == key %}checked{% endif %}><span>{{ label }}</span></label>
+      {% endfor %}
+    </div>
+    <p class="hint">“System” loads nothing extra — the fastest for customers on mobile data.</p>
+  </form>
+
+  {# ── 3–4. HEADER NA FOOTER ── #}
+  {% for part in parts %}
+  <form class="sd-step" data-step="{{ part }}" hidden>
+    {% csrf_token %}
+    <h1>{% if part == 'header' %}Header &amp; menu{% else %}Footer{% endif %}</h1>
+    <p class="hint sd-lead">{% if part == 'header' %}Tap a design — it appears in the preview instantly. <b>Sidebar</b> keeps the menu on the left; <b>top bar</b> puts it above your content.{% else %}The footer sits at the bottom of every page with your contact details. Tap a design to try it.{% endif %}</p>
+    <div class="sd-tabs" role="tablist">
+      <button type="button" class="on" data-tab="pick">🎨 Designs</button>
+      <button type="button" data-tab="ai">✨ AI</button>
+      <button type="button" data-tab="code">💻 Code</button>
+    </div>
+    <input type="hidden" name="mode" value="preset">
+    <div class="sd-pane" data-pane="pick">
+      {% if part == 'header' %}
+        <h3 class="sd-h">Sidebars <span class="pill on">Recommended</span></h3>
+        <div class="sd-grid">{% for h in headers_side %}{% include 'builder/_studio_card.html' with item=h kind='header' %}{% endfor %}</div>
+        <h3 class="sd-h">Top bars</h3>
+        <div class="sd-grid">{% for h in headers_top %}{% include 'builder/_studio_card.html' with item=h kind='header' %}{% endfor %}</div>
+      {% else %}
+        <div class="sd-grid">{% for f in footers %}{% include 'builder/_studio_card.html' with item=f kind='footer' %}{% endfor %}</div>
+      {% endif %}
+    </div>
+    <div class="sd-pane" data-pane="ai" hidden>
+      <p class="hint">Describe the {{ part }} you want. AI writes it and shows it in the preview.</p>
+      <textarea class="sd-brief" maxlength="800" placeholder="{% if part == 'header' %}e.g. Dark sidebar with my logo on top, big links and a green WhatsApp button at the bottom{% else %}e.g. Three columns: about us, quick links and contact, with a big WhatsApp button{% endif %}"></textarea>
+      <button type="button" class="btn sd-ai" data-ai-go>✨ Generate {{ part }}</button>
+      <div class="hint sd-ai-status"></div>
+    </div>
+    <div class="sd-pane" data-pane="code" hidden>
+      <p class="hint">HTML with a <code>&lt;style&gt;</code> block. Placeholders fill in automatically:
+        {% verbatim %}<code>{{site_name}}</code> <code>{{logo}}</code> <code>{{nav_links}}</code> <code>{{whatsapp}}</code> <code>{{phone}}</code> <code>{{year}}</code>{% endverbatim %}</p>
+      <textarea name="html" class="sd-code" spellcheck="false">{% if part == 'header' %}{{ site.custom_nav_html }}{% else %}{{ site.custom_footer_html }}{% endif %}</textarea>
+      <button type="button" class="btn sm" data-apply-code>▶ Show in preview &amp; save</button>
+    </div>
+  </form>
+  {% endfor %}
+
+  {# ── 5. KURASA ── #}
+  <form class="sd-step" data-step="pages" hidden>
+    {% csrf_token %}
+    <h1>Pages &amp; content</h1>
+    <p class="hint sd-lead">Build each page your way. The editor opens in a new tab — this Studio stays open.</p>
+    <div class="sd-pages" id="sd-pages">
+      {% for p in pages %}
+      <div class="sd-page" data-slug="{{ p.slug }}">
+        <div class="sd-page-t"><b>{{ p.title }}</b><span class="hint">{% if p.slug == 'home' %}/{% else %}/p/{{ p.slug }}/{% endif %}</span></div>
+        <div class="sd-page-a">
+          <a class="btn sm amber" target="_blank" href="{% url 'builder:page_editor' site.id p.id %}">🖱 Drag &amp; drop</a>
+          <a class="btn sm" target="_blank" href="{% url 'builder:page_editor' site.id p.id %}?open=code">💻 Code</a>
+          <a class="btn sm sd-ai-btn" target="_blank" href="{% url 'builder:page_editor' site.id p.id %}?open=ai">✨ AI</a>
+          <button type="button" class="btn sm ghost" data-show-page="{{ p.slug }}">👁 Preview</button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="sd-add">
+      <input type="text" id="new-page" placeholder="New page name, e.g. Gallery" maxlength="80">
+      <button type="button" class="btn sm" id="add-page">➕ Add page</button>
+    </div>
+    <div class="hint" id="add-status"></div>
+    {% if collections %}
+    <h3 class="sd-h">Your content</h3>
+    <div class="sd-cols">
+      {% for c in collections %}
+      <a class="sd-col" target="_blank" href="{% url 'builder:collection_items' site.id c.id %}">{{ c.icon }} <b>{{ c.name }}</b><span>{{ c.items.count }} added →</span></a>
+      {% endfor %}
+    </div>
+    {% endif %}
+    <a class="sd-zip" href="{% url 'builder:site_import' site.id %}">📦 <span><b>Already have a website?</b> Upload the whole folder as a ZIP</span> →</a>
+  </form>
+
+  {# ── 6. PUBLISH ── #}
+  <form class="sd-step" data-step="publish" hidden>
+    {% csrf_token %}
+    <div id="pub-live" {% if not site.is_published %}hidden{% endif %} class="sd-live">
+      <div style="font-size:42px">🎉</div>
+      <h1>Your website is live</h1>
+      <p class="hint">Share this link with your customers:</p>
+      <a class="sd-url" href="{{ site.public_url }}" target="_blank" rel="noopener">{{ site.subdomain }}.jamiitek.com ↗</a>
+      <p class="hint" style="margin-top:14px">Change anything in any step — updates go live immediately.</p>
+    </div>
+    <div id="pub-draft" {% if site.is_published %}hidden{% endif %}>
+      <h1>Go live</h1>
+      <p class="hint sd-lead">Publish and your website becomes visible to everyone.</p>
+      <ul class="sd-check" id="sd-check"></ul>
+    </div>
+  </form>
+
+  <div class="sd-actions">
+    <button type="button" class="btn ghost" id="sd-back">← Back</button>
+    <button type="button" class="btn amber" id="sd-next">Next →</button>
+  </div>
 </section>
 </div>
 
-{# Fomu ya siri: kuonyesha code ambayo haijahifadhiwa, ndani ya iframe #}
-<form id="code-preview" method="post" action="{{ preview_url }}" target="pv" hidden>
-  {% csrf_token %}<input type="hidden" name="{{ step }}_html" id="code-preview-html">
-</form>
+{{ layout|json_script:"sd-layout" }}
+{{ initial_state|json_script:"sd-state" }}
+{{ steps_json|json_script:"sd-steps" }}
+{{ done_json|json_script:"sd-done" }}
 
 <style>
-.main{max-width:none}
+.main{max-width:none;padding-top:22px}
 .sd-steps{margin-top:10px;border-top:1px solid var(--line);padding-top:10px}
 .sd-steps a{align-items:center}
+.sd-steps a.active{background:rgba(0,212,255,.08);color:var(--ink);border-color:rgba(0,212,255,.3)}
 .sd-n{width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;
   border:1.5px solid var(--line);font-family:var(--ff-mono);font-size:12px;font-weight:700;color:var(--muted)}
 .sd-n.ok{background:var(--green);border-color:var(--green);color:#04120a}
-.sd-steps a.active .sd-n{border-color:var(--cyan);color:var(--cyan)}
 .sd-st{display:flex;flex-direction:column;line-height:1.25}
 .sd-st small{font-size:11px;color:var(--dim);font-weight:400}
-.sd-head{margin-bottom:18px}
-.sd-title{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:6px 0 12px}
-.sd-title h1{margin:0}
-.sd-badge{font-family:var(--ff-mono);font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--cyan);
-  border:1px solid rgba(0,212,255,.3);padding:5px 10px;border-radius:100px}
-.sd-bar{height:6px;background:rgba(255,255,255,.05);border-radius:6px;overflow:hidden}
-.sd-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--green),var(--cyan));border-radius:6px;transition:width .4s var(--ease)}
+
 .sd{display:grid;grid-template-columns:minmax(340px,440px) 1fr;gap:20px;align-items:start}
-.sd-panel{margin:0}
+.sd-panel{order:1;background:var(--panel,#0b1426);border:1px solid var(--line);border-radius:16px;padding:18px 20px 0;min-width:0}
+/* Kompyuta: safu ya chaguo inascroll ndani yake — preview na vitufe vyake havitoki kwenye skrini */
+@media(min-width:1101px){
+  .sd-panel{position:sticky;top:16px;height:calc(100vh - 40px);height:calc(100dvh - 40px);overflow-y:auto;overscroll-behavior:contain}
+}
+.sd-prev{order:2;position:sticky;top:16px;height:calc(100vh - 40px);height:calc(100dvh - 40px);min-height:420px;
+  border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#0a0f1c;display:flex;flex-direction:column}
+.sd-panel h1{font-size:22px;margin:4px 0 6px}
 .sd-lead{font-size:14px;margin:0 0 6px}
-.sd-h{font-size:14px;margin:22px 0 10px;color:#fff;display:flex;align-items:center;gap:8px}
-.sd-actions{display:flex;justify-content:space-between;gap:10px;margin-top:26px;padding-top:18px;border-top:1px solid var(--line);
-  position:sticky;bottom:0;background:linear-gradient(180deg,transparent,var(--panel,#0b1426) 30%);padding-bottom:4px}
+.sd-h{font-size:14px;margin:20px 0 10px;color:#fff;display:flex;align-items:center;gap:8px}
+
+.sd-top{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.sd-stepper{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0}
+.sd-stepper::-webkit-scrollbar{display:none}
+.sd-stepper button{flex-shrink:0;display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.03);border:1px solid var(--line);
+  color:var(--muted);border-radius:100px;padding:6px 12px 6px 6px;font-size:12.5px;font-weight:600;cursor:pointer}
+.sd-stepper button i{font-style:normal;width:20px;height:20px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,.06);font-family:var(--ff-mono);font-size:11px}
+.sd-stepper button.on{border-color:var(--cyan);color:#fff}
+.sd-stepper button.on i{background:var(--cyan);color:#04120a}
+.sd-stepper button.ok i{background:var(--green);color:#04120a}
+.sd-save{font-family:var(--ff-mono);font-size:11px;color:var(--dim);white-space:nowrap}
+.sd-save.busy{color:var(--amber,#f0b03f)}.sd-save.ok{color:var(--green)}.sd-save.err{color:#ff8ba0}
+
+.sd-actions{position:sticky;bottom:0;display:flex;justify-content:space-between;gap:10px;margin:22px -20px 0;padding:14px 20px;
+  background:var(--panel,#0b1426);border-top:1px solid var(--line);border-radius:0 0 16px 16px;z-index:2}
 .sd-logo{display:flex;gap:14px;align-items:flex-start}
 .sd-logo-box{width:72px;height:72px;border-radius:14px;border:1.5px dashed var(--line);display:flex;align-items:center;justify-content:center;
   overflow:hidden;flex-shrink:0;background:rgba(255,255,255,.03);font-size:11px;color:var(--dim)}
 .sd-logo-box img{width:100%;height:100%;object-fit:contain}
-.sd-pal{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px}
-.sd-sw{border:1.5px solid var(--line);background:rgba(255,255,255,.03);border-radius:12px;padding:10px 8px;cursor:pointer;
-  display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--muted);font-size:11.5px;font-weight:600;transition:.15s}
+.sd-pal{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px}
+.sd-sw{border:1.5px solid var(--line);background:rgba(255,255,255,.03);border-radius:12px;padding:10px 6px;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--muted);font-size:11.5px;font-weight:600;transition:border-color .15s}
 .sd-sw i{width:34px;height:34px;border-radius:50%;background:var(--c);box-shadow:inset 0 0 0 3px #fff}
 .sd-sw i.dk{box-shadow:inset 0 0 0 3px #111827}
-.sd-sw:hover{border-color:var(--c)}.sd-sw.sel{border-color:var(--c);color:#fff;box-shadow:0 0 0 2px color-mix(in srgb,var(--c) 35%,transparent)}
+.sd-sw.sel{border-color:var(--c);color:#fff;box-shadow:0 0 0 2px color-mix(in srgb,var(--c) 35%,transparent)}
 .sd-row{display:flex;gap:18px;flex-wrap:wrap;margin-top:14px}
 .sd-inline{display:flex!important;align-items:center;gap:10px;margin:0!important}
 .sd-inline input[type=color]{width:44px;height:34px;padding:2px;border-radius:8px}
 .sd-inline input[type=checkbox]{width:auto}
 .sd-fonts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .sd-font{display:flex!important;align-items:center;gap:8px;margin:0!important;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer;font-weight:500}
-.sd-font input{width:auto}.sd-font.sel{border-color:var(--green)}
+.sd-font input{width:auto}.sd-font:has(input:checked){border-color:var(--green)}
 .sd-tabs{display:flex;gap:4px;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:12px;padding:4px;margin:14px 0}
 .sd-tabs button{flex:1;background:none;border:none;color:var(--muted);padding:9px 8px;border-radius:9px;font-weight:700;font-size:13px;cursor:pointer}
 .sd-tabs button.on{background:var(--green);color:#04120a}
-.sd-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
-.sd-card{position:relative;border:1.5px solid var(--line);border-radius:12px;padding:8px;cursor:pointer;background:rgba(255,255,255,.02);transition:.15s;display:block;margin:0!important}
-.sd-card:hover{border-color:var(--cyan);transform:translateY(-2px)}
+.sd-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+.sd-card{position:relative;border:1.5px solid var(--line);border-radius:12px;padding:8px;cursor:pointer;background:rgba(255,255,255,.02);display:block;margin:0!important;
+  transition:border-color .12s,transform .12s}
+.sd-card:hover{border-color:var(--cyan)}
+.sd-card:active{transform:scale(.98)}
 .sd-card input{position:absolute;opacity:0;pointer-events:none}
-.sd-card.sel{border-color:var(--green);box-shadow:0 0 0 2px rgba(37,211,102,.25)}
+.sd-card:has(input:checked){border-color:var(--green);box-shadow:0 0 0 2px rgba(37,211,102,.25)}
 .sd-card b{display:block;color:#fff;font-size:12.5px;margin:8px 2px 2px}
 .sd-card span{display:block;font-size:11px;color:var(--muted);line-height:1.4;margin:0 2px 2px}
 .sd-brief,.sd-code{width:100%;border:1.5px solid var(--line);border-radius:12px;background:rgba(255,255,255,.03);color:var(--ink);padding:12px}
 .sd-brief{min-height:90px;font-family:inherit;font-size:14px}
-.sd-code{min-height:260px;background:#070b14;color:#a9c7e8;font-family:var(--ff-mono);font-size:12.5px;line-height:1.6}
+.sd-code{min-height:240px;background:#070b14;color:#a9c7e8;font-family:var(--ff-mono);font-size:12.5px;line-height:1.6;margin-bottom:10px}
 .sd-ai,.sd-ai-btn{background:linear-gradient(135deg,var(--violet),var(--cyan))!important;color:#fff!important;border:none!important}
-.sd-ai{width:100%;margin-top:10px}
+.sd-ai{width:100%;margin-top:10px}.sd-ai-status{margin-top:8px}
 .sd-pages{display:flex;flex-direction:column;gap:8px}
 .sd-page{border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:10px}
 .sd-page-t{display:flex;justify-content:space-between;gap:10px}.sd-page-t b{color:#fff}
@@ -284,22 +293,42 @@
 .sd-check{list-style:none;padding:0;margin:14px 0;display:flex;flex-direction:column;gap:8px}
 .sd-check li{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:10px;padding:12px 14px;color:var(--muted)}
 .sd-check li.ok{color:var(--ink)}.sd-check li span{color:var(--green);font-weight:800;width:16px}
-.sd-check li a{margin-left:auto;color:var(--cyan);font-size:13px}
-.sd-live{text-align:center;padding:10px 0}.sd-live h2{margin:8px 0}
+.sd-check li button{margin-left:auto;background:none;border:none;color:var(--cyan);font-size:13px;cursor:pointer}
+.sd-live{text-align:center;padding:10px 0}
 .sd-url{display:inline-block;margin-top:8px;font-family:var(--ff-mono);color:var(--green);font-size:16px;padding:10px 16px;border:1px solid var(--line-2);border-radius:10px}
-.sd-prev{position:sticky;top:18px;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#0a0f1c;display:flex;flex-direction:column;height:calc(100vh - 150px);min-height:480px}
-.sd-prev-bar{display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid var(--line);background:#0d1424}
-.sd-dots{display:flex;gap:5px}.sd-dots i{width:9px;height:9px;border-radius:50%;background:#2a3446}
-.sd-prev-bar select{flex:1;min-width:0;max-width:220px;margin:0;padding:6px 10px;font-size:12.5px}
-.sd-dev{display:flex;gap:2px;margin-left:auto}
-.sd-dev button{background:none;border:1px solid transparent;border-radius:8px;padding:5px 8px;cursor:pointer;font-size:14px;opacity:.6}
-.sd-dev button.on{opacity:1;border-color:var(--line)}
-.sd-open{text-decoration:none;color:var(--muted);padding:4px 8px}
+
+/* ── Preview ── */
+.sd-prev-bar{display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:1px solid var(--line);background:#0d1424}
+.sd-dev{display:flex;gap:2px;background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:10px;padding:3px}
+.sd-dev button{display:flex;align-items:center;gap:6px;background:none;border:none;border-radius:7px;padding:6px 10px;cursor:pointer;
+  color:#9fb0c4;font-size:12.5px;font-weight:600}
+.sd-dev button.on{background:#fff;color:#0b1220}
+.sd-dev svg,.sd-icon svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.sd-prev-bar select{flex:1;min-width:0;max-width:200px;margin:0 0 0 auto;padding:6px 10px;font-size:12.5px}
+.sd-icon{background:rgba(255,255,255,.05);border:1px solid var(--line);color:#cfd8e3;border-radius:9px;padding:6px 8px;cursor:pointer;display:flex}
 .sd-frame{flex:1;position:relative;background:#1a2233;overflow:hidden}
-/* Iframe inachorwa kwa upana halisi (1280 kompyuta, 390 simu) kisha fitFrame() inaipunguza */
 .sd-frame iframe{position:absolute;top:0;left:0;border:0;background:#fff;transform-origin:0 0}
-.sd-frame.mob iframe{box-shadow:0 0 0 1px #000,0 20px 60px rgba(0,0,0,.5)}
-@media(max-width:1100px){.sd{grid-template-columns:1fr}.sd-prev{position:relative;top:0;height:70vh}}
+.sd-frame.dev-tab iframe,.sd-frame.dev-mob iframe{box-shadow:0 0 0 1px #000,0 20px 60px rgba(0,0,0,.5)}
+.sd-load{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#9fb0c4;font-size:13px;
+  background:#1a2233;transition:opacity .2s;pointer-events:none}
+.sd-load.gone{opacity:0}
+.sd-prev.full{position:fixed;inset:0;height:auto;z-index:300;border-radius:0;top:0}
+
+/* Tablet na simu: preview inakaa JUU na inabaki inaonekana ukiscroll chaguo */
+@media(max-width:1100px){
+  .sd{grid-template-columns:1fr;gap:12px}
+  .sd-prev{order:0;position:sticky;top:0;height:42vh;height:42dvh;min-height:250px;z-index:20}
+  .sd-panel{order:1}
+}
+/* Simu: preview inagusa kingo za skrini; vitufe vya Back/Next vinakaa juu ya menyu ya chini */
+@media(max-width:900px){
+  .main{padding-top:0!important}
+  .sd-prev{margin:0 -16px;border-radius:0 0 16px 16px;border-top:none}
+  .sd-dev button span{display:none}
+  .sd-actions{bottom:calc(64px + env(safe-area-inset-bottom))}
+}
+@media(max-width:420px){.sd-prev{margin:0 -12px}}
+@media(max-width:560px){.sd-panel{padding:14px 14px 0}.sd-actions{margin:22px -14px 0;padding:12px 14px}}
 
 /* ── Michoro midogo ya headers/footers ── */
 .th{position:relative;aspect-ratio:16/10;border-radius:8px;overflow:hidden;background:#f3f5f8;
@@ -361,126 +390,289 @@
 {% include 'builder/_ai_magic.html' %}
 <script>
 (function(){
-  const CSRF = '{{ csrf_token }}';
-  const SID = {{ site.id }};
-  const STEP = '{{ step }}';
+  const $ = (s, r=document) => r.querySelector(s), $$ = (s, r=document) => [...r.querySelectorAll(s)];
+  const read = id => JSON.parse(document.getElementById(id).textContent);
+  const CSRF = '{{ csrf_token }}', SID = {{ site.id }};
   const PREVIEW = '{{ preview_url }}';
-  const pv = document.getElementById('pv');
-  const state = {};
-  const acc = document.getElementById('accent');
+  const STEPS = read('sd-steps').map(s => s.key), TITLES = Object.fromEntries(read('sd-steps').map(s => [s.key, s.title]));
+  let L = read('sd-layout');
+  const saved = read('sd-state');
+  const S = {...saved, headerMode: saved.header || !saved.headerCode ? 'preset' : 'custom',
+                        footerMode: saved.footer || !saved.footerCode ? 'preset' : 'custom'};
+  const done = new Set(read('sd-done'));
+  let step = '{{ step }}';
 
-  function refresh(){
-    const q = new URLSearchParams(state).toString();
-    pv.src = PREVIEW + (q ? '?' + q : '');
-  }
-  // Rangi ya sasa inaonekana hata kwenye michoro midogo ya headers/footers
-  function paintThumbs(color){ document.documentElement.style.setProperty('--acc', color); }
-  paintThumbs('{{ site.accent_color }}');
+  const pv = $('#pv'), wrap = $('#frame-wrap');
+  const doc = () => { try { return pv.contentDocument; } catch(e){ return null; } };
 
-  window.previewPage = slug => { state.page = slug; document.getElementById('pv-page').value = slug; refresh(); };
-  // Preview ya kompyuta inaonyesha sura ya kompyuta hata kwenye nafasi ndogo:
-  // inachorwa kwa 1280px kisha inapunguzwa (scale) iingie.
-  const wrap = document.getElementById('frame-wrap');
-  function fitFrame(){
-    const mob = wrap.classList.contains('mob');
-    const W = mob ? 390 : 1280, w = wrap.clientWidth, h = wrap.clientHeight;
-    const k = Math.min(1, w / W);
-    pv.style.width = W + 'px';
-    pv.style.height = (h / k) + 'px';
-    pv.style.left = Math.max(0, (w - W * k) / 2) + 'px';
-    pv.style.transform = `scale(${k})`;
-  }
-  new ResizeObserver(fitFrame).observe(wrap);
-  fitFrame();
-  window.device = (d, btn) => {
-    wrap.classList.toggle('mob', d === 'mob');
-    document.querySelectorAll('.sd-dev button').forEach(b => b.classList.toggle('on', b === btn));
-    fitFrame();
+  // ══ PREVIEW: mabadiliko yanafanyika NDANI ya iframe, bila kuipakia upya ══
+  const NAV = {
+    true:  ['rgba(14,22,18,.72)', '#0e1612', '#f2f6f2', 'rgba(242,246,242,.75)', 'rgba(242,246,242,.12)'],
+    false: ['rgba(255,255,255,.72)', '#ffffff', '#16211b', 'rgba(22,33,27,.7)', 'rgba(22,33,27,.1)'],
   };
-
-  // ── Hatua ya 2: rangi na font ──
-  let t;
-  window.pickPalette = btn => {
-    document.querySelectorAll('.sd-sw').forEach(b => b.classList.toggle('sel', b === btn));
-    acc.value = btn.dataset.color;
-    document.getElementById('dark').checked = btn.dataset.dark === '1';
-    state.accent = btn.dataset.color; state.dark = btn.dataset.dark; refresh();
-  };
-  if (acc) acc.addEventListener('input', () => {
-    document.querySelectorAll('.sd-sw').forEach(b => b.classList.remove('sel'));
-    state.accent = acc.value; paintThumbs(acc.value);
-    clearTimeout(t); t = setTimeout(refresh, 250);
+  function applyTheme(){
+    const d = doc(); if (!d) return;
+    const r = d.documentElement.style;
+    r.setProperty('--accent', S.accent);
+    ['--nav-bg', '--nav-solid', '--nav-ink', '--nav-mut', '--nav-line'].forEach((k, i) => r.setProperty(k, NAV[!!S.dark][i]));
+    const f = L.fonts[S.font] || L.fonts.system;
+    r.setProperty('--font-body', f.body); r.setProperty('--font-head', f.head);
+    const link = d.getElementById('jt-font');
+    if (link && f.href && link.getAttribute('href') !== f.href) link.href = f.href;
+    document.documentElement.style.setProperty('--acc', S.accent);
+  }
+  const fill = code => Object.entries(L.placeholders).reduce((h, [k, v]) => h.split(k).join(v), code || '');
+  function put(slot, cssId, html, css){
+    const d = doc(); if (!d) return;
+    const el = d.getElementById(slot), st = d.getElementById(cssId);
+    if (!el || !st) return;
+    el.innerHTML = html; st.textContent = css;
+  }
+  function applyHeader(){
+    const d = doc(); if (!d) return;
+    if (S.headerMode === 'custom' && S.headerCode){ put('jt-nav-slot', 'jt-nav-css', fill(S.headerCode), ''); }
+    else if (L.headers[S.header]){
+      const h = L.headers[S.header];
+      put('jt-nav-slot', 'jt-nav-css', h.html, L.headerCommon + (h.side ? L.sideCommon : '') + h.css);
+    } else return;               // bado hajachagua — acha nav ya sasa
+    d.body.className = 'has-custom';
+  }
+  function applyFooter(){
+    if (S.footerMode === 'custom' && S.footerCode) put('jt-foot-slot', 'jt-foot-css', fill(S.footerCode), '');
+    else if (L.footers[S.footer]){ const f = L.footers[S.footer]; put('jt-foot-slot', 'jt-foot-css', f.html, L.footerCommon + f.css); }
+  }
+  function applyName(){
+    const d = doc(); if (!d) return;
+    const name = $('#f-name').value;
+    d.querySelectorAll('.hx-brand span, .fx-brand span, .fx-f_minimal .fx-name, .fx-f_editorial .fx-name, .fx-mark')
+      .forEach(el => el.textContent = name);
+  }
+  function applyAll(){ applyTheme(); applyHeader(); applyFooter(); }
+  pv.addEventListener('load', () => {
+    applyAll();
+    const d = doc();
+    // Maudhui yanaonekana mara moja (bila kusubiri scroll animation)
+    if (d) d.querySelectorAll('.jt-reveal').forEach(e => e.classList.add('in'));
+    $('#pv-load').classList.add('gone');
   });
-  const dark = document.getElementById('dark');
-  if (dark) dark.addEventListener('change', () => { state.dark = dark.checked ? '1' : '0'; refresh(); });
-  window.pickFont = r => {
-    document.querySelectorAll('.sd-font').forEach(l => l.classList.toggle('sel', l.contains(r)));
-    state.font = r.value; refresh();
-  };
+  function reloadPreview(slug){
+    $('#pv-load').classList.remove('gone');
+    pv.src = PREVIEW + (slug ? '?page=' + encodeURIComponent(slug) : '');
+  }
+  $('#pv-page').addEventListener('change', e => reloadPreview(e.target.value));
+  // Mteja akirudi kutoka editor (tab nyingine), onyesha mabadiliko yake
+  let away = false;
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) away = true;
+    else if (away){ away = false; reloadPreview($('#pv-page').value); }
+  });
 
-  // ── Hatua ya 3–4: design, AI, code ──
-  window.pickLayout = (input) => {
-    document.querySelectorAll('.sd-card').forEach(c => c.classList.toggle('sel', c.contains(input)));
-    state[STEP] = input.value; refresh();
-  };
-  window.sdTab = (name, btn) => {
-    document.querySelectorAll('.sd-tabs button').forEach(b => b.classList.toggle('on', b === btn));
-    document.querySelectorAll('.sd-pane').forEach(p => p.hidden = p.id !== 'pane-' + name);
-    // Code/AI zinahifadhi code; "Choose" inahifadhi design iliyochaguliwa
-    document.getElementById('mode').value = name === 'pick' ? 'preset' : 'custom';
-  };
-  window.previewCode = () => {
-    document.getElementById('code-preview-html').value = document.getElementById('code').value;
-    document.getElementById('code-preview').submit();
-  };
-  window.aiGen = async () => {
-    const brief = document.getElementById('ai-brief').value.trim();
-    const st = document.getElementById('ai-status'), go = document.getElementById('ai-go');
-    if (brief.length < 3){ st.textContent = 'Describe what you want first.'; return; }
-    go.disabled = true; go.textContent = '✨ Designing…'; st.textContent = 'AI is writing your ' + STEP + '…';
+  // ── Ukubwa wa skrini: inachorwa kwa upana halisi kisha inapunguzwa iingie ──
+  const WIDTH = {desk: 1280, tab: 768, mob: 390};
+  let dev = window.innerWidth <= 700 ? 'mob' : (window.innerWidth <= 1100 ? 'tab' : 'desk');
+  function fitFrame(){
+    const W = WIDTH[dev], w = wrap.clientWidth, h = wrap.clientHeight;
+    const k = Math.min(1, w / W);
+    Object.assign(pv.style, {width: W + 'px', height: (h / k) + 'px', left: Math.max(0, (w - W * k) / 2) + 'px', transform: `scale(${k})`});
+  }
+  function setDev(d){
+    dev = d;
+    wrap.className = 'sd-frame dev-' + d;
+    $$('.sd-dev button').forEach(b => b.classList.toggle('on', b.dataset.dev === d));
+    fitFrame();
+  }
+  $$('.sd-dev button').forEach(b => b.addEventListener('click', () => setDev(b.dataset.dev)));
+  new ResizeObserver(fitFrame).observe(wrap);
+  setDev(dev);
+  $('#pv-full').addEventListener('click', () => { $('#sd-prev').classList.toggle('full'); setTimeout(fitFrame, 30); });
+
+  // ══ KUHIFADHI: nyuma, bila kupakia ukurasa ══
+  const saveEl = $('#sd-save');
+  function status(cls, text){ saveEl.className = 'sd-save ' + cls; saveEl.textContent = text; }
+  async function save(stepKey, fd){
+    fd = fd || new FormData(form(stepKey));
+    status('busy', 'Saving…');
     try {
-      const fd = new FormData(); fd.append('brief', brief); fd.append('target', STEP === 'footer' ? 'footer' : 'nav');
-      const res = await fetch(`/builder/site/${SID}/nav/ai/`, {method:'POST', headers:{'X-CSRFToken':CSRF}, body:fd});
+      const res = await fetch(`/builder/site/${SID}/studio/${stepKey}/`, {
+        method: 'POST', body: fd, headers: {'X-CSRFToken': CSRF, 'X-Requested-With': 'fetch'}});
       const data = await res.json().catch(() => null);
-      if (!res.ok || !data || !data.ok){ st.textContent = (data && data.error) || 'AI could not finish — try again.'; return; }
-      document.getElementById('code').value = data.html;
-      sdTab('code', document.querySelector('.sd-tabs [data-tab=code]'));
-      previewCode();
-      st.textContent = '';
-    } catch(e){ st.textContent = 'Cannot reach the server — check your connection.'; }
-    finally { go.disabled = false; go.textContent = '✨ Generate ' + STEP; }
-  };
-  {% if step == 'header' and site.custom_nav_html or step == 'footer' and site.custom_footer_html %}
-  // Mteja ana code yake tayari — anzia kwenye tab ya Code
-  sdTab('code', document.querySelector('.sd-tabs [data-tab=code]'));
-  {% endif %}
+      if (!res.ok || !data || !data.ok) throw new Error((data && data.error) || `Server error (${res.status}) — please try again`);
+      status('ok', '✓ Saved');
+      if (data.done){ data.done.forEach(k => done.add(k)); paintSteps(); }
+      if (data.layout){ L = data.layout; applyAll(); }
+      return data;
+    } catch(e){
+      status('err', '⚠ ' + (e.message === 'Failed to fetch' ? 'No connection — not saved' : e.message));
+      throw e;
+    }
+  }
+  const timers = {};
+  function autosave(stepKey){ clearTimeout(timers[stepKey]); timers[stepKey] = setTimeout(() => save(stepKey).catch(() => {}), 500); }
 
-  // ── Hatua ya 1: logo ──
-  const lf = document.getElementById('logo-file');
-  if (lf) lf.addEventListener('change', async () => {
-    const f = lf.files[0]; if (!f) return;
-    const st = document.getElementById('logo-status'); st.textContent = ' Uploading…';
+  // ══ HATUA: zinabadilishwa kwa JavaScript, URL inabadilika bila kupakia ══
+  const form = k => $(`.sd-step[data-step="${k}"]`);
+  function paintSteps(){
+    $$('[data-go]').forEach(el => {
+      const k = el.dataset.go, ok = done.has(k);
+      el.classList.toggle('on', k === step); el.classList.toggle('active', k === step); el.classList.toggle('ok', ok);
+      const n = el.querySelector('[data-num]');
+      if (n){ n.textContent = ok ? '✓' : n.dataset.num; n.classList.toggle('ok', ok); }
+    });
+    // Orodha ya kukagua kabla ya kupublish
+    $('#sd-check').innerHTML = STEPS.filter(k => k !== 'publish').map(k =>
+      `<li class="${done.has(k) ? 'ok' : ''}"><span>${done.has(k) ? '✓' : '○'}</span>${TITLES[k]}` +
+      (done.has(k) ? '' : `<button type="button" data-go="${k}">Do it →</button>`) + '</li>').join('');
+  }
+  function show(k, push){
+    step = k;
+    $$('.sd-step').forEach(f => f.hidden = f.dataset.step !== k);
+    const i = STEPS.indexOf(k);
+    $('#sd-back').style.visibility = i ? 'visible' : 'hidden';
+    const next = $('#sd-next');
+    const live = !$('#pub-live').hidden;
+    next.textContent = k === 'publish' ? (live ? 'Go to dashboard →' : '🚀 Publish my website') : 'Next →';
+    paintSteps();
+    if (push) history.pushState({step: k}, '', `/builder/site/${SID}/studio/${k}/`);
+    // Anza juu ya hatua mpya: kompyuta inascroll safu yenyewe, simu inascroll ukurasa
+    const panel = $('.sd-panel');
+    if (getComputedStyle(panel).overflowY === 'auto') panel.scrollTo({top: 0});
+    else if (push) window.scrollTo({top: 0, behavior: 'smooth'});
+    // Orodha ya hatua inasogea upande tu (scrollIntoView ingesogeza dirisha zima pia)
+    const bar = $('.sd-stepper'), btn = bar.querySelector(`[data-go="${k}"]`);
+    if (btn) bar.scrollTo({left: btn.offsetLeft - bar.clientWidth / 2 + btn.offsetWidth / 2, behavior: 'smooth'});
+  }
+  document.addEventListener('click', e => {
+    const go = e.target.closest('[data-go]');
+    if (go){ e.preventDefault(); show(go.dataset.go, true); }
+  });
+  window.addEventListener('popstate', () => {
+    const k = location.pathname.split('/').filter(Boolean).pop();
+    show(STEPS.includes(k) ? k : STEPS[0], false);
+  });
+  $('#sd-back').addEventListener('click', () => show(STEPS[Math.max(0, STEPS.indexOf(step) - 1)], true));
+  $('#sd-next').addEventListener('click', async () => {
+    const btn = $('#sd-next');
+    if (step === 'publish'){
+      if (!$('#pub-live').hidden){ location.href = '{% url "builder:site_dashboard" site.id %}'; return; }
+      btn.disabled = true;
+      try { await save('publish'); $('#pub-live').hidden = false; $('#pub-draft').hidden = true; show('publish'); }
+      catch(e){} finally { btn.disabled = false; }
+      return;
+    }
+    const f = form(step);
+    if (step === 'business' && !f.reportValidity()) return;
+    // Header/footer bila chaguo: endelea tu (inabaki na muonekano wa sasa)
+    const skip = (step === 'header' && !S.header && S.headerMode === 'preset') ||
+                 (step === 'footer' && !S.footer && S.footerMode === 'preset');
+    btn.disabled = true;
+    try {
+      if (!skip) await save(step);
+      show(STEPS[STEPS.indexOf(step) + 1], true);
+    } catch(e){ /* ujumbe umeshaonyeshwa juu */ }
+    finally { btn.disabled = false; }
+  });
+
+  // ── 1. Biashara ──
+  $('#f-name').addEventListener('input', applyName);
+  $('#logo-btn').addEventListener('click', () => $('#logo-file').click());
+  $('#logo-file').addEventListener('change', async e => {
+    const f = e.target.files[0]; if (!f) return;
+    const st = $('#logo-status'); st.textContent = ' Uploading…';
     const fd = new FormData(); fd.append('file', f);
     try {
-      const res = await fetch("{% url 'builder:asset_upload' site.id %}", {method:'POST', headers:{'X-CSRFToken':CSRF}, body:fd});
+      const res = await fetch("{% url 'builder:asset_upload' site.id %}", {method: 'POST', headers: {'X-CSRFToken': CSRF}, body: fd});
       const data = await res.json();
-      if (!res.ok) { st.textContent = ' ' + (data.error || 'Upload failed'); return; }
-      document.getElementById('logo-url').value = data.url;
-      document.getElementById('logo-box').innerHTML = `<img src="${data.url}" alt="">`;
-      st.textContent = ' ✓ Uploaded — save to apply';
-    } catch(e){ st.textContent = ' Upload failed — check your connection'; }
+      if (!res.ok){ st.textContent = ' ' + (data.error || 'Upload failed'); return; }
+      $('#logo-url').value = data.url;
+      $('#logo-box').innerHTML = `<img src="${data.url}" alt="">`;
+      st.textContent = ' ✓ Uploaded';
+      save('business').catch(() => {});
+    } catch(err){ st.textContent = ' Upload failed — check your connection'; }
   });
 
-  // ── Hatua ya 5: ukurasa mpya ──
-  window.addPage = () => {
-    const title = document.getElementById('new-page').value.trim();
-    if (!title) return;
-    const f = document.createElement('form');
-    f.method = 'post'; f.action = "{% url 'builder:page_create' site.id %}";
-    f.innerHTML = `<input type="hidden" name="csrfmiddlewaretoken" value="${CSRF}"><input type="hidden" name="title">`;
-    f.querySelector('[name=title]').value = title;
-    document.body.appendChild(f); f.submit();
-  };
+  // ── 2. Rangi na font: papo hapo + autosave ──
+  const acc = $('#accent'), dark = $('#dark');
+  function markPalette(){ $$('.sd-sw').forEach(b => b.classList.toggle('sel', b.dataset.color.toLowerCase() === S.accent.toLowerCase() && (b.dataset.dark === '1') === !!S.dark)); }
+  $$('.sd-sw').forEach(b => b.addEventListener('click', () => {
+    S.accent = acc.value = b.dataset.color; S.dark = dark.checked = b.dataset.dark === '1';
+    markPalette(); applyTheme(); autosave('style');
+  }));
+  acc.addEventListener('input', () => { S.accent = acc.value; markPalette(); applyTheme(); autosave('style'); });
+  dark.addEventListener('change', () => { S.dark = dark.checked; markPalette(); applyTheme(); autosave('style'); });
+  $$('input[name=font]').forEach(r => r.addEventListener('change', () => { S.font = r.value; applyTheme(); autosave('style'); }));
+  markPalette();
+
+  // ── 3–4. Header na footer: papo hapo + autosave ──
+  ['header', 'footer'].forEach(part => {
+    const f = form(part), mode = f.querySelector('[name=mode]'), code = f.querySelector('[name=html]');
+    const apply = part === 'header' ? applyHeader : applyFooter;
+    const cur = S[part];
+    if (cur){ const r = f.querySelector(`input[name=preset][value="${cur}"]`); if (r) r.checked = true; }
+    function tab(name){
+      f.querySelectorAll('.sd-tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === name));
+      f.querySelectorAll('.sd-pane').forEach(p => p.hidden = p.dataset.pane !== name);
+    }
+    f.querySelectorAll('.sd-tabs button').forEach(b => b.addEventListener('click', () => tab(b.dataset.tab)));
+    f.querySelectorAll('input[name=preset]').forEach(r => r.addEventListener('change', () => {
+      S[part] = r.value; S[part + 'Mode'] = 'preset'; mode.value = 'preset';
+      apply(); autosave(part);
+    }));
+    function useCode(){
+      S[part + 'Code'] = code.value; S[part + 'Mode'] = 'custom'; mode.value = 'custom';
+      f.querySelectorAll('input[name=preset]').forEach(r => r.checked = false);
+      apply(); save(part).catch(() => {});
+    }
+    f.querySelector('[data-apply-code]').addEventListener('click', useCode);
+    f.querySelector('[data-ai-go]').addEventListener('click', async e => {
+      const go = e.currentTarget, st = f.querySelector('.sd-ai-status'), brief = f.querySelector('.sd-brief').value.trim();
+      if (brief.length < 3){ st.textContent = 'Describe what you want first.'; return; }
+      go.disabled = true; go.textContent = '✨ Designing…'; st.textContent = 'AI is writing your ' + part + '…';
+      try {
+        const fd = new FormData(); fd.append('brief', brief); fd.append('target', part === 'footer' ? 'footer' : 'nav');
+        const res = await fetch(`/builder/site/${SID}/nav/ai/`, {method: 'POST', headers: {'X-CSRFToken': CSRF}, body: fd});
+        const data = await res.json().catch(() => null);
+        if (!res.ok || !data || !data.ok){ st.textContent = (data && data.error) || `AI could not finish (${res.status}) — try again.`; return; }
+        code.value = data.html; tab('code'); useCode(); st.textContent = '';
+      } catch(err){ st.textContent = 'Cannot reach the server — check your connection.'; }
+      finally { go.disabled = false; go.textContent = '✨ Generate ' + part; }
+    });
+    if (S[part + 'Mode'] === 'custom') tab('code');
+  });
+
+  // ── 5. Kurasa: kuongeza bila kutoka Studio ──
+  document.addEventListener('click', e => {
+    const b = e.target.closest('[data-show-page]');
+    if (!b) return;
+    $('#pv-page').value = b.dataset.showPage; reloadPreview(b.dataset.showPage);
+    $('#sd-prev').scrollIntoView({block: 'nearest', behavior: 'smooth'});
+  });
+  async function addPage(){
+    const inp = $('#new-page'), title = inp.value.trim(), st = $('#add-status');
+    if (!title){ inp.focus(); return; }
+    const fd = new FormData(form('pages')); fd.append('action', 'add_page'); fd.append('title', title);
+    $('#add-page').disabled = true; st.textContent = 'Adding…';
+    try {
+      const res = await fetch(`/builder/site/${SID}/studio/pages/`, {method: 'POST', body: fd, headers: {'X-CSRFToken': CSRF, 'X-Requested-With': 'fetch'}});
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data || !data.ok){ st.textContent = (data && data.error) || `Could not add the page (${res.status}).`; return; }
+      const p = data.page, esc = t => t.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+      $('#sd-pages').insertAdjacentHTML('beforeend', `<div class="sd-page" data-slug="${p.slug}">
+        <div class="sd-page-t"><b>${esc(p.title)}</b><span class="hint">/p/${p.slug}/</span></div>
+        <div class="sd-page-a"><a class="btn sm amber" target="_blank" href="${p.edit}">🖱 Drag &amp; drop</a>
+        <a class="btn sm" target="_blank" href="${p.edit}?open=code">💻 Code</a>
+        <a class="btn sm sd-ai-btn" target="_blank" href="${p.edit}?open=ai">✨ AI</a>
+        <button type="button" class="btn sm ghost" data-show-page="${p.slug}">👁 Preview</button></div></div>`);
+      $('#pv-page').insertAdjacentHTML('beforeend', `<option value="${p.slug}">${esc(p.title)}</option>`);
+      inp.value = ''; st.textContent = `✓ "${p.title}" added — open it with Drag & drop, Code or AI.`;
+    } catch(err){ st.textContent = 'No connection — the page was not added.'; }
+    finally { $('#add-page').disabled = false; }
+  }
+  $('#add-page').addEventListener('click', addPage);
+  $('#new-page').addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); addPage(); } });
+  // Enter kwenye fomu yoyote isipakie ukurasa
+  $$('.sd-step').forEach(f => f.addEventListener('submit', e => { e.preventDefault(); $('#sd-next').click(); }));
+
+  show(step, false);
 })();
 </script>
 {% endblock %}
