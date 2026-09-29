@@ -1,0 +1,6 @@
+{# Kadi moja ya design ya header/footer kwenye Studio. Inahitaji: item, current, kind #}
+<label class="sd-card {% if current == item.key %}sel{% endif %}">
+  <input type="radio" name="preset" value="{{ item.key }}" {% if current == item.key %}checked{% endif %} onchange="pickLayout(this)">
+  <div class="th {% if kind == 'footer' %}f th-f-{{ item.thumb }}{% else %}th-{{ item.thumb }}{% endif %}" aria-hidden="true"><i class="a"></i><i class="b"></i><i class="c"></i></div>
+  <b>{{ item.name }}</b><span>{{ item.desc }}</span>
+</label>

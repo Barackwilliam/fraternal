@@ -394,3 +394,125 @@ class SiteImportFlowTest(TestCase):
         self.assertIsNone(imp.website)              # rekodi imebaki kwa ajili ya prune
         self.assertEqual(set(self._prune()), urls)
         self.assertFalse(SiteImport.objects.filter(pk=imp.pk).exists())
+
+
+# ══ Website Studio + maktaba ya header/footer ══════════════════
+
+class LayoutLibraryTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user('mjenzi', password='Siri#123456')
+        self.site = ClientWebsite.objects.create(
+            owner=self.user, subdomain='dukamjenzi', site_name='Duka & Co', is_published=True,
+            contact_phone='+255 712 000 111', whatsapp_number='+255712000111',
+            contact_email='hi@duka.co.tz', contact_address='Arusha', tagline='Bei nafuu')
+        self.site.bootstrap_from_schema()
+
+    def test_every_design_renders_without_leftover_placeholders(self):
+        from builder.layouts import HEADERS, FOOTERS
+        from builder.nav_presets import render_nav, render_footer
+        self.assertGreaterEqual(len(HEADERS), 10)
+        self.assertGreaterEqual(len(FOOTERS), 10)
+        for key in HEADERS:
+            self.site.nav_preset = key
+            html, css = render_nav(self.site, 'home')
+            self.assertNotIn('{{', html, key)
+            self.assertIn('id="jt-links"', html, key)          # menyu ya simu inafanya kazi
+            self.assertIn('Duka &amp; Co', html, key)          # jina lime-escape-iwa
+            self.assertIn('.hx-burger', css, key)
+            self.assertEqual('.jt-body{margin-left' in css, HEADERS[key]['kind'] == 'side', key)
+        for key in FOOTERS:
+            self.site.footer_preset = key
+            html, css = render_footer(self.site)
+            self.assertNotIn('{{', html, key)
+            self.assertIn('JamiiTek', html, key)
+
+    def test_new_sites_default_to_sidebar_existing_look_kept(self):
+        r = Client().get('/', HTTP_HOST='dukamjenzi.jamiitek.com')
+        html = r.content.decode()
+        self.assertIn('hx-side_classic', html)
+        self.assertIn('fx-f_columns', html)
+        self.assertIn('<body class="has-custom">', html)     # hakuna padding ya glass juu
+
+        # Site ya zamani (nav_preset tupu) inabaki na nav ya glass ya awali
+        ClientWebsite.objects.filter(pk=self.site.pk).update(nav_preset='', footer_preset='')
+        html = Client().get('/', HTTP_HOST='dukamjenzi.jamiitek.com').content.decode()
+        self.assertIn('class="nav-glass"', html)
+        self.assertIn('class="jt-footer"', html)
+        self.assertNotIn('hx-side', html)
+
+    def test_font_choice_loads_only_when_chosen(self):
+        html = Client().get('/', HTTP_HOST='dukamjenzi.jamiitek.com').content.decode()
+        self.assertNotIn('fonts.googleapis.com', html)        # system: hakuna font ya ziada
+        self.site.theme_settings = {'font': 'poppins'}
+        self.site.save()
+        html = Client().get('/', HTTP_HOST='dukamjenzi.jamiitek.com').content.decode()
+        self.assertIn('family=Poppins', html)
+
+
+class StudioTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user('studio', password='Siri#123456')
+        self.site = ClientWebsite.objects.create(owner=self.user, subdomain='studiosite', site_name='Studio Site')
+        self.site.bootstrap_from_schema()
+        self.c = Client()
+        self.c.login(username='studio', password='Siri#123456')
+        self.base = f'/builder/site/{self.site.id}/studio/'
+
+    def test_every_step_opens_and_others_are_blocked(self):
+        for step in ('business', 'style', 'header', 'footer', 'pages', 'publish'):
+            r = self.c.get(f'{self.base}{step}/')
+            self.assertEqual(r.status_code, 200, step)
+            self.assertNotContains(r, 'scifi-canvas')          # hakuna WebGL — inafunguka haraka
+        self.assertEqual(self.c.get(f'{self.base}nope/').status_code, 404)
+        other = Client()
+        User.objects.create_user('jirani', password='Siri#123456')
+        other.login(username='jirani', password='Siri#123456')
+        self.assertEqual(other.get(self.base).status_code, 404)
+
+    def test_walk_through_all_steps(self):
+        r = self.c.post(f'{self.base}business/', {'site_name': 'Mama Lishe', 'tagline': 'Chakula kitamu',
+                                                  'contact_phone': '+255 700 111 222'})
+        self.assertRedirects(r, f'{self.base}style/', fetch_redirect_response=False)
+        r = self.c.post(f'{self.base}style/', {'accent_color': 'red; }</style>', 'font': 'poppins', 'dark_nav': 'on'})
+        self.assertRedirects(r, f'{self.base}header/', fetch_redirect_response=False)
+        r = self.c.post(f'{self.base}header/', {'mode': 'preset', 'preset': 'nope'})
+        self.assertRedirects(r, f'{self.base}header/', fetch_redirect_response=False)   # design isiyopo
+        self.c.post(f'{self.base}header/', {'mode': 'preset', 'preset': 'top_glass'})
+        self.c.post(f'{self.base}footer/', {'mode': 'custom', 'html': '<footer>{{site_name}} footer</footer>'})
+        self.c.post(f'{self.base}pages/', {})
+        self.c.post(f'{self.base}publish/', {})
+
+        self.site.refresh_from_db()
+        self.assertEqual(self.site.site_name, 'Mama Lishe')
+        self.assertNotIn('style', self.site.accent_color)     # rangi mbaya imekataliwa
+        self.assertEqual(self.site.theme_settings['font'], 'poppins')
+        self.assertTrue(self.site.dark_nav)
+        self.assertEqual(self.site.nav_preset, 'top_glass')
+        self.assertIn('{{site_name}} footer', self.site.custom_footer_html)
+        self.assertTrue(self.site.is_published)
+        self.assertEqual(set(self.site.theme_settings['studio_done']),
+                         {'business', 'style', 'header', 'footer', 'pages', 'publish'})
+
+        html = Client().get('/', HTTP_HOST='studiosite.jamiitek.com').content.decode()
+        self.assertIn('hx-top_glass', html)
+        self.assertIn('Mama Lishe footer', html)
+
+    def test_preview_shows_unsaved_choices_without_saving(self):
+        r = self.c.get(f'{self.base}preview/?header=side_midnight&footer=f_mega&accent=%23123456&font=inter')
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(r['X-Frame-Options'], 'SAMEORIGIN')
+        self.assertContains(r, 'hx-side_midnight')
+        self.assertContains(r, 'fx-f_mega')
+        self.assertContains(r, '--accent:#123456')
+        r = self.c.post(f'{self.base}preview/', {'header_html': '<nav id="jt-links">MPYA {{site_name}}</nav>'})
+        self.assertContains(r, 'MPYA Studio Site')
+        self.site.refresh_from_db()
+        self.assertEqual(self.site.nav_preset, 'side_classic')     # hakuna kilichohifadhiwa
+        self.assertEqual(self.site.custom_nav_html, '')
+        self.assertEqual(self.site.accent_color, '#e8a13c')
+
+    def test_dashboard_points_to_next_step(self):
+        self.c.post(f'{self.base}business/', {'site_name': 'X'})
+        r = self.c.get(f'/builder/site/{self.site.id}/')
+        self.assertContains(r, f'{self.base}style/')
+        self.assertContains(r, '1/6 done')

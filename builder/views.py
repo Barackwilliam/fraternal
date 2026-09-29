@@ -101,7 +101,8 @@ def signup(request):
             _register_subdomain(site)
             login(request, user)
             messages.success(request, f'Congratulations! Your website {site.subdomain}.jamiitek.com has been created.')
-            return redirect('builder:site_dashboard', site_id=site.id)
+            # Mteja mpya anaanza Studio — hatua kwa hatua, si dashboard yenye kila kitu
+            return redirect('builder:studio', site_id=site.id)
         except ValidationError as e:
             error = ' '.join(e.messages)
 
@@ -143,7 +144,7 @@ def create_site(request):
             site.bootstrap_from_schema()
             apply_template(site, request.POST.get('template_key', 'clean_start'))
             _register_subdomain(site)
-            return redirect('builder:site_dashboard', site_id=site.id)
+            return redirect('builder:studio', site_id=site.id)
         except ValidationError as e:
             error = ' '.join(e.messages)
     return render(request, 'builder/create_site.html', {
@@ -404,8 +405,15 @@ def site_dashboard(request, site_id):
          'url': '#publish'},
     ]
     done_count = sum(1 for st in steps if st['done'])
+    from .studio import studio_progress, STEPS as STUDIO_STEPS
+    st_done, st_total, st_next = studio_progress(site)
     return render(request, 'builder/dashboard.html', {
         'site': site,
+        'studio_done': st_done,
+        'studio_total': st_total,
+        'studio_pct': int(st_done / st_total * 100),
+        'studio_next': st_next,
+        'studio_next_title': dict((k, t) for k, t, _ in STUDIO_STEPS)[st_next],
         'pages': pages,
         'collections': col_list,
         'total_items': total_items,
@@ -983,13 +991,13 @@ def nav_save(request, site_id):
     """Hifadhi navbar. mode=preset (jina) au mode=custom (HTML)."""
     site = _my_site(request, site_id)
     mode = request.POST.get('mode')
-    from .nav_presets import NAV_PRESETS
+    from .nav_presets import NAV_PRESETS, HEADERS
     if mode == 'custom':
         site.custom_nav_html = (request.POST.get('html') or '')[:40000]
         site.nav_preset = ''
     elif mode == 'preset':
         key = request.POST.get('preset', '')
-        if key in NAV_PRESETS:
+        if key in HEADERS or key in NAV_PRESETS:
             site.nav_preset = key
             site.custom_nav_html = ''
     elif mode == 'default':
@@ -1006,18 +1014,18 @@ def footer_save(request, site_id):
     """Hifadhi footer. mode=preset/custom/default."""
     site = _my_site(request, site_id)
     mode = request.POST.get('mode')
-    from .nav_presets import FOOTER_PRESETS
+    from .nav_presets import FOOTER_PRESETS, FOOTERS
     if mode == 'custom':
         site.custom_footer_html = (request.POST.get('html') or '')[:40000]
     elif mode == 'preset':
         key = request.POST.get('preset', '')
-        if key in FOOTER_PRESETS:
-            # Footer preset: tunahifadhi HTML+CSS pamoja ndani ya custom_footer_html
-            preset = FOOTER_PRESETS[key]
-            site.custom_footer_html = f"<style>{preset['css']}</style>\n{preset['html']}"
+        if key in FOOTERS or key in FOOTER_PRESETS:
+            site.footer_preset = key
+            site.custom_footer_html = ''
     elif mode == 'default':
         site.custom_footer_html = ''
-    site.save(update_fields=['custom_footer_html'])
+        site.footer_preset = ''
+    site.save(update_fields=['custom_footer_html', 'footer_preset'])
     site.bump_version()
     return JsonResponse({'ok': True})
 

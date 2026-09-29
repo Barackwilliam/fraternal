@@ -1,0 +1,486 @@
+{% extends 'builder/base_panel.html' %}
+{% block title %}Studio · {{ step_title }} — {{ site.site_name }}{% endblock %}
+
+{# Studio haipakii WebGL/three.js ya background — inafunguka haraka #}
+{% block background %}{% endblock %}
+
+{% block sidenav %}
+<a href="{% url 'builder:site_dashboard' site.id %}">⬅ Dashboard</a>
+<div class="sd-steps">
+  {% for s in steps %}
+  <a href="{% url 'builder:studio_step' site.id s.key %}" class="{% if s.current %}active{% endif %}">
+    <span class="sd-n {% if s.done %}ok{% endif %}">{% if s.done %}✓{% else %}{{ s.num }}{% endif %}</span>
+    <span class="sd-st">{{ s.title }}<small>{{ s.sub }}</small></span>
+  </a>
+  {% endfor %}
+</div>
+{% endblock %}
+
+{% block mobnav %}
+<a href="{% url 'builder:site_dashboard' site.id %}"><span class="ic">⬅</span>Dash</a>
+{% for s in steps %}
+<a href="{% url 'builder:studio_step' site.id s.key %}" {% if s.current %}class="active"{% endif %}><span class="ic">{% if s.done %}✓{% else %}{{ s.num }}{% endif %}</span>{{ s.title|truncatewords:1 }}</a>
+{% endfor %}
+{% endblock %}
+
+{% block content %}
+<div class="sd-head">
+  <div class="crumb"><a href="{% url 'builder:site_dashboard' site.id %}">{{ site.site_name }}</a> / Website Studio</div>
+  <div class="sd-title">
+    <span class="sd-badge">Step {{ step_num }} of {{ steps|length }}</span>
+    <h1>{{ step_title }}</h1>
+  </div>
+  <div class="sd-bar"><i style="width:{{ progress_pct }}%"></i></div>
+</div>
+
+<div class="sd">
+<section class="sd-panel card">
+<form method="post" id="sd-form" autocomplete="off">
+  {% csrf_token %}
+
+  {% if step == 'business' %}
+  {# ═════════════ 1. BIASHARA ═════════════ #}
+  <p class="hint sd-lead">Tell us about your business. Tap <b>✨</b> on any field and AI writes it for you.</p>
+  <label>Business name *</label>
+  <input type="text" name="site_name" value="{{ site.site_name }}" data-ai="site_name" required maxlength="120">
+  <label>Tagline / slogan</label>
+  <input type="text" name="tagline" value="{{ site.tagline }}" data-ai="tagline" maxlength="200" placeholder="e.g. Fresh bread every morning in Arusha">
+
+  <label>Logo</label>
+  <div class="sd-logo">
+    <div class="sd-logo-box" id="logo-box">{% if site.logo_url %}<img src="{{ site.logo_url }}" alt="">{% else %}<span>No logo</span>{% endif %}</div>
+    <div style="flex:1;min-width:0">
+      <input type="file" id="logo-file" accept="image/png,image/jpeg,image/webp" hidden>
+      <button type="button" class="btn sm" onclick="document.getElementById('logo-file').click()">⬆ Upload logo</button>
+      <span class="hint" id="logo-status"></span>
+      <input type="text" name="logo_url" id="logo-url" value="{{ site.logo_url }}" placeholder="…or paste an image link" style="margin-top:8px">
+    </div>
+  </div>
+
+  <div class="grid c2">
+    <div><label>Phone</label><input type="text" inputmode="tel" name="contact_phone" value="{{ site.contact_phone }}" placeholder="+255 7XX XXX XXX"></div>
+    <div><label>WhatsApp</label><input type="text" inputmode="tel" name="whatsapp_number" value="{{ site.whatsapp_number }}" placeholder="+2557XXXXXXXX"></div>
+    <div><label>Email</label><input type="email" name="contact_email" value="{{ site.contact_email }}"></div>
+    <div><label>Address</label><input type="text" name="contact_address" value="{{ site.contact_address }}" placeholder="e.g. Sokoine Rd, Arusha"></div>
+  </div>
+
+  {% elif step == 'style' %}
+  {# ═════════════ 2. RANGI NA FONT ═════════════ #}
+  <p class="hint sd-lead">Pick a ready palette or your own color. The preview changes instantly.</p>
+  <h3 class="sd-h">Color palette</h3>
+  <div class="sd-pal">
+    {% for name, color, dark in palettes %}
+    <button type="button" class="sd-sw {% if site.accent_color|lower == color %}sel{% endif %}" style="--c:{{ color }}"
+            data-color="{{ color }}" data-dark="{{ dark|yesno:'1,0' }}" onclick="pickPalette(this)">
+      <i class="{% if dark %}dk{% endif %}"></i><span>{{ name }}</span>
+    </button>
+    {% endfor %}
+  </div>
+  <div class="sd-row">
+    <label class="sd-inline">Your own color <input type="color" name="accent_color" id="accent" value="{{ site.accent_color }}"></label>
+    <label class="sd-inline"><input type="checkbox" name="dark_nav" id="dark" {% if site.dark_nav %}checked{% endif %}> Dark menu</label>
+  </div>
+
+  <h3 class="sd-h">Font</h3>
+  <div class="sd-fonts">
+    {% for key, label in fonts %}
+    <label class="sd-font {% if current_font == key %}sel{% endif %}">
+      <input type="radio" name="font" value="{{ key }}" {% if current_font == key %}checked{% endif %} onchange="pickFont(this)">
+      <span>{{ label }}</span>
+    </label>
+    {% endfor %}
+  </div>
+  <p class="hint">“System” loads nothing extra — the fastest option for customers on mobile data.</p>
+
+  {% elif step == 'header' or step == 'footer' %}
+  {# ═════════════ 3–4. HEADER / FOOTER ═════════════ #}
+  <p class="hint sd-lead">{% if step == 'header' %}Choose how your menu looks. <b>Sidebar</b> keeps the menu on the left; <b>top bar</b> puts it above your content.{% else %}The footer appears at the bottom of every page with your contact details and links.{% endif %}</p>
+
+  <div class="sd-tabs" role="tablist">
+    <button type="button" class="on" data-tab="pick" onclick="sdTab('pick',this)">🎨 Choose a design</button>
+    <button type="button" data-tab="ai" onclick="sdTab('ai',this)">✨ AI</button>
+    <button type="button" data-tab="code" onclick="sdTab('code',this)">💻 Code</button>
+  </div>
+  <input type="hidden" name="mode" id="mode" value="preset">
+
+  <div class="sd-pane" id="pane-pick">
+    {% if step == 'header' %}
+      <h3 class="sd-h">Sidebars <span class="pill on">Recommended</span></h3>
+      <div class="sd-grid">{% for h in headers_side %}{% include 'builder/_studio_card.html' with item=h current=site.nav_preset kind='header' %}{% endfor %}</div>
+      <h3 class="sd-h">Top bars</h3>
+      <div class="sd-grid">{% for h in headers_top %}{% include 'builder/_studio_card.html' with item=h current=site.nav_preset kind='header' %}{% endfor %}</div>
+    {% else %}
+      <div class="sd-grid">{% for f in footers %}{% include 'builder/_studio_card.html' with item=f current=site.footer_preset kind='footer' %}{% endfor %}</div>
+    {% endif %}
+  </div>
+
+  <div class="sd-pane" id="pane-ai" hidden>
+    <p class="hint">Describe the {{ step }} you want. AI writes the code, then you can preview and tweak it.</p>
+    <textarea id="ai-brief" class="sd-brief" maxlength="800" placeholder="{% if step == 'header' %}e.g. Dark sidebar with my logo on top, big links and a green WhatsApp button at the bottom{% else %}e.g. Three columns: about us, quick links and contact, with a big WhatsApp button{% endif %}"></textarea>
+    <button type="button" class="btn sd-ai" id="ai-go" onclick="aiGen()">✨ Generate {{ step }}</button>
+    <div class="hint" id="ai-status" style="margin-top:8px"></div>
+  </div>
+
+  <div class="sd-pane" id="pane-code" hidden>
+    <p class="hint">Write your own HTML with a <code>&lt;style&gt;</code> block. Placeholders fill in automatically:
+      {% verbatim %}<code>{{site_name}}</code> <code>{{logo}}</code> <code>{{nav_links}}</code> <code>{{whatsapp}}</code> <code>{{phone}}</code> <code>{{year}}</code>{% endverbatim %}</p>
+    <textarea name="html" id="code" class="sd-code" spellcheck="false">{% if step == 'header' %}{{ site.custom_nav_html }}{% else %}{{ site.custom_footer_html }}{% endif %}</textarea>
+    <button type="button" class="btn sm" onclick="previewCode()" style="margin-top:10px">▶ Preview this code</button>
+  </div>
+
+  {% elif step == 'pages' %}
+  {# ═════════════ 5. KURASA ═════════════ #}
+  <p class="hint sd-lead">Build each page your way: drag & drop blocks, edit the code, or let AI write it.</p>
+  <div class="sd-pages">
+    {% for p in pages %}
+    <div class="sd-page">
+      <div class="sd-page-t"><b>{{ p.title }}</b><span class="hint">{% if p.slug == 'home' %}/{% else %}/p/{{ p.slug }}/{% endif %}</span></div>
+      <div class="sd-page-a">
+        <a class="btn sm amber" href="{% url 'builder:page_editor' site.id p.id %}">🖱 Drag &amp; drop</a>
+        <a class="btn sm" href="{% url 'builder:page_editor' site.id p.id %}?open=code">💻 Code</a>
+        <a class="btn sm sd-ai-btn" href="{% url 'builder:page_editor' site.id p.id %}?open=ai">✨ AI</a>
+        <button type="button" class="btn sm ghost" onclick="previewPage('{{ p.slug }}')">👁</button>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="sd-add">
+    <input type="text" id="new-page" placeholder="New page name, e.g. Gallery" maxlength="80">
+    <button type="button" class="btn sm" onclick="addPage()">➕ Add page</button>
+  </div>
+
+  {% if collections %}
+  <h3 class="sd-h">Your content</h3>
+  <p class="hint">Items you add here show up automatically wherever the matching block is on your pages.</p>
+  <div class="sd-cols">
+    {% for c in collections %}
+    <a class="sd-col" href="{% url 'builder:collection_items' site.id c.id %}">{{ c.icon }} <b>{{ c.name }}</b><span>{{ c.items.count }} added →</span></a>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <a class="sd-zip" href="{% url 'builder:site_import' site.id %}">📦 <span><b>Already have a website?</b> Upload the whole folder as a ZIP</span> →</a>
+
+  {% elif step == 'publish' %}
+  {# ═════════════ 6. PUBLISH ═════════════ #}
+  {% if site.is_published %}
+    <div class="sd-live">
+      <div style="font-size:42px">🎉</div>
+      <h2>Your website is live</h2>
+      <p class="hint">Share this link with your customers:</p>
+      <a class="sd-url" href="{{ site.public_url }}" target="_blank" rel="noopener">{{ site.subdomain }}.jamiitek.com ↗</a>
+      <p class="hint" style="margin-top:14px">You can come back to any step to change your design — updates go live immediately.</p>
+    </div>
+  {% else %}
+    <p class="hint sd-lead">Everything looks good? Publish and your website goes live for everyone.</p>
+    <ul class="sd-check">
+      {% for s in steps %}{% if s.key != 'publish' %}
+      <li class="{% if s.done %}ok{% endif %}"><span>{% if s.done %}✓{% else %}○{% endif %}</span>{{ s.title }}
+        {% if not s.done %}<a href="{% url 'builder:studio_step' site.id s.key %}">Do it →</a>{% endif %}</li>
+      {% endif %}{% endfor %}
+    </ul>
+  {% endif %}
+  {% endif %}
+
+  <div class="sd-actions">
+    {% if prev_step %}<a class="btn ghost" href="{% url 'builder:studio_step' site.id prev_step %}">← Back</a>{% else %}<span></span>{% endif %}
+    {% if step == 'publish' %}
+      {% if site.is_published %}<a class="btn amber" href="{% url 'builder:site_dashboard' site.id %}">Go to dashboard →</a>
+      {% else %}<button class="btn amber">🚀 Publish my website</button>{% endif %}
+    {% else %}
+      <button class="btn amber">Save &amp; continue →</button>
+    {% endif %}
+  </div>
+</form>
+</section>
+
+<section class="sd-prev">
+  <div class="sd-prev-bar">
+    <span class="sd-dots"><i></i><i></i><i></i></span>
+    <select id="pv-page" onchange="previewPage(this.value)" aria-label="Page to preview">
+      {% for p in pages %}<option value="{{ p.slug }}">{{ p.title }}</option>{% endfor %}
+    </select>
+    <span class="sd-dev">
+      <button type="button" class="on" onclick="device('desk',this)" title="Desktop">🖥</button>
+      <button type="button" onclick="device('mob',this)" title="Mobile">📱</button>
+    </span>
+    <a href="{{ site.public_url }}" target="_blank" rel="noopener" class="sd-open" title="Open live site">↗</a>
+  </div>
+  <div class="sd-frame" id="frame-wrap"><iframe id="pv" name="pv" title="Live preview" src="{{ preview_url }}"></iframe></div>
+</section>
+</div>
+
+{# Fomu ya siri: kuonyesha code ambayo haijahifadhiwa, ndani ya iframe #}
+<form id="code-preview" method="post" action="{{ preview_url }}" target="pv" hidden>
+  {% csrf_token %}<input type="hidden" name="{{ step }}_html" id="code-preview-html">
+</form>
+
+<style>
+.main{max-width:none}
+.sd-steps{margin-top:10px;border-top:1px solid var(--line);padding-top:10px}
+.sd-steps a{align-items:center}
+.sd-n{width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;
+  border:1.5px solid var(--line);font-family:var(--ff-mono);font-size:12px;font-weight:700;color:var(--muted)}
+.sd-n.ok{background:var(--green);border-color:var(--green);color:#04120a}
+.sd-steps a.active .sd-n{border-color:var(--cyan);color:var(--cyan)}
+.sd-st{display:flex;flex-direction:column;line-height:1.25}
+.sd-st small{font-size:11px;color:var(--dim);font-weight:400}
+.sd-head{margin-bottom:18px}
+.sd-title{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:6px 0 12px}
+.sd-title h1{margin:0}
+.sd-badge{font-family:var(--ff-mono);font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--cyan);
+  border:1px solid rgba(0,212,255,.3);padding:5px 10px;border-radius:100px}
+.sd-bar{height:6px;background:rgba(255,255,255,.05);border-radius:6px;overflow:hidden}
+.sd-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--green),var(--cyan));border-radius:6px;transition:width .4s var(--ease)}
+.sd{display:grid;grid-template-columns:minmax(340px,440px) 1fr;gap:20px;align-items:start}
+.sd-panel{margin:0}
+.sd-lead{font-size:14px;margin:0 0 6px}
+.sd-h{font-size:14px;margin:22px 0 10px;color:#fff;display:flex;align-items:center;gap:8px}
+.sd-actions{display:flex;justify-content:space-between;gap:10px;margin-top:26px;padding-top:18px;border-top:1px solid var(--line);
+  position:sticky;bottom:0;background:linear-gradient(180deg,transparent,var(--panel,#0b1426) 30%);padding-bottom:4px}
+.sd-logo{display:flex;gap:14px;align-items:flex-start}
+.sd-logo-box{width:72px;height:72px;border-radius:14px;border:1.5px dashed var(--line);display:flex;align-items:center;justify-content:center;
+  overflow:hidden;flex-shrink:0;background:rgba(255,255,255,.03);font-size:11px;color:var(--dim)}
+.sd-logo-box img{width:100%;height:100%;object-fit:contain}
+.sd-pal{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px}
+.sd-sw{border:1.5px solid var(--line);background:rgba(255,255,255,.03);border-radius:12px;padding:10px 8px;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--muted);font-size:11.5px;font-weight:600;transition:.15s}
+.sd-sw i{width:34px;height:34px;border-radius:50%;background:var(--c);box-shadow:inset 0 0 0 3px #fff}
+.sd-sw i.dk{box-shadow:inset 0 0 0 3px #111827}
+.sd-sw:hover{border-color:var(--c)}.sd-sw.sel{border-color:var(--c);color:#fff;box-shadow:0 0 0 2px color-mix(in srgb,var(--c) 35%,transparent)}
+.sd-row{display:flex;gap:18px;flex-wrap:wrap;margin-top:14px}
+.sd-inline{display:flex!important;align-items:center;gap:10px;margin:0!important}
+.sd-inline input[type=color]{width:44px;height:34px;padding:2px;border-radius:8px}
+.sd-inline input[type=checkbox]{width:auto}
+.sd-fonts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sd-font{display:flex!important;align-items:center;gap:8px;margin:0!important;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer;font-weight:500}
+.sd-font input{width:auto}.sd-font.sel{border-color:var(--green)}
+.sd-tabs{display:flex;gap:4px;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:12px;padding:4px;margin:14px 0}
+.sd-tabs button{flex:1;background:none;border:none;color:var(--muted);padding:9px 8px;border-radius:9px;font-weight:700;font-size:13px;cursor:pointer}
+.sd-tabs button.on{background:var(--green);color:#04120a}
+.sd-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.sd-card{position:relative;border:1.5px solid var(--line);border-radius:12px;padding:8px;cursor:pointer;background:rgba(255,255,255,.02);transition:.15s;display:block;margin:0!important}
+.sd-card:hover{border-color:var(--cyan);transform:translateY(-2px)}
+.sd-card input{position:absolute;opacity:0;pointer-events:none}
+.sd-card.sel{border-color:var(--green);box-shadow:0 0 0 2px rgba(37,211,102,.25)}
+.sd-card b{display:block;color:#fff;font-size:12.5px;margin:8px 2px 2px}
+.sd-card span{display:block;font-size:11px;color:var(--muted);line-height:1.4;margin:0 2px 2px}
+.sd-brief,.sd-code{width:100%;border:1.5px solid var(--line);border-radius:12px;background:rgba(255,255,255,.03);color:var(--ink);padding:12px}
+.sd-brief{min-height:90px;font-family:inherit;font-size:14px}
+.sd-code{min-height:260px;background:#070b14;color:#a9c7e8;font-family:var(--ff-mono);font-size:12.5px;line-height:1.6}
+.sd-ai,.sd-ai-btn{background:linear-gradient(135deg,var(--violet),var(--cyan))!important;color:#fff!important;border:none!important}
+.sd-ai{width:100%;margin-top:10px}
+.sd-pages{display:flex;flex-direction:column;gap:8px}
+.sd-page{border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:10px}
+.sd-page-t{display:flex;justify-content:space-between;gap:10px}.sd-page-t b{color:#fff}
+.sd-page-a{display:flex;gap:6px;flex-wrap:wrap}
+.sd-add{display:flex;gap:8px;margin-top:10px}.sd-add input{flex:1}
+.sd-cols{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sd-col{border:1px solid var(--line);border-radius:12px;padding:12px;text-decoration:none;display:flex;flex-direction:column;gap:2px}
+.sd-col b{color:#fff}.sd-col span{font-size:12px;color:var(--muted)}
+.sd-zip{display:flex;align-items:center;gap:12px;margin-top:18px;padding:14px;border:1px dashed rgba(37,211,102,.4);border-radius:12px;text-decoration:none;font-size:22px}
+.sd-zip span{flex:1;font-size:13px;color:var(--muted)}.sd-zip b{color:#fff;display:block}
+.sd-check{list-style:none;padding:0;margin:14px 0;display:flex;flex-direction:column;gap:8px}
+.sd-check li{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:10px;padding:12px 14px;color:var(--muted)}
+.sd-check li.ok{color:var(--ink)}.sd-check li span{color:var(--green);font-weight:800;width:16px}
+.sd-check li a{margin-left:auto;color:var(--cyan);font-size:13px}
+.sd-live{text-align:center;padding:10px 0}.sd-live h2{margin:8px 0}
+.sd-url{display:inline-block;margin-top:8px;font-family:var(--ff-mono);color:var(--green);font-size:16px;padding:10px 16px;border:1px solid var(--line-2);border-radius:10px}
+.sd-prev{position:sticky;top:18px;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#0a0f1c;display:flex;flex-direction:column;height:calc(100vh - 150px);min-height:480px}
+.sd-prev-bar{display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid var(--line);background:#0d1424}
+.sd-dots{display:flex;gap:5px}.sd-dots i{width:9px;height:9px;border-radius:50%;background:#2a3446}
+.sd-prev-bar select{flex:1;min-width:0;max-width:220px;margin:0;padding:6px 10px;font-size:12.5px}
+.sd-dev{display:flex;gap:2px;margin-left:auto}
+.sd-dev button{background:none;border:1px solid transparent;border-radius:8px;padding:5px 8px;cursor:pointer;font-size:14px;opacity:.6}
+.sd-dev button.on{opacity:1;border-color:var(--line)}
+.sd-open{text-decoration:none;color:var(--muted);padding:4px 8px}
+.sd-frame{flex:1;position:relative;background:#1a2233;overflow:hidden}
+/* Iframe inachorwa kwa upana halisi (1280 kompyuta, 390 simu) kisha fitFrame() inaipunguza */
+.sd-frame iframe{position:absolute;top:0;left:0;border:0;background:#fff;transform-origin:0 0}
+.sd-frame.mob iframe{box-shadow:0 0 0 1px #000,0 20px 60px rgba(0,0,0,.5)}
+@media(max-width:1100px){.sd{grid-template-columns:1fr}.sd-prev{position:relative;top:0;height:70vh}}
+
+/* ── Michoro midogo ya headers/footers ── */
+.th{position:relative;aspect-ratio:16/10;border-radius:8px;overflow:hidden;background:#f3f5f8;
+  --k:var(--acc,#25d366)}
+.th::after{content:"";position:absolute;inset:34% 10% 12% 10%;
+  background:linear-gradient(#dde2ea 0 0) 0 0/60% 9% no-repeat,linear-gradient(#e7ebf1 0 0) 0 26%/85% 6% no-repeat,
+  linear-gradient(#e7ebf1 0 0) 0 40%/70% 6% no-repeat,linear-gradient(var(--k) 0 0) 0 62%/24% 11% no-repeat}
+.th i{position:absolute;display:block}
+/* side */
+.th[class*="th-side"]::after{left:36%}
+.th[class*="th-side"] .a{left:0;top:0;bottom:0;width:27%;background:#fff;border-right:1px solid #e3e7ee}
+.th[class*="th-side"] .b{left:6%;top:9%;width:13%;height:7%;border-radius:3px;background:var(--k)}
+.th[class*="th-side"] .c{left:5%;top:24%;width:17%;height:40%;background:repeating-linear-gradient(#cfd6e0 0 5%,transparent 5% 18%)}
+.th-side-dark .a{background:#0b1020!important;border:none!important}.th-side-dark .c{background:repeating-linear-gradient(#3a4660 0 5%,transparent 5% 18%)!important}
+.th-side-accent .a{background:var(--k)!important;border:none!important}.th-side-accent .b{background:#fff!important}
+.th-side-accent .c{background:repeating-linear-gradient(rgba(255,255,255,.7) 0 5%,transparent 5% 18%)!important}
+.th-side-slim .a{width:19%!important}.th-side-slim .c{width:10%!important}.th-side-slim::after{left:28%!important}
+.th-side-float .a{top:5%!important;bottom:5%!important;left:3%!important;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,.12);border:none!important}
+.th-side-editorial .a{background:#f7f3ec!important;width:31%!important}.th-side-editorial .b{width:20%!important;height:9%!important;background:#1b1712!important}
+.th-side-editorial .c{background:repeating-linear-gradient(#d8ccb9 0 3%,transparent 3% 16%)!important;width:22%!important}
+/* top */
+.th:not([class*="th-side"]):not(.f) .a{left:0;right:0;top:0;height:18%;background:#fff;border-bottom:1px solid #e3e7ee}
+.th:not([class*="th-side"]):not(.f) .b{left:6%;top:6%;width:14%;height:6%;border-radius:3px;background:var(--k)}
+.th:not([class*="th-side"]):not(.f) .c{right:6%;top:7%;width:34%;height:4%;background:repeating-linear-gradient(90deg,#cfd6e0 0 18%,transparent 18% 26%)}
+.th-float .a{left:4%!important;right:4%!important;top:4%!important;border-radius:6px;box-shadow:0 3px 10px rgba(0,0,0,.1);border:none!important}
+.th-float .b{left:9%!important;top:9%!important}.th-float .c{top:10%!important;right:10%!important}
+.th-center .a{height:26%!important}.th-center .b{left:43%!important;top:5%!important}.th-center .c{right:30%!important;top:17%!important;width:40%!important}
+.th-split .b{left:43%!important}.th-split .c{left:6%!important;right:auto!important;width:28%!important}
+.th-accent .a{background:var(--k)!important;border:none!important}.th-accent .b{background:#fff!important}
+.th-accent .c{background:repeating-linear-gradient(90deg,rgba(255,255,255,.75) 0 18%,transparent 18% 26%)!important}
+.th-minimal .a{background:transparent!important;border:none!important}.th-minimal .b{background:#1f2937!important}
+.th-strip .a{height:24%!important;border-top:5px solid color-mix(in srgb,var(--k) 85%,#000)}.th-strip .b{top:11%!important}.th-strip .c{top:13%!important}
+.th-dark .a{background:#0b1020!important;border-bottom:2px solid var(--k)!important}.th-dark .c{background:repeating-linear-gradient(90deg,#3a4660 0 18%,transparent 18% 26%)!important}
+/* footers */
+.th.f::after{inset:10% 10% 44% 10%}
+.th.f .a{left:0;right:0;bottom:0;height:36%;background:#0b0f16}
+.th.f .b{left:7%;bottom:22%;width:16%;height:5%;border-radius:2px;background:#e8ecf2}
+.th.f .c{right:7%;bottom:9%;width:48%;height:18%;background:repeating-linear-gradient(90deg,#3a4660 0 20%,transparent 20% 30%)}
+.th-f-cta .a{height:48%!important;background:linear-gradient(var(--k) 0 55%,#0b0f16 55%)!important}.th-f-cta .b{bottom:30%!important;background:#fff!important}
+.th-f-mega .a{height:46%!important;background:radial-gradient(circle at 20% 0,color-mix(in srgb,var(--k) 35%,transparent),transparent 60%),#07090f!important}
+.th-f-mega .c{height:10%!important;width:80%!important;right:10%!important;bottom:6%!important;background:rgba(255,255,255,.12)!important}
+.th-f-center .a,.th-f-line .a,.th-f-split .a,.th-f-cards .a{background:#f6f7f9!important;border-top:1px solid #e3e7ee}
+.th-f-center .b{left:42%!important;background:#1f2937!important}.th-f-center .c{right:26%!important;background:repeating-linear-gradient(90deg,#cfd6e0 0 20%,transparent 20% 30%)!important}
+.th-f-line .a{height:14%!important}.th-f-line .b{bottom:5%!important;background:#1f2937!important}.th-f-line .c{bottom:5%!important;height:4%!important;background:repeating-linear-gradient(90deg,#cfd6e0 0 20%,transparent 20% 30%)!important}
+.th-f-split .b{background:#1f2937!important}.th-f-split .c{background:#fff!important;border:1px solid #dfe3ea;border-radius:4px;width:34%!important;height:24%!important}
+.th-f-accent .a{background:var(--k)!important}.th-f-accent .c{background:repeating-linear-gradient(90deg,rgba(255,255,255,.6) 0 20%,transparent 20% 30%)!important}
+.th-f-cards .b{display:none}.th-f-cards .c{left:7%!important;width:86%!important;height:16%!important;
+  background:repeating-linear-gradient(90deg,#fff 0 31%,transparent 31% 34.5%)!important;box-shadow:none}
+.th-f-editorial .a{background:#f7f3ec!important}.th-f-editorial .b{width:40%!important;height:10%!important;background:#1b1712!important;bottom:20%!important}
+.th-f-editorial .c{background:repeating-linear-gradient(90deg,#d8ccb9 0 20%,transparent 20% 30%)!important}
+.th-f-simple .a{height:20%!important}.th-f-simple .b{bottom:8%!important}.th-f-simple .c{bottom:7%!important;height:5%!important}
+.th-f-gradient .a{background:linear-gradient(160deg,var(--k),#0b1020 70%)!important}
+.th-f-stacked .c{left:7%!important;right:auto!important;width:46%!important;height:26%!important;bottom:5%!important;
+  background:repeating-linear-gradient(#e8ecf2 0 12%,transparent 12% 34%)!important}.th-f-stacked .b{left:auto!important;right:10%!important}
+</style>
+{% endblock %}
+
+{% block scripts %}
+{% include 'builder/_ai_magic.html' %}
+<script>
+(function(){
+  const CSRF = '{{ csrf_token }}';
+  const SID = {{ site.id }};
+  const STEP = '{{ step }}';
+  const PREVIEW = '{{ preview_url }}';
+  const pv = document.getElementById('pv');
+  const state = {};
+  const acc = document.getElementById('accent');
+
+  function refresh(){
+    const q = new URLSearchParams(state).toString();
+    pv.src = PREVIEW + (q ? '?' + q : '');
+  }
+  // Rangi ya sasa inaonekana hata kwenye michoro midogo ya headers/footers
+  function paintThumbs(color){ document.documentElement.style.setProperty('--acc', color); }
+  paintThumbs('{{ site.accent_color }}');
+
+  window.previewPage = slug => { state.page = slug; document.getElementById('pv-page').value = slug; refresh(); };
+  // Preview ya kompyuta inaonyesha sura ya kompyuta hata kwenye nafasi ndogo:
+  // inachorwa kwa 1280px kisha inapunguzwa (scale) iingie.
+  const wrap = document.getElementById('frame-wrap');
+  function fitFrame(){
+    const mob = wrap.classList.contains('mob');
+    const W = mob ? 390 : 1280, w = wrap.clientWidth, h = wrap.clientHeight;
+    const k = Math.min(1, w / W);
+    pv.style.width = W + 'px';
+    pv.style.height = (h / k) + 'px';
+    pv.style.left = Math.max(0, (w - W * k) / 2) + 'px';
+    pv.style.transform = `scale(${k})`;
+  }
+  new ResizeObserver(fitFrame).observe(wrap);
+  fitFrame();
+  window.device = (d, btn) => {
+    wrap.classList.toggle('mob', d === 'mob');
+    document.querySelectorAll('.sd-dev button').forEach(b => b.classList.toggle('on', b === btn));
+    fitFrame();
+  };
+
+  // ── Hatua ya 2: rangi na font ──
+  let t;
+  window.pickPalette = btn => {
+    document.querySelectorAll('.sd-sw').forEach(b => b.classList.toggle('sel', b === btn));
+    acc.value = btn.dataset.color;
+    document.getElementById('dark').checked = btn.dataset.dark === '1';
+    state.accent = btn.dataset.color; state.dark = btn.dataset.dark; refresh();
+  };
+  if (acc) acc.addEventListener('input', () => {
+    document.querySelectorAll('.sd-sw').forEach(b => b.classList.remove('sel'));
+    state.accent = acc.value; paintThumbs(acc.value);
+    clearTimeout(t); t = setTimeout(refresh, 250);
+  });
+  const dark = document.getElementById('dark');
+  if (dark) dark.addEventListener('change', () => { state.dark = dark.checked ? '1' : '0'; refresh(); });
+  window.pickFont = r => {
+    document.querySelectorAll('.sd-font').forEach(l => l.classList.toggle('sel', l.contains(r)));
+    state.font = r.value; refresh();
+  };
+
+  // ── Hatua ya 3–4: design, AI, code ──
+  window.pickLayout = (input) => {
+    document.querySelectorAll('.sd-card').forEach(c => c.classList.toggle('sel', c.contains(input)));
+    state[STEP] = input.value; refresh();
+  };
+  window.sdTab = (name, btn) => {
+    document.querySelectorAll('.sd-tabs button').forEach(b => b.classList.toggle('on', b === btn));
+    document.querySelectorAll('.sd-pane').forEach(p => p.hidden = p.id !== 'pane-' + name);
+    // Code/AI zinahifadhi code; "Choose" inahifadhi design iliyochaguliwa
+    document.getElementById('mode').value = name === 'pick' ? 'preset' : 'custom';
+  };
+  window.previewCode = () => {
+    document.getElementById('code-preview-html').value = document.getElementById('code').value;
+    document.getElementById('code-preview').submit();
+  };
+  window.aiGen = async () => {
+    const brief = document.getElementById('ai-brief').value.trim();
+    const st = document.getElementById('ai-status'), go = document.getElementById('ai-go');
+    if (brief.length < 3){ st.textContent = 'Describe what you want first.'; return; }
+    go.disabled = true; go.textContent = '✨ Designing…'; st.textContent = 'AI is writing your ' + STEP + '…';
+    try {
+      const fd = new FormData(); fd.append('brief', brief); fd.append('target', STEP === 'footer' ? 'footer' : 'nav');
+      const res = await fetch(`/builder/site/${SID}/nav/ai/`, {method:'POST', headers:{'X-CSRFToken':CSRF}, body:fd});
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data || !data.ok){ st.textContent = (data && data.error) || 'AI could not finish — try again.'; return; }
+      document.getElementById('code').value = data.html;
+      sdTab('code', document.querySelector('.sd-tabs [data-tab=code]'));
+      previewCode();
+      st.textContent = '';
+    } catch(e){ st.textContent = 'Cannot reach the server — check your connection.'; }
+    finally { go.disabled = false; go.textContent = '✨ Generate ' + STEP; }
+  };
+  {% if step == 'header' and site.custom_nav_html or step == 'footer' and site.custom_footer_html %}
+  // Mteja ana code yake tayari — anzia kwenye tab ya Code
+  sdTab('code', document.querySelector('.sd-tabs [data-tab=code]'));
+  {% endif %}
+
+  // ── Hatua ya 1: logo ──
+  const lf = document.getElementById('logo-file');
+  if (lf) lf.addEventListener('change', async () => {
+    const f = lf.files[0]; if (!f) return;
+    const st = document.getElementById('logo-status'); st.textContent = ' Uploading…';
+    const fd = new FormData(); fd.append('file', f);
+    try {
+      const res = await fetch("{% url 'builder:asset_upload' site.id %}", {method:'POST', headers:{'X-CSRFToken':CSRF}, body:fd});
+      const data = await res.json();
+      if (!res.ok) { st.textContent = ' ' + (data.error || 'Upload failed'); return; }
+      document.getElementById('logo-url').value = data.url;
+      document.getElementById('logo-box').innerHTML = `<img src="${data.url}" alt="">`;
+      st.textContent = ' ✓ Uploaded — save to apply';
+    } catch(e){ st.textContent = ' Upload failed — check your connection'; }
+  });
+
+  // ── Hatua ya 5: ukurasa mpya ──
+  window.addPage = () => {
+    const title = document.getElementById('new-page').value.trim();
+    if (!title) return;
+    const f = document.createElement('form');
+    f.method = 'post'; f.action = "{% url 'builder:page_create' site.id %}";
+    f.innerHTML = `<input type="hidden" name="csrfmiddlewaretoken" value="${CSRF}"><input type="hidden" name="title">`;
+    f.querySelector('[name=title]').value = title;
+    document.body.appendChild(f); f.submit();
+  };
+})();
+</script>
+{% endblock %}

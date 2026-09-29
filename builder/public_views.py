@@ -57,6 +57,8 @@ def _ctx(site, extra=None):
     ctx['custom_nav_css'] = nav_css
     ctx['custom_footer_html'] = foot_html
     ctx['custom_footer_css'] = foot_css
+    from .layouts import font_for
+    ctx['font_href'], ctx['font_body'], ctx['font_head'] = font_for(site)
 
     if extra:
         ctx.update(extra)

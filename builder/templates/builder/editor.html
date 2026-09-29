@@ -1175,7 +1175,14 @@ function endTour(){
   document.getElementById('tour-ov').classList.remove('on');
   localStorage.setItem('jt_tour_done', '1');
 }
-editor.on('load', ()=> setTimeout(()=>startTour(false), 900));
+// Studio inafungua editor moja kwa moja kwenye Code au AI (?open=code / ?open=ai).
+// Mteja amechagua njia yake tayari, kwa hiyo tour haionyeshwi juu yake.
+const OPEN_WITH = new URLSearchParams(location.search).get('open');
+editor.on('load', ()=> setTimeout(()=>{
+  if (OPEN_WITH === 'code') openCode();
+  else if (OPEN_WITH === 'ai') toggleAI();
+  else startTour(false);
+}, 900));
 </script>
 </body>
 </html>

@@ -119,7 +119,10 @@ class ClientWebsite(models.Model):
     global_css = models.TextField(blank=True)   # design system ya template
     custom_nav_html = models.TextField(blank=True)   # navbar ya mteja mwenyewe (au tupu = default)
     custom_footer_html = models.TextField(blank=True) # footer ya mteja mwenyewe
-    nav_preset = models.CharField(max_length=20, default='', blank=True)  # jina la preset iliyochaguliwa
+    # Muundo wa header/footer kutoka builder/layouts.py. Site MPYA zinaanza na
+    # sidebar ya kushoto; zilizopo zina '' (muonekano wa zamani haubadiliki).
+    nav_preset = models.CharField(max_length=20, default='side_classic', blank=True)
+    footer_preset = models.CharField(max_length=20, default='f_columns', blank=True)
     is_published = models.BooleanField(default=False)
     is_suspended = models.BooleanField(default=False)  # kwa admin wa JamiiTek
     created_at = models.DateTimeField(auto_now_add=True)
