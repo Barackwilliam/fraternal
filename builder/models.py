@@ -353,12 +353,15 @@ class SiteImport(models.Model):
     ana cache yake, na hakikisho lingepotea ombi la kuthibitisha
     likiangukia worker mwingine.
 
-    `uploaded` ina URL za kila file lililopakiwa Supabase. Mteja
-    asipothibitisha (au upakiaji ukishindwa katikati), command ya
-    `prune_site_imports` inazifuta baada ya IMPORT_TTL_HOURS.
+    `uploaded` ina URL za kila file lililopakiwa Supabase. Command ya
+    `prune_site_imports` inazifuta mteja asipothibitisha ndani ya
+    IMPORT_TTL_HOURS, au baadaye site isipozitaja tena (ZIP mpya
+    imechukua nafasi ya kurasa zote za import hii).
     """
+    # SET_NULL, si CASCADE: site ikifutwa, rekodi inabaki ili prune
+    # ifute files zake Supabase (vinginevyo zingebaki bila mwenyewe).
     website = models.ForeignKey(
-        ClientWebsite, on_delete=models.CASCADE, related_name='imports')
+        ClientWebsite, on_delete=models.SET_NULL, null=True, related_name='imports')
     token = models.CharField(max_length=32, unique=True)
     result = models.JSONField(default=dict, blank=True)   # pages, skipped, missing
     uploaded = models.JSONField(default=list, blank=True)
@@ -370,4 +373,4 @@ class SiteImport(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return f'{self.website.subdomain} import {self.token[:8]}'
+        return f'{self.website.subdomain if self.website else "(site imefutwa)"} import {self.token[:8]}'

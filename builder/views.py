@@ -683,7 +683,8 @@ def site_import_confirm(request, site_id):
             SiteAsset(website=site, url=u, file_name=u.rsplit('/', 1)[-1][:200])
             for u in imp.images
         ])
-        # Files sasa ni za site — prune isiziguse. Documents hazihitajiki tena.
+        # Documents hazihitajiki tena. `uploaded` inabaki: prune inaitumia kujua
+        # files za kufuta ZIP mpya ikichukua nafasi ya kurasa hizi.
         imp.confirmed_at = timezone.now()
         imp.result = {'pages': len(pages)}
         imp.save(update_fields=['confirmed_at', 'result'])

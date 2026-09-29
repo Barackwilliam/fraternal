@@ -234,8 +234,10 @@ class SiteImportFlowTest(TestCase):
         self.c = Client()
         self.c.login(username='mteja', password='Siri#123456')
 
+    _urls = itertools.count()      # URL mpya kila upakiaji, kama UUID za Supabase
+
     def _upload(self):
-        counter = itertools.count()
+        counter = self._urls
 
         def fake_upload(data, folder, ext, content_type):
             return {'success': True, 'url': f'https://cdn.test/{folder}/{next(counter)}.{ext}'}
@@ -310,34 +312,85 @@ class SiteImportFlowTest(TestCase):
         self.assertEqual(imp.result, {})
         self.assertFalse(self.site.pages.exclude(raw_document='').exists())
 
-    def test_prune_deletes_stale_unconfirmed_imports(self):
-        from datetime import timedelta
+    def _prune(self, delete=lambda u: True):
         from django.core.management import call_command
+        deleted = []
+        with mock.patch('apps.storage.is_configured', return_value=True), \
+                mock.patch('apps.storage.delete', side_effect=lambda u: deleted.append(u) or delete(u)):
+            call_command('prune_site_imports', quiet=True)
+        return deleted
+
+    def _age(self, imp, **kw):
+        from datetime import timedelta
         from django.utils import timezone
+        from builder.models import SiteImport
+        SiteImport.objects.filter(pk=imp.pk).update(**{
+            k: timezone.now() - timedelta(days=2) for k in kw})
+
+    def test_prune_deletes_stale_unconfirmed_imports(self):
         from builder.models import SiteImport
 
         r = self._upload()
         fresh = SiteImport.objects.get(token=r.context['token'])
         stale = SiteImport.objects.create(website=self.site, token='a' * 32,
                                           uploaded=['https://cdn.test/x.png', 'https://cdn.test/y.css'])
-        SiteImport.objects.filter(pk=stale.pk).update(created_at=timezone.now() - timedelta(days=2))
-        done = SiteImport.objects.create(website=self.site, token='b' * 32, uploaded=['https://cdn.test/z.png'],
-                                         confirmed_at=timezone.now() - timedelta(days=2))
-        SiteImport.objects.filter(pk=done.pk).update(created_at=timezone.now() - timedelta(days=2))
+        self._age(stale, created_at=1)
 
-        deleted = []
-        with mock.patch('apps.storage.is_configured', return_value=True), \
-                mock.patch('apps.storage.delete', side_effect=lambda u: deleted.append(u) or True):
-            call_command('prune_site_imports', quiet=True)
-
-        self.assertEqual(sorted(deleted), ['https://cdn.test/x.png', 'https://cdn.test/y.css'])
+        self.assertEqual(sorted(self._prune()), ['https://cdn.test/x.png', 'https://cdn.test/y.css'])
         self.assertFalse(SiteImport.objects.filter(pk=stale.pk).exists())
         self.assertTrue(SiteImport.objects.filter(pk=fresh.pk).exists())   # bado ndani ya saa 24
-        self.assertTrue(SiteImport.objects.filter(pk=done.pk).exists())    # imethibitishwa: files ni za site
 
         # Kufuta kukishindwa, rekodi inabaki kwa jaribio lijalo
-        SiteImport.objects.filter(pk=fresh.pk).update(created_at=timezone.now() - timedelta(days=2))
-        with mock.patch('apps.storage.is_configured', return_value=True), \
-                mock.patch('apps.storage.delete', return_value=False):
-            call_command('prune_site_imports', quiet=True)
+        self._age(fresh, created_at=1)
+        self._prune(delete=lambda u: False)
         self.assertTrue(SiteImport.objects.get(pk=fresh.pk).uploaded)
+
+    def test_reimport_cleans_up_old_import_only_when_unused(self):
+        from builder.models import SiteImport, SiteAsset
+
+        # Import ya kwanza, imethibitishwa
+        r = self._upload()
+        self.c.post(f'/builder/site/{self.site.id}/import/confirm/', {'token': r.context['token']})
+        first = SiteImport.objects.get(token=r.context['token'])
+        self._age(first, confirmed_at=1)
+        first_urls = set(first.uploaded)
+
+        # Bado inatumika -> haiguswi
+        self.assertEqual(self._prune(), [])
+        self.assertTrue(SiteImport.objects.filter(pk=first.pk).exists())
+
+        # ZIP mpya inachukua nafasi ya kurasa zote
+        r = self._upload()
+        self.c.post(f'/builder/site/{self.site.id}/import/confirm/',
+                    {'token': r.context['token'], 'remove_others': 'on'})
+        second = SiteImport.objects.get(token=r.context['token'])
+
+        # Mteja ameweka picha moja ya zamani kwenye page yake -> import ya zamani yote inabaki
+        kept = next(u for u in first_urls if u.endswith('.png'))
+        about = self.site.pages.get(slug='about')
+        about.raw_document = about.raw_document.replace('</body>', f'<img src="{kept}"></body>')
+        about.save()
+        self.assertEqual(self._prune(), [])
+
+        # Akiiondoa, import ya zamani inafutwa pamoja na picha zake kwenye maktaba
+        about.raw_document = about.raw_document.replace(f'<img src="{kept}">', '')
+        about.save()
+        self.assertEqual(set(self._prune()), first_urls)
+        self.assertFalse(SiteImport.objects.filter(pk=first.pk).exists())
+        self.assertFalse(SiteAsset.objects.filter(url__in=first_urls).exists())
+        self.assertTrue(SiteAsset.objects.filter(url__in=second.uploaded).exists())
+        # Import mpya haiguswi: inatumika, na bado iko ndani ya saa ya neema
+        self.assertTrue(SiteImport.objects.filter(pk=second.pk).exists())
+
+    def test_deleting_site_cleans_up_its_imports(self):
+        from builder.models import SiteImport
+        r = self._upload()
+        self.c.post(f'/builder/site/{self.site.id}/import/confirm/', {'token': r.context['token']})
+        imp = SiteImport.objects.get(token=r.context['token'])
+        urls = set(imp.uploaded)
+
+        self.site.delete()
+        imp.refresh_from_db()
+        self.assertIsNone(imp.website)              # rekodi imebaki kwa ajili ya prune
+        self.assertEqual(set(self._prune()), urls)
+        self.assertFalse(SiteImport.objects.filter(pk=imp.pk).exists())
