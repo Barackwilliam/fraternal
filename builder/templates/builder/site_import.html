@@ -8,6 +8,7 @@
 {% block sidenav %}
 <a href="{% url 'builder:my_sites' %}">⬅ My Websites</a>
 <a href="{% url 'builder:site_dashboard' site.id %}">📊 Dashboard</a>
+<a href="{% url 'builder:site_import' site.id %}" class="active">📦 Upload Website (ZIP)</a>
 {% endblock %}
 
 {% block content %}

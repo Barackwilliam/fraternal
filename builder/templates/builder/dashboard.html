@@ -9,6 +9,7 @@
 <a href="{% url 'builder:my_sites' %}"><span class="ic">⬅</span>Sites</a>
 <a href="{% url 'builder:site_dashboard' site.id %}" class="active"><span class="ic">📊</span>Dash</a>
 <a href="{% url 'builder:inquiries_list' site.id %}"><span class="ic">📥</span>Inquiries</a>
+<a href="{% url 'builder:site_import' site.id %}"><span class="ic">📦</span>Upload</a>
 {% for c in collections %}
 <a href="{% url 'builder:collection_items' site.id c.id %}"><span class="ic">{{ c.icon }}</span>{{ c.name_singular }}</a>
 {% endfor %}
@@ -19,6 +20,7 @@
 <a href="{% url 'builder:my_sites' %}">⬅ My Websites</a>
 <a href="{% url 'builder:site_dashboard' site.id %}" class="active">📊 Dashboard</a>
 <a href="{% url 'builder:inquiries_list' site.id %}">📥 Inquiries{% if new_inquiries %} ({{ new_inquiries }}){% endif %}</a>
+<a href="{% url 'builder:site_import' site.id %}">📦 Upload Website (ZIP)</a>
 {% for c in collections %}
 <a href="{% url 'builder:collection_items' site.id c.id %}">{{ c.icon }} {{ c.name }}</a>
 {% endfor %}
@@ -69,6 +71,15 @@
   {% endfor %}
   <div class="stat"><b>{{ new_inquiries }}</b><span>📥 New Inquiries</span></div>
   <div class="stat"><b>{% if site.is_published %}LIVE{% else %}DRAFT{% endif %}</b><span>🌍 Website Status</span></div>
+</div>
+
+<div class="card" style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;border-color:rgba(34,197,94,.35)">
+  <span style="font-size:30px">📦</span>
+  <div style="flex:1;min-width:220px">
+    <h2 style="margin:0 0 4px">Already have a website?</h2>
+    <p class="hint" style="margin:0">Upload the whole folder as a ZIP — every page, image and style goes live in one step. Great for sites from a designer or ChatGPT.</p>
+  </div>
+  <a class="btn amber" href="{% url 'builder:site_import' site.id %}">Upload Website (ZIP) →</a>
 </div>
 
 <div class="grid c2">
