@@ -101,6 +101,10 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'jamiitek.urls'
 
+# @login_required ilipeleka watu /accounts/login/ — ukurasa usiokuwepo (404).
+# Login ya web builder ndiyo ya wateja wa platform.
+LOGIN_URL = '/builder/login/'
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
