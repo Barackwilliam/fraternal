@@ -675,6 +675,10 @@ class SubscriptionPayment(models.Model):
     subscription    = models.ForeignKey(BotSubscription, on_delete=models.CASCADE, related_name='payments')
     amount          = models.PositiveIntegerField(help_text="TZS")
     months_covered  = models.PositiveSmallIntegerField(default=1)
+    # Mpango ambao mteja alichagua kwenye fomu. Unatumika wakati wa
+    # kuthibitisha — awali ulipotea kabisa.
+    plan            = models.ForeignKey('SubscriptionPlan', null=True, blank=True,
+                                        on_delete=models.SET_NULL, related_name='payments')
     payment_method  = models.CharField(max_length=60, default='NMB Bank Transfer')
     transaction_ref = models.CharField(max_length=100)
     status          = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')

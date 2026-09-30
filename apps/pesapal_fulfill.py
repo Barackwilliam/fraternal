@@ -51,10 +51,25 @@ def fulfill(tx):
             return False
 
         try:
-            handler(locked)
+            delivered = handler(locked)
         except Exception:
             logger.exception('Pesapal fulfillment imeshindikana kwa %s', locked.merchant_reference)
             raise
+
+        if delivered is False:
+            # Pesa imepokelewa lakini kitu kilicholipiwa hakipo (kimefutwa).
+            # Awali hii iliandikwa kwenye log tu — mteja amelipa, hakupata
+            # huduma, na hakuna aliyejua. Sasa JamiiTek inaarifiwa mara moja.
+            def _alert(tx=locked):
+                try:
+                    from apps.notify import notify
+                    notify(f'⚠️ MALIPO BILA HUDUMA: {tx.merchant_reference} — TZS {tx.amount:,.0f} '
+                           f'({tx.get_purpose_display()}, target={tx.target_id}) kutoka '
+                           f'{tx.first_name} {tx.last_name} {tx.phone}. Kitu kilicholipiwa hakipo — '
+                           f'kirejeshe au mrudishie pesa.')
+                except Exception:
+                    logger.exception('Pesapal: taarifa ya malipo bila huduma imeshindwa')
+            transaction.on_commit(_alert)
 
         locked.fulfilled = True
         locked.completed_at = locked.completed_at or timezone.now()
@@ -81,7 +96,7 @@ def _fulfill_subscription(tx):
     sub = BotSubscription.objects.select_for_update().filter(id=tx.target_id).first()
     if not sub:
         logger.error('Pesapal: BotSubscription %s haipo', tx.target_id)
-        return
+        return False
 
     months = int(tx.months or 1)
     ref = tx.confirmation_code or tx.merchant_reference
@@ -90,6 +105,7 @@ def _fulfill_subscription(tx):
     if not SubscriptionPayment.objects.filter(transaction_ref=ref).exists():
         SubscriptionPayment.objects.create(
             subscription=sub,
+            plan_id=tx.plan_id,
             amount=int(round(float(tx.amount))),
             months_covered=months,
             payment_method='Pesapal',
@@ -99,15 +115,13 @@ def _fulfill_subscription(tx):
             notes=f'Pesapal {tx.merchant_reference} ({tx.payment_method})',
         )
 
-    today = timezone.now().date()
-    base = sub.end_date if (sub.end_date and sub.end_date > today) else today
-    sub.end_date = _add_months(base, months)
-    sub.status = 'active'
-    # Anzisha upya kipindi cha kuhesabu jumbe
-    sub.usage_period_start = today
-    sub.messages_used = 0
-    sub.save(update_fields=['end_date', 'status', 'usage_period_start', 'messages_used'])
-    logger.info('Pesapal: subscription %s imeongezwa hadi %s', sub.pk, sub.end_date)
+    # Mpango uliolipiwa — awali haukuwekwa, mteja alibaki kwenye wa zamani
+    from apps.chatbot.billing import apply_payment
+    from apps.chatbot.models import SubscriptionPlan
+    plan = SubscriptionPlan.objects.filter(pk=tx.plan_id).first() if tx.plan_id else None
+    apply_payment(sub, months, plan=plan)
+    logger.info('Pesapal: subscription %s (%s) imeongezwa hadi %s',
+                sub.pk, sub.plan.name, sub.end_date)
 
 
 # ─────────────────────────────────────────────
@@ -119,7 +133,7 @@ def _fulfill_hosting(tx):
     site = ManagedWebsite.objects.select_for_update().filter(pk=tx.target_id).first()
     if not site:
         logger.error('Pesapal: ManagedWebsite %s haipo', tx.target_id)
-        return
+        return False
 
     months = int(tx.months or 1)
     ref = tx.confirmation_code or tx.merchant_reference
@@ -153,10 +167,16 @@ def _fulfill_invoice(tx):
     inv = Invoice.objects.select_for_update().filter(token=tx.target_id).first()
     if not inv:
         logger.error('Pesapal: Invoice %s haipo', tx.target_id)
-        return
+        return False
 
-    inv.amount_paid = inv.grand_total
-    inv.status = 'paid'
+    # Kiasi HALISI kilicholipwa, si "imelipwa yote". Invoice ikibadilishwa
+    # baada ya mteja kuanzisha malipo (bidhaa imeongezwa), kiasi cha zamani
+    # kiliiweka "Paid" kamili — na salio jipya likapotea.
+    from decimal import Decimal
+    total = Decimal(str(inv.grand_total))
+    paid = min(total, Decimal(str(inv.amount_paid or 0)) + Decimal(str(tx.amount)))
+    inv.amount_paid = paid
+    inv.status = 'paid' if paid >= total else 'partial'
     inv.paid_at = timezone.now()
     inv.paid_reference = tx.confirmation_code or tx.merchant_reference
     inv.save(update_fields=['amount_paid', 'status', 'paid_at', 'paid_reference'])

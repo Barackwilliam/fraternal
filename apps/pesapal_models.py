@@ -42,6 +42,10 @@ class PesapalTransaction(models.Model):
     amount      = models.DecimalField(max_digits=12, decimal_places=2)
     currency    = models.CharField(max_length=8, default='TZS')
     months      = models.PositiveSmallIntegerField(default=1)
+    # Mpango wa JamiiBot uliolipiwa. Awali haukuhifadhiwa popote: mteja
+    # aliyelipia Enterprise (bila kikomo) alibaki kwenye Starter (jumbe
+    # 5,000), na bot yake ilisimama alipofikia kikomo alicholipia kuondoa.
+    plan_id     = models.PositiveIntegerField(null=True, blank=True)
     description = models.CharField(max_length=200, blank=True)
 
     # ── Mlipaji ───────────────────────────────────────────

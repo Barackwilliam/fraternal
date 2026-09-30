@@ -317,7 +317,13 @@ def add_payment(request, pk):
     website = get_object_or_404(ManagedWebsite, pk=pk)
     try:
         from datetime import datetime
-        amount = Decimal(request.POST.get('amount', 0))
+        from apps.chatbot.billing import parse_amount
+        # "150,000" ilishindwa kusomwa na Decimal()
+        parsed = parse_amount(request.POST.get('amount'))
+        if parsed is None:
+            messages.error(request, 'Kiasi hakisomeki. Andika kama 150000 au 150,000.')
+            return redirect('website_detail', pk=pk)
+        amount = Decimal(parsed)
         payment_date = datetime.strptime(request.POST.get('payment_date'), '%Y-%m-%d').date()
         months_covered = int(request.POST.get('months_covered', 1))
         payment_method = request.POST.get('payment_method', '')
@@ -325,6 +331,14 @@ def add_payment(request, pk):
         extend_hosting = request.POST.get('extend_hosting') == 'on'
         auto_restore = request.POST.get('auto_restore') == 'on'
         notify_client = request.POST.get('notify_client') == 'on'
+
+        # Namba ile ile ya muamala kurekodiwa mara mbili (refresh, kubonyeza
+        # mara mbili) iliongeza hosting MARA MBILI kwa malipo moja.
+        if transaction_ref and HostingPayment.objects.filter(
+                website=website, transaction_ref__iexact=transaction_ref).exists():
+            messages.warning(request, f'Malipo yenye namba {transaction_ref} yalikwisha rekodiwa kwa '
+                                      f'{website.name}. Hakuna kilichoongezwa.')
+            return redirect('website_detail', pk=pk)
 
         HostingPayment.objects.create(
             website=website, amount=amount, payment_date=payment_date,

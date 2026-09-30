@@ -131,9 +131,10 @@ def pay_subscription(request):
         messages.warning(request, 'Please complete your bot setup first.')
         return redirect('chatbot_setup_wizard')
 
+    from apps.chatbot.billing import clean_months, price_for
     plan_id = request.POST.get('plan_id')
-    months = max(1, int(request.POST.get('months', 1) or 1))
-    plan = SubscriptionPlan.objects.filter(id=plan_id, is_active=True).first()
+    months = clean_months(request.POST.get('months', 1))
+    plan = SubscriptionPlan.objects.filter(id=plan_id, is_active=True).first() if str(plan_id or '').isdigit() else None
     if not plan:
         messages.error(request, 'Mpango uliochagua haupo.')
         return redirect('chatbot_billing')
@@ -147,15 +148,15 @@ def pay_subscription(request):
             end_date=date.today() + timedelta(days=7),
         )
 
-    # Punguzo sawa na linaloonyeshwa kwenye ukurasa (3/6/12 miezi)
-    discount = {1: 1.0, 3: 0.95, 6: 0.90, 12: 0.85}.get(months, 1.0)
-    amount = int(round(int(plan.price_tzs) * months * discount))
+    # Punguzo sawa na linaloonyeshwa kwenye ukurasa (apps/chatbot/billing.py)
+    amount = price_for(plan, months)
     tx = PesapalTransaction(
         purpose='chatbot_subscription',
         target_id=str(sub.id),
         amount=amount,
         currency='TZS',
         months=months,
+        plan_id=plan.pk,          # ili fulfill iweke mpango uliolipiwa
         description=f'{plan.name} — {bot.bot_name} ({months} mo)',
         email=client.email or request.user.email,
         phone=client.phone or '',
@@ -171,7 +172,6 @@ def pay_subscription(request):
 @login_required(login_url='/portal/login/')
 def pay_hosting(request, website_pk):
     from apps.models import ManagedWebsite
-    from apps.chatbot.models import ChatbotClient
     from .models import Client
 
     if request.method != 'POST':
@@ -180,16 +180,20 @@ def pay_hosting(request, website_pk):
     # Resolve client (portal client, au chatbot user)
     client = Client.objects.filter(user=request.user).first()
     if not client:
-        bc = ChatbotClient.objects.filter(user=request.user).first()
-        client = Client.objects.filter(user=request.user).first() if bc else None
-    if not client:
         messages.error(request, 'Akaunti haijaunganishwa na client profile.')
         return redirect('/portal/login/')
 
     website = get_object_or_404(ManagedWebsite, pk=website_pk, client=client)
-    months = max(1, int(request.POST.get('months', 1) or 1))
+    # Chaguo zile zile zinazoonyeshwa kwenye portal. Awali `int()` ya moja
+    # kwa moja: 'abc' ilileta Server Error, na months=500 iliunda agizo la
+    # TZS 25,000,000 kwa website ya TZS 50,000/mwezi.
+    from apps.chatbot.billing import clean_months
+    months = clean_months(request.POST.get('months', 1))
     price = website.price_for(months)
     amount = price.get('total') or (float(website.monthly_cost or 0) * months)
+    if not amount or float(amount) <= 0:
+        messages.error(request, f'{website.name} haina bei ya hosting iliyowekwa. Wasiliana na JamiiTek.')
+        return redirect('portal_billing')
 
     tx = PesapalTransaction(
         purpose='hosting_renewal',

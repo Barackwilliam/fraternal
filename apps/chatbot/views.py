@@ -757,22 +757,33 @@ def chatbot_billing(request):
     payments = sub.payments.order_by('-payment_date') if sub else []
 
     if request.method == 'POST':
-        ref    = request.POST.get('transaction_ref', '').strip()
-        amount = request.POST.get('amount', '0')
-        months = request.POST.get('months', 1)
-        method = request.POST.get('payment_method', 'NMB Bank')
+        from .billing import clean_months, parse_amount, price_for
+        ref    = request.POST.get('transaction_ref', '').strip()[:100]
+        months = clean_months(request.POST.get('months', 1))
+        method = request.POST.get('payment_method', 'NMB Bank')[:60]
         plan_id = request.POST.get('plan_id')
+        plan = plans.filter(pk=plan_id).first() if str(plan_id or '').isdigit() else None
+        plan = plan or (sub.plan if sub else None)
+        # "15,000" ilileta Server Error — Watanzania wengi huandika kwa koma.
+        # Kiasi kisichosomeka kinachukua bei inayotarajiwa ya mpango.
+        amount = parse_amount(request.POST.get('amount')) or (price_for(plan, months) if plan else 0)
 
         if not ref:
             messages.error(request, "Tafadhali weka namba ya transaction.")
-        elif sub:
+        elif not sub:
+            messages.error(request, "Hakuna subscription. Wasiliana na usaidizi.")
+        elif SubscriptionPayment.objects.filter(subscription=sub, transaction_ref__iexact=ref).exists():
+            # Awali namba ile ile ilikubaliwa mara mbili -> malipo mawili ya
+            # kuthibitisha -> miezi miwili kwa malipo moja.
+            messages.info(request, f"Malipo yenye namba {ref} tayari yametumwa. Tunayashughulikia.")
+        else:
             SubscriptionPayment.objects.create(
-                subscription=sub, amount=amount, months_covered=months,
-                payment_method=method, transaction_ref=ref
+                subscription=sub, plan=plan, amount=amount, months_covered=months,
+                payment_method=method, transaction_ref=ref,
             )
             messages.success(request, "✅ Malipo yametumwa! Tutahakikisha ndani ya masaa 24.")
-        else:
-            messages.error(request, "Hakuna subscription. Wasiliana na usaidizi.")
+        # Redirect baada ya POST: ku-refresh ukurasa kulituma fomu tena
+        return redirect('chatbot_billing')
 
     return render(request, 'chatbot/portal/billing.html', {
         'client': client, 'bot': bot, 'sub': sub,

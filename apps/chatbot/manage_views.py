@@ -327,31 +327,16 @@ def manage_verify_payment(request, payment_id):
         return redirect('manage_bot_payments')
 
     pay = get_object_or_404(SubscriptionPayment, id=payment_id)
+    from .billing import verify_payment
+    if not verify_payment(pay, user=request.user, months=request.POST.get('months')):
+        # Awali kubonyeza mara ya pili kuliongeza mwezi mwingine bure
+        messages.info(request, f"Malipo #{pay.id} yalikwisha thibitishwa — hakuna kilichobadilika.")
+        return redirect('manage_bot_payments')
     sub = pay.subscription
-    months = int(request.POST.get('months', pay.months_covered or 1))
-
-    pay.status      = 'verified'
-    pay.verified_at = timezone.now()
-    pay.verified_by = request.user
-    pay.save()
-
-    # Extend subscription
-    base_date = sub.end_date if sub.end_date and sub.end_date >= date.today() else date.today()
-    sub.end_date = base_date + timedelta(days=30 * months)
-    sub.status   = 'active'
-    sub.save()
-
-    # Reactivate bot if it was suspended for billing
-    bot = sub.bot
-    if bot.status in ('suspended', 'pending'):
-        if bot.whatsapp_phone_id:
-            bot.status    = 'active'
-            bot.is_active = True
-            bot.save()
-
+    sub.refresh_from_db()
     messages.success(
         request,
-        f"✅ Malipo yamethibitishwa! {bot.bot_name} — subscription hadi {sub.end_date}."
+        f"✅ Malipo yamethibitishwa! {sub.bot.bot_name} — {sub.plan.name} hadi {sub.end_date}."
     )
     return redirect('manage_bot_payments')
 
@@ -385,18 +370,11 @@ def manage_bulk_payment_action(request):
     pays = SubscriptionPayment.objects.filter(id__in=pay_ids, status='pending')
 
     if action == 'verify_all':
-        for pay in pays:
-            pay.status      = 'verified'
-            pay.verified_at = timezone.now()
-            pay.verified_by = request.user
-            pay.save()
-            sub = pay.subscription
-            months = pay.months_covered or 1
-            base = sub.end_date if sub.end_date and sub.end_date >= date.today() else date.today()
-            sub.end_date = base + timedelta(days=30 * months)
-            sub.status   = 'active'
-            sub.save()
-        messages.success(request, f"✅ Malipo {pays.count()} yamethibitishwa yote.")
+        from .billing import verify_payment
+        # list() — `pays.count()` baada ya kuthibitisha ilihesabu upya na
+        # kupata 0 (hakuna tena yaliyo 'pending'), ikaripoti "Malipo 0".
+        done = sum(1 for pay in list(pays) if verify_payment(pay, user=request.user))
+        messages.success(request, f"✅ Malipo {done} yamethibitishwa.")
 
     elif action == 'reject_all':
         pays.update(status='rejected')

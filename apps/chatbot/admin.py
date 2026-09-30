@@ -141,19 +141,11 @@ class SubscriptionPaymentAdmin(admin.ModelAdmin):
     actions = ['verify_payments', 'reject_payments']
 
     def verify_payments(self, request, queryset):
-        from datetime import date, timedelta
-        count = 0
-        for pay in queryset.filter(status='pending'):
-            pay.status = 'verified'
-            pay.verified_at = timezone.now()
-            pay.verified_by = request.user
-            pay.save()
-            sub = pay.subscription
-            new_end = (sub.end_date or date.today()) + timedelta(days=30 * pay.months_covered)
-            sub.end_date = new_end
-            sub.status = 'active'
-            sub.save()
-            count += 1
+        # Awali tarehe iliongezwa kuanzia end_date HATA IKIWA IMEPITA: mteja
+        # aliyechelewa siku 20 akalipia mwezi, alipata siku 10 tu.
+        from .billing import verify_payment
+        count = sum(1 for pay in list(queryset.filter(status='pending'))
+                    if verify_payment(pay, user=request.user))
         self.message_user(request, f"{count} malipo yamethibitishwa.")
     verify_payments.short_description = "✓ Thibitisha malipo yaliyochaguliwa"
 
