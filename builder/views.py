@@ -549,35 +549,10 @@ def site_dashboard(request, site_id):
     """
     from django.utils.timesince import timesince
     site = _my_site(request, site_id)
-<<<<<<< HEAD
-    collections = site.collections.annotate(items_count=Count('items'))
-    total_items = sum(c.items_count for c in collections)
-    # Hatua za kuanza (onboarding) — zina-tick automatic
-    pages = site.pages.all()
-    has_items = total_items > 0
-    has_contact = bool(site.contact_phone or site.whatsapp_number)
-    has_design = site.pages.exclude(grapes_data={}).exists()
-    col_list = list(collections)
-    first_col = col_list[0] if col_list else None
-    first_page = pages[0] if pages else None
-    steps = [
-        {'done': has_contact,
-         'label': 'Fill in your contact details (phone / WhatsApp)', 'url': f'/builder/site/{site.id}/info/'},
-        {'done': has_items,
-         'label': f'Add your first {first_col.name_singular if first_col else "content item"}',
-         'url': (f'/builder/site/{site.id}/collections/{first_col.id}/new/' if first_col else '#')},
-        {'done': has_design, 'label': 'Open the editor and customize your Home design',
-         'url': (f'/builder/site/{site.id}/pages/{first_page.id}/edit/' if first_page else '#')},
-        {'done': site.is_published, 'label': 'Publish — take your website live',
-         'url': '#publish'},
-    ]
-    done_count = sum(1 for st in steps if st['done'])
-=======
     # Site isiyo na kurasa inarudisha 404 kwa wageni na preview nyeupe
     ensure_pages(request, site)
     from .studio import studio_progress, publish_blockers, STEPS as STUDIO_STEPS
     st_done, st_total, st_next = studio_progress(site)
->>>>>>> 8d5a8aae8b37aa819c6f392d7825e1647f5e5e84
     return render(request, 'builder/dashboard.html', {
         'site': site,
         'studio_done': st_done,
@@ -625,7 +600,6 @@ def site_settings_save(request, site_id):
     site.bump_version()
     messages.success(request, 'Website details saved.')
 
-<<<<<<< HEAD
     # Domain inapitia moduli ile ile ya /manage/site-domains/: maelekezo
     # sahihi ya DNS (A kwa domain kuu, CNAME kwa www), kuzuia nakala, na
     # hali inayoonekana kwenye paneli ya JamiiTek.
@@ -641,27 +615,7 @@ def site_settings_save(request, site_id):
         else:
             domains.disconnect(site)
             messages.success(request, 'Domain imeondolewa.')
-    return redirect('builder:site_dashboard', site_id=site.id)
-=======
-    # ── Auto-registration ya custom domain kwenye Render (bila dashboard) ──
-    if domain_changed:
-        from . import render_api
-        if old_domain:
-            render_api.remove_custom_domain(old_domain)
-        if site.custom_domain:
-            ok, msg = render_api.add_custom_domain(site.custom_domain)
-            (messages.success if ok else messages.warning)(request, msg)
-            if render_api.check_dns(site.custom_domain):
-                messages.success(request,
-                    f'DNS check: "{site.custom_domain}" is already pointing to our '
-                    'servers — your domain should be live within minutes. ✅')
-            else:
-                messages.info(request,
-                    f'DNS check: "{site.custom_domain}" is not pointing to us yet. '
-                    'Add a CNAME record at your registrar: '
-                    f'{site.custom_domain} → jamiitek.onrender.com')
     return redirect('builder:studio_step', site_id=site.id, step='publish')
->>>>>>> 8d5a8aae8b37aa819c6f392d7825e1647f5e5e84
 
 
 @login_required

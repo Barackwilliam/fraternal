@@ -85,6 +85,9 @@ def _render_page(request, site, page, extra):
     ni muundo wa mteja mwenyewe, pamoja na <head> na <script> zake, na
     kuiweka ndani ya navbar yetu kungeiharibu.
     """
+    if page.raw_document:
+        # Ukurasa wa ZIP / template (site_import) — hati kamili ya mteja
+        return HttpResponse(render_raw_document(site, page))
     html = render_page_html(site, page)
     if page.mode == 'code' and page.is_full_document:
         return HttpResponse(html)
@@ -100,16 +103,7 @@ def home(request):
     page = site.pages.filter(slug='home').first() or site.pages.first()
     if page is None:
         raise Http404
-<<<<<<< HEAD
     return _render_page(request, site, page, {})
-=======
-    if page.raw_document:
-        return HttpResponse(render_raw_document(site, page))
-    return render(request, 'builder/public/page.html', _ctx(site, {
-        'page': page,
-        'page_html': render_page_html(site, page),
-    }))
->>>>>>> 8d5a8aae8b37aa819c6f392d7825e1647f5e5e84
 
 
 def page_view(request, slug):
@@ -118,16 +112,8 @@ def page_view(request, slug):
     if blocked:
         return blocked
     page = get_object_or_404(site.pages, slug=slug)
-<<<<<<< HEAD
     source = page.code_html if page.mode == 'code' else page.html_cache
     return _render_page(request, site, page, {
-=======
-    if page.raw_document:
-        return HttpResponse(render_raw_document(site, page))
-    return render(request, 'builder/public/page.html', _ctx(site, {
-        'page': page,
-        'page_html': render_page_html(site, page),
->>>>>>> 8d5a8aae8b37aa819c6f392d7825e1647f5e5e84
         'meta_title': f'{page.title} · {site.site_name}',
         'meta_description': _strip_html(source) or _strip_html(site.tagline or site.site_name),
         'meta_url': f'{_base_url(site)}/p/{page.slug}/',

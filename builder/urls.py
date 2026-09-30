@@ -1,10 +1,6 @@
 """URLs za dashboard (zinaingia kwenye jamiitek/urls.py kama /builder/)."""
 from django.urls import path
-<<<<<<< HEAD
-from . import views, studio_views, ai
-=======
-from . import views, ai, studio
->>>>>>> 8d5a8aae8b37aa819c6f392d7825e1647f5e5e84
+from . import views, studio, studio_views, ai
 
 app_name = 'builder'
 
