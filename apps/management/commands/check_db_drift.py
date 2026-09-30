@@ -52,10 +52,12 @@ class Command(BaseCommand):
                     missing_tables.append((model, table))
                     continue
 
-                db_cols = {
-                    c.name for c in
-                    connection.introspection.get_table_description(cursor, table)
-                }
+                desc = connection.introspection.get_table_description(cursor, table)
+                db_cols = {c.name for c in desc}
+                # Nguzo NOT NULL isiyo na default: INSERT ya Django (isiyoijua)
+                # inashindwa — inazuia kuhifadhi rows mpya kabisa.
+                blocking = {c.name for c in desc
+                            if not c.null_ok and getattr(c, 'default', None) is None}
                 model_cols = {}
                 for field in model._meta.local_fields:
                     model_cols[field.column] = field
@@ -65,7 +67,7 @@ class Command(BaseCommand):
                         missing_columns.append((model, table, col, field))
 
                 for col in db_cols - set(model_cols):
-                    extra_columns.append((table, col))
+                    extra_columns.append((table, col, col in blocking))
 
         if sql_only:
             for _, table, col, field in missing_columns:
@@ -80,7 +82,7 @@ class Command(BaseCommand):
 
         if not missing_tables and not missing_columns:
             self.stdout.write(self.style.SUCCESS(
-                '  Models na database zinalingana. Hakuna tofauti.'))
+                '  Nguzo zote za models zipo kwenye database.'))
         else:
             if missing_tables:
                 self.stdout.write(self.style.ERROR('  JEDWALI ZINAZOKOSEKANA'))
@@ -113,16 +115,35 @@ class Command(BaseCommand):
                     '  Endesha SQL hii kwenye Supabase SQL Editor, kisha '
                     'endesha command hii tena kuthibitisha.')
 
-        if extra_columns:
+        breaking = [(t, c) for t, c, b in extra_columns if b]
+        harmless = [(t, c) for t, c, b in extra_columns if not b]
+        if breaking:
             self.stdout.write('')
-            self.stdout.write(self.style.NOTICE(
-                '  NGUZO ZILIZOACHWA (zipo kwenye database, hazipo kwenye models)'))
-            for table, col in extra_columns:
+            self.stdout.write(self.style.ERROR(
+                '  NGUZO ZA ZIADA ZINAZOZUIA KUHIFADHI (NOT NULL, bila default)'))
+            for table, col in breaking:
                 self.stdout.write(f'    {table}.{col}')
             self.stdout.write('')
             self.stdout.write(
-                '  Hizi hazivunji kitu. Ni mabaki ya fields zilizoondolewa. '
-                'Ziache mpaka uwe na uhakika.')
+                '  Django haizijui, kwa hiyo haiziwekei thamani — kila INSERT kwenye')
+            self.stdout.write(
+                '  jedwali hizi inashindwa (IntegrityError / 500). SQL salama ya kurekebisha')
+            self.stdout.write(
+                '  (inaruhusu NULL tu — haifuti nguzo wala data):')
+            self.stdout.write('')
+            for table, col in breaking:
+                self.stdout.write(self.style.WARNING(
+                    f'    ALTER TABLE "{table}" ALTER COLUMN "{col}" DROP NOT NULL;'))
+        if harmless:
+            self.stdout.write('')
+            self.stdout.write(self.style.NOTICE(
+                '  NGUZO ZILIZOACHWA (zipo kwenye database, hazipo kwenye models)'))
+            for table, col in harmless:
+                self.stdout.write(f'    {table}.{col}')
+            self.stdout.write('')
+            self.stdout.write(
+                '  Hizi hazizuii kuhifadhi (zinaruhusu NULL au zina default). Ni mabaki '
+                'ya fields zilizoondolewa. Ziache mpaka uwe na uhakika.')
 
         self.stdout.write('')
 

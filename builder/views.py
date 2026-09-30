@@ -54,6 +54,27 @@ def _my_site(request, site_id):
     return get_object_or_404(ClientWebsite, id=site_id, owner=request.user)
 
 
+def ensure_pages(request, site):
+    """
+    Unda kurasa za aina ya site ikiwa haina hata moja. Ikishindwa, usirudishe
+    500 — rekodi kosa kwenye log na mwonyeshe mteja ujumbe (staff wanaona
+    maelezo ya kiufundi, kwa ajili ya kurekebisha).
+    """
+    if site.pages.exists():
+        return True
+    try:
+        with transaction.atomic():
+            site.bootstrap_from_schema()
+        return True
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).exception('bootstrap_from_schema failed (site %s)', site.id)
+        detail = f' ({type(e).__name__}: {str(e)[:300]})' if request.user.is_staff else ''
+        messages.error(request, 'We could not create the pages for this website. '
+                                'Our team has been notified.' + detail)
+        return False
+
+
 # ── Signup + kuunda website ─────────────────────────────
 
 def signup(request):
@@ -137,16 +158,26 @@ def create_site(request):
                 raise ValidationError('This subdomain is already taken.')
             if not site_name:
                 raise ValidationError('Enter the website name.')
-            site = ClientWebsite.objects.create(
-                owner=request.user, subdomain=subdomain,
-                site_name=site_name, website_type=website_type,
-            )
-            site.bootstrap_from_schema()
-            apply_template(site, request.POST.get('template_key', 'clean_start'))
+            # Yote au hakuna: kurasa zikishindwa kuundwa, site isibaki nusu —
+            # ingeleta 500 kwenye panel na "subdomain already taken" ukijaribu tena.
+            with transaction.atomic():
+                site = ClientWebsite.objects.create(
+                    owner=request.user, subdomain=subdomain,
+                    site_name=site_name, website_type=website_type,
+                )
+                site.bootstrap_from_schema()
+                apply_template(site, request.POST.get('template_key', 'clean_start'))
             _register_subdomain(site)
             return redirect('builder:studio', site_id=site.id)
         except ValidationError as e:
             error = ' '.join(e.messages)
+        except Exception as e:
+            # Transaction imerudisha nyuma: hakuna site nusu iliyobaki
+            import logging
+            logging.getLogger(__name__).exception('create_site failed (%s)', subdomain)
+            error = 'We could not create your website. Please try again or contact support.'
+            if request.user.is_staff:
+                error += f' ({type(e).__name__}: {str(e)[:300]})'
     return render(request, 'builder/create_site.html', {
         'error': error, 'website_types': available_website_types(),
         'site_templates': all_templates(),
@@ -383,10 +414,8 @@ def tutorial(request):
 def site_dashboard(request, site_id):
     from django.db.models import Count
     site = _my_site(request, site_id)
-    if not site.pages.exists():
-        # Site isiyo na kurasa (mfano imeundwa kupitia Django admin) inarudisha
-        # 404 kwa wageni na preview nyeupe — unda kurasa za aina yake.
-        site.bootstrap_from_schema()
+    # Site isiyo na kurasa inarudisha 404 kwa wageni na preview nyeupe
+    ensure_pages(request, site)
     collections = site.collections.annotate(items_count=Count('items'))
     total_items = sum(c.items_count for c in collections)
     # Hatua za kuanza (onboarding) — zina-tick automatic
@@ -848,6 +877,57 @@ def ai_status(request):
 
 def _staff_only(user):
     return user.is_authenticated and user.is_staff
+
+
+@login_required
+def superadmin_db_check(request):
+    """
+    Uchunguzi wa database ya production kwa staff, bila shell ya Render.
+
+    Kuunda site kulileta 500 kwenye production pekee (Postgres safi na SQLite
+    zinafanya kazi), na DEBUG=False haionyeshi traceback. Ukurasa huu
+    unaonyesha: migrations za builder, nguzo zinazokosekana/za ziada, na
+    jaribio la kuunda site + kurasa ndani ya transaction inayorudishwa nyuma
+    — likishindwa, traceback kamili. Hakuna kinachobaki kwenye database.
+    """
+    if not request.user.is_staff:
+        raise Http404
+    import io
+    import traceback
+    from django.core.management import call_command
+    from django.db.migrations.recorder import MigrationRecorder
+    from django.http import HttpResponse
+
+    out = io.StringIO()
+    out.write('== Migrations za builder zilizowekwa ==\n')
+    applied = MigrationRecorder.Migration.objects.filter(app='builder').order_by('id')
+    for m in applied:
+        out.write(f'  [X] {m.name}\n')
+
+    out.write('\n== Tofauti kati ya models na database (builder) ==\n')
+    try:
+        call_command('check_db_drift', app='builder', stdout=out)
+    except Exception:
+        out.write(traceback.format_exc())
+
+    out.write('\n== Jaribio: kuunda site + kurasa (rollback) ==\n')
+
+    class _Rollback(Exception):
+        pass
+    try:
+        with transaction.atomic():
+            site = ClientWebsite.objects.create(
+                owner=request.user, subdomain='zz-dbcheck-rollback',
+                site_name='DB check', website_type='companyprofile')
+            site.bootstrap_from_schema()
+            apply_template(site, 'clean_start')
+            out.write(f'  OK: kurasa {site.pages.count()}, collections {site.collections.count()}\n')
+            raise _Rollback
+    except _Rollback:
+        out.write('  Imerudishwa nyuma — hakuna kilichobaki kwenye database.\n')
+    except Exception:
+        out.write('  IMESHINDWA:\n' + traceback.format_exc())
+    return HttpResponse(out.getvalue(), content_type='text/plain; charset=utf-8')
 
 
 @login_required

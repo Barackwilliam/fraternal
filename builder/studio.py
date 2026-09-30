@@ -41,7 +41,7 @@ from django.views.decorators.clickjacking import xframe_options_sameorigin
 from .layouts import (FONTS, PALETTES, HEADER_COMMON_CSS, SIDE_COMMON_CSS, FOOTER_COMMON_CSS,
                       font_for)
 from .nav_presets import FOOTERS, HEADERS, get_preset_catalog, _placeholders, _fill
-from .views import _my_site
+from .views import _my_site, ensure_pages
 
 STEPS = [
     ('business', 'Business', 'Name, logo & contact'),
@@ -183,10 +183,8 @@ def studio(request, site_id, step=None):
     step = step or studio_progress(site)[2]
     if step not in STEP_KEYS:
         raise Http404
-    if not site.pages.exists():
-        # Site iliyoundwa bila kurasa (mfano kupitia Django admin, isiyoita
-        # bootstrap) ilionyesha preview nyeupe tupu. Unda kurasa za aina yake.
-        site.bootstrap_from_schema()
+    # Site isiyo na kurasa ilionyesha preview nyeupe tupu — unda za aina yake
+    ensure_pages(request, site)
 
     if request.method == 'POST':
         if step == 'pages' and request.POST.get('action') == 'add_page':

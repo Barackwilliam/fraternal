@@ -569,3 +569,54 @@ class StudioTest(TestCase):
         empty.is_published = True
         empty.save()
         self.assertEqual(Client().get('/', HTTP_HOST='tupu.jamiitek.com').status_code, 200)
+
+
+class BrokenDatabaseTest(TestCase):
+    """
+    Production: nguzo ya ziada NOT NULL kwenye builder_sitepage ilifanya kila
+    INSERT ya ukurasa ishindwe. Kuunda site kulileta 500 na kuacha site nusu
+    ("subdomain already taken" ukijaribu tena), na dashboard nayo ikawa 500.
+    """
+    def setUp(self):
+        self.user = User.objects.create_user('mteja2', password='Siri#123456')
+        self.c = Client()
+        self.c.login(username='mteja2', password='Siri#123456')
+
+    def _boom(self, *a, **k):
+        from django.db import IntegrityError
+        raise IntegrityError('null value in column "seo_title" violates not-null constraint')
+
+    def test_failed_create_leaves_no_half_site(self):
+        with mock.patch('builder.models.ClientWebsite.bootstrap_from_schema', self._boom):
+            r = self.c.post('/builder/new/', {'site_name': 'ubungo', 'subdomain': 'sales',
+                                              'website_type': 'companyprofile'})
+        self.assertEqual(r.status_code, 200)
+        self.assertContains(r, 'We could not create your website')
+        self.assertNotContains(r, 'seo_title')                     # maelezo ya kiufundi: staff tu
+        self.assertFalse(ClientWebsite.objects.filter(subdomain='sales').exists())
+        # Tatizo likiondoka, subdomain ile ile inafanya kazi
+        r = self.c.post('/builder/new/', {'site_name': 'ubungo', 'subdomain': 'sales',
+                                          'website_type': 'companyprofile'})
+        self.assertEqual(r.status_code, 302)
+
+    def test_dashboard_and_studio_do_not_500_when_pages_cannot_be_created(self):
+        site = ClientWebsite.objects.create(owner=self.user, subdomain='nusu', site_name='Nusu')
+        with mock.patch('builder.models.ClientWebsite.bootstrap_from_schema', self._boom):
+            r = self.c.get(f'/builder/site/{site.id}/')
+            self.assertEqual(r.status_code, 200)
+            self.assertContains(r, 'We could not create the pages')
+            self.assertEqual(self.c.get(f'/builder/site/{site.id}/studio/').status_code, 200)
+
+    def test_db_check_is_staff_only_and_reports_rollback(self):
+        self.assertEqual(self.c.get('/builder/superadmin/db-check/').status_code, 404)
+        self.user.is_staff = True
+        self.user.save()
+        r = self.c.get('/builder/superadmin/db-check/')
+        self.assertEqual(r.status_code, 200)
+        self.assertContains(r, '0011_layout_presets')
+        self.assertContains(r, 'Imerudishwa nyuma')
+        self.assertFalse(ClientWebsite.objects.filter(subdomain='zz-dbcheck-rollback').exists())
+        with mock.patch('builder.models.ClientWebsite.bootstrap_from_schema', self._boom):
+            r = self.c.get('/builder/superadmin/db-check/')
+        self.assertContains(r, 'IMESHINDWA')
+        self.assertContains(r, 'seo_title')
