@@ -46,7 +46,16 @@ class BuilderFlowTest(TestCase):
         assert item.data['includes'] == ['Usafiri 4x4', 'Malazi', 'Chakula']
         print('✓ Package imeongezwa, list field imechakatwa:', item.data['includes'])
 
-        # 4. Subdomain routing + shortcode rendering (draft: owner anaona preview)
+        # 4. Subdomain inaonyesha site iliyopublishiwa tu — hata mmiliki anaona "coming soon"
+        r = c.get('/', HTTP_HOST='kiliadventures.jamiitek.com')
+        html = r.content.decode()
+        assert 'coming soon' in html.lower() and 'You are the owner' in html
+        assert 'Serengeti Safari' not in html
+        # Draft inaonekana kwenye preview ya Studio
+        r = c.get(f'/builder/site/{site.id}/studio/preview/')
+        assert 'Serengeti Safari' in r.content.decode()
+        ClientWebsite.objects.filter(pk=site.pk).update(is_published=True)
+        site.refresh_from_db()
         r = c.get('/', HTTP_HOST='kiliadventures.jamiitek.com')
         self.assertEqual(r.status_code, 200)
         html = r.content.decode()
@@ -63,10 +72,13 @@ class BuilderFlowTest(TestCase):
         assert 'wa.me/255712345678' in r.content.decode()
         print('✓ Item detail + WhatsApp booking link')
 
-        # 6. Mgeni (si mmiliki) anaona coming soon kwa draft site
+        # 6. Mgeni anaona coming soon kwa draft site (bila maelezo ya mmiliki)
+        site.is_published = False
+        site.save()
         c2 = Client()
         r = c2.get('/', HTTP_HOST='kiliadventures.jamiitek.com')
         assert 'coming soon' in r.content.decode().lower()
+        assert 'You are the owner' not in r.content.decode()
         # Publish → mgeni anaona site
         site.is_published = True
         site.save()
@@ -690,6 +702,62 @@ class BrandingTest(TestCase):
         c.login(username='chapa', password='Siri#123456')
         r = c.get(f'/builder/site/{self.site.id}/studio/preview/')
         self.assertBadge(r.content.decode())
+
+
+class PublishRulesTest(TestCase):
+    """Kupublish kunahitaji kila hatua ya Studio iwe imehifadhiwa."""
+    def setUp(self):
+        self.user = User.objects.create_user('pub', password='Siri#123456')
+        self.site = ClientWebsite.objects.create(owner=self.user, subdomain='pub', site_name='Pub')
+        self.site.bootstrap_from_schema()
+        self.c = Client()
+        self.c.login(username='pub', password='Siri#123456')
+        self.base = f'/builder/site/{self.site.id}/studio/'
+
+    def _ajax(self, step, data=None):
+        return self.c.post(f'{self.base}{step}/', data or {}, HTTP_X_REQUESTED_WITH='fetch')
+
+    def test_cannot_publish_until_every_step_is_saved(self):
+        r = self._ajax('publish')
+        self.assertEqual(r.status_code, 400)
+        self.assertIn('Business', r.json()['error'])
+        # Dashboard: kitufe cha publish kinampeleka kwenye hatua inayokosekana
+        r = self.c.post(f'/builder/site/{self.site.id}/publish/')
+        self.assertRedirects(r, f'{self.base}business/', fetch_redirect_response=False)
+        self.site.refresh_from_db()
+        self.assertFalse(self.site.is_published)
+        self.assertContains(self.c.get(f'/builder/site/{self.site.id}/'), 'Finish setup')
+
+        self._ajax('business', {'site_name': 'Pub'})
+        self._ajax('style', {'accent_color': '#123456', 'font': 'system'})
+        self._ajax('header', {'mode': 'preset', 'preset': 'top_classic'})
+        self._ajax('footer', {'mode': 'preset', 'preset': 'f_columns'})
+        self.assertEqual(self._ajax('publish').status_code, 400)          # bado kurasa
+        self._ajax('pages')
+        r = self._ajax('publish')
+        self.assertEqual(r.status_code, 200)
+        self.site.refresh_from_db()
+        self.assertTrue(self.site.is_published)
+        # Kuunpublish kunaruhusiwa daima
+        self.c.post(f'/builder/site/{self.site.id}/publish/')
+        self.site.refresh_from_db()
+        self.assertFalse(self.site.is_published)
+
+    def test_zip_only_site_needs_business_and_pages_only(self):
+        self.site.pages.all().update(raw_document='<!doctype html><html><body>x</body></html>')
+        self._ajax('business', {'site_name': 'Pub'})
+        self._ajax('pages')
+        self.assertEqual(self._ajax('publish').status_code, 200)
+
+    def test_editor_has_pro_tools_and_previews_drafts(self):
+        home = self.site.pages.get(slug='home')
+        r = self.c.get(f'/builder/site/{self.site.id}/pages/{home.id}/edit/')
+        self.assertContains(r, f'/builder/site/{self.site.id}/studio/preview/?page=home')   # si subdomain
+        self.assertNotContains(r, 'https://pub.jamiitek.com')
+        for marker in ('id="page-switch"', "bm.add('jb-' + id", 'id="am"', 'componentFirst', 'appendOnClick',
+                       'id="canvas-theme"', 'data-scope="sel"', 'show-hint'):
+            self.assertContains(r, marker)
+        self.assertContains(r, 'Hero — Centered')
 
 
 class BrokenDatabaseTest(TestCase):

@@ -19,7 +19,8 @@
 
 {% block mobnav %}
 <a href="{% url 'builder:site_dashboard' site.id %}"><span class="ic">⬅</span>Dashboard</a>
-<a href="{{ site.public_url }}" target="_blank" rel="noopener"><span class="ic">↗</span>View site</a>
+{% if site.is_published %}<a href="{{ site.public_url }}" target="_blank" rel="noopener"><span class="ic">↗</span>View site</a>
+{% else %}<a href="{{ preview_url }}" target="_blank" rel="noopener"><span class="ic">👁</span>Preview</a>{% endif %}
 {% endblock %}
 
 {% block content %}
@@ -246,7 +247,8 @@ vitufe vinaziunganisha kwa attribute ya form="…".{% endcomment %}
     </div>
     <div id="pub-draft" {% if site.is_published %}hidden{% endif %}>
       <h1>Go live</h1>
-      <p class="hint sd-lead">Publish and your website becomes visible to everyone.</p>
+      <p class="hint sd-lead">Save every step below, then publish — your website becomes visible to everyone at
+        <b>{{ site.subdomain }}.jamiitek.com</b>. Until then only the Studio preview shows it.</p>
       <ul class="sd-check" id="sd-check"></ul>
     </div>
 
@@ -295,6 +297,7 @@ vitufe vinaziunganisha kwa attribute ya form="…".{% endcomment %}
 {{ initial_state|json_script:"sd-state" }}
 {{ steps_json|json_script:"sd-steps" }}
 {{ done_json|json_script:"sd-done" }}
+{{ required_json|json_script:"sd-required" }}
 
 <style>
 /* Animation ya transform ya .main (base_panel) inaigeuza kuwa "containing block":
@@ -385,6 +388,7 @@ vitufe vinaziunganisha kwa attribute ya form="…".{% endcomment %}
 .sd-check li{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:10px;padding:12px 14px;color:var(--muted)}
 .sd-check li.ok{color:var(--ink)}.sd-check li span{color:var(--green);font-weight:800;width:16px}
 .sd-check li button{margin-left:auto;background:none;border:none;color:var(--cyan);font-size:13px;cursor:pointer}
+#sd-next.locked{background:rgba(255,255,255,.08)!important;color:var(--muted)!important;border-color:var(--line)!important;box-shadow:none!important}
 .sd-live{text-align:center;padding:10px 0}
 .sd-url{display:inline-block;margin-top:8px;font-family:var(--ff-mono);color:var(--green);font-size:16px;padding:10px 16px;border:1px solid var(--line-2);border-radius:10px}
 
@@ -564,6 +568,9 @@ vitufe vinaziunganisha kwa attribute ya form="…".{% endcomment %}
   const S = {...saved, headerMode: saved.header || !saved.headerCode ? 'preset' : 'custom',
                         footerMode: saved.footer || !saved.footerCode ? 'preset' : 'custom'};
   const done = new Set(read('sd-done'));
+  // Hatua zinazotakiwa kuhifadhiwa kabla ya kupublish
+  const REQUIRED = read('sd-required');
+  const missing = () => REQUIRED.filter(k => !done.has(k));
   let step = '{{ step }}';
 
   const pv = $('#pv'), wrap = $('#frame-wrap');
@@ -741,7 +748,7 @@ vitufe vinaziunganisha kwa attribute ya form="…".{% endcomment %}
       if (n){ n.textContent = ok ? '✓' : n.dataset.num; n.classList.toggle('ok', ok); }
     });
     // Orodha ya kukagua kabla ya kupublish
-    $('#sd-check').innerHTML = STEPS.filter(k => k !== 'publish').map(k =>
+    $('#sd-check').innerHTML = REQUIRED.map(k =>
       `<li class="${done.has(k) ? 'ok' : ''}"><span>${done.has(k) ? '✓' : '○'}</span>${TITLES[k]}` +
       (done.has(k) ? '' : `<button type="button" data-go="${k}">Do it →</button>`) + '</li>').join('');
   }
@@ -753,7 +760,9 @@ vitufe vinaziunganisha kwa attribute ya form="…".{% endcomment %}
     $('#sd-back').style.visibility = i ? 'visible' : 'hidden';
     const next = $('#sd-next');
     const live = !$('#pub-live').hidden;
-    next.textContent = k === 'publish' ? (live ? 'Go to dashboard →' : '🚀 Publish my website') : 'Next →';
+    next.textContent = k === 'publish' ? (live ? 'Go to dashboard →'
+      : (missing().length ? `Save ${missing().length} more step${missing().length > 1 ? 's' : ''} first` : '🚀 Publish my website')) : 'Next →';
+    next.classList.toggle('locked', k === 'publish' && !live && missing().length > 0);
     paintSteps();
     if (push) history.pushState({step: k}, '', `/builder/site/${SID}/studio/${k}/`);
     // Anza juu ya hatua mpya: kompyuta inascroll safu yenyewe, simu inascroll ukurasa
@@ -777,6 +786,8 @@ vitufe vinaziunganisha kwa attribute ya form="…".{% endcomment %}
     const btn = $('#sd-next');
     if (step === 'publish'){
       if (!$('#pub-live').hidden){ location.href = '{% url "builder:site_dashboard" site.id %}'; return; }
+      // Kupublish kunahitaji hatua zote kuhifadhiwa — mpeleke kwenye inayofuata
+      if (missing().length){ status('err', `Save “${TITLES[missing()[0]]}” first`); show(missing()[0], true); return; }
       btn.disabled = true;
       try { await save('publish'); $('#pub-live').hidden = false; $('#pub-draft').hidden = true; show('publish'); }
       catch(e){} finally { btn.disabled = false; }
@@ -784,12 +795,17 @@ vitufe vinaziunganisha kwa attribute ya form="…".{% endcomment %}
     }
     const f = form(step);
     if (step === 'business' && !f.reportValidity()) return;
-    // Header/footer bila chaguo: endelea tu (inabaki na muonekano wa sasa)
-    const skip = (step === 'header' && !S.header && S.headerMode === 'preset') ||
-                 (step === 'footer' && !S.footer && S.footerMode === 'preset');
+    // Header/footer bila chaguo: hatua haiwezi kuhifadhiwa — na bila kuhifadhiwa
+    // website haiwezi kupublishiwa. Mwambie achague kwanza.
+    if ((step === 'header' && !S.header && S.headerMode === 'preset') ||
+        (step === 'footer' && !S.footer && S.footerMode === 'preset')){
+      status('err', `Pick a ${step} design first — tap one above`);
+      f.querySelector('.sd-grid').scrollIntoView({block: 'center', behavior: 'smooth'});
+      return;
+    }
     btn.disabled = true;
     try {
-      if (!skip) await save(step);
+      await save(step);
       show(STEPS[STEPS.indexOf(step) + 1], true);
     } catch(e){ /* ujumbe umeshaonyeshwa juu */ }
     finally { btn.disabled = false; }

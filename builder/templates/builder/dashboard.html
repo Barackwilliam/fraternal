@@ -32,16 +32,25 @@ inquiries, kupakia ZIP na JamiiBot. Kila kitu kingine kiko ndani ya Studio.
     <div class="db-logo">{% if site.logo_url %}<img src="{{ site.logo_url }}" alt="">{% else %}{{ site.site_name|slice:":1"|upper }}{% endif %}</div>
     <div class="db-name">
       <h1>{{ site.site_name }}</h1>
+      {% if site.is_published %}
       <a href="{{ site.public_url }}" target="_blank" rel="noopener">{{ site.subdomain }}.jamiitek.com ↗</a>
       {% if site.is_premium and site.custom_domain %}<a href="https://{{ site.custom_domain }}" target="_blank" rel="noopener" class="db-domain">{{ site.custom_domain }} ↗</a>{% endif %}
+      {% else %}
+      {# Subdomain inaonyesha website iliyopublishiwa tu — kabla ya hapo, preview ya Studio #}
+      <span class="db-off">{{ site.subdomain }}.jamiitek.com · opens after you publish</span>
+      <a href="{% url 'builder:studio_preview' site.id %}" target="_blank" rel="noopener">👁 Preview draft ↗</a>
+      {% endif %}
     </div>
     <form method="post" action="{% url 'builder:toggle_publish' site.id %}" class="db-pub">
       {% csrf_token %}
       {% if site.is_published %}
         <span class="db-state live"><i></i>Live</span>
         <button class="btn sm ghost" onclick="return confirm('Take your website offline? Visitors will see a “coming soon” page.')">Unpublish</button>
+      {% elif blockers %}
+        <span class="db-state"><i></i>Draft · {{ blockers|length }} step{{ blockers|length|pluralize }} to save</span>
+        <a class="btn sm amber" href="{% url 'builder:studio_step' site.id blockers.0.0 %}" title="Save every Studio step to publish">Finish setup →</a>
       {% else %}
-        <span class="db-state"><i></i>Draft — only you can see it</span>
+        <span class="db-state"><i></i>Draft — ready to publish</span>
         <button class="btn sm amber">🚀 Publish</button>
       {% endif %}
     </form>
@@ -118,6 +127,7 @@ inquiries, kupakia ZIP na JamiiBot. Kila kitu kingine kiko ndani ya Studio.
 .db-name h1{margin:0;font-size:24px;line-height:1.2}
 .db-name a{color:var(--cyan);font-family:var(--ff-mono);font-size:13px;text-decoration:none;width:fit-content}
 .db-name a.db-domain{color:var(--green)}
+.db-off{font-family:var(--ff-mono);font-size:12.5px;color:var(--dim)}
 .db-pub{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .db-state{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:#f0b03f;padding:7px 12px;border-radius:999px;
   background:rgba(240,176,63,.1);border:1px solid rgba(240,176,63,.3)}
