@@ -1,55 +1,51 @@
 {% comment %}
   apps/templates/proposal/_theme.html
 
-  MUUNDO: Neumorphism ya mwanga (soft UI).
-  Kila kitu kimechongwa kutoka kwenye uso mmoja — hakuna mistari,
-  kina kinatokana na vivuli viwili: giza chini-kulia, mwanga juu-kushoto.
-
-  KANUNI: kilichoinuka kinabonyezwa, kilichobonyea kinajazwa.
+  MUUNDO: giza la kitaalamu — sawa na Templates Marketplace, Website Builder na
+  JamiiBot (zamani: neumorphism ya mwanga, iliyoonekana kama mfumo mwingine).
+  Majina ya tokens (--nu-*) hayajabadilika, kwa hiyo kurasa zote tatu za
+  proposal (aina → brief → quotation) zinabadilika pamoja.
 {% endcomment %}
 
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
 /* ═══════════════════════════════════════════════════════
    TOKENS
 ═══════════════════════════════════════════════════════ */
 :root {
-  /* Uso — umetulia, si mweupe kupita kiasi */
-  --nu-bg:      #DBE2EC;
-  --nu-bg-2:    #E3E9F2;
-  --nu-hi:      #FBFDFF;                    /* mwanga juu-kushoto */
-  --nu-sh:      rgba(140,156,182,.62);      /* giza chini-kulia */
-  --nu-sh-soft: rgba(140,156,182,.38);
+  --nu-bg:      #0b1120;
+  --nu-bg-2:    #0e1628;
+  --nu-hi:      rgba(255,255,255,.04);
+  --nu-sh:      rgba(0,0,0,.55);
+  --nu-sh-soft: rgba(0,0,0,.35);
+  --nu-line:    rgba(148,178,255,.13);
 
-  /* Maandishi — nyeusi halisi kwa vichwa na majibu */
-  --nu-ink:   #07090E;
-  --nu-ink-2: #363E4F;
-  --nu-ink-3: #6E798D;
+  --nu-ink:   #f3f6fb;
+  --nu-ink-2: #c3cddc;
+  --nu-ink-3: #8a97ab;
 
-  /* Wino wa brand */
-  --nu-blue:   #2F6FC4;
-  --nu-blue-2: #24568F;
-  --nu-violet: #7C4DEF;
-  --nu-pink:   #E14A90;
-  --nu-ok:     #1B8F68;
-  --nu-warn:   #B36A16;
-  --nu-err:    #C8433F;
+  --nu-blue:   #00d4ff;
+  --nu-blue-2: #38bdf8;
+  --nu-violet: #8b6cff;
+  --nu-pink:   #ff5fa2;
+  --nu-ok:     #25d366;
+  --nu-warn:   #ffb020;
+  --nu-err:    #ff6b81;
 
-  --nu-grad: linear-gradient(118deg, #6D8DF0 0%, #A66BF0 38%, #E765A8 70%, #F0925E 100%);
+  --nu-grad: linear-gradient(118deg, #00d4ff 0%, #7c5cff 55%, #ff5fa2 100%);
 
-  /* Kina */
-  --nu-out:    8px 8px 18px var(--nu-sh), -8px -8px 18px var(--nu-hi);
-  --nu-out-sm: 4px 4px 9px var(--nu-sh-soft), -4px -4px 9px var(--nu-hi);
-  --nu-out-lg: 14px 14px 30px var(--nu-sh), -12px -12px 26px var(--nu-hi);
-  --nu-in:     inset 5px 5px 11px var(--nu-sh), inset -5px -5px 11px var(--nu-hi);
-  --nu-in-sm:  inset 3px 3px 6px var(--nu-sh-soft), inset -3px -3px 6px var(--nu-hi);
+  --nu-out:    0 18px 50px rgba(0,0,0,.45), 0 0 0 1px var(--nu-line);
+  --nu-out-sm: 0 8px 24px rgba(0,0,0,.32), 0 0 0 1px var(--nu-line);
+  --nu-out-lg: 0 30px 90px rgba(0,0,0,.55), 0 0 0 1px rgba(148,178,255,.16);
+  --nu-in:     inset 0 0 0 1px var(--nu-line), inset 0 2px 10px rgba(0,0,0,.35);
+  --nu-in-sm:  inset 0 0 0 1px var(--nu-line);
 
   --nu-r:    18px;
-  --nu-r-lg: 28px;
-  --nu-r-xl: 34px;
+  --nu-r-lg: 26px;
+  --nu-r-xl: 32px;
 
-  --nu-font: 'Outfit', system-ui, -apple-system, sans-serif;
+  --nu-font: 'Plus Jakarta Sans', Inter, system-ui, -apple-system, sans-serif;
   --nu-mono: 'Space Mono', ui-monospace, monospace;
 }
 
@@ -57,23 +53,30 @@
    SHELL
 ═══════════════════════════════════════════════════════ */
 body.pp-page {
-  background: var(--nu-bg) !important;
-  /* Mwanga hafifu juu-kushoto — hautoi weupe mkali */
+  background: #05070d !important;
   background-image:
-    radial-gradient(ellipse 90% 60% at 15% 0%,  rgba(255,255,255,.34) 0%, transparent 58%),
-    radial-gradient(ellipse 70% 50% at 88% 12%, rgba(160,176,202,.30) 0%, transparent 55%);
+    radial-gradient(900px 520px at 50% -8%, rgba(124,92,255,.30), transparent 65%),
+    radial-gradient(700px 420px at 95% 30%, rgba(0,212,255,.12), transparent 60%),
+    radial-gradient(600px 420px at 0% 80%, rgba(37,211,102,.07), transparent 60%) !important;
+  background-attachment: fixed !important;
   color: var(--nu-ink-2);
   font-family: var(--nu-font);
   cursor: auto !important;
 }
 body.pp-page #cursor-outer,
 body.pp-page #cursor-inner { display: none !important; }
+body.pp-page input, body.pp-page textarea, body.pp-page select { color: var(--nu-ink); }
+body.pp-page ::placeholder { color: var(--nu-ink-3); opacity: 1; }
+@media print {
+  :root { --nu-ink: #07090E; --nu-ink-2: #363E4F; --nu-ink-3: #6E798D; --nu-bg: #fff; --nu-blue: #2F6FC4; }
+}
 
 /* Nav */
 body.pp-page #site-nav.pinned .nav-inner {
-  background: rgba(219,226,236,.93);
-  border-bottom: none;
-  box-shadow: 0 8px 22px rgba(140,156,182,.36);
+  background: rgba(5,7,13,.86);
+  border-bottom: 1px solid var(--nu-line);
+  box-shadow: 0 8px 26px rgba(0,0,0,.4);
+  backdrop-filter: blur(16px);
 }
 body.pp-page .nav-logo    { color: var(--nu-ink); }
 body.pp-page .nav-logo em { color: var(--nu-blue); }
@@ -140,7 +143,7 @@ body.pp-page .nav-burger span { background: var(--nu-ink) !important; }
 .pp-stp.on b { background: var(--nu-grad); color: #fff; box-shadow: none; }
 .pp-stp.done { color: var(--nu-ok); }
 .pp-stp.done b { background: var(--nu-bg); color: var(--nu-ok); box-shadow: var(--nu-in-sm); }
-.pp-stp-sep { width: 8px; height: 3px; border-radius: 3px; background: rgba(140,156,182,.45); }
+.pp-stp-sep { width: 8px; height: 3px; border-radius: 3px; background: var(--nu-line); }
 
 /* ═══════════════════════════════════════════════════════
    SURFACES
@@ -163,7 +166,7 @@ body.pp-page .nav-burger span { background: var(--nu-ink) !important; }
 .pp-panel-head {
   display: flex; align-items: flex-start; gap: 14px;
   padding-bottom: 20px; margin-bottom: 24px;
-  border-bottom: 1px solid rgba(140,156,182,.28);
+  border-bottom: 1px solid var(--nu-line);
 }
 .pp-panel-ico {
   width: 44px; height: 44px; border-radius: 14px; flex-shrink: 0;
@@ -183,7 +186,7 @@ body.pp-page .nav-burger span { background: var(--nu-ink) !important; }
   position: relative; overflow: hidden;
   padding: 26px 28px; border-radius: 24px;
   background: var(--nu-grad);
-  box-shadow: 10px 10px 26px rgba(126,100,172,.38), -8px -8px 20px var(--nu-hi);
+  box-shadow: 0 24px 60px rgba(124,92,255,.35);
   color: #fff;
 }
 .pp-gcard::after {
@@ -236,7 +239,7 @@ body.pp-page .nav-burger span { background: var(--nu-ink) !important; }
 }
 .pp-btn-primary {
   background: var(--nu-grad); color: #fff;
-  box-shadow: 7px 7px 16px rgba(126,100,172,.40), -6px -6px 14px var(--nu-hi);
+  box-shadow: 0 14px 34px rgba(0,212,255,.25);
 }
 .pp-btn-primary:hover { transform: translateY(-2px); }
 .pp-btn-primary:active {
@@ -277,7 +280,7 @@ body.pp-page .nav-burger span { background: var(--nu-ink) !important; }
   .pp-main  { padding-bottom: 74px; }
   .pp-panel { padding: 22px 18px; border-radius: 22px; }
   .pp-steps { width: 100%; justify-content: center; }
-  :root { --nu-out: 6px 6px 13px var(--nu-sh), -6px -6px 13px var(--nu-hi); }
+
 }
 
 @media (prefers-reduced-motion: reduce) {

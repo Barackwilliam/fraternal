@@ -222,3 +222,13 @@ def render_page_html(site, page):
         result = render_shortcodes(site, source)
         cache.set(cache_key, result, 3600)  # saa 1 — version ndiyo invalidator
     return result
+
+
+def render_raw_document(site, page):
+    """HTML kamili ya page iliyopakiwa kwa ZIP (SitePage.raw_document)."""
+    cache_key = f'jtraw:{site.id}:{page.id}:v{site.content_version}'
+    result = cache.get(cache_key)
+    if result is None:
+        result = render_shortcodes(site, page.raw_document)
+        cache.set(cache_key, result, 3600)
+    return result

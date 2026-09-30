@@ -48,6 +48,12 @@ h1{font-family:var(--ff-d);font-size:clamp(30px,5.4vw,52px);line-height:1.1;lett
   max-width:760px}
 h1 em{font-style:normal;background:linear-gradient(90deg,var(--green),var(--cyan));
   -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+/* Animation inafunga kila neno ndani ya span ya inline-block. Chromium haipaki
+   gradient ya <em> ndani ya watoto wa inline-block — maneno yalibaki WAZI kabisa
+   ("Your website," haikuonekana, sentensi ikaanza na "built for the"). Kila
+   neno linapata gradient yake mwenyewe. */
+h1 em .w{background:linear-gradient(90deg,var(--green),var(--cyan));
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
 .sub{color:var(--muted);font-size:clamp(15px,2vw,17px);margin:16px 0 46px;max-width:620px;line-height:1.7}
 
 .paths{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:22px}

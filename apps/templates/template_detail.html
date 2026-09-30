@@ -1,0 +1,236 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}{{ seo_title }} | JamiiTek{% endblock %}
+{% block meta_desc %}{{ seo_description }}{% endblock %}
+{% block meta_keywords %}{{ seo_keywords }}{% endblock %}
+{% block og_type %}product{% endblock %}
+{% block og_title %}{{ seo_title }}{% endblock %}
+{% block og_desc %}{{ seo_description }}{% endblock %}
+{% block og_image_alt %}{{ tpl.name }} — website template by JamiiTek{% endblock %}
+{% block tw_title %}{{ seo_title }}{% endblock %}
+{% block tw_desc %}{{ seo_description }}{% endblock %}
+{% block schema_markup %}{% for block in json_ld %}
+<script type="application/ld+json">{{ block|safe }}</script>{% endfor %}
+{% endblock %}
+
+{% block extra_css %}
+{% comment %}
+Ukurasa wa SEO wa template moja (apps/template_seo.py). Maandishi yote hapa
+ni HTML halisi — Google na AI zinaisoma; iframe ni onyesho tu.
+{% endcomment %}
+{% include 'includes/mk_style.html' %}
+<style>
+.td-hero{position:relative;padding:clamp(100px,12vw,140px) 0 50px;isolation:isolate}
+.td-hero::before{content:"";position:absolute;inset:0;z-index:-1;
+  background:radial-gradient(800px 480px at 15% 0%,rgba(124,92,255,.32),transparent 65%),
+  radial-gradient(700px 420px at 95% 30%,rgba(0,212,255,.16),transparent 60%)}
+.td-grid{display:grid;grid-template-columns:1fr 1.15fr;gap:clamp(28px,4vw,56px);align-items:center}
+.td-cat{display:inline-flex;align-items:center;gap:8px;padding:7px 14px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.04);
+  font-size:13px;font-weight:700;color:var(--c)}
+.td-hero h1{font-size:clamp(34px,5vw,60px);line-height:1.04;letter-spacing:-.04em;font-weight:800;margin:18px 0 16px}
+.td-hero h1 small{display:block;font-size:.42em;letter-spacing:-.01em;font-weight:700;color:var(--mut);margin-top:10px}
+.td-lead{font-size:17px;line-height:1.7;color:var(--mut);margin:0 0 26px}
+.td-ctas{display:flex;flex-wrap:wrap;gap:10px}
+.td-trust{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:22px;font-size:13px;color:var(--mut)}
+.td-trust span::before{content:"✓ ";color:var(--g);font-weight:800}
+
+/* Laptop + simu */
+.td-show{position:relative;padding:0 0 40px 0}
+.td-laptop{border-radius:16px;overflow:hidden;border:1px solid var(--line);background:#0a0f1c;box-shadow:0 40px 100px rgba(0,0,0,.55),0 0 0 1px rgba(0,212,255,.08)}
+.td-screen{position:relative;aspect-ratio:16/10;overflow:hidden;background:#fff}
+.td-screen iframe,.td-phone-in iframe{position:absolute;top:0;left:0;border:0;transform-origin:0 0;background:#fff;pointer-events:none}
+.td-screen iframe{width:1280px;height:800px}
+.td-phone{position:absolute;right:-10px;bottom:0;width:clamp(120px,24%,170px);padding:7px;border-radius:26px;background:#05070d;border:1px solid rgba(255,255,255,.14);
+  box-shadow:0 30px 70px rgba(0,0,0,.6)}
+.td-phone-in{position:relative;aspect-ratio:9/19;border-radius:20px;overflow:hidden;background:#fff}
+.td-phone-in iframe{width:390px;height:823px}
+.td-live{position:absolute;left:14px;bottom:54px;z-index:2;display:inline-flex;gap:8px;align-items:center;padding:8px 14px;border-radius:999px;
+  background:rgba(5,7,13,.85);border:1px solid var(--line);font-size:13px;font-weight:700;color:#fff;backdrop-filter:blur(8px)}
+.td-live::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--g);box-shadow:0 0 0 4px rgba(37,211,102,.25)}
+
+/* Sehemu */
+.td-sec{padding:clamp(50px,7vw,80px) 0 0}
+.td-kick{font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--c)}
+.td-sec h2{font-size:clamp(26px,3.4vw,40px);letter-spacing:-.03em;line-height:1.1;margin:10px 0 12px;font-weight:800}
+.td-sub{color:var(--mut);font-size:16px;line-height:1.65;max-width:680px;margin:0 0 28px}
+.td-feats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.td-feat{padding:22px;border-radius:18px;border:1px solid var(--line);background:linear-gradient(160deg,rgba(255,255,255,.05),rgba(255,255,255,.015))}
+.td-feat span{font-size:24px}.td-feat h3{font-size:16.5px;margin:12px 0 6px;font-weight:800}.td-feat p{margin:0;color:var(--mut);font-size:14px;line-height:1.6}
+.td-feat.hi{border-color:rgba(0,212,255,.3);background:linear-gradient(160deg,rgba(0,212,255,.1),rgba(124,92,255,.05))}
+
+.td-plans{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.td-plan{position:relative;display:flex;flex-direction:column;padding:26px;border-radius:22px;border:1px solid var(--line);background:#0a0f1c}
+.td-plan.best{border-color:rgba(37,211,102,.5);background:linear-gradient(170deg,rgba(37,211,102,.1),#0a0f1c 60%)}
+.td-plan .tag{position:absolute;top:-12px;left:22px;padding:4px 12px;border-radius:999px;background:var(--g);color:#04120a;font-size:11.5px;font-weight:800}
+.td-plan h3{margin:0 0 4px;font-size:18px;font-weight:800}
+.td-plan .pr{font-size:32px;font-weight:800;letter-spacing:-.03em;margin:10px 0 2px}.td-plan .pr small{font-size:14px;color:var(--mut);font-weight:600}
+.td-plan ul{list-style:none;padding:0;margin:14px 0 22px;color:#cfd8e8;font-size:14px;line-height:1.5;flex:1}
+.td-plan li{padding:6px 0 6px 24px;position:relative}.td-plan li::before{content:"✓";position:absolute;left:0;color:var(--g);font-weight:800}
+.td-plan .mk-btn{justify-content:center}
+
+.td-article{display:grid;grid-template-columns:1.4fr 1fr;gap:40px;align-items:start}
+.td-article p{color:#c3cddc;font-size:16px;line-height:1.8;margin:0 0 16px}
+.td-facts{border:1px solid var(--line);border-radius:18px;padding:8px 20px;background:#0a0f1c}
+.td-facts div{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);font-size:14px}
+.td-facts div:last-child{border:0}.td-facts dt{color:var(--mut)}.td-facts dd{margin:0;font-weight:700;text-align:right}
+
+.td-faq details{border:1px solid var(--line);border-radius:16px;background:#0a0f1c;margin-bottom:10px;overflow:hidden}
+.td-faq summary{cursor:pointer;list-style:none;padding:18px 20px;font-weight:700;font-size:16px;display:flex;justify-content:space-between;gap:14px}
+.td-faq summary::-webkit-details-marker{display:none}
+.td-faq summary::after{content:"+";color:var(--c);font-size:22px;line-height:1;transition:transform .2s}
+.td-faq details[open] summary::after{transform:rotate(45deg)}
+.td-faq details p{margin:0;padding:0 20px 18px;color:var(--mut);line-height:1.7;font-size:15px}
+
+.td-rel{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.td-rel .mk-card{animation:none}
+@media(max-width:980px){.td-grid,.td-article{grid-template-columns:1fr}.td-feats,.td-plans,.td-rel{grid-template-columns:1fr 1fr}.td-show{max-width:640px}}
+@media(max-width:620px){.td-feats,.td-plans,.td-rel{grid-template-columns:1fr}.td-phone{right:0}}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="mk">
+  <section class="td-hero">
+    <div class="mk-in">
+      <nav class="mk-crumbs" aria-label="Breadcrumb"><a href="/">Home</a> › <a href="{% url 'templates_marketplace' %}">Templates</a> ›
+        <a href="{{ cat_url }}">{{ tpl.category_plain }}</a> › <span>{{ tpl.name }}</span></nav>
+      <div class="td-grid">
+        <div>
+          <span class="td-cat">{{ tpl.get_category_display }}{% if tpl.badge %} · {{ tpl.get_badge_display }}{% endif %}</span>
+          <h1>{{ tpl.name }}<small>{{ cat_noun|capfirst }} website template</small></h1>
+          <p class="td-lead">{{ tpl.description }}</p>
+          <div class="td-ctas">
+            <a class="mk-btn p" href="{% url 'builder:from_template' tpl.pk %}">✨ Customize free in Builder</a>
+            <a class="mk-btn s" href="{% url 'template_preview' tpl.pk %}" target="_blank" rel="noopener">👁 Live preview</a>
+          </div>
+          <div class="td-trust"><span>Free to customize</span><span>Mobile-perfect</span><span>Free .jamiitek.com address</span><span>WhatsApp built in</span></div>
+        </div>
+        <div class="td-show" aria-label="Preview of {{ tpl.name }} on a laptop and a phone">
+          <div class="td-laptop">
+            <div class="mk-chrome" style="position:static"><i></i><i></i><i></i><span>{{ tpl.slug }}.jamiitek.com</span></div>
+            <div class="td-screen"><iframe data-src="{% url 'template_preview_raw' tpl.pk %}" title="{{ tpl.name }} on desktop" tabindex="-1" loading="lazy"></iframe></div>
+          </div>
+          <div class="td-phone"><div class="td-phone-in"><iframe data-src="{% url 'template_preview_raw' tpl.pk %}" title="{{ tpl.name }} on mobile" tabindex="-1" loading="lazy"></iframe></div></div>
+          <a class="td-live" href="{% url 'template_preview' tpl.pk %}" target="_blank" rel="noopener">Live demo</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="mk-in td-sec">
+    <span class="td-kick">What’s inside</span>
+    <h2>Everything a {{ cat_noun }} website needs</h2>
+    <p class="td-sub">{{ tpl.name }} comes ready with the sections your customers look for — and the JamiiTek platform adds the rest.</p>
+    <div class="td-feats">
+      {% for f in features %}<div class="td-feat hi"><span>⭐</span><h3>{{ f }}</h3><p>Built into the {{ tpl.name }} design — just add your own content.</p></div>{% endfor %}
+      {% for icon, head, text in common_features %}<div class="td-feat"><span>{{ icon }}</span><h3>{{ head }}</h3><p>{{ text }}</p></div>{% endfor %}
+    </div>
+  </section>
+
+  <section class="mk-in td-sec" id="pricing">
+    <span class="td-kick">Pricing</span>
+    <h2>Three ways to get {{ tpl.name }}</h2>
+    <p class="td-sub">Do it yourself for free, or let the JamiiTek team handle everything. Prices in Tanzanian shillings.</p>
+    <div class="td-plans">
+      <div class="td-plan best"><span class="tag">Most popular</span>
+        <h3>✨ Customize yourself</h3><div class="pr">Free</div><small style="color:var(--mut)">in the JamiiTek Builder</small>
+        <ul><li>Edit text, photos &amp; colors</li><li>Drag &amp; drop, code or AI</li><li>Publish on yourname.jamiitek.com</li><li>Inquiries in your dashboard</li></ul>
+        <a class="mk-btn p" href="{% url 'builder:from_template' tpl.pk %}">Start customizing →</a></div>
+      <div class="td-plan">
+        <h3>🌐 Hosted — we set it up</h3><div class="pr">{{ tpl.price_hosted_monthly|intcomma }} <small>TSh / month</small></div><small style="color:var(--mut)">+ your domain</small>
+        <ul><li>We add your content &amp; photos</li><li>Hosting, SSL &amp; updates</li><li>Your own domain (.co.tz / .com)</li><li>Support on WhatsApp</li></ul>
+        <a class="mk-btn s" target="_blank" rel="noopener" href="https://wa.me/255629712678?text={{ 'Hello JamiiTek! I want the '|urlencode }}{{ tpl.name|urlencode }}{{ ' template on the Hosted plan.'|urlencode }}">Choose Hosted on WhatsApp</a></div>
+      <div class="td-plan">
+        <h3>💻 Source code</h3><div class="pr">{{ tpl.price_source_code|intcomma }} <small>TSh once</small></div><small style="color:var(--mut)">host it anywhere</small>
+        <ul><li>Full HTML/CSS/JS code</li><li>Use on your own server</li><li>Setup guidance included</li><li>JamiiTek footer credit stays</li></ul>
+        <a class="mk-btn s" target="_blank" rel="noopener" href="https://wa.me/255629712678?text={{ 'Hello JamiiTek! I want to buy the source code of the '|urlencode }}{{ tpl.name|urlencode }}{{ ' template.'|urlencode }}">Buy on WhatsApp</a></div>
+    </div>
+  </section>
+
+  <section class="mk-in td-sec">
+    <span class="td-kick">How it works</span>
+    <h2>Live in three steps</h2>
+    <div class="mk-steps">
+      <div class="mk-step"><i>01</i><span>✨</span><b>Open it in the Builder</b><p>Create a free account — {{ tpl.name }} opens in the editor right away.</p></div>
+      <div class="mk-step"><i>02</i><span>🎨</span><b>Make it yours</b><p>Your name, logo, photos, prices and WhatsApp number. Add pages if you need them.</p></div>
+      <div class="mk-step"><i>03</i><span>🚀</span><b>Publish &amp; get customers</b><p>Go live on yourname.jamiitek.com, share the link, and connect your own domain any time.</p></div>
+    </div>
+  </section>
+
+  <section class="mk-in td-sec">
+    <div class="td-article">
+      <div>
+        <span class="td-kick">About this template</span>
+        <h2>{{ tpl.name }} — {{ cat_noun }} website template for Tanzania</h2>
+        {% for p in article %}<p>{{ p }}</p>{% endfor %}
+      </div>
+      <dl class="td-facts">
+        <div><dt>Category</dt><dd><a href="{{ cat_url }}">{{ tpl.category_plain }}</a></dd></div>
+        <div><dt>Customize</dt><dd>Free in JamiiTek Builder</dd></div>
+        <div><dt>Hosted plan</dt><dd>TSh {{ tpl.price_hosted_monthly|intcomma }}/mo</dd></div>
+        <div><dt>Source code</dt><dd>TSh {{ tpl.price_source_code|intcomma }}</dd></div>
+        <div><dt>Responsive</dt><dd>Phone · Tablet · Laptop</dd></div>
+        <div><dt>Languages</dt><dd>English · Kiswahili</dd></div>
+        <div><dt>Updated</dt><dd><time datetime="{{ tpl.updated_at|date:'c' }}">{{ tpl.updated_at|date:'j M Y' }}</time></dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <section class="mk-in td-sec td-faq">
+    <span class="td-kick">FAQ</span>
+    <h2>Questions about {{ tpl.name }}</h2>
+    {% for q, a in faq %}<details{% if forloop.first %} open{% endif %}><summary>{{ q }}</summary><p>{{ a }}</p></details>{% endfor %}
+  </section>
+
+  <section class="mk-in">
+    <div class="mk-final">
+      <div><h2>Not quite what you had in mind?</h2>
+        <p>Describe your business and the look you want in a short proposal — the JamiiTek team designs a website just for you, using {{ tpl.name }} as a starting point if you like.</p></div>
+      <div class="mk-ctas">
+        <a class="mk-btn p" href="{% url 'select_website' %}?template={{ tpl.pk }}">📝 Write a proposal</a>
+        <a class="mk-btn s" href="{% url 'templates_marketplace' %}">Browse all templates</a>
+      </div>
+    </div>
+  </section>
+
+  {% if related %}
+  <section class="mk-in" style="padding-bottom:90px">
+    <span class="td-kick">You may also like</span>
+    <h2 style="font-size:clamp(24px,3vw,34px);letter-spacing:-.03em;margin:10px 0 24px;font-weight:800">More website templates</h2>
+    <div class="td-rel">
+      {% for r in related %}
+      <article class="mk-card">
+        <a class="mk-shot" href="{{ r.get_absolute_url }}" style="--grad:{{ r.gradient_css }};display:block">
+          <div class="mk-chrome"><i></i><i></i><i></i><span>{{ r.slug }}.jamiitek.com</span></div>
+          <div class="mk-frame"><iframe data-src="{% url 'template_preview_raw' r.pk %}" title="{{ r.name }}" tabindex="-1" aria-hidden="true" loading="lazy"></iframe><div class="mk-shine"></div></div>
+        </a>
+        <div class="mk-body">
+          <div class="mk-meta"><span class="mk-cat">{{ r.get_category_display }}</span></div>
+          <h3><a href="{{ r.get_absolute_url }}">{{ r.name }}</a></h3>
+          <p>{{ r.description }}</p>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function(){
+  // Onyesho la laptop na simu: iframe ya 1280/390px inapunguzwa kutoshea fremu
+  const fit = () => document.querySelectorAll('.td-screen iframe,.td-phone-in iframe').forEach(f => {
+    f.style.transform = 'scale(' + (f.parentElement.clientWidth / parseInt(getComputedStyle(f).width)) + ')';
+  });
+  fit(); addEventListener('resize', fit);
+  const frames = [...document.querySelectorAll('iframe[data-src]')];
+  const load = f => { if (!f.src){ f.addEventListener('load', () => f.classList.add('ok'), {once: true}); f.src = f.dataset.src; } };
+  if ('IntersectionObserver' in window){
+    const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting){ load(e.target); io.unobserve(e.target); } }), {rootMargin: '300px 0px'});
+    frames.forEach(f => io.observe(f));
+  } else frames.forEach(load);
+})();
+</script>
+{% endblock %}

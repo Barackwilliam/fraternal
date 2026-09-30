@@ -9,7 +9,8 @@ from django.shortcuts import render, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
-from .rendering import render_page_html, render_shortcodes, render_inquiry_form
+from .rendering import (render_page_html, render_raw_document, render_shortcodes,
+                        render_inquiry_form)
 
 
 def _get_site(request):
@@ -56,6 +57,8 @@ def _ctx(site, extra=None):
     ctx['custom_nav_css'] = nav_css
     ctx['custom_footer_html'] = foot_html
     ctx['custom_footer_css'] = foot_css
+    from .layouts import font_for
+    ctx['font_href'], ctx['font_body'], ctx['font_head'] = font_for(site)
 
     if extra:
         ctx.update(extra)
@@ -63,15 +66,16 @@ def _ctx(site, extra=None):
 
 
 def _check_published(request, site):
-    """Draft site inaonekana kwa mmiliki tu (preview)."""
+    """Site ambayo haijapublishiwa: "coming soon" kwa kila mtu isipokuwa staff."""
+    # Subdomain inaonyesha website iliyopublishiwa TU — hata kwa mmiliki.
+    # Mmiliki anaangalia draft kwenye preview ya Studio; hapa anaelezwa hilo.
     if site.is_published:
         return None
-    if request.user.is_authenticated and (
-        request.user == site.owner or request.user.is_staff
-    ):
+    if request.user.is_authenticated and request.user.is_staff:
         return None
+    is_owner = request.user.is_authenticated and request.user == site.owner
     return render(request, 'builder/public/coming_soon.html',
-                  {'site': site}, status=200)
+                  {'site': site, 'is_owner': is_owner}, status=200)
 
 
 def _render_page(request, site, page, extra):
@@ -96,7 +100,16 @@ def home(request):
     page = site.pages.filter(slug='home').first() or site.pages.first()
     if page is None:
         raise Http404
+<<<<<<< HEAD
     return _render_page(request, site, page, {})
+=======
+    if page.raw_document:
+        return HttpResponse(render_raw_document(site, page))
+    return render(request, 'builder/public/page.html', _ctx(site, {
+        'page': page,
+        'page_html': render_page_html(site, page),
+    }))
+>>>>>>> 8d5a8aae8b37aa819c6f392d7825e1647f5e5e84
 
 
 def page_view(request, slug):
@@ -105,8 +118,16 @@ def page_view(request, slug):
     if blocked:
         return blocked
     page = get_object_or_404(site.pages, slug=slug)
+<<<<<<< HEAD
     source = page.code_html if page.mode == 'code' else page.html_cache
     return _render_page(request, site, page, {
+=======
+    if page.raw_document:
+        return HttpResponse(render_raw_document(site, page))
+    return render(request, 'builder/public/page.html', _ctx(site, {
+        'page': page,
+        'page_html': render_page_html(site, page),
+>>>>>>> 8d5a8aae8b37aa819c6f392d7825e1647f5e5e84
         'meta_title': f'{page.title} · {site.site_name}',
         'meta_description': _strip_html(source) or _strip_html(site.tagline or site.site_name),
         'meta_url': f'{_base_url(site)}/p/{page.slug}/',

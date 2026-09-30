@@ -1,0 +1,97 @@
+{% extends 'builder/base_panel.html' %}
+{% block title %}Preview Import — {{ site.site_name }}{% endblock %}
+
+{% block mobnav %}
+<a href="{% url 'builder:site_dashboard' site.id %}"><span class="ic">⬅</span>Dash</a>
+{% endblock %}
+
+{% block sidenav %}
+<a href="{% url 'builder:my_sites' %}">⬅ My Websites</a>
+<a href="{% url 'builder:site_dashboard' site.id %}">📊 Dashboard</a>
+{% endblock %}
+
+{% block content %}
+<style>
+.imp-page{border:1px solid var(--line);border-radius:12px;margin-bottom:10px;overflow:hidden}
+.imp-page summary{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:12px 14px;cursor:pointer;list-style:none}
+.imp-page summary::-webkit-details-marker{display:none}
+.imp-page summary .path{font-family:var(--ff-mono);font-size:12px;color:var(--muted)}
+.imp-page summary .go{margin-left:auto;font-size:12px;color:var(--muted)}
+.imp-page[open] summary .go{color:var(--cyan)}
+.imp-frame{width:100%;height:480px;border:0;border-top:1px solid var(--line);background:#fff;display:block}
+.imp-list{font-family:var(--ff-mono);font-size:12px;color:var(--muted);max-height:180px;overflow:auto;margin:8px 0 0;padding-left:18px}
+</style>
+
+<div class="topbar">
+  <div>
+    <div class="crumb"><a href="{% url 'builder:site_dashboard' site.id %}">{{ site.site_name }}</a> / <a href="{% url 'builder:site_import' site.id %}">Upload website</a> / Preview</div>
+    <h1>👀 Check Your Pages</h1>
+    <p class="hint" style="font-size:14px">{{ result.pages|length }} page{{ result.pages|length|pluralize }} and {{ result.assets }} file{{ result.assets|pluralize }} ready. Click a page to preview it, then confirm.</p>
+  </div>
+</div>
+
+<div class="card">
+  <h2>📄 Pages</h2>
+  {% for p in result.pages %}
+  <details class="imp-page" data-i="{{ forloop.counter0 }}">
+    <summary>
+      <strong>{{ p.title }}</strong>
+      <span class="pill {% if p.slug == 'home' %}on{% endif %}">{{ p.url }}</span>
+      <span class="path">{{ p.path }}</span>
+      {% if p.replaces %}<span class="pill off">replaces existing page</span>{% endif %}
+      <span class="go">Preview ▾</span>
+    </summary>
+    <iframe class="imp-frame" sandbox="allow-scripts" title="Preview of {{ p.title }}"></iframe>
+  </details>
+  {% endfor %}
+  <p class="hint">Links in the preview don't navigate between pages — they will once your site is live.</p>
+</div>
+
+{% if result.missing or result.skipped %}
+<div class="card" style="border-color:rgba(240,176,63,.4)">
+  <h2>⚠ Worth checking</h2>
+  {% if result.missing %}
+  <p class="hint" style="margin:0"><b>{{ result.missing|length }}</b> file{{ result.missing|length|pluralize }} your pages link to {{ result.missing|length|pluralize:"is,are" }} not in the ZIP. These will show as broken until you add them and upload again:</p>
+  <ul class="imp-list">{% for m in result.missing %}<li>{{ m }}</li>{% endfor %}</ul>
+  {% endif %}
+  {% if result.skipped %}
+  <p class="hint" style="margin:14px 0 0"><b>{{ result.skipped|length }}</b> file{{ result.skipped|length|pluralize }} {{ result.skipped|length|pluralize:"was,were" }} skipped:</p>
+  <ul class="imp-list">{% for path, why in result.skipped %}<li>{{ path }} — {{ why }}</li>{% endfor %}</ul>
+  {% endif %}
+</div>
+{% endif %}
+
+<div class="card">
+  <h2>✅ Put it live</h2>
+  <form method="post" action="{% url 'builder:site_import_confirm' site.id %}"
+        onsubmit="const b=this.querySelector('button');b.disabled=true;b.textContent='⏳ Saving…'">
+    {% csrf_token %}
+    <input type="hidden" name="token" value="{{ token }}">
+    {% if others %}
+    <label style="display:flex;gap:8px;align-items:flex-start;font-weight:500">
+      <input type="checkbox" name="remove_others" style="width:auto;margin-top:3px">
+      <span>Also delete my other pages that are not in this ZIP
+        <span class="hint">({% for o in others %}{{ o.title }}{% if not forloop.last %}, {% endif %}{% endfor %})</span></span>
+    </label>
+    {% endif %}
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
+      <button class="btn amber">🚀 Import {{ result.pages|length }} page{{ result.pages|length|pluralize }}</button>
+      <a class="btn ghost" href="{% url 'builder:site_import' site.id %}">Upload a different ZIP</a>
+    </div>
+    <p class="hint" style="margin-top:12px">{% if site.is_published %}Your website is live — the new pages show immediately.{% else %}Your website is still a draft — publish it from the dashboard when you're happy.{% endif %}</p>
+  </form>
+</div>
+
+{{ docs|json_script:"imp-docs" }}
+<script>
+(function(){
+  const docs = JSON.parse(document.getElementById('imp-docs').textContent);
+  document.querySelectorAll('.imp-page').forEach(d => {
+    d.addEventListener('toggle', () => {
+      const f = d.querySelector('iframe');
+      if (d.open && !f.srcdoc) f.srcdoc = docs[+d.dataset.i];
+    });
+  });
+})();
+</script>
+{% endblock %}

@@ -1,52 +1,32 @@
 {% extends 'builder/base_panel.html' %}
-{% block title %}{{ site.site_name }} — Panel{% endblock %}
+{% block title %}{{ site.site_name }} — Dashboard{% endblock %}
 
-{% block scripts %}
-{% include 'builder/_ai_magic.html' %}
-{% endblock %}
+{% comment %}
+Dashboard ya website: vitu vitano tu — hali ya website, Website Studio,
+inquiries, kupakia ZIP na JamiiBot. Kila kitu kingine kiko ndani ya Studio.
+{% endcomment %}
 
 {% block mobnav %}
 <a href="{% url 'builder:my_sites' %}"><span class="ic">⬅</span>Sites</a>
 <a href="{% url 'builder:site_dashboard' site.id %}" class="active"><span class="ic">📊</span>Dash</a>
+<a href="{% url 'builder:studio' site.id %}"><span class="ic">🪄</span>Studio</a>
 <a href="{% url 'builder:inquiries_list' site.id %}"><span class="ic">📥</span>Inquiries</a>
-{% for c in collections %}
-<a href="{% url 'builder:collection_items' site.id c.id %}"><span class="ic">{{ c.icon }}</span>{{ c.name_singular }}</a>
-{% endfor %}
-<a href="{% url 'builder:tutorial' %}"><span class="ic">🎓</span>Tutorial</a>
+<a href="{% url 'builder:site_import' site.id %}"><span class="ic">📦</span>Upload</a>
 {% endblock %}
 
 {% block sidenav %}
 <a href="{% url 'builder:my_sites' %}">⬅ My Websites</a>
 <a href="{% url 'builder:site_dashboard' site.id %}" class="active">📊 Dashboard</a>
+<a href="{% url 'builder:studio' site.id %}">🪄 Website Studio</a>
 <a href="{% url 'builder:inquiries_list' site.id %}">📥 Inquiries{% if new_inquiries %} ({{ new_inquiries }}){% endif %}</a>
-{% for c in collections %}
-<a href="{% url 'builder:collection_items' site.id c.id %}">{{ c.icon }} {{ c.name }}</a>
-{% endfor %}
-<a href="{% url 'builder:tutorial' %}">🎓 How to Use</a>
+<a href="{% url 'builder:site_import' site.id %}">📦 Upload Website (ZIP)</a>
+<a href="{% url 'jamiibot_landing' %}">🤖 JamiiBot</a>
 {% endblock %}
 
 {% block content %}
-<div class="topbar">
-  <div>
-    <div class="crumb"><a href="{% url 'builder:my_sites' %}">My Websites</a> / {{ site.site_name }}</div>
-    <h1>{{ site.site_name }}</h1>
-    <p class="hint" style="font-size:14px">
-      <a href="{{ site.public_url }}" target="_blank" style="color:var(--amber-ink);font-weight:700">{{ site.subdomain }}.jamiitek.com ↗</a>
-      · type: {{ site.website_type }}
-    </p>
-  </div>
-  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap" id="publish">
-    {% if site.is_published %}<span class="pill on">● Live</span>
-    {% else %}<span class="pill off">○ Draft — only you can see it</span>{% endif %}
-    <form method="post" action="{% url 'builder:toggle_publish' site.id %}">
-      {% csrf_token %}
-      <button class="btn {% if not site.is_published %}amber{% else %}ghost{% endif %}">
-        {% if site.is_published %}Unpublish{% else %}🚀 Publish{% endif %}
-      </button>
-    </form>
-  </div>
-</div>
+<div class="db">
 
+<<<<<<< HEAD
 
 <!-- ── Njia tatu za kufanya kazi ──
      Mteja mpya hakujua aanzie wapi: dashboard ilikuwa na sehemu nane, na
@@ -217,20 +197,78 @@
       <p class="hint" style="margin:6px 0 12px">{{ t.description|default:'' }}</p>
       {% if site.template_key == t.key %}
         <span class="pill on">Active</span>
+=======
+{# ═══ 1. HALI YA WEBSITE ═══ #}
+<section class="db-status {% if site.is_published %}is-live{% endif %}">
+  <div class="db-id">
+    <div class="db-logo">{% if site.logo_url %}<img src="{{ site.logo_url }}" alt="">{% else %}{{ site.site_name|slice:":1"|upper }}{% endif %}</div>
+    <div class="db-name">
+      <h1>{{ site.site_name }}</h1>
+      {% if site.is_published %}
+      <a href="{{ site.public_url }}" target="_blank" rel="noopener">{{ site.subdomain }}.jamiitek.com ↗</a>
+      {% if site.is_premium and site.custom_domain %}<a href="https://{{ site.custom_domain }}" target="_blank" rel="noopener" class="db-domain">{{ site.custom_domain }} ↗</a>{% endif %}
+>>>>>>> 8d5a8aae8b37aa819c6f392d7825e1647f5e5e84
       {% else %}
-      <form method="post" action="{% url 'builder:change_template' site.id %}"
-            onsubmit="return confirm('Changing the template will rewrite the design of your default pages. Continue?')">
-        {% csrf_token %}
-        <input type="hidden" name="template_key" value="{{ t.key }}">
-        <button class="btn sm">Use This</button>
-      </form>
+      {# Subdomain inaonyesha website iliyopublishiwa tu — kabla ya hapo, preview ya Studio #}
+      <span class="db-off">{{ site.subdomain }}.jamiitek.com · opens after you publish</span>
+      <a href="{% url 'builder:studio_preview' site.id %}" target="_blank" rel="noopener">👁 Preview draft ↗</a>
       {% endif %}
     </div>
-    {% endfor %}
+    <form method="post" action="{% url 'builder:toggle_publish' site.id %}" class="db-pub">
+      {% csrf_token %}
+      {% if site.is_published %}
+        <span class="db-state live"><i></i>Live</span>
+        <button class="btn sm ghost" onclick="return confirm('Take your website offline? Visitors will see a “coming soon” page.')">Unpublish</button>
+      {% elif blockers %}
+        <span class="db-state"><i></i>Draft · {{ blockers|length }} step{{ blockers|length|pluralize }} to save</span>
+        <a class="btn sm amber" href="{% url 'builder:studio_step' site.id blockers.0.0 %}" title="Save every Studio step to publish">Finish setup →</a>
+      {% else %}
+        <span class="db-state"><i></i>Draft — ready to publish</span>
+        <button class="btn sm amber">🚀 Publish</button>
+      {% endif %}
+    </form>
   </div>
-</div>
-{% endif %}
+  <div class="db-facts">
+    <div><b>{% if site.is_published %}Live{% else %}Draft{% endif %}</b><span>Status</span></div>
+    <div><b>{{ page_count }}</b><span>Page{{ page_count|pluralize }}{% if imported_pages %} · {{ imported_pages }} uploaded{% endif %}</span></div>
+    <div><b>{{ new_inquiries }}</b><span>New inquir{{ new_inquiries|pluralize:"y,ies" }}</span></div>
+    <div><b>{{ studio_done }}/{{ studio_total }}</b><span>Setup steps</span></div>
+    <div><b>{{ last_change }}</b><span>Last change</span></div>
+  </div>
+</section>
 
+{# ═══ 2. WEBSITE STUDIO ═══ #}
+<a class="db-studio" href="{% url 'builder:studio_step' site.id studio_next %}">
+  <span class="db-studio-glow" aria-hidden="true"></span>
+  <span class="db-studio-ic">🪄</span>
+  <span class="db-studio-tx">
+    <small>Website Studio</small>
+    <b>{% if studio_done == studio_total %}Edit your website{% elif studio_done %}Continue building your website{% else %}Build your website step by step{% endif %}</b>
+    <span>{% if studio_done == studio_total %}Pages, content, colors, header, footer, templates and your domain — all in one place.{% else %}Next: <strong>{{ studio_next_title }}</strong> · pages, content, colors, header, footer and more.{% endif %}</span>
+    <span class="db-bar"><i style="width:{{ studio_pct }}%"></i></span>
+  </span>
+  <span class="btn amber db-go">{% if studio_done == studio_total %}Open Studio{% elif studio_done %}Continue{% else %}Start{% endif %} →</span>
+</a>
+
+<div class="db-pair">
+  {# ═══ 3. INQUIRIES ═══ #}
+  <a class="db-tile db-inq" href="{% url 'builder:inquiries_list' site.id %}{% if new_inquiries %}?status=new{% endif %}">
+    <span class="db-tile-ic">📥{% if new_inquiries %}<em>{{ new_inquiries }}</em>{% endif %}</span>
+    <b>Inquiries</b>
+    <span>{% if new_inquiries %}{{ new_inquiries }} new message{{ new_inquiries|pluralize }} from customers waiting for your reply.{% elif total_inquiries %}All caught up — {{ total_inquiries }} message{{ total_inquiries|pluralize }} so far.{% else %}Messages customers send from your website’s contact form land here.{% endif %}</span>
+    <span class="db-link">{% if new_inquiries %}Reply now{% else %}Open inquiries{% endif %} →</span>
+  </a>
+
+  {# ═══ 4. UPLOAD ZIP ═══ #}
+  <a class="db-tile db-zip" href="{% url 'builder:site_import' site.id %}">
+    <span class="db-tile-ic">📦</span>
+    <b>Upload a website</b>
+    <span>Already have a finished site from a designer or ChatGPT? Upload the folder as a ZIP — every page, image and style goes live in one step.</span>
+    <span class="db-link">Upload ZIP →</span>
+  </a>
+</div>
+
+<<<<<<< HEAD
 <!-- Settings -->
 <div class="card" id="settings">
   <h2>⚙️ Website Details</h2>
@@ -258,49 +296,106 @@
         <input type="text" name="contact_address" value="{{ site.contact_address }}">
       </div>
     </div>
+=======
+{# ═══ 5. JAMIIBOT ═══ #}
+<a class="db-bot" href="{% url 'jamiibot_landing' %}">
+  <span class="db-bot-chat" aria-hidden="true">
+    <i class="in">Habari, mko wazi saa ngapi leo?</i>
+    <i class="out">Karibu sana! Tuko wazi hadi saa 4 usiku. Nikusaidie kuweka oda sasa hivi? 🙂</i>
+    <i class="in">Ndiyo tafadhali</i>
+  </span>
+  <span class="db-bot-tx">
+    <small>New · JamiiBot</small>
+    <b>Let AI answer your customers on WhatsApp — 24/7</b>
+    <span>While you sleep, JamiiBot replies in Swahili &amp; English, answers prices and questions, and takes bookings and orders. Connect your WhatsApp by scanning a QR code.</span>
+    <span class="db-bot-cta"><span class="btn">Try it free for 7 days →</span><em>No payment to start</em></span>
+  </span>
+</a>
+>>>>>>> 8d5a8aae8b37aa819c6f392d7825e1647f5e5e84
 
-    <h2 style="margin-top:26px">🎨 Website Appearance</h2>
-    <div class="grid c2">
-      <div>
-        <label>Navbar Style / Layout</label>
-        <select name="nav_style">
-          {% for val, label in site.NAV_STYLES %}
-          <option value="{{ val }}" {% if site.nav_style == val %}selected{% endif %}>{{ label }}</option>
-          {% endfor %}
-        </select>
-        <p class="hint">Glass = floating blurred navbar · Side = sidebar menu (dashboard style) · Top = classic · Centered = minimal centered.</p>
-      </div>
-      <div>
-        <label>Accent Color</label>
-        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-          <input type="color" name="accent_color" value="{{ site.accent_color }}">
-          <label style="display:flex;align-items:center;gap:8px;margin:0;font-weight:500">
-            <input type="checkbox" name="dark_nav" {% if site.dark_nav %}checked{% endif %}> Dark navbar
-          </label>
-        </div>
-        <p class="hint">This color is used on your navbar, buttons and highlights.</p>
-      </div>
-    </div>
-
-    <h2 style="margin-top:26px">🌐 Custom Domain <span class="pill {% if site.is_premium %}on{% else %}off{% endif %}" style="margin-left:6px">{% if site.is_premium %}PREMIUM ACTIVE{% else %}PREMIUM ONLY{% endif %}</span></h2>
-    {% if site.is_premium %}
-    <div class="grid c2">
-      <div>
-        <label>Your Domain (without http://)</label>
-        <input type="text" name="custom_domain" value="{{ site.custom_domain|default:'' }}" placeholder="www.mybusiness.co.tz">
-        <p class="hint">After saving, your domain is <b>registered automatically</b> on our servers —
-        you only need ONE thing at your domain registrar: add a CNAME record pointing
-        <b>{{ site.custom_domain|default:'your domain' }}</b> → <b>jamiitek.onrender.com</b>.
-        SSL activates by itself once DNS is detected. Your site stays reachable at
-        {{ site.subdomain }}.jamiitek.com too.</p>
-      </div>
-    </div>
-    {% else %}
-    <p class="hint">Connect your own domain (e.g. <b>www.mybusiness.co.tz</b>) with a Premium plan.
-    <a href="https://wa.me/255750910158?text=Hello%20JamiiTek,%20I%20want%20to%20upgrade%20{{ site.subdomain }}.jamiitek.com%20to%20Premium%20for%20a%20custom%20domain"
-       target="_blank" rel="noopener" style="color:var(--green-2)">Upgrade via WhatsApp →</a></p>
-    {% endif %}
-    <button class="btn" style="margin-top:18px">💾 Save Details</button>
-  </form>
 </div>
+
+<style>
+.db{display:flex;flex-direction:column;gap:16px;max-width:1080px}
+/* Hali */
+.db-status{border:1px solid var(--line);border-radius:20px;padding:22px;background:var(--panel,#0b1426);position:relative;overflow:hidden}
+.db-status::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:linear-gradient(90deg,#f0b03f,transparent)}
+.db-status.is-live::before{background:linear-gradient(90deg,var(--green),var(--cyan),transparent)}
+.db-id{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.db-logo{width:56px;height:56px;border-radius:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden;
+  background:linear-gradient(135deg,rgba(0,212,255,.18),rgba(37,211,102,.18));border:1px solid var(--line);
+  font:800 24px/1 var(--ff-display);color:#fff}
+.db-logo img{width:100%;height:100%;object-fit:contain;background:#fff}
+.db-name{flex:1;min-width:200px;display:flex;flex-direction:column;gap:2px}
+.db-name h1{margin:0;font-size:24px;line-height:1.2}
+.db-name a{color:var(--cyan);font-family:var(--ff-mono);font-size:13px;text-decoration:none;width:fit-content}
+.db-name a.db-domain{color:var(--green)}
+.db-off{font-family:var(--ff-mono);font-size:12.5px;color:var(--dim)}
+.db-pub{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.db-state{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:#f0b03f;padding:7px 12px;border-radius:999px;
+  background:rgba(240,176,63,.1);border:1px solid rgba(240,176,63,.3)}
+.db-state i{width:8px;height:8px;border-radius:50%;background:currentColor}
+.db-state.live{color:var(--green);background:rgba(37,211,102,.1);border-color:rgba(37,211,102,.35)}
+.db-state.live i{box-shadow:0 0 0 0 currentColor;animation:dbPulse 1.8s infinite}
+@keyframes dbPulse{70%{box-shadow:0 0 0 7px transparent}100%{box-shadow:0 0 0 0 transparent}}
+.db-facts{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:20px}
+.db-facts div{border:1px solid var(--line);border-radius:14px;padding:12px 14px;background:rgba(255,255,255,.02);min-width:0}
+.db-facts b{display:block;font:800 19px/1.2 var(--ff-display);color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.db-facts span{font-size:11.5px;color:var(--muted)}
+/* Studio */
+.db-studio{position:relative;overflow:hidden;display:flex;align-items:center;gap:20px;flex-wrap:wrap;padding:26px;border-radius:22px;text-decoration:none;
+  border:1px solid rgba(0,212,255,.35);background:linear-gradient(125deg,rgba(0,212,255,.13),rgba(124,58,237,.1) 55%,rgba(37,211,102,.08));
+  transition:transform .2s,border-color .2s,box-shadow .2s}
+.db-studio:hover{transform:translateY(-2px);border-color:var(--cyan);box-shadow:0 18px 50px rgba(0,212,255,.12)}
+.db-studio-glow{position:absolute;right:-80px;top:-80px;width:260px;height:260px;border-radius:50%;
+  background:radial-gradient(circle,rgba(0,212,255,.25),transparent 70%);pointer-events:none}
+.db-studio-ic{font-size:40px;width:72px;height:72px;border-radius:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1)}
+.db-studio-tx{flex:1;min-width:230px;display:flex;flex-direction:column;gap:6px;position:relative}
+.db-studio-tx small,.db-bot-tx small{font:700 11px/1 var(--ff-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--cyan)}
+.db-studio-tx b{font:800 22px/1.25 var(--ff-display);color:#fff}
+.db-studio-tx>span{color:var(--muted);font-size:14px}
+.db-studio-tx strong{color:#fff}
+.db-bar{height:7px;background:rgba(255,255,255,.07);border-radius:7px;overflow:hidden;max-width:440px;margin-top:4px}
+.db-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--green),var(--cyan));border-radius:7px}
+.db-go{position:relative;padding:14px 24px;font-size:15px}
+/* Inquiries + ZIP */
+.db-pair{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.db-tile{display:flex;flex-direction:column;gap:8px;padding:22px;border-radius:20px;border:1px solid var(--line);background:var(--panel,#0b1426);
+  text-decoration:none;color:var(--muted);font-size:13.5px;line-height:1.55;transition:transform .2s,border-color .2s}
+.db-tile:hover{transform:translateY(-2px)}
+.db-tile b{font:800 18px/1.3 var(--ff-display);color:#fff}
+.db-tile-ic{position:relative;width:50px;height:50px;border-radius:15px;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:4px}
+.db-tile-ic em{position:absolute;top:-6px;right:-8px;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:#ff4d6d;color:#fff;
+  font:800 11.5px/22px var(--ff-mono);font-style:normal;text-align:center;box-shadow:0 0 0 3px var(--panel,#0b1426)}
+.db-inq .db-tile-ic{background:rgba(255,77,109,.12);border:1px solid rgba(255,77,109,.3)}
+.db-inq:hover{border-color:rgba(255,77,109,.5)}
+.db-zip .db-tile-ic{background:rgba(37,211,102,.12);border:1px solid rgba(37,211,102,.3)}
+.db-zip:hover{border-color:rgba(37,211,102,.5)}
+.db-link{margin-top:auto;padding-top:6px;font-weight:800;color:#fff;font-size:14px}
+/* JamiiBot */
+.db-bot{display:grid;grid-template-columns:minmax(220px,300px) 1fr;gap:26px;align-items:center;padding:26px;border-radius:22px;text-decoration:none;
+  border:1px solid rgba(37,211,102,.4);background:radial-gradient(500px 240px at 0% 100%,rgba(37,211,102,.18),transparent 70%),
+  linear-gradient(135deg,#07251a,#0b1426 70%);transition:transform .2s,box-shadow .2s}
+.db-bot:hover{transform:translateY(-2px);box-shadow:0 20px 60px rgba(37,211,102,.15)}
+.db-bot-chat{display:flex;flex-direction:column;gap:8px;padding:16px;border-radius:18px;background:#0b141a;border:1px solid rgba(255,255,255,.06)}
+.db-bot-chat i{font-style:normal;font-size:12.5px;line-height:1.45;padding:8px 11px;border-radius:12px;max-width:88%;color:#e9edef}
+.db-bot-chat .in{background:#202c33;align-self:flex-start;border-top-left-radius:3px}
+.db-bot-chat .out{background:#005c4b;align-self:flex-end;border-top-right-radius:3px}
+.db-bot-tx{display:flex;flex-direction:column;gap:8px}
+.db-bot-tx small{color:var(--green)}
+.db-bot-tx b{font:800 23px/1.25 var(--ff-display);color:#fff}
+.db-bot-tx>span{color:#b9c9c0;font-size:14px;line-height:1.6}
+.db-bot-cta{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:6px}
+.db-bot-cta .btn{background:var(--green);color:#04120a;border-color:var(--green);font-weight:800}
+.db-bot-cta em{font-style:normal;font-size:12px;color:#8fb3a1}
+@media(max-width:900px){.db-facts{grid-template-columns:repeat(3,1fr)}.db-facts div:nth-child(n+4){display:none}}
+@media(max-width:700px){
+  .db-pair,.db-bot{grid-template-columns:1fr}
+  .db-status,.db-studio,.db-tile,.db-bot{padding:18px}
+  .db-studio-ic{width:56px;height:56px;font-size:30px}
+  .db-go{width:100%}
+  .db-pub{width:100%}
+}
+</style>
 {% endblock %}

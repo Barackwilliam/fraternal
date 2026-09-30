@@ -7,10 +7,13 @@
 <title>Editor · {{ page.title }} · {{ site.site_name }}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://unpkg.com/grapesjs@0.21.13/dist/css/grapes.min.css">
-<script src="https://unpkg.com/grapesjs@0.21.13"></script>
-<script src="https://unpkg.com/grapesjs-preset-webpage@1.0.3"></script>
-<script src="https://unpkg.com/grapesjs-blocks-basic@1.0.2"></script>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/grapesjs@0.21.13/dist/css/grapes.min.css">
+<script src="https://cdn.jsdelivr.net/npm/grapesjs@0.21.13/dist/grapes.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/grapesjs-preset-webpage@1.0.3/dist/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/grapesjs-blocks-basic@1.0.2/dist/index.js"></script>
+{# Parser ya CSS ya browser inaacha shorthand zenye var() (mf. background:var(--accent)) — PostCSS inahifadhi CSS kama ilivyoandikwa #}
+<script src="https://cdn.jsdelivr.net/npm/grapesjs-parser-postcss@1.0.3/dist/index.js"></script>
 <style>
 :root{
   --bg:#050b18; --panel:#0a1424; --panel-2:#0d1a30; --line:rgba(120,180,255,.12);
@@ -393,8 +396,83 @@ body{font-family:'Inter',-apple-system,sans-serif;height:100vh;height:100dvh;dis
   .mw-card,.mw-backdrop,.mw-glow,.mw-device,.mw-arrow,.mw-feats li{animation:none!important}
 }
 
+/* ══ TOP BAR v2 ══ */
+.ed-top svg,.ed-page svg,.am svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.ed-back{gap:4px}
+.ed-page{display:flex;align-items:center;gap:8px;padding:0 4px 0 10px;border:1px solid var(--line);border-radius:10px;
+  background:rgba(255,255,255,.04);color:var(--cyan);min-height:38px}
+.ed-page select{background:transparent;border:none;color:#fff;font-weight:700;font-size:13.5px;padding:8px 22px 8px 2px;
+  cursor:pointer;max-width:170px;appearance:none;-webkit-appearance:none;
+  background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);
+  background-position:calc(100% - 11px) 50%,calc(100% - 6px) 50%;background-size:5px 5px;background-repeat:no-repeat}
+.ed-page select:focus{outline:none}
+.ed-page option{background:#0a1424;color:#fff}
+.ed-grp{display:flex;gap:2px}
+.ed-btn.ic{padding:8px 10px;min-width:38px;justify-content:center;font-weight:800}
+.devs button{display:flex;align-items:center}
+.devs svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#save-state.dirty{color:var(--amber)}
+#btn-save.pulse{animation:savePulse 1.4s ease infinite}
+@keyframes savePulse{50%{box-shadow:0 0 0 6px rgba(0,212,255,.18)}}
+
+/* ══ BLOCKS: utafutaji + kadi nzuri ══ */
+.jt-bsearch{position:sticky;top:0;z-index:3;padding:10px;background:var(--panel)}
+.jt-bsearch input{width:100%;padding:11px 12px 11px 36px;border-radius:11px;border:1px solid var(--line);
+  background:rgba(255,255,255,.05) url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%237d8ca0' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20 20l-3.5-3.5'/%3E%3C/svg%3E") 12px 50% no-repeat;
+  color:var(--ink);font-size:13.5px;font-family:inherit}
+.jt-bsearch input:focus{outline:none;border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,212,255,.12)}
+.jt-bsearch small{display:block;margin-top:7px;font-size:11px;color:var(--dim)}
+.gjs-blocks-c{display:grid!important;grid-template-columns:1fr 1fr;gap:8px;padding:8px!important}
+.gjs-block{width:auto!important;min-height:0!important;margin:0!important;padding:8px 6px 10px!important;
+  display:flex!important;flex-direction:column;align-items:center;gap:6px;cursor:grab}
+.gjs-block svg{width:34px;height:34px}
+.gjs-block svg[viewBox="0 0 72 48"]{width:100%;max-width:96px;height:auto;border-radius:6px}
+/* Kichaguzi cha device cha GrapesJS kinarudia vitufe vya juu */
+.gjs-devices-c{display:none!important}
+.gjs-block-label{font-size:11.5px!important;line-height:1.3!important;font-weight:600;text-align:center}
+.gjs-block.jt-hide,.gjs-block-category.jt-hide{display:none!important}
+
+/* ══ MAKTABA YA PICHA ══ */
+.am{position:fixed;inset:0;z-index:450;display:none;align-items:center;justify-content:center;padding:16px}
+.am.on{display:flex}
+.am-bg{position:absolute;inset:0;background:rgba(3,6,14,.72);backdrop-filter:blur(6px)}
+.am-card{position:relative;width:min(760px,100%);max-height:88vh;display:flex;flex-direction:column;border-radius:20px;
+  background:linear-gradient(170deg,#0d1830,#0a1222);border:1px solid var(--line);box-shadow:0 40px 100px rgba(0,0,0,.6);animation:mdlIn .25s var(--ease)}
+.am-hd{display:flex;align-items:center;gap:10px;padding:16px 18px;border-bottom:1px solid var(--line)}
+.am-hd h3{flex:1;font-size:15px;color:#fff}
+.am-tools{display:flex;gap:8px;padding:14px 18px;flex-wrap:wrap}
+.am-tools input{flex:1;min-width:200px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--ink)}
+.am-drop{margin:0 18px;padding:18px;border:1.5px dashed rgba(0,212,255,.35);border-radius:14px;text-align:center;color:var(--muted);font-size:13px;cursor:pointer}
+.am-drop.over{background:rgba(0,212,255,.07);border-color:var(--cyan);color:#fff}
+.am-grid{flex:1;overflow-y:auto;padding:16px 18px 18px;display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
+.am-grid button{position:relative;aspect-ratio:1;border-radius:12px;overflow:hidden;border:2px solid transparent;background:#0b1222;cursor:pointer;padding:0}
+.am-grid button:hover{border-color:var(--cyan)}
+.am-grid img{width:100%;height:100%;object-fit:cover;display:block}
+.am-empty{grid-column:1/-1;text-align:center;color:var(--dim);font-size:13px;padding:30px}
+.am-st{padding:0 18px;font-size:12px;color:var(--muted);min-height:16px}
+
+/* ══ SHORTCUTS ══ */
+#keys{position:fixed;inset:0;z-index:460;display:none;align-items:center;justify-content:center;padding:16px}
+#keys.on{display:flex}
+#keys .am-card{width:min(520px,100%)}
+.keys-list{padding:14px 18px 20px;display:grid;grid-template-columns:auto 1fr;gap:10px 16px;font-size:13.5px;color:var(--muted);overflow-y:auto}
+.keys-list kbd{font-family:var(--ff-m);font-size:11.5px;color:var(--cyan);background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.25);
+  border-radius:6px;padding:3px 8px;white-space:nowrap;justify-self:start}
+.keys-tip{margin:0 18px 18px;padding:12px 14px;border-radius:12px;background:rgba(108,99,255,.08);border:1px solid rgba(108,99,255,.25);font-size:12.5px;color:#c9c5ff;line-height:1.6}
+
+/* ══ CODE IDE: upeo (ukurasa mzima / kipengele kilichochaguliwa) ══ */
+.ide-scope{display:flex;gap:2px;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:100px;padding:3px}
+.ide-scope button{background:none;border:none;color:var(--muted);font-size:11.5px;font-weight:700;padding:6px 12px;border-radius:100px;cursor:pointer}
+.ide-scope button.on{background:rgba(0,212,255,.15);color:var(--cyan)}
+.ide-scope button:disabled{opacity:.4;cursor:not-allowed}
+.CodeMirror-hints{z-index:500!important;background:#0c1730!important;border:1px solid var(--line)!important;border-radius:10px!important;
+  font-family:var(--ff-m)!important;font-size:12.5px!important;box-shadow:0 14px 40px rgba(0,0,0,.5)!important}
+.CodeMirror-hint{color:var(--ink)!important;padding:4px 10px!important}
+li.CodeMirror-hint-active{background:rgba(0,212,255,.18)!important;color:#fff!important}
+
 /* ══ MOBILE ══ */
 @media(max-width:820px){
+  .ed-page select{max-width:110px}
   .ed-top{gap:7px;padding:8px 10px}
   .ed-name .full{display:none}
   #save-state .txt{display:none}
@@ -474,24 +552,32 @@ body{font-family:'Inter',-apple-system,sans-serif;height:100vh;height:100dvh;dis
 {% endif %}
 
 <div class="ed-top" id="ed-top">
-  <a href="{% url 'builder:site_dashboard' site.id %}" class="ed-back">⬅ <span class="lbl">Dashboard</span></a>
-  <span class="ed-name"><span class="full">✏️</span> {{ site.site_name }} <span class="pg">/{{ page.slug }}</span></span>
+  <a href="{{ studio_pages_url }}" class="ed-back" title="Back to Website Studio"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg><span class="lbl">Studio</span></a>
+  {# Kuhamia ukurasa mwingine bila kurudi Studio — mabadiliko yanahifadhiwa kwanza #}
+  <label class="ed-page" title="Switch page">
+    <svg viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/></svg>
+    <select id="page-switch" aria-label="Page">
+      {% for p in pages %}<option value="{% url 'builder:page_editor' site.id p.id %}"{% if p.id == page.id %} selected{% endif %}>{{ p.title }}</option>{% endfor %}
+    </select>
+  </label>
   <span id="save-state"><span>●</span><span class="txt"> Ready</span></span>
   <div class="grow"></div>
-  <div class="devs" id="tour-devices">
-    <button data-dev="Desktop" class="on" title="Desktop">🖥️</button>
-    <button data-dev="Tablet" title="Tablet">💻</button>
-    <button data-dev="Mobile" title="Mobile">📱</button>
+  <div class="devs" id="tour-devices" role="group" aria-label="Screen size">
+    <button data-dev="Desktop" class="on" title="Desktop"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg></button>
+    <button data-dev="Tablet" title="Tablet"><svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M11 18h2"/></svg></button>
+    <button data-dev="Mobile" title="Mobile"><svg viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg></button>
   </div>
-  <button class="ed-btn" id="btn-code" onclick="openCode()" title="Edit HTML/CSS — live">&lt;/&gt;<span class="lbl"> Code</span></button>
-  <button class="ed-btn" id="btn-undo" title="Undo (Ctrl+Z)">↺<span class="lbl"> Undo</span></button>
-  <button class="ed-btn" id="btn-redo" title="Redo (Ctrl+Shift+Z)">↻<span class="lbl"> Redo</span></button>
-  <button class="ed-btn ai" id="tour-ai" onclick="toggleAI()">✨<span class="lbl"> AI Assistant</span></button>
-  <button class="ed-btn ai" id="btn-customize" onclick="openCustomize()" title="Customize the whole website design">🎨<span class="lbl"> Customize</span></button>
-  <a class="ed-btn" id="tour-preview" target="_blank"
-     href="{{ site.public_url }}{% if page.slug != 'home' %}/p/{{ page.slug }}{% endif %}">👁<span class="lbl"> Preview</span></a>
-  <button class="ed-btn" onclick="startTour(true)" title="Editor tutorial">🎓</button>
-  <button class="ed-btn primary" onclick="savePage()">💾<span class="lbl"> Save</span></button>
+  <div class="ed-grp">
+    <button class="ed-btn ic" id="btn-undo" title="Undo (Ctrl+Z)"><svg viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg></button>
+    <button class="ed-btn ic" id="btn-redo" title="Redo (Ctrl+Shift+Z)"><svg viewBox="0 0 24 24"><path d="M15 14l5-5-5-5"/><path d="M20 9H9a5 5 0 0 0 0 10h3"/></svg></button>
+  </div>
+  <button class="ed-btn" id="btn-code" onclick="openCode()" title="Edit HTML/CSS — live (Ctrl+E)"><svg viewBox="0 0 24 24"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg><span class="lbl">Code</span></button>
+  <button class="ed-btn ai" id="tour-ai" onclick="toggleAI()" title="AI writes text or whole sections">✨<span class="lbl">AI</span></button>
+  <button class="ed-btn ai" id="btn-customize" onclick="openCustomize()" title="Design of the whole website">🎨<span class="lbl">Theme</span></button>
+  {# Preview ya Studio: inaonyesha ukurasa huu hata kabla ya kupublish (subdomain = iliyopublishiwa tu) #}
+  <a class="ed-btn" id="tour-preview" target="_blank" rel="noopener" href="{{ preview_url }}" title="Open a full preview in a new tab"><svg viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><span class="lbl">Preview</span></a>
+  <button class="ed-btn ic" onclick="toggleKeys()" title="Shortcuts & help (?)">?</button>
+  <button class="ed-btn primary" id="btn-save" onclick="savePage()" title="Save (Ctrl+S)"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg><span class="lbl">Save</span></button>
 </div>
 
 <!-- Mobile device warning -->
@@ -509,10 +595,10 @@ body{font-family:'Inter',-apple-system,sans-serif;height:100vh;height:100dvh;dis
     <ul class="mw-feats">
       <li><span class="ic">🖱️</span> More precise control than a finger on touch</li>
       <li><span class="ic">🖥️</span> Bigger screen — see your whole design at once</li>
-      <li><span class="ic">⚡</span> Drag and arrange blocks much faster</li>
+      <li><span class="ic">👆</span> On a phone: <b>tap a block</b> to add it — no dragging needed</li>
     </ul>
     <div class="mw-actions">
-      <a class="mw-btn mw-primary" href="{% url 'builder:site_dashboard' site.id %}">🖥️ Okay, I'll Open on a Computer Later</a>
+      <a class="mw-btn mw-primary" href="{{ studio_pages_url }}">🖥️ Okay, I'll Open on a Computer Later</a>
       <button class="mw-btn mw-ghost" onclick="mwClose()">Continue Anyway on My Phone →</button>
     </div>
     <label class="mw-check-row"><input type="checkbox" id="mw-dontshow"> Don't remind me again on this device</label>
@@ -562,6 +648,11 @@ body{font-family:'Inter',-apple-system,sans-serif;height:100vh;height:100dvh;dis
   <div class="ide-top">
     <span class="ide-dots"><i></i><i></i><i></i></span>
     <span class="ide-title">Code Editor — Live</span>
+    {# Hariri ukurasa mzima, au kipengele ulichochagua tu (salama zaidi kwa section moja) #}
+    <div class="ide-scope" role="group" aria-label="What to edit">
+      <button type="button" data-scope="page" class="on">Whole page</button>
+      <button type="button" data-scope="sel" id="ide-scope-sel">Selected element</button>
+    </div>
     <span class="ide-sp"></span>
     <label class="ide-live on" id="ide-live-lb">
       <input type="checkbox" id="ide-live-cb" checked> LIVE
@@ -629,6 +720,39 @@ body{font-family:'Inter',-apple-system,sans-serif;height:100vh;height:100dvh;dis
   </div>
 </div>
 
+<!-- Maktaba ya picha: zilizopakiwa awali + kupakia mpya + link -->
+<div class="am" id="am">
+  <div class="am-bg" onclick="amClose()"></div>
+  <div class="am-card" role="dialog" aria-label="Images">
+    <div class="am-hd"><h3>🖼️ Your images</h3><button class="cz-x" onclick="amClose()" aria-label="Close">✕</button></div>
+    <div class="am-drop" id="am-drop">⬆ <b>Tap to upload</b> or drop an image here · JPG, PNG, WebP</div>
+    <div class="am-tools"><input type="url" id="am-url" placeholder="…or paste an image link (https://…)">
+      <button class="ed-btn sm" onclick="amUseUrl()">Use link</button></div>
+    <div class="am-st" id="am-st"></div>
+    <div class="am-grid" id="am-grid"></div>
+  </div>
+</div>
+
+<!-- Shortcuts na msaada -->
+<div id="keys">
+  <div class="am-bg" onclick="toggleKeys(false)"></div>
+  <div class="am-card" role="dialog" aria-label="Shortcuts">
+    <div class="am-hd"><h3>⌨️ Shortcuts & tips</h3><button class="cz-x" onclick="toggleKeys(false)" aria-label="Close">✕</button></div>
+    <div class="keys-list">
+      <kbd>Ctrl + S</kbd><span>Save now (it also saves by itself a second after every change)</span>
+      <kbd>Ctrl + Z</kbd><span>Undo</span>
+      <kbd>Ctrl + Shift + Z</kbd><span>Redo</span>
+      <kbd>Ctrl + D</kbd><span>Duplicate the selected element</span>
+      <kbd>Delete</kbd><span>Remove the selected element</span>
+      <kbd>Ctrl + E</kbd><span>Open the code editor</span>
+      <kbd>Ctrl + K</kbd><span>Search blocks</span>
+      <kbd>Double-click</kbd><span>Edit text, or change an image</span>
+      <kbd>Esc</kbd><span>Close any panel</span>
+    </div>
+    <div class="keys-tip">💡 Styles you change apply to the <b>selected element only</b>. Switch to Tablet or Mobile first to change how it looks on that screen size only.</div>
+  </div>
+</div>
+
 <!-- Kupakia image (Supabase) -->
 <!-- Uploadcare ilihitaji library ya 200KB kutoka CDN yao pamoja na
      web components nne. Sasa ni <input type=file> na fetch(). -->
@@ -676,6 +800,8 @@ const SITE_ID = {{ site.id }};
 </script>
 {{ page.html_cache|json_script:"starter-html" }}
 {{ page.css_cache|json_script:"starter-css" }}
+{% if canvas_head %}{{ canvas_head|json_script:"canvas-head" }}{% endif %}
+{{ canvas_theme|json_script:"canvas-theme" }}
 <script>
 const starterHtml = JSON.parse(document.getElementById('starter-html').textContent || '""');
 const starterCss = JSON.parse(document.getElementById('starter-css').textContent || '""');
@@ -684,7 +810,11 @@ const editor = grapesjs.init({
   container: '#gjs',
   height: '100%',
   fromElement: false,
-  plugins: ['gjs-preset-webpage', 'gjs-blocks-basic'],
+  plugins: ['gjs-preset-webpage', 'gjs-blocks-basic', 'grapesjs-parser-postcss'],
+  // Mtindo unaobadilishwa unagusa kipengele kilichochaguliwa TU (si kila kitu chenye class ile ile)
+  selectorManager: { componentFirst: true },
+  // Kwenye simu kuburuta ni kugumu: kubofya block kunaiongeza chini ya kipengele kilichochaguliwa
+  blockManager: { appendOnClick: true },
   pluginsOpts: { 'gjs-preset-webpage': { modalImportButton: false } },
   deviceManager: { devices: [
     { name: 'Desktop', width: '' },
@@ -692,8 +822,9 @@ const editor = grapesjs.init({
     { name: 'Mobile', width: '375px', widthMedia: '575px' },
   ]},
   storageManager: {
-    type: 'remote', autosave: true, autoload: true,
-    stepsBeforeSave: 5,
+    // Autosave yetu wenyewe (chini): inahifadhi sekunde 1 baada ya badiliko la mwisho,
+    // badala ya kusubiri mabadiliko 5 kama zamani
+    type: 'remote', autosave: false, autoload: true,
     options: { remote: {
       urlLoad: LOAD_URL,
       urlStore: SAVE_URL,
@@ -705,6 +836,15 @@ const editor = grapesjs.init({
   },
   assetManager: { custom: true },
 });
+
+// Page iliyopakiwa kwa ZIP: CSS za <head> yake (link/style) zinaingizwa
+// kwenye canvas ili design ionekane kama ilivyo kwenye site.
+{% if canvas_head %}
+editor.on('load', () => {
+  const head = JSON.parse(document.getElementById('canvas-head').textContent || '""');
+  editor.Canvas.getDocument().head.insertAdjacentHTML('beforeend', head);
+});
+{% endif %}
 
 // Device switcher
 document.querySelectorAll('.devs button').forEach(b=>{
@@ -789,6 +929,113 @@ bm.add('jt-col-{{ c.slug }}', {
 });
 {% endfor %}
 
+// ══ Maktaba ya sections za kitaalamu (builder/_editor_blocks.js) ══
+{% include 'builder/_editor_blocks.js' %}
+
+// ══ CANVAS = WEBSITE HALISI ══
+// Canvas ilionyesha HTML tupu bila rangi, fonts wala CSS ya site. Sasa inapata
+// rangi ya brand, fonts na global CSS — unachokiona ndicho mteja atakachokiona.
+const THEME = JSON.parse(document.getElementById('canvas-theme').textContent);
+editor.on('load', () => {
+  const doc = editor.Canvas.getDocument(), head = doc.head;
+  if (THEME.font_href) head.insertAdjacentHTML('beforeend', `<link rel="stylesheet" href="${THEME.font_href}">`);
+  const base = doc.createElement('style');
+  base.id = 'jt-canvas-base';
+  base.textContent = `:root{--accent:${THEME.accent};--font-body:${THEME.font_body};--font-head:${THEME.font_head}}` +
+    {% if canvas_head %}''{% else %}`*{box-sizing:border-box}body{margin:0;font-family:var(--font-body);color:#20261f;line-height:1.65}` +
+    `h1,h2,h3{font-family:var(--font-head)}img{max-width:100%}a{color:inherit}`{% endif %};
+  head.appendChild(base);
+  const g = doc.createElement('style');
+  g.id = 'jt-global-preview';          // Theme panel inaitumia hii hii kwa preview
+  g.textContent = THEME.global_css;
+  head.appendChild(g);
+  czStyleEl = g;
+});
+
+// ══ AUTOSAVE YA HARAKA + ONYO LA MABADILIKO AMBAYO HAYAJAHIFADHIWA ══
+let dirty = false, saveTimer = null, loaded = false;
+editor.on('load', () => setTimeout(() => { loaded = true; }, 400));
+function markDirty(){
+  if (!loaded) return;
+  dirty = true;
+  stateEl.className = 'dirty';
+  stateEl.innerHTML = '● <span class="txt">Unsaved changes</span>';
+  document.getElementById('btn-save').classList.add('pulse');
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => editor.store(), 1000);
+}
+editor.on('update', markDirty);
+window.addEventListener('beforeunload', e => { if (dirty){ e.preventDefault(); e.returnValue = ''; } });
+
+// ══ KUHAMIA UKURASA MWINGINE ══
+document.getElementById('page-switch').addEventListener('change', async e => {
+  const url = e.target.value;
+  if (dirty){ try { await editor.store(); } catch(err){} }
+  dirty = false;
+  location.href = url;
+});
+
+// ══ KUTAFUTA BLOCKS ══
+function blockSearch(){
+  const wrap = document.querySelector('.gjs-blocks-cs');
+  if (!wrap || wrap.querySelector('.jt-bsearch')) return;
+  wrap.insertAdjacentHTML('afterbegin', `<div class="jt-bsearch"><input type="search" id="bsearch"
+    placeholder="Search blocks — hero, pricing, gallery…" autocomplete="off"><small>Drag a block onto the page — or tap it to add it.</small></div>`);
+  const inp = document.getElementById('bsearch');
+  inp.addEventListener('input', () => {
+    const q = inp.value.trim().toLowerCase();
+    document.querySelectorAll('.gjs-block-category').forEach(cat => {
+      let any = false;
+      const title = ((cat.querySelector('.gjs-title') || {}).textContent || '').toLowerCase();
+      cat.querySelectorAll('.gjs-block').forEach(b => {
+        const hit = !q || b.textContent.toLowerCase().includes(q) || title.includes(q);
+        b.classList.toggle('jt-hide', !hit); if (hit) any = true;
+      });
+      cat.classList.toggle('jt-hide', !any);
+      if (q && any){ const c = cat.querySelector('.gjs-blocks-c'); if (c) c.style.display = ''; cat.classList.add('gjs-open'); }
+    });
+  });
+}
+editor.on('load', () => {
+  // Fungua Blocks mwanzoni na weka utafutaji juu yake
+  const bbtn = editor.Panels.getButton('views', 'open-blocks');
+  if (bbtn) bbtn.set('active', true);
+  setTimeout(blockSearch, 50);
+});
+editor.on('run:open-blocks', () => setTimeout(blockSearch, 30));
+
+// Sections za kitaalamu kwanza; Basic/Forms zinakaa chini zikiwa zimefungwa
+editor.on('load', () => setTimeout(() => {
+  const cats = editor.BlockManager.getCategories();
+  cats.forEach(c => c.set('open', /Hero/.test(c.get('label') || c.id)));
+  const box = document.querySelector('.gjs-block-categories');
+  if (box) [...box.children].forEach(el => {
+    const t = ((el.querySelector('.gjs-title') || {}).textContent || '').trim().toLowerCase();
+    if (t === 'basic' || t === 'forms' || t === 'extra') box.appendChild(el);
+  });
+}, 60));
+
+// ══ SHORTCUTS ══
+const km = editor.Keymaps;
+km.add('jt:duplicate', '⌘+d, ctrl+d', ed => {
+  const sel = ed.getSelected(); if (!sel || !sel.collection) return;
+  const copy = sel.clone(); sel.collection.add(copy, {at: sel.index() + 1}); ed.select(copy);
+}, {prevent: true});
+km.add('jt:code', '⌘+e, ctrl+e', () => openCode(), {prevent: true});
+km.add('jt:search', '⌘+k, ctrl+k', () => {
+  const b = editor.Panels.getButton('views', 'open-blocks'); if (b) b.set('active', true);
+  setTimeout(() => { blockSearch(); const i = document.getElementById('bsearch'); if (i) i.focus(); }, 60);
+}, {prevent: true});
+function toggleKeys(open){
+  const k = document.getElementById('keys');
+  k.classList.toggle('on', open === undefined ? !k.classList.contains('on') : open);
+}
+document.addEventListener('keydown', e => {
+  const typing = /input|textarea|select/i.test(e.target.tagName) || e.target.isContentEditable;
+  if (e.key === '?' && !typing) toggleKeys();
+  if (e.key === 'Escape'){ toggleKeys(false); amClose(); }
+});
+
 // Placeholder → shortcode wakati wa kuhifadhi
 const origGetHtml = editor.getHtml.bind(editor);
 editor.getHtml = function(){
@@ -803,11 +1050,11 @@ editor.getHtml = function(){
 const stateEl = document.getElementById('save-state');
 editor.on('storage:start:store', () => { stateEl.className='saving';
   stateEl.innerHTML='<span class="spin" style="width:10px;height:10px;border-color:var(--amber);border-top-color:transparent"></span><span class="txt"> Saving…</span>'; });
-editor.on('storage:end:store', () => { stateEl.className='saved';
+editor.on('storage:end:store', () => { dirty = false; document.getElementById('btn-save').classList.remove('pulse'); stateEl.className='saved';
   stateEl.innerHTML='● <span class="txt">Saved ' + new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) + '</span>'; });
 editor.on('storage:error', () => { stateEl.className='';
   stateEl.innerHTML='⚠ <span class="txt">Save failed</span>'; });
-function savePage(){ editor.store(); }
+function savePage(){ clearTimeout(saveTimer); return editor.store(); }
 document.addEventListener('keydown', e => {
   if ((e.ctrlKey || e.metaKey) && e.key === 's'){ e.preventDefault(); savePage(); }
 });
@@ -911,6 +1158,7 @@ async function jtLoadCM(){
   await loadCSS(`${CM_BASE}/theme/material-darker.min.css`);
   await loadCSS(`${CM_BASE}/addon/dialog/dialog.min.css`);
   await loadCSS(`${CM_BASE}/addon/fold/foldgutter.min.css`);
+  await loadCSS(`${CM_BASE}/addon/hint/show-hint.min.css`);
   await loadJS(`${CM_BASE}/codemirror.min.js`);
   await Promise.all([
     loadJS(`${CM_BASE}/mode/xml/xml.min.js`),
@@ -936,6 +1184,13 @@ async function jtLoadCM(){
   ]);
   await loadJS(`${CM_BASE}/addon/search/search.min.js`);
   await loadJS(`${CM_BASE}/addon/comment/comment.min.js`);
+  // Autocomplete ya tags, attributes na CSS properties
+  await loadJS(`${CM_BASE}/addon/hint/show-hint.min.js`);
+  await Promise.all([
+    loadJS(`${CM_BASE}/addon/hint/xml-hint.min.js`),
+    loadJS(`${CM_BASE}/addon/hint/css-hint.min.js`),
+  ]);
+  await loadJS(`${CM_BASE}/addon/hint/html-hint.min.js`);
   cmLoaded = true;
 }
 
@@ -945,10 +1200,28 @@ function jtStatus(msg, cls){
     <span><span class="kbd">Ctrl+F</span> search · <span class="kbd">Ctrl+S</span> apply & save · <span class="kbd">Esc</span> close</span>`;
 }
 
+// Upeo wa code: 'page' = ukurasa mzima, 'sel' = kipengele kilichochaguliwa tu
+let ideScope = 'page', ideTarget = null;
+function jtSetScope(scope){
+  ideScope = scope === 'sel' && ideTarget ? 'sel' : 'page';
+  document.querySelectorAll('.ide-scope button').forEach(b => b.classList.toggle('on', b.dataset.scope === ideScope));
+  document.querySelector('#ide-pane-html .ide-pane-hd').textContent =
+    ideScope === 'sel' ? 'HTML — selected element only' : 'HTML — whole page';
+  jtReloadFromCanvas();
+}
+document.querySelectorAll('.ide-scope button').forEach(b => b.addEventListener('click', () => jtSetScope(b.dataset.scope)));
+
 function jtApplyCode(save){
   if (!cmHtml || !cmCss) return;
   try {
-    editor.setComponents(cmHtml.getValue());
+    if (ideScope === 'sel' && ideTarget && ideTarget.collection){
+      // Badilisha kipengele hiki tu; kinachochukua nafasi yake kinabaki kimechaguliwa
+      const added = ideTarget.replaceWith(cmHtml.getValue());
+      const next = Array.isArray(added) ? added[0] : added;
+      if (next){ ideTarget = next; editor.select(next); }
+    } else {
+      editor.setComponents(cmHtml.getValue());
+    }
     editor.setStyle(cmCss.getValue());
     const t = new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
     jtStatus(`✓ Applied to canvas ${t}${save ? ' — saving…' : ''}`, 'ok');
@@ -977,8 +1250,9 @@ function jtBeautify(){
 
 function jtReloadFromCanvas(){
   if (!cmHtml || !cmCss) return;
-  cmHtml.setValue(origGetHtml());
-  cmCss.setValue(editor.getCss());
+  cmHtml.setValue(ideScope === 'sel' && ideTarget ? ideTarget.toHTML() : origGetHtml());
+  // Bila CSS iliyolindwa ya GrapesJS (*{box-sizing}, body{margin}) — ingeongezwa tena kila "Apply"
+  cmCss.setValue(editor.getCss({avoidProtected: true}));
   jtStatus('⟲ Reloaded from canvas', 'ok');
 }
 
@@ -989,6 +1263,11 @@ function jtCloseIDE(){
 async function openCode(){
   const ide = document.getElementById('jt-ide');
   ide.classList.add('on');
+  // Kama kuna kipengele kilichochaguliwa (si ukurasa wenyewe), anza nacho
+  const sel = editor.getSelected();
+  ideTarget = sel && sel.collection ? sel : null;
+  document.getElementById('ide-scope-sel').disabled = !ideTarget;
+  ideScope = ideTarget ? 'sel' : 'page';
   try { await jtLoadCM(); }
   catch(e){ jtStatus('⚠ Could not load code engine — check internet. ' + e.message, 'er'); return; }
 
@@ -1001,6 +1280,7 @@ async function openCode(){
     extraKeys: {
       'Ctrl-S': () => jtApplyCode(true), 'Cmd-S': () => jtApplyCode(true),
       'Ctrl-/': 'toggleComment', 'Cmd-/': 'toggleComment',
+      'Ctrl-Space': 'autocomplete',
       'Esc': jtCloseIDE,
     },
   });
@@ -1009,6 +1289,9 @@ async function openCode(){
       Object.assign(opts('htmlmixed'), {autoCloseTags: true}));
     cmCss = CodeMirror(document.getElementById('ide-cm-css'), opts('css'));
     cmHtml.on('change', (cm, ch) => { if (ch.origin !== 'setValue') jtScheduleLive(); });
+    // Mapendekezo yanajitokeza unapoandika: "<" kwenye HTML, maneno kwenye CSS
+    cmHtml.on('inputRead', (cm, ch) => { if (ch.text[0] === '<') cm.showHint({completeSingle: false}); });
+    cmCss.on('inputRead', (cm, ch) => { if (/^[a-z-]$/i.test(ch.text[0]) && !cm.state.completionActive) cm.showHint({completeSingle: false}); });
     cmCss.on('change', (cm, ch) => { if (ch.origin !== 'setValue') jtScheduleLive(); });
     const cb = document.getElementById('ide-live-cb');
     cb.addEventListener('change', () => {
@@ -1039,7 +1322,7 @@ async function openCode(){
     window.addEventListener('mouseup', stop);
     window.addEventListener('touchend', stop);
   }
-  jtReloadFromCanvas();
+  jtSetScope(ideScope);
   // Auto-format mara moja ili code ikae nadhifu kama VS Code (si mstari mmoja)
   setTimeout(() => { jtBeautify(); }, 30);
   jtStatus('Ready — type and watch the canvas update live', 'ok');
@@ -1051,39 +1334,65 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && document.getElementById('jt-ide').classList.contains('on')) jtCloseIDE();
 });
 
-// Asset Manager — inapakia Supabase
-// Uploadcare iliambatanisha `-/resize/1200x/` kwenye URL kwa sababu CDN
-// yao ilifanya resize. Supabase haifanyi hivyo kwenye plan ya bure, kwa
-// hiyo tunatumia image kama ilivyo na ukubwa unashughulikiwa na CSS.
+// ══ MAKTABA YA PICHA ══
+// Kubofya picha mara mbili (au background kwenye Style) kunafungua maktaba:
+// picha zilizopakiwa awali, kupakia mpya (bofya au buruta) au link.
 const jtFile = document.getElementById('jt-file');
+const ASSET_LIST_URL = "{% url 'builder:asset_list' site.id %}";
 let amProps = null;
+const amSt = t => { document.getElementById('am-st').textContent = t || ''; };
 
-editor.on('asset:custom', props => { amProps = props; jtFile.click(); });
-
-jtFile.addEventListener('change', () => {
-  const f = jtFile.files[0];
-  if (!f) return;
-
-  const fd = new FormData();
-  fd.append('file', f);
-
-  fetch(ASSET_UPLOAD_URL, {
-    method: 'POST',
-    headers: { 'X-CSRFToken': CSRF },
-    body: fd,
-  })
-    .then(r => r.json())
-    .then(d => {
-      if (!d.url) { alert(d.error || 'Kupakia kumeshindwa.'); return; }
-      if (amProps) { amProps.select({ src: d.url }); }
-      else {
-        const sel = editor.getSelected();
-        if (sel && sel.is('image')) sel.set('src', d.url);
-      }
-    })
-    .catch(() => alert('Muunganisho umekatika.'))
-    .finally(() => { jtFile.value = ''; });
+function amPick(url){
+  const asset = editor.AssetManager.add({src: url});
+  if (amProps && amProps.select) amProps.select(asset, true);
+  else { const sel = editor.getSelected(); if (sel && sel.is('image')) sel.set('src', url); }
+  amClose();
+}
+async function amLoad(){
+  const grid = document.getElementById('am-grid');
+  grid.innerHTML = '<div class="am-empty">Loading your images…</div>';
+  try {
+    const data = await (await fetch(ASSET_LIST_URL)).json();
+    const list = (data.assets || []).filter(a => /\.(png|jpe?g|webp|gif|svg|avif)(\?|$)/i.test(a.url) || !/\.[a-z0-9]{2,5}(\?|$)/i.test(a.url));
+    grid.innerHTML = list.length ? '' : '<div class="am-empty">No images yet — upload your first one above.</div>';
+    list.forEach(a => {
+      const b = document.createElement('button'); b.type = 'button'; b.title = a.name || '';
+      const img = document.createElement('img'); img.src = a.url; img.loading = 'lazy'; img.alt = '';
+      b.appendChild(img); b.addEventListener('click', () => amPick(a.url)); grid.appendChild(b);
+    });
+  } catch(e){ grid.innerHTML = '<div class="am-empty">Could not load your images — check your connection.</div>'; }
+}
+function amOpen(){ document.getElementById('am').classList.add('on'); amSt(''); amLoad(); }
+function amClose(){
+  const m = document.getElementById('am'); if (!m.classList.contains('on')) return;
+  m.classList.remove('on');
+  if (amProps && amProps.close){ const p = amProps; amProps = null; p.close(); }
+}
+function amUseUrl(){
+  const u = document.getElementById('am-url').value.trim();
+  if (!/^https?:\/\//i.test(u)){ amSt('Paste a full link that starts with https://'); return; }
+  amPick(u);
+}
+async function amUpload(f){
+  if (!f || !/^image\//.test(f.type)){ amSt('Please choose an image file.'); return; }
+  amSt('Uploading ' + f.name + '…');
+  const fd = new FormData(); fd.append('file', f);
+  try {
+    const d = await (await fetch(ASSET_UPLOAD_URL, {method: 'POST', headers: {'X-CSRFToken': CSRF}, body: fd})).json();
+    if (!d.url){ amSt(d.error || 'Upload failed.'); return; }
+    amPick(d.url);
+  } catch(e){ amSt('Connection lost — the image was not uploaded.'); }
+  finally { jtFile.value = ''; }
+}
+editor.on('asset:custom', props => {
+  if (props.open){ amProps = props; if (!document.getElementById('am').classList.contains('on')) amOpen(); }
 });
+const amDrop = document.getElementById('am-drop');
+amDrop.addEventListener('click', () => jtFile.click());
+amDrop.addEventListener('dragover', e => { e.preventDefault(); amDrop.classList.add('over'); });
+amDrop.addEventListener('dragleave', () => amDrop.classList.remove('over'));
+amDrop.addEventListener('drop', e => { e.preventDefault(); amDrop.classList.remove('over'); amUpload(e.dataTransfer.files[0]); });
+jtFile.addEventListener('change', () => amUpload(jtFile.files[0]));
 
 // AI
 let lastAI = null;
@@ -1125,7 +1434,7 @@ function insertAI(){
 const TOUR = [
   { sel: '.gjs-pn-views-container, .gjs-pn-views', pos:'left',
     title:'🧱 Blocks & Styles',
-    text:'Here are your BLOCKS — sections, text, images, buttons. Drag any block and drop it onto your page. When you select an element, this same panel lets you change colors, sizes and spacing.' },
+    text:'Over 25 ready-made sections — hero, services, pricing, testimonials, FAQ, gallery, contact and more — all in your brand color. Search them, then drag one onto your page (or just tap it). Select anything to change colors, sizes and spacing here.' },
   { sel: '.gjs-cv-canvas', pos:'right',
     title:'🖥️ Canvas — Your Page',
     text:'This is your actual page. Click any text to edit it directly. Click any element to select it, then move it, delete it or style it.' },
@@ -1137,7 +1446,7 @@ const TOUR = [
     text:'Out of words? Ask the AI to create content or a whole section in English or Swahili — then insert it into your page with one click.' },
   { sel: '#tour-preview', pos:'bottom',
     title:'👁 Preview & Save',
-    text:'Everything saves AUTOMATICALLY. Click Preview to see the real website. When you are happy, go back to the Dashboard and hit Publish — and you are live! 🚀' },
+    text:'Every change saves by itself a second later. Preview shows the full page in a new tab — even before you publish. When every Studio step is saved, publish from the Studio and your site goes live at your address! 🚀' },
 ];
 let tourI = 0;
 function startTour(force){
@@ -1178,7 +1487,14 @@ function endTour(){
   document.getElementById('tour-ov').classList.remove('on');
   localStorage.setItem('jt_tour_done', '1');
 }
-editor.on('load', ()=> setTimeout(()=>startTour(false), 900));
+// Studio inafungua editor moja kwa moja kwenye Code au AI (?open=code / ?open=ai).
+// Mteja amechagua njia yake tayari, kwa hiyo tour haionyeshwi juu yake.
+const OPEN_WITH = new URLSearchParams(location.search).get('open');
+editor.on('load', ()=> setTimeout(()=>{
+  if (OPEN_WITH === 'code') openCode();
+  else if (OPEN_WITH === 'ai') toggleAI();
+  else startTour(false);
+}, 900));
 </script>
 </body>
 </html>

@@ -13,3 +13,4 @@ reports/
 .idea/
 .vscode/
 .DS_Store
+test_db.sqlite3

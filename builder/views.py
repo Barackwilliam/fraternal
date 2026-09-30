@@ -9,6 +9,7 @@ from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -18,11 +19,11 @@ from django.urls import reverse
 from django.views.decorators.http import require_POST
 
 from .models import (
-    ClientWebsite, SitePage, SiteCollection, SiteItem, SiteAsset, SiteInquiry, AiUsageLog,
+    ClientWebsite, SitePage, SiteCollection, SiteItem, SiteAsset, SiteImport, SiteInquiry,
+    AiUsageLog,
     available_website_types, validate_subdomain,
 )
 from .site_templates import all_templates, apply_template
-from .insights import get_insights
 
 
 def _register_subdomain(site):
@@ -53,18 +54,110 @@ def _my_site(request, site_id):
     return get_object_or_404(ClientWebsite, id=site_id, owner=request.user)
 
 
-# ── Signup + kuunda website ─────────────────────────────
+def ensure_pages(request, site):
+    """
+    Unda kurasa za aina ya site ikiwa haina hata moja. Ikishindwa, usirudishe
+    500 — rekodi kosa kwenye log na mwonyeshe mteja ujumbe (staff wanaona
+    maelezo ya kiufundi, kwa ajili ya kurekebisha).
+    """
+    if site.pages.exists():
+        return True
+    try:
+        with transaction.atomic():
+            site.bootstrap_from_schema()
+        return True
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).exception('bootstrap_from_schema failed (site %s)', site.id)
+        detail = f' ({type(e).__name__}: {str(e)[:300]})' if request.user.is_staff else ''
+        messages.error(request, 'We could not create the pages for this website. '
+                                'Our team has been notified.' + detail)
+        return False
+
+
+# ── Kuingia na kujisajili (web builder) ─────────────────
+
+class BuilderSignupForm(UserCreationForm):
+    """Account ya web builder: username, email (si lazima) na nywila."""
+    email = forms.EmailField(required=False)
+
+    class Meta(UserCreationForm.Meta):
+        model = User
+        fields = ('username', 'email')
+
+
+def _safe_next(request):
+    """`next` ya ndani ya jamiitek.com tu — si link ya nje (open redirect)."""
+    from django.utils.http import url_has_allowed_host_and_scheme
+    nxt = request.POST.get('next') or request.GET.get('next') or ''
+    ok = url_has_allowed_host_and_scheme(nxt, allowed_hosts={request.get_host()},
+                                         require_https=request.is_secure())
+    return nxt if ok and nxt.startswith('/') else ''
+
+
+def _template_for_next(nxt):
+    """Kama `next` ni "Customize in Builder" ya template, rudisha template hiyo."""
+    import re
+    m = re.match(r'^/builder/templates/(\d+)/use/', nxt or '')
+    if not m:
+        return None
+    from apps.models import WebsiteTemplate
+    return WebsiteTemplate.objects.filter(pk=m.group(1), is_active=True).first()
+
+
+def builder_login(request):
+    """
+    Kuingia kwenye web builder. Zamani LOGIN_URL ilikuwa /accounts/login/ —
+    ukurasa usiokuwepo (404), kwa hiyo mteja aliyetoka hakuweza kurudi.
+    """
+    from django.contrib.auth.forms import AuthenticationForm
+    nxt = _safe_next(request)
+    if request.user.is_authenticated:
+        return redirect(nxt or 'builder:my_sites')
+    form = AuthenticationForm(request, data=request.POST or None)
+    if request.method == 'POST':
+        # Watu wengi wanaandika email badala ya username
+        ident = (request.POST.get('username') or '').strip()
+        if '@' in ident:
+            u = User.objects.filter(email__iexact=ident).first()
+            if u:
+                data = request.POST.copy()
+                data['username'] = u.username
+                form = AuthenticationForm(request, data=data)
+        if form.is_valid():
+            login(request, form.get_user())
+            return redirect(nxt or 'builder:my_sites')
+    return render(request, 'builder/auth.html', {
+        'mode': 'login', 'form': form, 'next': nxt, 'from_template': _template_for_next(nxt),
+    })
+
+
+@require_POST
+def builder_logout(request):
+    from django.contrib.auth import logout
+    logout(request)
+    messages.success(request, 'You have signed out.')
+    return redirect('builder:login')
+
 
 def signup(request):
-    """Account mpya + website ya kwanza kwa hatua moja."""
+    """
+    Usajili wa web builder. Njia mbili:
+      - kawaida: account + website ya kwanza kwa hatua moja
+      - ukitoka mahali pengine (`next`, mf. template kutoka Marketplace):
+        account tu, kisha unarudishwa ulikotoka
+    """
+    nxt = _safe_next(request)
     if request.user.is_authenticated:
-        return redirect('builder:my_sites')
+        return redirect(nxt or 'builder:my_sites')
 
-    form = UserCreationForm(request.POST or None)
+    form = BuilderSignupForm(request.POST or None)
     error = None
+    account_only = bool(nxt)
 
     ai_draft = request.session.get('ai_draft')
-    ai_prefill = {}
+    # Funguo zipo daima — template inazitumia kama hoja za filter (hazisamehewi zikikosekana)
+    ai_prefill = {'site_name': '', 'website_type': ''}
     if ai_draft and ai_draft.get('plan') and request.GET.get('from') == 'ai':
         plan = ai_draft['plan']
         ai_prefill = {
@@ -73,6 +166,11 @@ def signup(request):
         }
 
     if request.method == 'POST' and form.is_valid():
+        if account_only:
+            user = form.save()
+            login(request, user)
+            messages.success(request, 'Welcome to JamiiTek Builder! Your account is ready.')
+            return redirect(nxt)
         subdomain = (request.POST.get('subdomain') or '').lower().strip()
         site_name = (request.POST.get('site_name') or '').strip()
         website_type = request.POST.get('website_type') or 'default'
@@ -100,16 +198,64 @@ def signup(request):
             _register_subdomain(site)
             login(request, user)
             messages.success(request, f'Congratulations! Your website {site.subdomain}.jamiitek.com has been created.')
-            return redirect('builder:site_dashboard', site_id=site.id)
+            # Mteja mpya anaanza Studio — hatua kwa hatua, si dashboard yenye kila kitu
+            return redirect('builder:studio', site_id=site.id)
         except ValidationError as e:
             error = ' '.join(e.messages)
 
-    return render(request, 'builder/signup.html', {
-        'form': form, 'error': error,
+    return render(request, 'builder/auth.html', {
+        'mode': 'signup', 'form': form, 'error': error, 'next': nxt,
+        'account_only': account_only, 'from_template': _template_for_next(nxt),
         'website_types': available_website_types(),
-        'site_templates': all_templates(),
         'ai_prefill': ai_prefill,
-        'from_ai': bool(ai_prefill),
+        'from_ai': bool(ai_prefill['site_name']),
+    })
+
+
+def from_template(request, pk):
+    """
+    "✨ Customize in Builder" kutoka Templates Marketplace. Asiye na account
+    anajisajili kwanza, kisha anarudi hapa (builder/template_bridge.py).
+    """
+    from apps.models import WebsiteTemplate
+    from .template_bridge import create_site_from_template, put_template_on_home, suggest_subdomain
+
+    tpl = get_object_or_404(WebsiteTemplate, pk=pk, is_active=True)
+    here = reverse('builder:from_template', args=[tpl.pk])
+    if not request.user.is_authenticated:
+        return redirect(f"{reverse('builder:signup')}?next={here}")
+
+    sites = request.user.websites.all()
+    error = None
+    if request.method == 'POST':
+        target = request.POST.get('target', 'new')
+        if target != 'new':
+            site = sites.filter(pk=target).first()
+            if site is None:
+                raise Http404
+            page = put_template_on_home(site, tpl)
+            messages.success(request, f'“{tpl.name}” is now the Home page of {site.site_name}. Make it yours!')
+            return redirect('builder:page_editor', site_id=site.id, page_id=page.id)
+        subdomain = (request.POST.get('subdomain') or '').lower().strip()
+        site_name = (request.POST.get('site_name') or '').strip()
+        try:
+            validate_subdomain(subdomain)
+            if ClientWebsite.objects.filter(subdomain=subdomain).exists():
+                raise ValidationError('This address is already taken — try another one.')
+            if not site_name:
+                raise ValidationError('Enter your business name.')
+            site, page = create_site_from_template(request.user, tpl, site_name, subdomain)
+            _register_subdomain(site)
+            messages.success(request, f'Your website is ready with the “{tpl.name}” design. '
+                                      'Click any text or image to change it.')
+            return redirect('builder:page_editor', site_id=site.id, page_id=page.id)
+        except ValidationError as e:
+            error = ' '.join(e.messages)
+
+    return render(request, 'builder/from_template.html', {
+        'tpl': tpl, 'sites': sites, 'error': error,
+        'suggest': request.POST.get('subdomain') or suggest_subdomain(tpl.name),
+        'site_name': request.POST.get('site_name', ''),
     })
 
 
@@ -135,16 +281,26 @@ def create_site(request):
                 raise ValidationError('This subdomain is already taken.')
             if not site_name:
                 raise ValidationError('Enter the website name.')
-            site = ClientWebsite.objects.create(
-                owner=request.user, subdomain=subdomain,
-                site_name=site_name, website_type=website_type,
-            )
-            site.bootstrap_from_schema()
-            apply_template(site, request.POST.get('template_key', 'clean_start'))
+            # Yote au hakuna: kurasa zikishindwa kuundwa, site isibaki nusu —
+            # ingeleta 500 kwenye panel na "subdomain already taken" ukijaribu tena.
+            with transaction.atomic():
+                site = ClientWebsite.objects.create(
+                    owner=request.user, subdomain=subdomain,
+                    site_name=site_name, website_type=website_type,
+                )
+                site.bootstrap_from_schema()
+                apply_template(site, request.POST.get('template_key', 'clean_start'))
             _register_subdomain(site)
-            return redirect('builder:site_dashboard', site_id=site.id)
+            return redirect('builder:studio', site_id=site.id)
         except ValidationError as e:
             error = ' '.join(e.messages)
+        except Exception as e:
+            # Transaction imerudisha nyuma: hakuna site nusu iliyobaki
+            import logging
+            logging.getLogger(__name__).exception('create_site failed (%s)', subdomain)
+            error = 'We could not create your website. Please try again or contact support.'
+            if request.user.is_staff:
+                error += f' ({type(e).__name__}: {str(e)[:300]})'
     return render(request, 'builder/create_site.html', {
         'error': error, 'website_types': available_website_types(),
         'site_templates': all_templates(),
@@ -377,10 +533,23 @@ def tutorial(request):
     })
 
 
+def _ago(since):
+    """'2 days, 3 hours' → '2 days ago'; '0 minutes' → 'Just now'."""
+    since = since.split(',')[0]
+    return 'Just now' if since.startswith('0') else f'{since} ago'
+
+
 @login_required
 def site_dashboard(request, site_id):
-    from django.db.models import Count
+    """
+    Dashboard ni ukurasa wa KWANZA mteja anaouona — kwa hiyo ni mfupi:
+    hali ya website, Studio, inquiries, kupakia ZIP na JamiiBot. Kila kitu
+    kingine (kurasa, maudhui, templates, maelezo, rangi, domain, vidokezo vya
+    AI) kiko ndani ya Website Studio.
+    """
+    from django.utils.timesince import timesince
     site = _my_site(request, site_id)
+<<<<<<< HEAD
     collections = site.collections.annotate(items_count=Count('items'))
     total_items = sum(c.items_count for c in collections)
     # Hatua za kuanza (onboarding) — zina-tick automatic
@@ -403,19 +572,25 @@ def site_dashboard(request, site_id):
          'url': '#publish'},
     ]
     done_count = sum(1 for st in steps if st['done'])
+=======
+    # Site isiyo na kurasa inarudisha 404 kwa wageni na preview nyeupe
+    ensure_pages(request, site)
+    from .studio import studio_progress, publish_blockers, STEPS as STUDIO_STEPS
+    st_done, st_total, st_next = studio_progress(site)
+>>>>>>> 8d5a8aae8b37aa819c6f392d7825e1647f5e5e84
     return render(request, 'builder/dashboard.html', {
         'site': site,
-        'pages': pages,
-        'collections': col_list,
-        'total_items': total_items,
-        'site_templates': [t for t in all_templates()
-                           if site.website_type in t['types']],
-        'onb_steps': steps,
-        'onb_done': done_count,
-        'onb_total': len(steps),
-        'onb_pct': int(done_count / len(steps) * 100),
+        'studio_done': st_done,
+        'studio_total': st_total,
+        'studio_pct': int(st_done / st_total * 100),
+        'studio_next': st_next,
+        'studio_next_title': dict((k, t) for k, t, _ in STUDIO_STEPS)[st_next],
+        'page_count': site.pages.count(),
         'new_inquiries': site.inquiries.filter(status='new').count(),
-        'insights': get_insights(site)[:3],
+        'total_inquiries': site.inquiries.count(),
+        'imported_pages': site.pages.exclude(raw_document='').count(),
+        'last_change': _ago(timesince(site.updated_at)),
+        'blockers': publish_blockers(site),
     })
 
 
@@ -424,8 +599,8 @@ def site_dashboard(request, site_id):
 def change_template(request, site_id):
     site = _my_site(request, site_id)
     apply_template(site, request.POST.get('template_key', 'clean_start'))
-    messages.success(request, 'Template mpya imewekwa! Design zako za awali za pages za template zimebadilishwa.')
-    return redirect('builder:site_dashboard', site_id=site.id)
+    messages.success(request, 'New template applied — the design of your default pages has been replaced.')
+    return redirect('builder:studio_step', site_id=site.id, step='pages')
 
 
 @login_required
@@ -437,7 +612,9 @@ def site_settings_save(request, site_id):
                   'nav_style', 'accent_color'):
         if field in request.POST:
             setattr(site, field, request.POST[field].strip())
-    site.dark_nav = request.POST.get('dark_nav') == 'on'
+    # Fomu ya domain ya Studio inatuma custom_domain peke yake — isizime dark nav
+    if 'accent_color' in request.POST:
+        site.dark_nav = request.POST.get('dark_nav') == 'on'
 
     new_domain = None
     if site.is_premium and 'custom_domain' in request.POST:
@@ -448,6 +625,7 @@ def site_settings_save(request, site_id):
     site.bump_version()
     messages.success(request, 'Website details saved.')
 
+<<<<<<< HEAD
     # Domain inapitia moduli ile ile ya /manage/site-domains/: maelekezo
     # sahihi ya DNS (A kwa domain kuu, CNAME kwa www), kuzuia nakala, na
     # hali inayoonekana kwenye paneli ya JamiiTek.
@@ -464,12 +642,40 @@ def site_settings_save(request, site_id):
             domains.disconnect(site)
             messages.success(request, 'Domain imeondolewa.')
     return redirect('builder:site_dashboard', site_id=site.id)
+=======
+    # ── Auto-registration ya custom domain kwenye Render (bila dashboard) ──
+    if domain_changed:
+        from . import render_api
+        if old_domain:
+            render_api.remove_custom_domain(old_domain)
+        if site.custom_domain:
+            ok, msg = render_api.add_custom_domain(site.custom_domain)
+            (messages.success if ok else messages.warning)(request, msg)
+            if render_api.check_dns(site.custom_domain):
+                messages.success(request,
+                    f'DNS check: "{site.custom_domain}" is already pointing to our '
+                    'servers — your domain should be live within minutes. ✅')
+            else:
+                messages.info(request,
+                    f'DNS check: "{site.custom_domain}" is not pointing to us yet. '
+                    'Add a CNAME record at your registrar: '
+                    f'{site.custom_domain} → jamiitek.onrender.com')
+    return redirect('builder:studio_step', site_id=site.id, step='publish')
+>>>>>>> 8d5a8aae8b37aa819c6f392d7825e1647f5e5e84
 
 
 @login_required
 @require_POST
 def toggle_publish(request, site_id):
     site = _my_site(request, site_id)
+    if not site.is_published:
+        # Kupublish kunahitaji kila hatua ya Studio iwe imehifadhiwa
+        from .studio import publish_blockers
+        missing = publish_blockers(site)
+        if missing:
+            messages.error(request, 'Save every step in the Website Studio before publishing — still missing: '
+                           + ', '.join(t for _, t in missing) + '.')
+            return redirect('builder:studio_step', site_id=site.id, step=missing[0][0])
     site.is_published = not site.is_published
     site.save(update_fields=['is_published'])
     state = 'is now live' if site.is_published else 'has been unpublished'
@@ -483,9 +689,25 @@ def toggle_publish(request, site_id):
 def page_editor(request, site_id, page_id):
     site = _my_site(request, site_id)
     page = get_object_or_404(SitePage, id=page_id, website=site)
+    canvas_head = ''
+    if page.raw_document:
+        from .site_import import canvas_head as _canvas_head
+        canvas_head = _canvas_head(page.raw_document)
+    from .layouts import font_for
+    font_href, font_body, font_head = font_for(site)
     return render(request, 'builder/editor.html', {
         'site': site, 'page': page,
+        'pages': site.pages.all(),                 # kuhamia ukurasa mwingine bila kutoka editor
         'collections': site.collections.all(),
+        'canvas_head': canvas_head,
+        # Canvas inaonyesha website halisi: rangi, fonts na CSS ya site nzima
+        'canvas_theme': {
+            'accent': site.accent_color, 'font_href': font_href,
+            'font_body': font_body, 'font_head': font_head,
+            'global_css': site.global_css or '',
+        },
+        'preview_url': reverse('builder:studio_preview', args=[site.id]) + f'?page={page.slug}',
+        'studio_pages_url': reverse('builder:studio_step', args=[site.id, 'pages']),
     })
 
 
@@ -496,7 +718,7 @@ def page_create(request, site_id):
     title = (request.POST.get('title') or '').strip()
     if not title:
         messages.error(request, 'Enter a page name.')
-        return redirect('builder:site_dashboard', site_id=site.id)
+        return redirect('builder:studio_step', site_id=site.id, step='pages')
     from django.utils.text import slugify
     base = slugify(title)[:70] or 'page'
     slug, n = base, 2
@@ -516,12 +738,18 @@ def page_create(request, site_id):
 def page_delete(request, site_id, page_id):
     site = _my_site(request, site_id)
     page = get_object_or_404(SitePage, id=page_id, website=site)
+    fetch = request.headers.get('X-Requested-With') == 'fetch'   # Studio: bila kupakia upya
     if page.slug == 'home':
+        if fetch:
+            return JsonResponse({'ok': False, 'error': 'The home page cannot be deleted.'}, status=400)
         messages.error(request, 'The home page cannot be deleted.')
     else:
         page.delete()
+        site.bump_version()
+        if fetch:
+            return JsonResponse({'ok': True})
         messages.success(request, f'Page "{page.title}" has been deleted.')
-    return redirect('builder:site_dashboard', site_id=site.id)
+    return redirect('builder:studio_step', site_id=site.id, step='pages')
 
 
 # GrapesJS storage endpoints
@@ -544,8 +772,155 @@ def page_save(request, site_id, page_id):
     page.grapes_data = data.get('project', {})
     page.html_cache = data.get('html', '')
     page.css_cache = data.get('css', '')
+    if page.raw_document:
+        # Page iliyopakiwa kwa ZIP: body mpya inarudi ndani ya document
+        # yake, <head> (CSS, fonts, meta) na scripts zinabaki.
+        from .site_import import merge_editor_save
+        page.raw_document = merge_editor_save(
+            page.raw_document, page.html_cache, page.css_cache)
     page.save()
     return JsonResponse({'status': 'ok'})
+
+
+# ── Kupakia website nzima kwa ZIP ───────────────────────
+
+IMPORT_TTL_HOURS = 24      # hakikisho lisipothibitishwa, files zinafutwa baada ya hapo
+
+
+@login_required
+def site_import(request, site_id):
+    """
+    Hatua 1: mteja anapakia ZIP. Assets zinapakiwa Supabase papo hapo,
+    kurasa zinakaa kwenye SiteImport mpaka athibitishe kwenye hakikisho.
+    Kila URL iliyopakiwa inarekodiwa — hata upakiaji ukishindwa katikati —
+    ili `prune_site_imports` izifute mteja asipothibitisha.
+    """
+    import logging
+    import uuid
+    from apps import storage
+    from . import site_import as si
+
+    site = _my_site(request, site_id)
+    ctx = {'site': site, 'limits': {
+        'zip_mb': si.MAX_ZIP_BYTES // 1024 // 1024, 'pages': si.MAX_PAGES,
+        'files': si.MAX_FILES,
+    }}
+    if request.method != 'POST':
+        return render(request, 'builder/site_import.html', ctx)
+
+    f = request.FILES.get('zip')
+    if not f:
+        ctx['error'] = 'Choose a .zip file first.'
+        return render(request, 'builder/site_import.html', ctx)
+    if not storage.is_configured():
+        ctx['error'] = 'File storage is not configured on the server yet. Please contact JamiiTek support.'
+        return render(request, 'builder/site_import.html', ctx)
+
+    uploaded, images = [], []     # list.append ni salama kwa threads
+
+    def uploader(data, ext, content_type):
+        r = storage.upload_bytes(data, f'sites/{site.id}/import', ext, content_type)
+        if not r.get('success'):
+            raise si.ImportRejected(f'Uploading a file failed: {r.get("error", "unknown error")}')
+        uploaded.append(r['url'])
+        if content_type.startswith('image/'):
+            images.append(r['url'])
+        return r['url']
+
+    imp = SiteImport(website=site, token=uuid.uuid4().hex)
+    try:
+        result = si.prepare(f, uploader)
+    except Exception as e:
+        if not isinstance(e, si.ImportRejected):
+            logging.getLogger(__name__).exception('site import failed (site %s)', site.id)
+        ctx['error'] = str(e) if isinstance(e, si.ImportRejected) else \
+            'Something went wrong while processing the ZIP. Please try again.'
+        if uploaded:              # files zilizokwisha pakiwa zitafutwa na prune
+            imp.uploaded = uploaded
+            imp.save()
+        return render(request, 'builder/site_import.html', ctx)
+
+    # Hata kuhifadhi au kuonyesha hakikisho kukishindwa, mteja apate ujumbe
+    # unaoeleweka (si "Internal Server Error"), na files zilizopakiwa zifutwe baadaye.
+    try:
+        imp.result, imp.uploaded, imp.images = result, uploaded, images
+        imp.save()
+
+        existing = set(site.pages.values_list('slug', flat=True))
+        imported = {p['slug'] for p in result['pages']}
+        for p in result['pages']:
+            p['url'] = si.page_url(p['slug'])
+            p['replaces'] = p['slug'] in existing
+        return render(request, 'builder/site_import_preview.html', {
+            'site': site, 'token': imp.token, 'result': result,
+            'others': site.pages.exclude(slug__in=imported),
+            'docs': [p['document'] for p in result['pages']],
+        })
+    except Exception:
+        logging.getLogger(__name__).exception('site import: saving the preview failed (site %s)', site.id)
+        if uploaded and imp.pk is None:
+            try:
+                SiteImport.objects.create(website=site, token=uuid.uuid4().hex, uploaded=uploaded)
+            except Exception:
+                pass
+        ctx['error'] = ('Your ZIP was read, but we could not save it. Please try again — '
+                        'if it keeps failing, send the ZIP to JamiiTek support.')
+        return render(request, 'builder/site_import.html', ctx)
+
+
+@login_required
+@require_POST
+def site_import_confirm(request, site_id):
+    """Hatua 2: andika kurasa kwenye database."""
+    from datetime import timedelta
+    from django.utils import timezone
+    from .site_import import editable_body
+
+    site = _my_site(request, site_id)
+    with transaction.atomic():
+        # select_for_update: kubonyeza "Import" mara mbili hakuandiki mara mbili
+        imp = SiteImport.objects.select_for_update().filter(
+            website=site, token=(request.POST.get('token') or '')[:32],
+            confirmed_at__isnull=True,
+            created_at__gte=timezone.now() - timedelta(hours=IMPORT_TTL_HOURS),
+        ).exclude(result={}).first()
+        if imp is None:
+            messages.error(request, 'This import has expired. Please upload the ZIP again.')
+            return redirect('builder:site_import', site_id=site.id)
+
+        pages = imp.result['pages']
+        slugs = []
+        for order, p in enumerate(pages):
+            SitePage.objects.update_or_create(
+                website=site, slug=p['slug'],
+                defaults={
+                    'title': p['title'],
+                    'raw_document': p['document'],
+                    'html_cache': editable_body(p['document']),
+                    'css_cache': '',
+                    'grapes_data': {},       # editor ianze na HTML mpya
+                    'sort_order': order,
+                },
+            )
+            slugs.append(p['slug'])
+        if request.POST.get('remove_others'):
+            for page in site.pages.exclude(slug__in=slugs):
+                page.delete()
+        # Picha zinaingia kwenye maktaba ya picha ya editor pia
+        SiteAsset.objects.bulk_create([
+            SiteAsset(website=site, url=u, file_name=u.rsplit('/', 1)[-1][:200])
+            for u in imp.images
+        ])
+        # Documents hazihitajiki tena. `uploaded` inabaki: prune inaitumia kujua
+        # files za kufuta ZIP mpya ikichukua nafasi ya kurasa hizi.
+        imp.confirmed_at = timezone.now()
+        imp.result = {'pages': len(pages)}
+        imp.save(update_fields=['confirmed_at', 'result'])
+
+    n = len(pages)
+    messages.success(request, f'Your website has been imported — {n} page{"s" if n != 1 else ""} '
+                              f'are ready. Open your site to check it, then publish.')
+    return redirect('builder:site_dashboard', site_id=site.id)
 
 
 # ── Collections (Packages, Trips, Destinations, Products...) ──
@@ -689,6 +1064,57 @@ def ai_status(request):
 
 def _staff_only(user):
     return user.is_authenticated and user.is_staff
+
+
+@login_required
+def superadmin_db_check(request):
+    """
+    Uchunguzi wa database ya production kwa staff, bila shell ya Render.
+
+    Kuunda site kulileta 500 kwenye production pekee (Postgres safi na SQLite
+    zinafanya kazi), na DEBUG=False haionyeshi traceback. Ukurasa huu
+    unaonyesha: migrations za builder, nguzo zinazokosekana/za ziada, na
+    jaribio la kuunda site + kurasa ndani ya transaction inayorudishwa nyuma
+    — likishindwa, traceback kamili. Hakuna kinachobaki kwenye database.
+    """
+    if not request.user.is_staff:
+        raise Http404
+    import io
+    import traceback
+    from django.core.management import call_command
+    from django.db.migrations.recorder import MigrationRecorder
+    from django.http import HttpResponse
+
+    out = io.StringIO()
+    out.write('== Migrations za builder zilizowekwa ==\n')
+    applied = MigrationRecorder.Migration.objects.filter(app='builder').order_by('id')
+    for m in applied:
+        out.write(f'  [X] {m.name}\n')
+
+    out.write('\n== Tofauti kati ya models na database (builder) ==\n')
+    try:
+        call_command('check_db_drift', app='builder', stdout=out)
+    except Exception:
+        out.write(traceback.format_exc())
+
+    out.write('\n== Jaribio: kuunda site + kurasa (rollback) ==\n')
+
+    class _Rollback(Exception):
+        pass
+    try:
+        with transaction.atomic():
+            site = ClientWebsite.objects.create(
+                owner=request.user, subdomain='zz-dbcheck-rollback',
+                site_name='DB check', website_type='companyprofile')
+            site.bootstrap_from_schema()
+            apply_template(site, 'clean_start')
+            out.write(f'  OK: kurasa {site.pages.count()}, collections {site.collections.count()}\n')
+            raise _Rollback
+    except _Rollback:
+        out.write('  Imerudishwa nyuma — hakuna kilichobaki kwenye database.\n')
+    except Exception:
+        out.write('  IMESHINDWA:\n' + traceback.format_exc())
+    return HttpResponse(out.getvalue(), content_type='text/plain; charset=utf-8')
 
 
 @login_required
@@ -836,13 +1262,13 @@ def nav_save(request, site_id):
     """Hifadhi navbar. mode=preset (jina) au mode=custom (HTML)."""
     site = _my_site(request, site_id)
     mode = request.POST.get('mode')
-    from .nav_presets import NAV_PRESETS
+    from .nav_presets import NAV_PRESETS, HEADERS
     if mode == 'custom':
         site.custom_nav_html = (request.POST.get('html') or '')[:40000]
         site.nav_preset = ''
     elif mode == 'preset':
         key = request.POST.get('preset', '')
-        if key in NAV_PRESETS:
+        if key in HEADERS or key in NAV_PRESETS:
             site.nav_preset = key
             site.custom_nav_html = ''
     elif mode == 'default':
@@ -859,18 +1285,18 @@ def footer_save(request, site_id):
     """Hifadhi footer. mode=preset/custom/default."""
     site = _my_site(request, site_id)
     mode = request.POST.get('mode')
-    from .nav_presets import FOOTER_PRESETS
+    from .nav_presets import FOOTER_PRESETS, FOOTERS
     if mode == 'custom':
         site.custom_footer_html = (request.POST.get('html') or '')[:40000]
     elif mode == 'preset':
         key = request.POST.get('preset', '')
-        if key in FOOTER_PRESETS:
-            # Footer preset: tunahifadhi HTML+CSS pamoja ndani ya custom_footer_html
-            preset = FOOTER_PRESETS[key]
-            site.custom_footer_html = f"<style>{preset['css']}</style>\n{preset['html']}"
+        if key in FOOTERS or key in FOOTER_PRESETS:
+            site.footer_preset = key
+            site.custom_footer_html = ''
     elif mode == 'default':
         site.custom_footer_html = ''
-    site.save(update_fields=['custom_footer_html'])
+        site.footer_preset = ''
+    site.save(update_fields=['custom_footer_html', 'footer_preset'])
     site.bump_version()
     return JsonResponse({'ok': True})
 

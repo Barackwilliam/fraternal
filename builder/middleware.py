@@ -19,6 +19,14 @@ class SubdomainMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
+        response = self._dispatch(request)
+        if getattr(request, 'client_site', None) is not None:
+            # "Developed by JamiiTek" kwenye kila ukurasa wa mteja (builder/branding.py)
+            from .branding import add_badge_to_response
+            response = add_badge_to_response(response)
+        return response
+
+    def _dispatch(self, request):
         host = request.get_host().split(':')[0].lower()
         request.client_site = None
         request.subdomain = None

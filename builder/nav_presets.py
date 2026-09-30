@@ -3,8 +3,15 @@ Navbar & Footer — presets za muundo + custom HTML ya mteja.
 
 Mfumo:
   - Kama site.custom_nav_html ipo → tunaitumia (custom kamili ya mteja)
-  - Vinginevyo kama site.nav_preset ipo → tunatumia preset ya muundo huo
+  - Vinginevyo kama site.nav_preset ipo → muundo kutoka builder/layouts.py
+    (HEADERS), au preset ya zamani hapa chini (NAV_PRESETS)
   - Vinginevyo → default (glass nav ya sasa, base.html inaishughulikia)
+
+Footer ni hivyo hivyo: custom_footer_html → footer_preset (layouts.FOOTERS
+au FOOTER_PRESETS za zamani) → default ya base.html.
+
+NAV_PRESETS na FOOTER_PRESETS za hapa chini ni za ZAMANI: zinabaki ili site
+zinazozitumia zisivunjike, lakini Studio inaonyesha za layouts.py pekee.
 
 PLACEHOLDERS (zinafanya kazi kwenye custom HTML na presets):
   {{logo}}       → <img> ya logo (kama ipo) — vinginevyo tupu
@@ -21,7 +28,10 @@ pages (ambazo ni dynamic). Custom HTML bila {{nav_links}} pia inaruhusiwa —
 mteja anaweza kuandika links zake mwenyewe kwa mkono.
 """
 from builder.images import image_url
+from builder.layouts import (HEADERS, FOOTERS, HEADER_COMMON_CSS, SIDE_COMMON_CSS,
+                             FOOTER_COMMON_CSS, mobile_menu_for)
 from datetime import datetime
+import html as html_lib
 import re
 
 
@@ -160,42 +170,110 @@ FOOTER_PRESETS = {
 }
 
 
+# Aikoni ndogo (SVG ya mistari) — hazipakii faili lolote la ziada
+ICONS = {
+    'Phone': '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 '
+             '19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 '
+             '2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg>',
+    'WhatsApp': '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.4A8.4 '
+                '8.4 0 1 1 21 11.5z"/><path d="M9 9.5c.3 1.8 1.7 3.3 3.5 3.8l1-1 2 .8-.4 1.6"/></svg>',
+    'Email': '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/>'
+             '<path d="m22 6-10 7L2 6"/></svg>',
+    'Address': '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/>'
+               '<circle cx="12" cy="10" r="3"/></svg>',
+}
+
+
 def _nav_links_html(site, page_slug=None):
     """<a> za pages zote za nav, kutoka database."""
     out = []
     for p in site.pages.filter(show_in_nav=True).order_by('sort_order', 'id'):
         href = '/' if p.slug == 'home' else f'/p/{p.slug}/'
         on = ' class="on"' if page_slug and p.slug == page_slug else ''
-        out.append(f'<a href="{href}"{on}>{p.title}</a>')
+        out.append(f'<a href="{href}"{on}>{html_lib.escape(p.title)}</a>')
     return '\n'.join(out)
 
 
 def _placeholders(site, page_slug=None):
+    esc = html_lib.escape
+    name = esc(site.site_name or '')
+    tagline = esc(site.tagline or '')
+    phone = esc(site.contact_phone or '')
+    email = esc(getattr(site, 'contact_email', '') or '')
+    address = esc(getattr(site, 'contact_address', '') or '')
     logo = ''
     if site.logo_url:
-        logo = f'<img src="{image_url(site.logo_url, 80)}" alt="" loading="eager">'
+        logo = f'<img src="{esc(image_url(site.logo_url, 80))}" alt="" loading="eager">'
     wa = ''
     if site.whatsapp_number:
         digits = re.sub(r'\D', '', site.whatsapp_number)
         wa = f'https://wa.me/{digits}'
-    tagline_line = f'<div class="cfoot-tag">{site.tagline}</div>' if site.tagline else ''
-    phone_line = f'<div>📞 {site.contact_phone}</div>' if site.contact_phone else ''
-    email = getattr(site, 'contact_email', '') or ''
+    tel = 'tel:' + re.sub(r'[^\d+]', '', site.contact_phone or '') if site.contact_phone else ''
+    cta_href = wa or tel or ('mailto:' + email if email else '/p/contact/')
+
+    tagline_line = f'<div class="cfoot-tag">{tagline}</div>' if tagline else ''
+    phone_line = f'<div>📞 {phone}</div>' if phone else ''
     email_line = f'<div>✉ {email}</div>' if email else ''
     whatsapp_line = f'<div>💬 <a href="{wa}">WhatsApp</a></div>' if wa else ''
+
+    # Mawasiliano yaliyopo tu — hakuna mistari mitupu
+    contacts = []
+    if phone:
+        contacts.append(('Phone', tel, phone))
+    if wa:
+        contacts.append(('WhatsApp', wa, 'Chat with us'))
+    if email:
+        contacts.append(('Email', f'mailto:{email}', email))
+    if address:
+        contacts.append(('Address', '', address))
+    contact_list = '<ul class="fx-contact">' + ''.join(
+        f'<li><b>{k}</b>' + (f'<a href="{h}">{v}</a>' if h else f'<span>{v}</span>') + '</li>'
+        for k, h, v in contacts) + '</ul>' if contacts else ''
+    contact_cards = ''.join(
+        (f'<a class="fx-ccard" href="{h}">' if h else '<div class="fx-ccard">')
+        + f'<i>{ICONS[k]}</i><b>{k}</b><span>{v}</span>' + ('</a>' if h else '</div>')
+        for k, h, v in contacts)
+    linked = [(k, h, v) for k, h, v in contacts if h]
+    contact_icons = ('<div class="fx-icons">' + ''.join(
+        f'<a href="{h}" aria-label="{k}" title="{k}">{ICONS[k]}</a>' for k, h, _ in linked) + '</div>') if linked else ''
+    # Njia za mkato chini ya menyu ya simu
+    m_contact = ''.join(f'<a href="{h}">{ICONS[k]}{"Call" if k == "Phone" else k}</a>' for k, h, _ in linked)
+    # Mawasiliano makubwa ya footer ya "Let's talk": email, vinginevyo simu, vinginevyo WhatsApp
+    big = next(((h, v) for k, h, v in contacts if k == 'Email'), None) or \
+        next(((h, v) for k, h, v in contacts if k == 'Phone'), None) or \
+        next(((h, 'Chat on WhatsApp') for k, h, v in contacts if k == 'WhatsApp'), None)
+    big_contact = f'<a class="fx-big" href="{big[0]}">{big[1]}</a>' if big else ''
+    ghost_href, ghost_text = (tel, f'Call {phone}') if phone else (('mailto:' + email, 'Email us') if email else ('', ''))
+
     return {
         '{{logo}}': logo,
-        '{{site_name}}': site.site_name,
+        '{{site_name}}': name,
         '{{nav_links}}': _nav_links_html(site, page_slug),
-        '{{phone}}': site.contact_phone or '',
+        '{{phone}}': phone,
         '{{email}}': email,
+        '{{address}}': address,
         '{{whatsapp}}': wa or '#',
         '{{year}}': str(datetime.now().year),
-        '{{tagline}}': site.tagline or '',
+        '{{tagline}}': tagline,
+        '{{tagline_or_name}}': tagline or name,
         '{{tagline_line}}': tagline_line,
+        '{{tagline_meta}}': f'<div class="hx-side-meta">{tagline}</div>' if tagline else '',
         '{{phone_line}}': phone_line,
         '{{email_line}}': email_line,
         '{{whatsapp_line}}': whatsapp_line,
+        '{{phone_inline}}': f'<a href="{tel}">{phone}</a>' if phone else '',
+        '{{email_inline}}': f'<a href="mailto:{email}">{email}</a>' if email else '',
+        '{{cta}}': f'<a class="hx-cta" href="{cta_href}">Get in touch</a>',
+        '{{cta_footer}}': f'<a class="fx-cta" href="{cta_href}">Contact us</a>',
+        '{{contact_list}}': contact_list,
+        '{{contact_cards}}': contact_cards,
+        '{{contact_icons}}': contact_icons,
+        '{{m_contact}}': m_contact,
+        '{{big_contact}}': big_contact,
+        '{{cta_ghost}}': f'<a class="fx-ghost" href="{ghost_href}">{ghost_text}</a>' if ghost_href else '',
+        '{{to_top}}': ('<a class="fx-totop" href="#" onclick="window.scrollTo({top:0,behavior:\'smooth\'});'
+                       'return false">Back to top</a>'),
+        '{{credit}}': 'Developed by <a href="https://www.jamiitek.com" target="_blank" rel="noopener">JamiiTek</a>',
     }
 
 
@@ -205,11 +283,22 @@ def _fill(html, ph):
     return html
 
 
+def header_css(key):
+    """CSS kamili ya header ya layouts.py (pamoja na ya sidebar ikiwa side)."""
+    h = HEADERS[key]
+    extra = SIDE_COMMON_CSS if h['kind'] == 'side' else ''
+    return HEADER_COMMON_CSS + extra + h['css']
+
+
 def render_nav(site, page_slug=None):
     """Rudisha (html, css) ya navbar. Tupu = tumia default ya base.html."""
     ph = _placeholders(site, page_slug)
     if site.custom_nav_html.strip():
-        return _fill(site.custom_nav_html, ph), ''
+        # CSS ya pamoja inapendezesha {{cta}} na kufunga scroll menyu ikiwa wazi
+        return _fill(site.custom_nav_html, ph), HEADER_COMMON_CSS
+    if site.nav_preset in HEADERS:
+        ph['{{mm}}'] = 'hx-m-' + mobile_menu_for(site, site.nav_preset)
+        return _fill(HEADERS[site.nav_preset]['html'], ph), header_css(site.nav_preset)
     if site.nav_preset in NAV_PRESETS:
         preset = NAV_PRESETS[site.nav_preset]
         return _fill(preset['html'], ph), preset['css']
@@ -220,18 +309,21 @@ def render_footer(site, page_slug=None):
     """Rudisha (html, css) ya footer. Tupu = tumia default ya base.html."""
     ph = _placeholders(site, page_slug)
     if site.custom_footer_html.strip():
-        return _fill(site.custom_footer_html, ph), ''
-    # footer preset inaweza kuhifadhiwa kwenye nav_preset? Hapana — tuna field moja.
-    # Tunatumia convention: footer preset inahifadhiwa ndani ya custom_footer_html
-    # kama mteja amechagua preset (tunaijaza pale). Kwa hiyo hapa default tu.
+        # {{contact_icons}}, {{cta_footer}}, {{to_top}} n.k. zinapata muonekano wao
+        return _fill(site.custom_footer_html, ph), FOOTER_COMMON_CSS
+    key = getattr(site, 'footer_preset', '')
+    if key in FOOTERS:
+        return _fill(FOOTERS[key]['html'], ph), FOOTER_COMMON_CSS + FOOTERS[key]['css']
+    if key in FOOTER_PRESETS:
+        return _fill(FOOTER_PRESETS[key]['html'], ph), FOOTER_PRESETS[key]['css']
     return '', ''
 
 
 def get_preset_catalog():
-    """Kwa UI — orodha ya presets zote na preview."""
+    """Kwa UI — muundo wote unaoweza kuchaguliwa (wa layouts.py)."""
     return {
-        'nav': [{'key': k, **{kk: vv for kk, vv in v.items() if kk in ('name', 'desc')}}
-                for k, v in NAV_PRESETS.items()],
-        'footer': [{'key': k, **{kk: vv for kk, vv in v.items() if kk in ('name', 'desc')}}
-                   for k, v in FOOTER_PRESETS.items()],
+        'nav': [{'key': k, 'name': v['name'], 'desc': v['desc'], 'kind': v['kind'], 'thumb': v['thumb']}
+                for k, v in HEADERS.items()],
+        'footer': [{'key': k, 'name': v['name'], 'desc': v['desc'], 'thumb': v['thumb']}
+                   for k, v in FOOTERS.items()],
     }

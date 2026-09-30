@@ -101,6 +101,10 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'jamiitek.urls'
 
+# @login_required ilipeleka watu /accounts/login/ — ukurasa usiokuwepo (404).
+# Login ya web builder ndiyo ya wateja wa platform.
+LOGIN_URL = '/builder/login/'
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -391,3 +395,17 @@ PAYMENTS_OWNER_EMAIL    = os.getenv('PAYMENTS_OWNER_EMAIL', 'info@jamiitek.com')
 SITE_BASE_URL        = os.getenv('SITE_BASE_URL', 'https://www.jamiitek.com')
 BLOG_REVIEW_EMAIL    = os.getenv('BLOG_REVIEW_EMAIL', 'info@jamiitek.com')
 UNSPLASH_ACCESS_KEY  = os.getenv('UNSPLASH_ACCESS_KEY', '')
+
+# ── Logging ──────────────────────────────────────────────────────
+# Bila hii, DEBUG=False inaficha traceback za makosa ya 500: Django inazituma
+# kwa ADMINS (hawajawekwa) tu. Sasa zinaandikwa kwenye stderr, na zinaonekana
+# kwenye Render → Logs.
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {'console': {'class': 'logging.StreamHandler'}},
+    'root': {'handlers': ['console'], 'level': 'WARNING'},
+    'loggers': {
+        'django.request': {'handlers': ['console'], 'level': 'ERROR', 'propagate': False},
+    },
+}

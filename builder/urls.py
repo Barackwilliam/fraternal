@@ -1,11 +1,19 @@
 """URLs za dashboard (zinaingia kwenye jamiitek/urls.py kama /builder/)."""
 from django.urls import path
+<<<<<<< HEAD
 from . import views, studio_views, ai
+=======
+from . import views, ai, studio
+>>>>>>> 8d5a8aae8b37aa819c6f392d7825e1647f5e5e84
 
 app_name = 'builder'
 
 urlpatterns = [
     path('signup/', views.signup, name='signup'),
+    path('login/', views.builder_login, name='login'),
+    path('logout/', views.builder_logout, name='logout'),
+    # Templates Marketplace → Builder (builder/template_bridge.py)
+    path('templates/<int:pk>/use/', views.from_template, name='from_template'),
     path('', views.my_sites, name='my_sites'),
     path('new/', views.create_site, name='create_site'),
     path('tutorial/', views.tutorial, name='tutorial'),
@@ -27,6 +35,7 @@ urlpatterns = [
 
     # Super-admin (staff only)
     path('superadmin/', views.superadmin, name='superadmin'),
+    path('superadmin/db-check/', views.superadmin_db_check, name='superadmin_db_check'),
     path('superadmin/<int:site_id>/action/', views.superadmin_action, name='superadmin_action'),
     path('site/<int:site_id>/collections/<int:collection_id>/ai-suggest/',
          views.ai_suggest_items, name='ai_suggest_items'),
@@ -36,6 +45,12 @@ urlpatterns = [
     path('site/<int:site_id>/publish/', views.toggle_publish, name='toggle_publish'),
     path('site/<int:site_id>/template/', views.change_template, name='change_template'),
 
+    # Website Studio — hatua kwa hatua (builder/studio.py)
+    path('site/<int:site_id>/studio/', studio.studio, name='studio'),
+    path('site/<int:site_id>/studio/preview/', studio.studio_preview, name='studio_preview'),
+    path('site/<int:site_id>/studio/<slug:step>/', studio.studio, name='studio_step'),
+    path('site/<int:site_id>/import/', views.site_import, name='site_import'),
+    path('site/<int:site_id>/import/confirm/', views.site_import_confirm, name='site_import_confirm'),
     path('site/<int:site_id>/pages/new/', views.page_create, name='page_create'),
     path('site/<int:site_id>/pages/<int:page_id>/edit/', views.page_editor, name='page_editor'),
     path('site/<int:site_id>/pages/<int:page_id>/delete/', views.page_delete, name='page_delete'),
