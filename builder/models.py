@@ -208,31 +208,6 @@ class SitePage(models.Model):
     raw_document = models.TextField(blank=True)
     sort_order = models.PositiveIntegerField(default=0)
     show_in_nav = models.BooleanField(default=True)
-
-    # ── Code Studio ────────────────────────────────────────────
-    # GrapesJS inabadilisha HTML inayobandikwa ndani yake: inaondoa
-    # <script>, inapoteza <head>, na inaandika muundo upya. Mteja
-    # aliyebandika website aliyopewa na designer aliona imevunjika.
-    #
-    # Hali ya 'code' inapita pembeni ya GrapesJS kabisa: code inahifadhiwa
-    # na kuonyeshwa kama ilivyo. Shortcodes ([[site:phone]]) bado zinafanya
-    # kazi. Ukurasa kamili (<!DOCTYPE html>) unaonyeshwa bila navbar yetu;
-    # kipande kinaingia ndani ya navbar na footer ya website.
-    MODE_CHOICES = [('visual', 'Visual editor'), ('code', 'Code yangu')]
-    mode = models.CharField(max_length=10, choices=MODE_CHOICES, default='visual')
-    code_html = models.TextField(blank=True, default='')
-    code_css = models.TextField(blank=True, default='')
-    code_updated_at = models.DateTimeField(null=True, blank=True)
-
-    @property
-    def is_code(self):
-        return self.mode == 'code'
-
-    @property
-    def is_full_document(self):
-        """Code ni ukurasa kamili (una <html> au <!DOCTYPE>), si kipande."""
-        head = (self.code_html or '').lstrip()[:600].lower()
-        return head.startswith('<!doctype') or '<html' in head
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:

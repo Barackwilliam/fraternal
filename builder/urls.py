@@ -1,10 +1,6 @@
 """URLs za dashboard (zinaingia kwenye jamiitek/urls.py kama /builder/)."""
 from django.urls import path
-<<<<<<< HEAD
-from . import views, studio_views, ai
-=======
 from . import views, ai, studio
->>>>>>> 8d5a8aae8b37aa819c6f392d7825e1647f5e5e84
 
 app_name = 'builder'
 
@@ -56,13 +52,6 @@ urlpatterns = [
     path('site/<int:site_id>/pages/<int:page_id>/delete/', views.page_delete, name='page_delete'),
     path('site/<int:site_id>/pages/<int:page_id>/load/', views.page_load, name='page_load'),
     path('site/<int:site_id>/pages/<int:page_id>/save/', views.page_save, name='page_save'),
-    # Code Studio — code ya mteja kama ilivyo, bila GrapesJS
-    path('site/<int:site_id>/pages/<int:page_id>/code/', studio_views.code_studio, name='code_studio'),
-    path('site/<int:site_id>/pages/<int:page_id>/code/save/', studio_views.code_save, name='code_save'),
-    path('site/<int:site_id>/pages/<int:page_id>/code/preview/', studio_views.code_preview, name='code_preview'),
-    path('site/<int:site_id>/pages/<int:page_id>/code/visual/', studio_views.code_to_visual, name='code_to_visual'),
-    # Taarifa za biashara — ukurasa wake maalum
-    path('site/<int:site_id>/info/', studio_views.business_info, name='business_info'),
 
     path('site/<int:site_id>/collections/<int:collection_id>/', views.collection_items, name='collection_items'),
     path('site/<int:site_id>/collections/<int:collection_id>/new/', views.item_form, name='item_new'),
