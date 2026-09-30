@@ -280,7 +280,7 @@
                 <label class="f-label">Which website is this payment for? *</label>
                 <select name="website" class="f-input" required>
                   <option value="">— Select website —</option>
-                  {% for p in billing_plans %}<option value="{{ p.website.pk }}" data-opts="{% for o in p.options %}{{ o.months }}:{{ o.total|floatformat:0 }}:{{ o.per_month|floatformat:0 }}:{{ o.saving|floatformat:0 }}:{{ o.discount_pct|floatformat:0 }}{% if not forloop.last %},{% endif %}{% endfor %}">{{ p.website.name }} — TZS {{ p.website.monthly_cost|floatformat:0 }}/mo</option>{% endfor %}
+                  {% for p in billing_plans %}<option value="{{ p.website.pk }}"{% if billing_plans|length == 1 %} selected{% endif %} data-opts="{% for o in p.options %}{{ o.months }}:{{ o.total|floatformat:0 }}:{{ o.per_month|floatformat:0 }}:{{ o.saving|floatformat:0 }}:{{ o.discount_pct|floatformat:0 }}{% if not forloop.last %},{% endif %}{% endfor %}">{{ p.website.name }} — TZS {{ p.website.monthly_cost|floatformat:0 }}/mo</option>{% endfor %}
                 </select>
               </div>
             </div>
@@ -518,9 +518,24 @@ setTimeout(()=>{document.getElementById('bf1').style.width='100%'},400);
     }
     return true;
   };
+  // Mteja mwenye website MOJA hakuwa na cha kuchagua, lakini "Pay Now"
+  // ilimwambia "select a website first" — chaguo lilikuwa juu ya "— Select
+  // website —", na lilikuwa CHINI ya kitufe, kwenye fomu ya benki.
+  const realOpts = [...sel.options].filter(o => o.value);
+  if (!sel.value && realOpts.length === 1) sel.value = realOpts[0].value;
+
+  function guideToPicker(){
+    sel.scrollIntoView({behavior:'smooth', block:'center'});
+    sel.focus({preventScroll:true});
+    sel.style.transition = 'box-shadow .3s';
+    sel.style.boxShadow = '0 0 0 3px rgba(0,255,136,.55)';
+    setTimeout(() => { sel.style.boxShadow = ''; }, 2200);
+  }
+
   window.payHostingPesapal = function(btn){
-    const wid = sel.value;
-    if(!wid){ alert('Please select a website first.'); return; }
+    let wid = sel.value;
+    if(!wid && realOpts.length === 1){ wid = sel.value = realOpts[0].value; renderOptions(); }
+    if(!wid){ guideToPicker(); return; }
     const f = document.getElementById('pspHostForm');
     f.action = '{% url "pesapal_pay_hosting" website_pk=0 %}'.replace('/0/', '/'+wid+'/');
     document.getElementById('pspHostMonths').value = monthsInput.value || 1;
