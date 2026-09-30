@@ -11,7 +11,7 @@ from apps.chatbot.manage_views import (
     jamiibot_landing
 )
 from apps.seo.sitemaps import sitemaps
-from apps.seo.views import robots_txt, news_sitemap
+from apps.seo.views import robots_txt, news_sitemap, llms_txt
 from apps.indexnow import key_file as indexnow_key
 from apps.seo.manifest import web_manifest
 from builder import views as builder_views
@@ -28,6 +28,7 @@ urlpatterns = [
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
     path('news-sitemap.xml', news_sitemap, name='news_sitemap'),
     path('indexnow.txt', indexnow_key, name='indexnow_key'),
+    path('llms.txt', llms_txt, name='llms_txt'),
     path('manifest.json', web_manifest, name='web_manifest'),
 
     # JamiiBot Landing Page

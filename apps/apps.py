@@ -10,3 +10,5 @@ class AppsConfig(AppConfig):
         from . import blog_signals  # noqa: F401
         # Taarifa kwa mteja website inaposimamishwa — njia zote
         from . import suspension_signals  # noqa: F401
+        # Templates: IndexNow kila template inapohifadhiwa (SEO)
+        from . import template_signals  # noqa: F401

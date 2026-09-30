@@ -443,10 +443,15 @@ class WebsiteTemplateAdmin(admin.ModelAdmin):
     list_filter   = ('category', 'is_active', 'badge')
     search_fields = ('name', 'description')
     ordering      = ('order', '-created_at')
+    prepopulated_fields = {'slug': ('name',)}
 
     fieldsets = (
         ('📋 Basic Info', {
-            'fields': ('name', 'category', 'description', 'badge', 'rating')
+            'fields': ('name', 'slug', 'category', 'description', 'badge', 'rating')
+        }),
+        ('🔎 SEO — Google & AI', {
+            'fields': ('seo_title', 'seo_description', 'long_description'),
+            'description': 'Si lazima: ukurasa /templates/<slug>/ unajitengenezea maandishi. Maelezo marefu yako hapa yanasaidia template ipatikane Google.'
         }),
         ('💰 Pricing', {
             'fields': ('price_hosted_monthly', 'price_source_code'),
@@ -458,7 +463,7 @@ class WebsiteTemplateAdmin(admin.ModelAdmin):
         }),
         ('💻 Template HTML Code', {
             'fields': ('preview_html',),
-            'description': '⚠️ Weka HTML code yote ya template hapa. Itaonekana kwenye /templates/preview/<id>/'
+            'description': '⚠️ Weka HTML code yote ya template hapa. Itaonekana kwenye /templates/<slug>/ na /templates/preview/<id>/'
         }),
         ('⚙️ Settings', {
             'fields': ('is_active', 'order')

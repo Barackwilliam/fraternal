@@ -132,7 +132,7 @@ vitufe vinaziunganisha kwa attribute ya form="…".{% endcomment %}
   <form class="sd-step" data-step="{{ part }}" hidden>
     {% csrf_token %}
     <h1>{% if part == 'header' %}Header &amp; menu{% else %}Footer{% endif %}</h1>
-    <p class="hint sd-lead">{% if part == 'header' %}Tap a design — it appears in the preview instantly. <b>Sidebar</b> keeps the menu on the left; <b>top bar</b> puts it above your content.{% else %}The footer sits at the bottom of every page with your contact details. Tap a design to try it.{% endif %}</p>
+    <p class="hint sd-lead">{% if part == 'header' %}Tap a design — it appears in the preview instantly. <b>Top bars</b> keep the menu above your content; <b>sidebars</b> slide in from the left when visitors tap ☰.{% else %}The footer sits at the bottom of every page with your contact details. Tap a design to try it.{% endif %}</p>
     <div class="sd-tabs" role="tablist">
       <button type="button" class="on" data-tab="pick">🎨 Designs</button>
       <button type="button" data-tab="ai">✨ AI</button>
@@ -141,10 +141,11 @@ vitufe vinaziunganisha kwa attribute ya form="…".{% endcomment %}
     <input type="hidden" name="mode" value="preset">
     <div class="sd-pane" data-pane="pick">
       {% if part == 'header' %}
-        <h3 class="sd-h">Sidebars <span class="pill on">Recommended</span></h3>
-        <div class="sd-grid">{% for h in headers_side %}{% include 'builder/_studio_card.html' with item=h kind='header' %}{% endfor %}</div>
-        <h3 class="sd-h">Top bars</h3>
+        <h3 class="sd-h">Top bars <span class="pill on">Recommended</span></h3>
         <div class="sd-grid">{% for h in headers_top %}{% include 'builder/_studio_card.html' with item=h kind='header' %}{% endfor %}</div>
+        <h3 class="sd-h">Sidebars</h3>
+        <p class="hint" style="margin:-4px 0 10px">A slim bar sits on top; the sidebar slides in from the left when visitors tap ☰ — on laptops, tablets and phones.</p>
+        <div class="sd-grid">{% for h in headers_side %}{% include 'builder/_studio_card.html' with item=h kind='header' %}{% endfor %}</div>
         <h3 class="sd-h">Menu on phones <span class="pill">New</span></h3>
         <p class="hint">How the menu opens when a customer taps ☰ on a phone.</p>
         <div class="sd-mm">
