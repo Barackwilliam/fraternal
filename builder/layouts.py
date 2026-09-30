@@ -56,30 +56,10 @@ def mobile_menu_for(site, header_key):
 #  CSS YA PAMOJA
 # ══════════════════════════════════════════════════════════════
 
-HEADER_COMMON_CSS = """
-.hx{z-index:60;font-family:inherit;--m-ease:cubic-bezier(.32,.72,0,1)}
-.hx a{text-decoration:none}
-.hx-brand{display:inline-flex;align-items:center;gap:10px;color:var(--nav-ink);font-weight:800;font-size:18px;
-  letter-spacing:-.02em;line-height:1.15;min-width:0}
-.hx-brand img{height:34px;width:auto;border-radius:8px;display:block;flex-shrink:0}
-.hx-menu{display:flex;align-items:center;gap:4px}
-.hx-mlinks{display:contents}
-.hx-mhead,.hx-mfoot,.hx-scrim,.hx-x{display:none}
-.hx-menu a{color:var(--nav-mut);font-weight:600;font-size:14.5px;transition:color .2s,background .2s,border-color .2s}
-.hx-menu a:hover,.hx-menu a.on{color:var(--nav-ink)}
-.hx-cta{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--accent);color:#fff!important;
-  padding:10px 18px;border-radius:10px;font-weight:700;font-size:14px;white-space:nowrap;transition:filter .2s,transform .2s}
-.hx-cta:hover{filter:brightness(1.08);transform:translateY(-1px)}
-.hx-burger{display:none;width:44px;height:44px;border:1px solid var(--nav-line);border-radius:12px;background:transparent;
-  cursor:pointer;align-items:center;justify-content:center;flex-direction:column;gap:5px;flex-shrink:0;padding:0}
-.hx-burger span,.hx-burger::before,.hx-burger::after{content:"";display:block;width:18px;height:2px;background:var(--nav-ink);
-  border-radius:2px;transition:width .25s}
-.hx-burger::after{width:12px;margin-left:6px}
-.hx-burger:hover::after{width:18px;margin-left:0}
-.hx-dark{--nav-ink:#f4f6fa;--nav-mut:rgba(244,246,250,.68);--nav-solid:#0a0e16;--nav-line:rgba(255,255,255,.12)}
-.hx-onaccent{--nav-ink:#fff;--nav-mut:rgba(255,255,255,.84);--nav-solid:var(--accent);--nav-line:rgba(255,255,255,.32)}
-.hx-onaccent .hx-cta{background:#fff;color:var(--accent)!important}
-@media(max-width:900px){
+# Paneli ya menyu (drawer/sheet/skrini nzima/tabs). Headers za juu zinaitumia
+# kwenye simu tu; sidebars zinaitumia kwenye KILA upana (SIDE_COMMON_CSS) —
+# sidebar iliyojaa upande wa kushoto kwenye laptop ilichukua nafasi kubwa mno.
+MENU_PANEL_CSS = """
   /* backdrop-filter inageuza header kuwa "containing block" ya position:fixed —
      menyu ingebanwa ndani ya urefu wa header. Kwenye simu: rangi thabiti. */
   .hx{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
@@ -185,26 +165,64 @@ HEADER_COMMON_CSS = """
   .hx-m-tabs.hx-onaccent nav.hx-menu .hx-mlinks a.on::before{background:#fff}
   .hx-m-tabs nav.hx-menu .hx-mlinks a::after{display:none}
   body:has(.hx-m-tabs) .jt-body{padding-bottom:86px}
-}
+"""
+
+# Sehemu ya pamoja ya paneli (bila mitindo 6 ya simu) — sidebars kwenye laptop
+MENU_PANEL_BASE_CSS = MENU_PANEL_CSS.split('/* ── 1. Sidebar ya kushoto ── */')[0]
+
+HEADER_COMMON_CSS = """
+.hx{z-index:60;font-family:inherit;--m-ease:cubic-bezier(.32,.72,0,1)}
+.hx a{text-decoration:none}
+.hx-brand{display:inline-flex;align-items:center;gap:10px;color:var(--nav-ink);font-weight:800;font-size:18px;
+  letter-spacing:-.02em;line-height:1.15;min-width:0}
+.hx-brand img{height:34px;width:auto;border-radius:8px;display:block;flex-shrink:0}
+.hx-menu{display:flex;align-items:center;gap:4px}
+.hx-mlinks{display:contents}
+.hx-mhead,.hx-mfoot,.hx-scrim,.hx-x{display:none}
+.hx-menu a{color:var(--nav-mut);font-weight:600;font-size:14.5px;transition:color .2s,background .2s,border-color .2s}
+.hx-menu a:hover,.hx-menu a.on{color:var(--nav-ink)}
+.hx-cta{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--accent);color:#fff!important;
+  padding:10px 18px;border-radius:10px;font-weight:700;font-size:14px;white-space:nowrap;transition:filter .2s,transform .2s}
+.hx-cta:hover{filter:brightness(1.08);transform:translateY(-1px)}
+.hx-burger{display:none;width:44px;height:44px;border:1px solid var(--nav-line);border-radius:12px;background:transparent;
+  cursor:pointer;align-items:center;justify-content:center;flex-direction:column;gap:5px;flex-shrink:0;padding:0}
+.hx-burger span,.hx-burger::before,.hx-burger::after{content:"";display:block;width:18px;height:2px;background:var(--nav-ink);
+  border-radius:2px;transition:width .25s}
+.hx-burger::after{width:12px;margin-left:6px}
+.hx-burger:hover::after{width:18px;margin-left:0}
+.hx-dark{--nav-ink:#f4f6fa;--nav-mut:rgba(244,246,250,.68);--nav-solid:#0a0e16;--nav-line:rgba(255,255,255,.12)}
+.hx-onaccent{--nav-ink:#fff;--nav-mut:rgba(255,255,255,.84);--nav-solid:var(--accent);--nav-line:rgba(255,255,255,.32)}
+.hx-onaccent .hx-cta{background:#fff;color:var(--accent)!important}
+@media(max-width:900px){
+""" + MENU_PANEL_CSS + """}
 @media(prefers-reduced-motion:reduce){.hx .hx-menu,.hx nav.hx-menu .hx-mlinks a{transition:none!important}}
 """
 
-# Inaongezwa kwa sidebars pekee — inasogeza maudhui kulia kwenye kompyuta,
-# na kugeuza sidebar kuwa bar ya juu kwenye simu (menyu inateleza kama sidebar).
+# Sidebars. Simu na tablet (≤900px): kama zamani — bar ya juu, menyu inateleza
+# kutoka kushoto. Laptop (≥901px): zamani sidebar ilikaa wazi kushoto na kula
+# sehemu kubwa ya skrini; sasa ni bar ya juu (logo + kitufe cha mawasiliano + ☰)
+# na sidebar inateleza kutoka kushoto ukibonyeza ☰ — ukurasa unatumia upana wote.
 SIDE_COMMON_CSS = """
-.hx-side{position:fixed;top:0;left:0;bottom:0;width:var(--side-w);display:flex;flex-direction:column;gap:26px;
-  padding:28px 18px 22px;overflow-y:auto;background:var(--nav-solid);border-right:1px solid var(--nav-line)}
+.hx-side{position:sticky;top:0;display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:12px 18px;background:var(--nav-solid);border-bottom:1px solid var(--nav-line)}
 .hx-side .hx-menu{flex-direction:column;align-items:stretch;gap:2px}
 .hx-side .hx-menu a{display:block;padding:11px 14px;border-radius:10px}
-.hx-side-foot{margin-top:auto;display:flex;flex-direction:column;gap:12px}
+.hx-side-foot{display:none}
 .hx-side-meta{font-size:12.5px;color:var(--nav-mut);line-height:1.55}
-@media(min-width:901px){.jt-body{margin-left:var(--side-w)}.hx-side nav.hx-menu .hx-cta{display:none}}
-@media(max-width:900px){
-  .hx-side{position:sticky;bottom:auto;width:auto;flex-direction:row;align-items:center;justify-content:space-between;
-    gap:12px;padding:12px 18px;border-right:none;border-bottom:1px solid var(--nav-line);overflow:visible}
-  .hx-side-foot{display:none}
+@media(min-width:901px){
+  .hx.hx-side{gap:14px;padding:14px clamp(20px,4vw,44px);flex-direction:row;align-items:center}
+  .hx.hx-side .hx-brand{flex-direction:row;align-items:center}
+  .hx-side .hx-burger{display:inline-flex;order:3}
+  .hx-side-foot{display:flex;align-items:center;gap:12px;margin-left:auto;order:2}
+  .hx-side-foot .hx-side-meta{display:none}
+""" + MENU_PANEL_BASE_CSS + """
+  /* Laptop: daima sidebar inayoteleza kutoka kushoto (mitindo ya simu ni ya simu tu) */
+  .hx-side nav.hx-menu{top:0;bottom:0;left:0;width:min(86vw,380px);border-radius:0 24px 24px 0;transform:translateX(-104%)}
+  .hx-side nav.hx-menu.open{transform:none}
+  .hx-side nav.hx-menu .hx-mlinks a{transform:translateX(-14px)}
 }
 """
+
 
 MENU_HTML = """<nav class="hx-menu" id="jt-links" aria-label="Main menu">
     <div class="hx-mhead"><a class="hx-brand" href="/">{{logo}}<span>{{site_name}}</span></a><button class="hx-x" type="button" onclick="jtMenu(false)" aria-label="Close menu"></button></div>
@@ -314,8 +332,7 @@ HEADERS = {
         'html': _side('side_floating'),
         'css': """:root{--side-w:292px}
 @media(min-width:901px){
-  .hx-side_floating{top:16px;left:16px;bottom:16px;width:calc(var(--side-w) - 32px);border-radius:22px;
-    border:1px solid var(--nav-line);box-shadow:0 20px 60px rgba(15,23,42,.12)}
+  .hx-side_floating{margin:12px 12px 0;top:12px;border-radius:18px;border:1px solid var(--nav-line);box-shadow:0 20px 60px rgba(15,23,42,.12)}
 }
 .hx-side_floating .hx-brand{font-size:19px;padding:0 6px}
 .hx-side_floating .hx-menu a:hover{background:color-mix(in srgb,var(--nav-ink) 6%,transparent)}
@@ -866,7 +883,7 @@ FOOTERS = {
     },
 }
 
-DEFAULT_HEADER = 'side_classic'
+DEFAULT_HEADER = 'top_glass'     # sidebar ilikuwa default; kwenye laptop ilikula nafasi kubwa
 DEFAULT_FOOTER = 'f_columns'
 
 

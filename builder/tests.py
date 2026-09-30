@@ -433,7 +433,9 @@ class LayoutLibraryTest(TestCase):
             self.assertIn('.hx-burger', css, key)
             self.assertIn('hx-m-' + HEADERS[key]['mobile'], html, key)   # mtindo wa menyu ya simu
             self.assertIn('hx-scrim', html, key)
-            self.assertEqual('.jt-body{margin-left' in css, HEADERS[key]['kind'] == 'side', key)
+            # Sidebar: laptop ina bar ya juu + ☰ (sidebar haikai wazi kushoto tena)
+            self.assertNotIn('.jt-body{margin-left', css, key)
+            self.assertEqual('.hx-side .hx-burger{display:inline-flex' in css, HEADERS[key]['kind'] == 'side', key)
         for key in FOOTERS:
             self.site.footer_preset = key
             html, css = render_footer(self.site)
@@ -442,10 +444,10 @@ class LayoutLibraryTest(TestCase):
             # Credit haiko ndani ya footer tena — branding.py inaiweka chini ya ukurasa
             self.assertNotIn('JamiiTek', html, key)
 
-    def test_new_sites_default_to_sidebar_existing_look_kept(self):
+    def test_new_sites_default_to_top_bar_existing_look_kept(self):
         r = Client().get('/', HTTP_HOST='dukamjenzi.jamiitek.com')
         html = r.content.decode()
-        self.assertIn('hx-side_classic', html)
+        self.assertIn('hx-top_glass', html)
         self.assertIn('fx-f_columns', html)
         self.assertIn('<body class="has-custom">', html)     # hakuna padding ya glass juu
 
@@ -455,6 +457,18 @@ class LayoutLibraryTest(TestCase):
         self.assertIn('class="nav-glass"', html)
         self.assertIn('class="jt-footer"', html)
         self.assertNotIn('hx-side', html)
+
+    def test_default_sidebars_move_to_top_bar_but_chosen_ones_stay(self):
+        import importlib
+        from django.apps import apps as django_apps
+        mig = importlib.import_module('builder.migrations.0013_default_top_header')
+        chosen = ClientWebsite.objects.create(owner=self.user, subdomain='imechaguliwa', site_name='C', nav_preset='side_classic',
+                                              theme_settings={'studio_done': ['header']})
+        ClientWebsite.objects.filter(pk=self.site.pk).update(nav_preset='side_classic')
+        mig.to_top_bar(django_apps, None)
+        self.site.refresh_from_db(); chosen.refresh_from_db()
+        self.assertEqual(self.site.nav_preset, 'top_glass')
+        self.assertEqual(chosen.nav_preset, 'side_classic')
 
     def test_font_choice_loads_only_when_chosen(self):
         html = Client().get('/', HTTP_HOST='dukamjenzi.jamiitek.com').content.decode()
@@ -523,7 +537,7 @@ class StudioTest(TestCase):
         r = self.c.post(f'{self.base}preview/', {'header_html': '<nav id="jt-links">MPYA {{site_name}}</nav>'})
         self.assertContains(r, 'MPYA Studio Site')
         self.site.refresh_from_db()
-        self.assertEqual(self.site.nav_preset, 'side_classic')     # hakuna kilichohifadhiwa
+        self.assertEqual(self.site.nav_preset, 'top_glass')        # hakuna kilichohifadhiwa
         self.assertEqual(self.site.custom_nav_html, '')
         self.assertEqual(self.site.accent_color, '#e8a13c')
 
@@ -636,7 +650,7 @@ class MobileMenuTest(TestCase):
         return Client().get('/', HTTP_HOST='simu.jamiitek.com').content.decode()
 
     def test_each_header_has_its_own_phone_menu_and_owner_can_change_it(self):
-        self.assertIn('hx-m-left', self._home())                       # sidebar → drawer ya kushoto
+        self.assertIn('hx-m-drop', self._home())                       # top bar ya default → kadi ya dropdown
         r = self.c.post(f'{self.base}header/', {'mode': 'preset', 'preset': 'top_classic', 'mobile_menu': 'tabs'},
                         HTTP_X_REQUESTED_WITH='fetch')
         self.assertEqual(r.status_code, 200)
