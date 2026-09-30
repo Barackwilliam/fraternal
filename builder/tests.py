@@ -519,7 +519,42 @@ class StudioTest(TestCase):
         self.c.post(f'{self.base}business/', {'site_name': 'X'})
         r = self.c.get(f'/builder/site/{self.site.id}/')
         self.assertContains(r, f'{self.base}style/')
-        self.assertContains(r, '1/6 done')
+        self.assertContains(r, '<b>1/6</b><span>Setup steps</span>', html=False)
+
+    def test_dashboard_shows_only_the_five_essentials(self):
+        r = self.c.get(f'/builder/site/{self.site.id}/')
+        for url in (f'{self.base}', f'/builder/site/{self.site.id}/inquiries/',
+                    f'/builder/site/{self.site.id}/import/', '/bot/',
+                    f'/builder/site/{self.site.id}/publish/'):
+            self.assertContains(r, url)
+        # Vilivyohamia Studio havipo tena kwenye dashboard
+        for gone in ('Your Pages', 'Design Template', 'Website Details', 'name="custom_domain"',
+                     'Getting Started', 'AI Coach', '/collections/'):
+            self.assertNotContains(r, gone)
+
+    def test_moved_features_live_in_studio(self):
+        r = self.c.get(f'{self.base}pages/')
+        self.assertContains(r, 'data-del-page=')
+        self.assertContains(r, 'form="tpl-form"')
+        r = self.c.get(f'{self.base}publish/')
+        self.assertContains(r, 'Your own domain')
+        # Kufuta ukurasa kwa fetch: JSON, bila kuondoka Studio; Home hailindwi kufutwa
+        team = self.site.pages.get(slug='team')
+        r = self.c.post(f'/builder/site/{self.site.id}/pages/{team.id}/delete/', HTTP_X_REQUESTED_WITH='fetch')
+        self.assertEqual(r.json(), {'ok': True})
+        self.assertFalse(self.site.pages.filter(slug='team').exists())
+        home = self.site.pages.get(slug='home')
+        r = self.c.post(f'/builder/site/{self.site.id}/pages/{home.id}/delete/', HTTP_X_REQUESTED_WITH='fetch')
+        self.assertEqual(r.status_code, 400)
+        # Domain kutoka Studio: haizimi dark nav, inarudi kwenye hatua ya Publish
+        ClientWebsite.objects.filter(pk=self.site.pk).update(is_premium=True, dark_nav=True)
+        with mock.patch('builder.render_api.add_custom_domain', return_value=(True, 'ok')), \
+             mock.patch('builder.render_api.check_dns', return_value=False):
+            r = self.c.post(f'/builder/site/{self.site.id}/settings/', {'custom_domain': 'www.duka.co.tz'})
+        self.assertRedirects(r, f'{self.base}publish/', fetch_redirect_response=False)
+        self.site.refresh_from_db()
+        self.assertEqual(self.site.custom_domain, 'www.duka.co.tz')
+        self.assertTrue(self.site.dark_nav)
 
     # ── Studio bila kupakia ukurasa upya (fetch + JSON) ──
     def _ajax(self, step, data):
