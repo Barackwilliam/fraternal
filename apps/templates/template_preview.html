@@ -7,7 +7,8 @@
 <meta name="theme-color" content="#07070f">
 <meta property="og:title" content="{{ template.name }} — JamiiTek Templates">
 <meta property="og:description" content="Tazama template ya {{ template.name }} kutoka JamiiTek. Bei kuanzia TSh {{ template.price_hosted_monthly|floatformat:0 }}/mo.">
-<meta property="og:url" content="{{ request.build_absolute_uri }}">
+<link rel="canonical" href="{{ canonical }}">
+<meta property="og:url" content="{{ canonical }}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">

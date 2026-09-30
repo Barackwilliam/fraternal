@@ -167,9 +167,6 @@ MENU_PANEL_CSS = """
   body:has(.hx-m-tabs) .jt-body{padding-bottom:86px}
 """
 
-# Sehemu ya pamoja ya paneli (bila mitindo 6 ya simu) — sidebars kwenye laptop
-MENU_PANEL_BASE_CSS = MENU_PANEL_CSS.split('/* ── 1. Sidebar ya kushoto ── */')[0]
-
 HEADER_COMMON_CSS = """
 .hx{z-index:60;font-family:inherit;--m-ease:cubic-bezier(.32,.72,0,1)}
 .hx a{text-decoration:none}
@@ -199,9 +196,9 @@ HEADER_COMMON_CSS = """
 """
 
 # Sidebars. Simu na tablet (≤900px): kama zamani — bar ya juu, menyu inateleza
-# kutoka kushoto. Laptop (≥901px): zamani sidebar ilikaa wazi kushoto na kula
-# sehemu kubwa ya skrini; sasa ni bar ya juu (logo + kitufe cha mawasiliano + ☰)
-# na sidebar inateleza kutoka kushoto ukibonyeza ☰ — ukurasa unatumia upana wote.
+# kutoka kushoto. Laptop na desktop (≥901px): zamani sidebar ilikaa wazi kushoto
+# na kula sehemu kubwa ya skrini; sasa ni header ya juu yenye links ZOTE wazi
+# ndani yake (logo · links · kitufe cha mawasiliano) — hakuna ☰, haijifichi.
 SIDE_COMMON_CSS = """
 .hx-side{position:sticky;top:0;display:flex;align-items:center;justify-content:space-between;gap:12px;
   padding:12px 18px;background:var(--nav-solid);border-bottom:1px solid var(--nav-line)}
@@ -210,16 +207,15 @@ SIDE_COMMON_CSS = """
 .hx-side-foot{display:none}
 .hx-side-meta{font-size:12.5px;color:var(--nav-mut);line-height:1.55}
 @media(min-width:901px){
-  .hx.hx-side{gap:14px;padding:14px clamp(20px,4vw,44px);flex-direction:row;align-items:center}
+  .hx.hx-side{gap:20px;padding:14px clamp(20px,4vw,44px);flex-direction:row;align-items:center}
   .hx.hx-side .hx-brand{flex-direction:row;align-items:center}
-  .hx-side .hx-burger{display:inline-flex;order:3}
-  .hx-side-foot{display:flex;align-items:center;gap:12px;margin-left:auto;order:2}
+  .hx-side .hx-burger,.hx-side .hx-scrim,.hx-side .hx-mhead,.hx-side .hx-mfoot{display:none}
+  .hx.hx-side nav.hx-menu{flex-direction:row;align-items:center;flex-wrap:wrap;justify-content:flex-end;gap:4px;margin-left:auto}
+  .hx.hx-side nav.hx-menu a{display:inline-block;padding:9px 14px;border-radius:9px;font-size:15px;border-bottom:none}
+  .hx.hx-side nav.hx-menu a:hover,.hx.hx-side nav.hx-menu a.on{padding-left:14px}
+  .hx.hx-side nav.hx-menu .hx-cta{display:none}
+  .hx-side-foot{display:flex;align-items:center;gap:12px}
   .hx-side-foot .hx-side-meta{display:none}
-""" + MENU_PANEL_BASE_CSS + """
-  /* Laptop: daima sidebar inayoteleza kutoka kushoto (mitindo ya simu ni ya simu tu) */
-  .hx-side nav.hx-menu{top:0;bottom:0;left:0;width:min(86vw,380px);border-radius:0 24px 24px 0;transform:translateX(-104%)}
-  .hx-side nav.hx-menu.open{transform:none}
-  .hx-side nav.hx-menu .hx-mlinks a{transform:translateX(-14px)}
 }
 """
 

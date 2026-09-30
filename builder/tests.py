@@ -433,9 +433,9 @@ class LayoutLibraryTest(TestCase):
             self.assertIn('.hx-burger', css, key)
             self.assertIn('hx-m-' + HEADERS[key]['mobile'], html, key)   # mtindo wa menyu ya simu
             self.assertIn('hx-scrim', html, key)
-            # Sidebar: laptop ina bar ya juu + ☰ (sidebar haikai wazi kushoto tena)
+            # Sidebar kwenye laptop: header ya juu yenye links wazi (haikai kushoto, haijifichi)
             self.assertNotIn('.jt-body{margin-left', css, key)
-            self.assertEqual('.hx-side .hx-burger{display:inline-flex' in css, HEADERS[key]['kind'] == 'side', key)
+            self.assertEqual('.hx.hx-side nav.hx-menu{flex-direction:row' in css, HEADERS[key]['kind'] == 'side', key)
         for key in FOOTERS:
             self.site.footer_preset = key
             html, css = render_footer(self.site)

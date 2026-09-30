@@ -1,0 +1,27 @@
+{% extends 'emails/base_email.html' %}
+{% load humanize %}
+{% block content %}
+<p class="greeting">New proposal 📝 JT-{{ proposal.pk }}</p>
+
+<p><b>{{ client.name|default:client.email }}</b>{% if client.company %} ({{ client.company }}){% endif %} wants a
+<b>{{ proposal.website_type.name }}</b> project.</p>
+
+<div class="info-box" style="font-size:14px;line-height:1.7">
+  <b>Email:</b> {{ client.email }}<br>
+  {% if client.phone %}<b>Phone:</b> {{ client.phone }}<br>{% endif %}
+  {% if ref %}<b>Based on template:</b> {{ ref.name }} ({{ ref.category }})<br>{% endif %}
+  {% if total %}<b>Estimated total:</b> TSh {{ total|intcomma }}{% endif %}
+</div>
+
+{% for r in rows %}
+<p style="margin:10px 0 2px;font-size:13px;color:#718096">{{ r.label }}</p>
+<p style="margin:0;font-size:14.5px">{% if r.items %}{% for i in r.items %}{{ i.name }}{% if i.price %} — TSh {{ i.price|intcomma }}{% endif %}{% if not forloop.last %}, {% endif %}{% endfor %}{% else %}{{ r.text|default:"—"|linebreaksbr }}{% endif %}</p>
+{% endfor %}
+
+<div class="btn-wrap">
+  <a href="{{ preview_url }}" class="btn">Open the proposal</a>
+</div>
+<p style="font-size:13px;color:#718096;text-align:center">
+  {% if wa_phone %}<a href="https://wa.me/{{ wa_phone }}">Reply on WhatsApp</a> · {% endif %}<a href="mailto:{{ client.email }}">Reply by email</a> · <a href="{{ admin_url }}">Admin</a>
+</p>
+{% endblock %}

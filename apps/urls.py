@@ -10,7 +10,7 @@ from . import contract_views
 from . import proposal_views
 from . import docs_views
 from .views import select_website_type, dynamic_form, proposal_preview, generate_pdf
-from .views import templates_marketplace, template_preview, template_preview_raw
+from .views import templates_marketplace, template_preview, template_preview_raw, template_detail
 from . import management_views
 from . import infra_views
 from . import client_portal_views as portal
@@ -118,6 +118,9 @@ urlpatterns = [
     path('templates/', templates_marketplace, name='templates_marketplace'),
     path('templates/preview/<int:pk>/', template_preview, name='template_preview'),
     path('templates/preview/<int:pk>/raw/', template_preview_raw, name='template_preview_raw'),
+    # SEO: jamii (/templates/c/restaurant/) na ukurasa wa kila template (/templates/<slug>/)
+    path('templates/c/<slug:cat_slug>/', templates_marketplace, name='templates_category'),
+    path('templates/<slug:slug>/', template_detail, name='template_detail'),
 
     # Proposal System
     path('proposals/', select_website_type, name='select_website'),

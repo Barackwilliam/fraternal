@@ -158,6 +158,16 @@
 
 
 {% block content %}
+<style>
+.pv-sent{display:flex;flex-wrap:wrap;align-items:center;gap:16px;margin:0 0 22px;padding:18px 20px;border-radius:var(--nu-r-lg,20px);
+  border:1px solid rgba(37,211,102,.4);background:linear-gradient(135deg,rgba(37,211,102,.12),rgba(0,212,255,.06));color:var(--nu-ink-2);font-size:14.5px;line-height:1.6;
+  animation:pvIn .5s cubic-bezier(.22,.9,.3,1) both}
+.pv-sent b{display:block;color:var(--nu-ink);font-size:16px}
+.pv-sent-ico{width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:#25d366;color:#04120a;font-size:18px;flex-shrink:0}
+.pv-sent-wa{display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border-radius:12px;background:#25d366;color:#04120a!important;font-weight:800;text-decoration:none;white-space:nowrap}
+@keyframes pvIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@media print{.pv-sent{display:none}}
+</style>
 <script>document.body.classList.add('pp-page');</script>
 
 <!-- ══ HEADER ══ -->
@@ -189,6 +199,18 @@
 <!-- ══ DOCUMENT ══ -->
 <section class="pp-main">
   <div class="container pp-narrow">
+
+    {% if just_sent %}
+    <div class="pv-sent" role="status">
+      <span class="pv-sent-ico"><i class="fas fa-paper-plane"></i></span>
+      <div style="flex:1;min-width:220px">
+        <b>Sent to JamiiTek ✓</b>
+        Your proposal JT-{{ proposal.id }} has reached our team. We'll reply to {{ proposal.client.email }}{% if proposal.client.phone %} or {{ proposal.client.phone }}{% endif %} within 24 hours.
+      </div>
+      <a class="pv-sent-wa" target="_blank" rel="noopener"
+         href="https://wa.me/255629712678?text={{ 'Hello JamiiTek! I just sent proposal JT-'|urlencode }}{{ proposal.id }}{{ ' ('|urlencode }}{{ proposal.website_type.name|urlencode }}{{ '). '|urlencode }}"><i class="fab fa-whatsapp"></i> Talk on WhatsApp</a>
+    </div>
+    {% endif %}
 
     <div class="pp-sheet" id="printable-area">
 

@@ -19,6 +19,7 @@ class StaticPageSitemap(Sitemap):
         ('About',           0.7,  'monthly'),
         ('contact',         0.7,  'monthly'),
         ('select_website',  0.8,  'weekly'),
+        ('templates_marketplace', 0.9, 'daily'),
         ('jamiibot_landing',0.95, 'daily'),     # Bot landing page
         ('chatbot_register',0.9,  'weekly'),    # Bot signup
     ]
@@ -114,6 +115,40 @@ class BlogIndexSitemap(Sitemap):
         return latest.published_at if latest else date.today()
 
 
+class TemplateSitemap(Sitemap):
+    """Ukurasa wa kila template (/templates/<slug>/) — apps/template_seo.py."""
+    protocol = 'https'
+    changefreq = 'weekly'
+    priority = 0.8
+
+    def items(self):
+        from apps.models import WebsiteTemplate
+        return list(WebsiteTemplate.objects.filter(is_active=True).exclude(slug__isnull=True)
+                    .exclude(slug='').order_by('order', 'pk').only('slug', 'updated_at'))
+
+    def location(self, item):
+        return item.get_absolute_url()
+
+    def lastmod(self, item):
+        return item.updated_at
+
+
+class TemplateCategorySitemap(Sitemap):
+    """Kurasa za jamii: /templates/c/restaurant/ n.k."""
+    protocol = 'https'
+    changefreq = 'weekly'
+    priority = 0.75
+
+    def items(self):
+        from apps.models import WebsiteTemplate
+        from apps.template_seo import cat_key, cat_slug
+        keys = WebsiteTemplate.objects.filter(is_active=True).values_list('category', flat=True).distinct()
+        return sorted({cat_slug(cat_key(k)) for k in keys})
+
+    def location(self, item):
+        return reverse('templates_category', args=[item])
+
+
 # Combine all sitemaps
 sitemaps = {
     'static':     StaticPageSitemap(),
@@ -121,4 +156,6 @@ sitemaps = {
     'blog_index': BlogIndexSitemap(),
     'blog':       BlogSitemap(),
     'blog-authors': BlogAuthorSitemap(),
+    'templates':  TemplateSitemap(),
+    'template-categories': TemplateCategorySitemap(),
 }

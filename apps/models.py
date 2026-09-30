@@ -933,8 +933,16 @@ class WebsiteTemplate(models.Model):
     ]
 
     name        = models.CharField(max_length=200, verbose_name='Template Name')
+    # SEO: anwani yenye jina (/templates/savanna-luxe/) badala ya namba. Inajazwa
+    # yenyewe kutoka jina ikiwa tupu.
+    slug        = models.SlugField(max_length=220, unique=True, blank=True, null=True,
+                                   help_text='Inajazwa yenyewe kutoka jina. Usibadilishe baada ya kuchapishwa (link za Google zingevunjika).')
     category    = models.CharField(max_length=50, choices=CATEGORY_CHOICES, verbose_name='Category')
     description = models.TextField(verbose_name='Description (Short)')
+    # SEO (si lazima): ukurasa wa template una maandishi ya kutosha hata bila haya
+    seo_title       = models.CharField(max_length=70, blank=True, help_text='Kichwa cha Google (≤60 herufi). Tupu = kinatengenezwa chenyewe.')
+    seo_description = models.CharField(max_length=170, blank=True, help_text='Maelezo ya Google (≤155 herufi). Tupu = yanatengenezwa yenyewe.')
+    long_description = models.TextField(blank=True, help_text='Maelezo marefu kwenye ukurasa wa template (aya kadhaa). Yanasaidia sana SEO.')
     badge       = models.CharField(max_length=10, choices=BADGE_CHOICES, blank=True, verbose_name='Badge')
     rating      = models.DecimalField(max_digits=2, decimal_places=1, default=4.9, verbose_name='Rating')
 
@@ -960,6 +968,27 @@ class WebsiteTemplate(models.Model):
 
     def __str__(self):
         return f'{self.name} ({self.get_category_display()})'
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            from django.utils.text import slugify
+            base = slugify(self.name)[:200] or 'template'
+            if base in ('preview', 'c'):  # zinagongana na /templates/preview/ na /templates/c/
+                base += '-template'
+            slug, n = base, 2
+            while WebsiteTemplate.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+                slug, n = f'{base}-{n}', n + 1
+            self.slug = slug
+        super().save(*args, **kwargs)
+
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('template_detail', args=[self.slug]) if self.slug else reverse('template_preview', args=[self.pk])
+
+    def category_plain(self):
+        """Jina la jamii bila emoji — kwa vichwa vya Google."""
+        import re
+        return re.sub(r'^[^A-Za-z0-9]+', '', self.get_category_display()).strip()
 
     def gradient_css(self):
         return f'linear-gradient(135deg, {self.gradient_start}, {self.gradient_end})'

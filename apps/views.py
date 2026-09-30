@@ -3,6 +3,7 @@ from django.shortcuts import render
 from .models import Question,Service,Team,BlogPost
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from django.contrib.auth.models import User, auth
 from django.contrib.auth.decorators import login_required
 
@@ -279,9 +280,17 @@ def select_website_type(request):
     if tpl_id:
         ref_template = WebsiteTemplate.objects.filter(
             pk=tpl_id, is_active=True).first()
+    # Templates ↔ proposal: "hujaona template unayoipenda? tuandikie" — na
+    # kinyume chake, template za kuchagua kama mfano wa muundo unaoutaka.
+    active = WebsiteTemplate.objects.filter(is_active=True)
+    featured = list(active.filter(category=ref_template.category).exclude(pk=ref_template.pk)[:4]) if ref_template else []
+    featured += list(active.exclude(pk__in=[t.pk for t in featured] + ([ref_template.pk] if ref_template else []))
+                     .order_by('order', '-created_at')[:4 - len(featured)])
     return render(request, 'select_website.html', {
         'website_types': website_types,
         'ref_template': ref_template,
+        'featured_templates': featured,
+        'template_count': active.count(),
         'title': 'Select Website Type'
     })
 
@@ -357,6 +366,20 @@ def _resolve_client(cleaned):
     return client
 
 
+def _notify_new_proposal(proposal):
+    """Proposal mpya → email kwa JamiiTek (nyuma, mteja asisubiri SMTP)."""
+    import threading
+    rows, total = _build_requirement_rows(proposal.requirements if isinstance(proposal.requirements, dict) else {})
+
+    def _send():
+        try:
+            from apps.utils.email_notifications import send_new_proposal_notice
+            send_new_proposal_notice(proposal, rows, total)
+        except Exception:
+            logger.exception('new proposal notice failed')
+    threading.Thread(target=_send, daemon=True).start()
+
+
 def dynamic_form(request, website_type_id):
     website_type = get_object_or_404(WebsiteType, id=website_type_id)
 
@@ -391,7 +414,7 @@ def dynamic_form(request, website_type_id):
                         'id': ref.pk,
                         'name': ref.name,
                         'category': ref.get_category_display(),
-                        'preview_url': f'/templates/preview/{ref.pk}/',
+                        'preview_url': ref.get_absolute_url(),
                     }
 
             proposal = ProjectProposal.objects.create(
@@ -399,8 +422,9 @@ def dynamic_form(request, website_type_id):
                 website_type=website_type,
                 requirements=requirements,
             )
+            _notify_new_proposal(proposal)
 
-            return redirect('proposal_preview', proposal_id=proposal.id)
+            return redirect(f"{reverse('proposal_preview', args=[proposal.id])}?sent=1")
 
     else:
         initial_data = {}
@@ -529,6 +553,7 @@ def proposal_preview(request, proposal_id):
         'proposal': proposal,
         'requirement_rows': rows,
         'total_cost': total_cost,
+        'just_sent': request.GET.get('sent') == '1',
         'title': 'Proposal Preview',
     })
 
@@ -569,31 +594,90 @@ def generate_pdf(request, proposal_id):
 from .models import WebsiteTemplate
 from django.utils.safestring import mark_safe
 
-def templates_marketplace(request):
-    """Page inayoonyesha templates zote zilizowekwa na admin"""
-    category = request.GET.get('category', 'all')
-    templates = WebsiteTemplate.objects.filter(is_active=True)
-    if category != 'all':
-        templates = templates.filter(category=category)
-    
-    all_templates = WebsiteTemplate.objects.filter(is_active=True)
-    categories_used = all_templates.values_list('category', flat=True).distinct()
-
-    # Chips za jamii: kila jamii yenye template, na idadi yake (orodha ya zamani
-    # iliandikwa kwa mkono na iliacha Tourism, Technology, Real Estate n.k.)
+def _template_categories(all_templates):
+    """Jamii zenye template, na idadi yake (kwa chips na kurasa za jamii)."""
     from collections import Counter
+    from . import template_seo
     counts = Counter(all_templates.values_list('category', flat=True))
     labels = dict(WebsiteTemplate.CATEGORY_CHOICES)
-    categories = [{'key': k, 'label': labels.get(k, k), 'count': n}
-                  for k, n in sorted(counts.items(), key=lambda kv: -kv[1])]
+    return [{'key': k, 'label': labels.get(k, k), 'count': n,
+             'slug': template_seo.cat_slug(template_seo.cat_key(k))}
+            for k, n in sorted(counts.items(), key=lambda kv: -kv[1])]
 
+
+def templates_marketplace(request, cat_slug=None):
+    """Templates zote — au za jamii moja (/templates/c/<jamii>/, ukurasa wa SEO)."""
+    from django.http import Http404
+    from . import template_seo
+    all_templates = WebsiteTemplate.objects.filter(is_active=True)
+    categories = _template_categories(all_templates)
+
+    category, cat = request.GET.get('category', 'all'), None
+    if cat_slug:
+        cat = next((c for c in categories if c['slug'] == cat_slug), None)
+        if cat is None:
+            raise Http404
+        category = cat['key']
+    templates = all_templates if category == 'all' else all_templates.filter(category=category)
+
+    seo = None
+    if cat:
+        info = template_seo.cat_info(cat['key'])
+        noun = info['noun'].title()
+        seo = {
+            'title': f'{noun} Website Templates — Tanzania | JamiiTek',
+            'h1': f'{noun} website templates',
+            'description': template_seo.plain(
+                f'{cat["count"]} premium {info["noun"]} website template{"s" if cat["count"] != 1 else ""} for '
+                f'{info["who"]}. Customize free in the JamiiTek Builder and publish today.', 158),
+            'intro': f'Designs made for {info["who"]} in Tanzania and East Africa — '
+                     f'{", ".join(f.lower() for f in info["features"])}. Kwa Kiswahili: templates za website ya {info["sw"]}.',
+            'keywords': f'{info["noun"]} website template, {info["noun"]} website Tanzania, '
+                        f'website ya {info["sw"]}, template ya {info["sw"]}, JamiiTek templates',
+        }
+        url = f'{template_seo.BASE_URL}/templates/c/{cat_slug}/'
+        list_name = seo['h1']
+    else:
+        url, list_name = f'{template_seo.BASE_URL}/templates/', 'JamiiTek website templates'
+
+    import json
+    tpl_list = list(templates)
     return render(request, 'templates_marketplace.html', {
-        'templates': templates,
+        'templates': tpl_list,
         'selected_category': category,
         'total_count': all_templates.count(),
-        'filtered_count': templates.count(),
-        'categories_used': list(categories_used),
+        'filtered_count': len(tpl_list),
         'categories': categories,
+        'seo': seo,
+        'canonical': url,
+        'item_list_ld': json.dumps(template_seo.item_list_ld(tpl_list, list_name, url), ensure_ascii=False),
+    })
+
+
+def template_detail(request, slug):
+    """Ukurasa kamili wa template moja — ndio unaopatikana Google na kwenye AI."""
+    import json
+    from . import template_seo
+    tpl = get_object_or_404(WebsiteTemplate, slug=slug, is_active=True)
+    related = list(WebsiteTemplate.objects.filter(is_active=True, category=tpl.category)
+                   .exclude(pk=tpl.pk).order_by('order', '-created_at')[:3])
+    if len(related) < 3:
+        related += list(WebsiteTemplate.objects.filter(is_active=True).exclude(pk=tpl.pk)
+                        .exclude(pk__in=[r.pk for r in related]).order_by('order', '-created_at')[:3 - len(related)])
+    return render(request, 'template_detail.html', {
+        'tpl': tpl,
+        'seo_title': template_seo.title(tpl),
+        'seo_description': template_seo.description(tpl),
+        'seo_keywords': template_seo.keywords(tpl),
+        'canonical': template_seo.BASE_URL + tpl.get_absolute_url(),
+        'cat_url': f'/templates/c/{template_seo.cat_slug(template_seo.cat_key(tpl))}/',
+        'cat_noun': template_seo.cat_info(tpl)['noun'],
+        'features': template_seo.features(tpl),
+        'common_features': template_seo.COMMON_FEATURES,
+        'article': template_seo.article(tpl),
+        'faq': template_seo.faq(tpl),
+        'related': related,
+        'json_ld': [json.dumps(block, ensure_ascii=False) for block in template_seo.json_ld(tpl)],
     })
 
 
@@ -601,7 +685,10 @@ def template_preview(request, pk):
     """Wrapper page — preview bar + device toggle + iframe"""
     from django.shortcuts import get_object_or_404
     tpl = get_object_or_404(WebsiteTemplate, pk=pk, is_active=True)
-    return render(request, 'template_preview.html', {'template': tpl})
+    from . import template_seo
+    # Google ipe ukurasa kamili (/templates/<slug>/) sifa, si fremu hii
+    return render(request, 'template_preview.html', {
+        'template': tpl, 'canonical': template_seo.BASE_URL + tpl.get_absolute_url()})
 
 
 from django.views.decorators.clickjacking import xframe_options_exempt
@@ -613,5 +700,10 @@ def template_preview_raw(request, pk):
     from django.http import HttpResponse
     tpl = get_object_or_404(WebsiteTemplate, pk=pk, is_active=True)
     if not tpl.preview_html or not tpl.preview_html.strip():
-        return HttpResponse('<p style="font-family:sans-serif;padding:2rem;color:#999">Hakuna HTML iliyowekwa kwa template hii.</p>', content_type='text/html; charset=utf-8')
-    return HttpResponse(tpl.preview_html, content_type='text/html; charset=utf-8')
+        resp = HttpResponse('<p style="font-family:sans-serif;padding:2rem;color:#999">Hakuna HTML iliyowekwa kwa template hii.</p>', content_type='text/html; charset=utf-8')
+    else:
+        resp = HttpResponse(tpl.preview_html, content_type='text/html; charset=utf-8')
+    # HTML ghafi ya demo isiingie Google kama ukurasa wake (maudhui ya mfano,
+    # nakala); ukurasa wa template ndio unaoorodheshwa.
+    resp['X-Robots-Tag'] = 'noindex, follow'
+    return resp

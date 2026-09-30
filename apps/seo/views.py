@@ -34,12 +34,31 @@ def robots_txt(request):
         "Allow: /chatbot/register/",
         "Allow: /chatbot/login/",
         "Allow: /bot/",
+        "Allow: /templates/",
+        "Disallow: /templates/preview/*/raw/",
+        "",
+        # AI: ChatGPT, Perplexity, Claude, Gemini n.k. ziruhusiwe wazi ili
+        # templates na huduma zetu zitajwe kwenye majibu yao. Kila kundi la
+        # User-agent linasimama peke yake, kwa hiyo sehemu binafsi zinarudiwa.
+        "# AI assistants & answer engines — welcome (see /llms.txt)",
+        *[f"User-agent: {bot}" for bot in (
+            'GPTBot', 'OAI-SearchBot', 'ChatGPT-User', 'PerplexityBot', 'Perplexity-User',
+            'ClaudeBot', 'Claude-SearchBot', 'Claude-User', 'Google-Extended', 'Applebot-Extended',
+            'Bingbot', 'CCBot', 'meta-externalagent', 'cohere-ai', 'DuckAssistBot')],
+        "Allow: /",
+        "Disallow: /admin/",
+        "Disallow: /manage/",
+        "Disallow: /portal/",
+        "Disallow: /api/",
+        "Disallow: /chatbot/dashboard/",
+        "Disallow: /templates/preview/*/raw/",
         "",
         # Crawl-delay imeondolewa: Bing inaiheshimu na ingechelewesha
         # indexing ya habari mpya (makala ~10 kwa siku). Google inaipuuza.
         f"# Sitemaps",
         f"Sitemap: https://{host}/sitemap.xml",
         f"Sitemap: https://{host}/news-sitemap.xml",
+        f"# AI summary: https://{host}/llms.txt",
     ]
     return HttpResponse("\n".join(lines), content_type="text/plain")
 
@@ -83,3 +102,53 @@ def news_sitemap(request):
                + ''.join(items) + '</urlset>')
         cache.set(key, xml, 600)
     return HttpResponse(xml, content_type='application/xml')
+
+
+def llms_txt(request):
+    """
+    /llms.txt (llmstxt.org) — muhtasari wa JamiiTek kwa AI (ChatGPT, Claude,
+    Perplexity, Gemini): huduma zetu na KILA template na link yake, ili mtu
+    akiuliza "website template ya mgahawa Tanzania" AI ipate jibu sahihi.
+    """
+    from django.core.cache import cache
+    from apps.models import WebsiteTemplate
+    from apps import template_seo as ts
+
+    tpls = list(WebsiteTemplate.objects.filter(is_active=True).order_by('category', 'order', 'pk'))
+    key = 'seo:llms:' + str(max((t.updated_at.timestamp() for t in tpls), default=0)) + f':{len(tpls)}'
+    txt = cache.get(key)
+    if txt is None:
+        base = ts.BASE_URL
+        lines = [
+            '# JamiiTek',
+            '',
+            '> JamiiTek is a Tanzanian technology company (Dar es Salaam) that builds websites, '
+            'AI WhatsApp chatbots (JamiiBot), hosting and domains for businesses in Tanzania and East Africa. '
+            'It runs a free drag-and-drop Website Builder and a marketplace of premium website templates '
+            'that anyone can customize for free and publish on yourname.jamiitek.com.',
+            '',
+            'Prices are in Tanzanian shillings (TSh). Customers can: (1) customize any template free in the '
+            'JamiiTek Builder, (2) choose a hosted plan where JamiiTek sets everything up, (3) buy the source code, '
+            'or (4) send a proposal for a fully custom website. Contact: WhatsApp +255 629 712 678, info@jamiitek.com.',
+            '',
+            '## Main pages',
+            f'- [Website templates]({base}/templates/): all premium website templates',
+            f'- [Website Builder]({base}/builder/signup/): free drag & drop website builder',
+            f'- [Custom website proposal]({base}/proposals/): describe your project and get a quotation',
+            f'- [JamiiBot]({base}/bot/): AI WhatsApp chatbot for businesses (Swahili & English)',
+            f'- [Services]({base}/service/): web development, hosting and domains in Tanzania',
+            '',
+            '## Website templates',
+        ]
+        for t in tpls:
+            lines.append(f'- [{t.name} — {ts.cat_info(t)["noun"]} website template]({base}{t.get_absolute_url()}): '
+                         f'{ts.plain(t.description, 180)} Customize free; hosted TSh {t.price_hosted_monthly:,}/month; '
+                         f'source code TSh {t.price_source_code:,}.')
+        cats = sorted({ts.cat_key(t) for t in tpls})
+        if cats:
+            lines += ['', '## Template categories']
+            lines += [f'- [{ts.cat_info(c)["noun"].title()} website templates]({base}/templates/c/{ts.cat_slug(c)}/)' for c in cats]
+        lines += ['', '## Optional', f'- [Blog]({base}/blog/): guides on websites, SEO and digital business in Tanzania']
+        txt = '\n'.join(lines) + '\n'
+        cache.set(key, txt, 3600)
+    return HttpResponse(txt, content_type='text/plain; charset=utf-8')

@@ -309,6 +309,24 @@ def send_blog_comment_notice(comment) -> bool:
     )
 
 
+def send_new_proposal_notice(proposal, rows, total) -> bool:
+    """Proposal mpya kutoka /proposals/ — timu ya JamiiTek imjibu mteja haraka."""
+    base = _site_base()
+    ref = (proposal.requirements or {}).get('reference_template') if isinstance(proposal.requirements, dict) else None
+    c = proposal.client
+    return _send(
+        subject=f'📝 New proposal JT-{proposal.pk}: {proposal.website_type.name} — {c.name or c.email}',
+        template='new_proposal.html',
+        context={
+            'proposal': proposal, 'client': c, 'rows': rows, 'total': total, 'ref': ref,
+            'preview_url': f'{base}/proposals/preview/{proposal.pk}/',
+            'admin_url': f'{base}/admin/apps/projectproposal/{proposal.pk}/change/',
+            'wa_phone': ''.join(ch for ch in (c.phone or '') if ch.isdigit()),
+        },
+        to_email=_owner_email(),
+    )
+
+
 # ══════════════════════════════════════════════════════════════════════════════
 # 7. BULK — Run all expiry checks (call from management command or cron)
 # ══════════════════════════════════════════════════════════════════════════════

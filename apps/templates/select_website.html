@@ -1,165 +1,249 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Request a Quotation — {{ block.super }}{% endblock %}
+{% block title %}Custom Website Proposal — Get a Free Quotation in Tanzania | JamiiTek{% endblock %}
+{% block meta_desc %}Didn’t find the perfect website template? Describe your business and JamiiTek designs a custom website for you. Get a costed quotation in 2 minutes — reply within 24 hours.{% endblock %}
+{% block meta_keywords %}custom website Tanzania, website quotation Tanzania, website price Tanzania, bei ya website Tanzania, web design proposal, website development Dar es Salaam, kutengeneza website, JamiiTek{% endblock %}
+{% block og_title %}Custom Website Proposal — JamiiTek{% endblock %}
+{% block og_desc %}Didn’t find the perfect template? Tell us about your business and we design it for you. Costed quotation in 2 minutes.{% endblock %}
 
 {% block extra_css %}
-{% include "proposal/_theme.html" %}
+{% comment %}
+Proposal — hatua 1. Mtindo ule ule wa marketplace (.mk, includes/mk_style.html)
+na kiungo cha moja kwa moja na templates:
+  • kutoka template  → ?template=<pk> → kadi ya "Based on …" + inabebwa hadi quotation
+  • hujaona template → chagua aina ya mradi → brief → JamiiTek inapata email papo hapo
+  • kinyume chake    → templates za kuchagua kama mfano (links za /templates/<slug>/)
+{% endcomment %}
+{% include 'includes/mk_style.html' %}
 <style>
-/* ── Step 1: kadi zilizochongwa ──────────────────────── */
-.pt-card {
-  display: flex; flex-direction: column; height: 100%;
-  padding: 26px 24px 22px;
-  background: var(--nu-bg);
-  border-radius: var(--nu-r-lg);
-  box-shadow: var(--nu-out);
-  text-decoration: none;
-  transition: box-shadow .2s, transform .2s;
-}
-.pt-card:hover { transform: translateY(-4px); box-shadow: var(--nu-out-lg); }
-.pt-card:active { transform: translateY(0); box-shadow: var(--nu-in); }
-.pt-card:focus-visible { outline: 2px solid var(--nu-blue); outline-offset: 4px; }
+.ps-hero{position:relative;padding:clamp(100px,12vw,150px) 0 clamp(40px,6vw,70px);isolation:isolate}
+.ps-hero::before{content:"";position:absolute;inset:0;z-index:-2;
+  background:radial-gradient(900px 520px at 80% -10%,rgba(255,77,157,.22),transparent 65%),
+  radial-gradient(800px 480px at 10% 10%,rgba(124,92,255,.35),transparent 62%),
+  radial-gradient(600px 400px at 50% 100%,rgba(0,212,255,.12),transparent 60%)}
+.ps-hero::after{content:"";position:absolute;inset:0;z-index:-1;opacity:.45;
+  background:linear-gradient(rgba(148,178,255,.06) 1px,transparent 1px) 0 0/56px 56px,linear-gradient(90deg,rgba(148,178,255,.06) 1px,transparent 1px) 0 0/56px 56px;
+  -webkit-mask:radial-gradient(ellipse at 30% 20%,#000 30%,transparent 75%);mask:radial-gradient(ellipse at 30% 20%,#000 30%,transparent 75%)}
+.ps-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:clamp(30px,5vw,70px);align-items:center}
 
-.pt-ico {
-  width: 52px; height: 52px; border-radius: 17px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 19px; color: var(--nu-blue);
-  background: var(--nu-bg); box-shadow: var(--nu-out-sm);
-  margin-bottom: 18px;
-  transition: background .2s, color .2s, box-shadow .2s;
-}
-.pt-card:hover .pt-ico {
-  background: var(--nu-grad); color: #fff;
-  box-shadow: 5px 5px 12px rgba(140,110,190,.32), -4px -4px 10px var(--nu-hi);
-}
-.pt-name {
-  font-size: 17.5px; font-weight: 600; letter-spacing: -0.4px;
-  color: var(--nu-ink); margin-bottom: 7px; line-height: 1.28;
-}
-.pt-desc { font-size: 13.5px; line-height: 1.65; color: var(--nu-ink-3); margin-bottom: 18px; flex: 1; }
-.pt-go {
-  display: inline-flex; align-items: center; gap: 8px;
-  font-size: 13px; font-weight: 600; color: var(--nu-blue);
-}
-.pt-go i { font-size: 11px; transition: transform .2s; }
-.pt-card:hover .pt-go i { transform: translateX(4px); }
+.ps-steps{display:inline-flex;align-items:center;gap:6px;padding:6px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.04);margin-bottom:26px}
+.ps-steps span{display:inline-flex;align-items:center;gap:8px;padding:7px 14px 7px 8px;border-radius:999px;font-size:13px;font-weight:700;color:var(--mut)}
+.ps-steps span b{width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;background:rgba(255,255,255,.08);color:#fff}
+.ps-steps span.on{background:#fff;color:#05070d}.ps-steps span.on b{background:linear-gradient(135deg,var(--v),var(--c))}
+.ps-hero h1{font-size:clamp(38px,6vw,74px);line-height:1.02;letter-spacing:-.045em;font-weight:800;margin:0 0 20px}
+.ps-hero h1 em{font-style:normal;background:linear-gradient(100deg,#fff 5%,var(--c) 40%,var(--v) 70%,#ff4d9d 95%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.ps-lead{font-size:clamp(16px,1.7vw,19px);line-height:1.65;color:var(--mut);max-width:600px;margin:0 0 28px}
+.ps-trust{display:flex;flex-wrap:wrap;gap:10px}
+.ps-trust span{display:inline-flex;align-items:center;gap:8px;padding:9px 14px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.04);font-size:13.5px;font-weight:600;color:#dbe3f0}
+.ps-trust i{color:var(--g)}
 
-.pt-empty {
-  text-align: center; padding: 60px 24px;
-  background: var(--nu-bg); border-radius: var(--nu-r-lg); box-shadow: var(--nu-in);
-}
-.pt-empty i { font-size: 30px; color: var(--nu-ink-3); opacity: .5; margin-bottom: 14px; }
-.pt-empty h4 { font-size: 18px; font-weight: 600; color: var(--nu-ink); margin-bottom: 6px; }
+/* Karatasi ya proposal inayoelea */
+.ps-doc{position:relative;padding:26px;border-radius:24px;border:1px solid var(--line);
+  background:linear-gradient(160deg,rgba(255,255,255,.08),rgba(255,255,255,.02));backdrop-filter:blur(14px);
+  box-shadow:0 40px 100px rgba(0,0,0,.5);transform:rotate(1.5deg);animation:psFloat 6s ease-in-out infinite}
+@keyframes psFloat{50%{transform:rotate(1.5deg) translateY(-10px)}}
+.ps-doc-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;font-size:12px;color:var(--mut);font-weight:700;letter-spacing:.08em}
+.ps-doc-h b{font-size:15px;color:#fff;letter-spacing:0}
+.ps-line{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px dashed var(--line);font-size:14px;color:#cfd8e8}
+.ps-line em{font-style:normal;font-weight:700;color:#fff}
+.ps-total{display:flex;justify-content:space-between;align-items:baseline;margin-top:14px;font-weight:800}
+.ps-total span{font-size:24px;letter-spacing:-.02em;background:linear-gradient(100deg,var(--c),var(--v));-webkit-background-clip:text;background-clip:text;color:transparent}
+.ps-stamp{position:absolute;left:-18px;bottom:-18px;display:inline-flex;align-items:center;gap:10px;padding:12px 16px;border-radius:16px;
+  background:#0b1120;border:1px solid rgba(37,211,102,.45);box-shadow:0 20px 50px rgba(0,0,0,.5);font-size:13px;font-weight:700;transform:rotate(-3deg)}
+.ps-stamp i{width:30px;height:30px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;background:#25d366;color:#04120a}
+
+/* Kutoka template */
+.ps-ref{display:grid;grid-template-columns:220px 1fr auto;gap:22px;align-items:center;padding:16px;border-radius:22px;margin-bottom:34px;
+  border:1px solid rgba(0,212,255,.35);background:linear-gradient(120deg,rgba(0,212,255,.1),rgba(124,92,255,.08))}
+.ps-ref .mk-shot{margin:0;aspect-ratio:16/10}
+.ps-ref small{font-size:11.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--c)}
+.ps-ref h3{margin:4px 0 6px;font-size:22px;font-weight:800;letter-spacing:-.02em}
+.ps-ref p{margin:0;color:var(--mut);font-size:14.5px;line-height:1.6}
+.ps-ref-acts{display:flex;flex-direction:column;gap:8px}
+
+/* Aina za mradi */
+.ps-h2{font-size:clamp(26px,3.4vw,40px);letter-spacing:-.03em;line-height:1.1;margin:10px 0 10px;font-weight:800}
+.ps-kick{font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--c)}
+.ps-sub{color:var(--mut);font-size:16px;line-height:1.65;max-width:640px;margin:0 0 28px}
+.ps-types{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px}
+.ps-type{position:relative;display:flex;flex-direction:column;padding:26px 24px 22px;border-radius:22px;border:1px solid var(--line);overflow:hidden;
+  background:linear-gradient(165deg,#0e1526,#090d18);transition:transform .3s cubic-bezier(.22,.9,.3,1),border-color .3s,box-shadow .3s;
+  animation:mkIn .6s cubic-bezier(.22,.9,.3,1) both}
+.ps-type::before{content:"";position:absolute;inset:-1px;border-radius:inherit;opacity:0;transition:opacity .3s;z-index:0;
+  background:radial-gradient(400px 200px at var(--mx,50%) 0%,rgba(0,212,255,.18),transparent 70%)}
+.ps-type>*{position:relative;z-index:1}
+.ps-type:hover{transform:translateY(-6px);border-color:rgba(0,212,255,.4);box-shadow:0 30px 70px rgba(0,0,0,.5)}
+.ps-type:hover::before{opacity:1}
+.ps-type:focus-visible{outline:2px solid var(--c);outline-offset:3px}
+.ps-num{position:absolute;top:18px;right:22px;font-size:40px;font-weight:800;color:rgba(255,255,255,.05);letter-spacing:-.04em}
+.ps-ico{width:54px;height:54px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:21px;color:#fff;margin-bottom:18px;
+  background:linear-gradient(135deg,var(--v),var(--c));box-shadow:0 12px 28px rgba(124,92,255,.35)}
+.ps-type:nth-child(3n+2) .ps-ico{background:linear-gradient(135deg,#ff4d9d,#ff8a3d);box-shadow:0 12px 28px rgba(255,77,157,.3)}
+.ps-type:nth-child(3n+3) .ps-ico{background:linear-gradient(135deg,#12b767,#00d4ff);box-shadow:0 12px 28px rgba(18,183,103,.3)}
+.ps-type b{font-size:18.5px;font-weight:800;letter-spacing:-.02em;margin-bottom:8px;color:#fff}
+.ps-type p{margin:0 0 20px;color:var(--mut);font-size:14px;line-height:1.6;flex:1}
+.ps-go{display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:800;color:var(--c)}
+.ps-go i{transition:transform .2s}.ps-type:hover .ps-go i{transform:translateX(5px)}
+
+/* Mchakato */
+.ps-flow{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;counter-reset:f}
+.ps-flow div{position:relative;padding:22px;border-radius:20px;border:1px solid var(--line);background:rgba(255,255,255,.03)}
+.ps-flow div::before{counter-increment:f;content:"0" counter(f);display:block;font-size:13px;font-weight:800;color:var(--c);margin-bottom:10px;letter-spacing:.08em}
+.ps-flow b{display:block;font-size:16px;margin-bottom:6px}.ps-flow p{margin:0;color:var(--mut);font-size:14px;line-height:1.6}
+
+.ps-tpls{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.ps-tpls .mk-card{animation:none}
+.ps-tpls .mk-body{padding:14px 16px 16px}.ps-tpls .mk-body h3{font-size:17px}
+.ps-tpls .mk-body p{margin-bottom:12px;font-size:13px}
+.ps-links{display:flex;gap:14px;font-size:13px;font-weight:700}.ps-links a{color:var(--c)}.ps-links a+a{color:#cfd8e8}
+.ps-empty{padding:50px 24px;text-align:center;border-radius:22px;border:1px dashed var(--line);color:var(--mut)}
+@media(max-width:1000px){.ps-grid{grid-template-columns:1fr}.ps-doc{max-width:460px;margin:10px 18px 0}.ps-flow,.ps-tpls{grid-template-columns:1fr 1fr}
+  .ps-ref{grid-template-columns:160px 1fr}.ps-ref-acts{grid-column:1/-1;flex-direction:row;flex-wrap:wrap}}
+@media(max-width:560px){.ps-flow,.ps-tpls{grid-template-columns:1fr}.ps-ref{grid-template-columns:1fr}.ps-steps span:not(.on){padding-right:8px}.ps-steps span:not(.on) i{display:none}}
+@media(prefers-reduced-motion:reduce){.ps-doc,.ps-type{animation:none}}
 </style>
 {% endblock %}
 
-
 {% block content %}
-<script>document.body.classList.add('pp-page');</script>
-
-<!-- ══ HEADER ══ -->
-<section class="pp-top">
-  <div class="container">
-    <div class="row align-items-center g-4">
-
-      <div class="col-lg-7">
-        <div class="pp-steps">
-          <span class="pp-stp on"><b>1</b> Category</span>
-          <span class="pp-stp-sep"></span>
-          <span class="pp-stp"><b>2</b> Brief</span>
-          <span class="pp-stp-sep"></span>
-          <span class="pp-stp"><b>3</b> Quotation</span>
+<div class="mk">
+  <section class="ps-hero">
+    <div class="mk-in ps-grid">
+      <div>
+        <div class="ps-steps" aria-label="Step 1 of 3">
+          <span class="on"><b>1</b>Project</span><span><b>2</b><i style="font-style:normal">Brief</i></span><span><b>3</b><i style="font-style:normal">Quotation</i></span>
         </div>
-
-        <div class="pp-kicker" style="margin-bottom:16px">
-          <i class="fas fa-file-lines"></i> Request a quotation
-        </div>
-
-        <h1 class="pp-h1">What are we building?</h1>
-        <p class="pp-lead" style="margin-top:16px">
-          Choose the category that matches your project. We'll ask a short set of
-          questions and prepare a costed quotation you can download straight away.
-        </p>
-
-        <div class="pp-trust">
-          <span><i class="fas fa-check"></i> Two minutes</span>
-          <span><i class="fas fa-check"></i> Costed PDF, instantly</span>
-          <span><i class="fas fa-check"></i> Reply within 24 hours</span>
+        {% if ref_template %}
+        <h1>Let’s make <em>{{ ref_template.name }}</em> truly yours.</h1>
+        <p class="ps-lead">Tell us what to change and add — our designers take this template as the starting point and build it around your brand. Costed quotation in two minutes.</p>
+        {% else %}
+        <h1>Didn’t find the perfect template? <em>We’ll design it for you.</em></h1>
+        <p class="ps-lead">Describe your business and the website you dream of. You get a costed quotation instantly — and the JamiiTek team receives your proposal the same second.</p>
+        {% endif %}
+        <div class="ps-trust">
+          <span><i class="fas fa-bolt"></i> 2 minutes</span>
+          <span><i class="fas fa-file-invoice"></i> Costed quotation + PDF</span>
+          <span><i class="fas fa-paper-plane"></i> Sent straight to JamiiTek</span>
+          <span><i class="fas fa-clock"></i> Reply within 24h</span>
         </div>
       </div>
-
-      <div class="col-lg-5 d-none d-lg-block">
-        <div class="pp-gcard">
-          <div class="pp-gcard-label">Projects delivered</div>
-          <div class="pp-gcard-value">40<small>+</small></div>
-          <div class="pp-gcard-note">
-            Web, mobile and SaaS builds for clients across Tanzania — from school
-            systems to POS platforms.
-          </div>
+      <div aria-hidden="true">
+        <div class="ps-doc">
+          <div class="ps-doc-h"><b>Quotation JT-0427</b>PROPOSAL</div>
+          <div class="ps-line">Custom design &amp; branding<em>✓</em></div>
+          <div class="ps-line">Pages — Home, About, Services, Contact<em>✓</em></div>
+          <div class="ps-line">WhatsApp &amp; booking forms<em>✓</em></div>
+          <div class="ps-line">SEO for Google + domain<em>✓</em></div>
+          <div class="ps-total">Estimated total <span>TSh ••• •••</span></div>
+          <div class="ps-stamp"><i class="fas fa-check"></i> Sent to JamiiTek</div>
         </div>
       </div>
-
     </div>
-  </div>
-</section>
+  </section>
 
-
-<!-- ══ CARDS ══ -->
-<section class="pp-main">
-  <div class="container">
-
+  <section class="mk-in" id="types">
     {% if ref_template %}
-    <div class="pp-note pp-note--accent">
-      <span class="pp-note-ico"><i class="fas fa-image"></i></span>
-      <span style="flex:1;min-width:220px">
-        <b>Based on the {{ ref_template.name }} design</b><br>
-        Your quotation will reference this template ({{ ref_template.get_category_display }}).
-        Choose a category below to continue.
-      </span>
-      <a href="/templates/preview/{{ ref_template.pk }}/" target="_blank" rel="noopener" style="white-space:nowrap">
-        View design <i class="fas fa-arrow-up-right-from-square" style="font-size:10px"></i>
+    <div class="ps-ref">
+      <a class="mk-shot" href="{{ ref_template.get_absolute_url }}" style="--grad:{{ ref_template.gradient_css }};display:block">
+        <div class="mk-chrome"><i></i><i></i><i></i><span>{{ ref_template.slug }}.jamiitek.com</span></div>
+        <div class="mk-frame"><iframe data-src="{% url 'template_preview_raw' ref_template.pk %}" title="{{ ref_template.name }}" tabindex="-1" aria-hidden="true"></iframe><div class="mk-shine"></div></div>
       </a>
+      <div>
+        <small>Your starting design</small>
+        <h3>{{ ref_template.name }}</h3>
+        <p>{{ ref_template.get_category_display }} — your quotation will reference this template. Pick the project type below to continue.</p>
+      </div>
+      <div class="ps-ref-acts">
+        <a class="mk-btn s" href="{{ ref_template.get_absolute_url }}">👁 View template</a>
+        <a class="mk-btn s" href="{% url 'select_website' %}">✕ Start without it</a>
+      </div>
     </div>
     {% endif %}
 
-    <div class="pp-note">
-      <span class="pp-note-ico"><i class="fas fa-lightbulb"></i></span>
-      <span style="flex:1;min-width:220px">
-        <b>Prefer to explore first?</b><br>
-        You can <a href="{% url 'builder:signup' %}">build a site yourself for free</a>
-        or <a href="/templates/">browse ready-made designs</a>.
-      </span>
-    </div>
+    <span class="ps-kick">Step 1 · Choose your project</span>
+    <h2 class="ps-h2">What are we building together?</h2>
+    <p class="ps-sub">Pick the closest match — the next step asks a few smart questions for that kind of project and prices every feature you tick.</p>
 
-    <div class="row g-4" style="margin-top:26px">
+    <div class="ps-types">
       {% for website in website_types %}
-      <div class="col-md-6 col-lg-4">
-        <a class="pt-card"
-           href="{% url 'dynamic_form' website.id %}{% if ref_template %}?template={{ ref_template.pk }}{% endif %}">
-          <span class="pt-ico"><i class="{{ website.icon|default:'fas fa-globe' }}"></i></span>
-          <span class="pt-name">{{ website.name }}</span>
-          <span class="pt-desc">
-            {{ website.description|default:"Tell us what you need and we'll scope it for you." }}
-          </span>
-          <span class="pt-go">Continue <i class="fas fa-arrow-right"></i></span>
-        </a>
-      </div>
+      <a class="ps-type" style="animation-delay:{% widthratio forloop.counter0 1 70 %}ms"
+         href="{% url 'dynamic_form' website.id %}{% if ref_template %}?template={{ ref_template.pk }}{% endif %}">
+        <span class="ps-num">{{ forloop.counter|stringformat:"02d" }}</span>
+        <span class="ps-ico"><i class="{{ website.icon|default:'fas fa-globe' }}"></i></span>
+        <b>{{ website.name }}</b>
+        <p>{{ website.description|default:"Tell us what you need and we'll scope it for you." }}</p>
+        <span class="ps-go">Describe it <i class="fas fa-arrow-right"></i></span>
+      </a>
       {% empty %}
-      <div class="col-12">
-        <div class="pt-empty">
-          <i class="fas fa-folder-open"></i>
-          <h4>No categories available yet</h4>
-          <p class="pp-small">
-            Check back shortly, or
-            <a href="{% url 'contact' %}" style="color:var(--nu-blue);font-weight:600">contact us</a>
-            and we'll scope your project directly.
-          </p>
-        </div>
+      <div class="ps-empty" style="grid-column:1/-1">
+        <b style="display:block;color:#fff;font-size:18px;margin-bottom:6px">Project types are being updated</b>
+        <a href="{% url 'contact' %}" style="color:var(--c);font-weight:700">Contact us</a> and we’ll scope your project directly.
       </div>
       {% endfor %}
     </div>
+  </section>
 
-  </div>
-</section>
+  <section class="mk-in" style="padding-top:clamp(56px,7vw,86px)">
+    <span class="ps-kick">What happens next</span>
+    <h2 class="ps-h2">From idea to a live website</h2>
+    <div class="ps-flow" style="margin-top:22px">
+      <div><b>Describe your project</b><p>Features, pages and the look you want — tick what you need.</p></div>
+      <div><b>Get your quotation</b><p>A costed quotation appears instantly. Download it as a PDF.</p></div>
+      <div><b>We call you</b><p>Your proposal lands with the JamiiTek team right away. We reply within 24 hours.</p></div>
+      <div><b>Design &amp; launch</b><p>We design, you review, then we publish it with your domain and SEO.</p></div>
+    </div>
+  </section>
 
+  {% if featured_templates %}
+  <section class="mk-in" style="padding-top:clamp(56px,7vw,86px)">
+    <span class="ps-kick">{% if ref_template %}Similar designs{% else %}Or start from a ready design{% endif %}</span>
+    <h2 class="ps-h2">{% if ref_template %}Compare with similar templates{% else %}Maybe it’s already here{% endif %}</h2>
+    <p class="ps-sub">{{ template_count }} premium template{{ template_count|pluralize }} you can customize free in the Builder — or use one as the reference for your proposal.</p>
+    <div class="ps-tpls">
+      {% for t in featured_templates %}
+      <article class="mk-card">
+        <a class="mk-shot" href="{{ t.get_absolute_url }}" style="--grad:{{ t.gradient_css }};display:block">
+          <div class="mk-chrome"><i></i><i></i><i></i><span>{{ t.slug }}.jamiitek.com</span></div>
+          <div class="mk-frame"><iframe data-src="{% url 'template_preview_raw' t.pk %}" title="{{ t.name }}" tabindex="-1" aria-hidden="true"></iframe><div class="mk-shine"></div></div>
+        </a>
+        <div class="mk-body">
+          <div class="mk-meta"><span class="mk-cat">{{ t.get_category_display }}</span></div>
+          <h3><a href="{{ t.get_absolute_url }}">{{ t.name }}</a></h3>
+          <p>{{ t.description }}</p>
+          <div class="ps-links"><a href="{% url 'select_website' %}?template={{ t.pk }}#types">Use as reference</a><a href="{% url 'builder:from_template' t.pk %}">Customize free</a></div>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  <section class="mk-in">
+    <div class="mk-final">
+      <div><h2>Prefer to build it yourself?</h2>
+        <p>Start free in the JamiiTek Builder — 28+ pro sections, AI, your own address. You can still send us a proposal any time.</p></div>
+      <div class="mk-ctas">
+        <a class="mk-btn p" href="{% url 'templates_marketplace' %}">Browse all templates</a>
+        <a class="mk-btn s" href="{% url 'builder:signup' %}">Open the Builder</a>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function(){
+  const frames = [...document.querySelectorAll('.mk-frame iframe[data-src]')];
+  const load = f => { if (!f.src){ f.addEventListener('load', () => f.classList.add('ok'), {once: true}); f.src = f.dataset.src; } };
+  if ('IntersectionObserver' in window){
+    const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting){ load(e.target); io.unobserve(e.target); } }), {rootMargin: '300px 0px'});
+    frames.forEach(f => io.observe(f));
+  } else frames.forEach(load);
+  // Mwanga unaofuata kipanya kwenye kadi za aina
+  document.querySelectorAll('.ps-type').forEach(c => c.addEventListener('pointermove', e => {
+    const r = c.getBoundingClientRect(); c.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+  }));
+})();
+</script>
 {% endblock %}
