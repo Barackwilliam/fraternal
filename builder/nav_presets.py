@@ -29,7 +29,7 @@ mteja anaweza kuandika links zake mwenyewe kwa mkono.
 """
 from builder.images import image_url
 from builder.layouts import (HEADERS, FOOTERS, HEADER_COMMON_CSS, SIDE_COMMON_CSS,
-                             FOOTER_COMMON_CSS)
+                             FOOTER_COMMON_CSS, mobile_menu_for)
 from datetime import datetime
 import html as html_lib
 import re
@@ -170,6 +170,20 @@ FOOTER_PRESETS = {
 }
 
 
+# Aikoni ndogo (SVG ya mistari) — hazipakii faili lolote la ziada
+ICONS = {
+    'Phone': '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 '
+             '19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 '
+             '2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg>',
+    'WhatsApp': '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.4A8.4 '
+                '8.4 0 1 1 21 11.5z"/><path d="M9 9.5c.3 1.8 1.7 3.3 3.5 3.8l1-1 2 .8-.4 1.6"/></svg>',
+    'Email': '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/>'
+             '<path d="m22 6-10 7L2 6"/></svg>',
+    'Address': '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/>'
+               '<circle cx="12" cy="10" r="3"/></svg>',
+}
+
+
 def _nav_links_html(site, page_slug=None):
     """<a> za pages zote za nav, kutoka database."""
     out = []
@@ -217,8 +231,19 @@ def _placeholders(site, page_slug=None):
         for k, h, v in contacts) + '</ul>' if contacts else ''
     contact_cards = ''.join(
         (f'<a class="fx-ccard" href="{h}">' if h else '<div class="fx-ccard">')
-        + f'<b>{k}</b><span>{v}</span>' + ('</a>' if h else '</div>')
+        + f'<i>{ICONS[k]}</i><b>{k}</b><span>{v}</span>' + ('</a>' if h else '</div>')
         for k, h, v in contacts)
+    linked = [(k, h, v) for k, h, v in contacts if h]
+    contact_icons = ('<div class="fx-icons">' + ''.join(
+        f'<a href="{h}" aria-label="{k}" title="{k}">{ICONS[k]}</a>' for k, h, _ in linked) + '</div>') if linked else ''
+    # Njia za mkato chini ya menyu ya simu
+    m_contact = ''.join(f'<a href="{h}">{ICONS[k]}{"Call" if k == "Phone" else k}</a>' for k, h, _ in linked)
+    # Mawasiliano makubwa ya footer ya "Let's talk": email, vinginevyo simu, vinginevyo WhatsApp
+    big = next(((h, v) for k, h, v in contacts if k == 'Email'), None) or \
+        next(((h, v) for k, h, v in contacts if k == 'Phone'), None) or \
+        next(((h, 'Chat on WhatsApp') for k, h, v in contacts if k == 'WhatsApp'), None)
+    big_contact = f'<a class="fx-big" href="{big[0]}">{big[1]}</a>' if big else ''
+    ghost_href, ghost_text = (tel, f'Call {phone}') if phone else (('mailto:' + email, 'Email us') if email else ('', ''))
 
     return {
         '{{logo}}': logo,
@@ -242,7 +267,13 @@ def _placeholders(site, page_slug=None):
         '{{cta_footer}}': f'<a class="fx-cta" href="{cta_href}">Contact us</a>',
         '{{contact_list}}': contact_list,
         '{{contact_cards}}': contact_cards,
-        '{{credit}}': 'Built with <a href="https://jamiitek.com" rel="noopener">JamiiTek</a>',
+        '{{contact_icons}}': contact_icons,
+        '{{m_contact}}': m_contact,
+        '{{big_contact}}': big_contact,
+        '{{cta_ghost}}': f'<a class="fx-ghost" href="{ghost_href}">{ghost_text}</a>' if ghost_href else '',
+        '{{to_top}}': ('<a class="fx-totop" href="#" onclick="window.scrollTo({top:0,behavior:\'smooth\'});'
+                       'return false">Back to top</a>'),
+        '{{credit}}': 'Developed by <a href="https://www.jamiitek.com" target="_blank" rel="noopener">JamiiTek</a>',
     }
 
 
@@ -263,8 +294,10 @@ def render_nav(site, page_slug=None):
     """Rudisha (html, css) ya navbar. Tupu = tumia default ya base.html."""
     ph = _placeholders(site, page_slug)
     if site.custom_nav_html.strip():
-        return _fill(site.custom_nav_html, ph), ''
+        # CSS ya pamoja inapendezesha {{cta}} na kufunga scroll menyu ikiwa wazi
+        return _fill(site.custom_nav_html, ph), HEADER_COMMON_CSS
     if site.nav_preset in HEADERS:
+        ph['{{mm}}'] = 'hx-m-' + mobile_menu_for(site, site.nav_preset)
         return _fill(HEADERS[site.nav_preset]['html'], ph), header_css(site.nav_preset)
     if site.nav_preset in NAV_PRESETS:
         preset = NAV_PRESETS[site.nav_preset]
@@ -276,7 +309,8 @@ def render_footer(site, page_slug=None):
     """Rudisha (html, css) ya footer. Tupu = tumia default ya base.html."""
     ph = _placeholders(site, page_slug)
     if site.custom_footer_html.strip():
-        return _fill(site.custom_footer_html, ph), ''
+        # {{contact_icons}}, {{cta_footer}}, {{to_top}} n.k. zinapata muonekano wao
+        return _fill(site.custom_footer_html, ph), FOOTER_COMMON_CSS
     key = getattr(site, 'footer_preset', '')
     if key in FOOTERS:
         return _fill(FOOTERS[key]['html'], ph), FOOTER_COMMON_CSS + FOOTERS[key]['css']

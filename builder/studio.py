@@ -20,8 +20,8 @@ Hatua:
 
   1. Biashara  — jina, tagline (✨ AI), logo, mawasiliano
   2. Mtindo    — rangi tayari au yako mwenyewe, nav nyeusi/nyeupe, font
-  3. Header    — Chagua (14) · ✨ AI · 💻 Code
-  4. Footer    — Chagua (12) · ✨ AI · 💻 Code
+  3. Header    — Chagua (14) + menyu ya simu (6) · ✨ AI · 💻 Code
+  4. Footer    — Chagua (16) · ✨ AI · 💻 Code
   5. Kurasa    — kila ukurasa: drag & drop · 💻 Code · ✨ AI; ZIP; maudhui
   6. Publish
 
@@ -39,8 +39,9 @@ from django.urls import reverse
 from django.views.decorators.clickjacking import xframe_options_sameorigin
 
 from .layouts import (FONTS, PALETTES, HEADER_COMMON_CSS, SIDE_COMMON_CSS, FOOTER_COMMON_CSS,
-                      font_for)
+                      MOBILE_MENUS, font_for)
 from .nav_presets import FOOTERS, HEADERS, get_preset_catalog, _placeholders, _fill
+from .branding import add_badge_to_response
 from .views import _my_site, ensure_pages
 
 STEPS = [
@@ -110,6 +111,11 @@ def _save_step(request, site, step):
             if key not in HEADERS:
                 return 'Pick a header design.'
             site.nav_preset, site.custom_nav_html = key, ''
+        # Mtindo wa menyu ya simu: '' = wa kawaida wa header iliyochaguliwa
+        mobile = p.get('mobile_menu', '')
+        ts = dict(site.theme_settings or {})
+        ts['mobile_menu'] = mobile if mobile in MOBILE_MENUS else ''
+        site.theme_settings = ts
         fields = ['nav_preset', 'custom_nav_html']
     elif step == 'footer':
         if p.get('mode') == 'custom':
@@ -159,7 +165,10 @@ def layout_bundle(site):
         'headerCommon': HEADER_COMMON_CSS,
         'sideCommon': SIDE_COMMON_CSS,
         'footerCommon': FOOTER_COMMON_CSS,
-        'headers': {k: {'html': _fill(h['html'], ph), 'css': h['css'], 'side': h['kind'] == 'side'}
+        # {{mm}} = mtindo wa kawaida wa menyu ya simu wa header; JS inaubadilisha
+        # mteja akichagua mwingine
+        'headers': {k: {'html': _fill(h['html'], {**ph, '{{mm}}': 'hx-m-' + h['mobile']}),
+                        'css': h['css'], 'side': h['kind'] == 'side', 'mobile': h['mobile']}
                     for k, h in HEADERS.items()},
         'footers': {k: {'html': _fill(f['html'], ph), 'css': f['css']} for k, f in FOOTERS.items()},
         # Kwa code ya mteja mwenyewe: placeholders zinajazwa upande wa browser
@@ -226,6 +235,7 @@ def studio(request, site_id, step=None):
         'headers_side': [h for h in catalog['nav'] if h['kind'] == 'side'],
         'headers_top': [h for h in catalog['nav'] if h['kind'] == 'top'],
         'footers': catalog['footer'],
+        'mobile_menus': [{'key': k, 'name': n, 'desc': d} for k, (n, d) in MOBILE_MENUS.items()],
         'palettes': PALETTES,
         'fonts': [(k, v[0]) for k, v in FONTS.items()],
         'current_font': ts.get('font', 'system'),
@@ -238,6 +248,7 @@ def studio(request, site_id, step=None):
             'header': site.nav_preset if site.nav_preset in HEADERS else '',
             'footer': site.footer_preset if site.footer_preset in FOOTERS else '',
             'headerCode': site.custom_nav_html, 'footerCode': site.custom_footer_html,
+            'mobile': ts.get('mobile_menu', '') if ts.get('mobile_menu') in MOBILE_MENUS else '',
         },
     })
 
@@ -267,6 +278,9 @@ def studio_preview(request, site_id):
             site.custom_footer_html = request.POST['footer_html'][:40000]
     if g.get('header') in HEADERS:
         site.nav_preset, site.custom_nav_html = g['header'], ''
+    if g.get('mobile', '') in MOBILE_MENUS or g.get('mobile') == 'auto':
+        site.theme_settings = {**(site.theme_settings or {}),
+                               'mobile_menu': '' if g['mobile'] == 'auto' else g['mobile']}
     if g.get('footer') in FOOTERS:
         site.footer_preset, site.custom_footer_html = g['footer'], ''
     if HEX_RE.match(g.get('accent', '')):
@@ -282,16 +296,16 @@ def studio_preview(request, site_id):
         # Bila kurasa bado onyesha header/footer — mteja aone design anayochagua
         from .models import SitePage
         page = SitePage(website=site, slug='home', title=site.site_name)
-        return render(request, 'builder/public/page.html', public_views._ctx(site, {
+        return add_badge_to_response(render(request, 'builder/public/page.html', public_views._ctx(site, {
             'page': page, 'is_preview': True,
             'page_html': ('<section style="padding:90px 24px;text-align:center">'
                           f'<h1 style="font-size:40px;margin-bottom:12px">{html_lib.escape(site.site_name)}</h1>'
                           '<p style="opacity:.7">Your page content will appear here.</p></section>'),
-        }))
+        })))
     if page.raw_document:
-        return HttpResponse(render_raw_document(site, page))
-    return render(request, 'builder/public/page.html', public_views._ctx(site, {
+        return add_badge_to_response(HttpResponse(render_raw_document(site, page)))
+    return add_badge_to_response(render(request, 'builder/public/page.html', public_views._ctx(site, {
         'page': page,
         'page_html': render_page_html(site, page),
         'is_preview': True,
-    }))
+    })))
