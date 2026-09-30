@@ -40,12 +40,20 @@
     </select>
     <button type="button" class="sd-icon" id="pv-full" title="Full screen">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+    <button type="button" class="sd-done" id="pv-close">Done</button>
   </div>
   <div class="sd-frame" id="frame-wrap">
     <iframe id="pv" title="Live preview of your website" src="{{ preview_url }}"></iframe>
     <div class="sd-load" id="pv-load">Loading preview…</div>
   </div>
+  {# Simu: badilisha design ukiwa unaangalia preview (inajazwa na JS kulingana na hatua) #}
+  <div class="sd-quick" id="pv-quick" hidden></div>
 </section>
+
+{# Simu: preview imefichwa ili chaguo zipate nafasi — kitufe hiki kinaifungua skrini nzima #}
+<button type="button" class="sd-fab" id="pv-open" aria-controls="sd-prev">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+  <span>Preview</span></button>
 
 {# ═══════════════ CONTROLS ═══════════════ #}
 <section class="sd-panel">
@@ -126,19 +134,40 @@
         <div class="sd-grid">{% for h in headers_side %}{% include 'builder/_studio_card.html' with item=h kind='header' %}{% endfor %}</div>
         <h3 class="sd-h">Top bars</h3>
         <div class="sd-grid">{% for h in headers_top %}{% include 'builder/_studio_card.html' with item=h kind='header' %}{% endfor %}</div>
+        <h3 class="sd-h">Menu on phones <span class="pill">New</span></h3>
+        <p class="hint">How the menu opens when a customer taps ☰ on a phone.</p>
+        <div class="sd-mm">
+          <label class="sd-mmc"><input type="radio" name="mobile_menu" value=""><i class="mm mm-auto"></i><span><b>Auto</b>Best match for your header</span></label>
+          {% for m in mobile_menus %}
+          <label class="sd-mmc"><input type="radio" name="mobile_menu" value="{{ m.key }}"><i class="mm mm-{{ m.key }}"></i><span><b>{{ m.name }}</b>{{ m.desc }}</span></label>
+          {% endfor %}
+        </div>
+        <button type="button" class="btn sm sd-try" id="mm-try">📱 Open the phone menu in the preview</button>
       {% else %}
         <div class="sd-grid">{% for f in footers %}{% include 'builder/_studio_card.html' with item=f kind='footer' %}{% endfor %}</div>
       {% endif %}
     </div>
     <div class="sd-pane" data-pane="ai" hidden>
       <p class="hint">Describe the {{ part }} you want. AI writes it and shows it in the preview.</p>
+      <div class="sd-sugg">
+        <span class="hint">Try one:</span>
+        {% if part == 'header' %}
+        <button type="button" data-sugg="Dark glass top bar that floats over the page: logo left, links in the middle, a green WhatsApp button on the right. On phones, a drawer slides in from the right with big links and the WhatsApp button at the bottom.">Dark glass + WhatsApp</button>
+        <button type="button" data-sugg="Elegant white left sidebar: logo on top, links with a thin brand-color line on the active one, the phone number and a Call us button at the bottom. On phones the same sidebar slides in from the left.">Elegant sidebar</button>
+        <button type="button" data-sugg="Bold top bar in my brand color with white uppercase links, and a rounded white Book now button. On phones the menu covers the whole screen with very large links.">Bold brand bar</button>
+        {% else %}
+        <button type="button" data-sugg="Dark four-column footer: about us with the logo, quick links, contact details with icons, and a card with a Get a quote button. Large, spacious and premium.">Dark 4 columns</button>
+        <button type="button" data-sugg="A big brand-color call-to-action band that says Ready to start? with a WhatsApp button, then a clean light footer with links and contacts.">Big CTA band</button>
+        <button type="button" data-sugg="Minimal luxury footer: very large serif business name, a short line about us, small links and contacts on warm off-white paper.">Luxury minimal</button>
+        {% endif %}
+      </div>
       <textarea class="sd-brief" maxlength="800" placeholder="{% if part == 'header' %}e.g. Dark sidebar with my logo on top, big links and a green WhatsApp button at the bottom{% else %}e.g. Three columns: about us, quick links and contact, with a big WhatsApp button{% endif %}"></textarea>
       <button type="button" class="btn sd-ai" data-ai-go>✨ Generate {{ part }}</button>
       <div class="hint sd-ai-status"></div>
     </div>
     <div class="sd-pane" data-pane="code" hidden>
       <p class="hint">HTML with a <code>&lt;style&gt;</code> block. Placeholders fill in automatically:
-        {% verbatim %}<code>{{site_name}}</code> <code>{{logo}}</code> <code>{{nav_links}}</code> <code>{{whatsapp}}</code> <code>{{phone}}</code> <code>{{year}}</code>{% endverbatim %}</p>
+        {% verbatim %}<code>{{site_name}}</code> <code>{{logo}}</code> <code>{{nav_links}}</code> <code>{{whatsapp}}</code> <code>{{phone}}</code> <code>{{year}}</code>{% endverbatim %}{% if part == 'header' %}{% verbatim %} <code>{{cta}}</code>{% endverbatim %}. The phone menu opens with <code>jtMenu(true)</code> on an element with <code>id="jt-links"</code>.{% else %}{% verbatim %} <code>{{contact_list}}</code> <code>{{contact_icons}}</code> <code>{{cta_footer}}</code> <code>{{to_top}}</code>{% endverbatim %}. The “Developed by JamiiTek” line is added below automatically.{% endif %}</p>
       <textarea name="html" class="sd-code" spellcheck="false">{% if part == 'header' %}{{ site.custom_nav_html }}{% else %}{{ site.custom_footer_html }}{% endif %}</textarea>
       <button type="button" class="btn sm" data-apply-code>▶ Show in preview &amp; save</button>
     </div>
@@ -209,7 +238,10 @@
 {{ done_json|json_script:"sd-done" }}
 
 <style>
-.main{max-width:none;padding-top:22px}
+/* Animation ya transform ya .main (base_panel) inaigeuza kuwa "containing block":
+   preview ya skrini nzima na kitufe cha Preview (position:fixed) vingebanwa ndani
+   yake, na z-index yake ingeviweka chini ya menyu ya chini ya simu. */
+.main{max-width:none;padding-top:22px;animation:none;z-index:auto}
 .sd-steps{margin-top:10px;border-top:1px solid var(--line);padding-top:10px}
 .sd-steps a{align-items:center}
 .sd-steps a.active{background:rgba(0,212,255,.08);color:var(--ink);border-color:rgba(0,212,255,.3)}
@@ -320,14 +352,62 @@
   .sd-prev{order:0;position:sticky;top:0;height:42vh;height:42dvh;min-height:250px;z-index:20}
   .sd-panel{order:1}
 }
-/* Simu: preview inagusa kingo za skrini; vitufe vya Back/Next vinakaa juu ya menyu ya chini */
+/* ── Simu ──
+   Preview ya juu ilichukua karibu nusu ya skrini na kubana chaguo. Sasa
+   imefichwa: kitufe "Preview" kinachoelea kinaifungua skrini nzima, na chini
+   yake kuna strip ya kubadilisha design ukiwa unaangalia. */
+.sd-fab,.sd-done{display:none}
 @media(max-width:900px){
   .main{padding-top:0!important}
-  .sd-prev{margin:0 -16px;border-radius:0 0 16px 16px;border-top:none}
+  .sd-prev{display:none}
+  .sd-prev.full{display:flex;position:fixed;inset:0;height:100vh;height:100dvh;min-height:0;margin:0;border:none;border-radius:0;z-index:400}
   .sd-dev button span{display:none}
+  #pv-full{display:none}
+  .sd-done{display:inline-flex;align-items:center;background:var(--green);color:#04120a;border:none;border-radius:9px;
+    padding:7px 14px;font-weight:800;font-size:13px;cursor:pointer}
   .sd-actions{bottom:calc(64px + env(safe-area-inset-bottom))}
+  .sd-fab{display:inline-flex;align-items:center;gap:8px;position:fixed;right:14px;z-index:30;
+    bottom:calc(64px + 78px + env(safe-area-inset-bottom));padding:12px 18px 12px 14px;border-radius:999px;border:none;cursor:pointer;
+    background:linear-gradient(135deg,var(--cyan),var(--violet,#7c3aed));color:#fff;font-weight:800;font-size:14px;
+    box-shadow:0 12px 30px rgba(0,0,0,.45),0 0 0 1px rgba(255,255,255,.12) inset}
+  .sd-fab svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .sd-fab.ping::after{content:"";position:absolute;inset:-4px;border-radius:inherit;border:2px solid var(--cyan);
+    animation:sdPing 1.1s ease-out 2}
+  html.sd-lock,html.sd-lock body{overflow:hidden}
+  .sd-quick{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:10px 12px calc(12px + env(safe-area-inset-bottom));
+    background:#0d1424;border-top:1px solid var(--line);flex-shrink:0}
+  .sd-quick::-webkit-scrollbar{display:none}
+  .sd-quick[hidden]{display:none}
+  .sd-quick button{flex-shrink:0;display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.05);border:1.5px solid var(--line);
+    color:#dbe4ee;border-radius:999px;padding:9px 14px;font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap}
+  .sd-quick button.on{border-color:var(--green);color:#fff;background:rgba(37,211,102,.12)}
+  .sd-quick button i{width:16px;height:16px;border-radius:50%;background:var(--c);box-shadow:inset 0 0 0 2px #fff}
+  .sd-quick button.q-menu{background:#fff;color:#0b1220;border-color:#fff}
 }
-@media(max-width:420px){.sd-prev{margin:0 -12px}}
+@keyframes sdPing{from{opacity:1;transform:scale(1)}to{opacity:0;transform:scale(1.25)}}
+
+/* ── Menyu ya simu: michoro midogo ── */
+.sd-mm{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px}
+.sd-mmc{display:flex!important;align-items:center;gap:12px;margin:0!important;border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;
+  cursor:pointer;background:rgba(255,255,255,.02);font-weight:400}
+.sd-mmc input{position:absolute;opacity:0;pointer-events:none}
+.sd-mmc:has(input:checked){border-color:var(--green);box-shadow:0 0 0 2px rgba(37,211,102,.25)}
+.sd-mmc span{font-size:11px;color:var(--muted);line-height:1.35}
+.sd-mmc b{display:block;color:#fff;font-size:12.5px;margin-bottom:2px}
+.mm{width:28px;height:46px;border:2px solid #5b6b82;border-radius:7px;position:relative;overflow:hidden;flex-shrink:0;background:#0d1424}
+.mm::after{content:"";position:absolute;background:var(--acc,#25d366)}
+.mm-auto::after{left:7px;right:7px;top:15px;height:12px;border-radius:3px;box-shadow:0 -6px 0 -4px #9fb0c4,0 6px 0 -4px #9fb0c4;background:transparent;border-top:2px solid var(--acc,#25d366);border-bottom:2px solid var(--acc,#25d366)}
+.mm-left::after{left:0;top:0;bottom:0;width:66%;border-radius:0 5px 5px 0}
+.mm-right::after{right:0;top:0;bottom:0;width:66%;border-radius:5px 0 0 5px}
+.mm-sheet::after{left:0;right:0;bottom:0;height:56%;border-radius:6px 6px 0 0}
+.mm-drop::after{left:3px;right:3px;top:3px;height:50%;border-radius:4px}
+.mm-full::after{inset:0}
+.mm-tabs::after{left:3px;right:3px;bottom:3px;height:8px;border-radius:3px}
+.sd-try{margin-top:12px}
+.sd-sugg{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:4px 0 10px}
+.sd-sugg button{background:rgba(255,255,255,.04);border:1px solid var(--line);color:#cfe3f5;border-radius:999px;padding:6px 12px;
+  font-size:12px;font-weight:600;cursor:pointer}
+.sd-sugg button:hover{border-color:var(--cyan)}
 @media(max-width:560px){.sd-panel{padding:14px 14px 0}.sd-actions{margin:22px -14px 0;padding:12px 14px}}
 
 /* ── Michoro midogo ya headers/footers ── */
@@ -381,6 +461,18 @@
 .th-f-editorial .c{background:repeating-linear-gradient(90deg,#d8ccb9 0 20%,transparent 20% 30%)!important}
 .th-f-simple .a{height:20%!important}.th-f-simple .b{bottom:8%!important}.th-f-simple .c{bottom:7%!important;height:5%!important}
 .th-f-gradient .a{background:linear-gradient(160deg,var(--k),#0b1020 70%)!important}
+.th-f-statement .a{height:54%!important;background:#07090e!important}
+.th-f-statement .b{width:46%!important;height:15%!important;bottom:26%!important;background:#fff!important}
+.th-f-statement .c{height:4%!important;bottom:9%!important}
+.th-f-bento .a{height:52%!important;background:#eef1f5!important}
+.th-f-bento .b{left:6%!important;bottom:6%!important;width:34%!important;height:40%!important;background:#fff!important;border-radius:3px}
+.th-f-bento .c{right:6%!important;bottom:6%!important;width:52%!important;height:18%!important;background:var(--k)!important;border-radius:3px;
+  box-shadow:0 calc(-100% - 4px) 0 #fff}
+.th-f-wave .a{height:50%!important;background:linear-gradient(var(--k) 0 44%,#f6f7f9 44%)!important;border-radius:50% 50% 0 0/14% 14% 0 0}
+.th-f-wave .b{background:#1f2937!important;bottom:18%!important}
+.th-f-wave .c{background:repeating-linear-gradient(90deg,#cfd6e0 0 20%,transparent 20% 30%)!important}
+.th-f-dual .a{height:46%!important;background:linear-gradient(90deg,var(--k) 0 38%,#0b0f16 38%)!important}
+.th-f-dual .b{background:#fff!important;bottom:26%!important}.th-f-dual .c{right:6%!important;width:44%!important}
 .th-f-stacked .c{left:7%!important;right:auto!important;width:46%!important;height:26%!important;bottom:5%!important;
   background:repeating-linear-gradient(#e8ecf2 0 12%,transparent 12% 34%)!important}.th-f-stacked .b{left:auto!important;right:10%!important}
 </style>
@@ -420,6 +512,7 @@
     const link = d.getElementById('jt-font');
     if (link && f.href && link.getAttribute('href') !== f.href) link.href = f.href;
     document.documentElement.style.setProperty('--acc', S.accent);
+    changed();
   }
   const fill = code => Object.entries(L.placeholders).reduce((h, [k, v]) => h.split(k).join(v), code || '');
   function put(slot, cssId, html, css){
@@ -430,16 +523,21 @@
   }
   function applyHeader(){
     const d = doc(); if (!d) return;
-    if (S.headerMode === 'custom' && S.headerCode){ put('jt-nav-slot', 'jt-nav-css', fill(S.headerCode), ''); }
+    if (S.headerMode === 'custom' && S.headerCode){ put('jt-nav-slot', 'jt-nav-css', fill(S.headerCode), L.headerCommon); }
     else if (L.headers[S.header]){
       const h = L.headers[S.header];
-      put('jt-nav-slot', 'jt-nav-css', h.html, L.headerCommon + (h.side ? L.sideCommon : '') + h.css);
+      // Mtindo wa menyu ya simu: chaguo la mteja au wa kawaida wa header hii
+      put('jt-nav-slot', 'jt-nav-css', h.html.replace(/\bhx-m-\w+/, 'hx-m-' + (S.mobile || h.mobile)),
+          L.headerCommon + (h.side ? L.sideCommon : '') + h.css);
     } else return;               // bado hajachagua — acha nav ya sasa
     d.body.className = 'has-custom';
+    d.documentElement.classList.remove('jt-menu-open');
+    changed();
   }
   function applyFooter(){
-    if (S.footerMode === 'custom' && S.footerCode) put('jt-foot-slot', 'jt-foot-css', fill(S.footerCode), '');
+    if (S.footerMode === 'custom' && S.footerCode) put('jt-foot-slot', 'jt-foot-css', fill(S.footerCode), L.footerCommon);
     else if (L.footers[S.footer]){ const f = L.footers[S.footer]; put('jt-foot-slot', 'jt-foot-css', f.html, L.footerCommon + f.css); }
+    changed();
   }
   function applyName(){
     const d = doc(); if (!d) return;
@@ -448,13 +546,15 @@
       .forEach(el => el.textContent = name);
   }
   function applyAll(){ applyTheme(); applyHeader(); applyFooter(); }
-  pv.addEventListener('load', () => {
+  function onPreviewLoad(){
     applyAll();
     const d = doc();
     // Maudhui yanaonekana mara moja (bila kusubiri scroll animation)
     if (d) d.querySelectorAll('.jt-reveal').forEach(e => e.classList.add('in'));
     $('#pv-load').classList.add('gone');
-  });
+  }
+  pv.addEventListener('load', onPreviewLoad);
+
   function reloadPreview(slug){
     $('#pv-load').classList.remove('gone');
     pv.src = PREVIEW + (slug ? '?page=' + encodeURIComponent(slug) : '');
@@ -472,6 +572,7 @@
   let dev = window.innerWidth <= 700 ? 'mob' : (window.innerWidth <= 1100 ? 'tab' : 'desk');
   function fitFrame(){
     const W = WIDTH[dev], w = wrap.clientWidth, h = wrap.clientHeight;
+    if (!w || !h) return;        // preview imefichwa (simu) — itapimwa ikifunguliwa
     const k = Math.min(1, w / W);
     Object.assign(pv.style, {width: W + 'px', height: (h / k) + 'px', left: Math.max(0, (w - W * k) / 2) + 'px', transform: `scale(${k})`});
   }
@@ -485,6 +586,55 @@
   new ResizeObserver(fitFrame).observe(wrap);
   setDev(dev);
   $('#pv-full').addEventListener('click', () => { $('#sd-prev').classList.toggle('full'); setTimeout(fitFrame, 30); });
+
+  // ══ SIMU: preview skrini nzima + strip ya kubadilisha design ══
+  const phone = matchMedia('(max-width:900px)');
+  const prevOpen = () => $('#sd-prev').classList.contains('full');
+  // Kitufe "Preview" kinapiga mdundo kuonyesha kwamba preview imebadilika
+  function changed(){
+    if (!phone.matches || prevOpen()) return;
+    const fab = $('#pv-open'); fab.classList.remove('ping'); void fab.offsetWidth; fab.classList.add('ping');
+  }
+  function quickChips(){
+    const q = $('#pv-quick'), esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+    let html = '';
+    if (step === 'header' || step === 'footer'){
+      if (step === 'header') html += '<button type="button" class="q-menu" data-q-menu>☰ Try the menu</button>';
+      form(step).querySelectorAll('input[name=preset]').forEach(r => {
+        const name = r.closest('label').querySelector('b').textContent;
+        html += `<button type="button" data-q-radio="${esc(r.value)}" class="${r.checked ? 'on' : ''}">${esc(name)}</button>`;
+      });
+    } else if (step === 'style'){
+      $$('.sd-sw').forEach((b, i) => html += `<button type="button" data-q-sw="${i}" class="${b.classList.contains('sel') ? 'on' : ''}"><i style="--c:${b.dataset.color}"></i>${esc(b.textContent.trim())}</button>`);
+    }
+    q.innerHTML = html; q.hidden = !html;
+    const on = q.querySelector('.on'); if (on) q.scrollLeft = on.offsetLeft - 70;
+  }
+  function openPreview(){
+    if (dev !== 'mob') setDev('mob');
+    $('#sd-prev').classList.add('full'); document.documentElement.classList.add('sd-lock');
+    quickChips(); setTimeout(fitFrame, 30);
+  }
+  function closePreview(){
+    const d = doc(); if (d) d.documentElement.classList.remove('jt-menu-open');
+    const w = pv.contentWindow; try { w && w.jtMenu && w.jtMenu(false); } catch(e){}
+    $('#sd-prev').classList.remove('full'); document.documentElement.classList.remove('sd-lock');
+  }
+  function tryMenu(){
+    if (phone.matches) openPreview(); else if (dev !== 'mob') setDev('mob');
+    setTimeout(() => { try { pv.contentWindow.jtMenu(true); } catch(e){} }, 250);
+  }
+  $('#pv-open').addEventListener('click', openPreview);
+  $('#pv-close').addEventListener('click', closePreview);
+  $('#pv-quick').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    if (b.hasAttribute('data-q-menu')) return tryMenu();
+    try { pv.contentWindow.jtMenu(false); } catch(err){}
+    if (b.dataset.qRadio){ const r = form(step).querySelector(`input[name=preset][value="${b.dataset.qRadio}"]`); if (r){ r.checked = true; r.dispatchEvent(new Event('change')); } }
+    if (b.dataset.qSw) $$('.sd-sw')[+b.dataset.qSw].click();
+    quickChips();
+  });
+  phone.addEventListener('change', e => { if (!e.matches) closePreview(); });
 
   // ══ KUHIFADHI: nyuma, bila kupakia ukurasa ══
   const saveEl = $('#sd-save');
@@ -525,6 +675,7 @@
   }
   function show(k, push){
     step = k;
+    if (prevOpen() && phone.matches) quickChips();
     $$('.sd-step').forEach(f => f.hidden = f.dataset.step !== k);
     const i = STEPS.indexOf(k);
     $('#sd-back').style.visibility = i ? 'visible' : 'hidden';
@@ -639,12 +790,26 @@
     if (S[part + 'Mode'] === 'custom') tab('code');
   });
 
+  // ── 3b. Menyu ya simu ──
+  const hf = form('header');
+  const mmSel = hf.querySelector(`input[name=mobile_menu][value="${S.mobile || ''}"]`);
+  if (mmSel) mmSel.checked = true;
+  hf.querySelectorAll('input[name=mobile_menu]').forEach(r => r.addEventListener('change', () => {
+    S.mobile = r.value; applyHeader();
+    // Bila header iliyochaguliwa hakuna cha kuhifadhi bado — itaenda pamoja nayo
+    if (S.header || S.headerMode === 'custom') autosave('header');
+  }));
+  $('#mm-try').addEventListener('click', tryMenu);
+  $$('[data-sugg]').forEach(b => b.addEventListener('click', () => {
+    const t = b.closest('.sd-pane').querySelector('.sd-brief'); t.value = b.dataset.sugg; t.focus();
+  }));
+
   // ── 5. Kurasa: kuongeza bila kutoka Studio ──
   document.addEventListener('click', e => {
     const b = e.target.closest('[data-show-page]');
     if (!b) return;
     $('#pv-page').value = b.dataset.showPage; reloadPreview(b.dataset.showPage);
-    $('#sd-prev').scrollIntoView({block: 'nearest', behavior: 'smooth'});
+    if (phone.matches) openPreview(); else $('#sd-prev').scrollIntoView({block: 'nearest', behavior: 'smooth'});
   });
   async function addPage(){
     const inp = $('#new-page'), title = inp.value.trim(), st = $('#add-status');
@@ -675,6 +840,8 @@
   $$('.sd-step').forEach(f => f.addEventListener('submit', e => { e.preventDefault(); $('#sd-next').click(); }));
 
   show(step, false);
+  // Iframe inaweza kumaliza kupakia kabla script hii haijaanza (hasa ikiwa imefichwa kwenye simu)
+  { const d = doc(); if (d && d.readyState === 'complete' && d.getElementById('jt-nav-slot')) onPreviewLoad(); }
 })();
 </script>
 {% endblock %}

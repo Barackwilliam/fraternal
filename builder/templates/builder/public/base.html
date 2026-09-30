@@ -199,7 +199,6 @@ display:contents: kishikio hakina sanduku lake, kwa hiyo sticky/fixed hazibadili
       {% if site.contact_phone %}📞 {{ site.contact_phone }}<br>{% endif %}
       {% if site.contact_email %}✉ {{ site.contact_email }}{% endif %}
     </div>
-    <div class="badge">Built with <a href="https://jamiitek.com" rel="noopener">JamiiTek</a></div>
   </div>
 </footer>
 {% endif %}
@@ -227,10 +226,19 @@ document.addEventListener('submit', e => e.preventDefault(), true);
 // Mobile menu
 // #jt-links inatafutwa kila mara: Studio inaweza kubadilisha nav baada ya ukurasa kufunguka,
 // na nav ya mteja isiyo na #jt-links isivunje scroll reveal iliyo chini.
-function jtMenu(open){ const l = document.getElementById('jt-links'); if (l) l.classList.toggle('open', open); }
+// Menyu ikiwa paneli juu ya ukurasa (drawer/sheet/skrini nzima), ukurasa wa nyuma hauscroll.
+function jtMenu(open){
+  const l = document.getElementById('jt-links'); if (!l) return;
+  l.classList.toggle('open', !!open);
+  const overlay = !!open && getComputedStyle(l).position === 'fixed';
+  document.documentElement.classList.toggle('jt-menu-open', overlay);
+  document.querySelectorAll('[aria-controls="jt-links"]').forEach(b => b.setAttribute('aria-expanded', open ? 'true' : 'false'));
+}
 document.addEventListener('click', e=>{
-  if (e.target.tagName === 'A' && e.target.closest('#jt-links')) jtMenu(false);
+  if (e.target.closest && e.target.closest('#jt-links a')) jtMenu(false);
 });
+document.addEventListener('keydown', e=>{ if (e.key === 'Escape') jtMenu(false); });
+matchMedia('(min-width:901px)').addEventListener('change', e=>{ if (e.matches) jtMenu(false); });
 // Scroll reveal — sections zote za content zinaingia kwa animation
 const io = new IntersectionObserver(entries=>{
   entries.forEach(en=>{ if (en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target); }});

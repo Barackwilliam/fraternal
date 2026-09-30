@@ -419,12 +419,16 @@ class LayoutLibraryTest(TestCase):
             self.assertIn('id="jt-links"', html, key)          # menyu ya simu inafanya kazi
             self.assertIn('Duka &amp; Co', html, key)          # jina lime-escape-iwa
             self.assertIn('.hx-burger', css, key)
+            self.assertIn('hx-m-' + HEADERS[key]['mobile'], html, key)   # mtindo wa menyu ya simu
+            self.assertIn('hx-scrim', html, key)
             self.assertEqual('.jt-body{margin-left' in css, HEADERS[key]['kind'] == 'side', key)
         for key in FOOTERS:
             self.site.footer_preset = key
             html, css = render_footer(self.site)
             self.assertNotIn('{{', html, key)
-            self.assertIn('JamiiTek', html, key)
+            self.assertIn('Duka &amp; Co', html, key)
+            # Credit haiko ndani ya footer tena — branding.py inaiweka chini ya ukurasa
+            self.assertNotIn('JamiiTek', html, key)
 
     def test_new_sites_default_to_sidebar_existing_look_kept(self):
         r = Client().get('/', HTTP_HOST='dukamjenzi.jamiitek.com')
@@ -549,7 +553,7 @@ class StudioTest(TestCase):
         r = self.c.get(self.base)
         layout = r.context['layout']
         self.assertEqual(len(layout['headers']), 14)
-        self.assertEqual(len(layout['footers']), 12)
+        self.assertEqual(len(layout['footers']), 16)
         self.assertContains(r, 'id="sd-layout"')
         r = self.c.get(f'{self.base}preview/')
         for slot in ('id="jt-nav-slot"', 'id="jt-nav-css"', 'id="jt-foot-slot"', 'id="jt-foot-css"', 'id="jt-font"'):
@@ -569,6 +573,88 @@ class StudioTest(TestCase):
         empty.is_published = True
         empty.save()
         self.assertEqual(Client().get('/', HTTP_HOST='tupu.jamiitek.com').status_code, 200)
+
+
+class MobileMenuTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user('simu', password='Siri#123456')
+        self.site = ClientWebsite.objects.create(owner=self.user, subdomain='simu', site_name='Simu',
+                                                 is_published=True, contact_phone='+255 700 000 000')
+        self.site.bootstrap_from_schema()
+        self.c = Client()
+        self.c.login(username='simu', password='Siri#123456')
+        self.base = f'/builder/site/{self.site.id}/studio/'
+
+    def _home(self):
+        return Client().get('/', HTTP_HOST='simu.jamiitek.com').content.decode()
+
+    def test_each_header_has_its_own_phone_menu_and_owner_can_change_it(self):
+        self.assertIn('hx-m-left', self._home())                       # sidebar → drawer ya kushoto
+        r = self.c.post(f'{self.base}header/', {'mode': 'preset', 'preset': 'top_classic', 'mobile_menu': 'tabs'},
+                        HTTP_X_REQUESTED_WITH='fetch')
+        self.assertEqual(r.status_code, 200)
+        html = self._home()
+        self.assertIn('hx-m-tabs', html)
+        self.assertIn('class="hx-mfoot"><a href="tel:+255700000000">', html)   # njia ya mkato ya kupiga simu
+        # Chaguo lisilojulikana → mtindo wa kawaida wa header
+        self.c.post(f'{self.base}header/', {'mode': 'preset', 'preset': 'top_glass', 'mobile_menu': 'x"><script>'},
+                    HTTP_X_REQUESTED_WITH='fetch')
+        self.site.refresh_from_db()
+        self.assertEqual(self.site.theme_settings['mobile_menu'], '')
+        self.assertIn('hx-m-drop', self._home())
+
+    def test_studio_offers_all_menu_styles_and_preview_applies_them(self):
+        r = self.c.get(f'{self.base}header/')
+        for key in ('left', 'right', 'sheet', 'drop', 'full', 'tabs'):
+            self.assertContains(r, f'name="mobile_menu" value="{key}"')
+        self.assertContains(r, 'id="pv-open"')                         # kitufe cha preview kwenye simu
+        r = self.c.get(f'{self.base}preview/?header=top_classic&mobile=sheet')
+        self.assertContains(r, 'hx-m-sheet')
+
+
+class BrandingTest(TestCase):
+    """"Developed by JamiiTek" iko kwenye kila ukurasa wa mteja na haiwezi kuondolewa."""
+    def setUp(self):
+        self.user = User.objects.create_user('chapa', password='Siri#123456')
+        self.site = ClientWebsite.objects.create(owner=self.user, subdomain='chapa', site_name='Chapa',
+                                                 is_published=True)
+        self.site.bootstrap_from_schema()
+
+    def _get(self, path='/'):
+        return Client().get(path, HTTP_HOST='chapa.jamiitek.com')
+
+    def assertBadge(self, html):
+        self.assertEqual(html.count('<jamiitek-badge'), 1)
+        self.assertIn('href="https://www.jamiitek.com" target="_blank"', html)
+        self.assertIn('display:block!important', html)
+        # Iko mwishoni kabisa, baada ya maudhui yote ya mteja
+        self.assertLess(html.rindex('<jamiitek-badge'), html.rindex('</body>'))
+        self.assertGreater(html.rindex('<jamiitek-badge'), html.rindex('</footer>') if '</footer>' in html else 0)
+
+    def test_builder_pages_custom_footer_and_zip_pages_all_get_the_badge(self):
+        self.assertBadge(self._get().content.decode())
+        # Footer ya mteja inayojaribu kuificha: inline !important inashinda CSS yake
+        self.site.custom_footer_html = '<footer>Yangu</footer><style>jamiitek-badge{display:none!important}</style>'
+        self.site.save()
+        self.assertBadge(self._get().content.decode())
+        # Ukurasa wa ZIP (HTML kamili ya mteja) — hauna nav/footer yetu, lakini alama ipo
+        from builder.models import SitePage
+        SitePage.objects.create(website=self.site, slug='zip', title='Zip',
+                                raw_document='<!doctype html><html><body><h1>Code yangu</h1></body></html>')
+        html = self._get('/p/zip/').content.decode()
+        self.assertBadge(html)
+        self.assertLess(html.index('Code yangu'), html.index('<jamiitek-badge'))
+
+    def test_non_html_and_platform_pages_untouched(self):
+        self.assertNotIn(b'jamiitek-badge', self._get('/robots.txt').content)
+        self.assertNotIn(b'jamiitek-badge', self._get('/sitemap.xml').content)
+        self.assertNotIn(b'jamiitek-badge', Client().get('/builder/signup/').content)
+
+    def test_studio_preview_shows_the_badge(self):
+        c = Client()
+        c.login(username='chapa', password='Siri#123456')
+        r = c.get(f'/builder/site/{self.site.id}/studio/preview/')
+        self.assertBadge(r.content.decode())
 
 
 class BrokenDatabaseTest(TestCase):
