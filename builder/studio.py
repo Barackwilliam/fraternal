@@ -72,6 +72,25 @@ def _mark_done(site, step):
     site.theme_settings = ts
 
 
+# Hatua zinazotakiwa kuhifadhiwa kabla ya kupublish. Site ya ZIP tupu (kurasa
+# zote ni raw_document) haitumii rangi/header/footer zetu, kwa hiyo inahitaji
+# biashara na kurasa tu.
+REQUIRED_STEPS = ['business', 'style', 'header', 'footer', 'pages']
+
+
+def required_steps(site):
+    pages = site.pages.all()
+    if pages.exists() and not pages.filter(raw_document='').exists():
+        return ['business', 'pages']
+    return REQUIRED_STEPS
+
+
+def publish_blockers(site):
+    """Hatua ambazo bado hazijahifadhiwa: [(key, jina), ...]. Tupu = inaweza kupublish."""
+    done, titles = _done(site), {k: t for k, t, _ in STEPS}
+    return [(k, titles[k]) for k in required_steps(site) if k not in done]
+
+
 def studio_progress(site):
     """Kwa dashboard: (hatua zilizokamilika, jumla, hatua inayofuata)."""
     done = _done(site)
@@ -134,6 +153,9 @@ def _save_step(request, site, step):
             site.footer_preset, site.custom_footer_html = key, ''
         fields = ['footer_preset', 'custom_footer_html']
     elif step == 'publish':
+        missing = publish_blockers(site)
+        if missing:
+            return 'Save every step before publishing — still missing: ' + ', '.join(t for _, t in missing) + '.'
         site.is_published = True
         fields = ['is_published']
 
@@ -251,6 +273,7 @@ def studio(request, site_id, step=None):
         # Vilivyohamishwa kutoka dashboard: templates, vidokezo vya AI, domain
         'site_templates': [t for t in all_templates() if site.website_type in t['types']],
         'insights': get_insights(site)[:4],
+        'required_json': required_steps(site),
         'preview_url': reverse('builder:studio_preview', args=[site.id]),
         'layout': layout_bundle(site),
         'initial_state': {

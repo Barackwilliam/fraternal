@@ -16,7 +16,8 @@
       {% else %}<span class="pill off">○ Draft</span>{% endif %}
     </p>
     <a class="btn sm" href="{% url 'builder:site_dashboard' s.id %}">Open Panel</a>
-    <a class="btn sm ghost" href="{{ s.public_url }}" target="_blank">Visit ↗</a>
+    {% if s.is_published %}<a class="btn sm ghost" href="{{ s.public_url }}" target="_blank">Visit ↗</a>
+    {% else %}<a class="btn sm ghost" href="{% url 'builder:studio_preview' s.id %}" target="_blank">👁 Preview</a>{% endif %}
   </div>
   {% endfor %}
 </div>

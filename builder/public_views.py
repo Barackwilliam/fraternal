@@ -66,15 +66,16 @@ def _ctx(site, extra=None):
 
 
 def _check_published(request, site):
-    """Draft site inaonekana kwa mmiliki tu (preview)."""
+    """Site ambayo haijapublishiwa: "coming soon" kwa kila mtu isipokuwa staff."""
+    # Subdomain inaonyesha website iliyopublishiwa TU — hata kwa mmiliki.
+    # Mmiliki anaangalia draft kwenye preview ya Studio; hapa anaelezwa hilo.
     if site.is_published:
         return None
-    if request.user.is_authenticated and (
-        request.user == site.owner or request.user.is_staff
-    ):
+    if request.user.is_authenticated and request.user.is_staff:
         return None
+    is_owner = request.user.is_authenticated and request.user == site.owner
     return render(request, 'builder/public/coming_soon.html',
-                  {'site': site}, status=200)
+                  {'site': site, 'is_owner': is_owner}, status=200)
 
 
 def home(request):

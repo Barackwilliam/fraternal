@@ -427,7 +427,7 @@ def site_dashboard(request, site_id):
     site = _my_site(request, site_id)
     # Site isiyo na kurasa inarudisha 404 kwa wageni na preview nyeupe
     ensure_pages(request, site)
-    from .studio import studio_progress, STEPS as STUDIO_STEPS
+    from .studio import studio_progress, publish_blockers, STEPS as STUDIO_STEPS
     st_done, st_total, st_next = studio_progress(site)
     return render(request, 'builder/dashboard.html', {
         'site': site,
@@ -441,6 +441,7 @@ def site_dashboard(request, site_id):
         'total_inquiries': site.inquiries.count(),
         'imported_pages': site.pages.exclude(raw_document='').count(),
         'last_change': _ago(timesince(site.updated_at)),
+        'blockers': publish_blockers(site),
     })
 
 
@@ -504,6 +505,14 @@ def site_settings_save(request, site_id):
 @require_POST
 def toggle_publish(request, site_id):
     site = _my_site(request, site_id)
+    if not site.is_published:
+        # Kupublish kunahitaji kila hatua ya Studio iwe imehifadhiwa
+        from .studio import publish_blockers
+        missing = publish_blockers(site)
+        if missing:
+            messages.error(request, 'Save every step in the Website Studio before publishing — still missing: '
+                           + ', '.join(t for _, t in missing) + '.')
+            return redirect('builder:studio_step', site_id=site.id, step=missing[0][0])
     site.is_published = not site.is_published
     site.save(update_fields=['is_published'])
     state = 'is now live' if site.is_published else 'has been unpublished'
@@ -521,10 +530,21 @@ def page_editor(request, site_id, page_id):
     if page.raw_document:
         from .site_import import canvas_head as _canvas_head
         canvas_head = _canvas_head(page.raw_document)
+    from .layouts import font_for
+    font_href, font_body, font_head = font_for(site)
     return render(request, 'builder/editor.html', {
         'site': site, 'page': page,
+        'pages': site.pages.all(),                 # kuhamia ukurasa mwingine bila kutoka editor
         'collections': site.collections.all(),
         'canvas_head': canvas_head,
+        # Canvas inaonyesha website halisi: rangi, fonts na CSS ya site nzima
+        'canvas_theme': {
+            'accent': site.accent_color, 'font_href': font_href,
+            'font_body': font_body, 'font_head': font_head,
+            'global_css': site.global_css or '',
+        },
+        'preview_url': reverse('builder:studio_preview', args=[site.id]) + f'?page={page.slug}',
+        'studio_pages_url': reverse('builder:studio_step', args=[site.id, 'pages']),
     })
 
 
