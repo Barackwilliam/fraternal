@@ -496,7 +496,7 @@
       const res = await fetch(`/builder/site/${SID}/studio/${stepKey}/`, {
         method: 'POST', body: fd, headers: {'X-CSRFToken': CSRF, 'X-Requested-With': 'fetch'}});
       const data = await res.json().catch(() => null);
-      if (!res.ok || !data || !data.ok) throw new Error((data && data.error) || `Server error (${res.status}) — please try again`);
+      if (!res.ok || !data || !data.ok) throw new Error((data && data.error) || `Error ${res.status} on ${new URL(res.url).pathname} — please try again`);
       status('ok', '✓ Saved');
       if (data.done){ data.done.forEach(k => done.add(k)); paintSteps(); }
       if (data.layout){ L = data.layout; applyAll(); }
@@ -654,7 +654,7 @@
     try {
       const res = await fetch(`/builder/site/${SID}/studio/pages/`, {method: 'POST', body: fd, headers: {'X-CSRFToken': CSRF, 'X-Requested-With': 'fetch'}});
       const data = await res.json().catch(() => null);
-      if (!res.ok || !data || !data.ok){ st.textContent = (data && data.error) || `Could not add the page (${res.status}).`; return; }
+      if (!res.ok || !data || !data.ok){ st.textContent = (data && data.error) || `Could not add the page — error ${res.status} on ${new URL(res.url).pathname}`; return; }
       const p = data.page, esc = t => t.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
       $('#sd-pages').insertAdjacentHTML('beforeend', `<div class="sd-page" data-slug="${p.slug}">
         <div class="sd-page-t"><b>${esc(p.title)}</b><span class="hint">/p/${p.slug}/</span></div>
@@ -664,6 +664,8 @@
         <button type="button" class="btn sm ghost" data-show-page="${p.slug}">👁 Preview</button></div></div>`);
       $('#pv-page').insertAdjacentHTML('beforeend', `<option value="${p.slug}">${esc(p.title)}</option>`);
       inp.value = ''; st.textContent = `✓ "${p.title}" added — open it with Drag & drop, Code or AI.`;
+      // Onyesha ukurasa mpya kwenye preview mara moja
+      $('#pv-page').value = p.slug; reloadPreview(p.slug);
     } catch(err){ st.textContent = 'No connection — the page was not added.'; }
     finally { $('#add-page').disabled = false; }
   }
