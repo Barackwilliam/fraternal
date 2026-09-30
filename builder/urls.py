@@ -27,6 +27,7 @@ urlpatterns = [
 
     # Super-admin (staff only)
     path('superadmin/', views.superadmin, name='superadmin'),
+    path('superadmin/db-check/', views.superadmin_db_check, name='superadmin_db_check'),
     path('superadmin/<int:site_id>/action/', views.superadmin_action, name='superadmin_action'),
     path('site/<int:site_id>/collections/<int:collection_id>/ai-suggest/',
          views.ai_suggest_items, name='ai_suggest_items'),
