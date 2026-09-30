@@ -1,0 +1,17 @@
+New inquiry on {{ site.site_name }}
+
+Name:  {{ inq.name }}
+Phone: {{ inq.phone }}{% if inq.email %}
+Email: {{ inq.email }}{% endif %}{% if inq.item %}
+About: {{ inq.item.title }}{% endif %}{% if inq.preferred_date %}
+Date:  {{ inq.preferred_date|date:"d M Y" }}{% endif %}{% if inq.people_count %}
+People: {{ inq.people_count }}{% endif %}
+
+{{ inq.message|default:"(no message)" }}
+
+{% if wa_link %}Reply on WhatsApp: {{ wa_link }}
+{% endif %}Call: {{ inq.phone }}
+All inquiries: {{ inbox_url }}
+
+A quick reply wins the customer. Most people contact more than one business.
+— JamiiTek Website Builder

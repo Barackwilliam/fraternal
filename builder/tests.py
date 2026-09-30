@@ -940,3 +940,99 @@ class BrokenDatabaseTest(TestCase):
             r = self.c.get('/builder/superadmin/db-check/')
         self.assertContains(r, 'IMESHINDWA')
         self.assertContains(r, 'seo_title')
+
+
+class InquiryNotifyTest(TestCase):
+    """Swali jipya kutoka website -> barua kwa mmiliki.
+
+    Awali swali lilihifadhiwa tu; mmiliki aliliona pale tu alipoingia
+    kwenye paneli, na wengi hawaingii kila siku.
+    """
+
+    def setUp(self):
+        from django.core.cache import cache
+        cache.clear()
+        # Tuma "papo hapo" badala ya kwenye thread, ili barua ionekane ndani
+        # ya jaribio. Tunabadilisha notify_owner PEKEE — si threading.Thread,
+        # ambayo ingeathiri kila thread ya mfumo (mf. DailyTasksMiddleware).
+        from builder import inquiry_notify
+        run_now = mock.patch.object(inquiry_notify, 'notify_owner',
+                                    side_effect=lambda inq: inquiry_notify._send(inq.pk))
+        run_now.start()
+        self.addCleanup(run_now.stop)
+        self.owner = User.objects.create_user('mmiliki', 'owner@example.com', 'x')
+        self.site = ClientWebsite.objects.create(
+            owner=self.owner, subdomain='escf', site_name='ESCF Tanzania',
+            website_type='ngo', is_published=True, contact_email='info@escf.or.tz')
+        self.c = Client()
+
+    def _send(self, **extra):
+        data = {'name': 'Juma Hassan', 'phone': '0754 000 111', 'email': 'juma@example.com',
+                'message': 'Nataka kuchangia mradi wa tembo.'}
+        data.update(extra)
+        return self.c.post('/inquiry/', data, HTTP_HOST='escf.localhost')
+
+    def test_owner_gets_email_with_reply_links(self):
+        from django.core import mail
+        self.assertEqual(self._send().status_code, 200)
+        self.assertEqual(len(mail.outbox), 1)
+        m = mail.outbox[0]
+        self.assertEqual(sorted(m.to), ['info@escf.or.tz', 'owner@example.com'])
+        self.assertEqual(m.reply_to, ['juma@example.com'])       # "Reply" inaenda kwa mgeni
+        self.assertIn('Juma Hassan', m.subject)
+        html = m.alternatives[0][0]
+        self.assertIn('https://wa.me/255754000111', html)          # 0754… -> 255754…
+        self.assertIn('Nataka kuchangia', html)
+        self.assertEqual(m.extra_headers.get('X-JT-Category'), 'inquiry')
+
+    def test_no_owner_email_still_saves(self):
+        from django.core import mail
+        self.site.contact_email = ''
+        self.site.save()
+        self.owner.email = ''
+        self.owner.save()
+        self._send()
+        self.assertEqual(len(mail.outbox), 0)
+        self.assertEqual(self.site.inquiries.count(), 1)
+
+    def test_hourly_mail_limit(self):
+        from django.core import mail
+        from builder.inquiry_notify import MAX_PER_HOUR
+        for i in range(MAX_PER_HOUR + 3):
+            self._send(name=f'Mgeni {i}')
+        self.assertEqual(self.site.inquiries.count(), MAX_PER_HOUR + 3)   # maswali YOTE yamehifadhiwa
+        self.assertEqual(len(mail.outbox), MAX_PER_HOUR)                  # barua zina kikomo
+
+    def test_bad_date_does_not_crash(self):
+        """Tarehe isiyosomeka ilileta Server Error na swali likapotea."""
+        for bad in ('31/12/2026', 'kesho', '2026-02-31'):
+            self.assertEqual(self._send(preferred_date=bad).status_code, 200)
+        self.assertEqual(self.site.inquiries.count(), 3)
+        self.assertTrue(all(i.preferred_date is None for i in self.site.inquiries.all()))
+
+
+class InquiryFormProfileTest(SimpleTestCase):
+    """Fomu inafuata aina ya website — NGO haiulizwi idadi ya watu."""
+
+    def _form(self, kind):
+        from builder.rendering import render_inquiry_form
+        return render_inquiry_form(mock.Mock(website_type=kind))
+
+    def test_ngo_has_no_booking_fields(self):
+        html = self._form('ngo')
+        self.assertNotIn('preferred_date', html)
+        self.assertNotIn('people_count', html)
+        self.assertIn('Get in touch', html)
+
+    def test_tourism_and_restaurant_keep_booking_fields(self):
+        t = self._form('tourism')
+        self.assertIn('Travel date', t)
+        self.assertIn('Travellers', t)
+        r = self._form('restaurant')
+        self.assertIn('Book a table', r)
+        self.assertIn('Guests', r)
+
+    def test_unknown_type_is_plain(self):
+        html = self._form('')
+        self.assertNotIn('preferred_date', html)
+        self.assertIn('Send an inquiry', html)

@@ -219,19 +219,30 @@ def submit_inquiry(request):
     if recent >= 30:
         return JsonResponse({'status': 'ok'})  # kimya — usiwape bots taarifa
 
-    preferred = (request.POST.get('preferred_date') or '').strip() or None
+    # Tarehe iliyotumwa ilihifadhiwa KAMA ILIVYO kwenye DateField. Muundo
+    # usiotarajiwa (kivinjari cha zamani, bot) ulileta Server Error — na
+    # swali la mgeni likapotea. Sasa isiyosomeka inaachwa tupu tu.
+    from django.utils.dateparse import parse_date
+    try:
+        preferred = parse_date((request.POST.get('preferred_date') or '').strip())
+    except ValueError:            # muundo sahihi lakini tarehe haipo (2026-02-31)
+        preferred = None
     people = request.POST.get('people_count') or None
     try:
         people = int(people) if people else None
     except ValueError:
         people = None
 
-    SiteInquiry.objects.create(
+    inquiry = SiteInquiry.objects.create(
         website=site, item=item, name=name, phone=phone,
         email=(request.POST.get('email') or '').strip()[:120],
         message=(request.POST.get('message') or '').strip()[:3000],
         preferred_date=preferred, people_count=people,
     )
+
+    # Mjulishe mmiliki — kwenye thread ya nyuma, mgeni hasubiri
+    from .inquiry_notify import notify_owner
+    notify_owner(inquiry)
 
     # Browser navigation ya kawaida (JS imezimwa/imefeli) → page ya asante,
     # AJAX fetch (Accept: */*) → JSON kama kawaida

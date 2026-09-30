@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>New inquiry</title></head>
+<body style="margin:0;padding:0;background:#f1f4f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;color:#1a2233">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f1f4f8;padding:24px 12px">
+<tr><td align="center">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #e3e8ef">
+
+  <tr><td style="background:#0b1426;padding:20px 24px">
+    <div style="font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:#25d366;font-weight:700">New inquiry</div>
+    <div style="font-size:19px;font-weight:700;color:#ffffff;margin-top:4px">{{ site.site_name }}</div>
+  </td></tr>
+
+  <tr><td style="padding:24px">
+    <div style="font-size:22px;font-weight:800;line-height:1.25">{{ inq.name }}</div>
+    {% if inq.item %}<div style="margin-top:6px;display:inline-block;background:#e8f7ee;color:#11733f;font-size:13px;font-weight:600;padding:4px 10px;border-radius:999px">About: {{ inq.item.title }}</div>{% endif %}
+
+    {% if inq.message %}
+    <div style="margin:18px 0 0;padding:14px 16px;background:#f6f8fb;border-left:4px solid #25d366;border-radius:8px;font-size:15px;line-height:1.55;white-space:pre-line">{{ inq.message }}</div>
+    {% endif %}
+
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:18px;font-size:14px">
+      <tr><td style="padding:7px 0;color:#6b7686;width:90px">Phone</td><td style="padding:7px 0;font-weight:600"><a href="{{ tel_link }}" style="color:#1a2233;text-decoration:none">{{ inq.phone }}</a></td></tr>
+      {% if inq.email %}<tr><td style="padding:7px 0;color:#6b7686">Email</td><td style="padding:7px 0;font-weight:600"><a href="mailto:{{ inq.email }}" style="color:#1a2233;text-decoration:none">{{ inq.email }}</a></td></tr>{% endif %}
+      {% if inq.preferred_date %}<tr><td style="padding:7px 0;color:#6b7686">Date</td><td style="padding:7px 0;font-weight:600">{{ inq.preferred_date|date:"d M Y" }}</td></tr>{% endif %}
+      {% if inq.people_count %}<tr><td style="padding:7px 0;color:#6b7686">People</td><td style="padding:7px 0;font-weight:600">{{ inq.people_count }}</td></tr>{% endif %}
+      <tr><td style="padding:7px 0;color:#6b7686">Received</td><td style="padding:7px 0">{{ inq.created_at|date:"d M Y, H:i" }}</td></tr>
+    </table>
+
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:22px">
+      {% if wa_link %}
+      <tr><td style="padding-bottom:10px">
+        <a href="{{ wa_link }}" style="display:block;text-align:center;background:#25d366;color:#ffffff;font-size:16px;font-weight:700;text-decoration:none;padding:14px;border-radius:12px">Reply on WhatsApp</a>
+      </td></tr>
+      {% endif %}
+      <tr><td>
+        <a href="{{ tel_link }}" style="display:block;text-align:center;background:#ffffff;color:#1a2233;font-size:15px;font-weight:600;text-decoration:none;padding:13px;border-radius:12px;border:1.5px solid #d6dde6">Call {{ inq.phone }}</a>
+      </td></tr>
+    </table>
+
+    <p style="margin:20px 0 0;font-size:13px;line-height:1.55;color:#6b7686">
+      A quick reply wins the customer — most people contact more than one business.
+      {% if inq.email %}You can also just press <b>Reply</b> to email them directly.{% endif %}
+    </p>
+  </td></tr>
+
+  <tr><td style="padding:16px 24px;border-top:1px solid #eef1f5;font-size:12.5px;color:#8a94a3">
+    <a href="{{ inbox_url }}" style="color:#1a73e8;text-decoration:none;font-weight:600">See all inquiries →</a>
+    <span style="float:right">JamiiTek Website Builder</span>
+  </td></tr>
+
+</table>
+</td></tr>
+</table>
+</body>
+</html>

@@ -135,11 +135,54 @@ FORM_CSS = """
 """
 
 
+# ── Fomu kulingana na aina ya website ─────────────────────────
+# Awali fomu ilikuwa ile ile kwa kila aina: NGO, shule na duka ziliuliza
+# "Preferred Date" na "Number of People" — maswali ya kuweka nafasi ya
+# utalii. Mgeni wa NGO aliyetaka kuchangia alikutana na "idadi ya watu?".
+#   date / people : lebo ya sehemu, au None kuificha
+#   title / item  : kichwa cha fomu, na kichwa kikiwa ni cha bidhaa moja
+FORM_PROFILES = {
+    'tourism':    {'title': 'Plan your trip', 'item': 'Book: {}', 'button': 'Send request',
+                   'date': 'Travel date', 'people': 'Travellers',
+                   'hint': 'Where would you like to go, and for how long?'},
+    'restaurant': {'title': 'Book a table', 'item': 'Order: {}', 'button': 'Send booking',
+                   'date': 'Date of visit', 'people': 'Guests',
+                   'hint': 'Time, special requests, or your order…'},
+    'events':     {'title': 'Book or enquire', 'item': 'Book: {}', 'button': 'Send request',
+                   'date': 'Event date', 'people': 'Guests / tickets',
+                   'hint': 'Tell us about your event…'},
+    'realestate': {'title': 'Ask about a property', 'item': 'Ask about: {}', 'button': 'Send enquiry',
+                   'date': 'Preferred viewing date', 'people': None,
+                   'hint': 'Buying or renting? Your budget and preferred area…'},
+    'ecommerce':  {'title': 'Ask or order', 'item': 'Order: {}', 'button': 'Send order',
+                   'date': None, 'people': 'Quantity',
+                   'hint': 'Size, colour, delivery location…'},
+    'school':     {'title': 'Admissions enquiry', 'item': 'Ask about: {}', 'button': 'Send enquiry',
+                   'date': None, 'people': None,
+                   'hint': "Student's class or age, and what you would like to know…"},
+    'ngo':        {'title': 'Get in touch', 'item': 'Ask about: {}', 'button': 'Send message',
+                   'date': None, 'people': None,
+                   'hint': 'Would you like to volunteer, partner or donate? Tell us…'},
+}
+_DEFAULT_FORM = {'title': 'Send an inquiry', 'item': 'Ask about: {}', 'button': 'Send inquiry',
+                 'date': None, 'people': None, 'hint': 'Tell us what you need…'}
+
+
 def render_inquiry_form(site, item=None):
     """Booking/inquiry form inayopost /inquiry/ ya website husika."""
+    prof = FORM_PROFILES.get(getattr(site, 'website_type', '') or '', _DEFAULT_FORM)
     item_field = (f'<input type="hidden" name="item_id" value="{item.id}">'
                   if item is not None else '')
-    title = f'Book: {_esc(item.title)}' if item is not None else 'Send an Inquiry'
+    title = prof['item'].format(_esc(item.title)) if item is not None else prof['title']
+    button = _esc(prof['button'])
+    extra = []
+    if prof['date']:
+        extra.append(f'<div><label>{_esc(prof["date"])}</label>\n'
+                     f'      <input type="date" name="preferred_date"></div>')
+    if prof['people']:
+        extra.append(f'<div><label>{_esc(prof["people"])}</label>\n'
+                     f'      <input type="number" name="people_count" min="1" max="10000"></div>')
+    extra_row = ('<div class="jt-row">\n      ' + '\n      '.join(extra) + '\n    </div>') if extra else ''
     return FORM_CSS + f"""
 <div class="jt-form" id="jt-inquiry">
   <div class="jt-ok" id="jt-ok">✅ Thank you! Your inquiry has been received — we will contact you shortly.</div>
@@ -156,15 +199,10 @@ def render_inquiry_form(site, item=None):
       <div><label>Email</label>
       <input type="email" name="email" maxlength="120"></div>
     </div>
-    <div class="jt-row">
-      <div><label>Preferred Date</label>
-      <input type="date" name="preferred_date"></div>
-      <div><label>Number of People</label>
-      <input type="number" name="people_count" min="1" max="10000"></div>
-    </div>
+    {extra_row}
     <label>Message</label>
-    <textarea name="message" maxlength="3000" placeholder="Tell us what you need..."></textarea>
-    <button type="submit">Send Inquiry ✉️</button>
+    <textarea name="message" maxlength="3000" placeholder="{_esc(prof['hint'])}"></textarea>
+    <button type="submit">{button} ✉️</button>
   </form>
 </div>
 <script>
@@ -174,8 +212,8 @@ async function jtSend(f){{
     const res = await fetch('/inquiry/', {{method:'POST', body:new FormData(f)}});
     if (res.ok) {{ f.style.display='none'; document.getElementById('jt-ok').style.display='block';
       document.getElementById('jt-inquiry').scrollIntoView({{behavior:'smooth'}}); }}
-    else {{ btn.disabled=false; btn.textContent='Send Inquiry ✉️'; alert('Something went wrong. Please try again.'); }}
-  }} catch(e) {{ btn.disabled=false; btn.textContent='Send Inquiry ✉️'; alert('Network error. Please try again.'); }}
+    else {{ btn.disabled=false; btn.textContent='{button} ✉️'; alert('Something went wrong. Please try again.'); }}
+  }} catch(e) {{ btn.disabled=false; btn.textContent='{button} ✉️'; alert('Network error. Please try again.'); }}
   return false;
 }}
 </script>"""
