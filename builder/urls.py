@@ -6,6 +6,10 @@ app_name = 'builder'
 
 urlpatterns = [
     path('signup/', views.signup, name='signup'),
+    path('login/', views.builder_login, name='login'),
+    path('logout/', views.builder_logout, name='logout'),
+    # Templates Marketplace → Builder (builder/template_bridge.py)
+    path('templates/<int:pk>/use/', views.from_template, name='from_template'),
     path('', views.my_sites, name='my_sites'),
     path('new/', views.create_site, name='create_site'),
     path('tutorial/', views.tutorial, name='tutorial'),

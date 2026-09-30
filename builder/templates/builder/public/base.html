@@ -145,6 +145,8 @@ body.has-side .jt-body{margin-left:250px;flex:1;min-width:0}
   .jt-reveal{opacity:1;transform:none}
 }
 {% block extra_css %}{% endblock %}
+{% if not is_preview %}/* "No items yet — add some from your dashboard" ni ujumbe kwa MMILIKI (preview ya Studio), si kwa wageni */
+.jt-empty{display:none!important}{% endif %}
 </style>
 {% if site.global_css %}<style id="jt-global-css">{{ site.global_css|safe }}</style>{% endif %}
 {% if page.css_cache %}<style>{{ page.css_cache|safe }}</style>{% endif %}

@@ -579,12 +579,21 @@ def templates_marketplace(request):
     all_templates = WebsiteTemplate.objects.filter(is_active=True)
     categories_used = all_templates.values_list('category', flat=True).distinct()
 
+    # Chips za jamii: kila jamii yenye template, na idadi yake (orodha ya zamani
+    # iliandikwa kwa mkono na iliacha Tourism, Technology, Real Estate n.k.)
+    from collections import Counter
+    counts = Counter(all_templates.values_list('category', flat=True))
+    labels = dict(WebsiteTemplate.CATEGORY_CHOICES)
+    categories = [{'key': k, 'label': labels.get(k, k), 'count': n}
+                  for k, n in sorted(counts.items(), key=lambda kv: -kv[1])]
+
     return render(request, 'templates_marketplace.html', {
         'templates': templates,
         'selected_category': category,
         'total_count': all_templates.count(),
         'filtered_count': templates.count(),
         'categories_used': list(categories_used),
+        'categories': categories,
     })
 
 

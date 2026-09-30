@@ -1,0 +1,87 @@
+{% extends 'builder/base_panel.html' %}
+{% block title %}Customize “{{ tpl.name }}” — JamiiTek Builder{% endblock %}
+{% block background %}{% endblock %}
+{% comment %}
+Templates Marketplace → Builder (builder/template_bridge.py): mteja anachagua
+jina na anwani (au site yake iliyopo), kisha template inafunguka kwenye editor.
+{% endcomment %}
+{% block content %}
+<div class="ft">
+  <section class="ft-prev">
+    <div class="ft-bar"><i></i><i></i><i></i><span>{{ suggest }}.jamiitek.com</span>
+      <a href="{% url 'template_preview' tpl.pk %}" target="_blank" rel="noopener">Full preview ↗</a></div>
+    <div class="ft-frame"><iframe src="{% url 'template_preview_raw' tpl.pk %}" title="{{ tpl.name }}" loading="lazy"></iframe></div>
+  </section>
+
+  <section class="ft-form">
+    <span class="ft-kicker">✨ Customize in Builder</span>
+    <h1>Make “{{ tpl.name }}” yours</h1>
+    <p class="hint ft-lead">Choose where this design goes. It opens in the editor right away — change every text, image and color, add pages, then publish.</p>
+    {% if error %}<div class="msg error">{{ error }}</div>{% endif %}
+
+    <form method="post">
+      {% csrf_token %}
+      {% if sites %}
+      <div class="ft-targets">
+        <label class="ft-t"><input type="radio" name="target" value="new" checked><span><b>🆕 A new website</b>Create a new site with this design</span></label>
+        {% for s in sites %}
+        <label class="ft-t"><input type="radio" name="target" value="{{ s.id }}"><span><b>{{ s.site_name }}</b>Replace the Home page of {{ s.subdomain }}.jamiitek.com</span></label>
+        {% endfor %}
+      </div>
+      {% else %}<input type="hidden" name="target" value="new">{% endif %}
+
+      <div id="ft-new">
+        <label for="sn">Business name</label>
+        <input type="text" id="sn" name="site_name" value="{{ site_name }}" placeholder="e.g. Kili Adventures" maxlength="120">
+        <label for="sd">Your address</label>
+        <div class="ft-dom"><input type="text" id="sd" name="subdomain" value="{{ suggest }}" pattern="[a-z0-9]([a-z0-9-]{1,48}[a-z0-9])?"><span>.jamiitek.com</span></div>
+        <p class="hint">Visitors see it here after you publish. You can connect your own domain later.</p>
+      </div>
+      <button class="btn amber ft-go">Open in the editor →</button>
+      <p class="hint ft-note">🔒 Free to customize. Publishing needs your Business details and Pages saved in the Studio.</p>
+    </form>
+  </section>
+</div>
+
+<style>
+.main{max-width:none}
+.ft{display:grid;grid-template-columns:1.25fr 1fr;gap:22px;align-items:start}
+.ft-prev{border:1px solid var(--line);border-radius:18px;overflow:hidden;background:#0a0f1c;position:sticky;top:16px}
+.ft-bar{display:flex;align-items:center;gap:6px;padding:10px 14px;border-bottom:1px solid var(--line);font-size:12px;color:var(--muted)}
+.ft-bar i{width:9px;height:9px;border-radius:50%;background:#ff5f57}.ft-bar i:nth-child(2){background:#febc2e}.ft-bar i:nth-child(3){background:#28c840}
+.ft-bar span{margin-left:8px;font-family:var(--ff-mono);padding:3px 10px;border-radius:6px;background:rgba(255,255,255,.05);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.ft-bar a{color:var(--cyan);text-decoration:none;font-weight:700;white-space:nowrap}
+.ft-frame{position:relative;height:min(72vh,640px);overflow:hidden;background:#fff}
+.ft-frame iframe{position:absolute;top:0;left:0;width:200%;height:200%;border:0;transform:scale(.5);transform-origin:0 0}
+.ft-form{background:var(--panel,#0b1426);border:1px solid var(--line);border-radius:18px;padding:26px}
+.ft-kicker{font-family:var(--ff-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--cyan)}
+.ft-form h1{font-size:26px;margin:8px 0 6px}
+.ft-lead{margin-bottom:18px}
+.ft-targets{display:flex;flex-direction:column;gap:8px;margin-bottom:18px}
+.ft-t{display:flex!important;gap:12px;align-items:flex-start;border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;cursor:pointer;margin:0!important;font-weight:400}
+.ft-t input{width:auto;margin-top:3px;accent-color:var(--green)}
+.ft-t:has(input:checked){border-color:var(--green);background:rgba(37,211,102,.06)}
+.ft-t span{font-size:12.5px;color:var(--muted);line-height:1.45}.ft-t b{display:block;color:#fff;font-size:14px}
+.ft-dom{display:flex;align-items:center;gap:8px}.ft-dom input{flex:1}.ft-dom span{font-weight:700;color:var(--muted)}
+.ft-go{width:100%;justify-content:center;margin-top:18px;padding:14px}
+.ft-note{text-align:center;margin-top:12px}
+@media(max-width:900px){.ft{grid-template-columns:1fr}.ft-prev{position:static}.ft-frame{height:52vh}.ft-form{order:-1}}
+</style>
+<script>
+(function(){
+  const box = document.getElementById('ft-new');
+  document.querySelectorAll('input[name=target]').forEach(r => r.addEventListener('change', () => {
+    box.hidden = document.querySelector('input[name=target]:checked').value !== 'new';
+  }));
+  const n = document.getElementById('sn'), d = document.getElementById('sd'), bar = document.querySelector('.ft-bar span');
+  let touched = false;
+  const show = () => { bar.textContent = (d.value || 'yourname') + '.jamiitek.com'; };
+  d.addEventListener('input', () => { touched = true; d.value = d.value.toLowerCase().replace(/[^a-z0-9-]/g, ''); show(); });
+  n.addEventListener('input', () => {
+    if (touched) return;
+    d.value = n.value.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || d.value;
+    show();
+  });
+})();
+</script>
+{% endblock %}

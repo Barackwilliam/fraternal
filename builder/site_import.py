@@ -163,12 +163,14 @@ _TITLE_RE = re.compile(r'<title[^>]*>(.*?)</title\s*>', re.I | re.S)
 
 
 def _decode(data):
+    # Herufi NUL (\x00) haziwezi kuhifadhiwa kwenye JSON/text ya Postgres —
+    # HTML iliyozibeba ilileta "Internal Server Error" wakati wa kuhifadhi.
     for enc in ('utf-8-sig', 'cp1252'):
         try:
-            return data.decode(enc)
+            return data.decode(enc).replace('\x00', '')
         except UnicodeDecodeError:
             continue
-    return data.decode('utf-8', 'replace')
+    return data.decode('utf-8', 'replace').replace('\x00', '')
 
 
 def plan_pages(page_paths):

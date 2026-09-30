@@ -9,6 +9,7 @@ from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -74,18 +75,89 @@ def ensure_pages(request, site):
         return False
 
 
-# ── Signup + kuunda website ─────────────────────────────
+# ── Kuingia na kujisajili (web builder) ─────────────────
+
+class BuilderSignupForm(UserCreationForm):
+    """Account ya web builder: username, email (si lazima) na nywila."""
+    email = forms.EmailField(required=False)
+
+    class Meta(UserCreationForm.Meta):
+        model = User
+        fields = ('username', 'email')
+
+
+def _safe_next(request):
+    """`next` ya ndani ya jamiitek.com tu — si link ya nje (open redirect)."""
+    from django.utils.http import url_has_allowed_host_and_scheme
+    nxt = request.POST.get('next') or request.GET.get('next') or ''
+    ok = url_has_allowed_host_and_scheme(nxt, allowed_hosts={request.get_host()},
+                                         require_https=request.is_secure())
+    return nxt if ok and nxt.startswith('/') else ''
+
+
+def _template_for_next(nxt):
+    """Kama `next` ni "Customize in Builder" ya template, rudisha template hiyo."""
+    import re
+    m = re.match(r'^/builder/templates/(\d+)/use/', nxt or '')
+    if not m:
+        return None
+    from apps.models import WebsiteTemplate
+    return WebsiteTemplate.objects.filter(pk=m.group(1), is_active=True).first()
+
+
+def builder_login(request):
+    """
+    Kuingia kwenye web builder. Zamani LOGIN_URL ilikuwa /accounts/login/ —
+    ukurasa usiokuwepo (404), kwa hiyo mteja aliyetoka hakuweza kurudi.
+    """
+    from django.contrib.auth.forms import AuthenticationForm
+    nxt = _safe_next(request)
+    if request.user.is_authenticated:
+        return redirect(nxt or 'builder:my_sites')
+    form = AuthenticationForm(request, data=request.POST or None)
+    if request.method == 'POST':
+        # Watu wengi wanaandika email badala ya username
+        ident = (request.POST.get('username') or '').strip()
+        if '@' in ident:
+            u = User.objects.filter(email__iexact=ident).first()
+            if u:
+                data = request.POST.copy()
+                data['username'] = u.username
+                form = AuthenticationForm(request, data=data)
+        if form.is_valid():
+            login(request, form.get_user())
+            return redirect(nxt or 'builder:my_sites')
+    return render(request, 'builder/auth.html', {
+        'mode': 'login', 'form': form, 'next': nxt, 'from_template': _template_for_next(nxt),
+    })
+
+
+@require_POST
+def builder_logout(request):
+    from django.contrib.auth import logout
+    logout(request)
+    messages.success(request, 'You have signed out.')
+    return redirect('builder:login')
+
 
 def signup(request):
-    """Account mpya + website ya kwanza kwa hatua moja."""
+    """
+    Usajili wa web builder. Njia mbili:
+      - kawaida: account + website ya kwanza kwa hatua moja
+      - ukitoka mahali pengine (`next`, mf. template kutoka Marketplace):
+        account tu, kisha unarudishwa ulikotoka
+    """
+    nxt = _safe_next(request)
     if request.user.is_authenticated:
-        return redirect('builder:my_sites')
+        return redirect(nxt or 'builder:my_sites')
 
-    form = UserCreationForm(request.POST or None)
+    form = BuilderSignupForm(request.POST or None)
     error = None
+    account_only = bool(nxt)
 
     ai_draft = request.session.get('ai_draft')
-    ai_prefill = {}
+    # Funguo zipo daima — template inazitumia kama hoja za filter (hazisamehewi zikikosekana)
+    ai_prefill = {'site_name': '', 'website_type': ''}
     if ai_draft and ai_draft.get('plan') and request.GET.get('from') == 'ai':
         plan = ai_draft['plan']
         ai_prefill = {
@@ -94,6 +166,11 @@ def signup(request):
         }
 
     if request.method == 'POST' and form.is_valid():
+        if account_only:
+            user = form.save()
+            login(request, user)
+            messages.success(request, 'Welcome to JamiiTek Builder! Your account is ready.')
+            return redirect(nxt)
         subdomain = (request.POST.get('subdomain') or '').lower().strip()
         site_name = (request.POST.get('site_name') or '').strip()
         website_type = request.POST.get('website_type') or 'default'
@@ -126,12 +203,59 @@ def signup(request):
         except ValidationError as e:
             error = ' '.join(e.messages)
 
-    return render(request, 'builder/signup.html', {
-        'form': form, 'error': error,
+    return render(request, 'builder/auth.html', {
+        'mode': 'signup', 'form': form, 'error': error, 'next': nxt,
+        'account_only': account_only, 'from_template': _template_for_next(nxt),
         'website_types': available_website_types(),
-        'site_templates': all_templates(),
         'ai_prefill': ai_prefill,
-        'from_ai': bool(ai_prefill),
+        'from_ai': bool(ai_prefill['site_name']),
+    })
+
+
+def from_template(request, pk):
+    """
+    "✨ Customize in Builder" kutoka Templates Marketplace. Asiye na account
+    anajisajili kwanza, kisha anarudi hapa (builder/template_bridge.py).
+    """
+    from apps.models import WebsiteTemplate
+    from .template_bridge import create_site_from_template, put_template_on_home, suggest_subdomain
+
+    tpl = get_object_or_404(WebsiteTemplate, pk=pk, is_active=True)
+    here = reverse('builder:from_template', args=[tpl.pk])
+    if not request.user.is_authenticated:
+        return redirect(f"{reverse('builder:signup')}?next={here}")
+
+    sites = request.user.websites.all()
+    error = None
+    if request.method == 'POST':
+        target = request.POST.get('target', 'new')
+        if target != 'new':
+            site = sites.filter(pk=target).first()
+            if site is None:
+                raise Http404
+            page = put_template_on_home(site, tpl)
+            messages.success(request, f'“{tpl.name}” is now the Home page of {site.site_name}. Make it yours!')
+            return redirect('builder:page_editor', site_id=site.id, page_id=page.id)
+        subdomain = (request.POST.get('subdomain') or '').lower().strip()
+        site_name = (request.POST.get('site_name') or '').strip()
+        try:
+            validate_subdomain(subdomain)
+            if ClientWebsite.objects.filter(subdomain=subdomain).exists():
+                raise ValidationError('This address is already taken — try another one.')
+            if not site_name:
+                raise ValidationError('Enter your business name.')
+            site, page = create_site_from_template(request.user, tpl, site_name, subdomain)
+            _register_subdomain(site)
+            messages.success(request, f'Your website is ready with the “{tpl.name}” design. '
+                                      'Click any text or image to change it.')
+            return redirect('builder:page_editor', site_id=site.id, page_id=page.id)
+        except ValidationError as e:
+            error = ' '.join(e.messages)
+
+    return render(request, 'builder/from_template.html', {
+        'tpl': tpl, 'sites': sites, 'error': error,
+        'suggest': request.POST.get('subdomain') or suggest_subdomain(tpl.name),
+        'site_name': request.POST.get('site_name', ''),
     })
 
 
@@ -677,19 +801,32 @@ def site_import(request, site_id):
             imp.save()
         return render(request, 'builder/site_import.html', ctx)
 
-    imp.result, imp.uploaded, imp.images = result, uploaded, images
-    imp.save()
+    # Hata kuhifadhi au kuonyesha hakikisho kukishindwa, mteja apate ujumbe
+    # unaoeleweka (si "Internal Server Error"), na files zilizopakiwa zifutwe baadaye.
+    try:
+        imp.result, imp.uploaded, imp.images = result, uploaded, images
+        imp.save()
 
-    existing = set(site.pages.values_list('slug', flat=True))
-    imported = {p['slug'] for p in result['pages']}
-    for p in result['pages']:
-        p['url'] = si.page_url(p['slug'])
-        p['replaces'] = p['slug'] in existing
-    return render(request, 'builder/site_import_preview.html', {
-        'site': site, 'token': imp.token, 'result': result,
-        'others': site.pages.exclude(slug__in=imported),
-        'docs': [p['document'] for p in result['pages']],
-    })
+        existing = set(site.pages.values_list('slug', flat=True))
+        imported = {p['slug'] for p in result['pages']}
+        for p in result['pages']:
+            p['url'] = si.page_url(p['slug'])
+            p['replaces'] = p['slug'] in existing
+        return render(request, 'builder/site_import_preview.html', {
+            'site': site, 'token': imp.token, 'result': result,
+            'others': site.pages.exclude(slug__in=imported),
+            'docs': [p['document'] for p in result['pages']],
+        })
+    except Exception:
+        logging.getLogger(__name__).exception('site import: saving the preview failed (site %s)', site.id)
+        if uploaded and imp.pk is None:
+            try:
+                SiteImport.objects.create(website=site, token=uuid.uuid4().hex, uploaded=uploaded)
+            except Exception:
+                pass
+        ctx['error'] = ('Your ZIP was read, but we could not save it. Please try again — '
+                        'if it keeps failing, send the ZIP to JamiiTek support.')
+        return render(request, 'builder/site_import.html', ctx)
 
 
 @login_required
