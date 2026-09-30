@@ -344,7 +344,13 @@ body.scifi .card:hover::after{opacity:1}
     <a href="{% url 'builder:tutorial' %}">🎓 How to Use</a>
     {% endblock %}
   </nav>
-  <div class="foot">JamiiTek · Tanzania<br><a href="https://jamiitek.com">jamiitek.com</a></div>
+  <div class="foot">
+    {% if user.is_authenticated %}
+    <form method="post" action="{% url 'builder:logout' %}" style="margin-bottom:10px">{% csrf_token %}
+      <button type="submit" style="background:none;border:1px solid var(--line);color:var(--muted);border-radius:8px;padding:7px 12px;cursor:pointer;font-size:12px;width:100%;text-align:left">
+        ⎋ Sign out · {{ user.username }}</button></form>
+    {% endif %}
+    JamiiTek · Tanzania<br><a href="https://jamiitek.com">jamiitek.com</a></div>
 </aside>
 
 <nav class="mob-nav">

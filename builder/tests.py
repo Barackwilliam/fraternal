@@ -760,6 +760,97 @@ class PublishRulesTest(TestCase):
         self.assertContains(r, 'Hero — Centered')
 
 
+class TemplateBridgeTest(TestCase):
+    """Templates Marketplace → Builder, na login/usajili wa web builder."""
+    def setUp(self):
+        from apps.models import WebsiteTemplate
+        self.tpl = WebsiteTemplate.objects.create(
+            name='Savanna Luxe', category='Tourism', description='Safari site',
+            preview_html='<!doctype html><html><head><style>.hero{color:gold}</style></head>'
+                         '<body><section class="hero"><h1>Wild Tanzania</h1></section><script>var x=1</script></body></html>')
+
+    def test_visitor_signs_up_then_lands_in_the_editor_with_the_template(self):
+        c = Client()
+        use = f'/builder/templates/{self.tpl.pk}/use/'
+        r = c.get(use)
+        self.assertRedirects(r, f'/builder/signup/?next={use}', fetch_redirect_response=False)
+        r = c.get(f'/builder/signup/?next={use}')
+        self.assertContains(r, 'Savanna Luxe')                     # "unaanza na template hii"
+        self.assertNotContains(r, 'name="subdomain"')              # account tu — site inachaguliwa baadaye
+        r = c.post('/builder/signup/', {'username': 'mpya', 'email': 'm@x.co', 'password1': 'Siri#123456x',
+                                        'password2': 'Siri#123456x', 'next': use})
+        self.assertRedirects(r, use, fetch_redirect_response=False)
+        r = c.get(use)
+        self.assertContains(r, 'savanna-luxe')                     # anwani inayopendekezwa
+        r = c.post(use, {'target': 'new', 'site_name': 'Savanna Tours', 'subdomain': 'savannatours'})
+        site = ClientWebsite.objects.get(subdomain='savannatours')
+        home = site.pages.get(slug='home')
+        self.assertRedirects(r, f'/builder/site/{site.id}/pages/{home.id}/edit/', fetch_redirect_response=False)
+        self.assertIn('.hero{color:gold}', home.raw_document)      # <head> ya template inabaki
+        self.assertIn('Wild Tanzania', home.html_cache)
+        self.assertNotIn('<script', home.html_cache)               # editor inapata body bila scripts
+        self.assertEqual(site.pages.count(), 1)
+        self.assertEqual(site.theme_settings['source_template']['id'], self.tpl.pk)
+        # Editor inafunguka, na site ya template inahitaji Business + Pages tu kupublish
+        self.assertEqual(c.get(f'/builder/site/{site.id}/pages/{home.id}/edit/').status_code, 200)
+        from builder.studio import required_steps
+        self.assertEqual(required_steps(site), ['business', 'pages'])
+        # Anwani iliyochukuliwa inakataliwa kwa ujumbe wazi
+        r = c.post(use, {'target': 'new', 'site_name': 'X', 'subdomain': 'savannatours'})
+        self.assertContains(r, 'already taken')
+
+    def test_template_can_replace_home_of_an_existing_site(self):
+        user = User.objects.create_user('mwenye', password='Siri#123456')
+        site = ClientWebsite.objects.create(owner=user, subdomain='mwenye', site_name='Mwenye')
+        site.bootstrap_from_schema()
+        c = Client(); c.login(username='mwenye', password='Siri#123456')
+        c.post(f'/builder/templates/{self.tpl.pk}/use/', {'target': str(site.id)})
+        self.assertIn('Wild Tanzania', site.pages.get(slug='home').raw_document)
+        self.assertTrue(site.pages.filter(slug='about').exists())  # kurasa nyingine hazijaguswa
+        # Site ya mtu mwingine: 404
+        other = ClientWebsite.objects.create(owner=User.objects.create_user('jirani2'), subdomain='jirani2', site_name='J')
+        self.assertEqual(c.post(f'/builder/templates/{self.tpl.pk}/use/', {'target': str(other.id)}).status_code, 404)
+
+    def test_builder_login_logout_and_safe_next(self):
+        User.objects.create_user('ingia', email='ingia@x.co', password='Siri#123456')
+        c = Client()
+        r = c.get('/builder/')
+        self.assertRedirects(r, '/builder/login/?next=/builder/', fetch_redirect_response=False)
+        self.assertEqual(c.get('/builder/login/').status_code, 200)
+        r = c.post('/builder/login/', {'username': 'ingia@x.co', 'password': 'Siri#123456', 'next': '/builder/'})
+        self.assertRedirects(r, '/builder/', fetch_redirect_response=False)       # email inakubalika
+        r = c.post('/builder/logout/')
+        self.assertRedirects(r, '/builder/login/', fetch_redirect_response=False)
+        r = c.post('/builder/login/', {'username': 'ingia', 'password': 'Siri#123456', 'next': 'https://evil.example/'})
+        self.assertRedirects(r, '/builder/', fetch_redirect_response=False)       # si link ya nje
+
+    def test_marketplace_links_every_template_to_the_builder(self):
+        r = Client().get('/templates/')
+        self.assertContains(r, f'/builder/templates/{self.tpl.pk}/use/')
+        self.assertContains(r, 'Safari &amp; Travel website')              # jamii zote zinaonekana
+        r = Client().get(f'/templates/preview/{self.tpl.pk}/')
+        self.assertContains(r, f'/builder/templates/{self.tpl.pk}/use/')
+
+    def test_jamiibot_page_shows_all_plans_and_two_phone_guide(self):
+        from apps.chatbot.models import SubscriptionPlan
+        for slug, name, price in (('basic', 'Starter', 5000), ('pro', 'Business', 10000), ('enterprise', 'Enterprise', 15000)):
+            SubscriptionPlan.objects.update_or_create(slug=slug, defaults={'name': name, 'price_tzs': price, 'msg_limit': 0})
+        r = Client().get('/bot/')
+        for price in ('5,000', '10,000', '15,000'):
+            self.assertContains(r, f'<div class="price-amount">{price}</div>')
+        self.assertContains(r, 'id="setup-guide"')                  # link ya menyu ilielekeza kwenye sehemu isiyokuwepo
+        self.assertContains(r, '2 phones')
+
+    def test_empty_collection_hint_is_for_the_owner_only(self):
+        user = User.objects.create_user('tupu2', password='Siri#123456')
+        site = ClientWebsite.objects.create(owner=user, subdomain='tupu2', site_name='T', is_published=True)
+        site.bootstrap_from_schema()
+        html = Client().get('/', HTTP_HOST='tupu2.jamiitek.com').content.decode()
+        self.assertIn('.jt-empty{display:none!important}', html)
+        c = Client(); c.login(username='tupu2', password='Siri#123456')
+        self.assertNotContains(c.get(f'/builder/site/{site.id}/studio/preview/'), '.jt-empty{display:none!important}')
+
+
 class BrokenDatabaseTest(TestCase):
     """
     Production: nguzo ya ziada NOT NULL kwenye builder_sitepage ilifanya kila

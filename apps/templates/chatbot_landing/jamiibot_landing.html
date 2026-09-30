@@ -1,4 +1,4 @@
-{% load static %}
+{% load static humanize %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -227,6 +227,22 @@
     .f-badge-sm{font-family:var(--mono);font-size:10px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.4);padding:3px 9px;border-radius:5px}
 
     /* RESPONSIVE */
+    .need-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:40px}
+    .need-card{position:relative;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:22px;padding:30px;color:rgba(255,255,255,.7)}
+    .need-card h3{color:#fff;font-size:20px;font-weight:800;margin:14px 0 8px}
+    .need-card p{font-size:14px;line-height:1.65;margin-bottom:14px}
+    .need-card b{color:#fff}
+    .need-card ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:9px;font-size:13.5px}
+    .need-card li i{color:var(--lime);margin-right:8px}
+    .need-no{position:absolute;top:22px;right:26px;font-family:var(--mono);font-size:44px;font-weight:800;color:rgba(255,255,255,.07)}
+    .need-ic{width:54px;height:54px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:24px;color:var(--ink);background:var(--lime)}
+    .need-steps{margin:26px 0 0;padding:22px 26px 22px 46px;border-radius:18px;background:rgba(184,247,77,.06);border:1px dashed rgba(184,247,77,.35);
+      color:rgba(255,255,255,.8);font-size:14.5px;line-height:1.7;display:flex;flex-direction:column;gap:6px}
+    .need-steps b{color:#fff}
+    .price-note{text-align:center;margin-top:28px;font-size:14px;color:var(--muted)}
+    .price-note a{color:var(--ink);font-weight:700}
+    .price-note i{color:var(--wa);margin-right:4px}
+    @media(max-width:768px){.need-grid{grid-template-columns:1fr}.need-steps{padding-left:36px}}
     @media(max-width:1024px){.feature-grid,.pricing-grid{grid-template-columns:1fr 1fr}.steps{grid-template-columns:1fr 1fr}.hero-inner{grid-template-columns:1fr;text-align:center}.hero-ctas{justify-content:center}.hero-right{display:none}.footer-top{grid-template-columns:1fr 1fr}.guide-grid{grid-template-columns:1fr}}
     @media(max-width:768px){.nav-links,.nav-cta{display:none}.mob-menu{display:block}.testi-grid,.pricing-grid,.feature-grid,.steps{grid-template-columns:1fr}.section{padding:56px 5%}.section-inner{padding:0}.footer-top{grid-template-columns:1fr}.btn-cta-sec{margin-left:0;margin-top:10px}.cta-section .btn-cta-sec{display:none}.hero{padding:84px 6% 48px}.hero-ctas .btn-hero-primary,.hero-ctas .btn-hero-wa{flex:1;justify-content:center}}
     @media(max-width:480px){nav{padding:0 5%}.hero-h1{font-size:33px}.hero-sub{font-size:15px}.section-h2{font-size:26px}.price-card{padding:24px}.brands-row{gap:14px}.footer-top{gap:22px}}
@@ -414,7 +430,7 @@
       <div class="step">
         <div class="step-num">3<span>🔗</span></div>
         <div class="step-title">Connect WhatsApp — Scan a QR</div>
-        <div class="step-desc">Just scan a QR code with WhatsApp — no Meta account, no waiting for approval. Or add it to your website with one line of code.</div>
+        <div class="step-desc">Scan a QR code with WhatsApp — no Meta account, no waiting for approval. You need <a href="#setup-guide" style="color:inherit;font-weight:800">2 phones</a>: one shows the code, your business phone scans it.</div>
       </div>
       <div class="step">
         <div class="step-num">4<span>🚀</span></div>
@@ -531,27 +547,72 @@
 </section>
 
 <!-- PRICING -->
+<!-- SETUP GUIDE — unachohitaji kuunganisha (simu 2) -->
+<section class="section" id="setup-guide" style="background:var(--ink)">
+  <div class="section-inner">
+    <div class="section-tag" style="background:rgba(184,247,77,.1);border-color:rgba(184,247,77,.3);color:var(--lime)">Setup Guide</div>
+    <h2 class="section-h2" style="color:#fff">What you need to connect: <span style="color:var(--lime)">2 phones</span></h2>
+    <p class="section-sub" style="color:rgba(255,255,255,.6)">WhatsApp links a bot the same way it links WhatsApp Web — by scanning a QR code. You scan with one phone while the code shows on another screen.</p>
+    <div class="need-grid">
+      <div class="need-card">
+        <div class="need-no">1</div>
+        <div class="need-ic"><i class="fab fa-whatsapp"></i></div>
+        <h3>Your business phone</h3>
+        <p>The phone with the WhatsApp number your customers already message. This is the number the bot answers from.</p>
+        <ul><li><i class="fas fa-check"></i> WhatsApp or WhatsApp Business installed</li>
+          <li><i class="fas fa-check"></i> You use it to <b>scan the QR code</b> (Linked devices)</li>
+          <li><i class="fas fa-check"></i> Keep it charged and online at least once every 14 days</li></ul>
+      </div>
+      <div class="need-card">
+        <div class="need-no">2</div>
+        <div class="need-ic"><i class="fas fa-mobile-screen-button"></i></div>
+        <h3>A second phone (or a computer)</h3>
+        <p>Open your JamiiBot dashboard here to <b>show the QR code</b> — a phone cannot scan its own screen.</p>
+        <ul><li><i class="fas fa-check"></i> Shows the QR code while phone 1 scans it</li>
+          <li><i class="fas fa-check"></i> Then send your bot a test message from it</li>
+          <li><i class="fas fa-check"></i> A laptop or tablet works too</li></ul>
+      </div>
+    </div>
+    <ol class="need-steps">
+      <li><b>Phone 2:</b> sign in to JamiiBot → <b>Connect WhatsApp</b> → a QR code appears.</li>
+      <li><b>Phone 1:</b> WhatsApp → <b>⋮ / Settings → Linked devices → Link a device</b> → scan the code.</li>
+      <li>Done ✅ — send “Habari” to your business number from phone 2 and watch the bot reply.</li>
+    </ol>
+  </div>
+</section>
+
 <section class="section" id="pricing" style="background:var(--bg)">
   <div class="section-inner">
     <div class="section-tag">Transparent Pricing</div>
     <h2 class="section-h2">Simple plans, no surprises</h2>
     <p class="section-sub"><strong>Try everything free for 7 days — no payment to start.</strong> Pick a plan only if you decide to keep going, and pay by M-Pesa, Tigo Pesa, Airtel Money or bank.</p>
+    {# Mipango inatoka database (SubscriptionPlan) — bei ikibadilishwa kwenye admin inabadilika hapa pia #}
     <div class="pricing-grid">
-      <div class="price-card">
-        <div class="price-plan">Starter</div>
-        <div class="price-amount">5,000</div>
+      {% for plan in plans %}
+      <div class="price-card{% if forloop.counter == 2 %} popular{% endif %}">
+        <div class="price-plan">{{ plan.name }}</div>
+        <div class="price-amount">{{ plan.price_tzs|intcomma }}</div>
         <div class="price-period">TZS / month</div>
-        <div class="price-feature"><i class="fas fa-check"></i> 5,000 messages / month</div>
-        <div class="price-feature"><i class="fas fa-check"></i> WhatsApp + website widget</div>
+        {% for f in plan.features %}<div class="price-feature"><i class="fas fa-check"></i> {{ f }}</div>{% endfor %}
         <div class="price-feature"><i class="fas fa-check"></i> Swahili + English</div>
-        <div class="price-feature"><i class="fas fa-check"></i> Up to 5 services / FAQs</div>
-        <div class="price-feature"><i class="fas fa-check"></i> Dashboard</div>
+        <div class="price-feature"><i class="fas fa-check"></i> {% if plan.max_services %}Up to {{ plan.max_services }} services / FAQs{% else %}Unlimited services{% endif %}</div>
         <div class="price-feature"><i class="fas fa-check"></i> 7-day free trial</div>
-          <a href="/chatbot/register/" style="color:rgba(255,255,255,.5);font-size:13px;font-weight:600;text-decoration:none;display:flex;align-items:center;gap:7px"><i class="fas fa-gift fa-sm"></i> Start 7-day free trial</a>
-          <a href="https://wa.me/255768146230?text=Habari%20JamiiBot%2C%20nataka%20kujaribu%20demo" target="_blank" style="color:var(--lime);font-size:13px;font-weight:600;text-decoration:none;display:flex;align-items:center;gap:7px"><i class="fab fa-whatsapp fa-sm"></i> Try the Live Demo</a>
-        </div>
+        <a href="/chatbot/register/?plan={{ plan.slug }}" class="btn-price">Start free trial</a>
       </div>
+      {% empty %}
+      {# Hakuna mipango kwenye database (mf. DB mpya): bei rasmi #}
+      <div class="price-card"><div class="price-plan">Starter</div><div class="price-amount">5,000</div><div class="price-period">TZS / month</div>
+        <div class="price-feature"><i class="fas fa-check"></i> 5,000 messages / month</div><div class="price-feature"><i class="fas fa-check"></i> WhatsApp + website widget</div>
+        <div class="price-feature"><i class="fas fa-check"></i> 7-day free trial</div><a href="/chatbot/register/" class="btn-price">Start free trial</a></div>
+      <div class="price-card popular"><div class="price-plan">Business</div><div class="price-amount">10,000</div><div class="price-period">TZS / month</div>
+        <div class="price-feature"><i class="fas fa-check"></i> 10,000 messages / month</div><div class="price-feature"><i class="fas fa-check"></i> Full analytics</div>
+        <div class="price-feature"><i class="fas fa-check"></i> 7-day free trial</div><a href="/chatbot/register/" class="btn-price">Start free trial</a></div>
+      <div class="price-card"><div class="price-plan">Enterprise</div><div class="price-amount">15,000</div><div class="price-period">TZS / month</div>
+        <div class="price-feature"><i class="fas fa-check"></i> Unlimited messages</div><div class="price-feature"><i class="fas fa-check"></i> Priority support</div>
+        <div class="price-feature"><i class="fas fa-check"></i> 7-day free trial</div><a href="/chatbot/register/" class="btn-price">Start free trial</a></div>
+      {% endfor %}
     </div>
+    <p class="price-note"><i class="fab fa-whatsapp"></i> Not sure which plan? <a href="https://wa.me/255768146230?text=Habari%20JamiiBot%2C%20nataka%20kujaribu%20demo" target="_blank" rel="noopener">Try the live demo on WhatsApp</a> — every plan starts with 7 free days.</p>
   </div>
 </section>
 
