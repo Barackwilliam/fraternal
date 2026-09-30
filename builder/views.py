@@ -383,6 +383,10 @@ def tutorial(request):
 def site_dashboard(request, site_id):
     from django.db.models import Count
     site = _my_site(request, site_id)
+    if not site.pages.exists():
+        # Site isiyo na kurasa (mfano imeundwa kupitia Django admin) inarudisha
+        # 404 kwa wageni na preview nyeupe — unda kurasa za aina yake.
+        site.bootstrap_from_schema()
     collections = site.collections.annotate(items_count=Count('items'))
     total_items = sum(c.items_count for c in collections)
     # Hatua za kuanza (onboarding) — zina-tick automatic

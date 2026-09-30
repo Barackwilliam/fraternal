@@ -183,6 +183,10 @@ def studio(request, site_id, step=None):
     step = step or studio_progress(site)[2]
     if step not in STEP_KEYS:
         raise Http404
+    if not site.pages.exists():
+        # Site iliyoundwa bila kurasa (mfano kupitia Django admin, isiyoita
+        # bootstrap) ilionyesha preview nyeupe tupu. Unda kurasa za aina yake.
+        site.bootstrap_from_schema()
 
     if request.method == 'POST':
         if step == 'pages' and request.POST.get('action') == 'add_page':
@@ -277,7 +281,15 @@ def studio_preview(request, site_id):
     slug = g.get('page') or 'home'
     page = site.pages.filter(slug=slug).first() or site.pages.first()
     if page is None:
-        return HttpResponse('<p style="font-family:sans-serif;padding:40px">Add a page to see a preview.</p>')
+        # Bila kurasa bado onyesha header/footer — mteja aone design anayochagua
+        from .models import SitePage
+        page = SitePage(website=site, slug='home', title=site.site_name)
+        return render(request, 'builder/public/page.html', public_views._ctx(site, {
+            'page': page, 'is_preview': True,
+            'page_html': ('<section style="padding:90px 24px;text-align:center">'
+                          f'<h1 style="font-size:40px;margin-bottom:12px">{html_lib.escape(site.site_name)}</h1>'
+                          '<p style="opacity:.7">Your page content will appear here.</p></section>'),
+        }))
     if page.raw_document:
         return HttpResponse(render_raw_document(site, page))
     return render(request, 'builder/public/page.html', public_views._ctx(site, {

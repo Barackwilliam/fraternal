@@ -554,3 +554,18 @@ class StudioTest(TestCase):
         r = self.c.get(f'{self.base}preview/')
         for slot in ('id="jt-nav-slot"', 'id="jt-nav-css"', 'id="jt-foot-slot"', 'id="jt-foot-css"', 'id="jt-font"'):
             self.assertContains(r, slot)
+
+    def test_site_without_pages_gets_pages_and_a_real_preview(self):
+        """Site iliyoundwa bila kurasa (Django admin) ilionyesha preview nyeupe na 404."""
+        empty = ClientWebsite.objects.create(owner=self.user, subdomain='tupu', site_name='Tupu')
+        self.assertFalse(empty.pages.exists())
+        # Preview haiwi nyeupe hata kabla ya kurasa kuwepo
+        r = self.c.get(f'/builder/site/{empty.id}/studio/preview/?header=side_accent')
+        self.assertContains(r, 'hx-side_accent')
+        self.assertContains(r, 'Your page content will appear here')
+        # Kufungua Studio kunaunda kurasa za aina ya site
+        self.c.get(f'/builder/site/{empty.id}/studio/')
+        self.assertTrue(empty.pages.filter(slug='home').exists())
+        empty.is_published = True
+        empty.save()
+        self.assertEqual(Client().get('/', HTTP_HOST='tupu.jamiitek.com').status_code, 200)
