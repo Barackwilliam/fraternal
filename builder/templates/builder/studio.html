@@ -6,6 +6,7 @@
 
 {% block sidenav %}
 <a href="{% url 'builder:site_dashboard' site.id %}">⬅ Dashboard</a>
+<a href="{% url 'builder:tutorial' %}">🎓 How to use</a>
 <div class="sd-steps">
   {% for s in steps %}
   <a href="{% url 'builder:studio_step' site.id s.key %}" data-go="{{ s.key }}">
@@ -49,6 +50,15 @@
   {# Simu: badilisha design ukiwa unaangalia preview (inajazwa na JS kulingana na hatua) #}
   <div class="sd-quick" id="pv-quick" hidden></div>
 </section>
+
+{% comment %}Fomu hizi ziko nje ya fomu za hatua (fomu ndani ya fomu haziruhusiwi);
+vitufe vinaziunganisha kwa attribute ya form="…".{% endcomment %}
+<form id="tpl-form" method="post" action="{% url 'builder:change_template' site.id %}" hidden
+      onsubmit="return confirm('This replaces the design of your default pages. Continue?')">{% csrf_token %}</form>
+<form id="domain-form" method="post" action="{% url 'builder:site_settings_save' site.id %}" hidden>{% csrf_token %}</form>
+{% for ins in insights %}{% if ins.ai_suggest and ins.collection_id %}
+<form id="sug-{{ forloop.counter }}" method="post" action="{% url 'builder:ai_suggest_items' site.id ins.collection_id %}" hidden>{% csrf_token %}</form>
+{% endif %}{% endfor %}
 
 {# Simu: preview imefichwa ili chaguo zipate nafasi — kitufe hiki kinaifungua skrini nzima #}
 <button type="button" class="sd-fab" id="pv-open" aria-controls="sd-prev">
@@ -182,12 +192,13 @@
     <div class="sd-pages" id="sd-pages">
       {% for p in pages %}
       <div class="sd-page" data-slug="{{ p.slug }}">
-        <div class="sd-page-t"><b>{{ p.title }}</b><span class="hint">{% if p.slug == 'home' %}/{% else %}/p/{{ p.slug }}/{% endif %}</span></div>
+        <div class="sd-page-t"><b>{{ p.title }}{% if p.raw_document %} <span class="pill" title="Uploaded from a ZIP">📦 uploaded</span>{% endif %}</b><span class="hint">{% if p.slug == 'home' %}/{% else %}/p/{{ p.slug }}/{% endif %}</span></div>
         <div class="sd-page-a">
           <a class="btn sm amber" target="_blank" href="{% url 'builder:page_editor' site.id p.id %}">🖱 Drag &amp; drop</a>
           <a class="btn sm" target="_blank" href="{% url 'builder:page_editor' site.id p.id %}?open=code">💻 Code</a>
           <a class="btn sm sd-ai-btn" target="_blank" href="{% url 'builder:page_editor' site.id p.id %}?open=ai">✨ AI</a>
           <button type="button" class="btn sm ghost" data-show-page="{{ p.slug }}">👁 Preview</button>
+          {% if p.slug != 'home' %}<button type="button" class="btn sm danger sd-del" data-del-page="{% url 'builder:page_delete' site.id p.id %}" data-title="{{ p.title }}" title="Delete page">🗑</button>{% endif %}
         </div>
       </div>
       {% endfor %}
@@ -206,6 +217,21 @@
     </div>
     {% endif %}
     <a class="sd-zip" href="{% url 'builder:site_import' site.id %}">📦 <span><b>Already have a website?</b> Upload the whole folder as a ZIP</span> →</a>
+    {% if site_templates %}
+    <h3 class="sd-h">Ready-made templates</h3>
+    <p class="hint">Start again from a finished design for your type of business. ⚠️ This replaces the design of your default pages.</p>
+    <div class="sd-tpls">
+      {% for t in site_templates %}
+      <div class="sd-tpl{% if site.template_key == t.key %} on{% endif %}">
+        <span class="sd-tpl-sw" style="background:{{ t.preview }}"></span>
+        <b>{{ t.label }}</b>
+        <span class="hint">{{ t.tagline }}</span>
+        {% if site.template_key == t.key %}<span class="pill on">Active</span>
+        {% else %}<button class="btn sm" form="tpl-form" name="template_key" value="{{ t.key }}">Use this</button>{% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
   </form>
 
   {# ── 6. PUBLISH ── #}
@@ -223,6 +249,39 @@
       <p class="hint sd-lead">Publish and your website becomes visible to everyone.</p>
       <ul class="sd-check" id="sd-check"></ul>
     </div>
+
+    {% if insights %}
+    <h3 class="sd-h">💡 Tips from your AI coach</h3>
+    <div class="sd-tips">
+      {% for ins in insights %}
+      <div class="sd-tip">
+        <span class="sd-tip-ic">{{ ins.icon }}</span>
+        <span class="sd-tip-tx"><b>{{ ins.title }}</b>{{ ins.text }}</span>
+        {% if ins.ai_suggest and ins.collection_id %}
+        <button class="btn sm" form="sug-{{ forloop.counter }}" onclick="this.textContent='✨ Generating…'">{{ ins.action_label }}</button>
+        {% else %}
+        <a class="btn sm ghost" href="{{ ins.action_url }}"{% if '/studio/' not in ins.action_url %} target="_blank"{% endif %}>{{ ins.action_label }} →</a>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <h3 class="sd-h">🌐 Your own domain <span class="pill {% if site.is_premium %}on{% endif %}">{% if site.is_premium %}Premium active{% else %}Premium{% endif %}</span></h3>
+    {% if site.is_premium %}
+    <label for="dom">Domain (without http://)</label>
+    <div class="sd-add">
+      <input type="text" id="dom" name="custom_domain" form="domain-form" value="{{ site.custom_domain|default:'' }}" placeholder="www.mybusiness.co.tz">
+      <button class="btn sm" form="domain-form">💾 Save</button>
+    </div>
+    <p class="hint">After saving, your domain is registered on our servers automatically. At your domain registrar add one CNAME record:
+      <b>{{ site.custom_domain|default:'your domain' }}</b> → <b>jamiitek.onrender.com</b>. SSL turns on by itself.
+      {{ site.subdomain }}.jamiitek.com keeps working too.</p>
+    {% else %}
+    <p class="hint">Use your own address like <b>www.mybusiness.co.tz</b> with Premium.
+      <a href="https://wa.me/255750910158?text=Hello%20JamiiTek,%20I%20want%20to%20upgrade%20{{ site.subdomain }}.jamiitek.com%20to%20Premium%20for%20a%20custom%20domain"
+         target="_blank" rel="noopener" style="color:var(--green)">Upgrade via WhatsApp →</a></p>
+    {% endif %}
   </form>
 
   <div class="sd-actions">
@@ -385,6 +444,19 @@
   .sd-quick button.q-menu{background:#fff;color:#0b1220;border-color:#fff}
 }
 @keyframes sdPing{from{opacity:1;transform:scale(1)}to{opacity:0;transform:scale(1.25)}}
+
+/* ── Templates, vidokezo, kufuta kurasa ── */
+.sd-tpls{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px}
+.sd-tpl{border:1.5px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.sd-tpl.on{border-color:var(--green)}
+.sd-tpl b{color:#fff;font-size:13px}.sd-tpl .hint{font-size:11.5px;line-height:1.4;flex:1}
+.sd-tpl-sw{display:block;width:100%;aspect-ratio:16/7;border-radius:8px;border:1px solid rgba(255,255,255,.08)}
+.sd-tips{display:flex;flex-direction:column;gap:8px}
+.sd-tip{display:flex;align-items:center;gap:12px;flex-wrap:wrap;border:1px solid rgba(108,99,255,.3);background:rgba(108,99,255,.05);border-radius:12px;padding:12px}
+.sd-tip-ic{font-size:22px}
+.sd-tip-tx{flex:1;min-width:180px;font-size:12.5px;color:var(--muted);line-height:1.5}
+.sd-tip-tx b{display:block;color:#fff;font-size:13.5px;margin-bottom:2px}
+.sd-del{margin-left:auto}
 
 /* ── Menyu ya simu: michoro midogo ── */
 .sd-mm{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px}
@@ -826,7 +898,8 @@
         <div class="sd-page-a"><a class="btn sm amber" target="_blank" href="${p.edit}">🖱 Drag &amp; drop</a>
         <a class="btn sm" target="_blank" href="${p.edit}?open=code">💻 Code</a>
         <a class="btn sm sd-ai-btn" target="_blank" href="${p.edit}?open=ai">✨ AI</a>
-        <button type="button" class="btn sm ghost" data-show-page="${p.slug}">👁 Preview</button></div></div>`);
+        <button type="button" class="btn sm ghost" data-show-page="${p.slug}">👁 Preview</button>
+        <button type="button" class="btn sm danger sd-del" data-del-page="${p.delete}" data-title="${esc(p.title)}" title="Delete page">🗑</button></div></div>`);
       $('#pv-page').insertAdjacentHTML('beforeend', `<option value="${p.slug}">${esc(p.title)}</option>`);
       inp.value = ''; st.textContent = `✓ "${p.title}" added — open it with Drag & drop, Code or AI.`;
       // Onyesha ukurasa mpya kwenye preview mara moja
@@ -835,6 +908,22 @@
     finally { $('#add-page').disabled = false; }
   }
   $('#add-page').addEventListener('click', addPage);
+  // Kufuta ukurasa bila kupakia Studio upya
+  document.addEventListener('click', async e => {
+    const b = e.target.closest('[data-del-page]'); if (!b) return;
+    if (!confirm(`Delete the page "${b.dataset.title}"? This cannot be undone.`)) return;
+    const st = $('#add-status'); b.disabled = true;
+    try {
+      const res = await fetch(b.dataset.delPage, {method: 'POST', headers: {'X-CSRFToken': CSRF, 'X-Requested-With': 'fetch'}});
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data || !data.ok){ st.textContent = (data && data.error) || `Could not delete the page (error ${res.status}).`; b.disabled = false; return; }
+      const row = b.closest('.sd-page'), slug = row.dataset.slug;
+      row.remove();
+      const opt = $(`#pv-page option[value="${slug}"]`); if (opt) opt.remove();
+      st.textContent = `✓ "${b.dataset.title}" deleted.`;
+      reloadPreview($('#pv-page').value);
+    } catch(err){ st.textContent = 'No connection — the page was not deleted.'; b.disabled = false; }
+  });
   $('#new-page').addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); addPage(); } });
   // Enter kwenye fomu yoyote isipakie ukurasa
   $$('.sd-step').forEach(f => f.addEventListener('submit', e => { e.preventDefault(); $('#sd-next').click(); }));

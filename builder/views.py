@@ -23,7 +23,6 @@ from .models import (
     available_website_types, validate_subdomain,
 )
 from .site_templates import all_templates, apply_template
-from .insights import get_insights
 
 
 def _register_subdomain(site):
@@ -410,34 +409,24 @@ def tutorial(request):
     })
 
 
+def _ago(since):
+    """'2 days, 3 hours' → '2 days ago'; '0 minutes' → 'Just now'."""
+    since = since.split(',')[0]
+    return 'Just now' if since.startswith('0') else f'{since} ago'
+
+
 @login_required
 def site_dashboard(request, site_id):
-    from django.db.models import Count
+    """
+    Dashboard ni ukurasa wa KWANZA mteja anaouona — kwa hiyo ni mfupi:
+    hali ya website, Studio, inquiries, kupakia ZIP na JamiiBot. Kila kitu
+    kingine (kurasa, maudhui, templates, maelezo, rangi, domain, vidokezo vya
+    AI) kiko ndani ya Website Studio.
+    """
+    from django.utils.timesince import timesince
     site = _my_site(request, site_id)
     # Site isiyo na kurasa inarudisha 404 kwa wageni na preview nyeupe
     ensure_pages(request, site)
-    collections = site.collections.annotate(items_count=Count('items'))
-    total_items = sum(c.items_count for c in collections)
-    # Hatua za kuanza (onboarding) — zina-tick automatic
-    pages = site.pages.all()
-    has_items = total_items > 0
-    has_contact = bool(site.contact_phone or site.whatsapp_number)
-    has_design = site.pages.exclude(grapes_data={}).exists()
-    col_list = list(collections)
-    first_col = col_list[0] if col_list else None
-    first_page = pages[0] if pages else None
-    steps = [
-        {'done': has_contact,
-         'label': 'Fill in your contact details (phone / WhatsApp)', 'url': '#settings'},
-        {'done': has_items,
-         'label': f'Add your first {first_col.name_singular if first_col else "content item"}',
-         'url': (f'/builder/site/{site.id}/collections/{first_col.id}/new/' if first_col else '#')},
-        {'done': has_design, 'label': 'Open the editor and customize your Home design',
-         'url': (f'/builder/site/{site.id}/pages/{first_page.id}/edit/' if first_page else '#')},
-        {'done': site.is_published, 'label': 'Publish — take your website live',
-         'url': '#publish'},
-    ]
-    done_count = sum(1 for st in steps if st['done'])
     from .studio import studio_progress, STEPS as STUDIO_STEPS
     st_done, st_total, st_next = studio_progress(site)
     return render(request, 'builder/dashboard.html', {
@@ -447,17 +436,11 @@ def site_dashboard(request, site_id):
         'studio_pct': int(st_done / st_total * 100),
         'studio_next': st_next,
         'studio_next_title': dict((k, t) for k, t, _ in STUDIO_STEPS)[st_next],
-        'pages': pages,
-        'collections': col_list,
-        'total_items': total_items,
-        'site_templates': [t for t in all_templates()
-                           if site.website_type in t['types']],
-        'onb_steps': steps,
-        'onb_done': done_count,
-        'onb_total': len(steps),
-        'onb_pct': int(done_count / len(steps) * 100),
+        'page_count': site.pages.count(),
         'new_inquiries': site.inquiries.filter(status='new').count(),
-        'insights': get_insights(site)[:3],
+        'total_inquiries': site.inquiries.count(),
+        'imported_pages': site.pages.exclude(raw_document='').count(),
+        'last_change': _ago(timesince(site.updated_at)),
     })
 
 
@@ -466,8 +449,8 @@ def site_dashboard(request, site_id):
 def change_template(request, site_id):
     site = _my_site(request, site_id)
     apply_template(site, request.POST.get('template_key', 'clean_start'))
-    messages.success(request, 'Template mpya imewekwa! Design zako za awali za pages za template zimebadilishwa.')
-    return redirect('builder:site_dashboard', site_id=site.id)
+    messages.success(request, 'New template applied — the design of your default pages has been replaced.')
+    return redirect('builder:studio_step', site_id=site.id, step='pages')
 
 
 @login_required
@@ -479,7 +462,9 @@ def site_settings_save(request, site_id):
                   'nav_style', 'accent_color'):
         if field in request.POST:
             setattr(site, field, request.POST[field].strip())
-    site.dark_nav = request.POST.get('dark_nav') == 'on'
+    # Fomu ya domain ya Studio inatuma custom_domain peke yake — isizime dark nav
+    if 'accent_color' in request.POST:
+        site.dark_nav = request.POST.get('dark_nav') == 'on'
 
     domain_changed = False
     old_domain = site.custom_domain
@@ -512,7 +497,7 @@ def site_settings_save(request, site_id):
                     f'DNS check: "{site.custom_domain}" is not pointing to us yet. '
                     'Add a CNAME record at your registrar: '
                     f'{site.custom_domain} → jamiitek.onrender.com')
-    return redirect('builder:site_dashboard', site_id=site.id)
+    return redirect('builder:studio_step', site_id=site.id, step='publish')
 
 
 @login_required
@@ -550,7 +535,7 @@ def page_create(request, site_id):
     title = (request.POST.get('title') or '').strip()
     if not title:
         messages.error(request, 'Enter a page name.')
-        return redirect('builder:site_dashboard', site_id=site.id)
+        return redirect('builder:studio_step', site_id=site.id, step='pages')
     from django.utils.text import slugify
     base = slugify(title)[:70] or 'page'
     slug, n = base, 2
@@ -570,12 +555,18 @@ def page_create(request, site_id):
 def page_delete(request, site_id, page_id):
     site = _my_site(request, site_id)
     page = get_object_or_404(SitePage, id=page_id, website=site)
+    fetch = request.headers.get('X-Requested-With') == 'fetch'   # Studio: bila kupakia upya
     if page.slug == 'home':
+        if fetch:
+            return JsonResponse({'ok': False, 'error': 'The home page cannot be deleted.'}, status=400)
         messages.error(request, 'The home page cannot be deleted.')
     else:
         page.delete()
+        site.bump_version()
+        if fetch:
+            return JsonResponse({'ok': True})
         messages.success(request, f'Page "{page.title}" has been deleted.')
-    return redirect('builder:site_dashboard', site_id=site.id)
+    return redirect('builder:studio_step', site_id=site.id, step='pages')
 
 
 # GrapesJS storage endpoints

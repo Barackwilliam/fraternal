@@ -22,8 +22,12 @@ Hatua:
   2. Mtindo    — rangi tayari au yako mwenyewe, nav nyeusi/nyeupe, font
   3. Header    — Chagua (14) + menyu ya simu (6) · ✨ AI · 💻 Code
   4. Footer    — Chagua (16) · ✨ AI · 💻 Code
-  5. Kurasa    — kila ukurasa: drag & drop · 💻 Code · ✨ AI; ZIP; maudhui
-  6. Publish
+  5. Kurasa    — kila ukurasa: drag & drop · 💻 Code · ✨ AI; kufuta; ZIP;
+                 maudhui; templates tayari
+  6. Publish   — kwenda hewani, vidokezo vya AI Coach, domain yako mwenyewe
+
+Dashboard ina vitu vitano tu (hali, Studio, inquiries, ZIP, JamiiBot) —
+kila kitu kingine cha kujenga website kiko hapa.
 
 Hatua zilizokamilika zinahifadhiwa kwenye theme_settings['studio_done'].
 Studio haitumii three.js wala background ya WebGL — inafunguka haraka.
@@ -203,7 +207,8 @@ def studio(request, site_id, step=None):
             page = _add_page(site, title)
             return JsonResponse({'ok': True, 'page': {
                 'id': page.id, 'slug': page.slug, 'title': page.title,
-                'edit': reverse('builder:page_editor', args=[site.id, page.id])}})
+                'edit': reverse('builder:page_editor', args=[site.id, page.id]),
+                'delete': reverse('builder:page_delete', args=[site.id, page.id])}})
 
         error = _save_step(request, site, step)
         if _wants_json(request):
@@ -224,6 +229,8 @@ def studio(request, site_id, step=None):
     done = _done(site)
     catalog = get_preset_catalog()
     ts = site.theme_settings or {}
+    from .insights import get_insights
+    from .site_templates import all_templates
     return render(request, 'builder/studio.html', {
         'site': site,
         'step': step,
@@ -241,6 +248,9 @@ def studio(request, site_id, step=None):
         'current_font': ts.get('font', 'system'),
         'pages': site.pages.all(),
         'collections': site.collections.all(),
+        # Vilivyohamishwa kutoka dashboard: templates, vidokezo vya AI, domain
+        'site_templates': [t for t in all_templates() if site.website_type in t['types']],
+        'insights': get_insights(site)[:4],
         'preview_url': reverse('builder:studio_preview', args=[site.id]),
         'layout': layout_bundle(site),
         'initial_state': {

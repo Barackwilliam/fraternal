@@ -1,5 +1,5 @@
 """
-AI Coach — Insights engine ya dashboard.
+AI Coach — vidokezo vinavyoonyeshwa kwenye hatua ya Go Live ya Studio.
 
 Sehemu ya 1 (hii file): RULE-BASED insights — bure kabisa, instant, hakuna
 API calls. Mfumo unachunguza hali ya website na kutoa ushauri 1-3 wenye
@@ -45,7 +45,7 @@ def get_insights(site):
             'text': ('Everything you build is invisible to customers until you '
                      'publish. ' + ('You look ready — go live!' if ready else
                      'Add your contact details and some content first, then publish.')),
-            'action_url': f'/builder/site/{site.id}/#publish',
+            'action_url': f'/builder/site/{site.id}/studio/publish/',
             'action_label': 'Publish',
             'priority': 1 if ready else 2,
         })
@@ -57,7 +57,7 @@ def get_insights(site):
             'title': 'Customers have no way to reach you',
             'text': ('Your phone/WhatsApp number appears on every page and '
                      'powers the booking buttons — without it, you lose every lead.'),
-            'action_url': f'/builder/site/{site.id}/#settings',
+            'action_url': f'/builder/site/{site.id}/studio/business/',
             'action_label': 'Add contact details',
             'priority': 1,
         })
@@ -85,7 +85,7 @@ def get_insights(site):
             'text': ('A one-line tagline appears in your hero and browser tab — '
                      'it positions your brand instantly. The ✨ AI button can '
                      'write one for you.'),
-            'action_url': f'/builder/site/{site.id}/#settings',
+            'action_url': f'/builder/site/{site.id}/studio/business/',
             'action_label': 'Write with AI',
             'priority': 3,
         })
@@ -96,8 +96,8 @@ def get_insights(site):
             'icon': '🖼️',
             'title': 'Add your logo',
             'text': ('A logo in the navbar makes your website look established '
-                     'and trustworthy. Upload one under Website Details.'),
-            'action_url': f'/builder/site/{site.id}/#settings',
+                     'and trustworthy. Upload it in the Studio’s first step.'),
+            'action_url': f'/builder/site/{site.id}/studio/business/',
             'action_label': 'Upload logo',
             'priority': 3,
         })
