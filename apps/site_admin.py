@@ -69,7 +69,14 @@ class HeroSlideAdmin(PreviewMixin, admin.ModelAdmin):
             'description': 'Wrap words in *asterisks* to colour them gold, '
                            'e.g. <code>That *Drive Success*</code>',
         }),
-        ('Buttons', {'fields': ('cta_label', 'cta_url', 'cta2_label', 'cta2_url')}),
+        ('Buttons', {
+            'fields': ('cta_label', 'cta_url', 'cta2_label', 'cta2_url'),
+            'description': 'Usiandike namba za simu hapa. Tumia njia fupi — zinafuata namba '
+                           'zilizowekwa kwenye Render:<br>'
+                           '<code>whatsapp:bot</code> → JamiiBot ya demo &nbsp;·&nbsp; '
+                           '<code>whatsapp:team</code> → WhatsApp ya timu &nbsp;·&nbsp; '
+                           '<code>tel:team</code> → kupiga simu timu',
+        }),
         ('Display', {'fields': ('is_active', 'order')}),
     )
 

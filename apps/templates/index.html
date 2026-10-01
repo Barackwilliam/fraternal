@@ -754,9 +754,9 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
       {% if forloop.first %}<h1 class="hs__title">{{ h.headline_html }}</h1>{% else %}<p class="hs__title">{{ h.headline_html }}</p>{% endif %}
       {% if h.subheadline %}<p class="hs__sub">{{ h.subheadline }}</p>{% endif %}
       {% if h.cta_label or h.cta2_label %}<div class="hs__btns">
-        {% if h.cta_label %}<a class="btn btn--gold" href="{{ h.cta_url|default:'#' }}"{% if h.cta_url|slice:":4" == "http" %} target="_blank" rel="noopener"{% endif %}>{{ h.cta_label }}
+        {% if h.cta_label %}<a class="btn btn--gold" href="{{ h.cta_url|contact_url }}"{% if h.cta_url|is_external %} target="_blank" rel="noopener"{% endif %}>{{ h.cta_label }}
           <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 11h12.2l-4.6-4.6L13 5l7 7-7 7-1.4-1.4 4.6-4.6H4z"/></svg></a>{% endif %}
-        {% if h.cta2_label %}<a class="btn btn--glass" href="{{ h.cta2_url|default:'#' }}"{% if h.cta2_url|slice:":4" == "http" %} target="_blank" rel="noopener"{% endif %}>{{ h.cta2_label }}</a>{% endif %}
+        {% if h.cta2_label %}<a class="btn btn--glass" href="{{ h.cta2_url|contact_url }}"{% if h.cta2_url|is_external %} target="_blank" rel="noopener"{% endif %}>{{ h.cta2_label }}</a>{% endif %}
       </div>{% endif %}
     </div>
   </article>
