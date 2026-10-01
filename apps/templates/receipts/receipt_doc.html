@@ -1,3 +1,4 @@
+{% load jt_contact %}
 {% load humanize %}<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -115,7 +116,7 @@ body{background:#E8ECF1;font-size:12.5px;line-height:1.55;
 
 <div class="c sm" style="margin-top:5pt">
   Address: Dar es Salaam, Tanzania<br>
-  Tel: +255 629 712 678<br>
+  Tel: {% contact "phone_display" %}<br>
   info@jamiitek.com
 </div>
 

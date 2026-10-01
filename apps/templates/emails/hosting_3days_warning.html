@@ -1,4 +1,5 @@
 {% extends 'emails/base_email.html' %}
+{% load jt_contact %}
 {% block content %}
 
 <!-- HEADER ACCENT: Red/Orange — urgent -->
@@ -82,7 +83,7 @@
 <div class="alert alert-info">
   <strong>⚡ After Payment — What to Do</strong>
   After making the payment, <strong>do not wait</strong> — immediately contact us with your payment proof so we can process your renewal right away and avoid suspension:<br><br>
-  📱 <strong>WhatsApp:</strong> +255 750 910 158<br>
+  📱 <strong>WhatsApp:</strong> {% contact "phone_display" %}<br>
   ✉ <strong>Email:</strong> info@jamiitek.co.tz<br><br>
   We process renewals within a few hours of receiving payment confirmation.
 </div>

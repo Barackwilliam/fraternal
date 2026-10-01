@@ -1,4 +1,5 @@
 {% extends 'builder/base_panel.html' %}
+{% load jt_contact %}
 {% block title %}Website Studio — {{ site.site_name }}{% endblock %}
 
 {# Studio haipakii background ya 3D — preview tayari inachorwa pembeni #}
@@ -282,7 +283,7 @@ vitufe vinaziunganisha kwa attribute ya form="…".{% endcomment %}
       {{ site.subdomain }}.jamiitek.com keeps working too.</p>
     {% else %}
     <p class="hint">Use your own address like <b>www.mybusiness.co.tz</b> with Premium.
-      <a href="https://wa.me/255750910158?text=Hello%20JamiiTek,%20I%20want%20to%20upgrade%20{{ site.subdomain }}.jamiitek.com%20to%20Premium%20for%20a%20custom%20domain"
+      <a href="https://wa.me/{% contact "wa" %}?text=Hello%20JamiiTek,%20I%20want%20to%20upgrade%20{{ site.subdomain }}.jamiitek.com%20to%20Premium%20for%20a%20custom%20domain"
          target="_blank" rel="noopener" style="color:var(--green)">Upgrade via WhatsApp →</a></p>
     {% endif %}
   </form>

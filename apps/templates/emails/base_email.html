@@ -1,3 +1,4 @@
+{% load jt_contact %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -77,7 +78,7 @@
       <div class="divider"></div>
       <p>This email was sent by JamiiTek Technologies.<br>
       Questions? Contact us at <a href="mailto:info@jamiitek.com">info@jamiitek.com</a><br>
-      or call <a href="tel:+255750910158">+255 750 910 158</a> · <a href="https://www.jamiitek.com">jamiitek.com</a></p>
+      or call <a href="tel:{% contact "phone" %}">{% contact "phone_display" %}</a> · <a href="https://www.jamiitek.com">jamiitek.com</a></p>
       <div class="footer-brand">© {% now "Y" %} JamiiTek Technologies — Dar es Salaam</div>
     </div>
   </div>

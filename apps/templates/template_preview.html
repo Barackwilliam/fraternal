@@ -1,3 +1,4 @@
+{% load jt_contact %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -740,7 +741,7 @@ function showToast(m){
 function orderNow(){
   const u=location.href;
   const m='Habari JamiiTek! 👋\n\nNimetazama preview ya template *'+NAME+'* ('+CAT+') na ninapenda sana!\n\n🔗 '+u+'\n\nNaomba tuongee kuhusu jinsi ya kuipata. Asante!';
-  window.open('https://wa.me/255629712678?text='+encodeURIComponent(m),'_blank');
+  window.open('https://wa.me/{% contact "wa" %}?text='+encodeURIComponent(m),'_blank');
 }
 </script>
 </body>

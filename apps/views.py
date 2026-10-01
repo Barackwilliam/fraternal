@@ -255,8 +255,9 @@ JamiiTek Team
             # Kosa halisi linaenda logs, si kwa mteja. "name 'send_mail' is
             # not defined" halimsaidii, na linafichua muundo wa ndani.
             logger.exception('Contact form: kutuma email kumeshindwa')
-            ujumbe = ("Samahani, ujumbe haujatoka. Tafadhali tupigie "
-                      "+255 629 712 678 au andika info@jamiitek.com.")
+            from apps.contact import contact
+            ujumbe = (f"Samahani, ujumbe haujatoka. Tafadhali tupigie "
+                      f"{contact()['phone_display']} au andika info@jamiitek.com.")
             messages.error(request, ujumbe)
             return render(request, 'contact.html', {'ujumbe': ujumbe})
     

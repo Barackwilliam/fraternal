@@ -33,6 +33,7 @@ from django.conf import settings
 from django.contrib.staticfiles import finders
 from django.template.loader import render_to_string
 from xhtml2pdf import pisa
+from apps.contact import contact as _contact
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -43,7 +44,7 @@ COMPANY = {
     'name':     'JamiiTek Digital Agency',
     'tagline':  'Your Trusted Digital Partner in Tanzania',
     'address':  'Kizota, Dodoma',
-    'whatsapp': '+255 750 910 158',
+    'whatsapp': _contact()['phone_display'],
     'email':    'info@jamiitek.com',
     'website':  'www.jamiitek.com',
 }

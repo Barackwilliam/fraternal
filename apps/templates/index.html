@@ -1,3 +1,4 @@
+{% load jt_contact %}
 {% load static %}<!DOCTYPE html>
 <html lang="en" prefix="og: https://ogp.me/ns#">
 <head>
@@ -224,12 +225,26 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 .hs{position:relative;background:var(--navy-950);overflow:hidden;isolation:isolate;
   min-height:560px;min-height:clamp(500px,86vh,620px);min-height:clamp(500px,86svh,620px)}
 @media (min-width:900px){.hs{min-height:clamp(560px,74vh,720px)}}
-.hs__slide{position:absolute;inset:0;opacity:0;visibility:hidden;
-  transition:opacity .9s var(--ease),visibility .9s}
+.hs__slide{position:absolute;inset:0;opacity:0;visibility:hidden}
 .hs__slide.is-on{opacity:1;visibility:visible;z-index:2}
+/* Slide inayoondoka inabaki CHINI ya mpya hadi pazia likamilike — hakuna
+   mweko mweusi kati ya slides mbili. */
+.hs__slide.is-out{opacity:1;visibility:visible;z-index:1}
 .hs__img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
-  transform:scale(1.06);will-change:transform}
+  transform:scale(1.02);will-change:transform}   /* karibu na mwisho wa `ken` — slide ikiondoka, picha haiiruki */
 .hs__slide.is-on .hs__img{animation:ken 10s ease-out forwards}
+/* Pazia: picha mpya inafunguka kutoka upande wa mwelekeo */
+.hs.is-fwd  .hs__slide.is-enter .hs__img{animation:hsWipeFwd 1s var(--ease) both, ken 10s ease-out forwards}
+.hs.is-back .hs__slide.is-enter .hs__img{animation:hsWipeBack 1s var(--ease) both, ken 10s ease-out forwards}
+@keyframes hsWipeFwd {from{clip-path:inset(0 0 0 100%)}to{clip-path:inset(0 0 0 0)}}
+@keyframes hsWipeBack{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+/* Pazia la rangi linaloongoza picha — mstari mwembamba wa dhahabu */
+.hs__slide.is-enter::after{content:"";position:absolute;top:0;bottom:0;width:3px;z-index:4;pointer-events:none;
+  background:linear-gradient(180deg,transparent,var(--gold),transparent);opacity:.9}
+.hs.is-fwd  .hs__slide.is-enter::after{animation:hsEdgeFwd 1s var(--ease) both}
+.hs.is-back .hs__slide.is-enter::after{animation:hsEdgeBack 1s var(--ease) both}
+@keyframes hsEdgeFwd {from{left:100%;opacity:1}85%{opacity:1}to{left:0;opacity:0}}
+@keyframes hsEdgeBack{from{left:0;opacity:1}85%{opacity:1}to{left:100%;opacity:0}}
 @keyframes ken{from{transform:scale(1.1)}to{transform:scale(1.005)}}
 /* mobile: dark top-to-bottom so text always reads; desktop: side gradient */
 .hs__scrim{position:absolute;inset:0;
@@ -247,8 +262,8 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
   mask-image:radial-gradient(80% 70% at 30% 45%,#000 20%,transparent 100%)}
 .hs__body{position:relative;z-index:3;height:100%;display:flex;flex-direction:column;
   justify-content:center;color:#fff;
-  padding-block:96px 104px;max-width:760px}
-@media (min-width:900px){.hs__body{padding-block:80px 96px}}
+  padding-block:96px 128px;max-width:760px}
+@media (min-width:900px){.hs__body{padding-block:80px 150px}}   /* nafasi kwa vitufe vya slider juu ya kadi ya domain */
 .hs__eyebrow{display:inline-flex;align-items:center;gap:8px;align-self:flex-start;
   padding:6px 13px;border-radius:100px;background:rgba(245,166,35,.16);
   border:1px solid rgba(245,166,35,.42);color:var(--gold-2);
@@ -276,10 +291,36 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 .hs__slide.is-on .hs__title{animation:rise .8s .2s both var(--ease)}
 .hs__slide.is-on .hs__sub{animation:rise .8s .32s both var(--ease)}
 .hs__slide.is-on .hs__btns{animation:rise .8s .44s both var(--ease)}
+/* Baada ya kubadilisha: maandishi yanaingia kutoka upande wa mwelekeo… */
+.hs.is-fwd  .hs__slide.is-enter .hs__eyebrow{animation:hsInFwd .7s .30s both var(--ease)}
+.hs.is-fwd  .hs__slide.is-enter .hs__title  {animation:hsInFwd .8s .38s both var(--ease)}
+.hs.is-fwd  .hs__slide.is-enter .hs__sub    {animation:hsInFwd .8s .48s both var(--ease)}
+.hs.is-fwd  .hs__slide.is-enter .hs__btns   {animation:hsInFwd .8s .58s both var(--ease)}
+.hs.is-back .hs__slide.is-enter .hs__eyebrow{animation:hsInBack .7s .30s both var(--ease)}
+.hs.is-back .hs__slide.is-enter .hs__title  {animation:hsInBack .8s .38s both var(--ease)}
+.hs.is-back .hs__slide.is-enter .hs__sub    {animation:hsInBack .8s .48s both var(--ease)}
+.hs.is-back .hs__slide.is-enter .hs__btns   {animation:hsInBack .8s .58s both var(--ease)}
+/* …na ya zamani yanaondoka upande mwingine, haraka, yasipishane */
+.hs.is-fwd  .hs__slide.is-out .hs__body{animation:hsOutFwd .45s both var(--ease)}
+.hs.is-back .hs__slide.is-out .hs__body{animation:hsOutBack .45s both var(--ease)}
+@keyframes hsInFwd  {from{opacity:0;transform:translateX(56px)}to{opacity:1;transform:none}}
+@keyframes hsInBack {from{opacity:0;transform:translateX(-56px)}to{opacity:1;transform:none}}
+@keyframes hsOutFwd {to{opacity:0;transform:translateX(-40px)}}
+@keyframes hsOutBack{to{opacity:0;transform:translateX(40px)}}
+@media (prefers-reduced-motion:reduce){
+  .hs__slide .hs__img,.hs__slide .hs__body,.hs__slide .hs__body *{animation:none!important}
+  .hs__slide.is-enter::after{display:none}
+  .hs__dot.is-on::after{animation:none;width:100%}
+}
 @keyframes rise{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
 
 .hs__ui{position:absolute;left:0;right:0;bottom:0;z-index:6;pointer-events:none}
-.hs__ui .wrap{display:flex;align-items:center;gap:14px;padding-bottom:22px}
+/* Kadi ya domain (.dom) inaingia ndani ya hero kwa --dom-overlap. Awali vitufe
+   vilikuwa 22px kutoka chini — CHINI ya kadi hiyo, na mishale ← → haikuweza
+   kubonyezwa kabisa kwenye kompyuta. */
+.hs{--dom-overlap:46px}
+@media (min-width:900px){.hs{--dom-overlap:58px}}
+.hs__ui .wrap{display:flex;align-items:center;gap:14px;padding-bottom:calc(var(--dom-overlap) + 18px)}
 .hs__dots{display:flex;gap:7px;pointer-events:auto}
 .hs__dot{width:26px;height:4px;border-radius:99px;background:rgba(255,255,255,.28);
   position:relative;overflow:hidden;transition:width .3s var(--ease),background .3s;
@@ -301,7 +342,7 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 @media (hover:hover){.hs__arrow:hover{background:var(--gold);color:#1A1206;border-color:var(--gold);transform:translateY(-2px)}}
 @media (min-width:768px){
   .hs__arrows{display:flex}
-  .hs__ui .wrap{padding-bottom:26px}
+  .hs__ui .wrap{padding-bottom:calc(var(--dom-overlap) + 22px)}
   .hs__dot{width:34px}.hs__dot.is-on{width:66px}
 }
 
@@ -631,9 +672,9 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 <div class="topbar">
   <div class="wrap topbar__in">
     <div class="topbar__g">
-      <a class="topbar__i" href="tel:+255629712678">
+      <a class="topbar__i" href="tel:{% contact "phone" %}">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.6 10.8a15 15 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.6 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.6 3.6a1 1 0 0 1-.25 1z"/></svg>
-        +255 629 712 678</a>
+        {% contact "phone_display" %}</a>
       <a class="topbar__i" href="mailto:info@jamiitek.com">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2m0 4-8 5-8-5V6l8 5 8-5z"/></svg>
         info@jamiitek.com</a>
@@ -1014,7 +1055,7 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
       <div class="cta__b">
         <a class="btn btn--gold" href="{% url 'get_started' %}">Start your project
           <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 11h12.2l-4.6-4.6L13 5l7 7-7 7-1.4-1.4 4.6-4.6H4z"/></svg></a>
-        <a class="btn btn--glass" href="https://wa.me/255629712678" target="_blank" rel="noopener">Chat on WhatsApp</a>
+        <a class="btn btn--glass" href="https://wa.me/{% contact "wa" %}" target="_blank" rel="noopener">Chat on WhatsApp</a>
       </div>
     </div>
   </div>
@@ -1099,7 +1140,7 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
           <li><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7m0 9.5A2.5 2.5 0 1 1 14.5 9 2.5 2.5 0 0 1 12 11.5"/></svg>
             Dar es Salaam, Tanzania</li>
           <li><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.6 10.8a15 15 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.6 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.6 3.6a1 1 0 0 1-.25 1z"/></svg>
-            <a href="tel:+255629712678">+255 629 712 678</a></li>
+            <a href="tel:{% contact "phone" %}">{% contact "phone_display" %}</a></li>
           <li><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2m0 4-8 5-8-5V6l8 5 8-5z"/></svg>
             <a href="mailto:info@jamiitek.com">info@jamiitek.com</a></li>
           <li><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2m0 2.04A14 14 0 0 1 13.9 8h-3.8A14 14 0 0 1 12 4.04M4.26 14a7.8 7.8 0 0 1 0-4h3.4a17 17 0 0 0 0 4z"/></svg>
@@ -1198,7 +1239,16 @@ if ('IntersectionObserver' in window) {
   document.querySelectorAll('[data-count]').forEach(function(el){ cIO.observe(el); });
 }
 
-/* ═════ HERO SLIDER ═════ */
+/* ═════ HERO SLIDER ═════
+   Mantiki iliyobadilishwa:
+   • Muda unaongozwa na DOT yenyewe: slide inabadilika pale `fill` ya dot
+     inapoisha. Awali setInterval ilianza upya kila baada ya kusimama, wakati
+     dot iliendelea kutoka ilipokuwa — dot ilijaa, kisha ikasubiri bure.
+   • Mwelekeo: mbele -> pazia kutoka kulia; nyuma -> kutoka kushoto.
+   • ←/→ zinafanya kazi tu slider ikionekana na mtu HAANDIKI kwenye sanduku
+     (awali kurekebisha herufi kwenye utafutaji wa domain kulibadilisha slide).
+   • Inasimama: kipanya juu, focus ndani, tab nyingine, au slider haionekani.
+   • Picha ya slide inayofuata inapakiwa mapema.                          */
 (function(){
   var root = document.querySelector('.hs');
   if (!root) return;
@@ -1206,55 +1256,91 @@ if ('IntersectionObserver' in window) {
       dots = [].slice.call(root.querySelectorAll('.hs__dot')),
       now = document.getElementById('hsNow'),
       prev = document.getElementById('hsPrev'), next = document.getElementById('hsNext'),
-      DUR = 7000, i = 0, timer = null;
+      n = slides.length, DUR = 7000, i = 0, outTimer = null,
+      hovering = false, focused = false, onScreen = true;
 
   root.style.setProperty('--hs-dur', DUR + 'ms');
+  if (n < 2) return;
 
-  function go(n){
-    n = (n + slides.length) % slides.length;
-    if (n === i) return;
-    slides[i].classList.remove('is-on'); slides[i].setAttribute('aria-hidden','true');
-    dots[i].classList.remove('is-on');   dots[i].setAttribute('aria-selected','false');
-    i = n;
-    slides[i].classList.add('is-on');    slides[i].removeAttribute('aria-hidden');
-    dots[i].classList.add('is-on');      dots[i].setAttribute('aria-selected','true');
+  function preload(k){
+    var img = slides[(k + n) % n].querySelector('.hs__img');
+    if (img && img.loading === 'lazy') img.loading = 'eager';
+  }
+  function syncPause(){
+    root.classList.toggle('is-paused', hovering || focused || !onScreen || document.hidden);
+  }
+
+  function go(to, dir){
+    to = (to + n) % n;
+    if (to === i) return;
+    dir = dir || (to > i ? 1 : -1);
+    var from = slides[i], incoming = slides[to];
+
+    clearTimeout(outTimer);
+    slides.forEach(function(s){ s.classList.remove('is-out', 'is-enter'); });
+    root.classList.toggle('is-fwd', dir > 0);
+    root.classList.toggle('is-back', dir < 0);
+
+    from.classList.remove('is-on');
+    from.classList.add('is-out');
+    from.setAttribute('aria-hidden', 'true');
+    void incoming.offsetWidth;                       // anzisha animations upya
+    incoming.classList.add('is-on', 'is-enter');
+    incoming.removeAttribute('aria-hidden');
+
+    dots[i].classList.remove('is-on');  dots[i].setAttribute('aria-selected', 'false');
+    dots[to].classList.add('is-on');    dots[to].setAttribute('aria-selected', 'true');
+    i = to;
     if (now) now.textContent = String(i + 1).padStart(2, '0');
-    restart();
-  }
-  function restart(){
-    clearInterval(timer);
-    if (reduced || slides.length < 2) return;
-    timer = setInterval(function(){ go(i + 1); }, DUR);
-  }
-  function pause(on){ root.classList.toggle('is-paused', on); if (on) clearInterval(timer); else restart(); }
 
-  dots.forEach(function(d, k){ d.addEventListener('click', function(){ go(k); }); });
-  if (prev) prev.addEventListener('click', function(){ go(i - 1); });
-  if (next) next.addEventListener('click', function(){ go(i + 1); });
-  root.addEventListener('mouseenter', function(){ pause(true); });
-  root.addEventListener('mouseleave', function(){ pause(false); });
-  root.addEventListener('focusin', function(){ pause(true); });
-  root.addEventListener('focusout', function(){ pause(false); });
-  document.addEventListener('visibilitychange', function(){ pause(document.hidden); });
+    outTimer = setTimeout(function(){ from.classList.remove('is-out'); }, 1050);
+    preload(i + 1);
+  }
+
+  // Autoplay: dot inapojaa, slide inabadilika. Kusimama = animation-play-state.
+  dots.forEach(function(d, k){
+    d.addEventListener('animationend', function(e){
+      if (e.animationName === 'fill' && d.classList.contains('is-on') && !reduced) go(i + 1, 1);
+    });
+    d.addEventListener('click', function(){ go(k, k > i ? 1 : -1); });
+  });
+  if (prev) prev.addEventListener('click', function(){ go(i - 1, -1); });
+  if (next) next.addEventListener('click', function(){ go(i + 1, 1); });
+
+  root.addEventListener('mouseenter', function(){ hovering = true;  syncPause(); });
+  root.addEventListener('mouseleave', function(){ hovering = false; syncPause(); });
+  root.addEventListener('focusin',    function(){ focused = true;   syncPause(); });
+  root.addEventListener('focusout',   function(){ focused = false;  syncPause(); });
+  document.addEventListener('visibilitychange', syncPause);
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(function(en){ onScreen = en[0].isIntersecting; syncPause(); },
+                             {threshold: .25}).observe(root);
+  }
+
+  function typing(t){
+    return t && (/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName) || t.isContentEditable);
+  }
   addEventListener('keydown', function(e){
-    if (nav.classList.contains('is-open')) return;
-    if (e.key === 'ArrowLeft') go(i - 1);
-    if (e.key === 'ArrowRight') go(i + 1);
+    if (!onScreen || typing(e.target) || nav.classList.contains('is-open')) return;
+    if (e.key === 'ArrowLeft')  go(i - 1, -1);
+    if (e.key === 'ArrowRight') go(i + 1, 1);
   });
 
   var sx = 0, sy = 0, tracking = false;
   root.addEventListener('touchstart', function(e){
-    sx = e.touches[0].clientX; sy = e.touches[0].clientY; tracking = true; pause(true);
+    sx = e.touches[0].clientX; sy = e.touches[0].clientY; tracking = true;
+    hovering = true; syncPause();
   }, {passive:true});
   root.addEventListener('touchend', function(e){
     if (!tracking) return;
-    tracking = false;
+    tracking = false; hovering = false;
     var dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
-    if (Math.abs(dx) > 46 && Math.abs(dx) > Math.abs(dy)) go(dx < 0 ? i + 1 : i - 1);
-    pause(false);
+    if (Math.abs(dx) > 46 && Math.abs(dx) > Math.abs(dy)) go(dx < 0 ? i + 1 : i - 1, dx < 0 ? 1 : -1);
+    syncPause();
   }, {passive:true});
 
-  restart();
+  preload(1);
+  syncPause();
 })();
 
 /* ═════ Scroll-snap carousels ═════ */

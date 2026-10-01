@@ -65,6 +65,7 @@ def client_required(view_func):
 
 # ── REGISTER ───────────────────────────────────────────────────────
 from apps.turnstile import verify_token, get_client_ip
+from apps.contact import contact as _contact
 
 def portal_register(request):
     if request.user.is_authenticated and not request.user.is_staff:
@@ -781,7 +782,7 @@ def portal_request_invoice(request):
         }],
         payment_methods=[
             {'method': 'NMB Bank', 'details': f"{getattr(settings, 'NMB_ACCOUNT', '21410034200')} — JamiiTek Technologies"},
-            {'method': 'M-Pesa', 'details': getattr(settings, 'MPESA_NUMBER', '0750910158') + ' — JamiiTek'},
+            {'method': 'M-Pesa', 'details': getattr(settings, 'MPESA_NUMBER', '') or _contact()['mpesa'] + ' — JamiiTek'},
         ],
         payment_terms='Please pay by the due date to avoid service interruption.',
         notes_en=(f'This invoice covers {label} of hosting for {website.name}. '

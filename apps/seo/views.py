@@ -1,6 +1,7 @@
 """
 JamiiTek SEO — robots.txt and other SEO endpoints
 """
+from apps.contact import contact as _contact
 from django.http import HttpResponse
 from django.views.decorators.cache import cache_page
 
@@ -129,7 +130,8 @@ def llms_txt(request):
             '',
             'Prices are in Tanzanian shillings (TSh). Customers can: (1) customize any template free in the '
             'JamiiTek Builder, (2) choose a hosted plan where JamiiTek sets everything up, (3) buy the source code, '
-            'or (4) send a proposal for a fully custom website. Contact: WhatsApp +255 629 712 678, info@jamiitek.com.',
+            'or (4) send a proposal for a fully custom website. '
+            f"Contact: WhatsApp {_contact()['phone_display']}, info@jamiitek.com.",
             '',
             '## Main pages',
             f'- [Website templates]({base}/templates/): all premium website templates',

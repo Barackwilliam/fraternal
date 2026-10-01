@@ -1,3 +1,4 @@
+{% load jt_contact %}
 {% load static %}
 <!DOCTYPE html>
 <html lang="sw" data-theme="dark">
@@ -114,7 +115,7 @@
     <a href="/chatbot/register/" class="register-btn"><i class="fas fa-rocket"></i> Create Account — Start Free Trial</a>
     <div class="links-row">
       <a href="/bot/">← Back to JamiiBot</a>
-      <a href="https://wa.me/255750910158">Need help?</a>
+      <a href="https://wa.me/{% contact "wa" %}">Need help?</a>
     </div>
   </div>
 </div>

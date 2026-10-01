@@ -18,7 +18,7 @@ RESULT_TTL = 60 * 30          # 30 minutes
 THROTTLE_LIMIT = 25           # lookups
 THROTTLE_WINDOW = 60          # per minute, per IP
 
-WHATSAPP_NUMBER = '255629712678'
+from apps.contact import contact as _contact  # namba moja ya timu
 
 
 def _client_ip(request):
@@ -119,7 +119,7 @@ def _whatsapp_link(result):
     else:
         text = f'Hello JamiiTek, I need help with the domain {domain}.'
     from urllib.parse import quote
-    return f'https://wa.me/{WHATSAPP_NUMBER}?text={quote(text)}'
+    return f"https://wa.me/{_contact()['wa']}?text={quote(text)}"
 
 
 def domain_prices():

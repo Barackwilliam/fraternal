@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load jt_contact %}
 {% block title %}{% if seo %}{{ seo.title }}{% else %}Website Templates Tanzania — {{ total_count }} Premium Designs | JamiiTek{% endif %}{% endblock %}
 {% block meta_desc %}{% if seo %}{{ seo.description }}{% else %}{{ total_count }} premium website templates for Tanzanian businesses — restaurants, hotels, salons, safari, shops, churches and more. Customize free in the JamiiTek Builder or let us build it for you.{% endif %}{% endblock %}
 {% block meta_keywords %}{% if seo %}{{ seo.keywords }}{% else %}website templates Tanzania, website template Tanzania, business website template, restaurant website template, hotel website template, safari website template, salon website template, website builder Tanzania, template za website, kutengeneza website Tanzania, JamiiTek templates{% endif %}{% endblock %}
@@ -215,7 +216,7 @@ function goWhatsApp(){
   const names = {hosted: 'Hosted Plan (' + document.getElementById('mPriceHosted').textContent + ' TSh/month + domain)',
                  build: 'Full Build (Custom Quote)', source: 'Source Code (One-Time Payment)'};
   const msg = 'Hello JamiiTek! 👋\n\nI am interested in the *' + _tplName + '* template.\n\nSelected plan: *' + names[_plan] + '*\n\nPlease share more details on how to proceed. Thank you! 🙏';
-  window.open('https://wa.me/255629712678?text=' + encodeURIComponent(msg), '_blank');
+  window.open('https://wa.me/{% contact "wa" %}?text=' + encodeURIComponent(msg), '_blank');
 }
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 </script>

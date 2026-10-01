@@ -1,4 +1,5 @@
 {% extends 'emails/base_email.html' %}
+{% load jt_contact %}
 {% block content %}
 
 {% comment %}
@@ -91,7 +92,7 @@ Hapa hakuna namba iliyoandikwa kwa mkono — kila kitu kinatoka
 <div class="alert alert-info">
   <strong>Already paid?</strong><br>
   Send us the confirmation now so we can process it before the deadline:<br><br>
-  <strong>WhatsApp:</strong> +255 750 910 158<br>
+  <strong>WhatsApp:</strong> {% contact "phone_display" %}<br>
   <strong>Email:</strong> info@jamiitek.com<br><br>
   If your payment is already on its way, reply to this email and we will hold the suspension while we confirm it.
 </div>

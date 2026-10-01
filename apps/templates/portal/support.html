@@ -1,4 +1,5 @@
 {% extends 'portal/base.html' %}
+{% load jt_contact %}
 {% block title %}Support{% endblock %}
 {% block content %}
 <style>
@@ -190,7 +191,7 @@
           <div class="ci-ico" style="background:rgba(37,211,102,.1);color:#25d366"><i class="fab fa-whatsapp" style="font-size:18px"></i></div>
           <div>
             <div class="ci-label">WhatsApp</div>
-            <div class="ci-val">+255 750 910 158</div>
+            <div class="ci-val">{% contact "phone_display" %}</div>
             <div class="ci-sub">Fastest response method</div>
           </div>
         </div>
@@ -219,7 +220,7 @@
           </div>
         </div>
         <div style="margin-top:16px;display:flex;flex-direction:column;gap:8px">
-          <a href="https://wa.me/255750910158?text=Hello JamiiTek, I need support for my website." target="_blank" class="wa-btn">
+          <a href="https://wa.me/{% contact "wa" %}?text=Hello JamiiTek, I need support for my website." target="_blank" class="wa-btn">
             <i class="fab fa-whatsapp fa-lg"></i> Chat on WhatsApp
           </a>
           <a href="mailto:info@jamiitek.co.tz" class="email-btn">

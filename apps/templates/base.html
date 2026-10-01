@@ -1,3 +1,4 @@
+{% load jt_contact %}
 {% load static %}
 <!DOCTYPE html>
 <html lang="en" prefix="og: https://ogp.me/ns#">
@@ -176,7 +177,7 @@
         <div class="footer-heading">Get in Touch</div>
         <ul class="footer-links">
           <li><a href="mailto:info@jamiitek.co.tz">info@jamiitek.com</a></li>
-          <li><a href="tel:+255629712678">+255629712678</a></li>
+          <li><a href="tel:{% contact "phone" %}">{% contact "phone_display" %}</a></li>
         </ul>
         <div class="footer-status mt-3">
           <div class="dot"></div>SYSTEMS OPERATIONAL

@@ -1,3 +1,4 @@
+{% load jt_contact %}
 {% load humanize %}<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -105,7 +106,7 @@ a{color:inherit;text-decoration:none}
 
   <p class="foot">
     Anything look wrong? Contact us on
-    <a href="tel:+255750910158">+255750910158</a> or
+    <a href="tel:{% contact "phone" %}">{% contact "phone_display" %}</a> or
     <a href="mailto:info@jamiitek.com">info@jamiitek.com</a>
     quoting {{ r.receipt_number }}.
   </p>
@@ -135,7 +136,7 @@ a{color:inherit;text-decoration:none}
 
   <p class="foot">
     We are happy to confirm any receipt for you.<br>
-    <a href="tel:+255750910158">+255750910158</a> &middot;
+    <a href="tel:{% contact "phone" %}">{% contact "phone_display" %}</a> &middot;
     <a href="mailto:info@jamiitek.com">info@jamiitek.com</a>
   </p>
 {% endif %}

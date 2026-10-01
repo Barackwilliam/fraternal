@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load jt_contact %}
 {% load static %}
 {% load custom_filters %}
 
@@ -208,7 +209,7 @@
         Your proposal JT-{{ proposal.id }} has reached our team. We'll reply to {{ proposal.client.email }}{% if proposal.client.phone %} or {{ proposal.client.phone }}{% endif %} within 24 hours.
       </div>
       <a class="pv-sent-wa" target="_blank" rel="noopener"
-         href="https://wa.me/255629712678?text={{ 'Hello JamiiTek! I just sent proposal JT-'|urlencode }}{{ proposal.id }}{{ ' ('|urlencode }}{{ proposal.website_type.name|urlencode }}{{ '). '|urlencode }}"><i class="fab fa-whatsapp"></i> Talk on WhatsApp</a>
+         href="https://wa.me/{% contact "wa" %}?text={{ 'Hello JamiiTek! I just sent proposal JT-'|urlencode }}{{ proposal.id }}{{ ' ('|urlencode }}{{ proposal.website_type.name|urlencode }}{{ '). '|urlencode }}"><i class="fab fa-whatsapp"></i> Talk on WhatsApp</a>
     </div>
     {% endif %}
 
@@ -348,7 +349,7 @@
         <b>What happens next</b><br>
         Our team reviews your requirements and contacts you within 24 hours to confirm
         scope, timeline, and the final quotation. Questions before then? Message us on
-        WhatsApp at <a href="https://wa.me/255629712678">+255 629 712 678</a>.
+        WhatsApp at <a href="https://wa.me/{% contact "wa" %}">{% contact "phone_display" %}</a>.
       </span>
     </div>
 

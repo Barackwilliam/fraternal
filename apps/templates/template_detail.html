@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load jt_contact %}
 {% load humanize %}
 {% block title %}{{ seo_title }} | JamiiTek{% endblock %}
 {% block meta_desc %}{{ seo_description }}{% endblock %}
@@ -139,11 +140,11 @@ ni HTML halisi — Google na AI zinaisoma; iframe ni onyesho tu.
       <div class="td-plan">
         <h3>🌐 Hosted — we set it up</h3><div class="pr">{{ tpl.price_hosted_monthly|intcomma }} <small>TSh / month</small></div><small style="color:var(--mut)">+ your domain</small>
         <ul><li>We add your content &amp; photos</li><li>Hosting, SSL &amp; updates</li><li>Your own domain (.co.tz / .com)</li><li>Support on WhatsApp</li></ul>
-        <a class="mk-btn s" target="_blank" rel="noopener" href="https://wa.me/255629712678?text={{ 'Hello JamiiTek! I want the '|urlencode }}{{ tpl.name|urlencode }}{{ ' template on the Hosted plan.'|urlencode }}">Choose Hosted on WhatsApp</a></div>
+        <a class="mk-btn s" target="_blank" rel="noopener" href="https://wa.me/{% contact "wa" %}?text={{ 'Hello JamiiTek! I want the '|urlencode }}{{ tpl.name|urlencode }}{{ ' template on the Hosted plan.'|urlencode }}">Choose Hosted on WhatsApp</a></div>
       <div class="td-plan">
         <h3>💻 Source code</h3><div class="pr">{{ tpl.price_source_code|intcomma }} <small>TSh once</small></div><small style="color:var(--mut)">host it anywhere</small>
         <ul><li>Full HTML/CSS/JS code</li><li>Use on your own server</li><li>Setup guidance included</li><li>JamiiTek footer credit stays</li></ul>
-        <a class="mk-btn s" target="_blank" rel="noopener" href="https://wa.me/255629712678?text={{ 'Hello JamiiTek! I want to buy the source code of the '|urlencode }}{{ tpl.name|urlencode }}{{ ' template.'|urlencode }}">Buy on WhatsApp</a></div>
+        <a class="mk-btn s" target="_blank" rel="noopener" href="https://wa.me/{% contact "wa" %}?text={{ 'Hello JamiiTek! I want to buy the source code of the '|urlencode }}{{ tpl.name|urlencode }}{{ ' template.'|urlencode }}">Buy on WhatsApp</a></div>
     </div>
   </section>
 

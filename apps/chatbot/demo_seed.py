@@ -19,7 +19,8 @@ from .models import (
 )
 
 
-JAMIITEK_WHATSAPP = '+255 750 910 158'   # namba ya timu — inapokea handoff na "piga hapa"
+from apps.contact import contact as _contact
+JAMIITEK_WHATSAPP = _contact()['phone_display']   # namba ya timu — inapokea handoff na "piga hapa"
 
 BUSINESS = {
     'bot_name':      'JamiiBot',

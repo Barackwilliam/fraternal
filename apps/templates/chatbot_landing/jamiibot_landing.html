@@ -1,3 +1,4 @@
+{% load jt_contact %}
 {% load static humanize %}
 <!DOCTYPE html>
 <html lang="en">
@@ -323,7 +324,7 @@
     <a href="#features" onclick="closeNav()"><i class="fas fa-star fa-sm"></i> Features</a>
     <a href="#pricing" onclick="closeNav()"><i class="fas fa-tag fa-sm"></i> Pricing</a>
     <a href="#setup-guide" onclick="closeNav()"><i class="fas fa-wrench fa-sm"></i> Setup Guide</a>
-    <a href="https://wa.me/255768146230?text=Habari%20JamiiBot%2C%20nataka%20kujaribu%20demo" target="_blank" class="demo" onclick="closeNav()"><i class="fab fa-whatsapp fa-sm"></i> Try the Live Demo</a>
+    <a href="https://wa.me/{% contact "bot_wa" %}?text=Habari%20JamiiBot%2C%20nataka%20kujaribu%20demo" target="_blank" class="demo" onclick="closeNav()"><i class="fab fa-whatsapp fa-sm"></i> Try the Live Demo</a>
   </nav>
   <div class="md-cta">
     <a href="/chatbot/login/" class="btn-login">Login</a>
@@ -345,7 +346,7 @@
       <p class="hero-sub">JamiiBot handles customer questions, showcases your services, and converts leads — automatically. While you focus on running your business.</p>
       <div class="hero-ctas">
         <a href="/chatbot/register/" class="btn-hero-primary"><i class="fas fa-rocket"></i> Start Free 7-Day Trial</a>
-        <a href="https://wa.me/255768146230?text=Habari%20JamiiBot%2C%20nataka%20kujaribu%20demo" target="_blank" class="btn-hero-wa"><i class="fab fa-whatsapp fa-lg"></i> Try the Live Demo</a>
+        <a href="https://wa.me/{% contact "bot_wa" %}?text=Habari%20JamiiBot%2C%20nataka%20kujaribu%20demo" target="_blank" class="btn-hero-wa"><i class="fab fa-whatsapp fa-lg"></i> Try the Live Demo</a>
       </div>
       <div class="hero-trust">
         <div class="hero-trust-stars">★★★★★</div>
@@ -612,7 +613,7 @@
         <div class="price-feature"><i class="fas fa-check"></i> 7-day free trial</div><a href="/chatbot/register/" class="btn-price">Start free trial</a></div>
       {% endfor %}
     </div>
-    <p class="price-note"><i class="fab fa-whatsapp"></i> Not sure which plan? <a href="https://wa.me/255768146230?text=Habari%20JamiiBot%2C%20nataka%20kujaribu%20demo" target="_blank" rel="noopener">Try the live demo on WhatsApp</a> — every plan starts with 7 free days.</p>
+    <p class="price-note"><i class="fab fa-whatsapp"></i> Not sure which plan? <a href="https://wa.me/{% contact "wa" %}?text=Habari%20JamiiBot%2C%20nataka%20kujaribu%20demo" target="_blank" rel="noopener">Try the live demo on WhatsApp</a> — every plan starts with 7 free days.</p>
   </div>
 </section>
 
@@ -649,7 +650,7 @@
   <p class="cta-sub">Join hundreds of Tanzanian businesses using JamiiBot. 7 days free — no payment required to start.</p>
   <div>
     <a href="/chatbot/register/" class="btn-cta-main"><i class="fas fa-rocket"></i> Create Free Account</a>
-    <a href="https://wa.me/255750910158" target="_blank" class="btn-cta-sec"><i class="fab fa-whatsapp"></i> Talk to Us First</a>
+    <a href="https://wa.me/{% contact "wa" %}" target="_blank" class="btn-cta-sec"><i class="fab fa-whatsapp"></i> Talk to Us First</a>
   </div>
   <div class="cta-trial">7-DAY FREE TRIAL · NO CREDIT CARD · CANCEL ANYTIME</div>
 </div>
@@ -661,7 +662,7 @@
       <div>
         <div class="footer-brand">JamiiTek 🤖</div>
         <div class="footer-desc">Building digital tools for Tanzanian businesses. JamiiBot brings AI-powered customer service to every WhatsApp number.</div>
-        <a href="https://wa.me/255750910158" target="_blank" class="footer-wa"><i class="fab fa-whatsapp fa-lg"></i> +255 750 910 158</a>
+        <a href="https://wa.me/{% contact "wa" %}" target="_blank" class="footer-wa"><i class="fab fa-whatsapp fa-lg"></i> {% contact "phone_display" %}</a>
       </div>
       <div>
         <div class="footer-col-title">JamiiBot</div>
@@ -681,8 +682,8 @@
       <div>
         <div class="footer-col-title">Support</div>
         <a href="mailto:info@jamiitek.com" class="footer-link">info@jamiitek.com</a>
-        <a href="https://wa.me/255750910158" target="_blank" class="footer-link">WhatsApp Support</a>
-        <a href="https://wa.me/255768146230?text=Habari%20JamiiBot%2C%20nataka%20kujaribu%20demo" target="_blank" class="footer-link">Try the Live Demo</a>
+        <a href="https://wa.me/{% contact "wa" %}" target="_blank" class="footer-link">WhatsApp Support</a>
+        <a href="https://wa.me/{% contact "bot_wa" %}?text=Habari%20JamiiBot%2C%20nataka%20kujaribu%20demo" target="_blank" class="footer-link">Try the Live Demo</a>
       </div>
     </div>
     <div class="footer-bottom">

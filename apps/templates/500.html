@@ -1,3 +1,4 @@
+{% load jt_contact %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -48,7 +49,7 @@ font-size:12.5px;color:#5F7590}
   <div class="f">
     <div class="br">Jamii<span>Tek</span></div>
     <div class="sl">Your Digital Success, Our Passion</div>
-    Need a hand? <a href="tel:+255629712678">+255 629 712 678</a> &middot; <a href="mailto:info@jamiitek.com">info@jamiitek.com</a>
+    Need a hand? <a href="tel:{% contact "phone" %}">{% contact "phone_display" %}</a> &middot; <a href="mailto:info@jamiitek.com">info@jamiitek.com</a>
   </div>
 </div>
 

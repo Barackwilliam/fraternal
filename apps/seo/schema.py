@@ -8,7 +8,8 @@ import json
 SITE_URL = "https://www.jamiitek.com"
 SITE_NAME = "JamiiTek"
 SITE_LOGO = "https://www.jamiitek.com/static/images/logo.png"
-PHONE = "+255750910158"
+from apps.contact import contact as _contact
+PHONE = _contact()["phone"]          # apps/contact.py — namba moja kila mahali
 EMAIL = "info@jamiitek.com"
 ADDRESS = "Dar es Salaam, Tanzania"
 FOUNDING_YEAR = "2020"
@@ -41,12 +42,11 @@ def organization_schema():
                 "@type": "ContactPoint",
                 "telephone": PHONE,
                 "contactType": "customer service",
-                "availableLanguage": ["English", "Swahili"],
-                "contactOption": "TollFree"
+                "availableLanguage": ["English", "Swahili"]
             }
         ],
         "sameAs": [
-            "https://wa.me/255750910158",
+            f"https://wa.me/{_contact()['wa']}",
         ],
         "areaServed": {
             "@type": "GeoCircle",

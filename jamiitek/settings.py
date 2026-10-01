@@ -409,3 +409,9 @@ LOGGING = {
         'django.request': {'handlers': ['console'], 'level': 'ERROR', 'propagate': False},
     },
 }
+
+# ── Namba za mawasiliano (apps/contact.py) ─────────────────
+# Timu (simu + WhatsApp + M-Pesa) na JamiiBot ya majaribio. Zisipowekwa,
+# apps/contact.py inatumia namba rasmi za sasa.
+JAMIITEK_PHONE = os.getenv('JAMIITEK_PHONE', '')
+JAMIIBOT_DEMO_WHATSAPP = os.getenv('JAMIIBOT_DEMO_WHATSAPP', '')

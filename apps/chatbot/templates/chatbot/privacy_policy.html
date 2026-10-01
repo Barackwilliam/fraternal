@@ -1,3 +1,4 @@
+{% load jt_contact %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -809,7 +810,7 @@
       <a href="https://www.jamiitek.com/contact/" class="cbtn">
         <i class="fas fa-comment-dots"></i> Contact Form
       </a>
-      <a href="https://wa.me/255757854907" target="_blank" class="cbtn">
+      <a href="https://wa.me/{% contact "wa" %}" target="_blank" class="cbtn">
         <i class="fab fa-whatsapp" style="color:#25d366"></i> WhatsApp
       </a>
     </div>
