@@ -184,6 +184,12 @@ form{margin-top:26px;display:grid;gap:14px}
     </div>
     {% endif %}
 
+    {% comment %} Wanaobonyeza "Start Free Trial" moja kwa moja hawaoni demo ya /bot/. Bila onyo hili, wanagundua kwenye hatua ya QR kwamba wanahitaji kifaa cha pili. {% endcomment %}
+    <div style="display:flex;gap:12px;align-items:flex-start;margin:0 0 18px;padding:13px 15px;border-radius:14px;background:rgba(245,197,66,.1);border:1px solid rgba(245,197,66,.4);color:#f7dc8c;font-size:13.5px;line-height:1.55">
+      <i class="fas fa-mobile-screen-button" style="margin-top:3px;color:#f5c542"></i>
+      <span><strong style="color:#fff">Utahitaji vifaa viwili kuunganisha WhatsApp:</strong> simu ya biashara (yenye WhatsApp) na kifaa kingine — kompyuta au simu nyingine — kuonyesha QR. <a href="/bot/#demo" style="color:#f5c542;font-weight:700">Tazama demo ya sekunde 45 →</a></span>
+    </div>
+
     <form method="post" id="regForm" novalidate>
       {% csrf_token %}
 

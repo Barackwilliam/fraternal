@@ -1,0 +1,630 @@
+{% comment %}
+  DEMO YA JAMIIBOT — "video" ya hatua kwa hatua, iliyojengwa kwa HTML/CSS/JS.
+
+  Kwa nini si video halisi:
+    • nyepesi kwenye data ya simu (hakuna MB za video)
+    • manukuu yanabadilika Kiswahili/Kiingereza
+    • maandishi yanahaririwa hapa — hakuna kurekodi upya mfumo ukibadilika
+
+  Hatua zinalingana na mfumo halisi:
+    register.html (siku 7 bila kadi) → wizard.html (jina la bot, unachouza,
+    uzinduzi) → connect.html (QR; Settings › Linked devices › Link a device)
+    → kujaribu kutoka simu nyingine → dashboard.
+
+  Injini: kila kipengele chenye data-at="ms" kinaonekana muda huo ukifika
+  ndani ya hatua yake. Kwa hiyo player inaweza kusimama, kurudi nyuma na
+  kuruka hatua bila kuvunjika — hali inahesabiwa kutoka muda, si kutoka
+  timers zinazofuatana.
+{% endcomment %}
+<style>
+.jd{--jd-bg:#0b0d12;--jd-line:rgba(255,255,255,.09);--jd-wa:#25d366;--jd-wa-d:#075e54;--jd-chat:#efeae2}
+.jd-wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+
+/* ── Onyo la vifaa viwili ── */
+.jd-need{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center;margin:0 auto 26px;max-width:860px;
+  padding:18px 22px;border-radius:20px;background:#fff8e6;border:1.5px solid #f5c542;box-shadow:0 10px 30px -18px rgba(180,120,0,.5)}
+.jd-need-ic{display:flex;gap:6px;align-items:flex-end}
+.jd-need-ic i{display:grid;place-items:center;border-radius:12px;background:#fff;border:1.5px solid #f0d27a;color:#8a5a00}
+.jd-need-ic i:first-child{width:46px;height:58px;font-size:20px}
+.jd-need-ic i:last-child{width:62px;height:46px;font-size:20px}
+.jd-need b{display:block;font-family:var(--head);font-size:18px;color:#5c3d00;margin-bottom:4px}
+.jd-need p{margin:0;font-size:14.5px;line-height:1.55;color:#6b4a00}
+.jd-need a{color:#8a5a00;font-weight:800}
+@media(max-width:620px){.jd-need{grid-template-columns:1fr}.jd-need-ic{justify-content:center}}
+
+/* ── Player ── */
+.jd-player{position:relative;border-radius:24px;overflow:hidden;background:var(--jd-bg);
+  box-shadow:0 40px 80px -30px rgba(6,7,10,.6),0 0 0 1px rgba(255,255,255,.06)}
+.jd-stage{position:relative;aspect-ratio:16/9;container-type:inline-size;overflow:hidden;
+  background:radial-gradient(70% 90% at 75% 20%,rgba(184,247,77,.13),transparent 60%),
+             radial-gradient(60% 80% at 10% 100%,rgba(37,211,102,.12),transparent 60%),var(--jd-bg)}
+@media(max-width:700px){.jd-stage{aspect-ratio:4/5}}
+
+.jd-scene{position:absolute;inset:0;opacity:0;visibility:hidden;transition:opacity .5s ease,visibility .5s}
+.jd-scene.is-on{opacity:1;visibility:visible}
+/* Vipengele vinavyojitokeza. Vifaa (laptop/simu) vinafifia TU — transform yao
+   ndiyo inayowaweka mahali pao, na kuibadilisha kungewasogeza. */
+.jd [data-at]:not(.jd-scr):not(.jd-cap-line):not(.jd-laptop):not(.jd-phone){opacity:0;transform:translateY(8px);transition:opacity .45s ease,transform .45s ease}
+.jd [data-at].on:not(.jd-scr):not(.jd-cap-line):not(.jd-laptop):not(.jd-phone){opacity:1;transform:none}
+.jd .jd-laptop[data-at],.jd .jd-phone[data-at]{opacity:0;transition:opacity .6s ease}
+.jd .jd-laptop[data-at].on,.jd .jd-phone[data-at].on{opacity:1}
+
+/* Kichwa cha hatua juu-kushoto */
+.jd-step{position:absolute;left:3.2cqw;top:3cqw;z-index:5;display:flex;align-items:center;gap:1.2cqw;
+  font-family:var(--head);color:#fff;font-size:2.3cqw;font-weight:600}
+.jd-step span{display:grid;place-items:center;width:4.2cqw;height:4.2cqw;border-radius:50%;background:var(--lime);color:#06070a;font-size:2cqw;font-weight:700}
+.jd-two{position:absolute;right:3.2cqw;top:3cqw;z-index:5;display:flex;align-items:center;gap:.8cqw;padding:.8cqw 1.4cqw;
+  border-radius:99px;background:#f5c542;color:#3d2900;font-weight:800;font-size:1.45cqw}
+@media(max-width:700px){
+  .jd-step{font-size:4.2cqw;gap:2cqw}.jd-step span{width:7cqw;height:7cqw;font-size:3.6cqw}
+  .jd-two{font-size:2.9cqw;padding:1.4cqw 2.4cqw}
+}
+
+/* ── Vifaa ── */
+.jd-laptop{position:absolute;width:56cqw;left:50%;top:52%;transform:translate(-50%,-50%)}
+.jd-laptop .scr{position:relative;aspect-ratio:16/10;border-radius:1.2cqw 1.2cqw 0 0;background:#1d2029;padding:.9cqw;
+  box-shadow:0 0 0 .25cqw #2c303b}
+.jd-laptop .base{height:1.5cqw;margin:0 -4cqw;border-radius:0 0 1.6cqw 1.6cqw;background:linear-gradient(#3a3f4b,#232730)}
+.jd-laptop .view{position:relative;height:100%;border-radius:.5cqw;overflow:hidden;background:#f8f9fc}
+.jd-phone{position:absolute;width:19cqw;aspect-ratio:9/19;border-radius:3cqw;background:#111;padding:.8cqw;
+  box-shadow:0 0 0 .3cqw #2a2d36,0 3cqw 6cqw -2cqw rgba(0,0,0,.7)}
+.jd-phone .view{position:relative;height:100%;border-radius:2.3cqw;overflow:hidden;background:#fff}
+.jd-phone .notch{position:absolute;top:1.2cqw;left:50%;width:5cqw;height:1.2cqw;border-radius:99px;background:#111;transform:translateX(-50%);z-index:9}
+.jd-label{position:absolute;left:50%;bottom:-4.4cqw;transform:translateX(-50%);white-space:nowrap;
+  font-size:1.35cqw;font-weight:800;color:#fff;background:rgba(255,255,255,.1);padding:.5cqw 1.2cqw;border-radius:99px}
+.jd-label b{color:var(--lime)}
+
+/* Skrini zinazobadilishana ndani ya kifaa kimoja */
+.jd-scr{position:absolute;inset:0;opacity:0;transition:opacity .4s ease}
+.jd-scr.is-cur{opacity:1}
+
+/* Mipangilio ya vifaa kwa hatua */
+.jd-pair .jd-laptop{width:48cqw;left:30%;top:50%}
+.jd-pair .jd-phone{right:9cqw;top:50%;transform:translateY(-52%)}
+.jd-solo-phone .jd-phone{left:50%;top:50%;transform:translate(-50%,-52%);width:22cqw}
+@media(max-width:700px){
+  .jd-laptop{width:86cqw;top:46%}
+  .jd-pair .jd-laptop{width:72cqw;left:42%;top:36%}
+  .jd-pair .jd-phone{width:30cqw;right:4cqw;top:auto;bottom:13cqw;transform:none}
+  .jd-solo-phone .jd-phone{width:40cqw}
+  .jd-label{font-size:2.7cqw;bottom:-7cqw}
+}
+
+/* ── UI ya JamiiBot (ndani ya laptop) ── */
+.jb{position:absolute;inset:0;padding:2.4cqw 3cqw;font-size:1.25cqw;color:#06070a;display:flex;flex-direction:column}
+.jb-top{display:flex;align-items:center;gap:.8cqw;font-weight:800;font-size:1.3cqw;margin-bottom:1.6cqw}
+.jb-top i{width:2cqw;height:2cqw;border-radius:.6cqw;background:var(--lime)}
+.jb h4{font-family:var(--head);font-size:2.2cqw;margin:0 0 1.4cqw;font-weight:600}
+.jb-f{margin-bottom:1cqw}
+.jb-f small{display:block;font-size:.95cqw;color:#64748b;margin-bottom:.35cqw;font-weight:700}
+.jb-in{height:2.6cqw;border-radius:.6cqw;border:.12cqw solid #e2e8f0;background:#fff;padding:0 .9cqw;display:flex;align-items:center;font-size:1.2cqw}
+.jb-in.focus{border-color:#06070a;box-shadow:0 0 0 .25cqw rgba(184,247,77,.6)}
+.jb-btn{margin-top:.6cqw;height:3cqw;border-radius:.8cqw;background:#06070a;color:#fff;display:grid;place-items:center;font-weight:800;font-size:1.25cqw;transition:transform .2s}
+.jb-btn.on{transform:scale(.96)!important}
+/* Katikati bila transform — kanuni ya kujitokeza ([data-at]) inatumia transform */
+.jb-toast{position:absolute;left:0;right:0;margin-inline:auto;width:max-content;max-width:92%;bottom:2cqw;background:#06070a;color:#fff;
+  padding:.9cqw 1.6cqw;border-radius:99px;font-weight:800;font-size:1.2cqw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.jb-toast b{color:var(--lime)}
+.jb-cols{display:grid;grid-template-columns:1fr 1fr;gap:0 1.4cqw}
+.jb-chips{display:flex;gap:.7cqw;flex-wrap:wrap}
+.jb-chip{padding:.55cqw 1.1cqw;border-radius:99px;background:rgba(184,247,77,.35);font-weight:800;font-size:1.15cqw}
+.jb-prog{display:flex;gap:.5cqw;margin-bottom:1.6cqw}
+.jb-prog i{flex:1;height:.45cqw;border-radius:99px;background:#e2e8f0}
+.jb-prog i.f{background:var(--lime)}
+.jb-big{font-family:var(--head);font-size:2.6cqw;font-weight:600;line-height:1.15;margin:0 0 1.2cqw}
+.caret::after{content:"|";margin-left:.1em;animation:jdBlink .8s steps(1) infinite}
+@keyframes jdBlink{50%{opacity:0}}
+
+.jb-connect{display:grid;grid-template-columns:auto 1fr;gap:2cqw;align-items:center}
+.jd-qr{width:15cqw;aspect-ratio:1;display:grid;grid-template-columns:repeat(21,1fr);padding:.8cqw;background:#fff;border-radius:.6cqw;
+  box-shadow:0 0 0 .12cqw #e2e8f0}
+.jd-qr i{background:#06070a}
+.jd-qr i.o{background:transparent}
+.jb-steps{margin:0;padding-left:1.6cqw;font-size:1.15cqw;line-height:1.75;color:#334155}
+.jb-steps b{color:#06070a}
+.jb-ok{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center}
+.jb-ok .ring{width:7cqw;height:7cqw;border-radius:50%;background:var(--jd-wa);color:#fff;display:grid;place-items:center;font-size:3.4cqw;
+  box-shadow:0 0 0 1.4cqw rgba(37,211,102,.18)}
+.jb-ok h5{font-family:var(--head);font-size:2.3cqw;margin:1.6cqw 0 .4cqw;font-weight:600}
+.jb-ok p{margin:0;color:#64748b;font-size:1.3cqw}
+.jb-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2cqw;margin-top:1cqw}
+.jb-stat{border-radius:1cqw;background:#fff;box-shadow:0 0 0 .12cqw #e2e8f0;padding:1.2cqw}
+.jb-stat b{display:block;font-family:var(--head);font-size:2.6cqw}
+.jb-stat small{color:#64748b;font-size:1cqw;font-weight:700}
+.jb-live{display:inline-flex;align-items:center;gap:.6cqw;padding:.5cqw 1.1cqw;border-radius:99px;background:rgba(37,211,102,.15);
+  color:#0b7a3a;font-weight:800;font-size:1.15cqw}
+.jb-live::before{content:"";width:.8cqw;height:.8cqw;border-radius:50%;background:var(--jd-wa);animation:jdPulse 1.4s infinite}
+@keyframes jdPulse{50%{box-shadow:0 0 0 .6cqw rgba(37,211,102,0)}0%{box-shadow:0 0 0 0 rgba(37,211,102,.5)}}
+
+/* ── UI ya WhatsApp (ndani ya simu) ── */
+.wa{position:absolute;inset:0;display:flex;flex-direction:column;font-size:1.05cqw;color:#111b21}
+.wa-bar{background:var(--jd-wa-d);color:#fff;padding:3.4cqw 1.2cqw 1cqw;font-weight:800;font-size:1.25cqw;display:flex;align-items:center;gap:.8cqw}
+.wa-bar .av{width:2.2cqw;height:2.2cqw;border-radius:50%;background:#cfe8d5}
+.wa-row{display:flex;align-items:center;gap:.9cqw;padding:1cqw 1.2cqw;border-bottom:.08cqw solid #eef0f2}
+.wa-row .av{width:2.6cqw;height:2.6cqw;border-radius:50%;background:#dfe5e7;flex:0 0 auto}
+.wa-row b{font-size:1.1cqw}
+.wa-row small{display:block;color:#667781;font-size:.9cqw}
+.wa-hl{background:rgba(37,211,102,.16);box-shadow:inset .35cqw 0 0 var(--jd-wa)}
+.wa-link{margin:1.6cqw 1.2cqw;height:3cqw;border-radius:99px;background:var(--jd-wa);color:#fff;display:grid;place-items:center;font-weight:800;font-size:1.15cqw}
+.wa-cam{position:absolute;inset:0;background:#111;display:grid;place-items:center}
+.wa-cam .frame{position:relative;width:76%;aspect-ratio:1;border-radius:1cqw;overflow:hidden}
+.wa-cam .frame .jd-qr{width:100%;padding:6%;border-radius:0}
+.wa-cam .frame::before,.wa-cam .frame::after{content:"";position:absolute;inset:0;border:.3cqw solid #fff;border-radius:1cqw;
+  -webkit-mask:linear-gradient(#000 0 0) top left/22% 22% no-repeat,linear-gradient(#000 0 0) top right/22% 22% no-repeat,
+                linear-gradient(#000 0 0) bottom left/22% 22% no-repeat,linear-gradient(#000 0 0) bottom right/22% 22% no-repeat;
+          mask:linear-gradient(#000 0 0) top left/22% 22% no-repeat,linear-gradient(#000 0 0) top right/22% 22% no-repeat,
+                linear-gradient(#000 0 0) bottom left/22% 22% no-repeat,linear-gradient(#000 0 0) bottom right/22% 22% no-repeat}
+.wa-cam .scan{position:absolute;left:4%;right:4%;height:.35cqw;background:var(--jd-wa);box-shadow:0 0 1.4cqw var(--jd-wa);animation:jdScan 1.6s ease-in-out infinite}
+@keyframes jdScan{0%,100%{top:8%}50%{top:90%}}
+.wa-cam small{position:absolute;bottom:2cqw;left:0;right:0;text-align:center;color:#fff;font-size:1cqw}
+.wa-done{position:absolute;inset:0;display:grid;place-items:center;background:rgba(7,94,84,.92);color:#fff;text-align:center;font-weight:800;font-size:1.3cqw}
+.wa-done i{display:block;font-size:4cqw;margin-bottom:.8cqw}
+.wa-chat{flex:1;background:var(--jd-chat);padding:1cqw;display:flex;flex-direction:column;gap:.7cqw;justify-content:flex-end}
+.wa-msg{max-width:84%;padding:.7cqw .9cqw;border-radius:.8cqw;font-size:1cqw;line-height:1.4;box-shadow:0 .1cqw .2cqw rgba(0,0,0,.08)}
+.wa-msg.in{background:#fff;align-self:flex-start;border-top-left-radius:0}
+.wa-msg.out{background:#d9fdd3;align-self:flex-end;border-top-right-radius:0}
+.wa-msg .who{display:block;font-size:.8cqw;font-weight:800;color:#0b7a3a;margin-bottom:.2cqw}
+.wa-typing{align-self:flex-end;background:#d9fdd3;border-radius:.8cqw;padding:.7cqw 1cqw;display:flex;gap:.35cqw}
+.wa-typing i{width:.55cqw;height:.55cqw;border-radius:50%;background:#7aa77f;animation:jdDot 1s infinite}
+.wa-typing i:nth-child(2){animation-delay:.15s}.wa-typing i:nth-child(3){animation-delay:.3s}
+@keyframes jdDot{50%{transform:translateY(-.4cqw);opacity:.5}}
+@media(max-width:700px){
+  .jb{font-size:2.1cqw;padding:3cqw 4cqw}.jb h4{font-size:3.6cqw}.jb-f small{font-size:1.7cqw}
+  .jb-in{height:4.6cqw;font-size:2cqw}.jb-btn{height:5cqw;font-size:2.1cqw}.jb-toast{font-size:2cqw}
+  .jb-chip{font-size:2cqw}.jb-big{font-size:4.2cqw}.jb-steps{font-size:1.9cqw}.jd-qr{width:22cqw}
+  .jb-stat b{font-size:4cqw}.jb-stat small{font-size:1.7cqw}.jb-live{font-size:1.9cqw}.jb-top{font-size:2.1cqw}
+  .jb-ok h5{font-size:3.6cqw}.jb-ok p{font-size:2.1cqw}.jb-ok .ring{width:11cqw;height:11cqw;font-size:5.4cqw}
+  .wa{font-size:1.75cqw}.wa-bar{font-size:2cqw;padding-top:5cqw}.wa-row b{font-size:1.8cqw}.wa-row small{font-size:1.5cqw}
+  .wa-link{font-size:1.9cqw;height:4.6cqw}.wa-msg{font-size:1.75cqw}.wa-msg .who{font-size:1.4cqw}.wa-done{font-size:2.1cqw}
+  .wa-cam small{font-size:1.7cqw}
+}
+
+/* Kadi ya vifaa viwili (hatua 3) */
+.jd-explain{position:absolute;left:50%;bottom:6cqw;transform:translateX(-50%);width:min(76cqw,820px);text-align:center;
+  color:#fff;font-size:1.9cqw;font-weight:700;line-height:1.45}
+.jd-explain b{color:#f5c542}
+@media(max-width:700px){.jd-explain{font-size:3.1cqw;bottom:3cqw;width:88cqw}}
+
+/* Kadi ya mwisho */
+.jd-end{position:absolute;inset:0;z-index:20;display:grid;place-items:center;text-align:center;padding:4cqw;
+  background:rgba(6,7,10,.82);backdrop-filter:blur(4px);opacity:0;visibility:hidden;transition:opacity .4s,visibility .4s}
+.jd-player.is-end .jd-end{opacity:1;visibility:visible}
+.jd-end h3{font-family:var(--head);color:#fff;font-size:clamp(20px,3.2cqw,34px);margin:0 0 8px}
+.jd-end p{color:rgba(255,255,255,.7);margin:0 0 20px;font-size:clamp(13px,1.6cqw,16px)}
+.jd-end .acts{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.jd-end a,.jd-end button{display:inline-flex;align-items:center;gap:8px;padding:12px 20px;border-radius:12px;font-weight:800;font-size:14px;
+  text-decoration:none;cursor:pointer;border:0;font-family:inherit}
+.jd-end a{background:var(--lime);color:#06070a}
+.jd-end button{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2)}
+
+/* Kitufe kikubwa cha kucheza (kabla ya kuanza) */
+.jd-big-play{position:absolute;inset:0;z-index:15;display:grid;place-items:center;background:rgba(6,7,10,.45);border:0;cursor:pointer;
+  transition:opacity .3s,visibility .3s}
+.jd-big-play span{width:84px;height:84px;border-radius:50%;background:var(--lime);color:#06070a;display:grid;place-items:center;font-size:30px;
+  box-shadow:0 0 0 14px rgba(184,247,77,.18)}
+.jd-player.is-started .jd-big-play{opacity:0;visibility:hidden}
+
+/* ── Manukuu ── */
+.jd-caps{position:relative;min-height:78px;padding:16px 22px;background:#11141b;border-top:1px solid var(--jd-line)}
+.jd-cap{position:absolute;inset:16px 22px auto;opacity:0;visibility:hidden;transition:opacity .35s}
+.jd-cap.is-on{opacity:1;visibility:visible}
+.jd-cap-line{position:absolute;inset:0;opacity:0;transition:opacity .35s;color:#e8edf5;font-size:15.5px;line-height:1.55}
+.jd-cap-line.is-cur{opacity:1}
+.jd-cap-line b{color:var(--lime)}
+.jd-cap-line .warn{color:#f5c542}
+
+/* ── Vidhibiti ── */
+.jd-ctl{display:flex;align-items:center;gap:12px;padding:12px 16px;background:#0d1016;border-top:1px solid var(--jd-line)}
+.jd-pp{width:40px;height:40px;border-radius:50%;border:0;background:var(--lime);color:#06070a;cursor:pointer;display:grid;place-items:center;flex:0 0 auto}
+.jd-segs{flex:1;display:flex;gap:5px}
+.jd-seg{flex:1;height:6px;border-radius:99px;background:rgba(255,255,255,.14);position:relative;overflow:hidden;cursor:pointer;border:0;padding:0}
+.jd-seg i{position:absolute;inset:0;width:0;background:var(--lime);border-radius:99px}
+.jd-seg:hover{background:rgba(255,255,255,.24)}
+.jd-time{font-family:var(--mono);font-size:12px;color:rgba(255,255,255,.55);min-width:72px;text-align:right}
+.jd-lang{display:flex;border-radius:99px;background:rgba(255,255,255,.08);padding:3px}
+.jd-lang button{border:0;background:transparent;color:rgba(255,255,255,.6);font-weight:800;font-size:12px;padding:6px 10px;border-radius:99px;cursor:pointer}
+.jd-lang button.on{background:#fff;color:#06070a}
+.jd-chips{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:18px}
+.jd-chip{border:1.5px solid var(--border);background:#fff;border-radius:99px;padding:8px 14px;font-weight:800;font-size:13px;color:#334155;cursor:pointer;
+  display:inline-flex;gap:8px;align-items:center;font-family:inherit}
+.jd-chip span{display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:#eef2f7;font-size:11px}
+.jd-chip.on{border-color:#06070a;background:#06070a;color:#fff}
+.jd-chip.on span{background:var(--lime);color:#06070a}
+.jd-chip.warn span{background:#f5c542;color:#3d2900}
+@media(max-width:620px){.jd-time{display:none}.jd-caps{min-height:96px}.jd-cap-line{font-size:14px}}
+
+/* Lugha */
+.jd[data-lang="sw"] .en,.jd[data-lang="en"] .sw{display:none!important}
+
+@media (prefers-reduced-motion:reduce){
+  .jd *{animation:none!important;transition:none!important}
+}
+</style>
+
+<section class="section jd" id="demo" data-lang="sw" style="background:var(--bg)">
+  <div class="jd-wrap">
+    <div class="section-tag" style="margin:0 auto 12px;display:table">
+      <span class="sw">Tazama demo</span><span class="en">Watch the demo</span></div>
+    <h2 class="section-h2" style="text-align:center">
+      <span class="sw">Kutoka usajili hadi bot hewani — hatua kwa hatua</span>
+      <span class="en">From sign-up to a live bot — step by step</span></h2>
+    <p class="section-sub" style="text-align:center;margin:0 auto 26px">
+      <span class="sw">Sekunde 45 zinazoonyesha kila hatua utakayopitia. Bonyeza hatua yoyote kuiruka.</span>
+      <span class="en">45 seconds showing every step you'll go through. Tap any step to jump to it.</span></p>
+
+    <!-- Onyo la vifaa viwili — LAZIMA lionekane kabla mtu hajaanza -->
+    <div class="jd-need" role="note">
+      <div class="jd-need-ic" aria-hidden="true"><i class="fab fa-whatsapp"></i><i class="fas fa-laptop"></i></div>
+      <div>
+        <b><span class="sw">⚠️ Utahitaji vifaa viwili kukamilisha usajili</span><span class="en">⚠️ You need two devices to finish setup</span></b>
+        <p class="sw"><strong>① Simu ya biashara</strong> yenye WhatsApp, na <strong>② kifaa kingine</strong> — kompyuta, tablet au simu nyingine.
+          QR ya kuunganisha inaonekana kwenye kifaa ②, na simu ① ndiyo inayoiskani. Simu haiwezi kuskani QR iliyo kwenye skrini yake yenyewe.
+          <a href="#setup-guide">Soma zaidi ↓</a></p>
+        <p class="en"><strong>① Your business phone</strong> with WhatsApp, and <strong>② another device</strong> — a computer, tablet or second phone.
+          The connection QR appears on device ②, and phone ① scans it. A phone can't scan a QR code shown on its own screen.
+          <a href="#setup-guide">Read more ↓</a></p>
+      </div>
+    </div>
+
+    <div class="jd-player" id="jdPlayer" tabindex="0" aria-label="JamiiBot setup demo">
+      <div class="jd-stage">
+
+        <!-- 1 · Kujisajili -->
+        <div class="jd-scene" data-dur="7000">
+          <div class="jd-step"><span>1</span><span class="sw" style="all:unset">Jisajili</span><span class="en" style="all:unset">Sign up</span></div>
+          <div class="jd-laptop"><div class="scr"><div class="view">
+            <div class="jb">
+              <div class="jb-top"><i></i>JamiiBot</div>
+              <h4>Start your free trial</h4>
+              <div class="jb-cols">
+                <div class="jb-f"><small>Business name</small><div class="jb-in" data-type data-at="500" data-text="Juma Electronics"></div></div>
+                <div class="jb-f"><small>Full name</small><div class="jb-in" data-type data-at="1700" data-text="Juma Hassan"></div></div>
+                <div class="jb-f"><small>Phone</small><div class="jb-in" data-type data-at="2700" data-text="+255 7XX XXX 456"></div></div>
+                <div class="jb-f"><small>Password</small><div class="jb-in" data-type data-at="3800" data-text="••••••••••"></div></div>
+              </div>
+              <div class="jb-btn" data-at="4900">Create account</div>
+              <div class="jb-toast" data-at="5500"><b>✓</b> <span class="sw">Akaunti imefunguliwa · Trial ya siku 7 imeanza</span><span class="en">Account created · 7-day trial started</span></div>
+            </div>
+          </div></div><div class="base"></div></div>
+        </div>
+
+        <!-- 2 · Wizard -->
+        <div class="jd-scene" data-dur="7500">
+          <div class="jd-step"><span>2</span><span class="sw" style="all:unset">Iambie bot kuhusu biashara yako</span><span class="en" style="all:unset">Tell the bot about your business</span></div>
+          <div class="jd-laptop"><div class="scr"><div class="view">
+            <div class="jd-scrs">
+              <div class="jd-scr" data-at="0"><div class="jb">
+                <div class="jb-prog"><i class="f"></i><i></i><i></i></div>
+                <p class="jb-big">What's your bot's name?</p>
+                <div class="jb-in focus" data-type data-at="600" data-text="Juma Bot"></div>
+              </div></div>
+              <div class="jd-scr" data-at="2600"><div class="jb">
+                <div class="jb-prog"><i class="f"></i><i class="f"></i><i></i></div>
+                <p class="jb-big">What do you sell?</p>
+                <div class="jb-chips">
+                  <span class="jb-chip" data-at="3100">📱 Simu</span>
+                  <span class="jb-chip" data-at="3500">🔌 Chaja</span>
+                  <span class="jb-chip" data-at="3900">🛠️ Matengenezo</span>
+                  <span class="jb-chip" data-at="4300">🚚 Delivery</span>
+                </div>
+              </div></div>
+              <div class="jd-scr" data-at="5200"><div class="jb">
+                <div class="jb-prog"><i class="f"></i><i class="f"></i><i class="f"></i></div>
+                <p class="jb-big">You're ready to launch 🚀</p>
+                <div class="jb-btn">Connect WhatsApp →</div>
+              </div></div>
+            </div>
+          </div></div><div class="base"></div></div>
+        </div>
+
+        <!-- 3 · Vifaa viwili -->
+        <div class="jd-scene jd-pair" data-dur="7000">
+          <div class="jd-step"><span>3</span><span class="sw" style="all:unset">Andaa vifaa viwili</span><span class="en" style="all:unset">Get two devices ready</span></div>
+          <div class="jd-two"><i class="fas fa-mobile-screen"></i>+<i class="fas fa-laptop"></i>
+            <span class="sw">Vifaa 2</span><span class="en">2 devices</span></div>
+          <div class="jd-laptop" data-at="300"><div class="scr"><div class="view">
+            <div class="jb"><div class="jb-top"><i></i>JamiiBot · Connect WhatsApp</div>
+              <div class="jb-connect"><div class="jd-qr"></div>
+                <div style="font-weight:800;color:#64748b"><span class="sw">QR inaonekana hapa</span><span class="en">The QR shows here</span></div></div></div>
+          </div></div><div class="base"></div>
+            <div class="jd-label"><b>②</b> <span class="sw">Kompyuta, tablet au simu nyingine</span><span class="en">Computer, tablet or second phone</span></div></div>
+          <div class="jd-phone" data-at="1100"><div class="notch"></div><div class="view">
+            <div class="wa"><div class="wa-bar">WhatsApp</div>
+              <div class="wa-row"><span class="av"></span><div><b>Mteja Asha</b><small>Bei ya chaja?</small></div></div>
+              <div class="wa-row"><span class="av"></span><div><b>Mteja Peter</b><small>Mko wazi leo?</small></div></div></div>
+          </div><div class="jd-label"><b>①</b> <span class="sw">Simu ya biashara</span><span class="en">Business phone</span></div></div>
+        </div>
+
+        <!-- 4 · Kuunganisha -->
+        <div class="jd-scene jd-pair" data-dur="12000">
+          <div class="jd-step"><span>4</span><span class="sw" style="all:unset">Unganisha WhatsApp</span><span class="en" style="all:unset">Connect WhatsApp</span></div>
+          <div class="jd-two"><i class="fas fa-mobile-screen"></i>+<i class="fas fa-laptop"></i>
+            <span class="sw">Vifaa 2</span><span class="en">2 devices</span></div>
+          <div class="jd-laptop"><div class="scr"><div class="view">
+            <div class="jd-scrs">
+              <div class="jd-scr" data-at="0"><div class="jb"><div class="jb-top"><i></i>JamiiBot · Connect WhatsApp</div>
+                <div class="jb-connect"><div class="jd-qr"></div>
+                  <ol class="jb-steps">
+                    <li>Fungua <b>WhatsApp</b> kwenye simu ya biashara</li>
+                    <li>Gusa <b>Settings › Linked devices</b></li>
+                    <li>Gusa <b>Link a device</b></li>
+                    <li>Scan QR iliyo hapo juu</li></ol></div></div></div>
+              <div class="jd-scr" data-at="9400"><div class="jb"><div class="jb-ok">
+                <div class="ring"><i class="fas fa-check"></i></div>
+                <h5>WhatsApp imeunganishwa</h5><p>+255 7XX XXX 456 · Juma Electronics</p></div></div></div>
+            </div>
+          </div></div><div class="base"></div>
+            <div class="jd-label"><b>②</b> <span class="sw">Inaonyesha QR</span><span class="en">Shows the QR</span></div></div>
+          <div class="jd-phone"><div class="notch"></div><div class="view">
+            <div class="jd-scrs">
+              <div class="jd-scr" data-at="0"><div class="wa"><div class="wa-bar">WhatsApp <span style="margin-left:auto">⋮</span></div>
+                <div class="wa-row"><span class="av"></span><div><b>Mteja Asha</b><small>Bei ya chaja?</small></div></div>
+                <div class="wa-row"><span class="av"></span><div><b>Mteja Peter</b><small>Mko wazi leo?</small></div></div></div></div>
+              <div class="jd-scr" data-at="2000"><div class="wa"><div class="wa-bar">Settings</div>
+                <div class="wa-row"><div><b>Account</b><small>Privacy, security</small></div></div>
+                <div class="wa-row wa-hl"><div><b>Linked devices</b><small>WhatsApp Web, JamiiBot…</small></div></div>
+                <div class="wa-row"><div><b>Chats</b><small>Theme, wallpapers</small></div></div></div></div>
+              <div class="jd-scr" data-at="4000"><div class="wa"><div class="wa-bar">Linked devices</div>
+                <div class="wa-link">Link a device</div>
+                <div style="padding:0 1.2cqw;color:#667781;font-size:.95cqw;text-align:center">Use WhatsApp on other devices</div></div></div>
+              <div class="jd-scr" data-at="5800"><div class="wa-cam"><div class="frame"><div class="jd-qr"></div><div class="scan"></div></div>
+                <small class="sw">Elekeza kamera kwenye QR ya kifaa ②</small><small class="en">Point the camera at device ②'s QR</small></div></div>
+              <div class="jd-scr" data-at="8800"><div class="wa-done"><div><i class="fas fa-circle-check"></i>
+                <span class="sw">Kifaa kimeunganishwa</span><span class="en">Device linked</span></div></div></div>
+            </div>
+          </div><div class="jd-label"><b>①</b> <span class="sw">Inaskani</span><span class="en">Scans</span></div></div>
+        </div>
+
+        <!-- 5 · Kujaribu -->
+        <div class="jd-scene jd-solo-phone" data-dur="8500">
+          <div class="jd-step"><span>5</span><span class="sw" style="all:unset">Jaribu bot yako</span><span class="en" style="all:unset">Test your bot</span></div>
+          <div class="jd-phone"><div class="notch"></div><div class="view">
+            <div class="wa"><div class="wa-bar"><span class="av"></span>Mteja · +255 7XX XXX 902</div>
+              <div class="wa-chat">
+                <div class="wa-msg in" data-at="600">Habari, mna chaja ya Samsung? 🔌</div>
+                <div class="wa-typing" data-at="1900" data-until="3800"><i></i><i></i><i></i></div>
+                <div class="wa-msg out" data-at="3800"><span class="who">🤖 Juma Bot</span>Habari! 👋 Ndiyo, tuna chaja ya Samsung 25W. Ungependa tukuletee leo?</div>
+                <div class="wa-msg in" data-at="5600">Ndiyo, niko Sinza</div>
+                <div class="wa-msg out" data-at="6900"><span class="who">🤖 Juma Bot</span>Sawa! Nimempa Juma taarifa — atakupigia kuthibitisha 📞</div>
+              </div></div>
+          </div><div class="jd-label"><b>①</b> <span class="sw">Simu ya biashara — bot inajibu yenyewe</span><span class="en">Business phone — the bot replies itself</span></div></div>
+        </div>
+
+        <!-- 6 · Tayari -->
+        <div class="jd-scene" data-dur="6000">
+          <div class="jd-step"><span>6</span><span class="sw" style="all:unset">Bot yako iko hewani</span><span class="en" style="all:unset">Your bot is live</span></div>
+          <div class="jd-laptop"><div class="scr"><div class="view">
+            <div class="jb"><div class="jb-top"><i></i>JamiiBot · Dashboard <span class="jb-live" style="margin-left:auto">LIVE</span></div>
+              <h4>Juma Bot</h4>
+              <div class="jb-stats">
+                <div class="jb-stat" data-at="400"><b>24/7</b><small class="sw">Inajibu muda wote</small><small class="en">Always answering</small></div>
+                <div class="jb-stat" data-at="900"><b>SW · EN</b><small class="sw">Kiswahili na Kiingereza</small><small class="en">Swahili and English</small></div>
+                <div class="jb-stat" data-at="1400"><b>7</b><small class="sw">Siku za trial bure</small><small class="en">Free trial days</small></div>
+              </div>
+            </div>
+          </div></div><div class="base"></div></div>
+        </div>
+
+        <button class="jd-big-play" type="button" aria-label="Play demo"><span><i class="fas fa-play"></i></span></button>
+        <div class="jd-end">
+          <div>
+            <h3><span class="sw">Tayari kuanza?</span><span class="en">Ready to start?</span></h3>
+            <p><span class="sw">Kumbuka: simu ya biashara + kifaa kingine. Trial ya siku 7, bila kadi.</span>
+               <span class="en">Remember: business phone + one more device. 7-day trial, no card.</span></p>
+            <div class="acts">
+              <a href="/chatbot/register/"><i class="fas fa-rocket"></i> <span class="sw">Anza trial bure</span><span class="en">Start free trial</span></a>
+              <button type="button" class="jd-replay"><i class="fas fa-rotate-left"></i> <span class="sw">Rudia</span><span class="en">Replay</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Manukuu: mstari wa mwisho ambao muda wake umefika ndio unaoonekana -->
+      <div class="jd-caps" aria-live="polite">
+        <div class="jd-cap"><div class="jd-scrs">
+          <div class="jd-cap-line jd-scr" data-at="0"><span class="sw">Bonyeza <b>Start Free Trial</b> hapa jamiitek.com/bot. Jaza jina la biashara, simu na nywila.</span><span class="en">Tap <b>Start Free Trial</b> here on jamiitek.com/bot. Fill in your business name, phone and password.</span></div>
+          <div class="jd-cap-line jd-scr" data-at="5300"><span class="sw">Akaunti inafunguka mara moja — <b>trial ya siku 7, bila kadi</b>.</span><span class="en">Your account opens instantly — <b>7-day trial, no card</b>.</span></div>
+        </div></div>
+        <div class="jd-cap"><div class="jd-scrs">
+          <div class="jd-cap-line jd-scr" data-at="0"><span class="sw">Wizard inakuuliza maswali matatu: <b>jina la bot</b>, <b>unachouza</b>, kisha uzinduzi.</span><span class="en">The wizard asks three things: <b>your bot's name</b>, <b>what you sell</b>, then launch.</span></div>
+          <div class="jd-cap-line jd-scr" data-at="5200"><span class="sw">Bot inajifunza biashara yako kutoka majibu haya. Unaweza kuongeza zaidi baadaye.</span><span class="en">The bot learns your business from these answers. You can add more later.</span></div>
+        </div></div>
+        <div class="jd-cap"><div class="jd-scrs">
+          <div class="jd-cap-line jd-scr" data-at="0"><span class="sw"><span class="warn">Muhimu:</span> sasa unahitaji <b>vifaa viwili</b>.</span><span class="en"><span class="warn">Important:</span> you now need <b>two devices</b>.</span></div>
+          <div class="jd-cap-line jd-scr" data-at="2200"><span class="sw"><b>②</b> Kompyuta au simu nyingine inaonyesha QR. <b>①</b> Simu ya biashara inaiskani — haiwezi kuskani skrini yake yenyewe.</span><span class="en"><b>②</b> A computer or second phone shows the QR. <b>①</b> The business phone scans it — it can't scan its own screen.</span></div>
+        </div></div>
+        <div class="jd-cap"><div class="jd-scrs">
+          <div class="jd-cap-line jd-scr" data-at="0"><span class="sw">Kwenye kifaa <b>②</b>, ingia JamiiBot → <b>Connect WhatsApp</b>. QR inaonekana.</span><span class="en">On device <b>②</b>, sign in to JamiiBot → <b>Connect WhatsApp</b>. A QR appears.</span></div>
+          <div class="jd-cap-line jd-scr" data-at="2000"><span class="sw">Kwenye simu <b>①</b>: WhatsApp → <b>Settings › Linked devices</b>.</span><span class="en">On phone <b>①</b>: WhatsApp → <b>Settings › Linked devices</b>.</span></div>
+          <div class="jd-cap-line jd-scr" data-at="4000"><span class="sw">Gusa <b>Link a device</b>.</span><span class="en">Tap <b>Link a device</b>.</span></div>
+          <div class="jd-cap-line jd-scr" data-at="5800"><span class="sw">Elekeza kamera ya simu <b>①</b> kwenye QR iliyo kwenye kifaa <b>②</b>.</span><span class="en">Point phone <b>①</b>'s camera at the QR on device <b>②</b>.</span></div>
+          <div class="jd-cap-line jd-scr" data-at="9000"><span class="sw"><b>✓ Imeunganishwa.</b> Namba yako ya WhatsApp sasa inajibiwa na bot.</span><span class="en"><b>✓ Connected.</b> Your WhatsApp number is now answered by the bot.</span></div>
+        </div></div>
+        <div class="jd-cap"><div class="jd-scrs">
+          <div class="jd-cap-line jd-scr" data-at="0"><span class="sw">Jaribu: kutoka <b>simu nyingine</b> (si ya biashara), tuma “Habari” kwa namba ya biashara yako.</span><span class="en">Test it: from <b>another phone</b> (not the business one), send “Hi” to your business number.</span></div>
+          <div class="jd-cap-line jd-scr" data-at="3800"><span class="sw">Bot inajibu yenyewe — kwa Kiswahili au Kiingereza, hata saa 8 usiku.</span><span class="en">The bot replies by itself — in Swahili or English, even at 2am.</span></div>
+          <div class="jd-cap-line jd-scr" data-at="6900"><span class="sw">Mteja akihitaji mtu, bot inakupa taarifa uendelee mwenyewe.</span><span class="en">When a customer needs a person, the bot hands over to you.</span></div>
+        </div></div>
+        <div class="jd-cap"><div class="jd-scrs">
+          <div class="jd-cap-line jd-scr" data-at="0"><span class="sw">Hiyo ndiyo yote. Fuatilia kila mazungumzo kwenye dashboard yako.</span><span class="en">That's it. Follow every conversation from your dashboard.</span></div>
+        </div></div>
+      </div>
+
+      <div class="jd-ctl">
+        <button class="jd-pp" type="button" aria-label="Play"><i class="fas fa-play"></i></button>
+        <div class="jd-segs"></div>
+        <span class="jd-time">0:00 / 0:00</span>
+        <div class="jd-lang" role="group" aria-label="Language">
+          <button type="button" data-l="sw" class="on">SW</button><button type="button" data-l="en">EN</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="jd-chips"></div>
+  </div>
+</section>
+
+<script>
+(function(){
+  var sec = document.getElementById('demo');
+  var P = document.getElementById('jdPlayer');
+  if (!P) return;
+  var scenes = [].slice.call(P.querySelectorAll('.jd-scene'));
+  var caps   = [].slice.call(P.querySelectorAll('.jd-cap'));
+  var segBox = P.querySelector('.jd-segs'), timeEl = P.querySelector('.jd-time'), pp = P.querySelector('.jd-pp');
+  var chipBox = sec.querySelector('.jd-chips');
+  var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var durs = scenes.map(function(s){ return +s.dataset.dur || 6000; });
+  var starts = []; durs.reduce(function(a, d, k){ starts[k] = a; return a + d; }, 0);
+  var total = durs.reduce(function(a, b){ return a + b; }, 0);
+  var t = 0, playing = false, last = 0, raf = 0, started = false, userPaused = false;
+
+  var titles = [
+    ['Jisajili','Sign up'], ['Wizard','Wizard'], ['Vifaa 2','2 devices'],
+    ['Unganisha','Connect'], ['Jaribu','Test'], ['Tayari','Live']];
+
+  // ── Vipande vya upau wa muda + chips ──
+  var segs = scenes.map(function(_, k){
+    var b = document.createElement('button'); b.className = 'jd-seg'; b.type = 'button';
+    b.setAttribute('aria-label', 'Step ' + (k + 1)); b.innerHTML = '<i></i>';
+    b.addEventListener('click', function(){ seek(starts[k]); play(); });
+    segBox.appendChild(b); return b;
+  });
+  var chips = scenes.map(function(_, k){
+    var b = document.createElement('button'); b.className = 'jd-chip' + (k === 2 ? ' warn' : ''); b.type = 'button';
+    b.innerHTML = '<span>' + (k + 1) + '</span><span class="sw" style="all:unset">' + titles[k][0] +
+                  '</span><span class="en" style="all:unset">' + titles[k][1] + '</span>';
+    b.addEventListener('click', function(){ seek(starts[k]); play(); P.scrollIntoView({behavior:'smooth', block:'center'}); });
+    chipBox.appendChild(b); return b;
+  });
+
+  // ── QR za mfano (sawa kila mahali) ──
+  [].forEach.call(P.querySelectorAll('.jd-qr'), function(q){
+    var h = '', seed = 7;
+    for (var y = 0; y < 21; y++) for (var x = 0; x < 21; x++) {
+      var finder = (x < 7 && y < 7) || (x > 13 && y < 7) || (x < 7 && y > 13);
+      var on;
+      if (finder) {
+        var fx = x > 13 ? x - 14 : x, fy = y > 13 ? y - 14 : y;
+        on = fx === 0 || fx === 6 || fy === 0 || fy === 6 || (fx > 1 && fx < 5 && fy > 1 && fy < 5);
+      } else { seed = (seed * 9301 + 49297) % 233280; on = seed / 233280 > .52; }
+      h += '<i' + (on ? '' : ' class="o"') + '></i>';
+    }
+    q.innerHTML = h;
+  });
+
+  // ── Hali kutoka muda (inaruhusu kusimama/kurudi/kuruka) ──
+  function sceneAt(ms){
+    for (var k = scenes.length - 1; k >= 0; k--) if (ms >= starts[k]) return k;
+    return 0;
+  }
+  // Vipengele vya kila hatua vinakusanywa MARA MOJA. Awali kila frame
+  // ilitafuta upya (querySelectorAll) na kuandika maandishi hata yasipobadilika
+  // — kwenye simu ya bei nafuu frames zilikuwa chache, na video ilicheza polepole.
+  function collect(root){
+    return {
+      timed: [].slice.call(root.querySelectorAll('[data-at]:not(.jd-scr)')).map(function(el){
+        return {el: el, at: +el.dataset.at, until: el.dataset.until ? +el.dataset.until : Infinity,
+                text: el.hasAttribute('data-type') ? (el.dataset.text || '') : null, shown: -1};
+      }),
+      groups: [].slice.call(root.querySelectorAll('.jd-scrs')).map(function(box){
+        return [].slice.call(box.children).filter(function(c){ return c.classList.contains('jd-scr'); })
+                 .map(function(c){ return {el: c, at: +c.dataset.at}; });
+      })
+    };
+  }
+  var sceneData = scenes.map(collect), capData = caps.map(collect);
+
+  function renderScene(d, local){
+    d.timed.forEach(function(x){
+      if (x.text !== null) {
+        var n = local < x.at ? 0 : Math.min(x.text.length, Math.floor((local - x.at) / 70));
+        if (n !== x.shown) { x.el.textContent = x.text.slice(0, n); x.shown = n; }
+        var typing = local >= x.at && n < x.text.length;
+        x.el.classList.toggle('caret', typing);
+        x.el.classList.toggle('focus', local >= x.at - 200 && n < x.text.length);
+        x.el.classList.toggle('on', true);
+      } else {
+        x.el.classList.toggle('on', local >= x.at && local < x.until);
+      }
+    });
+    d.groups.forEach(function(g){
+      var cur = g[0];
+      g.forEach(function(c){ if (local >= c.at) cur = c; });
+      g.forEach(function(c){ c.el.classList.toggle('is-cur', c === cur); });
+    });
+  }
+  function fmt(ms){ var s = Math.round(ms / 1000); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
+
+  function render(){
+    var k = sceneAt(t), local = t - starts[k];
+    scenes.forEach(function(s, j){ s.classList.toggle('is-on', j === k); });
+    caps.forEach(function(c, j){ c.classList.toggle('is-on', j === k); });
+    renderScene(sceneData[k], local);
+    renderScene(capData[k], local);
+    segs.forEach(function(s, j){
+      var f = j < k ? 1 : j > k ? 0 : Math.min(1, local / durs[j]);
+      s.firstChild.style.width = (f * 100) + '%';
+    });
+    chips.forEach(function(c, j){ c.classList.toggle('on', j === k); });
+    timeEl.textContent = fmt(t) + ' / ' + fmt(total);
+  }
+
+  function frame(now){
+    if (!playing) return;
+    // Muda HALISI unapita hata frames zikiwa chache (simu dhaifu). Kikomo cha
+    // 400ms kinazuia kuruka mbele tu baada ya tab kurudi — ingawa tab
+    // ikifichwa player tayari inasimama yenyewe.
+    t += Math.min(now - last, 400);
+    last = now;
+    if (t >= total) { t = total; render(); pause(); P.classList.add('is-end'); return; }
+    render();
+    raf = requestAnimationFrame(frame);
+  }
+  function play(){
+    if (playing) return;
+    if (t >= total) t = 0;
+    P.classList.remove('is-end'); P.classList.add('is-started');
+    started = true; playing = true; userPaused = false; last = performance.now();
+    pp.innerHTML = '<i class="fas fa-pause"></i>'; pp.setAttribute('aria-label', 'Pause');
+    raf = requestAnimationFrame(frame);
+  }
+  function pause(){
+    playing = false; cancelAnimationFrame(raf);
+    pp.innerHTML = '<i class="fas fa-play"></i>'; pp.setAttribute('aria-label', 'Play');
+  }
+  function seek(ms){ t = Math.max(0, Math.min(total - 1, ms)); P.classList.remove('is-end'); render(); }
+
+  pp.addEventListener('click', function(){ if (playing) { pause(); userPaused = true; } else play(); });
+  P.querySelector('.jd-big-play').addEventListener('click', play);
+  P.querySelector('.jd-replay').addEventListener('click', function(){ seek(0); play(); });
+  P.addEventListener('keydown', function(e){
+    if (e.key === ' ' || e.key === 'k') { e.preventDefault(); pp.click(); }
+    if (e.key === 'ArrowRight') { seek(starts[Math.min(scenes.length - 1, sceneAt(t) + 1)]); }
+    if (e.key === 'ArrowLeft')  { seek(starts[Math.max(0, sceneAt(t) - (t - starts[sceneAt(t)] < 1200 ? 1 : 0))]); }
+  });
+
+  // Lugha
+  [].forEach.call(P.querySelectorAll('.jd-lang button'), function(b){
+    b.addEventListener('click', function(){
+      sec.dataset.lang = b.dataset.l;
+      [].forEach.call(P.querySelectorAll('.jd-lang button'), function(x){ x.classList.toggle('on', x === b); });
+    });
+  });
+
+  // Inajicheza yenyewe ikionekana (isipokuwa mtu ameisimamisha au anapendelea bila mwendo);
+  // inasimama ikitoka kwenye skrini au tab ikifichwa.
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(function(en){
+      var vis = en[0].isIntersecting;
+      if (vis && !playing && !userPaused && !reduced && !P.classList.contains('is-end')) play();
+      if (!vis && playing) pause();
+    }, {threshold: .55}).observe(P);
+  }
+  document.addEventListener('visibilitychange', function(){ if (document.hidden && playing) pause(); });
+
+  P.jd = {seek: seek, play: play, pause: pause, starts: starts, get t(){ return t; }};
+  render();
+})();
+</script>
