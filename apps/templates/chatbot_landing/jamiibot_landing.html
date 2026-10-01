@@ -6,8 +6,19 @@
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <title>JamiiBot — AI WhatsApp Chatbot for Your Business | JamiiTek</title>
   <meta name="description" content="Automate your WhatsApp customer service with AI. JamiiBot handles inquiries 24/7, speaks Swahili & English, and grows your business while you sleep.">
+  {% comment %}
+    Clash Display na Satoshi ni fonts za FONTSHARE, si Google. Awali ziliombwa
+    kutoka Google Fonts — Google ikipokea family isiyoijua inakataa OMBI ZIMA
+    (HTTP 400), kwa hiyo hata JetBrains Mono haikupakia, na ukurasa wote
+    ulitumia font mbadala. Sasa kila font kutoka kwa mtoaji wake.
+    Satoshi ina 300/400/500/700/900 tu (hakuna 600); kivinjari kinachagua iliyo karibu.
+  {% endcomment %}
+  <link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+  <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
+  <link href="https://api.fontshare.com/v2/css?f[]=clash-display@500,600,700&f[]=satoshi@400,500,700,900&display=swap" rel="stylesheet">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@500;600;700&family=Satoshi:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
   <style>
     :root{
@@ -17,9 +28,9 @@
       --slate:#64748b;--muted:#94a3b8;
       --card:#ffffff;--bg:#f8f9fc;
       --border:#e8ecf2;
-      --head:'Clash Display',sans-serif;
-      --body:'Satoshi',sans-serif;
-      --mono:'JetBrains Mono',monospace;
+      --head:'Clash Display',ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif;
+      --body:'Satoshi',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+      --mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
     }
     *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
     html{scroll-behavior:smooth}
