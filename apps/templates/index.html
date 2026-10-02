@@ -714,24 +714,28 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 }
 
 /* ── 2. Huduma kama tabs za kivinjari ─────────────────────── */
-.kv-sx{display:grid;grid-template-columns:300px minmax(0,1fr);gap:0;align-items:stretch}
-.kv-sx-tabs{display:flex;flex-direction:column;gap:4px;padding:10px 0 10px 10px}
-.kv-sx-tab{position:relative;display:flex;align-items:center;gap:12px;padding:13px 16px;border:0;border-radius:14px 0 0 14px;
+.kv-sx{display:grid;grid-template-columns:290px minmax(0,1fr);gap:0;align-items:stretch}
+.kv-sx-tabs{display:flex;flex-direction:column;justify-content:center;gap:2px;padding:12px 0 12px 8px}
+.kv-sx-tab{position:relative;display:flex;align-items:center;gap:12px;padding:10px 16px 10px 12px;border:0;border-radius:14px 0 0 14px;
   background:transparent;color:var(--ink-2);font:inherit;font-size:15px;font-weight:600;text-align:left;cursor:pointer;transition:background .2s,color .2s}
-.kv-sx-tab:hover{background:rgba(12,22,38,.04)}
-.kv-sx-tab .ic{display:grid;place-items:center;width:34px;height:34px;border-radius:10px;flex:0 0 auto;color:#fff}
-.kv-sx-tab .ic svg{width:17px;height:17px}
-.kv-sx-tab[aria-selected="true"]{background:#fff;color:var(--ink);box-shadow:-10px 0 26px -18px rgba(4,16,31,.4)}
+.kv-sx-tab:hover{background:rgba(12,22,38,.04);color:var(--ink)}
+.kv-sx-tab .ic{display:grid;place-items:center;width:36px;height:36px;border-radius:10px;flex:0 0 auto;color:#fff;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.18)}
+.kv-sx-tab .ic svg{width:18px;height:18px}
+.kv-sx-tab[aria-selected="true"]{background:#fff;color:var(--ink);box-shadow:-12px 0 30px -20px rgba(4,16,31,.45)}
 .kv-sx-tab[aria-selected="true"]::before{content:"";position:absolute;left:0;top:12px;bottom:12px;width:3px;border-radius:3px;background:var(--gold)}
-.kv-sx .kv-win{border-radius:0 18px 18px 18px}
-.kv-sx-panel{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);min-height:400px}
+/* Dirisha linajaza urefu wote wa tabs — hakuna nafasi tupu chini ya picha */
+.kv-sx .kv-win{display:flex;flex-direction:column;border-radius:0 18px 18px 18px}
+.kv-sx .kv-chrome{background:#F6F8FB}
+.kv-sx .kv-url [data-sx-path]{color:var(--muted)}
+.kv-sx-panel{flex:1;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);min-height:440px}
 .kv-sx-media{position:relative;overflow:hidden;background:var(--navy-800)}
-.kv-sx-media img{width:100%;height:100%;object-fit:cover;display:block}
+.kv-sx-media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
 .kv-sx-media .art{position:absolute;inset:0;display:grid;place-items:center}
-.kv-sx-media .art svg{width:34%;max-width:140px;color:rgba(255,255,255,.92)}
-.kv-sx-text{padding:clamp(24px,3.4vw,44px);display:flex;flex-direction:column;justify-content:center}
-.kv-sx-text h3{margin:0 0 12px;font-size:clamp(24px,2.6vw,34px);line-height:1.1;letter-spacing:-.02em;color:var(--ink)}
-.kv-sx-text p{margin:0 0 24px;color:var(--ink-2);font-size:16px;line-height:1.65;max-width:46ch}
+.kv-sx-media .art svg{width:30%;max-width:130px;color:rgba(255,255,255,.92)}
+.kv-sx-text{padding:clamp(26px,3.4vw,48px);display:flex;flex-direction:column;justify-content:center}
+.kv-sx-text h3{margin:0 0 12px;font-size:clamp(24px,2.5vw,34px);line-height:1.1;letter-spacing:-.02em;color:var(--ink)}
+.kv-sx-text p{margin:0 0 26px;color:var(--ink-2);font-size:16px;line-height:1.65;max-width:42ch}
 .kv-sx-text .btn{align-self:flex-start}
 .kv-sx-panel[hidden]{display:none}
 @media(max-width:900px){
@@ -825,16 +829,17 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 }
 @media (min-width:1180px){.nav__ic,.nav__chev{display:none}}
 
-/* ══ KAZI ZINAJITELEZA — kama mstari wa "trusted infrastructure" ══ */
-.wk__clip{overflow:hidden;margin-inline:calc(var(--pad) * -1);padding-block:4px 22px;
-  -webkit-mask:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);mask:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent)}
-.wk--marquee .wk__track{overflow:visible;width:max-content;margin:0;padding:0 var(--pad);scroll-snap-type:none;
-  animation:slide var(--wk-dur,60s) linear infinite}
-.wk--marquee .wk__card{flex:0 0 min(330px,78vw);scroll-snap-align:none}
-@media (min-width:768px){.wk--marquee .wk__card{flex-basis:clamp(300px,34vw,420px)}}
-.wk--marquee.is-paused .wk__track{animation-play-state:paused}
-@media (hover:hover){.wk--marquee .wk__clip:hover .wk__track{animation-play-state:paused}}
-.wk--marquee .wk__nav,.wk--marquee .wk__bar,.wk--marquee .wk__swipe{display:none}
+/* ══ KAZI ZINAJITELEZA — lakini mtu anaweza kuzivuta ══
+   Ni slider ya kawaida (inaweza kusogezwa kwa kidole, kipanya, trackpad au
+   mishale) ambayo JavaScript inaisogeza polepole yenyewe. Ukiigusa
+   inasimama, na inaendelea baada ya sekunde chache. */
+.wk--auto .wk__track{scroll-snap-type:none;scroll-behavior:auto;cursor:grab;
+  -webkit-mask:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent);mask:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent)}
+.wk--auto .wk__track.is-drag{cursor:grabbing;user-select:none}
+.wk--auto .wk__track.is-drag a{pointer-events:none}
+.wk--auto .wk__card{flex:0 0 min(330px,78vw);scroll-snap-align:none}
+@media (min-width:768px){.wk--auto .wk__card{flex-basis:clamp(300px,32vw,410px)}}
+.wk--auto .wk__bar{display:none}
 /* Kadi fupi za simu: mistari ya hakikisho iligusa lebo ya aina */
 @media (max-width:767px){.kv-mock .ln{display:none}.kv-mock .kv-mnav{margin-bottom:7%}}
 </style>
@@ -1059,6 +1064,8 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
           {% endfor %}
         </div>
         <div class="kv-win">
+          <div class="kv-chrome" aria-hidden="true"><span class="kv-dots"><i></i><i></i><i></i></span>
+            <span class="kv-url"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17 9h-1V7a4 4 0 0 0-8 0v2H7a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2zm-7-2a2 2 0 0 1 4 0v2h-4z"/></svg><b>jamiitek.com</b><span data-sx-path>/service/</span></span></div>
           {% for sv in services %}
           <div class="kv-sx-panel" role="tabpanel" id="sxp{{ forloop.counter }}" aria-labelledby="sxt{{ forloop.counter }}" data-url="{{ sv.home_url }}">
             <div class="kv-sx-media">
@@ -1558,29 +1565,45 @@ function carousel(trackId, prevId, nextId, barId){
 }
 carousel('wkTrack', 'wkPrev', 'wkNext', 'wkBar');
 carousel('tmTrack', 'tmPrev', 'tmNext', null);
-/* ═════ Kazi zinajiteleza ═════
-   Kadi zinanakiliwa mara moja (nakala zimefichwa kwa screen readers na
-   keyboard) ili mstari uzunguke bila kukatika. Inasimama ukigusa au
-   ukiweka kipanya; "reduce motion" -> inabaki kama slider ya kawaida. */
+/* ═════ Kazi zinajiteleza (na zinavutika) ═════ */
 (function(){
   var sec=document.getElementById('work'), track=document.getElementById('wkTrack');
-  if(!sec||!track||matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if(!sec||!track) return;
   var cards=[].slice.call(track.children);
-  if(cards.length<3) return;
+  if(cards.length<3||matchMedia('(prefers-reduced-motion: reduce)').matches) return;   // slider ya kawaida
+  // Nakala moja ya kadi -> mzunguko usiokatika pande zote mbili
   cards.forEach(function(c){
     var cl=c.cloneNode(true); cl.setAttribute('aria-hidden','true');
     [].forEach.call(cl.querySelectorAll('a,button'),function(a){a.tabIndex=-1;});
     track.appendChild(cl);
   });
-  var clip=document.createElement('div'); clip.className='wk__clip';
-  track.parentNode.insertBefore(clip,track); clip.appendChild(track);
-  sec.style.setProperty('--wk-dur',(cards.length*8)+'s');
-  sec.classList.add('wk--marquee');
-  var t=null;
-  clip.addEventListener('touchstart',function(){clearTimeout(t);sec.classList.add('is-paused');},{passive:true});
-  clip.addEventListener('touchend',function(){t=setTimeout(function(){sec.classList.remove('is-paused');},1800);},{passive:true});
-  track.addEventListener('focusin',function(){sec.classList.add('is-paused');});
-  track.addEventListener('focusout',function(){sec.classList.remove('is-paused');});
+  sec.classList.add('wk--auto');
+  var SPEED=32, pos=0, last=0, hold=0, hover=false, dragging=false, onScreen=true;
+  function half(){ return track.scrollWidth/2; }
+  function wrap(){ var h=half(); if(track.scrollLeft>=h){track.scrollLeft-=h;} else if(track.scrollLeft<=0){track.scrollLeft+=h;} pos=track.scrollLeft; }
+  function pause(ms){ hold=Math.max(hold, performance.now()+(ms||0)); }
+  function frame(now){
+    var dt=Math.min(now-(last||now),60); last=now;
+    if(!hover && !dragging && onScreen && !document.hidden && now>hold){
+      pos+=SPEED*dt/1000; track.scrollLeft=pos;
+      if(track.scrollLeft>=half()) wrap();
+    }
+    requestAnimationFrame(frame);
+  }
+  // Mtu akisogeza mwenyewe (swipe, trackpad, mishale) — fuata alipofika, simama kidogo
+  track.addEventListener('scroll',function(){ if(Math.abs(track.scrollLeft-pos)>2){ pos=track.scrollLeft; pause(2500); wrap(); } },{passive:true});
+  track.addEventListener('mouseenter',function(){hover=true;});
+  track.addEventListener('mouseleave',function(){hover=false;});
+  track.addEventListener('touchstart',function(){pause(3000);},{passive:true});
+  track.addEventListener('touchend',function(){pause(2500);},{passive:true});
+  track.addEventListener('focusin',function(){pause(6000);});
+  ['wkPrev','wkNext'].forEach(function(id){ var b=document.getElementById(id); if(b) b.addEventListener('click',function(){pause(4000);}); });
+  // Kuvuta kwa kipanya kunatoka carousel() (juu) — hapa tunasimama tu mtu anapovuta
+  track.addEventListener('pointerdown',function(){ dragging=true; });
+  addEventListener('pointerup',function(){ if(dragging){ dragging=false; pos=track.scrollLeft; wrap(); pause(2500); } });
+  if('IntersectionObserver' in window) new IntersectionObserver(function(en){onScreen=en[0].isIntersecting;}).observe(track);
+  track.scrollLeft=1; pos=1;
+  requestAnimationFrame(frame);
 })();
 
 /* ═════ KIVINJARI ═════ */
@@ -1610,6 +1633,8 @@ carousel('tmTrack', 'tmPrev', 'tmNext', null);
     function pick(k, focus){
       tabs.forEach(function(t,j){ t.setAttribute('aria-selected', j===k); t.tabIndex = j===k?0:-1; });
       panels.forEach(function(p,j){ p.hidden = j!==k; });
+      var path=sx.querySelector('[data-sx-path]'), u=(panels[k].dataset.url||'/service/');
+      if (path) path.textContent = /^https?:/.test(u) ? ' → '+u.replace(/^https?:\/\/(www\.)?/,'') : (u.charAt(0)==='#' ? '/'+u : u);
       if (focus) tabs[k].focus();
     }
     tabs.forEach(function(t,k){

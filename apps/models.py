@@ -15,6 +15,22 @@ from .pesapal_models import PesapalTransaction  # noqa: F401
 # SERVICES
 # ============================================================
 
+# Ikoni za kadi za huduma (njia za SVG, viewBox 0 0 24 24, fill=currentColor).
+# `icon_path` na `home_url` zilipotea kwenye model — template ziliziomba,
+# zikapata kitu kitupu: vibandiko vya rangi bila ikoni, na kila "Learn more"
+# ikielekeza anwani tupu.
+SERVICE_ICONS = {
+    'code':    'M8.7 16.6 4.1 12l4.6-4.6L7.3 6 1.3 12l6 6zm6.6 0 4.6-4.6-4.6-4.6L16.7 6l6 6-6 6z',
+    'bot':     'M12 2a2 2 0 0 1 1 3.7V7h4a3 3 0 0 1 3 3v7a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3v-7a3 3 0 0 1 3-3h4V5.7A2 2 0 0 1 12 2zM9 11.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm6 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM1 12h2v4H1zm20 0h2v4h-2z',
+    'server':  'M4 3h16a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zm0 10h16a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-6a1 1 0 0 1 1-1zm3-8a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm0 10a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z',
+    'globe':   'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm6.9 6h-2.9a15.6 15.6 0 0 0-1.4-3.6A8 8 0 0 1 18.9 8zM12 4c.8 1.2 1.5 2.5 1.9 4h-3.8c.4-1.5 1.1-2.8 1.9-4zM4.3 14a8 8 0 0 1 0-4h3.4a16.5 16.5 0 0 0 0 4zm.8 2H8a15.6 15.6 0 0 0 1.4 3.6A8 8 0 0 1 5.1 16zM8 8H5.1a8 8 0 0 1 4.3-3.6A15.6 15.6 0 0 0 8 8zm4 12c-.8-1.2-1.5-2.5-1.9-4h3.8c-.4 1.5-1.1 2.8-1.9 4zm2.3-6H9.7a14.7 14.7 0 0 1 0-4h4.6a14.7 14.7 0 0 1 0 4zm.3 5.6A15.6 15.6 0 0 0 16 16h2.9a8 8 0 0 1-4.3 3.6zM16.3 14a16.5 16.5 0 0 0 0-4h3.4a8 8 0 0 1 0 4z',
+    'mobile':  'M7 1h10a2 2 0 0 1 2 2v18a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2zm0 4v14h10V5zm5 15.5a1 1 0 1 0 0-2 1 1 0 0 0 0 2z',
+    'design':  'M12 2a10 10 0 0 0 0 20c1 0 1.7-.8 1.7-1.7 0-.4-.2-.8-.4-1.1a1.7 1.7 0 0 1 1.3-2.9H17a5 5 0 0 0 5-5C22 6.5 17.5 2 12 2zM6.5 12a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm3-4a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm3 4a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z',
+    'builder': 'M3 3h8v8H3zm10 0h8v5h-8zM3 13h8v8H3zm10-3h8v11h-8z',
+    'layout':  'M3 3h18v5H3zm0 7h7v11H3zm9 0h9v11h-9z',
+}
+
+
 class Service(models.Model):
     ICON_CHOICES = [
         ('code', 'Code — websites'),
@@ -47,6 +63,15 @@ class Service(models.Model):
     show_on_home = models.BooleanField(
         default=False,
         help_text='Show this service in the homepage "What we build" section.')
+
+    @property
+    def icon_path(self):
+        return SERVICE_ICONS.get(self.icon or 'code', SERVICE_ICONS['code'])
+
+    @property
+    def home_url(self):
+        """Kitufe cha kadi: link_url ikiwekwa kwenye admin, vinginevyo ukurasa wa huduma."""
+        return (self.link_url or '').strip() or '/service/'
 
     def __str__(self):
         return self.service_type
