@@ -295,7 +295,205 @@
     .fs-b.out{align-self:flex-end;background:#005C4B;border-top-right-radius:2px}
     .fs-b.out .t::after{content:" \2713\2713";color:#53BDEB}
     @media(max-width:768px){.fs{padding:60px 5%}}
-  </style>
+  
+    /* ══════════════════════════════════════════════════════════════
+       MAZUNGUMZO — JamiiBot inaishi ndani ya WhatsApp, kwa hiyo ukurasa
+       wenyewe ni mazungumzo. Rangi zote zinatoka WhatsApp:
+         usiku   #0c1d1a  — sehemu za giza (kama WhatsApp dark mode)
+         karatasi #efe7dc — mandhari ya chat, yenye michoro midogo
+         kiputo  #d9fdd3  — ujumbe unaotoka
+         tiki    #53bdeb  — "imesomwa". Inatumika kwa KITU KIMOJA TU:
+                            kuonyesha kitu kimekamilika.
+       Kitu kimoja cha kukumbukwa: vichwa vya sehemu ni viputo vya ujumbe.
+       ══════════════════════════════════════════════════════════════ */
+    :root{
+      --lime:#25d366; --lime-d:#1ea952;          /* kitendo kikuu = kijani cha WhatsApp */
+      --ink:#0e1b19; --ink2:#18302b;
+      --night:#0c1d1a; --night-2:#112824; --night-bubble:#1f2c33; --night-out:#005c4b;
+      --paper:#efe7dc; --bubble:#d9fdd3; --tick:#53bdeb; --amber:#f5c542;
+      --wa-meta:#667781;
+      --doodle-light:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220' fill='none' stroke='%230e1b19' stroke-opacity='.07' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M24 30h34a8 8 0 0 1 8 8v14a8 8 0 0 1-8 8H38l-10 8v-8h-4a8 8 0 0 1-8-8V38a8 8 0 0 1 8-8z'/%3E%3Crect x='150' y='22' width='26' height='44' rx='6'/%3E%3Cpath d='M160 58h6'/%3E%3Cpath d='M96 132l8-14h22l8 14v28a4 4 0 0 1-4 4H100a4 4 0 0 1-4-4z'/%3E%3Cpath d='M106 132v-6a9 9 0 0 1 18 0v6'/%3E%3Cpath d='M30 150l6 12 13 2-9 9 2 13-12-6-12 6 2-13-9-9 13-2z'/%3E%3Cpath d='M158 150l8 8 16-18'/%3E%3Cpath d='M166 168l8 8 16-18'/%3E%3Ccircle cx='96' cy='52' r='10'/%3E%3Cpath d='M90 52l4 4 8-8'/%3E%3C/svg%3E");
+      --doodle-dark:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220' fill='none' stroke='%23ffffff' stroke-opacity='.035' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M24 30h34a8 8 0 0 1 8 8v14a8 8 0 0 1-8 8H38l-10 8v-8h-4a8 8 0 0 1-8-8V38a8 8 0 0 1 8-8z'/%3E%3Crect x='150' y='22' width='26' height='44' rx='6'/%3E%3Cpath d='M96 132l8-14h22l8 14v28a4 4 0 0 1-4 4H100a4 4 0 0 1-4-4z'/%3E%3Cpath d='M30 150l6 12 13 2-9 9 2 13-12-6-12 6 2-13-9-9 13-2z'/%3E%3Cpath d='M158 150l8 8 16-18'/%3E%3Cpath d='M166 168l8 8 16-18'/%3E%3Ccircle cx='96' cy='52' r='10'/%3E%3C/svg%3E");
+    }
+    .mz-paper{background:var(--paper) var(--doodle-light) 0 0/220px 220px}
+    .mz-night{background:var(--night) var(--doodle-dark) 0 0/220px 220px;color:#e9edef}
+    .mz-sec{padding:clamp(72px,10vw,128px) 24px}
+    .mz-in{max-width:1140px;margin:0 auto}
+
+    /* ── Kichwa kama kiputo ── */
+    .mz-head{max-width:720px;margin-bottom:clamp(36px,5vw,56px)}
+    .mz-head.c{margin-inline:auto;text-align:center}
+    .mz-say{position:relative;display:inline-block;text-align:left;background:#fff;border-radius:4px 26px 26px 26px;
+      padding:14px 26px 30px 22px;box-shadow:0 1px 1.5px rgba(11,20,26,.14),0 24px 50px -30px rgba(14,27,25,.35)}
+    .mz-say::before{content:"";position:absolute;left:-11px;top:0;width:12px;height:16px;background:inherit;
+      clip-path:polygon(100% 0,0 0,100% 100%)}
+    .mz-say .who{display:block;font-size:13px;font-weight:700;color:#0f8a5f;margin-bottom:4px}
+    .mz-say h2{font-family:var(--head);font-weight:600;font-size:clamp(30px,4.4vw,54px);line-height:1.04;letter-spacing:-.025em;
+      margin:0;color:var(--ink)}
+    /* Bila text-wrap:balance: ndani ya kiputo kinachojipima, balance ilivunja mistari
+       huku kiputo kikibaki na upana wa mstari mmoja — nafasi tupu kubwa kulia. */
+    .mz-say .at{position:absolute;right:18px;bottom:9px;font-size:12px;color:var(--wa-meta)}
+    .mz-night .mz-say{background:var(--night-bubble);box-shadow:0 30px 60px -36px rgba(0,0,0,.8)}
+    .mz-night .mz-say h2{color:#e9edef}
+    .mz-night .mz-say .who{color:#25d366}
+    .mz-night .mz-say .at{color:#8696a0}
+    .mz-sub{margin:18px 0 0;max-width:52ch;font-size:17px;line-height:1.6;color:#4a5a57}
+    .mz-head.c .mz-sub{margin-inline:auto}
+    .mz-night .mz-sub{color:#aebac1}
+
+    /* Tiki — sent ✓ / delivered ✓✓ / read ✓✓ (bluu) */
+    .tk{display:inline-flex;width:18px;height:11px;vertical-align:-1px;color:#8696a0;transition:color .35s}
+    .tk svg{width:100%;height:100%}
+    .tk .t2{opacity:0;transition:opacity .25s}
+    .tk.is-deliv .t2,.tk.is-read .t2{opacity:1}
+    .tk.is-read{color:var(--tick)}
+
+    .mz-btn{display:inline-flex;align-items:center;gap:10px;padding:15px 24px;border-radius:999px;background:var(--lime);color:#06261a;
+      font-weight:800;font-size:15px;text-decoration:none;box-shadow:0 14px 30px -14px rgba(37,211,102,.8);transition:transform .2s,box-shadow .2s}
+    .mz-btn:hover{transform:translateY(-2px);box-shadow:0 18px 34px -14px rgba(37,211,102,.9)}
+    .mz-btn:focus-visible,.mz-link:focus-visible,.mz-compose:focus-visible{outline:3px solid var(--tick);outline-offset:3px}
+    .mz-link{color:inherit;font-weight:700;text-underline-offset:4px}
+
+    /* ══ HATUA — usajili hadi bot hewani ══ */
+    .mz-steps-grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:clamp(32px,6vw,80px);align-items:start}
+    .mz-steps-aside .mz-btn{margin-top:28px}
+    .mz-clock{display:flex;align-items:baseline;gap:10px;margin-top:34px;padding-top:22px;border-top:1px solid rgba(14,27,25,.12);color:#4a5a57;font-size:15px}
+    .mz-clock b{font-family:var(--head);font-size:clamp(32px,4vw,44px);line-height:1;color:var(--ink);letter-spacing:-.03em;white-space:nowrap}
+    .mz-thread{position:relative;border-radius:30px;padding:28px clamp(16px,3vw,32px) 30px;background:#e7ddd0 var(--doodle-light) 0 0/220px 220px;
+      box-shadow:inset 0 0 0 1px rgba(14,27,25,.06),0 40px 80px -50px rgba(14,27,25,.55)}
+    .mz-thread-top{display:flex;align-items:center;gap:12px;margin:-28px calc(-1 * clamp(16px,3vw,32px)) 22px;padding:16px clamp(16px,3vw,32px);
+      border-radius:30px 30px 0 0;background:var(--wa-deep,#075e54);color:#fff}
+    .mz-thread-top img{width:38px;height:38px;border-radius:50%;background:#fff}
+    .mz-thread-top b{display:block;font-size:15px}
+    .mz-thread-top small{font-size:12.5px;opacity:.8}
+    .mz-day{display:table;margin:0 auto 16px;padding:5px 12px;border-radius:8px;background:#fff;color:var(--wa-meta);font-size:12.5px;box-shadow:0 1px .5px rgba(11,20,26,.13)}
+    .mz-msg{position:relative;max-width:min(88%,460px);margin:0 0 12px auto;padding:12px 16px 24px 14px;border-radius:14px 4px 14px 14px;
+      background:var(--bubble);box-shadow:0 1px .5px rgba(11,20,26,.13)}
+    .mz-msg::before{content:"";position:absolute;right:-9px;top:0;width:10px;height:14px;background:inherit;clip-path:polygon(0 0,100% 0,0 100%)}
+    .mz-msg h3{margin:0 0 4px;font-size:16.5px;font-weight:800;color:var(--ink)}
+    .mz-msg p{margin:0;font-size:15px;line-height:1.5;color:#2b3b38}
+    .mz-msg .meta{position:absolute;right:12px;bottom:6px;display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--wa-meta)}
+    .mz-msg.bot{margin:18px auto 0 0;background:#fff;border-radius:4px 14px 14px 14px}
+    .mz-msg.bot::before{left:-9px;right:auto;clip-path:polygon(100% 0,0 0,100% 100%)}
+    .mz-msg.bot .from{display:block;font-size:13px;font-weight:700;color:#0f8a5f;margin-bottom:3px}
+    .mz-typing{display:none;width:66px;margin:18px auto 0 0;padding:12px 14px;border-radius:4px 14px 14px 14px;background:#fff;box-shadow:0 1px .5px rgba(11,20,26,.13)}
+    .mz-typing i{display:inline-block;width:7px;height:7px;margin:0 2px;border-radius:50%;background:#8a9a97;animation:mzDot 1s infinite}
+    .mz-typing i:nth-child(2){animation-delay:.15s}.mz-typing i:nth-child(3){animation-delay:.3s}
+    @keyframes mzDot{50%{transform:translateY(-4px);opacity:.45}}
+    .mz-msg .two{display:block;margin-top:8px;padding:8px 10px;border-radius:8px;background:rgba(245,197,66,.22);color:#5c3d00;font-size:13.5px;font-weight:600}
+    /* Mwendo mmoja uliopangwa: JS inaongeza .mz-anim; bila JS, kila kitu kinaonekana kikiwa kimekamilika */
+    .mz-thread.mz-anim .mz-msg{opacity:0;transform:translateY(10px) scale(.98);transition:opacity .45s ease,transform .45s ease}
+    .mz-thread.mz-anim .mz-msg.on{opacity:1;transform:none}
+    .mz-thread.mz-anim .mz-typing.on{display:block}
+
+    /* ══ VIPENGELE — mazungumzo ya usiku ══ */
+    .mz-exs{position:relative;display:grid;gap:0}
+    .mz-exs::before{content:"";position:absolute;left:0;top:0;bottom:0;width:calc(100% - 320px);border-radius:30px;
+      background:#0b141a var(--doodle-dark) 0 0/220px 220px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.05)}
+    .mz-ex{position:relative;display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:40px;align-items:center;padding:22px clamp(18px,3vw,36px)}
+    .mz-ex:first-child{padding-top:34px}.mz-ex:last-child{padding-bottom:34px}
+    .mz-pair{display:flex;flex-direction:column;gap:10px}
+    .mz-b{position:relative;max-width:min(82%,440px);padding:9px 12px 22px;border-radius:4px 12px 12px 12px;background:#202c33;color:#e9edef;font-size:15px;line-height:1.5}
+    .mz-b.out{align-self:flex-end;background:var(--night-out);border-radius:12px 4px 12px 12px}
+    .mz-b .meta{position:absolute;right:10px;bottom:5px;display:flex;gap:5px;align-items:center;font-size:11px;color:rgba(233,237,239,.6)}
+    .mz-b .from{display:block;font-size:12.5px;font-weight:700;color:#53bdeb;margin-bottom:2px}
+    .mz-b.out .from{color:#7ee2b8}
+    .mz-b ul{margin:4px 0 0;padding:0;list-style:none}
+    .mz-b li{display:flex;justify-content:space-between;gap:18px;padding:3px 0;border-bottom:1px dashed rgba(255,255,255,.12)}
+    .mz-b li:last-child{border:0}
+    .mz-note{position:relative;padding-left:22px}
+    .mz-note::before{content:"";position:absolute;left:-30px;top:12px;width:42px;height:1px;background:rgba(233,237,239,.25)}
+    .mz-note::after{content:"";position:absolute;left:8px;top:8px;width:9px;height:9px;border-radius:50%;background:#25d366;box-shadow:0 0 0 5px rgba(37,211,102,.15)}
+    .mz-note h3{margin:0 0 6px 12px;font-family:var(--head);font-weight:600;font-size:21px;line-height:1.2;color:#fff}
+    .mz-note p{margin:0 0 0 12px;font-size:14.5px;line-height:1.55;color:#aebac1}
+    .mz-extras{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;margin-top:28px}
+    .mz-extra{border-radius:24px;padding:26px;background:var(--night-2);box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}
+    .mz-extra h3{margin:0 0 6px;font-family:var(--head);font-weight:600;font-size:21px;color:#fff}
+    .mz-extra p{margin:0 0 18px;color:#aebac1;font-size:14.5px;line-height:1.55}
+    .mz-widget{display:flex;align-items:flex-end;justify-content:flex-end;gap:10px;height:120px;border-radius:14px;padding:14px;
+      background:linear-gradient(180deg,#fff 0 22px,#f4f6f8 22px);position:relative;overflow:hidden}
+    .mz-widget::before{content:"";position:absolute;left:12px;top:7px;width:44px;height:8px;border-radius:4px;background:#dfe5e7;box-shadow:54px 0 0 #dfe5e7,108px 0 0 #dfe5e7}
+    .mz-widget span{padding:8px 12px;border-radius:12px 12px 4px 12px;background:#fff;color:#111b21;font-size:13px;box-shadow:0 6px 16px -8px rgba(0,0,0,.4)}
+    .mz-widget i{display:grid;place-items:center;width:46px;height:46px;border-radius:50%;background:#25d366;color:#fff;font-size:22px;flex:0 0 auto}
+    .mz-dash{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    .mz-dash div{border-radius:14px;padding:14px;background:rgba(255,255,255,.04);box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}
+    .mz-dash b{display:block;font-family:var(--head);font-size:26px;color:#fff}
+    .mz-dash small{color:#8696a0;font-size:12.5px}
+
+    /* ══ Sehemu zilizopo — zinavaa design mpya ══ */
+    .fs{background:var(--paper) var(--doodle-light) 0 0/220px 220px!important}
+    .fs-chat{border-radius:26px!important;box-shadow:0 40px 80px -40px rgba(14,27,25,.6)!important}
+    .fs-cta{background:var(--lime)!important;color:#06261a!important;border-radius:999px!important}
+    .fs-pay{background:#fff!important;border:0!important;border-radius:18px!important;box-shadow:0 1px 1.5px rgba(11,20,26,.12)}
+    #setup-guide{background:var(--night) var(--doodle-dark) 0 0/220px 220px!important}
+    #setup-guide .need-card{background:var(--night-2)!important;border:0!important;border-radius:24px!important;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}
+    #setup-guide .need-no{color:rgba(245,197,66,.35)!important}
+    #setup-guide .need-ic{background:rgba(245,197,66,.14)!important;color:var(--amber)!important}
+    #setup-guide .need-card li i{color:var(--amber)!important}
+    #setup-guide .need-steps{background:rgba(245,197,66,.07)!important;border:1px solid rgba(245,197,66,.25)!important;border-radius:18px!important}
+    #pricing{background:var(--paper) var(--doodle-light) 0 0/220px 220px!important}
+    .price-card{border:0!important;border-radius:26px!important;box-shadow:0 1px 1.5px rgba(11,20,26,.12),0 30px 60px -44px rgba(14,27,25,.5)!important}
+    .price-amount{font-family:var(--head)!important;letter-spacing:-.03em}
+    .price-card.popular{background:var(--night)!important;transform:translateY(-10px)}
+    .price-card.popular .price-amount{color:var(--lime)!important}
+    .price-card.popular::before{content:"Most chosen"!important;text-transform:none!important;letter-spacing:0!important;background:var(--lime)!important;color:#06261a!important}
+    .btn-price{border-radius:999px!important}
+    .price-card.popular .btn-price{background:var(--lime)!important;color:#06261a!important}
+    .price-note a{color:var(--ink)!important}
+
+    /* ══ USHUHUDA — jumbe kutoka kwa wateja ══ */
+    .mz-quotes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:26px 22px;align-items:start}
+    .mz-quotes .mz-b{max-width:none;background:#fff;color:#111b21;font-size:15.5px;padding:14px 16px 26px;box-shadow:0 1px 1.5px rgba(11,20,26,.13)}
+    .mz-quotes .mz-b::before{content:"";position:absolute;left:-9px;top:0;width:10px;height:14px;background:#fff;clip-path:polygon(100% 0,0 0,100% 100%)}
+    .mz-quotes .mz-b:nth-child(2){margin-top:46px}
+    .mz-quotes .mz-b:nth-child(3){margin-top:18px}
+    .mz-quotes .from{font-size:13.5px}
+    .mz-quotes .role{display:block;margin-top:10px;font-size:12.5px;color:var(--wa-meta)}
+    .mz-night .mz-quotes .mz-b{box-shadow:0 30px 60px -40px rgba(0,0,0,.9)}
+    .mz-quotes .meta{color:var(--wa-meta)}
+
+    /* ══ MWISHO — sanduku la kuandika ujumbe ══ */
+    .mz-cta{text-align:center}
+    .mz-compose{display:flex;align-items:center;gap:12px;max-width:720px;margin:0 auto;padding:10px 10px 10px 18px;border-radius:999px;
+      background:#fff;text-decoration:none;color:var(--ink);box-shadow:0 1px 1.5px rgba(11,20,26,.14),0 30px 60px -36px rgba(14,27,25,.55);
+      transition:transform .2s}
+    .mz-compose:hover{transform:translateY(-2px)}
+    .mz-compose .emo{font-size:22px;opacity:.6}
+    .mz-compose .txt{flex:1;text-align:left;font-size:clamp(15px,2.1vw,19px);color:#3b4a49}
+    .mz-compose .txt::after{content:"";display:inline-block;width:2px;height:1.05em;margin-left:3px;vertical-align:-3px;background:#25d366;animation:mzCaret 1s steps(1) infinite}
+    @keyframes mzCaret{50%{opacity:0}}
+    .mz-compose .send{display:flex;align-items:center;gap:10px;padding:13px 18px 13px 20px;border-radius:999px;background:#25d366;color:#06261a;font-weight:800;font-size:15px;white-space:nowrap}
+    .mz-compose .send svg{width:20px;height:20px}
+    .mz-cta-small{margin-top:20px;color:#4a5a57;font-size:14.5px}
+
+    /* Footer kwenye usiku */
+    footer{background:var(--night) var(--doodle-dark) 0 0/220px 220px!important}
+
+    @media(max-width:960px){
+      .mz-steps-grid{grid-template-columns:1fr}
+      .mz-exs::before{width:100%}
+      .mz-ex{grid-template-columns:1fr;gap:16px}
+      .mz-note{padding:0 0 6px 4px}
+      .mz-note::before{display:none}
+      .mz-note::after{left:-2px}
+      .mz-extras{grid-template-columns:1fr}
+      .mz-quotes{grid-template-columns:1fr}
+      .mz-quotes .mz-b:nth-child(n){margin-top:0}
+      .price-card.popular{transform:none}
+    }
+    @media(max-width:560px){
+      .mz-compose{flex-wrap:wrap;border-radius:26px;padding:14px}
+      .mz-compose .send{width:100%;justify-content:center}
+      .mz-compose .emo{display:none}
+    }
+    @media (prefers-reduced-motion:reduce){
+      .mz-thread.mz-anim .mz-msg{opacity:1;transform:none;transition:none}
+      .mz-typing i,.mz-compose .txt::after{animation:none}
+      .mz-btn,.mz-compose{transition:none}
+    }
+    .price-card.popular::before{top:18px!important;right:18px!important;left:auto!important;transform:none!important;border-radius:999px!important;
+      padding:6px 12px!important;font-family:var(--body)!important;font-size:12.5px!important;font-weight:800!important;width:auto!important}
+</style>
   <!-- JamiiBot widget: mgeni anaijaribu bidhaa yenyewe kabla ya kujisajili -->
   <script src="https://www.jamiitek.com/chatbot/widget/b785f732-5c0d-4cc0-af87-dfcbfb100dbf.js" defer></script>
   <link rel="stylesheet" href="{% static 'css/interaction.css' %}">
@@ -426,102 +624,114 @@
   {# Demo ya hatua kwa hatua + onyo la vifaa viwili — mara tu baada ya hero #}
   {% include 'chatbot_landing/_demo_player.html' %}
 
-<section class="section" id="how-it-works">
-  <div class="section-inner">
-    <div class="section-tag">Simple Process</div>
-    <h2 class="section-h2">From signup to live bot in under 10 minutes</h2>
-    <p class="section-sub">No technical skills needed. We handle everything. You just describe your business.</p>
-    <div class="steps">
-      <div class="step">
-        <div class="step-num">1<span>✓</span></div>
-        <div class="step-title">Create Your Account</div>
-        <div class="step-desc">Sign up at jamiitek.com/chatbot/register. Takes 2 minutes. No credit card required for trial.</div>
+  <!-- HATUA: usajili hadi bot hewani — kama mazungumzo yenye tiki -->
+  <section class="mz-sec mz-paper" id="how-it-works">
+    <div class="mz-in mz-steps-grid">
+      <div class="mz-steps-aside">
+        <div class="mz-head" style="margin-bottom:0">
+          <div class="mz-say"><span class="who">JamiiBot</span><h2>From sign&#8209;up to a live bot in under 10 minutes</h2><span class="at">09:00</span></div>
+          <p class="mz-sub">No coding and no waiting for approval. You describe your business; the bot learns it and starts answering.</p>
+        </div>
+        <a href="/chatbot/register/" class="mz-btn">Start your free trial</a>
+        <div class="mz-clock"><b>7 days</b><span>free to try — no card, no M-Pesa</span></div>
       </div>
-      <div class="step">
-        <div class="step-num">2<span>→</span></div>
-        <div class="step-title">Configure Your Bot</div>
-        <div class="step-desc">Tell us your business, services, pricing, and FAQs. Our wizard guides you through every step.</div>
-      </div>
-      <div class="step">
-        <div class="step-num">3<span>🔗</span></div>
-        <div class="step-title">Connect WhatsApp — Scan a QR</div>
-        <div class="step-desc">Scan a QR code with WhatsApp — no Meta account, no waiting for approval. You need <a href="#setup-guide" style="color:inherit;font-weight:800">2 phones</a>: one shows the code, your business phone scans it.</div>
-      </div>
-      <div class="step">
-        <div class="step-num">4<span>🚀</span></div>
-        <div class="step-title">Go Live!</div>
-        <div class="step-desc">Your AI bot starts replying instantly on WhatsApp and your website. Monitor every conversation from your dashboard.</div>
-      </div>
-    </div>
-    <div style="text-align:center;margin-top:44px">
-      <a href="/chatbot/register/" style="display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:#fff;font-size:14px;font-weight:800;padding:13px 26px;border-radius:11px;transition:all .2s" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
-        <i class="fas fa-rocket"></i> Start Your Free Trial Now
-      </a>
-    </div>
-  </div>
-</section>
 
-<!-- FEATURES -->
-<div class="features-bg" id="features">
-  <div style="max-width:1100px;margin:0 auto">
-    <div style="margin-bottom:48px">
-      <div class="section-tag" style="background:rgba(184,247,77,.1);border-color:rgba(184,247,77,.2);color:var(--lime)">Everything You Need</div>
-      <h2 class="section-h2" style="color:#fff">Built for Tanzanian businesses</h2>
-      <p class="section-sub" style="color:rgba(255,255,255,.45)">Every feature designed to help local businesses convert WhatsApp messages into customers.</p>
-    </div>
-    <div class="feature-grid">
-      <div class="feature-card">
-        <div class="f-ico" style="background:rgba(37,211,102,.1)">🇹🇿</div>
-        <div class="f-title">Speaks Swahili & English</div>
-        <div class="f-desc">Automatically detects whether your customer writes in Swahili or English and responds in the same language.</div>
-        <span class="f-tag">Auto-detect</span>
-      </div>
-      <div class="feature-card">
-        <div class="f-ico" style="background:rgba(184,247,77,.1)">🌐</div>
-        <div class="f-title">WhatsApp + Your Website</div>
-        <div class="f-desc">One bot, everywhere your customers are. Add a WhatsApp-style chat widget to your website with a single line of code.</div>
-        <span class="f-tag">Website widget</span>
-      </div>
-      <div class="feature-card">
-        <div class="f-ico" style="background:rgba(79,70,229,.15)">⚡</div>
-        <div class="f-title">Responds in Under 2 Seconds</div>
-        <div class="f-desc">Lightning-fast responses keep customers engaged. No more making them wait for a reply that might never come.</div>
-        <span class="f-tag">Always instant</span>
-      </div>
-      <div class="feature-card">
-        <div class="f-ico" style="background:rgba(245,158,11,.1)">🕐</div>
-        <div class="f-title">24/7 — Never Sleeps</div>
-        <div class="f-desc">Your bot works at 2am, on weekends, on holidays. Every customer gets an instant response, always.</div>
-        <span class="f-tag">Round the clock</span>
-      </div>
-      <div class="feature-card">
-        <div class="f-ico" style="background:rgba(239,68,68,.1)">🛍️</div>
-        <div class="f-title">Showcases Your Services</div>
-        <div class="f-desc">Add all your products, services, and prices. The bot intelligently presents the right information based on what the customer asks.</div>
-        <span class="f-tag">Smart catalog</span>
-      </div>
-      <div class="feature-card">
-        <div class="f-ico" style="background:rgba(59,130,246,.1)">📊</div>
-        <div class="f-title">Dashboard & Analytics</div>
-        <div class="f-desc">See all your conversations, track message counts, and understand your customers. Full visibility into what your bot is doing.</div>
-        <span class="f-tag">Real-time</span>
-      </div>
-      <div class="feature-card">
-        <div class="f-ico" style="background:rgba(37,211,102,.1)">🙋</div>
-        <div class="f-title">Hands Over to a Human</div>
-        <div class="f-desc">When a customer needs a real person, the bot notifies you instantly (WhatsApp or email) and shares your number — no lead is ever lost.</div>
-        <span class="f-tag">Smart handoff</span>
+      <div class="mz-thread" id="mzThread" role="list" aria-label="Set-up steps">
+        <div class="mz-thread-top">
+          <img src="{% static 'img/jamiibot-icon.png' %}" alt="" width="38" height="38">
+          <div><b>JamiiBot set-up</b><small>4 steps</small></div>
+        </div>
+        <span class="mz-day">Today</span>
+
+        <div class="mz-msg" role="listitem">
+          <h3>1. Create your account</h3>
+          <p>Two minutes at jamiitek.com/chatbot/register. No card needed for the trial.</p>
+          <span class="meta">0:00 <span class="tk is-read" aria-hidden="true"><svg viewBox="0 0 18 11" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path class="t1" d="M1 6.2l3.2 3.2L11 2.2"/><path class="t2" d="M7.6 9.4L14.8 2.2"/></svg></span></span>
+        </div>
+        <div class="mz-msg" role="listitem">
+          <h3>2. Tell it about your business</h3>
+          <p>Name your bot, list what you sell, add prices and common questions. The wizard asks one thing at a time.</p>
+          <span class="meta">2 min <span class="tk is-read" aria-hidden="true"><svg viewBox="0 0 18 11" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path class="t1" d="M1 6.2l3.2 3.2L11 2.2"/><path class="t2" d="M7.6 9.4L14.8 2.2"/></svg></span></span>
+        </div>
+        <div class="mz-msg" role="listitem">
+          <h3>3. Scan a QR to connect WhatsApp</h3>
+          <p>No Meta account and no approval wait — the same way you link WhatsApp Web.</p>
+          <span class="two">You'll need two devices: one shows the QR, your business phone scans it. <a href="#setup-guide" class="mz-link">How?</a></span>
+          <span class="meta">5 min <span class="tk is-read" aria-hidden="true"><svg viewBox="0 0 18 11" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path class="t1" d="M1 6.2l3.2 3.2L11 2.2"/><path class="t2" d="M7.6 9.4L14.8 2.2"/></svg></span></span>
+        </div>
+
+        <div class="mz-typing" aria-hidden="true"><i></i><i></i><i></i></div>
+        <div class="mz-msg bot" role="listitem">
+          <span class="from">JamiiBot</span>
+          <h3>4. I'm live</h3>
+          <p>I'm answering your customers on WhatsApp and on your website — day and night. Every chat shows up in your dashboard.</p>
+          <span class="meta">9 min</span>
+        </div>
       </div>
     </div>
-  </div>
-</div>
+  </section>
+
+  <!-- VIPENGELE: mazungumzo halisi ya usiku — kila jibu linaonyesha uwezo mmoja -->
+  <section class="mz-sec mz-night" id="features">
+    <div class="mz-in">
+      <div class="mz-head">
+        <div class="mz-say"><span class="who">JamiiBot</span><h2>Built for the way Tanzanian customers message</h2><span class="at">02:13</span></div>
+        <p class="mz-sub">These are the conversations it handles while you sleep, serve customers or close the shop.</p>
+      </div>
+
+      <div class="mz-exs">
+        <div class="mz-ex">
+          <div class="mz-pair">
+            <div class="mz-b"><span class="from">Asha</span>Mko wazi saa hizi?<span class="meta">02:13</span></div>
+            <div class="mz-b out"><span class="from">Juma Electronics</span>Ndiyo! Mimi ni msaidizi wa Juma Electronics — najibu saa 24. Unahitaji nini leo?<span class="meta">02:13 <span class="tk is-read" aria-hidden="true"><svg viewBox="0 0 18 11" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path class="t1" d="M1 6.2l3.2 3.2L11 2.2"/><path class="t2" d="M7.6 9.4L14.8 2.2"/></svg></span></span></div>
+          </div>
+          <div class="mz-note"><h3>Answers at 2am, on Sundays, on holidays</h3><p>And in about two seconds — the reply carries the same minute as the question.</p></div>
+        </div>
+        <div class="mz-ex">
+          <div class="mz-pair">
+            <div class="mz-b"><span class="from">Peter</span>Do you deliver to Arusha?<span class="meta">09:41</span></div>
+            <div class="mz-b out"><span class="from">Juma Electronics</span>Yes — Arusha in 1 to 2 days. Shall I send the price list?<span class="meta">09:41 <span class="tk is-read" aria-hidden="true"><svg viewBox="0 0 18 11" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path class="t1" d="M1 6.2l3.2 3.2L11 2.2"/><path class="t2" d="M7.6 9.4L14.8 2.2"/></svg></span></span></div>
+          </div>
+          <div class="mz-note"><h3>Swahili or English, without being told</h3><p>It replies in the language your customer writes in.</p></div>
+        </div>
+        <div class="mz-ex">
+          <div class="mz-pair">
+            <div class="mz-b"><span class="from">Neema</span>Bei ya chaja?<span class="meta">13:05</span></div>
+            <div class="mz-b out"><span class="from">Juma Electronics</span>Hizi ndizo tulizonazo:
+              <ul><li><span>Samsung 25W</span><span>TZS 25,000</span></li><li><span>iPhone 20W</span><span>TZS 35,000</span></li><li><span>Type-C cable</span><span>TZS 8,000</span></li></ul>
+              <span class="meta">13:05 <span class="tk is-read" aria-hidden="true"><svg viewBox="0 0 18 11" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path class="t1" d="M1 6.2l3.2 3.2L11 2.2"/><path class="t2" d="M7.6 9.4L14.8 2.2"/></svg></span></span></div>
+          </div>
+          <div class="mz-note"><h3>Knows your products and prices</h3><p>Add them once; it picks the right ones for each question.</p></div>
+        </div>
+        <div class="mz-ex">
+          <div class="mz-pair">
+            <div class="mz-b"><span class="from">Baraka</span>Nataka kuongea na mtu<span class="meta">16:22</span></div>
+            <div class="mz-b out"><span class="from">Juma Electronics</span>Sawa — nimempa Juma taarifa, atakupigia sasa hivi 📞<span class="meta">16:22 <span class="tk is-read" aria-hidden="true"><svg viewBox="0 0 18 11" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path class="t1" d="M1 6.2l3.2 3.2L11 2.2"/><path class="t2" d="M7.6 9.4L14.8 2.2"/></svg></span></span></div>
+          </div>
+          <div class="mz-note"><h3>Hands the chat to you when it should</h3><p>You get a WhatsApp or email alert, so no customer is left waiting.</p></div>
+        </div>
+      </div>
+
+      <div class="mz-extras">
+        <div class="mz-extra">
+          <h3>The same bot on your website</h3>
+          <p>One line of code adds a WhatsApp-style chat to any site.</p>
+          <div class="mz-widget" aria-hidden="true"><span>Habari! Nikusaidie?</span><i class="fab fa-whatsapp"></i></div>
+        </div>
+        <div class="mz-extra">
+          <h3>Every conversation in one dashboard</h3>
+          <p>See what customers ask, how often, and where a person stepped in.</p>
+          <div class="mz-dash" aria-hidden="true"><div><b>24/7</b><small>answering</small></div><div><b>2s</b><small>typical reply</small></div><div><b>SW/EN</b><small>languages</small></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
 
 <!-- START FREE -->
 <section class="fs" id="start-free">
   <div class="fs-in">
     <div>
-      <div class="section-tag">Start free</div>
-      <h2 class="section-h2">Try it free.<br>Decide later.</h2>
+      <div class="mz-head"><div class="mz-say"><span class="who">JamiiBot</span><h2>Try it free. Decide later.</h2><span class="at">10:15</span></div></div>
       <p class="section-sub" style="margin-bottom:30px">Set up your bot in about 10 minutes and let it answer real customers for a week. If it doesn't earn its keep, you simply stop.</p>
 
       <ul class="fs-list">
@@ -563,10 +773,9 @@
 
 <!-- PRICING -->
 <!-- SETUP GUIDE — unachohitaji kuunganisha (simu 2) -->
-<section class="section" id="setup-guide" style="background:var(--ink)">
+<section class="section mz-night" id="setup-guide">
   <div class="section-inner">
-    <div class="section-tag" style="background:rgba(184,247,77,.1);border-color:rgba(184,247,77,.3);color:var(--lime)">Setup Guide</div>
-    <h2 class="section-h2" style="color:#fff">What you need to connect: <span style="color:var(--lime)">2 phones</span></h2>
+    <div class="mz-head"><div class="mz-say"><span class="who">JamiiBot</span><h2>Before you connect: two devices</h2><span class="at">10:16</span></div></div>
     <p class="section-sub" style="color:rgba(255,255,255,.6)">WhatsApp links a bot the same way it links WhatsApp Web — by scanning a QR code. You scan with one phone while the code shows on another screen.</p>
     <div class="need-grid">
       <div class="need-card">
@@ -598,8 +807,7 @@
 
 <section class="section" id="pricing" style="background:var(--bg)">
   <div class="section-inner">
-    <div class="section-tag">Transparent Pricing</div>
-    <h2 class="section-h2">Simple plans, no surprises</h2>
+    <div class="mz-head"><div class="mz-say"><span class="who">JamiiBot</span><h2>Simple plans, no surprises</h2><span class="at">10:20</span></div></div>
     <p class="section-sub"><strong>Try everything free for 7 days — no payment to start.</strong> Pick a plan only if you decide to keep going, and pay by M-Pesa, Tigo Pesa, Airtel Money or bank.</p>
     {# Mipango inatoka database (SubscriptionPlan) — bei ikibadilishwa kwenye admin inabadilika hapa pia #}
     <div class="pricing-grid">
@@ -627,47 +835,40 @@
         <div class="price-feature"><i class="fas fa-check"></i> 7-day free trial</div><a href="/chatbot/register/" class="btn-price">Start free trial</a></div>
       {% endfor %}
     </div>
-    <p class="price-note"><i class="fab fa-whatsapp"></i> Not sure which plan? <a href="https://wa.me/{% contact "wa" %}?text=Habari%20JamiiBot%2C%20nataka%20kujaribu%20demo" target="_blank" rel="noopener">Try the live demo on WhatsApp</a> — every plan starts with 7 free days.</p>
+    <p class="price-note"><i class="fab fa-whatsapp"></i> Not sure which plan? <a href="https://wa.me/{% contact "wa" %}?text=Habari%20JamiiTek%2C%20nahitaji%20ushauri%20wa%20mpango%20wa%20JamiiBot" target="_blank" rel="noopener">Ask our team on WhatsApp</a> — every plan starts with 7 free days.</p>
   </div>
 </section>
 
-<!-- TESTIMONIALS -->
-<section class="section" style="background:var(--bg)">
-  <div class="section-inner">
-    <div class="section-tag">What Clients Say</div>
-    <h2 class="section-h2">Real businesses, real results</h2>
-    <p class="section-sub" style="margin-bottom:44px">See how JamiiBot is helping Tanzanian businesses save time and grow faster.</p>
-    <div class="testi-grid">
-      <div class="testi-card">
-        <div class="testi-stars">★★★★★</div>
-        <div class="testi-quote">"Before JamiiBot, I would miss customer messages at night. Now my bot answers immediately, in Swahili! I'm getting more orders than ever."</div>
-        <div class="testi-author"><div class="testi-av">F</div><div><div class="testi-name">Fatuma Hassan</div><div class="testi-role">Boutique Owner, Dar es Salaam</div></div></div>
-      </div>
-      <div class="testi-card" style="border-color:var(--ink)">
-        <div class="testi-stars">★★★★★</div>
-        <div class="testi-quote">"I set it up in 15 minutes. My customers think I have a full customer service team. The bot knows all my products and prices perfectly."</div>
-        <div class="testi-author"><div class="testi-av" style="background:linear-gradient(135deg,#10b981,#059669)">J</div><div><div class="testi-name">John Kimaro</div><div class="testi-role">Hardware Store, Arusha</div></div></div>
-      </div>
-      <div class="testi-card">
-        <div class="testi-stars">★★★★★</div>
-        <div class="testi-quote">"Our travel agency gets inquiries 24/7. JamiiBot handles everything — quotations, destinations, booking info. We just close the sales."</div>
-        <div class="testi-author"><div class="testi-av" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">A</div><div><div class="testi-name">Amina Salim</div><div class="testi-role">Travel Agency, Zanzibar</div></div></div>
-      </div>
+<!-- USHUHUDA: kama jumbe kutoka kwa wateja -->
+<section class="mz-sec mz-night">
+  <div class="mz-in">
+    <div class="mz-head">
+      <div class="mz-say"><span class="who">JamiiBot</span><h2>What owners tell us</h2><span class="at">18:30</span></div>
+    </div>
+    <div class="mz-quotes">
+      <div class="mz-b"><span class="from" style="color:#7c3aed">Fatuma Hassan</span>Before JamiiBot, I would miss customer messages at night. Now my bot answers immediately, in Swahili! I'm getting more orders than ever.<span class="role">Boutique owner, Dar es Salaam</span><span class="meta">21:04</span></div>
+      <div class="mz-b"><span class="from" style="color:#0f8a5f">John Kimaro</span>I set it up in 15 minutes. My customers think I have a full customer service team. The bot knows all my products and prices perfectly.<span class="role">Hardware store, Arusha</span><span class="meta">11:52</span></div>
+      <div class="mz-b"><span class="from" style="color:#c2410c">Amina Salim</span>Our travel agency gets inquiries 24/7. JamiiBot handles everything — quotations, destinations, booking info. We close the sales.<span class="role">Travel agency, Zanzibar</span><span class="meta">07:38</span></div>
     </div>
   </div>
 </section>
 
-<!-- CTA -->
-<div class="cta-section">
-  <div class="section-tag" style="background:rgba(0,0,0,.08);border-color:rgba(0,0,0,.15);color:var(--ink)">Start Today</div>
-  <h2 class="cta-h2">Ready to put your<br>WhatsApp on autopilot?</h2>
-  <p class="cta-sub">Join hundreds of Tanzanian businesses using JamiiBot. 7 days free — no payment required to start.</p>
-  <div>
-    <a href="/chatbot/register/" class="btn-cta-main"><i class="fas fa-rocket"></i> Create Free Account</a>
-    <a href="https://wa.me/{% contact "wa" %}" target="_blank" class="btn-cta-sec"><i class="fab fa-whatsapp"></i> Talk to Us First</a>
+<!-- MWISHO: sanduku la kuandika ujumbe — kitufe cha kutuma kinaanzisha trial -->
+<section class="mz-sec mz-paper mz-cta">
+  <div class="mz-in">
+    <div class="mz-head c">
+      <div class="mz-say"><span class="who">JamiiBot</span><h2>Ready to put your WhatsApp on autopilot?</h2><span class="at">now</span></div>
+      <p class="mz-sub">Seven days free. No card and no M-Pesa to start.</p>
+    </div>
+    <a href="/chatbot/register/" class="mz-compose" aria-label="Start your free trial — create an account">
+      <span class="emo" aria-hidden="true">🙂</span>
+      <span class="txt">Nataka kuanza trial ya siku 7</span>
+      <span class="send">Start free trial
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3.4 20.4 21 12 3.4 3.6 3.4 10l12.6 2-12.6 2z"/></svg></span>
+    </a>
+    <p class="mz-cta-small">Prefer to ask first? <a class="mz-link" href="https://wa.me/{% contact "wa" %}" target="_blank" rel="noopener">Message our team on WhatsApp</a></p>
   </div>
-  <div class="cta-trial">7-DAY FREE TRIAL · NO CREDIT CARD · CANCEL ANYTIME</div>
-</div>
+</section>
 
 <!-- FOOTER -->
 <footer>
@@ -689,8 +890,8 @@
       <div>
         <div class="footer-col-title">JamiiTek</div>
         <a href="/" class="footer-link">Main Website</a>
-        <a href="/services/" class="footer-link">Our Services</a>
-        <a href="/portfolio/" class="footer-link">Portfolio</a>
+        <a href="/service/" class="footer-link">Our Services</a>
+        <a href="/#work" class="footer-link">Portfolio</a>
         <a href="/contact/" class="footer-link">Contact Us</a>
       </div>
       <div>
@@ -716,9 +917,29 @@ window.addEventListener('scroll',()=>{document.getElementById('mainNav').classLi
 function toggleNav(){var d=document.getElementById('mobNav'),o=document.getElementById('mobOverlay');var open=d.classList.toggle('open');o.classList.toggle('open',open);document.body.style.overflow=open?'hidden':''}
 function closeNav(){document.getElementById('mobNav').classList.remove('open');document.getElementById('mobOverlay').classList.remove('open');document.body.style.overflow=''}
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeNav()});
-// Animate steps on scroll
-const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.style.opacity='1';e.target.style.transform='translateY(0)'}})},{threshold:.15})
-document.querySelectorAll('.step,.feature-card,.guide-step,.testi-card,.price-card').forEach(el=>{el.style.opacity='0';el.style.transform='translateY(20px)';el.style.transition='all .4s ease';obs.observe(el)})
+// Mwendo mmoja uliopangwa: jumbe za hatua zinafika moja baada ya nyingine,
+// tiki zinapanda ✓ -> ✓✓ -> ✓✓ bluu, kisha JamiiBot "inaandika" na kujibu.
+// Bila JS (au ukipendelea bila mwendo) kila kitu kinaonekana kimekamilika.
+(function(){
+  var th=document.getElementById('mzThread');
+  if(!th||!('IntersectionObserver' in window)||matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var msgs=[].slice.call(th.querySelectorAll('.mz-msg:not(.bot)')), bot=th.querySelector('.mz-msg.bot'), typing=th.querySelector('.mz-typing');
+  th.classList.add('mz-anim');
+  msgs.forEach(function(m){var t=m.querySelector('.tk'); if(t){t.classList.remove('is-read');}});
+  var io=new IntersectionObserver(function(en){
+    if(!en[0].isIntersecting) return; io.disconnect();
+    msgs.forEach(function(m,i){
+      var t=m.querySelector('.tk'), at=i*900;
+      setTimeout(function(){m.classList.add('on');},at);
+      setTimeout(function(){t&&t.classList.add('is-deliv');},at+450);
+      setTimeout(function(){t&&t.classList.add('is-read');},at+1100);
+    });
+    var end=msgs.length*900+700;
+    setTimeout(function(){typing.classList.add('on');},end);
+    setTimeout(function(){typing.classList.remove('on');bot.classList.add('on');},end+1500);
+  },{threshold:.35});
+  io.observe(th);
+})();
 </script>
 <script src="{% static 'js/interaction.js' %}" defer></script>
 </body>

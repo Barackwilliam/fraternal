@@ -879,7 +879,11 @@ class TemplateBridgeTest(TestCase):
         for price in ('5,000', '10,000', '15,000'):
             self.assertContains(r, f'<div class="price-amount">{price}</div>')
         self.assertContains(r, 'id="setup-guide"')                  # link ya menyu ilielekeza kwenye sehemu isiyokuwepo
-        self.assertContains(r, '2 phones')
+        # Hitaji la vifaa viwili lazima litajwe — kichwani mwa mwongozo na kwenye
+        # onyo la demo (Kiswahili). "two devices", si "2 phones": kompyuta au
+        # tablet inafanya kazi pia kuonyesha QR.
+        self.assertContains(r, 'two devices')
+        self.assertContains(r, 'Utahitaji vifaa viwili')
 
     def test_empty_collection_hint_is_for_the_owner_only(self):
         user = User.objects.create_user('tupu2', password='Siri#123456')
