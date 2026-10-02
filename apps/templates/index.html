@@ -657,6 +657,119 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
   align-items:center;justify-content:space-between;flex-wrap:wrap;font-size:12px;color:#6F87A6}
 @media (hover:hover){.fbot a:hover{color:var(--gold)}}
 
+
+/* ══════════════════════════════════════════════════════════════
+   KIVINJARI — kila biashara mnayoijengea inaishia kuwa tab kwenye
+   kivinjari, yenye anwani yake. Homepage inazungumza lugha hiyo:
+   address bar, tabs, na madirisha. Rangi za JamiiTek: navy + dhahabu.
+   Kitu kimoja cha kukumbukwa: utafutaji wa domain ni address bar halisi.
+   ══════════════════════════════════════════════════════════════ */
+.kv-win{background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 1px 0 rgba(12,22,38,.04),0 30px 70px -34px rgba(4,16,31,.45);
+  outline:1px solid rgba(12,22,38,.07)}
+.kv-chrome{display:flex;align-items:center;gap:12px;padding:10px 14px;background:#EEF2F7;border-bottom:1px solid #E3E9F2}
+.kv-dots{display:flex;gap:6px;flex:0 0 auto}
+.kv-dots i{width:10px;height:10px;border-radius:50%;background:#C9D3E1}
+.kv-dots i:first-child{background:#F5A623}
+.kv-url{flex:1;min-width:0;display:flex;align-items:center;gap:7px;padding:6px 12px;border-radius:999px;background:#fff;
+  font-size:12.5px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-shadow:inset 0 0 0 1px #E3E9F2}
+.kv-url svg{width:12px;height:12px;flex:0 0 auto;color:var(--green)}
+.kv-url b{font-weight:600;color:var(--ink)}
+
+/* ── 1. Address bar ya domain ─────────────────────────────── */
+.kv-addr{max-width:1000px;margin:0 auto}
+.kv-addr .kv-chrome{background:var(--navy-900);border-bottom:1px solid rgba(255,255,255,.07)}
+.kv-addr .kv-dots i{background:rgba(255,255,255,.18)}
+.kv-addr .kv-dots i:first-child{background:var(--gold)}
+.kv-tab{display:flex;align-items:center;gap:8px;padding:7px 14px;border-radius:10px 10px 0 0;margin-bottom:-11px;
+  background:var(--navy-800);color:#cfd9e8;font-size:12.5px;white-space:nowrap}
+.kv-tab i{width:14px;height:14px;border-radius:4px;background:var(--gold)}
+.kv-addr-body{background:linear-gradient(180deg,var(--navy-800),var(--navy-900));padding:24px clamp(16px,3vw,30px) 26px}
+.kv-bar{display:flex;align-items:center;gap:0;border-radius:16px;background:#fff;padding:6px 6px 6px 18px;
+  box-shadow:0 0 0 4px rgba(245,166,35,.18);transition:box-shadow .25s}
+.kv-bar:focus-within{box-shadow:0 0 0 4px rgba(245,166,35,.55)}
+.kv-lock{width:18px;height:18px;color:var(--green);flex:0 0 auto;margin-right:8px}
+.kv-scheme{color:#93a3b8;font-size:clamp(17px,2.3vw,24px);font-weight:500;user-select:none}
+.kv-bar .dom__input{flex:1;min-width:60px;border:0;outline:0;background:transparent;padding:12px 2px;
+  font:600 clamp(17px,2.3vw,24px)/1.2 var(--font-head,inherit);color:var(--ink);letter-spacing:-.01em}
+.kv-bar .dom__input::placeholder{color:#b6c1d0;font-weight:500}
+.kv-bar .dom__select{border:0;outline:0;background:#F6F8FB;border-radius:10px;padding:10px 8px;margin:0 8px;
+  font:700 clamp(15px,2vw,20px)/1 inherit;color:var(--navy-700);cursor:pointer}
+.kv-bar .btn{border-radius:12px;padding:14px 22px;white-space:nowrap}
+.kv-sub{display:flex;align-items:baseline;justify-content:space-between;gap:12px 22px;flex-wrap:wrap;margin-top:16px}
+.kv-sub h2{margin:0;font-size:clamp(17px,2vw,20px);font-weight:700;color:#fff;letter-spacing:-.01em}
+.kv-sub p{margin:0;color:#9fb0c7;font-size:14px}
+.kv-tlds{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.kv-tld{display:inline-flex;align-items:baseline;gap:8px;padding:8px 13px;border-radius:999px;border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.04);color:#fff;font:inherit;font-size:13.5px;cursor:pointer;transition:background .2s,border-color .2s}
+.kv-tld b{font-weight:700}
+.kv-tld small{color:#9fb0c7;font-size:12.5px}
+.kv-tld:hover{background:rgba(255,255,255,.09)}
+.kv-tld.on{border-color:var(--gold);background:rgba(245,166,35,.12)}
+.kv-tld:focus-visible,.kv-sx-tab:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+@media(max-width:640px){
+  .kv-bar{flex-wrap:wrap;padding:8px 8px 8px 14px;border-radius:14px}
+  .kv-bar .dom__input{flex:1 1 140px}
+  .kv-bar .btn{width:100%;margin-top:8px}
+  .kv-tab{display:none}
+}
+
+/* ── 2. Huduma kama tabs za kivinjari ─────────────────────── */
+.kv-sx{display:grid;grid-template-columns:300px minmax(0,1fr);gap:0;align-items:stretch}
+.kv-sx-tabs{display:flex;flex-direction:column;gap:4px;padding:10px 0 10px 10px}
+.kv-sx-tab{position:relative;display:flex;align-items:center;gap:12px;padding:13px 16px;border:0;border-radius:14px 0 0 14px;
+  background:transparent;color:var(--ink-2);font:inherit;font-size:15px;font-weight:600;text-align:left;cursor:pointer;transition:background .2s,color .2s}
+.kv-sx-tab:hover{background:rgba(12,22,38,.04)}
+.kv-sx-tab .ic{display:grid;place-items:center;width:34px;height:34px;border-radius:10px;flex:0 0 auto;color:#fff}
+.kv-sx-tab .ic svg{width:17px;height:17px}
+.kv-sx-tab[aria-selected="true"]{background:#fff;color:var(--ink);box-shadow:-10px 0 26px -18px rgba(4,16,31,.4)}
+.kv-sx-tab[aria-selected="true"]::before{content:"";position:absolute;left:0;top:12px;bottom:12px;width:3px;border-radius:3px;background:var(--gold)}
+.kv-sx .kv-win{border-radius:0 18px 18px 18px}
+.kv-sx-panel{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);min-height:400px}
+.kv-sx-media{position:relative;overflow:hidden;background:var(--navy-800)}
+.kv-sx-media img{width:100%;height:100%;object-fit:cover;display:block}
+.kv-sx-media .art{position:absolute;inset:0;display:grid;place-items:center}
+.kv-sx-media .art svg{width:34%;max-width:140px;color:rgba(255,255,255,.92)}
+.kv-sx-text{padding:clamp(24px,3.4vw,44px);display:flex;flex-direction:column;justify-content:center}
+.kv-sx-text h3{margin:0 0 12px;font-size:clamp(24px,2.6vw,34px);line-height:1.1;letter-spacing:-.02em;color:var(--ink)}
+.kv-sx-text p{margin:0 0 24px;color:var(--ink-2);font-size:16px;line-height:1.65;max-width:46ch}
+.kv-sx-text .btn{align-self:flex-start}
+.kv-sx-panel[hidden]{display:none}
+@media(max-width:900px){
+  .kv-sx{grid-template-columns:1fr}
+  .kv-sx-tabs{flex-direction:row;overflow-x:auto;scroll-snap-type:x mandatory;padding:0 0 10px;gap:8px;scrollbar-width:none}
+  .kv-sx-tabs::-webkit-scrollbar{display:none}
+  .kv-sx-tab{flex:0 0 auto;border-radius:999px;padding:9px 14px 9px 9px;background:#fff;box-shadow:inset 0 0 0 1px var(--line);scroll-snap-align:start}
+  .kv-sx-tab .ic{width:28px;height:28px;border-radius:50%}
+  .kv-sx-tab[aria-selected="true"]{background:var(--navy-900);color:#fff;box-shadow:none}
+  .kv-sx-tab[aria-selected="true"]::before{display:none}
+  .kv-sx .kv-win{border-radius:18px}
+  .kv-sx-panel{grid-template-columns:1fr;min-height:0}
+  .kv-sx-media{aspect-ratio:16/9}
+}
+
+/* ── 3. Kazi ndani ya madirisha ya kivinjari ──────────────── */
+.wk__card .kv-chrome{padding:9px 12px;background:#0d2240;border-bottom:1px solid rgba(255,255,255,.06)}
+.wk__card .kv-dots i{background:rgba(255,255,255,.2)}
+.wk__card .kv-dots i:first-child{background:var(--gold)}
+.wk__card .kv-url{background:rgba(255,255,255,.07);color:#c6d2e3;box-shadow:none}
+.wk__card .kv-url b{color:#fff}
+.kv-mock{position:absolute;inset:0;display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;padding:7% 8%;color:#fff;overflow:hidden}
+.kv-mock::after{content:"";position:absolute;right:-18%;top:-22%;width:62%;aspect-ratio:1;border-radius:50%;background:rgba(255,255,255,.07)}
+.kv-mock .nav{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:9%;text-align:left}
+.kv-mock .nav b{margin-right:auto;font-weight:800;font-size:clamp(12px,1.25vw,14px);letter-spacing:-.01em;white-space:nowrap}
+.kv-mock .lk{margin-left:auto;display:flex;gap:8px}
+.kv-mock .lk i{width:28px;height:5px;border-radius:5px;background:rgba(255,255,255,.22)}
+.kv-mock .hd{display:block;height:clamp(14px,1.6vw,20px);width:74%;border-radius:8px;background:rgba(255,255,255,.88);margin-bottom:9px}
+.kv-mock .hd.s{width:52%;margin-bottom:18px}
+.kv-mock .ln{display:block;height:6px;border-radius:6px;background:rgba(255,255,255,.25);margin-bottom:8px;width:64%}
+.kv-mock .ln.s{width:44%}
+.kv-mock .pill{display:none}  /* maelezo ya kadi yanakaa chini — hakikisho linabaki nusu ya juu */
+.kv-p0{background:linear-gradient(135deg,#123563,#071A31)}
+.kv-p1{background:linear-gradient(135deg,#0f6b55,#06342a)}
+.kv-p2{background:linear-gradient(135deg,#8a4b08,#3d2004)}
+.kv-p3{background:linear-gradient(135deg,#3b2a7a,#170f36)}
+
+@media (prefers-reduced-motion:reduce){.kv-bar,.kv-tld,.kv-sx-tab{transition:none}}
 </style>
   <link rel="stylesheet" href="{% static 'css/tokens.css' %}">
   <link rel="stylesheet" href="{% static 'css/interaction.css' %}">
@@ -783,40 +896,33 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 <!-- ═══ DOMAIN SEARCH ═══ -->
 <section class="dom" id="domains">
   <div class="wrap">
-    <div class="dom__card">
-      <div class="dom__head">
-        <span class="dom__globe"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2m6.9 6h-2.95a15.6 15.6 0 0 0-1.4-3.6A8 8 0 0 1 18.9 8M12 4.04A14 14 0 0 1 13.9 8h-3.8A14 14 0 0 1 12 4.04M4.26 14a7.8 7.8 0 0 1 0-4h3.4a17 17 0 0 0 0 4m.84 2h2.95a15.6 15.6 0 0 0 1.4 3.6A8 8 0 0 1 5.1 16m2.95-8H5.1a8 8 0 0 1 4.35-3.6A15.6 15.6 0 0 0 8.05 8M12 19.96A14 14 0 0 1 10.1 16h3.8A14 14 0 0 1 12 19.96M14.34 14H9.66a15 15 0 0 1 0-4h4.68a15 15 0 0 1 0 4m.21 5.6a15.6 15.6 0 0 0 1.4-3.6h2.95a8 8 0 0 1-4.35 3.6M16.36 14a17 17 0 0 0 0-4h3.4a7.8 7.8 0 0 1 0 4z"/></svg></span>
-        <div>
-          <h2>Find Your Perfect <span>Domain Name</span></h2>
-          <p>Search now &mdash; we register it for you within 24 hours.</p>
+    <div class="kv-win kv-addr">
+        <div class="kv-chrome" aria-hidden="true">
+          <span class="kv-dots"><i></i><i></i><i></i></span>
+          <span class="kv-tab"><i></i>Biashara yako · JamiiTek</span>
+        </div>
+        <div class="kv-addr-body">
+          <form class="dom__form kv-bar" id="domForm" role="search" autocomplete="off">
+            <svg class="kv-lock" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17 9h-1V7a4 4 0 0 0-8 0v2H7a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2zm-7-2a2 2 0 0 1 4 0v2h-4z"/></svg>
+            <span class="kv-scheme" aria-hidden="true">https://</span>
+            <label class="sr" for="domq">Domain name</label>
+            <input class="dom__input" id="domq" name="q" type="text" inputmode="url"
+                   autocapitalize="none" spellcheck="false" placeholder="jinalabiashara" required>
+            <label class="sr" for="domtld">Extension</label>
+            <select class="dom__select" id="domtld" name="tld">
+              <option value=".com">.com</option><option value=".co.tz" selected>.co.tz</option>
+              <option value=".tz">.tz</option><option value=".org">.org</option><option value=".net">.net</option>
+            </select>
+            <button class="btn btn--gold" type="submit" id="domBtn">Search</button>
+          </form>
+          <div class="kv-sub">
+            <h2>Find your perfect domain name</h2>
+            <p>Search now — we register it for you within 24 hours.</p>
+          </div>
+          <div class="kv-tlds" role="group" aria-label="Domain prices"><button type="button" class="kv-tld" data-tld=".com"><b>.com</b><small>Tsh 30,000</small></button><button type="button" class="kv-tld on" data-tld=".co.tz"><b>.co.tz</b><small>Tsh 25,000</small></button><button type="button" class="kv-tld" data-tld=".tz"><b>.tz</b><small>Tsh 15,000</small></button><button type="button" class="kv-tld" data-tld=".org"><b>.org</b><small>Tsh 30,000</small></button><button type="button" class="kv-tld" data-tld=".net"><b>.net</b><small>Tsh 30,000</small></button></div>
+          <div class="dres" id="domRes" role="status" aria-live="polite"></div>
         </div>
       </div>
-
-      <form class="dom__form" id="domForm" role="search" autocomplete="off">
-        <label class="sr" for="domq">Domain name</label>
-        <input class="dom__input" id="domq" name="q" type="text" inputmode="url"
-               autocapitalize="none" spellcheck="false"
-               placeholder="Enter your domain name..." required>
-        <label class="sr" for="domtld">Extension</label>
-        <select class="dom__select" id="domtld" name="tld">
-          <option value=".com">.com</option>
-          <option value=".co.tz" selected>.co.tz</option>
-          <option value=".tz">.tz</option>
-          <option value=".org">.org</option>
-          <option value=".net">.net</option>
-        </select>
-        <button class="btn btn--gold" type="submit" id="domBtn">Search</button>
-      </form>
-
-      <div class="tlds">
-        <div class="tld"><b>.com</b><small>Tsh 30,000</small></div>
-        <div class="tld"><b>.co.tz</b><small>Tsh 25,000</small></div>
-        <div class="tld"><b>.tz</b><small>Tsh 15,000</small></div>
-        <div class="tld"><b>.org</b><small>Tsh 30,000</small></div>
-        <div class="tld"><b>.net</b><small>Tsh 30,000</small></div>
-      </div>
-
-      <div class="dres" id="domRes" role="status" aria-live="polite"></div>
     </div>
   </div>
 </section>
@@ -863,22 +969,34 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
       <p>End-to-end digital work &mdash; design, development, hosting and the support that keeps it running.</p>
     </div>
 
-    <div class="svcs">
-      {# Kutoka Django admin → Services (zenye tiki ya "Show on home"). #}
-      {% for sv in services %}
-      <a class="svc rv" href="{{ sv.home_url }}"{% if sv.home_url|slice:":4" == "http" %} target="_blank" rel="noopener"{% endif %}>
-        <div class="svc__media ph">
-          {% if sv.image %}<img src="{{ sv.image }}" alt="{{ sv.service_type }}" width="1600" height="1000" loading="lazy" decoding="async">{% endif %}
-          <span class="svc__badge" style="background:{{ sv.accent|default:'#2E7BF6' }}"><svg viewBox="0 0 24 24" fill="currentColor"><path d="{{ sv.icon_path }}"/></svg></span>
+    {% comment %} Huduma kama tabs za kivinjari: kadi 8 ndefu zilichukua skrini tatu kwenye simu.
+          Sasa tab moja = dirisha moja. Data bado inatoka Django admin → Services. {% endcomment %}
+      <div class="kv-sx" data-sx>
+        <div class="kv-sx-tabs" role="tablist" aria-label="Services">
+          {% for sv in services %}
+          <button class="kv-sx-tab" role="tab" id="sxt{{ forloop.counter }}" aria-controls="sxp{{ forloop.counter }}"
+                  aria-selected="{% if forloop.first %}true{% else %}false{% endif %}" {% if not forloop.first %}tabindex="-1"{% endif %}>
+            <span class="ic" style="background:{{ sv.accent|default:'#2E7BF6' }}"><svg viewBox="0 0 24 24" fill="currentColor"><path d="{{ sv.icon_path }}"/></svg></span>
+            {{ sv.service_type }}
+          </button>
+          {% endfor %}
         </div>
-        <div class="svc__b">
-          <h3>{{ sv.service_type }}</h3>
-          <p>{% if sv.summary %}{{ sv.summary }}{% else %}{{ sv.description|striptags|truncatewords:22 }}{% endif %}</p>
-          <span class="svc__more">{{ sv.link_label|default:"Learn more" }} <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 11h12.2l-4.6-4.6L13 5l7 7-7 7-1.4-1.4 4.6-4.6H4z"/></svg></span>
+        <div class="kv-win">
+          {% for sv in services %}
+          <div class="kv-sx-panel" role="tabpanel" id="sxp{{ forloop.counter }}" aria-labelledby="sxt{{ forloop.counter }}" data-url="{{ sv.home_url }}">
+            <div class="kv-sx-media">
+              {% if sv.image %}<img src="{{ sv.image }}" alt="" width="1600" height="1000" loading="lazy" decoding="async">
+              {% else %}<div class="art" style="background:linear-gradient(135deg,{{ sv.accent|default:'#2E7BF6' }},#071A31)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="{{ sv.icon_path }}"/></svg></div>{% endif %}
+            </div>
+            <div class="kv-sx-text">
+              <h3>{{ sv.service_type }}</h3>
+              <p>{% if sv.summary %}{{ sv.summary }}{% else %}{{ sv.description|striptags|truncatewords:28 }}{% endif %}</p>
+              <a class="btn btn--gold" href="{{ sv.home_url }}"{% if sv.home_url|slice:":4" == "http" %} target="_blank" rel="noopener"{% endif %}>{{ sv.link_label|default:"Learn more" }}</a>
+            </div>
+          </div>
+          {% endfor %}
         </div>
-      </a>
-      {% endfor %}
-    </div>
+      </div>
   </div>
 </section>
 {% endif %}
@@ -956,9 +1074,11 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
       {% for p in portfolio %}
       <article class="wk__card">
         {% if p.live_url %}<a class="wk__link" href="{{ p.live_url }}" target="_blank" rel="noopener" aria-label="Fungua {{ p.title }} (inafunguka dirisha jipya)"></a>{% endif %}
-        <div class="wk__media ph">
+        <div class="kv-chrome" aria-hidden="true"><span class="kv-dots"><i></i><i></i><i></i></span>
+        <span class="kv-url">{% if p.live_url %}<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17 9h-1V7a4 4 0 0 0-8 0v2H7a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2zm-7-2a2 2 0 0 1 4 0v2h-4z"/></svg><b>{{ p.live_url|cut:"https://"|cut:"http://"|cut:"www."|cut:"/" }}</b>{% else %}{{ p.title }} · preview{% endif %}</span></div>
+      <div class="wk__media ph">
           {% if p.image %}<img src="{{ p.image }}" alt="{{ p.title }}{% if p.client %} — {{ p.client }}{% endif %}" width="1600" height="1200" loading="lazy" decoding="async">
-          {% else %}<div class="wk__noimg"><span>{{ p.title|slice:":1" }}</span></div>{% endif %}
+          {% else %}<div class="kv-mock kv-p{% cycle 0 1 2 3 %}" aria-hidden="true"><div class="nav"><b>{{ p.title }}</b><span class="lk"><i></i><i></i><i></i></span></div><span class="hd"></span><span class="hd s"></span><span class="ln"></span><span class="ln s"></span><span class="pill"></span></div>{% endif %}
         </div>
         <div class="wk__meta">
           {% if p.category %}<span class="wk__cat">{{ p.category }}</span>{% endif %}
@@ -981,6 +1101,7 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 
 
 <!-- ═══ TESTIMONIALS ═══ -->
+{% if testimonials %}
 <section class="sec" style="padding-top:0" id="testimonials">
   <div class="wrap">
     <div class="sec__hd rv">
@@ -989,50 +1110,18 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
     </div>
 
     <div class="tm__track" id="tmTrack" tabindex="0" aria-label="Testimonials, scrollable">
+      {% comment %} Kutoka Django admin → Testimonials. Awali majina matatu yaliandikwa hapa kwa
+         mkono; sasa sehemu inaonekana tu ukiongeza ushuhuda wa wateja halisi. {% endcomment %}
+      {% for t in testimonials %}
       <figure class="tm__card">
-        <div class="tm__stars" aria-label="5 out of 5">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
-        </div>
-        <blockquote class="tm__q">&ldquo;JamiiTek delivered beyond our expectations. The support is excellent and their work helped our business grow fast.&rdquo;</blockquote>
+        <div class="tm__stars" aria-label="{{ t.rating }} out of 5">{% for _ in "12345"|make_list %}{% if forloop.counter <= t.rating %}<svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>{% endif %}{% endfor %}</div>
+        <blockquote class="tm__q">&ldquo;{{ t.quote }}&rdquo;</blockquote>
         <figcaption class="tm__who">
-          <img class="tm__pic" src="{% static 'images/testimonials/client-1.jpg' %}" alt="" loading="lazy" decoding="async" width="48" height="48">
-          <span><b>Amina Juma</b><small>CEO, Amina Enterprises</small></span>
+          {% if t.image %}<img class="tm__pic" src="{{ t.image }}" alt="" loading="lazy" decoding="async" width="48" height="48">{% endif %}
+          <span><b>{{ t.name }}</b>{% if t.role %}<small>{{ t.role }}</small>{% endif %}</span>
         </figcaption>
       </figure>
-
-      <figure class="tm__card">
-        <div class="tm__stars" aria-label="5 out of 5">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
-        </div>
-        <blockquote class="tm__q">&ldquo;Our site was live in three weeks and orders doubled in the first month. They understand the Tanzanian market.&rdquo;</blockquote>
-        <figcaption class="tm__who">
-          <img class="tm__pic" src="{% static 'images/testimonials/client-2.jpg' %}" alt="" loading="lazy" decoding="async" width="48" height="48">
-          <span><b>Baraka Mushi</b><small>Founder, Mushi Traders</small></span>
-        </figcaption>
-      </figure>
-
-      <figure class="tm__card">
-        <div class="tm__stars" aria-label="5 out of 5">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
-        </div>
-        <blockquote class="tm__q">&ldquo;JamiiBot answers our customers all night. We stopped losing enquiries after hours completely.&rdquo;</blockquote>
-        <figcaption class="tm__who">
-          <img class="tm__pic" src="{% static 'images/testimonials/client-3.jpg' %}" alt="" loading="lazy" decoding="async" width="48" height="48">
-          <span><b>Neema Kileo</b><small>Operations Lead, Kilimo Group</small></span>
-        </figcaption>
-      </figure>
+      {% endfor %}
     </div>
 
     <div class="tm__nav">
@@ -1043,6 +1132,7 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
     </div>
   </div>
 </section>
+{% endif %}
 
 <!-- ═══ CTA ═══ -->
 <section class="sec--sm" style="padding-top:0">
@@ -1391,6 +1481,46 @@ function carousel(trackId, prevId, nextId, barId){
 }
 carousel('wkTrack', 'wkPrev', 'wkNext', 'wkBar');
 carousel('tmTrack', 'tmPrev', 'tmNext', null);
+/* ═════ KIVINJARI ═════ */
+(function(){
+  // Address bar: chips za bei zinachagua extension; mifano inajiandika kama placeholder
+  var form=document.getElementById('domForm'), q=document.getElementById('domq'), sel=document.getElementById('domtld');
+  var chips=[].slice.call(document.querySelectorAll('.kv-tld'));
+  function mark(){ chips.forEach(function(c){ c.classList.toggle('on', c.dataset.tld===sel.value); }); }
+  chips.forEach(function(c){ c.addEventListener('click', function(){ sel.value=c.dataset.tld; mark(); q.focus(); }); });
+  if (sel) sel.addEventListener('change', mark);
+  if (q && !matchMedia('(prefers-reduced-motion: reduce)').matches){
+    var names=['mamaneema','kilimofresh','safarijumbo','dukalajuma','shulemwanga','tryvis'], n=0, c=0, del=false, tm=null;
+    function tick(){
+      if (document.activeElement===q || q.value){ q.placeholder='jinalabiashara'; tm=setTimeout(tick,1200); return; }
+      var w=names[n%names.length];
+      c+=del?-1:1; q.placeholder=w.slice(0,c)||' ';
+      if(!del&&c===w.length){del=true; tm=setTimeout(tick,1600); return;}
+      if(del&&c===0){del=false;n++;}
+      tm=setTimeout(tick, del?45:90);
+    }
+    tick();
+  }
+  // Huduma: tabs (mishale ya keyboard inafanya kazi kama tablist ya kweli)
+  var sx=document.querySelector('[data-sx]');
+  if (sx){
+    var tabs=[].slice.call(sx.querySelectorAll('[role=tab]')), panels=[].slice.call(sx.querySelectorAll('[role=tabpanel]'));
+    function pick(k, focus){
+      tabs.forEach(function(t,j){ t.setAttribute('aria-selected', j===k); t.tabIndex = j===k?0:-1; });
+      panels.forEach(function(p,j){ p.hidden = j!==k; });
+      if (focus) tabs[k].focus();
+    }
+    tabs.forEach(function(t,k){
+      t.addEventListener('click', function(){ pick(k); });
+      t.addEventListener('keydown', function(e){
+        if(e.key==='ArrowDown'||e.key==='ArrowRight'){e.preventDefault();pick((k+1)%tabs.length,true);}
+        if(e.key==='ArrowUp'||e.key==='ArrowLeft'){e.preventDefault();pick((k-1+tabs.length)%tabs.length,true);}
+      });
+    });
+    pick(0);
+  }
+})();
+
 
 /* ═════ DOMAIN SEARCH ═════ */
 (function(){
