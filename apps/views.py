@@ -160,7 +160,24 @@ def contact(request):
 
 # Ushuhuda wa Wateja
 def About(request):
-    return render(request, 'about.html')
+    """Ukurasa wa About — namba zote ni HALISI kutoka database.
+
+    Awali ukurasa ulidai "since 2019", "192+ projects" na "5★ rating" bila
+    chanzo chochote. Sasa zinajihesabu: kazi zilizo hewani, huduma, na
+    websites tunazohost. Namba ikiwa 0, haionyeshwi.
+    """
+    from .models import ManagedWebsite, Service
+    from .site_content import PortfolioItem
+    stats = {
+        'projects': PortfolioItem.objects.filter(is_featured=True).count(),
+        'services': Service.objects.filter(show_on_home=True).count(),
+        'hosted': ManagedWebsite.objects.filter(status='active').count(),
+    }
+    return render(request, 'about.html', {
+        'stats': stats,
+        'services': list(Service.objects.filter(show_on_home=True).order_by('order', 'created_at')[:8]),
+        'work': list(PortfolioItem.objects.filter(is_featured=True)[:3]),
+    })
 
 def contact(request):
     """

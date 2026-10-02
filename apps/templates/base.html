@@ -83,7 +83,7 @@
   <link rel="stylesheet" href="{% static 'css/interaction.css' %}">
 
 </head>
-<body>
+<body class="{% block body_class %}{% endblock %}">
 
 <!-- Loader -->
 <div id="q-loader">
@@ -147,10 +147,13 @@
         <a href="{% url 'home' %}" class="footer-logo">Jamii<em>Tek</em></a>
         <p class="footer-desc">Building next-generation digital products for businesses across Tanzania and East Africa. Fast, secure, and scalable.</p>
         <div class="footer-socials">
-          <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
-          <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
-          <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-          <a href="#" aria-label="GitHub"><i class="fab fa-github"></i></a>
+          {% comment %} Zilikuwa href="#" — zinaonekana tu link ikiwekwa (SOCIAL_* kwenye Render). {% endcomment %}
+          {% if SOCIAL.twitter %}<a href="{{ SOCIAL.twitter }}" target="_blank" rel="noopener" aria-label="Twitter"><i class="fab fa-x-twitter"></i></a>{% endif %}
+          {% if SOCIAL.linkedin %}<a href="{{ SOCIAL.linkedin }}" target="_blank" rel="noopener" aria-label="Linkedin"><i class="fab fa-linkedin-in"></i></a>{% endif %}
+          {% if SOCIAL.instagram %}<a href="{{ SOCIAL.instagram }}" target="_blank" rel="noopener" aria-label="Instagram"><i class="fab fa-instagram"></i></a>{% endif %}
+          {% if SOCIAL.facebook %}<a href="{{ SOCIAL.facebook }}" target="_blank" rel="noopener" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>{% endif %}
+          {% if SOCIAL.github %}<a href="{{ SOCIAL.github }}" target="_blank" rel="noopener" aria-label="Github"><i class="fab fa-github"></i></a>{% endif %}
+          {% if SOCIAL.youtube %}<a href="{{ SOCIAL.youtube }}" target="_blank" rel="noopener" aria-label="Youtube"><i class="fab fa-youtube"></i></a>{% endif %}
         </div>
       </div>
       <div class="col-lg-2 col-md-3 col-6">
