@@ -493,6 +493,14 @@
     }
     .price-card.popular::before{top:18px!important;right:18px!important;left:auto!important;transform:none!important;border-radius:999px!important;
       padding:6px 12px!important;font-family:var(--body)!important;font-size:12.5px!important;font-weight:800!important;width:auto!important}
+
+    /* Hero kwenye simu/tablet: picha ya simu imefichwa (<=1024px), kwa hiyo urefu wa
+       skrini nzima (100vh) uliacha nafasi tupu kubwa juu na chini ya maandishi.
+       Sasa urefu unafuata maudhui. */
+    @media(max-width:1024px){.hero{min-height:0;padding:112px 6% 72px}}
+    @media(max-width:768px){.hero{padding:100px 6% 52px}.hero-sub{margin-bottom:26px}.hero-ctas{margin-bottom:26px}}
+    /* Vitufe vimoja chini ya kingine — maandishi hayavunjiki tena ("Start Free 7-" / "Day Trial") */
+    @media(max-width:480px){.hero-ctas{flex-direction:column}.hero-ctas a{width:100%;justify-content:center}}
 </style>
   <!-- JamiiBot widget: mgeni anaijaribu bidhaa yenyewe kabla ya kujisajili -->
   <script src="https://www.jamiitek.com/chatbot/widget/b785f732-5c0d-4cc0-af87-dfcbfb100dbf.js" defer></script>
@@ -554,7 +562,7 @@
       <h1 class="hero-h1">Your Business Deserves a<br><em>24/7 WhatsApp</em><br>Assistant</h1>
       <p class="hero-sub">JamiiBot handles customer questions, showcases your services, and converts leads — automatically. While you focus on running your business.</p>
       <div class="hero-ctas">
-        <a href="/chatbot/register/" class="btn-hero-primary"><i class="fas fa-rocket"></i> Start Free 7-Day Trial</a>
+        <a href="/chatbot/register/" class="btn-hero-primary"><i class="fas fa-rocket"></i> Start Free 7&#8209;Day Trial</a>
         <a href="https://wa.me/{% contact "bot_wa" %}?text=Habari%20JamiiBot%2C%20nataka%20kujaribu%20demo" target="_blank" class="btn-hero-wa"><i class="fab fa-whatsapp fa-lg"></i> Try the Live Demo</a>
       </div>
       <div class="hero-trust">
