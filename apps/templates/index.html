@@ -755,8 +755,8 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 .wk__card .kv-url b{color:#fff}
 .kv-mock{position:absolute;inset:0;display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;padding:7% 8%;color:#fff;overflow:hidden}
 .kv-mock::after{content:"";position:absolute;right:-18%;top:-22%;width:62%;aspect-ratio:1;border-radius:50%;background:rgba(255,255,255,.07)}
-.kv-mock .nav{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:9%;text-align:left}
-.kv-mock .nav b{margin-right:auto;font-weight:800;font-size:clamp(12px,1.25vw,14px);letter-spacing:-.01em;white-space:nowrap}
+.kv-mock .kv-mnav{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:9%;text-align:left}
+.kv-mock .kv-mnav b{margin-right:auto;font-weight:800;font-size:clamp(12px,1.25vw,14px);letter-spacing:-.01em;white-space:nowrap}
 .kv-mock .lk{margin-left:auto;display:flex;gap:8px}
 .kv-mock .lk i{width:28px;height:5px;border-radius:5px;background:rgba(255,255,255,.22)}
 .kv-mock .hd{display:block;height:clamp(14px,1.6vw,20px);width:74%;border-radius:8px;background:rgba(255,255,255,.88);margin-bottom:9px}
@@ -770,6 +770,73 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 .kv-p3{background:linear-gradient(135deg,#3b2a7a,#170f36)}
 
 @media (prefers-reduced-motion:reduce){.kv-bar,.kv-tld,.kv-sx-tab{transition:none}}
+
+/* ══ MENYU YA SIMU — paneli ya usiku, links kubwa zenye ikoni, vitendo chini ══
+   Awali: paneli nyeupe, links ndogo zinazofanana, nafasi tupu nusu ya skrini.
+   Sasa: kila link ina ikoni na eneo kubwa la kugusa; utafutaji wa domain juu;
+   Client Portal na WhatsApp ya timu chini, mahali kidole kinapofika. */
+.nav__m{display:none}
+@media (max-width:1179px){
+  .scrim{-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+  .nav{width:min(400px,100vw);background:
+      radial-gradient(120% 50% at 100% 0%,rgba(245,166,35,.14),transparent 60%),
+      linear-gradient(180deg,var(--navy-900),var(--navy-950));
+    color:#fff;padding:18px 16px calc(20px + env(safe-area-inset-bottom));box-shadow:-30px 0 80px rgba(0,0,0,.5);
+    transition:transform .42s cubic-bezier(.2,.8,.2,1)}
+  .nav__m{display:flex}
+  .nav__head{align-items:center;height:48px;margin:0 0 16px 2px}
+  .nav__brand{display:inline-flex;align-items:center;padding:7px 12px;border-radius:12px;background:#fff}
+  .nav__brand img{height:26px;width:auto}
+  .nav__x{top:18px;right:16px;background:rgba(255,255,255,.08);color:#fff;border-radius:50%}
+  .nav__find{align-items:center;gap:10px;margin-bottom:14px;padding:13px 14px;border-radius:14px;
+    background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,.1);color:#aebfd6;font-size:14px}
+  .nav__find svg{width:15px;height:15px;color:#3ddc97;flex:0 0 auto}
+  .nav__find b{color:#fff;font-weight:600;margin-right:2px}
+  .nav__l{gap:14px;min-height:56px;padding:9px 10px;border:0;border-radius:14px;color:#e6edf7;
+    font-size:16.5px;font-weight:600;transition:background .2s}
+  .nav__l:active,.nav__l:hover{background:rgba(255,255,255,.06)}
+  .nav__l:focus-visible,.nav__find:focus-visible,.nav__wa:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+  .nav__ic{display:grid;place-items:center;width:38px;height:38px;border-radius:11px;flex:0 0 auto;
+    background:rgba(255,255,255,.06);color:#a9bad1}
+  .nav__ic svg{width:19px;height:19px}
+  .nav__chev{margin-left:auto;display:grid;opacity:.35}
+  .nav__chev svg{width:17px;height:17px}
+  .nav__l.is-active{background:rgba(245,166,35,.11);color:#fff}
+  .nav__l.is-active .nav__ic{background:var(--gold);color:var(--navy-950)}
+  .nav__l.is-active .nav__chev{opacity:.8;color:var(--gold)}
+  .nav .hdr__cta{align-self:stretch;width:auto;margin:18px 0 0;min-height:54px;justify-content:center;border-radius:14px;
+    background:var(--gold);color:var(--navy-950);font-weight:700;box-shadow:0 16px 34px -18px rgba(245,166,35,.9)}
+  .nav__foot{flex-direction:column;gap:10px;margin-top:10px}
+  .nav__wa{display:flex;align-items:center;justify-content:center;gap:9px;min-height:50px;border-radius:14px;
+    box-shadow:inset 0 0 0 1px rgba(37,211,102,.45);color:#7ee2b0;font-weight:600;font-size:15px}
+  .nav__wa svg{width:19px;height:19px}
+  .nav__foot p{margin:4px 0 0;text-align:center;color:#7f93ad;font-size:12.5px}
+  /* Mwendo mmoja: links zinaingia moja baada ya nyingine panel inapofunguka */
+  .nav .nav__l,.nav .hdr__cta,.nav .nav__foot,.nav .nav__find{opacity:0;transform:translateX(18px);
+    transition:opacity .35s ease,transform .45s cubic-bezier(.2,.8,.2,1),background .2s}
+  .nav.is-open .nav__l,.nav.is-open .hdr__cta,.nav.is-open .nav__foot,.nav.is-open .nav__find{opacity:1;transform:none}
+  .nav.is-open .nav__find{transition-delay:.06s}
+  .nav.is-open .nav__l{transition-delay:calc(.08s + var(--i,0) * .035s)}
+  .nav.is-open .hdr__cta{transition-delay:.42s}
+  .nav.is-open .nav__foot{transition-delay:.48s}
+}
+@media (max-width:1179px) and (prefers-reduced-motion:reduce){
+  .nav,.nav .nav__l,.nav .hdr__cta,.nav .nav__foot,.nav .nav__find{transition:none;transform:none;opacity:1}
+}
+@media (min-width:1180px){.nav__ic,.nav__chev{display:none}}
+
+/* ══ KAZI ZINAJITELEZA — kama mstari wa "trusted infrastructure" ══ */
+.wk__clip{overflow:hidden;margin-inline:calc(var(--pad) * -1);padding-block:4px 22px;
+  -webkit-mask:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);mask:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent)}
+.wk--marquee .wk__track{overflow:visible;width:max-content;margin:0;padding:0 var(--pad);scroll-snap-type:none;
+  animation:slide var(--wk-dur,60s) linear infinite}
+.wk--marquee .wk__card{flex:0 0 min(330px,78vw);scroll-snap-align:none}
+@media (min-width:768px){.wk--marquee .wk__card{flex-basis:clamp(300px,34vw,420px)}}
+.wk--marquee.is-paused .wk__track{animation-play-state:paused}
+@media (hover:hover){.wk--marquee .wk__clip:hover .wk__track{animation-play-state:paused}}
+.wk--marquee .wk__nav,.wk--marquee .wk__bar,.wk--marquee .wk__swipe{display:none}
+/* Kadi fupi za simu: mistari ya hakikisho iligusa lebo ya aina */
+@media (max-width:767px){.kv-mock .ln{display:none}.kv-mock .kv-mnav{margin-bottom:7%}}
 </style>
   <link rel="stylesheet" href="{% static 'css/tokens.css' %}">
   <link rel="stylesheet" href="{% static 'css/interaction.css' %}">
@@ -831,18 +898,28 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
       <button class="nav__x" id="navX" aria-label="Close menu">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="width:21px;height:21px"><path d="M6 6l12 12M18 6L6 18"/></svg>
       </button>
-      <a class="nav__l is-active" href="{% url 'home' %}">Home</a>
-      <a class="nav__l" href="{% url 'service' %}">Services</a>
-      <a class="nav__l" href="#work">Work</a>
-      <a class="nav__l" href="#domains">Domains</a>
-      <a class="nav__l" href="{% url 'jamiibot_landing' %}">JamiiBot</a>
-      <a class="nav__l" href="{% url 'templates_marketplace' %}">Templates</a>
-      <a class="nav__l" href="{% url 'blog_list' %}">Blog</a>
-      <a class="nav__l" href="{% url 'About' %}">About</a>
-      <a class="nav__l" href="{% url 'contact' %}">Contact</a>
+      <div class="nav__m nav__head">
+        <span class="nav__brand"><img src="{% static 'images/logo.png' %}" alt="JamiiTek" width="150" height="29" loading="lazy"></span>
+      </div>
+      <a class="nav__m nav__find" href="#domains"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17 9h-1V7a4 4 0 0 0-8 0v2H7a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2zm-7-2a2 2 0 0 1 4 0v2h-4z"/></svg><span><b>https://</b>tafuta domain ya biashara yako</span></a>
+      <a class="nav__l is-active" href="{% url 'home' %}" style="--i:1"><span class="nav__ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></span><span class="nav__t">Home</span><span class="nav__chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m9 6 6 6-6 6"/></svg></span></a>
+      <a class="nav__l" href="{% url 'service' %}" style="--i:2"><span class="nav__ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h7v7H4zm9 0h7v7h-7zM4 14h7v6H4zm9 0h7v6h-7z"/></svg></span><span class="nav__t">Services</span><span class="nav__chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m9 6 6 6-6 6"/></svg></span></a>
+      <a class="nav__l" href="#work" style="--i:3"><span class="nav__ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1zm0 3h16"/></svg></span><span class="nav__t">Work</span><span class="nav__chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m9 6 6 6-6 6"/></svg></span></a>
+      <a class="nav__l" href="#domains" style="--i:4"><span class="nav__ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zm0 0c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9m0-18C9.5 5.6 8.2 8.6 8.2 12s1.3 6.4 3.8 9M3.5 9h17M3.5 15h17"/></svg></span><span class="nav__t">Domains</span><span class="nav__chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m9 6 6 6-6 6"/></svg></span></a>
+      <a class="nav__l" href="{% url 'jamiibot_landing' %}" style="--i:5"><span class="nav__ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H10l-5 4v-4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zm4 6h.01M15 11h.01"/></svg></span><span class="nav__t">JamiiBot</span><span class="nav__chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m9 6 6 6-6 6"/></svg></span></a>
+      <a class="nav__l" href="{% url 'templates_marketplace' %}" style="--i:6"><span class="nav__ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v5H4zm0 7h7v9H4zm9 0h7v9h-7z"/></svg></span><span class="nav__t">Templates</span><span class="nav__chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m9 6 6 6-6 6"/></svg></span></a>
+      <a class="nav__l" href="{% url 'blog_list' %}" style="--i:7"><span class="nav__ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6zm9 0v4h4M9 12h7M9 16h7"/></svg></span><span class="nav__t">Blog</span><span class="nav__chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m9 6 6 6-6 6"/></svg></span></a>
+      <a class="nav__l" href="{% url 'About' %}" style="--i:8"><span class="nav__ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm-7 9a7 7 0 0 1 14 0"/></svg></span><span class="nav__t">About</span><span class="nav__chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m9 6 6 6-6 6"/></svg></span></a>
+      <a class="nav__l" href="{% url 'contact' %}" style="--i:9"><span class="nav__ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16v12H4zm0 0 8 7 8-7"/></svg></span><span class="nav__t">Contact</span><span class="nav__chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m9 6 6 6-6 6"/></svg></span></a>
       <a class="btn btn--navy hdr__cta" href="{% url 'portal_login' %}">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5m0 2c-4 0-8 2-8 4.5V21h16v-2.5C20 16 16 14 12 14"/></svg>
         Client Portal</a>
+      <div class="nav__m nav__foot">
+        <a class="nav__wa" href="https://wa.me/{% contact "wa" %}" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.3-.5.1-1 .1-1.7-.1a15 15 0 0 1-1.6-.6 12 12 0 0 1-4.6-4.1 5 5 0 0 1-1.1-2.7 2.9 2.9 0 0 1 .9-2.2 1 1 0 0 1 .7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.1.1.3 0 .5l-.3.5-.4.4c-.1.1-.3.3-.1.6a9 9 0 0 0 1.6 2 8 8 0 0 0 2.3 1.4c.3.1.5.1.6-.1l.9-1.1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3a2 2 0 0 1-.1 1.2z"/></svg>
+          Chat with our team</a>
+        <p>{% contact "phone_display" %} · Dar es Salaam</p>
+      </div>
     </nav>
   </div>
 </header>
@@ -1078,7 +1155,7 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
         <span class="kv-url">{% if p.live_url %}<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17 9h-1V7a4 4 0 0 0-8 0v2H7a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2zm-7-2a2 2 0 0 1 4 0v2h-4z"/></svg><b>{{ p.live_url|cut:"https://"|cut:"http://"|cut:"www."|cut:"/" }}</b>{% else %}{{ p.title }} · preview{% endif %}</span></div>
       <div class="wk__media ph">
           {% if p.image %}<img src="{{ p.image }}" alt="{{ p.title }}{% if p.client %} — {{ p.client }}{% endif %}" width="1600" height="1200" loading="lazy" decoding="async">
-          {% else %}<div class="kv-mock kv-p{% cycle 0 1 2 3 %}" aria-hidden="true"><div class="nav"><b>{{ p.title }}</b><span class="lk"><i></i><i></i><i></i></span></div><span class="hd"></span><span class="hd s"></span><span class="ln"></span><span class="ln s"></span><span class="pill"></span></div>{% endif %}
+          {% else %}<div class="kv-mock kv-p{% cycle 0 1 2 3 %}" aria-hidden="true"><div class="kv-mnav"><b>{{ p.title }}</b><span class="lk"><i></i><i></i><i></i></span></div><span class="hd"></span><span class="hd s"></span><span class="ln"></span><span class="ln s"></span><span class="pill"></span></div>{% endif %}
         </div>
         <div class="wk__meta">
           {% if p.category %}<span class="wk__cat">{{ p.category }}</span>{% endif %}
@@ -1481,6 +1558,31 @@ function carousel(trackId, prevId, nextId, barId){
 }
 carousel('wkTrack', 'wkPrev', 'wkNext', 'wkBar');
 carousel('tmTrack', 'tmPrev', 'tmNext', null);
+/* ═════ Kazi zinajiteleza ═════
+   Kadi zinanakiliwa mara moja (nakala zimefichwa kwa screen readers na
+   keyboard) ili mstari uzunguke bila kukatika. Inasimama ukigusa au
+   ukiweka kipanya; "reduce motion" -> inabaki kama slider ya kawaida. */
+(function(){
+  var sec=document.getElementById('work'), track=document.getElementById('wkTrack');
+  if(!sec||!track||matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var cards=[].slice.call(track.children);
+  if(cards.length<3) return;
+  cards.forEach(function(c){
+    var cl=c.cloneNode(true); cl.setAttribute('aria-hidden','true');
+    [].forEach.call(cl.querySelectorAll('a,button'),function(a){a.tabIndex=-1;});
+    track.appendChild(cl);
+  });
+  var clip=document.createElement('div'); clip.className='wk__clip';
+  track.parentNode.insertBefore(clip,track); clip.appendChild(track);
+  sec.style.setProperty('--wk-dur',(cards.length*8)+'s');
+  sec.classList.add('wk--marquee');
+  var t=null;
+  clip.addEventListener('touchstart',function(){clearTimeout(t);sec.classList.add('is-paused');},{passive:true});
+  clip.addEventListener('touchend',function(){t=setTimeout(function(){sec.classList.remove('is-paused');},1800);},{passive:true});
+  track.addEventListener('focusin',function(){sec.classList.add('is-paused');});
+  track.addEventListener('focusout',function(){sec.classList.remove('is-paused');});
+})();
+
 /* ═════ KIVINJARI ═════ */
 (function(){
   // Address bar: chips za bei zinachagua extension; mifano inajiandika kama placeholder
