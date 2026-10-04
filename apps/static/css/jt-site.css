@@ -14,8 +14,8 @@
 
 :root{
   /* Mwanga — nyeupe yenye bluu iliyofifia sana (inaendana na navy ya chapa) */
-  --bg:#EDF3FC; --paper:#E2EBF8; --paper-2:#DAE6F7; --card:#FFFFFF;
-  --ink:#0B1730; --ink-2:#34405A; --muted:#66728A; --line:#D5DFEE; --line-2:#E1E9F5;
+  --bg:#E6EFFB; --paper:#D9E5F6; --paper-2:#D1E0F5; --card:#FFFFFF;
+  --ink:#0B1730; --ink-2:#34405A; --muted:#66728A; --line:#CCD8EB; --line-2:#DAE4F2;
   /* Navy ya chapa — kwa sehemu chache za giza (domain, footer, Kilimanjaro) */
   --navy:#0A2245; --navy-2:#123563; --navy-3:#1B4C8C; --navy-d:#0B1A36;
   --gold:#F5A623; --amber:#FFC456; --sun:#FF7A3D; --cyan:#22B8E0; --wa:#25D366; --violet:#7C5CFF; --green:#16A34A;
@@ -98,7 +98,7 @@ button{cursor:pointer;border:0;background:none}
 .hdr{position:fixed;inset:0 0 auto;z-index:50;transition:transform .45s var(--ease),background .3s,box-shadow .3s}
 .hdr__bar{position:absolute;left:0;top:0;height:3px;width:100%;background:var(--grad);transform-origin:0 50%;transform:scaleX(var(--p,0))}
 .hdr__in{display:flex;align-items:center;gap:14px;height:72px}
-.hdr.is-stuck{background:rgba(237,243,252,.86);-webkit-backdrop-filter:saturate(170%) blur(16px);backdrop-filter:saturate(170%) blur(16px);box-shadow:0 1px 0 var(--line),0 10px 30px -18px rgba(11,23,48,.25)}
+.hdr.is-stuck{background:rgba(230,239,251,.86);-webkit-backdrop-filter:saturate(170%) blur(16px);backdrop-filter:saturate(170%) blur(16px);box-shadow:0 1px 0 var(--line),0 10px 30px -18px rgba(11,23,48,.25)}
 .hdr.is-hidden{transform:translateY(-100%)}
 .brand{display:flex;align-items:center;gap:10px;flex:none;margin-right:auto;font:800 21px/1 'Sora',sans-serif;letter-spacing:-.045em;color:var(--ink)}
 .brand img{height:40px;width:auto}
