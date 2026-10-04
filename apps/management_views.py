@@ -1069,6 +1069,13 @@ def news_blog_endpoint(request):
             news_blog.run_and_notify()      # email ya rasimu, au ripoti ikishindwa
         except Exception:
             logger.exception('AI newsroom background run failed')
+        # JamiiTek Spotlight: makala 1 kuhusu JamiiTek, Jumatatu/Jumatano/Jumamosi.
+        # Inajiamulia yenyewe kama leo ni siku yake na kama imeshaandika leo.
+        try:
+            from apps import spotlight_blog
+            spotlight_blog.run_and_notify()
+        except Exception:
+            logger.exception('JamiiTek Spotlight background run failed')
 
     threading.Thread(target=_bg, name='jamiitek-news-blog', daemon=True).start()
     return JsonResponse({'ok': True, 'status': 'started', 'date': today})
