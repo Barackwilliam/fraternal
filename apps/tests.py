@@ -133,3 +133,39 @@ class ProposalFlowTest(NoPingMixin, TestCase):
         self.assertIn('Savanna Luxe', mail.outbox[0].alternatives[0][0])
         self.assertEqual(p.requirements['reference_template']['preview_url'], '/templates/savanna-luxe/')
         self.assertContains(self.client.get(r['Location']), 'Sent to JamiiTek')
+
+
+@override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend')
+class NewsletterTest(TestCase):
+    """Fomu ya footer ilituma email peke yake kwenda /contact/ na kupata
+    "Please fill in all fields". Sasa ina njia yake."""
+    url = '/newsletter/subscribe/'
+
+    def test_ajax_subscribe_sends_notice(self):
+        r = self.client.post(self.url, {'email': 'neema@biashara.co.tz'}, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        self.assertEqual(r.status_code, 200)
+        self.assertTrue(r.json()['ok'])
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn('neema@biashara.co.tz', mail.outbox[0].body)
+
+    def test_invalid_email_rejected(self):
+        r = self.client.post(self.url, {'email': 'si-email'}, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        self.assertEqual(r.status_code, 400)
+        self.assertFalse(r.json()['ok'])
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_without_js_redirects_back_with_status(self):
+        r = self.client.post(self.url, {'email': 'juma@example.com'}, HTTP_REFERER='http://testserver/About/?x=1')
+        self.assertRedirects(r, '/About/?subscribed=ok#site-footer', fetch_redirect_response=False)
+
+    def test_foreign_referer_is_not_followed(self):
+        r = self.client.post(self.url, {'email': 'juma@example.com'}, HTTP_REFERER='https://evil.example/')
+        self.assertEqual(r['Location'], '/?subscribed=ok#site-footer')
+
+    def test_honeypot_drops_silently(self):
+        r = self.client.post(self.url, {'email': 'bot@spam.com', 'company_website': 'x'}, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        self.assertTrue(r.json()['ok'])
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_get_redirects_home(self):
+        self.assertRedirects(self.client.get(self.url), '/', fetch_redirect_response=False)

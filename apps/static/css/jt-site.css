@@ -294,6 +294,11 @@ button{cursor:pointer;border:0;background:none}
 .news__in::placeholder{color:#8392AE}
 .news__in:focus{border-color:var(--amber)}
 .news__f .btn{width:100%;border-radius:14px}
+.news .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.news__msg{min-height:0;margin-top:8px;font-size:14px}
+.news__msg:empty{display:none}
+.news__msg.is-ok{color:#5BE694}
+.news__msg.is-err{color:#FFB08C}
 @media (min-width:560px){
   .news__f{flex-direction:row;padding:6px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12)}
   .news__in{flex:1;height:46px;border:0;background:none;border-radius:999px}

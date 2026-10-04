@@ -226,6 +226,24 @@ window.JT.carousel = function(trackId, prevId, nextId, barId){
   sync();
 };
 
+/* ── Newsletter (footer): inatumwa bila kuacha ukurasa ── */
+(function(){
+  var f = $('#newsForm'), msg = $('#newsMsg');
+  if (!f || !window.fetch || !window.FormData) return;
+  f.addEventListener('submit', function(e){
+    e.preventDefault();
+    var btn = $('button', f), input = $('input[type=email]', f);
+    function show(ok, text){ msg.textContent = text; msg.className = 'news__msg ' + (ok ? 'is-ok' : 'is-err'); }
+    if (!input.checkValidity()) { show(false, 'Please enter a valid email address.'); input.focus(); return; }
+    btn.disabled = true;
+    fetch(f.action, {method:'POST', body:new FormData(f), headers:{'X-Requested-With':'XMLHttpRequest'}, credentials:'same-origin'})
+      .then(function(r){ return r.json(); })
+      .then(function(d){ show(d.ok, d.message); if (d.ok) f.reset(); })
+      .catch(function(){ show(false, 'Connection problem. Please try again.'); })
+      .then(function(){ btn.disabled = false; });
+  });
+})();
+
 /* ── Scripts zisizo za lazima: baada ya ukurasa kufunguka ──
    Widget ya JamiiBot na interaction.js hazihitajiki kwa skrini ya kwanza. */
 function later(){

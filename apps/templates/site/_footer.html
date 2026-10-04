@@ -6,12 +6,16 @@
         <h3>Subscribe to our newsletter</h3>
         <p>New services, templates and offers — no spam.</p>
       </div>
-      <form class="news__f" method="post" action="{% url 'contact' %}">
-        {% csrf_token %}
-        <label class="sr" for="nEmail">Email address</label>
-        <input class="news__in" id="nEmail" name="email" type="email" placeholder="you@business.co.tz" required>
-        <button class="btn btn--gold btn--sm" type="submit">Subscribe</button>
-      </form>
+      <div>
+        <form class="news__f" id="newsForm" method="post" action="{% url 'newsletter_subscribe' %}" data-jt-skip>
+          {% csrf_token %}
+          <label class="hp" aria-hidden="true">Company website<input type="text" name="company_website" tabindex="-1" autocomplete="off"></label>
+          <label class="sr" for="nEmail">Email address</label>
+          <input class="news__in" id="nEmail" name="email" type="email" placeholder="you@business.co.tz" required autocomplete="email">
+          <button class="btn btn--gold btn--sm" type="submit">Subscribe</button>
+        </form>
+        {% with st=request.GET.subscribed %}<p class="news__msg{% if st == 'ok' %} is-ok{% elif st %} is-err{% endif %}" id="newsMsg" role="status" aria-live="polite">{% if st == 'ok' %}You're subscribed. Asante!{% elif st == 'invalid' %}Please enter a valid email address.{% elif st %}Something went wrong. Please try again or WhatsApp us.{% endif %}</p>{% endwith %}
+      </div>
     </div>
 
     <div class="fgrid">
