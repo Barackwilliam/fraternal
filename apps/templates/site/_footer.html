@@ -1,0 +1,88 @@
+{% load static jt_contact %}
+<footer class="ft" id="site-footer">
+  <div class="wrap">
+    <div class="news">
+      <div>
+        <h3>Subscribe to our newsletter</h3>
+        <p>New services, templates and offers — no spam.</p>
+      </div>
+      <form class="news__f" method="post" action="{% url 'contact' %}">
+        {% csrf_token %}
+        <label class="sr" for="nEmail">Email address</label>
+        <input class="news__in" id="nEmail" name="email" type="email" placeholder="you@business.co.tz" required>
+        <button class="btn btn--gold btn--sm" type="submit">Subscribe</button>
+      </form>
+    </div>
+
+    <div class="fgrid">
+      <div class="fab">
+        <a class="brand" href="{% url 'home' %}" aria-label="JamiiTek home">
+          <picture>
+            <source srcset="{% static 'images/logo-white.webp' %}" type="image/webp">
+            <img class="brand__logo" src="{% static 'images/logo-white.png' %}" alt="" width="46" height="40" loading="lazy">
+          </picture>
+          <span>Jamii<em>Tek</em></span>
+        </a>
+        <p>Building next-generation digital products for businesses across Tanzania and East Africa.</p>
+        <div class="fst"><i></i> Systems operational</div>
+        <div class="fsoc">
+          {% if SOCIAL.facebook %}<a href="{{ SOCIAL.facebook }}" target="_blank" rel="noopener" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 21v-8h2.7l.4-3.1h-3.1V7.9c0-.9.25-1.5 1.55-1.5H16.7V3.6A22 22 0 0 0 14.3 3.5c-2.4 0-4 1.45-4 4.1v2.3H7.6V13h2.7v8z"/></svg></a>{% endif %}
+          {% if SOCIAL.linkedin %}<a href="{{ SOCIAL.linkedin }}" target="_blank" rel="noopener" aria-label="Linkedin"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.9 8.5H4V20h2.9zM5.45 3.5A1.7 1.7 0 1 0 7.1 5.2a1.67 1.67 0 0 0-1.65-1.7M20 13.4c0-3-1.6-4.4-3.75-4.4a3.2 3.2 0 0 0-2.9 1.6h-.05V8.5H10.6V20h2.9v-5.7c0-1.5.29-2.95 2.15-2.95s1.85 1.7 1.85 3V20H20z"/></svg></a>{% endif %}
+          {% if SOCIAL.instagram %}<a href="{{ SOCIAL.instagram }}" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.2c3.2 0 3.58 0 4.85.07 3.25.15 4.77 1.69 4.92 4.92.06 1.27.07 1.65.07 4.85s0 3.58-.07 4.85c-.15 3.23-1.66 4.77-4.92 4.92-1.27.06-1.64.07-4.85.07s-3.58 0-4.85-.07c-3.26-.15-4.77-1.7-4.92-4.92C2.17 15.62 2.16 15.25 2.16 12s0-3.58.07-4.85c.15-3.23 1.66-4.77 4.92-4.92C8.42 2.17 8.8 2.16 12 2.16m0 4.97A4.87 4.87 0 1 0 16.87 12 4.87 4.87 0 0 0 12 7.13m0 8.03A3.16 3.16 0 1 1 15.16 12 3.16 3.16 0 0 1 12 15.16m5.06-9.31a1.14 1.14 0 1 0 1.14 1.14 1.14 1.14 0 0 0-1.14-1.14"/></svg></a>{% endif %}
+          {% if SOCIAL.github %}<a href="{{ SOCIAL.github }}" target="_blank" rel="noopener" aria-label="Github"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2A10 10 0 0 0 8.8 21.5c.5.1.7-.2.7-.5v-1.7C6.7 19.9 6.1 18 6.1 18c-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.3 1.1 2.9.8.1-.6.3-1.1.6-1.3-2.2-.3-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.7 0 0 .8-.3 2.7 1a9.4 9.4 0 0 1 5 0c1.9-1.3 2.7-1 2.7-1 .5 1.4.2 2.4.1 2.7.6.7 1 1.6 1 2.7 0 3.9-2.4 4.7-4.6 5 .4.3.7.9.7 1.9v2.8c0 .3.2.6.7.5A10 10 0 0 0 12 2"/></svg></a>{% endif %}
+        </div>
+      </div>
+
+      <div class="fcol">
+        <h4>Quick links</h4>
+        <ul>
+          <li><a href="{% url 'home' %}">Home</a></li>
+          <li><a href="{% url 'About' %}">About us</a></li>
+          <li><a href="{% url 'service' %}">Services</a></li>
+          <li><a href="{% url 'home' %}#work">Our work</a></li>
+          <li><a href="{% url 'home' %}#domains">Domains</a></li>
+          <li><a href="{% url 'templates_marketplace' %}">Templates</a></li>
+          <li><a href="{% url 'blog_list' %}">Blog</a></li>
+        </ul>
+      </div>
+      <div class="fcol">
+        <h4>Services</h4>
+        <ul>
+          <li><a href="{% url 'service' %}">Website development</a></li>
+          <li><a href="{% url 'jamiibot_landing' %}">AI WhatsApp bot</a></li>
+          <li><a href="{% url 'home' %}#hosting">Web hosting</a></li>
+          <li><a href="{% url 'home' %}#domains">Domain registration</a></li>
+          <li><a href="{% url 'service' %}">Mobile apps</a></li>
+          <li><a href="{% url 'service' %}">UI/UX design</a></li>
+          <li><a href="/builder/">Website builder</a></li>
+        </ul>
+      </div>
+      <div class="fcol">
+        <h4>Support</h4>
+        <ul>
+          <li><a href="{% url 'portal_login' %}">Client portal</a></li>
+          <li><a href="{% url 'portal_register' %}">Create account</a></li>
+          <li><a href="{% url 'contact' %}">Submit a request</a></li>
+          <li><a href="{% url 'company_profile_view' %}">Company profile</a></li>
+          <li><a href="{% url 'get_started' %}">Start a project</a></li>
+        </ul>
+      </div>
+      <div class="fcol">
+        <h4>Contact</h4>
+        <ul class="fct">
+          <li><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7m0 9.5A2.5 2.5 0 1 1 14.5 9 2.5 2.5 0 0 1 12 11.5"/></svg>Dar es Salaam, Tanzania</li>
+          <li><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.6 10.8a15 15 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.6 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.6 3.6a1 1 0 0 1-.25 1z"/></svg><a href="tel:{% contact "phone" %}">{% contact "phone_display" %}</a></li>
+          <li><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2m0 4-8 5-8-5V6l8 5 8-5z"/></svg><a href="mailto:info@jamiitek.com">info@jamiitek.com</a></li>
+        </ul>
+        <h4 style="margin-top:22px">We accept</h4>
+        <div class="pay"><span>M-Pesa</span><span>Tigo Pesa</span><span>Airtel Money</span><span>CRDB</span><span>NMB</span></div>
+      </div>
+    </div>
+
+    <p class="giant" aria-hidden="true">JamiiTek</p>
+    <div class="fbot">
+      <p>&copy; {% now "Y" %} JamiiTek Ltd. All rights reserved. Crafted in Tanzania 🇹🇿</p>
+      <p><a href="{% url 'About' %}">Terms &amp; conditions</a> &nbsp;·&nbsp; <a href="{% url 'About' %}">Privacy policy</a></p>
+    </div>
+  </div>
+</footer>
