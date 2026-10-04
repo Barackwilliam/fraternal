@@ -1,6 +1,6 @@
 # AI Newsroom + Blog SEO — JamiiTek
 
-Kila siku AI inakagua matukio makubwa ya dunia (RSS), inachagua **3 makubwa ya
+Kila siku AI inakagua matukio makubwa ya dunia (RSS), inachagua **5 makubwa ya
 teknolojia na biashara** (Tanzania / Afrika Mashariki; `NEWSROOM_DAILY` kubadilisha), inaandika **rasimu** za makala za ubora wa juu
 (SEO kamili), inachukua picha kutoka Unsplash, kisha **inakutumia email** ya
 kukumbusha kukagua na kuthibitisha. Hakuna kinachochapishwa bila wewe kubonyeza
@@ -142,7 +142,7 @@ Kusimamia: Admin → **Blog comments** (ficha/onyesha).
 
 ## 11. Google Discover: waandishi, sera ya uhariri, dawati la Tech & Business
 
-**Newsroom mpya (default):** rasimu **3 kwa siku** za *Tech & Business*
+**Newsroom mpya (default):** rasimu **5 kwa siku** za *Tech & Business*
 (TechCabal, Techpoint, Disrupt Africa, allAfrica TZ, Daily News, BBC Tech/Business),
 kwa kuipa Tanzania na Afrika Mashariki kipaumbele. Idadi inabadilishwa kwa env
 `NEWSROOM_DAILY`. Mtindo wa zamani bado unapatikana: `daily_news_blog --tz 5 --world 5`.
@@ -168,6 +168,9 @@ makala na kutoka chini ya kila ukurasa wa blog, na iko kwenye sitemap.
 
 
 ## JamiiTek Spotlight — makala maalum kuhusu JamiiTek
+
+**Ni ya ziada:** habari 5 za kila siku zinaendelea kama kawaida; Spotlight
+inaongeza makala 1 zaidi siku zake tu.
 
 Kila **Jumatatu, Jumatano na Jumamosi** (saa za Tanzania) AI inachunguza mfumo
 na kuandika **makala 1** kuhusu JamiiTek: huduma (kutoka admin → Services),

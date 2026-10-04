@@ -1,6 +1,6 @@
 """
 AI Newsroom — kila siku inakagua habari za TEKNOLOJIA NA BIASHARA (Tanzania,
-Afrika Mashariki, dunia), inachagua chache muhimu zaidi (default 3), kisha
+Afrika Mashariki, dunia), inachagua chache muhimu zaidi (default 5), kisha
 inaandika RASIMU (status='draft'). Mhariri LAZIMA aandike sehemu ya
 "What this means for Tanzanian businesses" kabla ya kuchapisha — hiyo ndiyo
 thamani ya kipekee (original insight) ambayo Google Discover na sera ya Google
@@ -45,7 +45,7 @@ DESK_FEEDS = [
     'https://feeds.bbci.co.uk/news/technology/rss.xml',
     'https://feeds.bbci.co.uk/news/business/rss.xml',
 ]
-DAILY_COUNT = int(os.getenv('NEWSROOM_DAILY', '3') or 3)
+DAILY_COUNT = int(os.getenv('NEWSROOM_DAILY', '5') or 5)
 DESK_LABEL = 'Tech & Business (Tanzania / East Africa focus)'
 
 # (Feeds za zamani — bado zinapatikana kwa --tz/--world kama utazihitaji)
@@ -295,7 +295,7 @@ def run(count=None, tz_count=None, world_count=None):
     Tengeneza rasimu za habari. Rudisha dict:
       {'created': [BlogPost,...], 'skipped': int, 'errors': [str,...]}
 
-    Default: dawati moja la Tech & Business, rasimu `NEWSROOM_DAILY` (3).
+    Default: dawati moja la Tech & Business, rasimu `NEWSROOM_DAILY` (5).
     tz_count/world_count (hiari) = mtindo wa zamani wa Tanzania + World News.
     """
     from apps.models import BlogPost, BlogCategory
