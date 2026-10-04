@@ -13,9 +13,9 @@
 @font-face{font-family:'Inter';font-weight:600;font-display:swap;src:url("../fonts/inter-600.woff2") format('woff2')}
 
 :root{
-  /* Mwanga — rangi kuu sasa ni nyeupe ya joto na navy, si nyeusi */
-  --bg:#FBFAF7; --paper:#F4F1EA; --paper-2:#EEF2F8; --card:#FFFFFF;
-  --ink:#0B1730; --ink-2:#34405A; --muted:#66728A; --line:#E6E1D6; --line-2:#EDEAE2;
+  /* Mwanga — nyeupe yenye bluu iliyofifia sana (inaendana na navy ya chapa) */
+  --bg:#E6EFFB; --paper:#D9E5F6; --paper-2:#D1E0F5; --card:#FFFFFF;
+  --ink:#0B1730; --ink-2:#34405A; --muted:#66728A; --line:#CCD8EB; --line-2:#DAE4F2;
   /* Navy ya chapa — kwa sehemu chache za giza (domain, footer, Kilimanjaro) */
   --navy:#0A2245; --navy-2:#123563; --navy-3:#1B4C8C; --navy-d:#0B1A36;
   --gold:#F5A623; --amber:#FFC456; --sun:#FF7A3D; --cyan:#22B8E0; --wa:#25D366; --violet:#7C5CFF; --green:#16A34A;
@@ -98,7 +98,7 @@ button{cursor:pointer;border:0;background:none}
 .hdr{position:fixed;inset:0 0 auto;z-index:50;transition:transform .45s var(--ease),background .3s,box-shadow .3s}
 .hdr__bar{position:absolute;left:0;top:0;height:3px;width:100%;background:var(--grad);transform-origin:0 50%;transform:scaleX(var(--p,0))}
 .hdr__in{display:flex;align-items:center;gap:14px;height:72px}
-.hdr.is-stuck{background:rgba(251,250,247,.86);-webkit-backdrop-filter:saturate(170%) blur(16px);backdrop-filter:saturate(170%) blur(16px);box-shadow:0 1px 0 var(--line),0 10px 30px -18px rgba(11,23,48,.25)}
+.hdr.is-stuck{background:rgba(230,239,251,.86);-webkit-backdrop-filter:saturate(170%) blur(16px);backdrop-filter:saturate(170%) blur(16px);box-shadow:0 1px 0 var(--line),0 10px 30px -18px rgba(11,23,48,.25)}
 .hdr.is-hidden{transform:translateY(-100%)}
 .brand{display:flex;align-items:center;gap:10px;flex:none;margin-right:auto;font:800 21px/1 'Sora',sans-serif;letter-spacing:-.045em;color:var(--ink)}
 .brand img{height:40px;width:auto}
@@ -177,7 +177,7 @@ button{cursor:pointer;border:0;background:none}
 
 /* Dirisha la kivinjari — kwa michoro ya "live" */
 .win{position:relative;border-radius:18px;overflow:hidden;background:#fff;box-shadow:0 0 0 1px var(--line),var(--sh-2)}
-.win__bar{display:flex;align-items:center;gap:6px;padding:10px 13px;background:#F3F0E8;border-bottom:1px solid var(--line)}
+.win__bar{display:flex;align-items:center;gap:6px;padding:10px 13px;background:#E8EEF8;border-bottom:1px solid var(--line)}
 .win__bar>i{width:9px;height:9px;border-radius:50%;background:#DCD5C6}
 .win__bar>i:first-child{background:#FF5F57}.win__bar>i:nth-child(2){background:#FEBC2E}.win__bar>i:nth-child(3){background:#28C840}
 .win__url{display:flex;align-items:center;gap:6px;flex:1;min-width:0;margin-left:8px;padding:5px 10px;border-radius:8px;background:#fff;font:500 11.5px var(--mono);color:#857C6B;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -236,7 +236,7 @@ button{cursor:pointer;border:0;background:none}
 .chat .typing i:nth-child(2){animation-delay:.15s}.chat .typing i:nth-child(3){animation-delay:.3s}
 
 /* Builder: vipande vinajipanga */
-.bw__pg{position:relative;padding:12px;display:grid;gap:8px;background:#FBFAF7}
+.bw__pg{position:relative;padding:12px;display:grid;gap:8px;background:#F2F6FC}
 .blk{border-radius:8px;opacity:0;transform:translateY(-14px) scale(.96);transition:opacity .5s var(--ease),transform .6s var(--ease)}
 .blk.on{opacity:1;transform:none}
 .blk--nav{display:flex;align-items:center;justify-content:space-between;height:22px;padding:0 8px;background:#fff;border:1px solid var(--line)}
