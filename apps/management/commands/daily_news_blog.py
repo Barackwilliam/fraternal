@@ -16,7 +16,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('--count', type=int, default=None,
-                            help='Rasimu ngapi za Tech & Business (default NEWSROOM_DAILY au 3)')
+                            help='Rasimu ngapi za Tech & Business (default NEWSROOM_DAILY au 5)')
         parser.add_argument('--tz', type=int, default=None, help='(Mtindo wa zamani) habari za Tanzania')
         parser.add_argument('--world', type=int, default=None, help='(Mtindo wa zamani) habari za kimataifa')
         parser.add_argument('--no-email', action='store_true', help='Usitume email ya kukagua')
