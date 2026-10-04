@@ -1,393 +1,205 @@
-{% load jt_contact %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#040918">
-<title>Get Your Website — JamiiTek</title>
-<meta name="description" content="Three ways to get your website with JamiiTek: build it yourself for free, buy a ready-made design, or order a fully custom website.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+{% extends 'site/base.html' %}
+{% load static jt_contact %}
+{% comment %}
+  /get-started/ — mahali vitufe vyote vya "Start a project" vinapoelekeza.
+  Sasa kiko kwenye mfumo mmoja na Home/Services/About/Contact (header,
+  footer, rangi). Awali kilikuwa ukurasa wa giza peke yake uliopakua
+  three.js (~600KB) kwa ajili ya umbo la 3D ambalo simu nyingi hazikulionyesha
+  — upande wa kulia wa hero ulibaki mtupu. Sasa mchoro ni HTML/CSS: AI
+  inaandika maelezo ya biashara, kisha website inajijenga.
+{% endcomment %}
+{% block title %}Get Your Website — JamiiTek{% endblock %}
+{% block meta_desc %}Four ways to get your website with JamiiTek: let AI build it, build it yourself for free, buy a ready-made design, or order a fully custom website.{% endblock %}
+
+{% block head %}
 <style>
-:root{
-  --bg:#040918;--panel:#0a1424;--panel-2:#0e1a30;--line:rgba(120,180,255,.1);
-  --ink:#e8f0f6;--muted:#7d8ca0;--dim:#4a5870;
-  --green:#25d366;--green-2:#00ff88;--cyan:#00d4ff;--violet:#6c63ff;
-  --ff-d:'Space Grotesk',sans-serif;--ff-m:'JetBrains Mono',monospace;
-  --ease:cubic-bezier(.22,.9,.3,1);
-}
-*{margin:0;padding:0;box-sizing:border-box}
-img{max-width:100%;height:auto}
-body{font-family:'Inter',-apple-system,sans-serif;color:var(--ink);min-height:100vh;
-  background:
-    radial-gradient(900px 480px at 80% -10%,rgba(37,211,102,.08),transparent 60%),
-    radial-gradient(800px 560px at -10% 110%,rgba(108,99,255,.08),transparent 55%),
-    var(--bg)}
-body::before{content:'';position:fixed;inset:0;pointer-events:none;opacity:.5;
-  background:linear-gradient(rgba(120,180,255,.03) 1px,transparent 1px),
-             linear-gradient(90deg,rgba(120,180,255,.03) 1px,transparent 1px);
-  background-size:44px 44px;
-  mask-image:radial-gradient(ellipse 90% 70% at 50% 0%,#000 30%,transparent 100%);
-  -webkit-mask-image:radial-gradient(ellipse 90% 70% at 50% 0%,#000 30%,transparent 100%)}
-.top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:18px clamp(16px,4vw,44px);
-  border-bottom:1px solid var(--line);position:relative;z-index:2}
-.brand{font-family:var(--ff-d);font-size:21px;font-weight:700;color:#fff;text-decoration:none}
-.brand span{color:var(--green)}
-.top a.home{color:var(--muted);text-decoration:none;font-size:14px;padding:9px 16px;border:1px solid var(--line);
-  border-radius:10px;transition:all .2s}
-.top a.home:hover{color:var(--cyan);border-color:var(--cyan)}
+/* ── Hero: AI inaandika, website inajijenga ── */
+.gs-art{position:relative;max-width:520px;margin-inline:auto;width:100%}
+.prompt{position:relative;z-index:2;width:min(400px,92%);padding:14px 16px;border-radius:18px;background:#fff;box-shadow:0 0 0 1px var(--line),var(--sh-2)}
+.prompt__hd{display:flex;align-items:center;gap:8px;margin-bottom:8px;font:600 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--violet)}
+.prompt__hd i{width:8px;height:8px;border-radius:50%;background:var(--violet);animation:ping 2s infinite}
+.prompt p{font-size:15px;color:var(--ink);min-height:46px}
+.prompt .caret{display:inline-block;width:2px;height:17px;margin-left:2px;vertical-align:-3px;background:var(--violet);animation:blink 1s steps(1) infinite}
+.gs-win{position:relative;margin:-14px 0 0 auto;width:min(440px,96%)}
+.gs-win .bw__pg{min-height:230px}
+.gs-win .tag-live{position:absolute;right:-6px;bottom:-14px}
+.gs-chip{position:absolute;z-index:3;left:-4%;bottom:14%;padding:10px 14px;animation-delay:1.4s,2.4s}
+.gs-chip b{display:block;font:800 22px/1 'Sora';letter-spacing:-.03em}
+.gs-chip small{font-size:12px;color:var(--muted)}
+@media (max-width:600px){.gs-chip{left:0;bottom:-6%}}
 
-.wrap{max-width:1160px;margin:0 auto;padding:clamp(40px,7vh,80px) 20px 80px;position:relative;z-index:2}
-.eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--ff-m);font-size:10.5px;
-  letter-spacing:2px;text-transform:uppercase;color:var(--cyan);background:rgba(0,212,255,.08);
-  border:1px solid rgba(0,212,255,.28);border-radius:100px;padding:7px 16px;margin-bottom:18px}
-.eyebrow i{width:6px;height:6px;border-radius:50%;background:var(--cyan);
-  animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(0,212,255,.5)}55%{box-shadow:0 0 0 7px rgba(0,212,255,0)}}
-h1{font-family:var(--ff-d);font-size:clamp(30px,5.4vw,52px);line-height:1.1;letter-spacing:-.02em;color:#fff;
-  max-width:760px}
-h1 em{font-style:normal;background:linear-gradient(90deg,var(--green),var(--cyan));
-  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-/* Animation inafunga kila neno ndani ya span ya inline-block. Chromium haipaki
-   gradient ya <em> ndani ya watoto wa inline-block — maneno yalibaki WAZI kabisa
-   ("Your website," haikuonekana, sentensi ikaanza na "built for the"). Kila
-   neno linapata gradient yake mwenyewe. */
-h1 em .w{background:linear-gradient(90deg,var(--green),var(--cyan));
-  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-.sub{color:var(--muted);font-size:clamp(15px,2vw,17px);margin:16px 0 46px;max-width:620px;line-height:1.7}
+.facts{display:flex;flex-wrap:wrap;gap:10px;margin-top:30px}
+.facts span{display:inline-flex;align-items:baseline;gap:8px;padding:10px 14px;border-radius:14px;background:#fff;box-shadow:0 0 0 1px var(--line)}
+.facts b{font:800 18px/1 'Sora';letter-spacing:-.03em}
+.facts small{font-size:13px;color:var(--muted)}
 
-.paths{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:22px}
-.path{position:relative;display:flex;flex-direction:column;background:linear-gradient(165deg,var(--panel),var(--panel-2));
-  border:1px solid var(--line);border-radius:20px;padding:30px 28px;text-decoration:none;color:var(--ink);
-  transition:transform .28s var(--ease),box-shadow .3s,border-color .25s;overflow:hidden;
-  animation:up .6s var(--ease) both}
-.path:nth-child(2){animation-delay:.1s}.path:nth-child(3){animation-delay:.2s}
-@keyframes up{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
-.path::after{content:'';position:absolute;top:0;left:0;right:0;height:2.5px;opacity:.85}
-
-/* ══ 3D HERO (2090) ══ */
-#hero-canvas{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0;transition:opacity 1.4s ease}
-#hero-canvas.ready{opacity:1}
-.hero-3d{position:relative;z-index:2;min-height:min(72vh,620px);display:flex;flex-direction:column;
-  justify-content:center;padding-bottom:20px}
-.hero-3d .eyebrow{animation:heroFade .8s var(--ease) both}
-/* Headline: kila neno linaingia staggered */
-.hero-3d h1{position:relative}
-.hero-3d h1 .w{display:inline-block;opacity:0;transform:translateY(30px) rotateX(-40deg);
-  animation:wordIn .7s var(--ease) forwards;transform-origin:bottom}
-@keyframes wordIn{to{opacity:1;transform:none}}
-@keyframes heroFade{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
-.hero-3d .sub{animation:heroFade .8s var(--ease) .5s both}
-.hero-3d .hero-cta{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;animation:heroFade .8s var(--ease) .7s both}
-.hero-cta .h-btn{display:inline-flex;align-items:center;gap:9px;padding:15px 30px;border-radius:14px;
-  font-weight:800;font-size:15.5px;text-decoration:none;transition:transform .2s var(--ease),box-shadow .3s;position:relative;overflow:hidden}
-.hero-cta .h-btn.primary{background:linear-gradient(135deg,var(--green),var(--cyan));color:#04120a;
-  box-shadow:0 8px 30px rgba(37,211,102,.3)}
-.hero-cta .h-btn.primary:hover{transform:translateY(-3px);box-shadow:0 14px 40px rgba(37,211,102,.45)}
-.hero-cta .h-btn.ghost{border:1px solid var(--line);color:var(--ink);background:rgba(255,255,255,.03)}
-.hero-cta .h-btn.ghost:hover{border-color:var(--cyan);color:var(--cyan);transform:translateY(-3px)}
-.hero-cta .h-btn.primary::after{content:'';position:absolute;inset:0;
-  background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.3) 50%,transparent 70%);
-  transform:translateX(-130%);animation:btnShine 3.5s ease infinite}
-@keyframes btnShine{0%,60%{transform:translateX(-130%)}90%,100%{transform:translateX(130%)}}
-/* Floating stat badges (HUD) */
-.hero-badges{display:flex;gap:20px;flex-wrap:wrap;margin-top:38px;animation:heroFade .8s var(--ease) .9s both}
-.hero-badge{display:flex;flex-direction:column;gap:2px}
-.hero-badge b{font-family:var(--ff-m);font-size:clamp(22px,3.5vw,32px);color:#fff;
-  text-shadow:0 0 24px rgba(0,212,255,.4);line-height:1}
-.hero-badge span{font-size:12px;color:var(--muted);letter-spacing:.5px}
-.hero-badge .bar{height:2px;width:38px;margin-top:5px;background:linear-gradient(90deg,var(--green),var(--cyan))}
-/* Scroll cue */
-.scroll-cue{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);z-index:2;
-  color:var(--dim);font-family:var(--ff-m);font-size:10px;letter-spacing:2px;text-transform:uppercase;
-  display:flex;flex-direction:column;align-items:center;gap:6px;animation:heroFade 1s var(--ease) 1.2s both}
-.scroll-cue .arrow{width:18px;height:18px;border-right:2px solid var(--cyan);border-bottom:2px solid var(--cyan);
-  transform:rotate(45deg);animation:cueBounce 1.8s ease infinite}
-@keyframes cueBounce{0%,100%{transform:rotate(45deg) translate(0,0);opacity:.4}50%{transform:rotate(45deg) translate(4px,4px);opacity:1}}
-@media(max-width:640px){.hero-3d{min-height:auto;padding-top:20px}.scroll-cue{display:none}}
-@media(prefers-reduced-motion:reduce){
-  .hero-3d h1 .w,.hero-3d .eyebrow,.hero-3d .sub,.hero-3d .hero-cta,.hero-badges,.scroll-cue{
-    animation:none!important;opacity:1!important;transform:none!important}
+/* ── Njia nne ── */
+.paths{display:grid;gap:16px}
+@media (min-width:980px){.paths{grid-template-columns:repeat(3,1fr)}}
+.path{--k:#2E7BF6;position:relative;display:flex;flex-direction:column;padding:28px;border-radius:24px;background:#fff;box-shadow:0 0 0 1px var(--line),var(--sh-1);overflow:hidden;isolation:isolate;
+  transition:transform .5s var(--ease),box-shadow .5s var(--ease)}
+.path::before{content:"";position:absolute;inset:0 0 auto;height:4px;background:var(--k)}
+.path::after{content:"";position:absolute;inset:0;z-index:-1;opacity:0;transition:opacity .4s;background:radial-gradient(420px circle at var(--mx,50%) var(--my,0%),color-mix(in srgb,var(--k) 12%,transparent),transparent 60%)}
+.path:hover{transform:translateY(-6px);box-shadow:0 0 0 1px color-mix(in srgb,var(--k) 40%,var(--line)),var(--sh-2)}
+.path:hover::after{opacity:1}
+.path__top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:20px}
+.path__ic{display:grid;place-items:center;width:52px;height:52px;border-radius:16px;color:var(--k);background:color-mix(in srgb,var(--k) 12%,#fff);transition:transform .5s var(--ease)}
+.path:hover .path__ic{transform:rotate(-8deg) scale(1.08)}
+.path__ic svg{width:25px;height:25px}
+.path__tag{padding:5px 10px;border-radius:999px;font:600 10.5px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:color-mix(in srgb,var(--k) 75%,#0B1730);background:color-mix(in srgb,var(--k) 12%,#fff)}
+.path h2{font-size:clamp(22px,1vw + 16px,26px);letter-spacing:-.035em;margin-bottom:10px}
+.path>p{color:var(--muted);font-size:15px}
+.path ul{display:grid;gap:9px;margin:20px 0 26px}
+.path li{display:flex;gap:10px;font-size:14.5px;color:var(--ink-2)}
+.path li svg{width:18px;height:18px;flex:none;margin-top:2px;color:var(--k)}
+.path .btn{margin-top:auto;width:100%;background:var(--k);color:#fff;box-shadow:0 10px 24px -12px var(--k)}
+.path .btn:hover{transform:translateY(-2px);filter:brightness(1.05)}
+/* AI: kadi pana juu */
+.path--ai{grid-column:1/-1;color:#fff;background:radial-gradient(500px 300px at 100% 0%,rgba(124,92,255,.45),transparent 60%),radial-gradient(500px 300px at 0% 100%,rgba(34,184,224,.3),transparent 60%),linear-gradient(140deg,var(--navy-2),var(--navy));box-shadow:var(--sh-2)}
+.path--ai::before{background:linear-gradient(90deg,var(--violet),var(--cyan))}
+.path--ai h2{color:#fff;font-size:clamp(26px,1.6vw + 18px,36px)}
+.path--ai>p,.path--ai li{color:#C9D3E8}
+.path--ai .path__ic{color:#fff;background:rgba(255,255,255,.12)}
+.path--ai .path__tag{color:#E3DEFF;background:rgba(124,92,255,.3)}
+.path--ai li svg{color:#7DE2FF}
+.path--ai .btn{background:linear-gradient(120deg,var(--violet),var(--cyan));width:auto;align-self:flex-start;padding:0 28px}
+@media (min-width:980px){.path--ai{display:grid;grid-template-columns:1.1fr .9fr;column-gap:48px;align-items:center}
+  .path--ai .ai-l{display:flex;flex-direction:column}
 }
-.path.ai::after{background:linear-gradient(90deg,var(--violet),var(--cyan))}
-.path.diy::after{background:linear-gradient(90deg,var(--green),var(--green-2))}
-.path.buy::after{background:linear-gradient(90deg,var(--cyan),#7db9ff)}
-.path.order::after{background:linear-gradient(90deg,var(--violet),#a78bfa)}
-.path:hover{transform:translateY(-7px);box-shadow:0 22px 54px rgba(0,0,0,.45)}
-.path.ai:hover{border-color:rgba(108,99,255,.6);transform:translateY(-5px)}
-.path.diy:hover{border-color:rgba(37,211,102,.5)}
-.path.buy:hover{border-color:rgba(0,212,255,.5)}
-.path.order:hover{border-color:rgba(108,99,255,.5)}
-.p-ico{width:58px;height:58px;border-radius:16px;display:flex;align-items:center;justify-content:center;
-  font-size:27px;margin-bottom:18px;border:1px solid var(--line)}
-.diy .p-ico{background:rgba(37,211,102,.1)}
-.buy .p-ico{background:rgba(0,212,255,.1)}
-.order .p-ico{background:rgba(108,99,255,.1)}
-.p-tag{position:absolute;top:22px;right:22px;font-family:var(--ff-m);font-size:9.5px;font-weight:700;
-  letter-spacing:1.5px;text-transform:uppercase;padding:5px 12px;border-radius:20px}
-.diy .p-tag{background:rgba(37,211,102,.12);color:var(--green-2);border:1px solid rgba(37,211,102,.3)}
-.buy .p-tag{background:rgba(0,212,255,.1);color:var(--cyan);border:1px solid rgba(0,212,255,.3)}
-.order .p-tag{background:rgba(108,99,255,.12);color:#b9b4ff;border:1px solid rgba(108,99,255,.3)}
-.path h2{font-family:var(--ff-d);font-size:21px;color:#fff;margin-bottom:9px}
-.path p{font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:18px}
-.p-feats{list-style:none;margin-bottom:24px;flex:1}
-.p-feats li{font-size:13.5px;color:var(--ink);padding:6px 0;display:flex;gap:9px;align-items:flex-start}
-.p-feats li::before{content:'✓';font-weight:900;flex-shrink:0}
-.diy .p-feats li::before{color:var(--green)}
-.buy .p-feats li::before{color:var(--cyan)}
-.order .p-feats li::before{color:var(--violet)}
-.p-cta{display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;border-radius:12px;
-  font-weight:700;font-size:14.5px;transition:all .2s var(--ease)}
-.diy .p-cta{background:linear-gradient(135deg,var(--green),#12b767);color:#031208}
-.buy .p-cta{background:linear-gradient(135deg,var(--cyan),#0891c9);color:#04121c}
-.order .p-cta{background:linear-gradient(135deg,var(--violet),#5348e8);color:#fff}
-.path:hover .p-cta{transform:translateY(-2px);box-shadow:0 10px 26px rgba(0,0,0,.4)}
-
-.help{margin-top:52px;text-align:center;color:var(--dim);font-size:14px}
-.help a{color:var(--cyan);text-decoration:none}
-.help a:hover{text-decoration:underline}
-@media(max-width:640px){
-  .wrap{padding-top:34px}
-  .p-tag{position:static;display:inline-block;margin-bottom:12px;width:fit-content}
-}
-@media(max-width:400px){
-  .top a.home{padding:7px 12px;font-size:13px}
-  .path{padding:24px 20px}
-  .p-ico{width:48px;height:48px;font-size:22px;margin-bottom:14px}
-  .path h2{font-size:19px}
-  .p-cta{font-size:13.5px;min-height:44px}
-}
+.ai-demo{display:none}
+@media (min-width:980px){.ai-demo{display:block}}
+.ai-demo .term{font-size:12px}
+.ai-demo .term>p:not([data-static]){opacity:0;transition:opacity .35s}
+.ai-demo .term>p.on{opacity:1}
+.help{margin-top:34px;text-align:center;color:var(--muted)}
+.help a{color:var(--navy-3);font-weight:600;text-decoration:underline;text-underline-offset:3px}
 </style>
-</head>
-<body>
-<canvas id="hero-canvas"></canvas>
-<div class="top">
-  <a class="brand" href="/">Jamii<span>Tek</span></a>
-  <a class="home" href="/">← Back to Home</a>
-</div>
+{% endblock %}
 
-<div class="wrap">
-  <div class="hero-3d">
-    <span class="eyebrow"><i></i>JAMIITEK · WEBSITE BUILDER</span>
-    <h1 id="hero-h1"><em>Your website,</em> built for the future.</h1>
-    <p class="sub">Whether you want full control, an AI to build it in seconds, a ready-made professional design, or a team that does everything for you — JamiiTek has a path for you. Free subdomain, instant publishing, no code needed.</p>
-    <div class="hero-cta">
-      <a class="h-btn primary" href="{% url 'builder:ai_generator' %}">✨ Let AI build it</a>
-      <a class="h-btn ghost" href="{% url 'builder:signup' %}">Start building free →</a>
+{% block content %}
+<section class="ph" data-live>
+  <div class="wrap ph__in">
+    <div>
+      <nav class="crumb up" style="--d:0s" aria-label="Breadcrumb"><a href="{% url 'home' %}">Home</a><i></i><span>Get started</span></nav>
+      <h1 class="split">Your website, <em>built for the future.</em></h1>
+      <p class="ph__lead up" style="--d:.5s">Want full control, an AI that builds it in seconds, a ready-made professional design, or a team that does everything for you? JamiiTek has a path for you — free subdomain, instant publishing, no code needed.</p>
+      <div class="acts up" style="--d:.65s">
+        <a class="btn btn--gold" href="{% url 'builder:ai_generator' %}">Let AI build it <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 11h12.2l-4.6-4.6L13 5l7 7-7 7-1.4-1.4 4.6-4.6H4z"/></svg></a>
+        <a class="btn btn--line" href="{% url 'builder:signup' %}">Start building free</a>
+      </div>
+      <div class="facts up" style="--d:.8s">
+        <span><b>30s</b><small>to a live website</small></span>
+        <span><b>Free</b><small>subdomain included</small></span>
+        <span><b>4</b><small>ways to get started</small></span>
+      </div>
     </div>
-    <div class="hero-badges">
-      <div class="hero-badge"><b data-count="30">30s</b><span>To a live website</span><div class="bar"></div></div>
-      <div class="hero-badge"><b data-count="0">Free</b><span>Subdomain included</span><div class="bar"></div></div>
-      <div class="hero-badge"><b data-count="4">4</b><span>Ways to get started</span><div class="bar"></div></div>
+
+    <div class="gs-art up" style="--d:.3s" aria-hidden="true">
+      <div class="prompt">
+        <div class="prompt__hd"><i></i>Describe your business</div>
+        <p><span data-type="Duka la nguo Kariakoo, tunauza vitenge na tunapokea M-Pesa|A safari company in Arusha with 3-day Serengeti tours|Mgahawa Mbezi — chakula cha mchana na delivery"></span><i class="caret"></i></p>
+      </div>
+      <div class="gs-win">
+        <div class="win" data-seq="build" data-step="700" data-hold="3200" data-tag="gsTag">
+          <div class="win__bar"><i></i><i></i><i></i><span class="win__url"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17 9h-1V7a4 4 0 0 0-8 0v2H7a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2zm-7-2a2 2 0 0 1 4 0v2h-4z"/></svg><b>yourname</b>.jamiitek.com</span></div>
+          <div class="bw__pg">
+            <div class="blk blk--nav"><b>Your Business</b><span><i></i><i></i><i></i></span></div>
+            <div class="blk blk--hero"><b></b><i></i><em></em></div>
+            <div class="blk blk--row"><span style="--k:#F5A623"></span><span style="--k:#25D366"></span><span style="--k:#22B8E0"></span></div>
+            <div class="blk blk--row"><span style="--k:#7C5CFF"></span><span style="--k:#FF7A3D"></span><span style="--k:#1B4C8C"></span></div>
+            <svg class="cursor" viewBox="0 0 24 24"><path d="M4 2l16 9-7 2-3 7z" fill="#fff" stroke="#0B1730" stroke-width="1.5" stroke-linejoin="round"/></svg>
+          </div>
+        </div>
+        <span class="tag-live" id="gsTag">● Published</span>
+      </div>
+      <div class="float gs-chip"><b>30s</b><small>from idea to live site</small></div>
     </div>
   </div>
-  <div class="scroll-cue"><span>Explore</span><div class="arrow"></div></div>
+</section>
 
-  <div class="paths">
-    <!-- 0. AI One-Shot -->
-    <a class="path ai" href="{% url 'builder:ai_generator' %}" style="grid-column:1/-1;background:linear-gradient(165deg,#151030,#0d1730);border:1.5px solid rgba(108,99,255,.35)">
-      <span class="p-tag" style="background:rgba(108,99,255,.15);color:#c9c5ff;border:1px solid rgba(108,99,255,.4)">✨ NEW · AI-POWERED</span>
-      <span class="p-ico" style="background:rgba(108,99,255,.14);border-color:rgba(108,99,255,.35)">🪄</span>
-      <h2 style="font-size:24px">Let AI Build It for You</h2>
-      <p style="font-size:14.5px">Just describe your business in one sentence — our AI generates the entire website: brand name, tagline, About Us, products/services with prices, and a design that fits your industry. In under 30 seconds.</p>
-      <ul class="p-feats" style="max-width:640px">
-        <li style="color:#c9c5ff">No prompts to write — just describe what you do</li>
-        <li style="color:#c9c5ff">Works in English or Swahili — automatic detection</li>
-        <li style="color:#c9c5ff">Advanced content quality — every draft is reviewed and improved by a second AI pass</li>
-      </ul>
-      <span class="p-cta" style="background:linear-gradient(135deg,#6c63ff,#00d4ff);color:#fff;max-width:400px;margin:0 auto">✨ Describe My Business</span>
-    </a>
+<section class="sec" style="padding-top:10px">
+  <div class="wrap">
+    <div class="paths">
+      <a class="path path--ai rv" href="{% url 'builder:ai_generator' %}" data-glow style="--k:#7C5CFF">
+        <div class="ai-l">
+          <div class="path__top">
+            <span class="path__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m15 4 5 5L9 20H4v-5zM13 6l5 5M5 3v4M3 5h4M19 15v4M17 17h4"/></svg></span>
+            <span class="path__tag">New · AI-powered</span>
+          </div>
+          <h2>Let AI build it for you.</h2>
+          <p>Describe your business in one sentence — our AI generates the whole website: brand name, tagline, About Us, products and services with prices, and a design that fits your industry. In under 30 seconds.</p>
+          <ul>
+            <li><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>No prompts to write — just describe what you do</li>
+            <li><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>Works in English or Swahili — detected automatically</li>
+            <li><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>Every draft is reviewed and improved by a second AI pass</li>
+          </ul>
+          <span class="btn">Describe my business <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 11h12.2l-4.6-4.6L13 5l7 7-7 7-1.4-1.4 4.6-4.6H4z"/></svg></span>
+        </div>
+        <div class="ai-demo" aria-hidden="true" data-live>
+          <div class="term" data-seq="ai" data-step="650" data-hold="3400">
+            <div class="bar" data-static><i></i><i></i><i></i></div>
+            <p><span class="c">›</span> "Duka la nguo Kariakoo, vitenge, M-Pesa"</p>
+            <p><span class="k">detect</span> language <span class="ok">Swahili ✓</span></p>
+            <p><span class="k">brand</span> <span class="s">"Vitenge vya Kariakoo"</span></p>
+            <p><span class="k">pages</span> Home · Bidhaa · Kuhusu · Mawasiliano</p>
+            <p><span class="k">products</span> 12 with prices <span class="ok">✓</span></p>
+            <p><span class="k">review</span> second pass <span class="ok">✓ improved</span></p>
+            <p class="cur"><span class="ok">● ready in 28s</span></p>
+          </div>
+        </div>
+      </a>
 
-    <!-- 1. Build it yourself -->
-    <a class="path diy" href="{% url 'builder:signup' %}">
-      <span class="p-tag">FREE · MOST POPULAR</span>
-      <span class="p-ico">🛠️</span>
-      <h2>Build It Yourself</h2>
-      <p>Use the JamiiTek Builder — no coding needed. Pick your website type and the structure creates itself.</p>
-      <ul class="p-feats">
-        <li>Drag & drop editor + AI content assistant</li>
-        <li>Free subdomain: yourname.jamiitek.com</li>
-        <li>Tourism, shop, restaurant, events & more</li>
-        <li>Live in as little as 10 minutes</li>
-      </ul>
-      <span class="p-cta">🚀 Start Building — Free</span>
-    </a>
+      <a class="path rv" href="{% url 'builder:signup' %}" data-glow style="--k:#16A34A">
+        <div class="path__top">
+          <span class="path__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h8v8H3zm10 0h8v5h-8zM3 13h8v8H3zm10-3h8v11h-8z"/></svg></span>
+          <span class="path__tag">Free · Most popular</span>
+        </div>
+        <h2>Build it yourself</h2>
+        <p>Use the JamiiTek Builder — no coding needed. Pick your website type and the structure creates itself.</p>
+        <ul>
+          <li><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>Drag &amp; drop editor + AI content assistant</li>
+          <li><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>Free subdomain: yourname.jamiitek.com</li>
+          <li><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>Tourism, shop, restaurant, events &amp; more</li>
+          <li><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>Live in as little as 10 minutes</li>
+        </ul>
+        <span class="btn">Start building — free</span>
+      </a>
 
-    <!-- 2. Buy ready-made -->
-    <a class="path buy" href="/templates/">
-      <span class="p-tag">READY-MADE</span>
-      <span class="p-ico">🛒</span>
-      <h2>Buy a Ready Website</h2>
-      <p>Browse our library of professionally designed websites. Preview any of them live, pick one, and we set it up with your brand.</p>
-      <ul class="p-feats">
-        <li>Professional designs for every industry</li>
-        <li>Live preview on mobile, tablet & desktop</li>
-        <li>Delivered fast with your content & branding</li>
-        <li>Cheaper than a fully custom build</li>
-      </ul>
-      <span class="p-cta">🛒 Browse Templates</span>
-    </a>
+      <a class="path rv" href="{% url 'templates_marketplace' %}" data-glow style="--k:#0E9BC8;--rd:.08s">
+        <div class="path__top">
+          <span class="path__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v5H4zm0 7h7v9H4zm9 0h7v9h-7z"/></svg></span>
+          <span class="path__tag">Ready-made</span>
+        </div>
+        <h2>Buy a ready website</h2>
+        <p>Browse our library of professionally designed websites. Preview any of them live, pick one, and we set it up with your brand.</p>
+        <ul>
+          <li><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>Professional designs for every industry</li>
+          <li><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>Live preview on mobile, tablet &amp; desktop</li>
+          <li><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>Delivered fast with your content &amp; branding</li>
+          <li><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>Cheaper than a fully custom build</li>
+        </ul>
+        <span class="btn">Browse templates</span>
+      </a>
 
-    <!-- 3. Order custom -->
-    <a class="path order" href="/proposals/">
-      <span class="p-tag">CUSTOM · FULL SERVICE</span>
-      <span class="p-ico">📋</span>
-      <h2>Order a Custom Website</h2>
-      <p>Tell us exactly what you need. You'll get an instant proposal with pricing, and our team builds everything for you.</p>
-      <ul class="p-feats">
-        <li>Answer a short questionnaire — get a quote instantly</li>
-        <li>Unique design built around your business</li>
-        <li>Advanced features, integrations & systems</li>
-        <li>Full support from the JamiiTek team</li>
-      </ul>
-      <span class="p-cta">📋 Request a Proposal</span>
-    </a>
+      <a class="path rv" href="/proposals/" data-glow style="--k:#1B4C8C;--rd:.16s">
+        <div class="path__top">
+          <span class="path__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4h6v3H9zM7 5H5v16h14V5h-2M8 12h8M8 16h5"/></svg></span>
+          <span class="path__tag">Custom · Full service</span>
+        </div>
+        <h2>Order a custom website</h2>
+        <p>Tell us exactly what you need. You'll get an instant proposal with pricing, and our team builds everything for you.</p>
+        <ul>
+          <li><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>Answer a short questionnaire — get a quote instantly</li>
+          <li><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>Unique design built around your business</li>
+          <li><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>Advanced features, integrations &amp; systems</li>
+          <li><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>Full support from the JamiiTek team</li>
+        </ul>
+        <span class="btn">Request a proposal</span>
+      </a>
+    </div>
+    <p class="help rv">Not sure which to choose? <a href="https://wa.me/{% contact "wa" %}?text=Hello%20JamiiTek,%20I%20need%20help%20choosing%20how%20to%20get%20my%20website" target="_blank" rel="noopener">Chat with us on WhatsApp</a> and we'll advise you for free.</p>
   </div>
+</section>
 
-  <p class="help">Not sure which to choose? <a href="https://wa.me/{% contact "wa" %}?text=Hello%20JamiiTek,%20I%20need%20help%20choosing%20how%20to%20get%20my%20website" rel="noopener">Chat with us on WhatsApp</a> and we'll advise you for free.</p>
-</div>
-<script>
-/* ══ GET-STARTED 3D HERO ENGINE ══ */
-(function(){
-  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  // 1. Split headline into animated words (staggered rise)
-  const h1 = document.getElementById('hero-h1');
-  if (h1 && !reduced){
-    const walk = (node) => {
-      const kids = Array.from(node.childNodes);
-      kids.forEach(n => {
-        if (n.nodeType === 3){ // text node
-          const frag = document.createDocumentFragment();
-          n.textContent.split(/(\s+)/).forEach(word => {
-            if (word.trim()){
-              const span = document.createElement('span');
-              span.className = 'w'; span.textContent = word;
-              frag.appendChild(span);
-            } else frag.appendChild(document.createTextNode(word));
-          });
-          node.replaceChild(frag, n);
-        } else if (n.nodeType === 1){ walk(n); }
-      });
-    };
-    walk(h1);
-    document.querySelectorAll('#hero-h1 .w').forEach((w, i) => {
-      w.style.animationDelay = (0.15 + i * 0.08) + 's';
-    });
-  }
-
-  // 2. Count-up badges
-  function countBadges(){
-    document.querySelectorAll('.hero-badge b[data-count]').forEach(el => {
-      const target = parseInt(el.dataset.count, 10);
-      if (!target || reduced) return;
-      const suffix = el.textContent.replace(/[\d]/g,'');
-      const dur = 1100, start = performance.now();
-      function step(now){
-        const p = Math.min(1,(now-start)/dur), e = 1-Math.pow(1-p,3);
-        el.textContent = Math.floor(e*target) + suffix;
-        if (p<1) requestAnimationFrame(step); else el.textContent = target + suffix;
-      }
-      setTimeout(() => requestAnimationFrame(step), 900);
-    });
-  }
-  countBadges();
-
-  // 3. WebGL background — device guard (kama builder engine)
-  function capable(){
-    if (reduced) return false;
-    if (navigator.deviceMemory && navigator.deviceMemory < 4) return false;
-    if (navigator.hardwareConcurrency && navigator.hardwareConcurrency < 4) return false;
-    if (Math.min(screen.width, screen.height) < 380) return false;
-    try { const c=document.createElement('canvas');
-      if(!(c.getContext('webgl')||c.getContext('experimental-webgl'))) return false;
-    } catch(e){ return false; }
-    return true;
-  }
-  if (!capable()) return;
-
-  const canvas = document.getElementById('hero-canvas');
-  let renderer, scene, camera, rafId, running = false, torus, particles, ring;
-
-  async function loadThree(){
-    return new Promise((res, rej) => {
-      const sc = document.createElement('script');
-      sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
-      sc.onload = res; sc.onerror = rej; document.head.appendChild(sc);
-    });
-  }
-
-  function build(){
-    const W = innerWidth, H = innerHeight;
-    renderer = new THREE.WebGLRenderer({canvas, alpha:true, antialias:true});
-    renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
-    renderer.setSize(W, H);
-    scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x040918, 0.05);
-    camera = new THREE.PerspectiveCamera(60, W/H, 0.1, 100);
-    camera.position.set(0, 0, 10);
-
-    // Wireframe torus knot inayozunguka — "core" ya 2090
-    const geo = new THREE.TorusKnotGeometry(2.4, 0.55, 120, 16);
-    const mat = new THREE.MeshBasicMaterial({color:0x00d4ff, wireframe:true, transparent:true, opacity:0.28});
-    torus = new THREE.Mesh(geo, mat);
-    torus.position.set(3.2, 0.5, -2);
-    scene.add(torus);
-
-    // Glowing ring
-    const ringGeo = new THREE.RingGeometry(3.6, 3.68, 64);
-    const ringMat = new THREE.MeshBasicMaterial({color:0x25d366, transparent:true, opacity:0.35, side:THREE.DoubleSide});
-    ring = new THREE.Mesh(ringGeo, ringMat);
-    ring.position.set(3.2, 0.5, -2);
-    scene.add(ring);
-
-    // Particle field
-    const pc = Math.min(700, Math.floor((W*H)/2400));
-    const pg = new THREE.BufferGeometry();
-    const pos = new Float32Array(pc*3);
-    for (let i=0;i<pc*3;i+=3){
-      pos[i]=(Math.random()-0.5)*30; pos[i+1]=(Math.random()-0.5)*20; pos[i+2]=(Math.random()-0.5)*16-4;
-    }
-    pg.setAttribute('position', new THREE.BufferAttribute(pos,3));
-    particles = new THREE.Points(pg, new THREE.PointsMaterial({color:0x6c63ff,size:0.05,transparent:true,opacity:0.7}));
-    scene.add(particles);
-  }
-
-  let mx=0, my=0, lastT=0, low=0;
-  function animate(t){
-    if (!running) return;
-    rafId = requestAnimationFrame(animate);
-    const dt = t-lastT; lastT=t;
-    if (dt>34){ low++; if(low>180){ stop(); return; } } else low=Math.max(0,low-1);
-    const tm = t*0.0004;
-    torus.rotation.x = tm*1.2; torus.rotation.y = tm*1.6;
-    ring.rotation.z = tm*0.8;
-    particles.rotation.y = tm*0.3;
-    camera.position.x += (mx*1.2 - camera.position.x)*0.04;
-    camera.position.y += (-my*0.8 - camera.position.y)*0.04;
-    camera.lookAt(2, 0, -2);
-    renderer.render(scene, camera);
-  }
-  function stop(){ running=false; cancelAnimationFrame(rafId); }
-
-  function onResize(){ if(!renderer) return;
-    renderer.setSize(innerWidth,innerHeight);
-    camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); }
-
-  loadThree().then(() => {
-    if (!window.THREE) return;
-    build(); running=true; lastT=performance.now();
-    canvas.classList.add('ready');
-    rafId = requestAnimationFrame(animate);
-    addEventListener('resize', onResize);
-    addEventListener('mousemove', e => { mx=(e.clientX/innerWidth-0.5); my=(e.clientY/innerHeight-0.5); });
-    document.addEventListener('visibilitychange', () => {
-      if (document.hidden) stop();
-      else { running=true; lastT=performance.now(); rafId=requestAnimationFrame(animate); }
-    });
-  }).catch(()=>{});
-})();
-</script>
-</body>
-</html>
+{% include 'site/_kili.html' with eyebrow="Karibu JamiiTek" title="Still deciding? Talk to a real person — it's" em="free." text="Tell us about your business on WhatsApp and we'll recommend the path that fits your budget and timeline." %}
+{% endblock %}
