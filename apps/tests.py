@@ -169,3 +169,82 @@ class NewsletterTest(TestCase):
 
     def test_get_redirects_home(self):
         self.assertRedirects(self.client.get(self.url), '/', fetch_redirect_response=False)
+
+
+class SpotlightTest(TestCase):
+    """JamiiTek Spotlight: makala 1 kuhusu JamiiTek Jumatatu/Jumatano/Jumamosi."""
+
+    def setUp(self):
+        from datetime import datetime
+        from django.utils import timezone as tz
+        self.monday = tz.make_aware(datetime(2026, 10, 5, 6, 0))     # Jumatatu
+        self.tuesday = tz.make_aware(datetime(2026, 10, 6, 6, 0))    # Jumanne
+        self.n = 0
+
+    def _fake_write(self, titles):
+        it = iter(titles)
+        def write(topic_name, facts, angle_text, previous, avoid):
+            self.n += 1
+            t = next(it)
+            return True, {'title': t, 'slug': t.lower().replace(' ', '-'), 'excerpt': 'x', 'body': '<p>Body</p>',
+                          'meta_title': t[:60], 'meta_description': 'd', 'focus_keyword': 'k', 'tags': 'a'}
+        return write
+
+    def _run(self, when, titles, **kw):
+        from apps import spotlight_blog as sb
+        with mock.patch.object(sb.timezone, 'localtime', return_value=when), \
+             mock.patch('django.utils.timezone.now', return_value=when), \
+             mock.patch.object(sb, 'write', side_effect=self._fake_write(titles)), \
+             mock.patch('apps.news_blog.unsplash_cover', return_value=''):
+            return sb.run(**kw)
+
+    def test_only_on_spotlight_days(self):
+        r = self._run(self.tuesday, ['Should not be written'])
+        self.assertEqual(r['created'], [])
+        self.assertIn('not a spotlight day', r['skipped'])
+        self.assertEqual(self.n, 0)
+
+    def test_writes_one_draft_on_monday_then_stops(self):
+        r = self._run(self.monday, ['How JamiiBot Answers Customers at 2am'])
+        self.assertEqual(len(r['created']), 1)
+        post = r['created'][0]
+        self.assertEqual(post.status, 'draft')
+        self.assertEqual(post.category.slug, 'jamiitek-spotlight')
+        self.assertTrue(post.source_name.startswith('spotlight:'))
+        again = self._run(self.monday, ['Another One'])
+        self.assertEqual(again['created'], [])
+        self.assertEqual(again['skipped'], 'already wrote today')
+
+    def test_topic_and_angle_never_repeat(self):
+        from apps.models import BlogPost
+        keys = set()
+        heads = ['How JamiiBot Answers Customers at 2am', 'Choosing Between .co.tz and .com',
+                 'Five Mistakes Shops Make With Their First Website', 'Inside Our Daily Backup Routine',
+                 'What Safari Companies Need From a Booking Page', 'Mobile Money Checkout Explained Simply']
+        for i in range(6):
+            r = self._run(self.monday, [heads[i]], force=True)
+            self.assertEqual(len(r['created']), 1, r)
+            keys.add(r['created'][0].source_name)
+        self.assertEqual(len(keys), 6)
+        self.assertEqual(BlogPost.objects.filter(source_name__startswith='spotlight:').count(), 6)
+
+    def test_similar_title_is_rejected_and_retried(self):
+        from apps.models import BlogPost
+        BlogPost.objects.create(title='Why Every Dar Shop Needs a WhatsApp Bot', slug='why-bot',
+                                excerpt='x', body='<p>x</p>')
+        r = self._run(self.monday, ['Why every Dar shop needs a WhatsApp bot!',
+                                    'Five Questions Shop Owners Ask About Online Orders'])
+        self.assertEqual(self.n, 2)
+        self.assertEqual(r['created'][0].title, 'Five Questions Shop Owners Ask About Online Orders')
+
+    def test_gives_up_without_unique_title(self):
+        from apps.models import BlogPost
+        BlogPost.objects.create(title='Same Title', slug='same', excerpt='x', body='<p>x</p>')
+        r = self._run(self.monday, ['Same Title', 'same title', 'Same  Title.'])
+        self.assertEqual(r['created'], [])
+        self.assertEqual(self.n, 3)
+
+    def test_autopublish_flag(self):
+        with mock.patch.dict('os.environ', {'SPOTLIGHT_AUTOPUBLISH': '1'}):
+            r = self._run(self.monday, ['A Practical Guide to .co.tz Domains'])
+        self.assertEqual(r['created'][0].status, 'published')

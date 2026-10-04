@@ -1,7 +1,7 @@
 # AI Newsroom + Blog SEO — JamiiTek
 
-Kila siku AI inakagua matukio makubwa ya dunia (RSS), inachagua **5 makubwa ya
-Tanzania + 5 ya kimataifa**, inaandika **rasimu** za makala za ubora wa juu
+Kila siku AI inakagua matukio makubwa ya dunia (RSS), inachagua **3 makubwa ya
+teknolojia na biashara** (Tanzania / Afrika Mashariki; `NEWSROOM_DAILY` kubadilisha), inaandika **rasimu** za makala za ubora wa juu
 (SEO kamili), inachukua picha kutoka Unsplash, kisha **inakutumia email** ya
 kukumbusha kukagua na kuthibitisha. Hakuna kinachochapishwa bila wewe kubonyeza
 **Publish** kwenye admin.
@@ -165,3 +165,32 @@ makala na kutoka chini ya kila ukurasa wa blog, na iko kwenye sitemap.
 
 **Picha:** ukipakia picha ya cover yenye upana chini ya 1200px, admin inakuonya
 (Google Discover inahitaji ≥1200px).
+
+
+## JamiiTek Spotlight — makala maalum kuhusu JamiiTek
+
+Kila **Jumatatu, Jumatano na Jumamosi** (saa za Tanzania) AI inachunguza mfumo
+na kuandika **makala 1** kuhusu JamiiTek: huduma (kutoka admin → Services),
+JamiiBot na mipango yake, website builder, templates, domains & hosting, au
+kesi halisi kutoka Portfolio.
+
+- **Inaanzishwa na cron ileile** ya `/tasks/news/` — hakuna job mpya ya kuweka.
+  Siku nyingine inaruka yenyewe; inaandika mara moja tu kwa siku.
+- **Haijirudii:** kila makala ina "mada + mtazamo" (mf. `jamiibot:how-to`) kwenye
+  `source_name`. Mada inarudi tu kwa mtazamo mpya (mwongozo, maswali, faida,
+  matumizi kwa sekta, makosa ya kuepuka, nyuma ya pazia, kulinganisha).
+  Kesi halisi (portfolio) inaandikwa mara moja tu.
+- **Vichwa ni vya kipekee:** kinalinganishwa na vichwa VYOTE vya blog; kikifanana
+  (≥80%), AI inaombwa kingine hadi mara 3.
+- **Ukweli tu:** AI inatumia data ya mfumo (huduma, bei, mipango) — haibuni bei,
+  wateja wala takwimu.
+- **Rasimu** kwenye kategoria *JamiiTek Spotlight*, na email ya kukagua.
+  `SPOTLIGHT_AUTOPUBLISH=1` → inachapishwa moja kwa moja.
+
+Amri:
+
+```
+python manage.py jamiitek_spotlight --list            # mada na mitazamo iliyotumika
+python manage.py jamiitek_spotlight --force           # andika sasa (siku yoyote)
+python manage.py jamiitek_spotlight --force --topic jamiibot
+```

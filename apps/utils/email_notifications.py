@@ -235,7 +235,7 @@ def send_welcome_email(client) -> bool:
     )
 
 
-def send_blog_review_reminder(posts, to_email=None) -> bool:
+def send_blog_review_reminder(posts, to_email=None, subject=None) -> bool:
     """
     Arifa mmiliki kuwa AI imeandaa rasimu za habari za kukagua na kuthibitisha.
     `posts` = orodha ya BlogPost (drafts). Rudisha True ikitumwa.
@@ -255,7 +255,7 @@ def send_blog_review_reminder(posts, to_email=None) -> bool:
         })
 
     return _send(
-        subject=f'📝 {len(rows)} news drafts ready for your review — JamiiTek',
+        subject=subject or f'📝 {len(rows)} news drafts ready for your review — JamiiTek',
         template='blog_review.html',
         context={
             'count': len(rows),
