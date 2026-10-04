@@ -1,0 +1,85 @@
+{% comment %}
+  Mchoro hai wa huduma moja, kulingana na ikoni iliyochaguliwa kwenye admin
+  (Service.icon). Kila mmoja ni HTML/CSS — hakuna picha ya kupakua.
+  Kigezo: svc
+{% endcomment %}
+{% if svc.icon == 'bot' %}
+<div class="art-stage"><div class="phone">
+  <div class="phone__scr">
+    <div class="phone__bar"><i><svg viewBox="0 0 24 24" fill="currentColor"><path d="{{ svc.icon_path }}"/></svg></i><span><b>Serengeti Lodge</b><small>JamiiBot · online</small></span></div>
+    <div class="chat" data-seq="chat" data-step="1200" data-hold="3400">
+      <p class="u">Mambo! Mna chumba wikendi hii?<small>19:02</small></p>
+      <p class="b typing"><i></i><i></i><i></i></p>
+      <p class="b">Poa! 🏕️ Ndiyo — vyumba 3 viko wazi Jumamosi. Double ni <b>Tsh 180,000</b>/usiku.<small>19:02</small></p>
+      <p class="u">Nichukulie kimoja tafadhali<small>19:03</small></p>
+      <p class="b">Tayari ✅ Booking #518. Link ya malipo M-Pesa imetumwa.<small>19:03</small></p>
+    </div>
+  </div>
+</div></div>
+{% elif svc.icon == 'server' %}
+<div class="art-stage"><div style="width:min(320px,86%)">
+  <div class="rack">
+    <div class="ru"><i class="led"></i><i class="led" style="--d:.4s;--t:.9s"></i><span class="vent"></span><span class="lbl">WEB-01</span></div>
+    <div class="ru"><i class="led" style="--d:.2s"></i><i class="led y" style="--t:2.1s"></i><span class="vent"></span><span class="lbl">DB-01</span></div>
+    <div class="ru"><i class="led" style="--d:.7s;--t:1.6s"></i><i class="led" style="--d:.1s;--t:.7s"></i><span class="vent"></span><span class="lbl">BACKUP</span></div>
+  </div>
+  <div class="uptime" style="margin-top:24px">
+    <div class="uptime__hd"><span>UPTIME · 30 DAYS</span><b>● OPERATIONAL</b></div>
+    <div class="bars">{% for _ in "123456789012345678901234567890" %}<i style="--i:{{ forloop.counter }}"></i>{% endfor %}</div>
+  </div>
+</div></div>
+{% elif svc.icon == 'globe' %}
+<div class="art-stage"><div class="dsearch">
+  <div class="dsearch__bar"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17 9h-1V7a4 4 0 0 0-8 0v2H7a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2zm-7-2a2 2 0 0 1 4 0v2h-4z"/></svg><span class="mono"><b data-type="biashara|mamaneema|kilimofresh|safarijumbo"></b><i class="caret"></i></span></div>
+  <div class="dsearch__res" data-seq="dom" data-step="550" data-hold="3000">
+    <p><b>.co.tz</b><span class="ok">Available</span><em>Tsh 25,000</em></p>
+    <p><b>.tz</b><span class="ok">Available</span><em>Tsh 15,000</em></p>
+    <p><b>.com</b><span class="no">Taken</span><em>—</em></p>
+    <p><b>.org</b><span class="ok">Available</span><em>Tsh 30,000</em></p>
+  </div>
+</div></div>
+{% elif svc.icon == 'mobile' %}
+<div class="art-stage"><div class="phone phone--app">
+  <div class="phone__scr app">
+    <div class="app__hd"><small>Habari, Juma 👋</small><b>Tsh 1,240,500</b><span>Mauzo ya leo · +18%</span></div>
+    <div class="app__list" data-seq="app" data-step="700" data-hold="3200">
+      <p><i style="--k:#25D366">M</i><span>M-Pesa · Neema</span><b>+35,000</b></p>
+      <p><i style="--k:#F5A623">O</i><span>Order #2742</span><b>+48,000</b></p>
+      <p><i style="--k:#22B8E0">A</i><span>Airtel · Baraka</span><b>+12,500</b></p>
+      <p class="app__toast">🔔 Mteja mpya amejiandikisha</p>
+    </div>
+  </div>
+</div></div>
+{% elif svc.icon == 'design' %}
+<div class="art-stage"><div class="canvas">
+  <div class="canvas__sw" data-seq="sw" data-step="420" data-hold="3600">
+    <i style="--k:#0A2245"></i><i style="--k:#1B4C8C"></i><i style="--k:#F5A623"></i><i style="--k:#FF7A3D"></i><i style="--k:#25D366"></i>
+  </div>
+  <svg class="canvas__pen draw" viewBox="0 0 300 150"><path d="M10 120C60 10 120 10 150 75S250 140 290 30" pathLength="1"/><circle cx="10" cy="120" r="4"/><circle cx="150" cy="75" r="4"/><circle cx="290" cy="30" r="4"/></svg>
+  <div class="canvas__type"><b>Aa</b><span>Sora · Inter</span></div>
+</div></div>
+{% elif svc.icon == 'builder' or svc.icon == 'layout' %}
+<div class="art-stage"><div style="width:min(330px,88%);position:relative">
+  <div class="win" data-seq="build" data-step="650" data-hold="3200" data-tag="tag{{ svc.pk }}">
+    <div class="win__bar"><i></i><i></i><i></i><span class="win__url"><b>yourname</b>.jamiitek.com</span></div>
+    <div class="bw__pg">
+      <div class="blk blk--nav"><b>Your Business</b><span><i></i><i></i><i></i></span></div>
+      <div class="blk blk--hero"><b></b><i></i><em></em></div>
+      <div class="blk blk--row"><span style="--k:#F5A623"></span><span style="--k:#25D366"></span><span style="--k:#22B8E0"></span></div>
+      <svg class="cursor" viewBox="0 0 24 24"><path d="M4 2l16 9-7 2-3 7z" fill="#fff" stroke="#0B1730" stroke-width="1.5" stroke-linejoin="round"/></svg>
+    </div>
+  </div>
+  <span class="tag-live" id="tag{{ svc.pk }}" style="position:absolute;right:-6px;bottom:-14px">● Published</span>
+</div></div>
+{% else %}
+<div class="art-stage"><div class="term code" data-seq="code" data-step="520" data-hold="3600">
+  <div class="bar" data-static><i></i><i></i><i></i></div>
+  <p><span class="k">&lt;section</span> <span class="c">class</span>=<span class="s">"hero"</span><span class="k">&gt;</span></p>
+  <p>&nbsp;&nbsp;<span class="k">&lt;h1&gt;</span>Karibu Duka la Juma<span class="k">&lt;/h1&gt;</span></p>
+  <p>&nbsp;&nbsp;<span class="k">&lt;a</span> <span class="c">href</span>=<span class="s">"/shop"</span><span class="k">&gt;</span>Nunua sasa<span class="k">&lt;/a&gt;</span></p>
+  <p><span class="k">&lt;/section&gt;</span></p>
+  <p>&nbsp;</p>
+  <p><span class="c">$</span> jamiitek deploy</p>
+  <p class="cur"><span class="ok">✓ live · 0.8s · mobile-ready</span></p>
+</div></div>
+{% endif %}

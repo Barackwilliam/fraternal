@@ -282,6 +282,63 @@ JamiiTek Team
 
 
 
+def newsletter_subscribe(request):
+    """Fomu ya newsletter kwenye footer (Home, Services, About, Contact).
+
+    Awali fomu hii ilituma email PEKEE kwenda /contact/, ambayo inadai
+    jina, mada na ujumbe pia — kila mgeni aliyejiandikisha alipata
+    "Please fill in all fields" na hakuna aliyesajiliwa. Sasa ina njia
+    yake: email moja inathibitishwa, timu inapata taarifa kwa barua pepe.
+
+    AJAX (footer ina JS) -> JSON. Bila JS -> inarudi ukurasa uliotoka
+    na ?subscribed=ok|invalid|error, ambayo footer inaionyesha.
+    """
+    from django.core.exceptions import ValidationError
+    from django.core.validators import validate_email
+    from django.http import JsonResponse
+    from django.utils.http import url_has_allowed_host_and_scheme
+
+    if request.method != 'POST':
+        return redirect('home')
+
+    ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+    back = request.META.get('HTTP_REFERER') or '/'
+    if not url_has_allowed_host_and_scheme(back, allowed_hosts={request.get_host()},
+                                           require_https=request.is_secure()):
+        back = '/'
+    from urllib.parse import urlsplit
+    back = urlsplit(back).path or '/'
+
+    def reply(state, text, code=200):
+        if ajax:
+            return JsonResponse({'ok': state == 'ok', 'message': text}, status=code)
+        return redirect(f'{back}?subscribed={state}#site-footer')
+
+    # Mtego wa bot: sehemu iliyofichwa; binadamu haijazi
+    if request.POST.get('company_website', '').strip():
+        return reply('ok', "You're subscribed. Asante!")
+
+    email = (request.POST.get('email') or '').strip()
+    try:
+        validate_email(email)
+    except ValidationError:
+        return reply('invalid', 'Please enter a valid email address.', 400)
+
+    try:
+        send_mail(
+            subject='New newsletter subscriber',
+            message=f'{email} subscribed to the JamiiTek newsletter from {back}.',
+            from_email='info@jamiitek.com',
+            recipient_list=['info@jamiitek.com'],
+            fail_silently=False,
+        )
+    except Exception:
+        logger.exception('Newsletter: kutuma taarifa kumeshindwa')
+        return reply('error', 'Something went wrong. Please try again or WhatsApp us.', 502)
+    return reply('ok', "You're subscribed. Asante!")
+
+
+
 import os
 from django.http import HttpResponse
 from django.conf import settings

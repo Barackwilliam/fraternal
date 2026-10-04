@@ -1,0 +1,61 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en" prefix="og: https://ogp.me/ns#">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+{% comment %}
+  Base nyepesi ya kurasa nne za umma: Home, Services, About na Contact.
+  base.html ya zamani (Google Fonts, Bootstrap grid, Font Awesome x3,
+  loader inayosubiri 'load') bado inatumiwa na blog na kurasa nyingine —
+  haijaguswa. Hapa kuna CSS moja na JS moja zinazohifadhiwa na kivinjari,
+  kwa hiyo ukurasa wa pili unafunguka karibu papo hapo.
+{% endcomment %}
+<title>{% block title %}{{ page_title|default:"JamiiTek — Web Development & AI WhatsApp Bot Tanzania" }}{% endblock %}</title>
+<meta name="description" content="{% block meta_desc %}{{ page_desc|default:"JamiiTek: Tanzania's leading web developer. Websites, AI WhatsApp bots (JamiiBot), web hosting & domains. Dar es Salaam." }}{% endblock %}">
+{% if page_keywords %}<meta name="keywords" content="{{ page_keywords }}">{% endif %}
+<meta name="author" content="JamiiTek">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+<link rel="canonical" href="{% block canonical %}{% if canonical %}{{ canonical }}{% else %}https://www.jamiitek.com{{ request.path }}{% endif %}{% endblock %}">
+<meta name="geo.region" content="TZ-02">
+<meta name="geo.placename" content="Dar es Salaam, Tanzania">
+<meta name="geo.position" content="-6.7924;39.2083">
+<meta name="ICBM" content="-6.7924, 39.2083">
+<meta property="og:type" content="website">
+<meta property="og:url" content="{% if canonical %}{{ canonical }}{% else %}https://www.jamiitek.com{{ request.path }}{% endif %}">
+<meta property="og:site_name" content="JamiiTek">
+<meta property="og:title" content="{% block og_title %}{{ page_title|default:'JamiiTek — Web Development & AI WhatsApp Bot Tanzania' }}{% endblock %}">
+<meta property="og:description" content="{% block og_desc %}{{ page_desc|default:'Websites, AI WhatsApp bots, hosting & domains for businesses across Tanzania.' }}{% endblock %}">
+<meta property="og:image" content="https://www.jamiitek.com{% static 'images/og-image.jpg' %}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="en_TZ">
+<meta property="og:locale:alternate" content="sw_TZ">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@JamiiTek">
+<meta name="theme-color" content="#FBFAF7">
+<link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
+<link rel="apple-touch-icon" sizes="180x180" href="{% static 'images/apple-touch-icon.png' %}">
+<link rel="manifest" href="/manifest.json">
+{{ schema_markup|safe }}
+{% block schema_markup %}{% endblock %}
+<link rel="preload" as="font" type="font/woff2" href="{% static 'fonts/sora-800.woff2' %}" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="{% static 'fonts/inter-400.woff2' %}" crossorigin>
+<link rel="stylesheet" href="{% static 'css/jt-site.css' %}">
+<link rel="stylesheet" href="{% static 'css/interaction.css' %}" media="print" onload="this.media='all'">
+<script>document.documentElement.classList.add('js')</script>
+{% block head %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+{% include 'site/_header.html' %}
+<main>
+{% block content %}{% endblock %}
+</main>
+{% include 'site/_footer.html' %}
+<script src="{% static 'js/jt-site.js' %}"></script>
+{% block scripts %}{% endblock %}
+{% include 'includes/offline_guard.html' %}
+{# Zinapakiwa baada ya ukurasa kufunguka (angalia jt-site.js → later) #}
+<script type="text/later" data-src="https://www.jamiitek.com/chatbot/widget/b785f732-5c0d-4cc0-af87-dfcbfb100dbf.js"></script>
+<script type="text/later" data-src="{% static 'js/interaction.js' %}"></script>
+</body>
+</html>

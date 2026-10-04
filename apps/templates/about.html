@@ -1,116 +1,183 @@
-{% extends 'base.html' %}
-{% load static %}
+{% extends 'site/base.html' %}
+{% load static jt_contact %}
 {% block title %}About Us — JamiiTek{% endblock %}
+{% block meta_desc %}JamiiTek is a digital studio in Dar es Salaam building websites, WhatsApp bots and systems for businesses across Tanzania and East Africa.{% endblock %}
 
-{% block body_class %}kv-light{% endblock %}
+{% block head %}
+<style>
+/* ── Jiji la Dar es Salaam jioni (SVG yote ni code) ── */
+.city{position:relative;border-radius:26px;overflow:hidden;aspect-ratio:600/380;box-shadow:0 0 0 1px var(--line),var(--sh-2)}
+.city svg{width:100%;height:100%}
+.c-win rect{fill:#FFD884;opacity:.1;animation:lit var(--t) steps(1) infinite;animation-delay:var(--d)}
+@keyframes lit{30%{opacity:.95}70%{opacity:.1}}
+.c-sh rect{fill:#FFE8C2;opacity:0;animation:shim var(--t) ease-in-out infinite;animation-delay:var(--d)}
+@keyframes shim{50%{opacity:.75;transform:translateX(6px)}}
+.c-dhow{animation:sail 46s linear infinite}
+.c-dhow g{animation:rock 3.2s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 100%}
+@keyframes sail{from{transform:translateX(-90px)}to{transform:translateX(680px)}}
+@keyframes rock{50%{transform:rotate(2.5deg) translateY(1px)}}
+.c-sun{animation:sunpulse 6s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes sunpulse{50%{transform:scale(1.04)}}
+.c-birds path{fill:none;stroke:#3A3355;stroke-width:1.4;stroke-linecap:round}
+.c-birds{animation:fly2 30s linear infinite}
+@keyframes fly2{from{transform:translateX(-60px)}to{transform:translateX(660px)}}
+.ab-float{position:absolute;padding:12px 16px;min-width:130px}
+.ab-float b{display:block;font:800 28px/1 'Sora';letter-spacing:-.04em;color:var(--ink)}
+.ab-float small{display:block;margin-top:5px;font-size:12px;color:var(--muted)}
+.ab-f1{left:-4%;bottom:12%;animation-delay:1s,2s}
+.ab-f2{right:-3%;top:8%;animation-delay:1.3s,2.6s}
+@media (max-width:600px){.ab-f1{left:2%;bottom:-8%}.ab-f2{right:2%;top:-8%}}
 
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/kv-pages.css' %}">
+/* Takwimu */
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+@media (min-width:900px){.stats{grid-template-columns:repeat(4,1fr)}}
+.stat{position:relative;padding:24px;border-radius:20px;background:#fff;box-shadow:0 0 0 1px var(--line),var(--sh-1);overflow:hidden}
+.stat b{display:block;font:800 clamp(34px,3vw + 16px,52px)/1 'Sora';letter-spacing:-.05em;color:var(--ink)}
+.stat small{display:block;margin-top:10px;color:var(--muted);font-size:14px}
+.stat::after{content:"";position:absolute;left:0;bottom:0;height:3px;width:100%;background:var(--grad);transform:scaleX(0);transform-origin:0;transition:transform 1.4s var(--ease) .2s}
+.stat.in::after{transform:none}
+
+/* Hadithi + maadili */
+.story{display:grid;gap:40px}
+@media (min-width:980px){.story{grid-template-columns:1.05fr 1fr;gap:64px;align-items:start}}
+.story p{color:var(--ink-2);font-size:17px;margin-bottom:16px}
+.quote{margin-top:26px;padding:22px 24px;border-radius:18px;background:var(--paper);font:600 clamp(18px,1vw + 13px,22px)/1.4 'Sora';letter-spacing:-.02em;position:relative}
+.quote::before{content:"";position:absolute;left:0;top:18px;bottom:18px;width:3px;border-radius:3px;background:var(--grad)}
+.vals{display:grid;gap:14px}
+@media (min-width:600px){.vals{grid-template-columns:repeat(2,1fr)}}
+.val{padding:24px;border-radius:20px;background:#fff;box-shadow:0 0 0 1px var(--line),var(--sh-1);transition:transform .5s var(--ease),box-shadow .5s var(--ease)}
+.val:hover{transform:translateY(-5px);box-shadow:0 0 0 1px var(--line),var(--sh-2)}
+.val__ic{display:grid;place-items:center;width:50px;height:50px;border-radius:15px;margin-bottom:18px;color:var(--a);background:color-mix(in srgb,var(--a) 12%,#fff)}
+.val__ic svg{width:24px;height:24px;stroke-dasharray:80;stroke-dashoffset:80;transition:stroke-dashoffset 1.6s var(--ease) .3s}
+.val.in .val__ic svg{stroke-dashoffset:0}
+.val h3{font-size:19px;margin-bottom:6px}
+.val p{color:var(--muted);font-size:14.5px}
+
+/* Huduma (vidonge) + kazi */
+.chips2{display:flex;flex-wrap:wrap;gap:10px}
+.chip2{display:inline-flex;align-items:center;gap:10px;padding:10px 16px 10px 10px;border-radius:999px;background:#fff;box-shadow:0 0 0 1px var(--line);font:600 14.5px 'Sora';letter-spacing:-.01em;transition:transform .35s var(--ease),box-shadow .35s}
+.chip2:hover{transform:translateY(-3px);box-shadow:0 0 0 1px var(--a),0 10px 24px -12px var(--a)}
+.chip2 span{display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--a);color:#fff}
+.chip2 svg{width:16px;height:16px}
+.works{display:grid;gap:18px}
+@media (min-width:800px){.works{grid-template-columns:repeat(3,1fr)}}
+.work{display:block;transition:transform .5s var(--ease)}
+.work:hover{transform:translateY(-6px)}
+.work__shot{aspect-ratio:16/10;background:linear-gradient(135deg,var(--navy-3),var(--navy));display:grid;place-items:center;color:#fff;font:700 18px 'Sora';overflow:hidden}
+.work__shot img{width:100%;height:100%;object-fit:cover;object-position:top}
+.work__meta{display:flex;justify-content:space-between;gap:10px;padding:14px 16px;font-size:14px}
+.work__meta b{font-family:'Sora'}
+.work__meta small{color:var(--muted)}
+</style>
 {% endblock %}
 
 {% block content %}
-{% load jt_contact %}
-<main class="kv">
-
-  <section class="kv-hero">
-    <div class="kv-wrap kv-hero-grid">
-      <div>
-        <nav class="kv-crumb" aria-label="Breadcrumb"><a href="{% url 'home' %}">Home</a> / About</nav>
-        <h1>Built in Tanzania, for businesses that want to be <span class="u">found</span></h1>
-        <p class="kv-lead">JamiiTek is a digital studio in Dar es Salaam. We build websites, WhatsApp bots and systems for businesses, organisations and startups — and we stay around after launch.</p>
-        <div class="kv-acts">
-          <a class="kv-btn kv-btn--gold" href="{% url 'contact' %}">Work with us</a>
-          <a class="kv-btn kv-btn--ghost" href="{% url 'service' %}">See our services</a>
-        </div>
-      </div>
-      {% comment %} Namba HALISI kutoka database — si takwimu zilizoandikwa kwa mkono.
-        Awali ukurasa ulidai "since 2019", "192+ projects" na "5★ rating" bila chanzo. {% endcomment %}
-      <div class="kv-win kv-in">
-        <div class="kv-chrome" aria-hidden="true"><span class="kv-dots"><i></i><i></i><i></i></span>
-          <span class="kv-url"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17 9h-1V7a4 4 0 0 0-8 0v2H7a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2zm-7-2a2 2 0 0 1 4 0v2h-4z"/></svg><b>jamiitek.com</b>/about</span></div>
-        <div class="ab-stats">
-          {% if stats.projects %}<div class="ab-stat hl"><b>{{ stats.projects }}</b><small>projects live today</small></div>{% endif %}
-          {% if stats.services %}<div class="ab-stat"><b>{{ stats.services }}</b><small>services under one roof</small></div>{% endif %}
-          {% if stats.hosted %}<div class="ab-stat"><b>{{ stats.hosted }}</b><small>websites we host and maintain</small></div>{% endif %}
-          <div class="ab-stat"><b>DSM</b><small>Dar es Salaam, serving East Africa</small></div>
-        </div>
+<section class="ph" data-live>
+  <div class="wrap ph__in">
+    <div>
+      <nav class="crumb up" style="--d:0s" aria-label="Breadcrumb"><a href="{% url 'home' %}">Home</a><i></i><span>About</span></nav>
+      <h1 class="split">Built in Tanzania, for businesses that want to be <em>found.</em></h1>
+      <p class="ph__lead up" style="--d:.5s">JamiiTek is a digital studio in Dar es Salaam. We build websites, WhatsApp bots and systems for businesses, organisations and startups — and we stay around after launch.</p>
+      <div class="acts up" style="--d:.65s">
+        <a class="btn btn--gold" href="{% url 'contact' %}">Work with us <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 11h12.2l-4.6-4.6L13 5l7 7-7 7-1.4-1.4 4.6-4.6H4z"/></svg></a>
+        <a class="btn btn--line" href="{% url 'service' %}">See our services</a>
       </div>
     </div>
-  </section>
-
-  <section class="kv-sec">
-    <div class="kv-wrap ab-story">
-      <div class="body kv-in">
-        <span class="kv-kicker">Our story</span>
-        <h2 style="font-size:clamp(28px,3.6vw,44px);line-height:1.08;margin-bottom:22px">Your reliable digital partner</h2>
-        <p>We build fast, secure and easy-to-use websites and software for businesses, organisations and startups across Tanzania and beyond. Our job is to turn ideas into digital tools that solve real problems — clearly and efficiently.</p>
-        <p>We believe every business deserves a strong online presence, whatever its size. So we price clearly, explain things in plain language, and stay a message away after your project goes live.</p>
-        <p class="ab-quote">Every business deserves to be found online — not only the big ones.</p>
+    <div class="up" style="--d:.3s;position:relative">
+      <div class="city" aria-hidden="true">
+        <svg viewBox="0 0 600 380" preserveAspectRatio="xMidYMid slice">
+          <defs>
+            <linearGradient id="cSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6E7FC0"/><stop offset=".35" stop-color="#C79AB4"/><stop offset=".6" stop-color="#F6B28A"/><stop offset=".72" stop-color="#FFD7A0"/></linearGradient>
+            <linearGradient id="cSea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E7A889"/><stop offset=".3" stop-color="#9A7FA6"/><stop offset="1" stop-color="#3D4F86"/></linearGradient>
+            <radialGradient id="cSun"><stop offset="0" stop-color="#FFF7E4"/><stop offset=".25" stop-color="#FFE2A8"/><stop offset="1" stop-color="#FFB27A" stop-opacity="0"/></radialGradient>
+            <linearGradient id="cRef" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+            <mask id="cMask"><rect x="0" y="272" width="600" height="108" fill="url(#cRef)"/></mask>
+            <g id="cCity"><path d="M-6 272V212h35V272Z" fill="#1A2850"/><path d="M30 272V220h40V272Z" fill="#1E2C55"/><path d="M72 272V148h19V272Z M83 148v-11h1.4V148Z" fill="#2A3966"/><path d="M90 272V244h16V272Z" fill="#24335F"/><path d="M105 272V228h21V272Z" fill="#1A2850"/><path d="M127 272V244h25V272Z" fill="#1A2850"/><path d="M153 272V228h21V272Z" fill="#1A2850"/><path d="M174 272V148h25V272Z" fill="#1A2850"/><path d="M199 272V146l16 -24l16 24V272Z M214.2 104h1.5v20h-1.5Z" fill="#1A2850"/><path d="M229 272V165h39V272Z" fill="#2A3966"/><path d="M266 272V181h40V272Z" fill="#2A3966"/><path d="M306 272V104l13 -10l13 10V272Z M319 84v-16h1.5v16Z" fill="#1E2C55"/><path d="M332 272V112l13 -10l13 10V272Z M345 92v-16h1.5v16Z" fill="#1A2850"/><path d="M360 272V177h33V272Z M380 177v-17h1.4V177Z" fill="#1A2850"/><path d="M392 272V108h20V272Z M404 108v-14h1.4V108Z" fill="#1E2C55"/><path d="M412 272V160h6V148h6V140h6V148h6V160h6V272Z" fill="#24335F"/><path d="M447 272V187h31V272Z M466 187v-12h1.4V187Z" fill="#1A2850"/><path d="M478 272V148h38V272Z" fill="#1A2850"/><path d="M516 272V228h36V272Z" fill="#1E2C55"/><path d="M553 272V228h27V272Z" fill="#2A3966"/><path d="M583 272V188h18V272Z M594 188v-17h1.4V188Z" fill="#2A3966"/><path d="M604 272V220h21V272Z" fill="#24335F"/></g>
+          </defs>
+          <rect width="600" height="380" fill="url(#cSky)"/>
+          <circle class="c-sun" cx="455" cy="236" r="120" fill="url(#cSun)"/>
+          <circle cx="455" cy="236" r="26" fill="#FFF4DC"/>
+          <g class="c-birds"><path d="M40 80q5-5 10 0q5-5 10 0"/><path d="M64 94q4-4 8 0q4-4 8 0"/><path d="M30 100q3-3 6 0q3-3 6 0"/></g>
+          <rect y="272" width="600" height="108" fill="url(#cSea)"/>
+          <rect x="420" y="272" width="70" height="108" fill="#FFE6B8" opacity=".35"/>
+          <use href="#cCity"/>
+          <g class="c-win"><rect x="36" y="243" width="3" height="4" style="--t:5.8s;--d:1.5s"/><rect x="77" y="258" width="3" height="4" style="--t:5.3s;--d:4.6s"/><rect x="76" y="177" width="3" height="4" style="--t:6.7s;--d:2.7s"/><rect x="111" y="257" width="3" height="4" style="--t:8.3s;--d:3.8s"/><rect x="110" y="262" width="3" height="4" style="--t:4.2s;--d:5.8s"/><rect x="217" y="254" width="3" height="4" style="--t:7.2s;--d:0.3s"/><rect x="244" y="251" width="3" height="4" style="--t:8.0s;--d:2.7s"/><rect x="254" y="200" width="3" height="4" style="--t:6.7s;--d:5.7s"/><rect x="285" y="238" width="3" height="4" style="--t:8.4s;--d:1.5s"/><rect x="283" y="206" width="3" height="4" style="--t:6.5s;--d:4.7s"/><rect x="319" y="237" width="3" height="4" style="--t:6.7s;--d:5.5s"/><rect x="344" y="159" width="3" height="4" style="--t:7.8s;--d:3.8s"/><rect x="344" y="237" width="3" height="4" style="--t:4.0s;--d:0.3s"/><rect x="377" y="242" width="3" height="4" style="--t:3.9s;--d:5.9s"/><rect x="383" y="193" width="3" height="4" style="--t:7.8s;--d:2.0s"/><rect x="401" y="215" width="3" height="4" style="--t:3.9s;--d:5.1s"/><rect x="430" y="240" width="3" height="4" style="--t:7.4s;--d:2.9s"/><rect x="424" y="212" width="3" height="4" style="--t:5.4s;--d:0.9s"/><rect x="427" y="257" width="3" height="4" style="--t:8.9s;--d:5.8s"/><rect x="498" y="250" width="3" height="4" style="--t:7.0s;--d:5.0s"/><rect x="489" y="258" width="3" height="4" style="--t:8.9s;--d:4.3s"/><rect x="536" y="248" width="3" height="4" style="--t:5.0s;--d:1.6s"/><rect x="528" y="256" width="3" height="4" style="--t:6.9s;--d:4.8s"/><rect x="530" y="248" width="3" height="4" style="--t:6.9s;--d:4.4s"/><rect x="566" y="256" width="3" height="4" style="--t:3.9s;--d:5.9s"/><rect x="562" y="251" width="3" height="4" style="--t:8.6s;--d:2.9s"/><rect x="594" y="249" width="3" height="4" style="--t:8.2s;--d:1.6s"/><rect x="586" y="212" width="3" height="4" style="--t:4.0s;--d:2.6s"/></g>
+          <g mask="url(#cMask)" opacity=".5"><use href="#cCity" transform="matrix(1 0 0 -1 0 544)"/></g>
+          <g class="c-sh"><rect x="535" y="370" width="13" height="1.4" rx=".7" style="--t:2.9s;--d:3.9s"/><rect x="249" y="324" width="26" height="1.4" rx=".7" style="--t:3.7s;--d:2.7s"/><rect x="431" y="287" width="15" height="1.4" rx=".7" style="--t:3.8s;--d:1.4s"/><rect x="520" y="368" width="35" height="1.4" rx=".7" style="--t:4.9s;--d:2.2s"/><rect x="181" y="369" width="26" height="1.4" rx=".7" style="--t:3.5s;--d:2.1s"/><rect x="211" y="368" width="17" height="1.4" rx=".7" style="--t:3.0s;--d:1.6s"/><rect x="280" y="332" width="25" height="1.4" rx=".7" style="--t:3.0s;--d:1.5s"/><rect x="80" y="324" width="14" height="1.4" rx=".7" style="--t:2.8s;--d:3.3s"/><rect x="196" y="341" width="20" height="1.4" rx=".7" style="--t:5.7s;--d:2.2s"/><rect x="339" y="310" width="36" height="1.4" rx=".7" style="--t:4.0s;--d:3.9s"/><rect x="425" y="325" width="23" height="1.4" rx=".7" style="--t:3.8s;--d:3.4s"/><rect x="445" y="295" width="27" height="1.4" rx=".7" style="--t:3.6s;--d:1.0s"/><rect x="184" y="282" width="38" height="1.4" rx=".7" style="--t:5.8s;--d:0.6s"/><rect x="576" y="282" width="29" height="1.4" rx=".7" style="--t:3.4s;--d:0.2s"/><rect x="288" y="293" width="21" height="1.4" rx=".7" style="--t:4.5s;--d:1.0s"/><rect x="294" y="324" width="9" height="1.4" rx=".7" style="--t:5.5s;--d:2.9s"/><rect x="595" y="306" width="24" height="1.4" rx=".7" style="--t:4.3s;--d:3.5s"/><rect x="10" y="361" width="37" height="1.4" rx=".7" style="--t:2.9s;--d:1.1s"/><rect x="439" y="345" width="28" height="1.4" rx=".7" style="--t:2.6s;--d:1.4s"/><rect x="79" y="343" width="34" height="1.4" rx=".7" style="--t:2.5s;--d:2.2s"/><rect x="412" y="343" width="11" height="1.4" rx=".7" style="--t:3.2s;--d:1.7s"/><rect x="413" y="354" width="27" height="1.4" rx=".7" style="--t:5.8s;--d:2.6s"/><rect x="285" y="359" width="35" height="1.4" rx=".7" style="--t:4.9s;--d:2.9s"/><rect x="455" y="363" width="23" height="1.4" rx=".7" style="--t:3.6s;--d:0.0s"/><rect x="389" y="352" width="27" height="1.4" rx=".7" style="--t:4.2s;--d:1.2s"/><rect x="533" y="295" width="30" height="1.4" rx=".7" style="--t:5.9s;--d:2.2s"/><rect x="29" y="319" width="25" height="1.4" rx=".7" style="--t:5.1s;--d:1.1s"/><rect x="565" y="288" width="10" height="1.4" rx=".7" style="--t:3.7s;--d:1.7s"/><rect x="292" y="286" width="21" height="1.4" rx=".7" style="--t:2.9s;--d:0.5s"/><rect x="67" y="337" width="34" height="1.4" rx=".7" style="--t:5.6s;--d:4.0s"/><rect x="110" y="345" width="22" height="1.4" rx=".7" style="--t:3.1s;--d:3.2s"/><rect x="333" y="286" width="15" height="1.4" rx=".7" style="--t:4.8s;--d:3.0s"/><rect x="71" y="306" width="26" height="1.4" rx=".7" style="--t:3.9s;--d:2.5s"/><rect x="411" y="281" width="11" height="1.4" rx=".7" style="--t:4.2s;--d:1.4s"/><rect x="83" y="340" width="37" height="1.4" rx=".7" style="--t:3.5s;--d:2.3s"/><rect x="565" y="342" width="17" height="1.4" rx=".7" style="--t:4.4s;--d:0.9s"/></g>
+          <g class="c-dhow"><g>
+            <path d="M18 330h46l-8 10H26z" fill="#2B2340"/>
+            <path d="M40 330V280" stroke="#2B2340" stroke-width="1.6"/>
+            <path d="M22 286C38 282 60 290 66 326H40z" fill="#F7EEDF"/>
+            <path d="M22 286 70 324" stroke="#2B2340" stroke-width="1.2"/>
+          </g></g>
+        </svg>
       </div>
-      <div class="ab-values">
-        <div class="ab-val kv-in"><span class="kv-ic" style="background:#2E7BF6"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><h3>Quality</h3><p>Fast, secure and built to last — not just to pass a demo.</p></div>
-        <div class="ab-val kv-in"><span class="kv-ic" style="background:#F5A623"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9z"/></svg></span><h3>Speed</h3><p>Clear timelines from day one, and we keep them.</p></div>
-        <div class="ab-val kv-in"><span class="kv-ic" style="background:#1FA97A"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/></svg></span><h3>Transparency</h3><p>One fixed price, and you see the work as it happens.</p></div>
-        <div class="ab-val kv-in"><span class="kv-ic" style="background:#7C3AED"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span><h3>Support</h3><p>After launch we keep your site running — on WhatsApp, not a ticket queue.</p></div>
-      </div>
+      {% if stats.projects %}<div class="float ab-float ab-f1"><b data-count="{{ stats.projects }}">{{ stats.projects }}</b><small>projects live today</small></div>{% endif %}
+      <div class="float ab-float ab-f2"><b>DSM</b><small>Dar es Salaam · East Africa</small></div>
     </div>
-  </section>
+  </div>
+</section>
 
-  {% if services %}
-  <section class="kv-sec" style="padding-top:0">
-    <div class="kv-wrap">
-      <span class="kv-kicker">What we do</span>
-      <h2 style="font-size:clamp(28px,3.6vw,44px);line-height:1.08;max-width:20ch">One team for everything online</h2>
-      <div class="ab-svcs">
-        {% for svc in services %}
-        <a class="ab-svc kv-in" href="{% url 'service' %}#svc-{{ svc.pk }}"><span class="kv-ic" style="background:{{ svc.accent|default:'#2E7BF6' }};width:38px;height:38px"><svg viewBox="0 0 24 24" fill="currentColor"><path d="{{ svc.icon_path }}"/></svg></span><b>{{ svc.service_type }}</b></a>
-        {% endfor %}
-      </div>
+{% comment %} Namba HALISI kutoka database — si takwimu zilizoandikwa kwa mkono.
+  Awali ukurasa ulidai "since 2019", "192+ projects" na "5★ rating" bila chanzo. Namba ikiwa 0, haionyeshwi. {% endcomment %}
+<section class="sec" style="padding-top:20px">
+  <div class="wrap">
+    <div class="stats">
+      {% if stats.projects %}<div class="stat rv"><b data-count="{{ stats.projects }}">{{ stats.projects }}</b><small>projects live today</small></div>{% endif %}
+      {% if stats.services %}<div class="stat rv" style="--rd:.08s"><b data-count="{{ stats.services }}">{{ stats.services }}</b><small>services under one roof</small></div>{% endif %}
+      {% if stats.hosted %}<div class="stat rv" style="--rd:.16s"><b data-count="{{ stats.hosted }}">{{ stats.hosted }}</b><small>websites we host and maintain</small></div>{% endif %}
+      <div class="stat rv" style="--rd:.24s"><b>24/7</b><small>JamiiBot answering on WhatsApp</small></div>
     </div>
-  </section>
-  {% endif %}
+  </div>
+</section>
 
-  {% if work %}
-  <section class="kv-sec" style="padding-top:0">
-    <div class="kv-wrap">
-      <span class="kv-kicker">Recent work</span>
-      <h2 style="font-size:clamp(28px,3.6vw,44px);line-height:1.08">Built by us, used every day</h2>
-      <div class="ab-work">
-        {% for p in work %}
-        <a class="kv-win kv-in" href="{{ p.live_url|default:'/#work' }}"{% if p.live_url %} target="_blank" rel="noopener"{% endif %}>
-          <div class="kv-chrome" aria-hidden="true"><span class="kv-dots"><i></i><i></i><i></i></span>
-            <span class="kv-url">{% if p.live_url %}<b>{{ p.live_url|cut:"https://"|cut:"http://"|cut:"www."|cut:"/" }}</b>{% else %}{{ p.title }}{% endif %}</span></div>
-          <div class="shot">{% if p.image %}<img src="{{ p.image }}" alt="{{ p.title }}" loading="lazy" decoding="async">{% else %}<span>{{ p.title }}</span>{% endif %}</div>
-          <div class="meta"><b>{{ p.title }}</b>{% if p.category %}<small>{{ p.category }}</small>{% endif %}</div>
-        </a>
-        {% endfor %}
-      </div>
+<section class="sec" style="padding-top:0">
+  <div class="wrap story">
+    <div class="rv">
+      <span class="eyebrow">Our story</span>
+      <h2 style="font-size:clamp(2rem,1.1rem + 3vw,3.4rem);font-weight:800;letter-spacing:-.045em;margin:16px 0 22px">Your reliable digital partner.</h2>
+      <p>We build fast, secure and easy-to-use websites and software for businesses, organisations and startups across Tanzania and beyond. Our job is to turn ideas into digital tools that solve real problems — clearly and efficiently.</p>
+      <p>We believe every business deserves a strong online presence, whatever its size. So we price clearly, explain things in plain language, and stay a message away after your project goes live.</p>
+      <p class="quote">Every business deserves to be found online — not only the big ones.</p>
     </div>
-  </section>
-  {% endif %}
-
-  <section class="kv-sec" style="padding-top:0">
-    <div class="kv-wrap">
-      <div class="kv-cta kv-in"><div class="kv-cta-grid">
-        <div><h2>Have a project in mind?</h2>
-          <p class="kv-lead">Tell us about it. We reply within one business day with a plan, a timeline and a fixed price.</p></div>
-        <div class="kv-acts" style="margin:0">
-          <a class="kv-btn kv-btn--gold" href="{% url 'contact' %}">Start a conversation</a>
-          <a class="kv-btn kv-btn--wa" href="https://wa.me/{% contact 'wa' %}" target="_blank" rel="noopener">WhatsApp us</a>
-        </div>
-      </div></div>
+    <div class="vals">
+      <div class="val rv" style="--a:#2E7BF6"><span class="val__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><h3>Quality</h3><p>Fast, secure and built to last — not just to pass a demo.</p></div>
+      <div class="val rv" style="--a:#E08A00;--rd:.08s"><span class="val__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9z"/></svg></span><h3>Speed</h3><p>Clear timelines from day one, and we keep them.</p></div>
+      <div class="val rv" style="--a:#16A34A;--rd:.16s"><span class="val__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/></svg></span><h3>Transparency</h3><p>One fixed price, and you see the work as it happens.</p></div>
+      <div class="val rv" style="--a:#7C3AED;--rd:.24s"><span class="val__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span><h3>Support</h3><p>After launch we keep your site running — on WhatsApp, not a ticket queue.</p></div>
     </div>
-  </section>
-</main>
-{% endblock %}
+  </div>
+</section>
 
-{% block extra_js %}
-<script>
-(function(){
-  var els=document.querySelectorAll('.kv-in');
-  if(!('IntersectionObserver' in window)||matchMedia('(prefers-reduced-motion: reduce)').matches){els.forEach(function(e){e.classList.add('on')});return;}
-  var io=new IntersectionObserver(function(en){en.forEach(function(e){if(e.isIntersecting){e.target.classList.add('on');io.unobserve(e.target);}})},{threshold:.15});
-  els.forEach(function(e){io.observe(e)});
-})();
-</script>
+{% if services %}
+<section class="sec" style="padding-top:0">
+  <div class="wrap">
+    <div class="sh rv"><span class="eyebrow">What we do</span><h2>One team for everything online.</h2></div>
+    <div class="chips2">
+      {% for svc in services %}
+      <a class="chip2 rv" style="--a:{{ svc.accent|default:'#2E7BF6' }};--rd:{% widthratio forloop.counter0 1 40 %}ms" href="{% url 'service' %}#svc-{{ svc.pk }}"><span><svg viewBox="0 0 24 24" fill="currentColor"><path d="{{ svc.icon_path }}"/></svg></span>{{ svc.service_type }}</a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% if work %}
+<section class="sec" style="padding-top:0">
+  <div class="wrap">
+    <div class="sh rv"><span class="eyebrow">Recent work</span><h2>Built by us, used every day.</h2></div>
+    <div class="works">
+      {% for p in work %}
+      <a class="work win rv" style="--rd:{% cycle '0s' '.08s' '.16s' %}" href="{{ p.live_url|default:'/#work' }}"{% if p.live_url %} target="_blank" rel="noopener"{% endif %}>
+        <div class="win__bar" aria-hidden="true"><i></i><i></i><i></i><span class="win__url">{% if p.live_url %}<b>{{ p.live_url|cut:"https://"|cut:"http://"|cut:"www."|cut:"/" }}</b>{% else %}{{ p.title }}{% endif %}</span></div>
+        <div class="work__shot">{% if p.image %}<img src="{{ p.image }}" alt="{{ p.title }}" loading="lazy" decoding="async" data-hide-broken>{% else %}<span>{{ p.title }}</span>{% endif %}</div>
+        <div class="work__meta"><b>{{ p.title }}</b>{% if p.category %}<small>{{ p.category }}</small>{% endif %}</div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% include 'site/_kili.html' with eyebrow="Tujenge pamoja" title="Have a project in mind? Let's" em="talk." text="Tell us about it. We reply within one business day with a plan, a timeline and a fixed price." %}
 {% endblock %}
