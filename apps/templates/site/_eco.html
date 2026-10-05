@@ -97,19 +97,95 @@
 .eco-bld__steps span.on{color:#5BE694}
 .eco-bld__steps span.on::before{content:"✓ "}
 /* demo: templates */
-.eco-tpl{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.eco-tpl div{border-radius:9px;overflow:hidden;background:#fff;opacity:.55;transform:scale(.96);transition:all .45s var(--ease)}
-.eco-tpl div.on{opacity:1;transform:none;box-shadow:0 0 0 2px var(--amber),0 10px 24px -10px rgba(245,166,35,.8)}
-.eco-tpl i{display:block;height:34px;background:var(--g)}
-.eco-tpl b{display:block;height:5px;margin:7px 7px 4px;border-radius:3px;background:#D6DEEA}
-.eco-tpl em{display:block;height:5px;width:55%;margin:0 7px 8px;border-radius:3px;background:#E7ECF4}
-.eco-tpl small{display:block;padding:0 7px 7px;font:600 9.5px 'Inter';color:#0B1730}
+/* demo: templates — tovuti ndogo halisi ndani ya kivinjari */
+.tpv{padding:10px}
+.tpv__win{border-radius:12px;overflow:hidden;background:#fff;box-shadow:0 18px 40px -18px rgba(0,0,0,.7)}
+.tpv__bar{display:flex;align-items:center;gap:5px;padding:7px 9px;background:#E9EEF6}
+.tpv__bar>i{width:7px;height:7px;border-radius:50%;background:#FF5F57}.tpv__bar>i:nth-child(2){background:#FEBC2E}.tpv__bar>i:nth-child(3){background:#28C840}
+.tpv__url{flex:1;min-width:0;display:flex;align-items:center;gap:4px;margin-left:6px;padding:3px 8px;border-radius:6px;background:#fff;font:500 10px var(--mono);color:#7A8499;white-space:nowrap;overflow:hidden}
+.tpv__url svg{width:9px;height:9px;flex:none;color:#16A34A}.tpv__url b{color:#0B1730;font-weight:600}
+.tpv__view{position:relative;aspect-ratio:16/11;overflow:hidden;container-type:inline-size;background:#fff}
+.site{position:absolute;inset:0;font-size:2.4cqw;font-family:'Inter',system-ui,sans-serif;color:#0B1730;opacity:0;visibility:hidden;transition:opacity .5s,visibility 0s .5s}
+.site.is-on{opacity:1;visibility:visible;transition:opacity .5s}
+.site.is-on .site__in{animation:tpvScroll 11s ease-in-out .6s infinite}
+/* Inashuka hadi mwisho wa tovuti (--sd inapimwa na JS) kisha inarudi juu */
+@keyframes tpvScroll{0%,16%{transform:none}48%,70%{transform:translateY(calc(var(--sd,0px) * -1))}100%{transform:none}}
+.d-hero h4,.sf-hero h4,.f-hero h4{color:#fff}
+.site h4,.site h5{margin:0;font-family:'Sora',sans-serif;letter-spacing:-.03em}
+.site p{margin:0}
+.s-nav{display:flex;align-items:center;gap:1em;height:3.4em;padding:0 1.4em;border-bottom:1px solid rgba(0,0,0,.06)}
+.s-nav b{display:flex;align-items:center;gap:.45em;margin-right:auto;font:800 1.2em 'Sora',sans-serif;letter-spacing:-.03em}
+.s-nav b i{width:1.2em;height:1.2em;border-radius:.35em;background:var(--sc)}
+.s-nav span{font-size:.85em;color:#5B667D}
+.s-nav em{font-style:normal;padding:.45em .9em;border-radius:99em;background:var(--sc);color:#fff;font-size:.8em;font-weight:600}
+.s-btn{display:inline-block;margin-top:1em;padding:.6em 1.2em;border-radius:99em;font-weight:700;font-size:.9em}
+.s-h2{display:flex;justify-content:space-between;align-items:baseline;margin:1.4em 1.4em .7em;font:800 1.15em 'Sora',sans-serif;letter-spacing:-.02em}
+.s-h2 small{font:500 .7em 'Inter';color:#8A93A6}
+/* Duka */
+.site--duka{--sc:#1B4C8C}
+.d-hero{display:grid;grid-template-columns:1.2fr 1fr;align-items:center;margin:1.2em 1.4em 0;padding:1.6em;border-radius:1.2em;background:linear-gradient(135deg,#123563,#0A2245);color:#fff}
+.d-hero small{font:600 .7em var(--mono);letter-spacing:.12em;color:#FFC456}
+.d-hero h4{margin:.3em 0 .4em;font-size:1.9em;line-height:1.05}
+.d-hero p{font-size:.85em;color:#C7D3EA}
+.d-hero .s-btn{background:#F5A623;color:#2A1800}
+.d-hero svg{width:100%;height:auto}
+.d-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.9em;margin:0 1.4em}
+.d-card{border-radius:.9em;overflow:hidden;box-shadow:0 0 0 1px #E6EBF3}
+.d-card div{display:grid;place-items:center;height:7em;background:var(--bg)}
+.d-card svg{width:55%;height:auto}
+.d-card p{padding:.6em .7em 0;font-size:.85em;font-weight:600}
+.d-card span{display:flex;justify-content:space-between;align-items:center;padding:.2em .7em .7em;font-size:.8em;color:#1B4C8C;font-weight:700}
+.d-card span i{display:grid;place-items:center;width:1.6em;height:1.6em;border-radius:50%;background:#1B4C8C;color:#fff;font-style:normal}
+.s-wa{display:flex;align-items:center;justify-content:center;gap:.6em;margin:1.4em;padding:.9em;border-radius:.8em;background:#25D366;color:#fff;font-weight:700;font-size:.95em}
+.s-wa svg{width:1.3em;height:1.3em}
+/* Safari */
+.site--safari{--sc:#15803D}
+.sf-hero{position:relative;height:17em;color:#fff}
+.sf-hero svg{position:absolute;inset:0;width:100%;height:100%}
+.sf-hero div{position:absolute;left:1.6em;top:2.4em;max-width:60%}
+.sf-hero small{font:600 .7em var(--mono);letter-spacing:.14em;color:#FFE1A8}
+.sf-hero h4{margin:.3em 0;font-size:2.1em;line-height:1.02;text-shadow:0 2px 10px rgba(0,0,0,.25)}
+.sf-hero .s-btn{background:#fff;color:#14532D}
+.sf-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.9em;margin:0 1.4em}
+.sf-card{border-radius:.9em;overflow:hidden;box-shadow:0 0 0 1px #E7E2D6}
+.sf-card i{display:block;height:6em;background:var(--bg)}
+.sf-card p{padding:.55em .7em 0;font-size:.85em;font-weight:700}
+.sf-card span{display:flex;justify-content:space-between;padding:.2em .7em .7em;font-size:.75em;color:#6B6455}
+.sf-card span b{color:#15803D}
+.sf-rev{display:flex;align-items:center;gap:.8em;margin:1.3em 1.4em;padding:1em;border-radius:.9em;background:#F6F1E6;font-size:.85em}
+.sf-rev b{color:#D97706;font-size:1.1em}
+/* Restaurant */
+.site--food{--sc:#EA580C;background:#FFF8F0}
+.f-hero{display:grid;grid-template-columns:1.15fr 1fr;align-items:center;gap:.6em;padding:1.8em 1.4em;background:radial-gradient(circle at 80% 50%,#3B1E12,#1C0F0A 70%);color:#fff}
+.f-hero small{font:600 .7em var(--mono);letter-spacing:.12em;color:#FDBA74}
+.f-hero h4{margin:.3em 0 .4em;font-size:1.8em;line-height:1.05}
+.f-hero p{font-size:.85em;color:#E7D3C3}
+.f-hero .s-btn{background:#EA580C;color:#fff}
+.f-hero svg{width:100%;height:auto}
+.f-menu{margin:0 1.4em;border-radius:.9em;background:#fff;box-shadow:0 0 0 1px #F1E4D6}
+.f-menu p{display:flex;align-items:center;gap:.7em;padding:.75em .9em;border-bottom:1px dashed #EEDFCF;font-size:.9em}
+.f-menu p:last-child{border:0}
+.f-menu p i{display:grid;place-items:center;width:2.2em;height:2.2em;border-radius:.6em;background:#FFF1E4;font-style:normal;font-size:1.1em}
+.f-menu p span{flex:1;font-weight:600}
+.f-menu p span small{display:block;font-weight:400;color:#8A7A6B;font-size:.85em}
+.f-menu p b{color:#EA580C}
+.f-info{display:flex;justify-content:space-around;margin:1.2em 1.4em;font-size:.8em;color:#7A6A5B}
+.s-ft{display:grid;gap:.3em;padding:1.3em 1.4em 1.5em;background:#0B1730;color:#9AA6BD;font-size:.8em}
+.s-ft b{display:flex;align-items:center;gap:.45em;color:#fff;font:800 1.15em 'Sora',sans-serif}
+.s-ft b i{width:1em;height:1em;border-radius:.3em;background:var(--sc)}
+.s-ft small{font-size:.85em;color:#6B7792}
+.f-info b{display:block;color:#1C0F0A;font-size:1.15em}
+/* Vitufe vya kuchagua template */
+.tpv__pick{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px}
+.tpv__pick button{display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 4px;border-radius:10px;background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,.1);color:#B9C7E2;font:600 12px 'Inter',sans-serif;cursor:pointer;transition:all .3s}
+.tpv__pick button i{width:9px;height:9px;border-radius:3px;background:var(--g)}
+.tpv__pick button.on{background:rgba(245,166,35,.16);box-shadow:inset 0 0 0 1.5px var(--amber);color:#fff}
 @media (max-width:520px){
   .eco__card{padding:12px;border-radius:20px}
   .eco__tabs button{padding:9px 4px;font-size:11.5px;gap:5px}
   .eco__pane h3{flex-wrap:wrap;font-size:18.5px}
 }
-@media (prefers-reduced-motion:reduce){.eco__orb--3,.eco__core::before,.eco__core i,.eco__beams line{animation:none}}
+@media (prefers-reduced-motion:reduce){.site__in,.eco__orb--3,.eco__core::before,.eco__core i,.eco__beams line{animation:none}}
 </style>
 
 <div class="eco up" style="--d:.9s" data-eco>
@@ -164,10 +240,67 @@
     <div class="eco__pane" role="tabpanel" style="--c:#F5A623">
       <h3>Ready-made templates <em>FROM TSH 15K</em></h3>
       <p>Professionally designed sites for shops, safaris, restaurants, schools and more. Add your content and go live in hours — hosting included.</p>
-      <div class="eco__demo eco-tpl" data-demo="tpl">
-        <div style="--g:linear-gradient(120deg,#1B4C8C,#0A2245)"><i></i><b></b><em></em><small>Duka</small></div>
-        <div style="--g:linear-gradient(120deg,#16A34A,#0F5132)"><i></i><b></b><em></em><small>Safari</small></div>
-        <div style="--g:linear-gradient(120deg,#F5A623,#FF7A3D)"><i></i><b></b><em></em><small>Restaurant</small></div>
+      <div class="eco__demo tpv" data-demo="tpl">
+        <div class="tpv__win">
+          <div class="tpv__bar"><i></i><i></i><i></i><span class="tpv__url"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17 9V7A5 5 0 0 0 7 7v2H5v13h14V9zm-8 0V7a3 3 0 0 1 6 0v2z"/></svg><b data-url>dukalajuma</b>.jamiitek.com</span></div>
+          <div class="tpv__view">
+
+            <div class="site site--duka is-on"><div class="site__in">
+              <div class="s-nav"><b><i></i>Duka la Juma</b><span>Bidhaa</span><span>Oda</span><em>🛒 2</em></div>
+              <div class="d-hero">
+                <div><small>MPYA · 2026</small><h4>Mitindo mipya ya msimu</h4><p>Nguo, viatu na mikoba — tunaleta hadi mlangoni Dar.</p><span class="s-btn">Nunua sasa →</span></div>
+                <svg viewBox="0 0 100 90"><circle cx="55" cy="45" r="38" fill="#1B4C8C"/><path d="M38 22l12-6h10l12 6 10 14-11 7-5-6v40H44V37l-5 6-11-7z" fill="#F5A623"/><path d="M50 16q5 8 10 0" fill="none" stroke="#0A2245" stroke-width="3"/><circle cx="55" cy="50" r="3" fill="#0A2245"/><circle cx="55" cy="60" r="3" fill="#0A2245"/></svg>
+              </div>
+              <div class="s-h2">Bidhaa maarufu <small>Ona zote →</small></div>
+              <div class="d-grid">
+                <div class="d-card"><div style="--bg:#E8F0FB"><svg viewBox="0 0 60 50"><path d="M14 10l9-4h14l9 4 8 11-9 5-4-5v26H19V21l-4 5-9-5z" fill="#2563EB"/></svg></div><p>Shati ya kitenge</p><span>Tsh 25,000<i>+</i></span></div>
+                <div class="d-card"><div style="--bg:#FDF1DD"><svg viewBox="0 0 60 50"><path d="M6 30q4-14 16-12l8 8q10 2 24 6v8H6z" fill="#EA580C"/><path d="M6 38h48v5H6z" fill="#1F2937"/><path d="M24 22l3 3M28 20l3 3" stroke="#fff" stroke-width="2"/></svg></div><p>Viatu vya michezo</p><span>Tsh 45,000<i>+</i></span></div>
+                <div class="d-card"><div style="--bg:#EEF7EE"><svg viewBox="0 0 60 50"><path d="M20 18q0-10 10-10t10 10" fill="none" stroke="#14532D" stroke-width="3"/><rect x="10" y="18" width="40" height="28" rx="5" fill="#16A34A"/><rect x="26" y="26" width="8" height="5" rx="1" fill="#FCD34D"/></svg></div><p>Mkoba wa ngozi</p><span>Tsh 38,000<i>+</i></span></div>
+              </div>
+              <div class="s-wa"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2z"/></svg>Agiza kwa WhatsApp</div>
+              <div class="s-ft"><b><i></i>Duka la Juma</b><span>Kariakoo, Dar es Salaam · 0712 000 000</span><small>© 2026 · Powered by JamiiTek</small></div>
+            </div></div>
+
+            <div class="site site--safari"><div class="site__in">
+              <div class="s-nav"><b><i></i>Serengeti Trails</b><span>Tours</span><span>Zanzibar</span><em>Book</em></div>
+              <div class="sf-hero">
+                <svg viewBox="0 0 400 170" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="sfSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F97316"/><stop offset=".55" stop-color="#FDBA74"/><stop offset="1" stop-color="#FDE68A"/></linearGradient></defs><rect width="400" height="170" fill="url(#sfSky)"/><circle cx="300" cy="105" r="34" fill="#FFF7D6"/><path d="M0 120q80-18 170-4t230-10v64H0z" fill="#B45309"/><path d="M0 138q100-14 220-2t180-6v40H0z" fill="#78350F"/><g fill="#1C1917"><path d="M250 128v-30M240 98q10-8 22 0" stroke="#1C1917" stroke-width="2.5" fill="none"/><path d="M222 100q28-10 56 0q-28 5-56 0z"/><path d="M110 140l2-22 4-2 1-20 4-2 2 4-3 2-1 18 10 1 2 21h-3l-2-14-8-1-3 15z"/><path d="M150 141l2-17 3-1 1-15 3-1 2 3-2 2-1 13 8 1 1 15h-2l-2-11-6-1-2 12z"/></g></svg>
+                <div><small>TANZANIA · 2026</small><h4>Discover the wild side</h4><span class="s-btn">Book a safari →</span></div>
+              </div>
+              <div class="s-h2">Popular tours <small>★ 4.9 on Google</small></div>
+              <div class="sf-grid">
+                <div class="sf-card"><i style="--bg:linear-gradient(160deg,#FCD34D,#B45309)"></i><p>3-Day Serengeti</p><span>from <b>$650</b></span></div>
+                <div class="sf-card"><i style="--bg:linear-gradient(160deg,#67E8F9,#0E7490)"></i><p>Zanzibar Beach</p><span>from <b>$420</b></span></div>
+                <div class="sf-card"><i style="--bg:linear-gradient(160deg,#C4B5FD,#4C1D95)"></i><p>Kilimanjaro Trek</p><span>from <b>$1,450</b></span></div>
+              </div>
+              <div class="sf-rev"><b>★★★★★</b><span>“Best trip of our lives — guides were amazing!” — Anna, UK</span></div>
+              <div class="s-ft"><b><i></i>Serengeti Trails</b><span>Arusha, Tanzania · info@serengetitrails.co.tz</span><small>© 2026 · Powered by JamiiTek</small></div>
+            </div></div>
+
+            <div class="site site--food"><div class="site__in">
+              <div class="s-nav"><b><i></i>Mama Ntilie Kitchen</b><span>Menu</span><span>Delivery</span><em>Agiza</em></div>
+              <div class="f-hero">
+                <div><small>WAZI LEO · 7:00–22:00</small><h4>Chakula kitamu cha nyumbani</h4><p>Pika leo, tunaleta moto moto ndani ya dakika 30.</p><span class="s-btn">Agiza sasa →</span></div>
+                <svg viewBox="0 0 100 100"><circle cx="50" cy="52" r="40" fill="#FAFAF9"/><circle cx="50" cy="52" r="31" fill="#F5E6C8"/><g fill="#D97706"><circle cx="40" cy="45" r="3"/><circle cx="52" cy="40" r="2.5"/><circle cx="60" cy="50" r="3"/><circle cx="45" cy="58" r="2.6"/><circle cx="57" cy="62" r="2.4"/></g><g fill="#7C2D12"><rect x="36" y="50" width="7" height="5" rx="1.5"/><rect x="52" y="54" width="7" height="5" rx="1.5"/><rect x="47" y="45" width="6" height="5" rx="1.5"/></g><path d="M62 38l6-5M66 44l7-3" stroke="#16A34A" stroke-width="2.5" stroke-linecap="round"/><path d="M30 6q4 6 0 12M42 4q4 6 0 12" stroke="#fff" stroke-opacity=".5" stroke-width="2" fill="none"/></svg>
+              </div>
+              <div class="s-h2">Menu ya leo <small>Bei kwa Tsh</small></div>
+              <div class="f-menu">
+                <p><i>🍛</i><span>Pilau ya nyama<small>Na kachumbari</small></span><b>8,000</b></p>
+                <p><i>🍟</i><span>Chipsi mayai<small>Spesheli ya jioni</small></span><b>5,000</b></p>
+                <p><i>🍌</i><span>Ndizi nyama<small>Ya nazi</small></span><b>7,000</b></p>
+                <p><i>🥭</i><span>Juisi ya embe<small>Freshi</small></span><b>2,500</b></p>
+              </div>
+              <div class="f-info"><span><b>30 min</b>Delivery</span><span><b>4.8 ★</b>Reviews</span><span><b>Dar</b>Kote</span></div>
+              <div class="s-ft"><b><i></i>Mama Ntilie Kitchen</b><span>Sinza, Dar es Salaam · Delivery kote Dar</span><small>© 2026 · Powered by JamiiTek</small></div>
+            </div></div>
+
+          </div>
+        </div>
+        <div class="tpv__pick">
+          <button type="button" class="on" data-i="0" style="--g:#1B4C8C"><i></i>Duka</button>
+          <button type="button" data-i="1" style="--g:#15803D"><i></i>Safari</button>
+          <button type="button" data-i="2" style="--g:#EA580C"><i></i>Restaurant</button>
+        </div>
       </div>
       <div class="eco__stats"><span><b>Hours</b> to launch</span><span><b>SSL</b> + hosting</span><span><b>WhatsApp</b> orders</span></div>
       <a class="eco__go" href="{% url 'templates_marketplace' %}">Browse templates <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 11h12.2l-4.6-4.6L13 5l7 7-7 7-1.4-1.4 4.6-4.6H4z"/></svg></a>
@@ -255,10 +388,15 @@
       var b0=400+txt.length*55;
       st.forEach(function(s,k){later(function(){bar.style.setProperty('--p',(k+1)*25+'%');s.classList.add('on')},b0+k*700)});
     } else {
-      var ts=[].slice.call(d.children), n=0;
-      ts.forEach(function(t){t.classList.remove('on')}); ts[0].classList.add('on');
-      if(reduce) return;
-      (function step(){later(function(){ts[n].classList.remove('on');n=(n+1)%ts.length;ts[n].classList.add('on');step()},1300)})();
+      // Template: onyesha tovuti halisi; inabadilika kila sekunde 6 hadi mtu achague mwenyewe
+      var sites=[].slice.call(d.querySelectorAll('.site')), btns=[].slice.call(d.querySelectorAll('.tpv__pick button')),
+          url=d.querySelector('[data-url]'), names=['dukalajuma','serengetitrails','mamantilie'];
+      var view=d.querySelector('.tpv__view');
+      var show=function(k){d._n=k;sites.forEach(function(x,j){x.classList.toggle('is-on',j===k);var inn=x.firstElementChild;inn.style.setProperty('--sd',Math.max(0,inn.scrollHeight-view.clientHeight)+'px')});btns.forEach(function(b,j){b.classList.toggle('on',j===k)});url.textContent=names[k]};
+      if(!d._bound){d._bound=1;btns.forEach(function(b,j){b.addEventListener('click',function(){d._manual=1;clear();show(j)})})}
+      show(d._n||0);
+      if(reduce||d._manual) return;
+      (function step(){later(function(){show((d._n+1)%sites.length);step()},6000)})();
     }
   }
 
