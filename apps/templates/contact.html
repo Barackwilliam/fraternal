@@ -5,31 +5,66 @@
 
 {% block head %}
 <style>
-/* ── Ramani hai ya Dar es Salaam ── */
-.dmap{position:relative;border-radius:26px;overflow:hidden;aspect-ratio:600/420;background:#EFEADF;box-shadow:0 0 0 1px var(--line),var(--sh-2)}
-.dmap svg{width:100%;height:100%}
-.dm-streets{fill:none;stroke:#DAD2C0;stroke-width:1.2}
-.dm-roads path{fill:none;stroke:#fff;stroke-width:7;stroke-linecap:round}
-.dm-roads2 path{fill:none;stroke:#F0BC5E;stroke-width:3.4;stroke-linecap:round}
-.dm-sea{fill:#A9D3EE}
-.dm-wave{fill:none;stroke:#fff;stroke-width:1.4;stroke-linecap:round;opacity:.7;stroke-dasharray:10 14;animation:wave 6s linear infinite}
-@keyframes wave{to{stroke-dashoffset:-48}}
-.dm-lbl{font:600 9.5px var(--mono);letter-spacing:.1em;fill:#5E5848}
-.dm-lbl--sea{fill:#2F6E96;font-style:italic;letter-spacing:.16em}
-.dm-car{fill:var(--navy-3)}
-.dm-car.g{fill:var(--gold)}
-.dm-ferry{fill:#fff;stroke:var(--navy);stroke-width:1.2}
-.dm-pin .r{fill:none;stroke:var(--sun);stroke-width:2;transform-box:fill-box;transform-origin:center;animation:ring 2.6s var(--ease) infinite}
+/* ── Ramani ya Dar es Salaam — mtindo wa programu za ramani ── */
+.dmap-w{position:relative}
+.dmap{position:relative;border-radius:26px;overflow:hidden;aspect-ratio:600/440;background:#F3F0EA;box-shadow:0 0 0 1px var(--line),0 40px 80px -40px rgba(11,23,48,.45)}
+.dmap>svg{position:absolute;inset:0;width:100%;height:100%}
+.dm-land{fill:url(#dmBlocks)}
+.dm-park{fill:#CFE7C4}
+.dm-sea{fill:#9ECDF0}
+.dm-shore{fill:none;stroke:#BBDDF5;stroke-width:6;stroke-linejoin:round}
+.dm-min path{fill:none;stroke:#fff;stroke-width:3;stroke-linecap:round}
+.dm-main .c{fill:none;stroke:#D9D3C7;stroke-width:9;stroke-linecap:round}
+.dm-main .f{fill:none;stroke:#fff;stroke-width:6.5;stroke-linecap:round}
+.dm-hw .c{fill:none;stroke:#E2A54A;stroke-width:11;stroke-linecap:round}
+.dm-hw .f{fill:none;stroke:#FAD27F;stroke-width:8;stroke-linecap:round}
+.dm-rl{font:600 7.5px 'Inter',sans-serif;fill:#6E6A60;letter-spacing:.04em;paint-order:stroke;stroke:#fff;stroke-width:2.5px}
+.dm-lbl{font:600 8.5px 'Inter',sans-serif;letter-spacing:.16em;fill:#8A8579;paint-order:stroke;stroke:#F3F0EA;stroke-width:3px}
+.dm-lbl--sea{font:italic 600 10px 'Inter',sans-serif;fill:#3C7EB0;stroke:none;letter-spacing:.2em}
+.dm-poi circle{fill:#fff;stroke-width:1.6}
+.dm-poi text{font:600 7.5px 'Inter',sans-serif;fill:#4B5563;paint-order:stroke;stroke:#fff;stroke-width:2.5px}
+.dm-route-c{fill:none;stroke:#1A56DB;stroke-width:7;stroke-linecap:round;stroke-linejoin:round;opacity:.25}
+.dm-route{fill:none;stroke:#2F6FEB;stroke-width:4.5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1;animation:dmRoute 2.4s var(--ease) 1s forwards}
+@keyframes dmRoute{to{stroke-dashoffset:0}}
+.dm-me .h{fill:rgba(47,111,235,.18);transform-box:fill-box;transform-origin:center;animation:dmHalo 2.4s ease-out infinite}
+@keyframes dmHalo{0%{transform:scale(.6);opacity:1}100%{transform:scale(1.8);opacity:0}}
+.dm-me .d{fill:#2F6FEB;stroke:#fff;stroke-width:3}
+.dm-car{fill:#fff;stroke:#2F6FEB;stroke-width:2.5;opacity:0;animation:fadeIn .4s 3.4s forwards}
+.dm-ferry{fill:#fff;stroke:#3C7EB0;stroke-width:1.2}
+.dm-pin{animation:drop 1s var(--ease) .5s both}
+@keyframes drop{from{transform:translate(360px,248px) translateY(-40px);opacity:0}}
+.dm-pin .r{fill:none;stroke:#EA4335;stroke-width:2;transform-box:fill-box;transform-origin:center;animation:ring 2.6s var(--ease) infinite}
 .dm-pin .r2{animation-delay:1.3s}
-.dm-pin{animation:drop 1s var(--ease) .6s both}
-@keyframes drop{from{transform:translateY(-40px);opacity:0}}
-.dm-card{left:4%;bottom:5%;padding:12px 14px;min-width:200px;animation-delay:1.1s,2s}
-.dm-card b{display:block;font:700 14px 'Sora';letter-spacing:-.02em}
-.dm-card small{display:flex;align-items:center;gap:6px;margin-top:3px;font:500 11.5px var(--mono);color:var(--muted)}
-.dm-card small i{width:7px;height:7px;border-radius:50%;background:var(--green);animation:ping 2s infinite}
-.dm-clock{right:4%;top:5%;padding:10px 14px;text-align:right;animation-delay:1.4s,2.6s}
-.dm-clock b{display:block;font:800 24px/1 'Sora';letter-spacing:-.03em;font-variant-numeric:tabular-nums}
-.dm-clock small{font:500 10.5px var(--mono);color:var(--muted)}
+.dm-tag{font:700 9px 'Inter',sans-serif;fill:#0B1730}
+/* Chrome ya programu ya ramani */
+.dm-search{position:absolute;left:4%;top:4.5%;right:24%;display:flex;align-items:center;gap:8px;padding:9px 13px;border-radius:999px;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.12),0 8px 24px -10px rgba(11,23,48,.3);font:500 12.5px 'Inter',sans-serif;color:var(--ink-2);white-space:nowrap;overflow:hidden}
+.dm-search svg{width:15px;height:15px;flex:none;color:#EA4335}
+.dm-search b{color:var(--ink);font-weight:600}
+.dm-ctl{position:absolute;right:3.5%;top:4.5%;display:grid;gap:8px}
+.dm-ctl span{display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.12);color:#4B5563;font:500 18px/1 'Inter'}
+.dm-ctl .zm{display:grid;border-radius:10px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,.12)}
+.dm-ctl .zm span{border-radius:0;box-shadow:none}.dm-ctl .zm span+span{border-top:1px solid #E5E7EB}
+.dm-ctl svg{width:16px;height:16px}
+.dm-eta{position:absolute;left:50%;top:17%;translate:-50% 0;display:flex;align-items:center;gap:7px;padding:6px 11px;border-radius:999px;background:#2F6FEB;color:#fff;font:600 11.5px 'Inter',sans-serif;box-shadow:0 8px 20px -8px rgba(47,111,235,.8);opacity:0;animation:fadeIn .5s 3.2s forwards;white-space:nowrap}
+.dm-eta svg{width:14px;height:14px}
+.dm-scale{position:absolute;right:3.5%;bottom:3.5%;display:flex;align-items:flex-end;gap:5px;font:600 9.5px 'Inter';color:#4B5563}
+.dm-scale i{width:46px;height:5px;border:1.5px solid #4B5563;border-top:0}
+.dm-attr{position:absolute;left:3.5%;bottom:3%;font:600 9px 'Inter';color:#9A958A;letter-spacing:.04em}
+/* Kadi ya mahali */
+.dm-place{position:relative;z-index:3;display:grid;gap:10px;width:min(360px,calc(100% - 28px));margin:-58px 0 0 14px;padding:14px;border-radius:18px;background:#fff;box-shadow:0 0 0 1px var(--line),0 24px 50px -24px rgba(11,23,48,.5)}
+.dm-place__hd{display:flex;align-items:center;gap:11px}
+.dm-place__hd img{width:42px;height:auto;padding:4px;border-radius:12px;background:#fff;box-shadow:0 0 0 1px var(--line)}
+.dm-place__hd b{display:block;font:700 15px 'Sora';letter-spacing:-.02em}
+.dm-place__hd small{display:block;font-size:12px;color:var(--muted)}
+.dm-place__st{display:flex;flex-wrap:wrap;gap:4px 12px;font:500 12px 'Inter';color:var(--muted)}
+.dm-place__st .ok{color:var(--green);font-weight:600}
+.dm-place__st b{color:var(--ink);font-variant-numeric:tabular-nums}
+.dm-place__acts{display:flex;gap:7px}
+.dm-place__acts a{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 6px;border-radius:999px;font:600 12.5px 'Inter';box-shadow:inset 0 0 0 1px var(--line);color:#1A56DB}
+.dm-place__acts a:first-child{background:#1A56DB;color:#fff;box-shadow:none}
+.dm-place__acts svg{width:15px;height:15px}
+@media (max-width:520px){.dm-search{right:4%;font-size:11.5px}.dm-ctl{display:none}.dm-eta{top:16%}}
+@media (prefers-reduced-motion:reduce){.dm-route{animation:none;stroke-dashoffset:0}.dm-car,.dm-eta{animation:none;opacity:1}}
 
 /* ── Njia za mawasiliano + fomu ── */
 .ct{display:grid;gap:28px}
@@ -87,37 +122,77 @@ a.way:hover .way__go{transform:translateX(4px);color:var(--ink)}
         <a class="btn btn--line" href="#write">Write a message</a>
       </div>
     </div>
-    <div class="up" style="--d:.3s;position:relative">
+    <div class="up dmap-w" style="--d:.3s">
       <div class="dmap" aria-hidden="true">
-        <svg viewBox="0 0 600 420" preserveAspectRatio="xMidYMid slice">
-          <path class="dm-streets" d="M60 0V420M120 0V420M180 0V420M240 0V420M300 0V420M360 0V330M0 60H460M0 150H440M0 250H420M0 330H380"/>
-          <g class="dm-roads"><path id="r0" d="M380 318C330 280 270 250 200 226C140 206 80 196 0 196"/><path id="r1" d="M386 300C380 240 400 180 430 120C446 90 452 50 452 0"/><path id="r2" d="M380 318C340 340 280 360 210 380C160 394 90 404 0 410"/><path id="r3" d="M200 226C210 160 230 90 250 0"/><path id="r4" d="M0 110C100 120 200 140 300 170C350 186 400 190 446 200"/></g>
-          <g class="dm-roads2"><use href="#r0"/><use href="#r1"/><use href="#r2"/></g>
-          <path class="dm-sea" d="M600 0H452C446 30 452 58 470 76C492 98 520 104 528 128C536 152 512 170 488 176C466 182 452 200 446 222C440 246 450 262 436 280C424 296 398 300 392 316C386 332 404 344 430 350C468 360 520 352 556 370C578 380 590 400 600 420Z"/>
-          <path class="dm-wave" d="M500 40C530 46 560 40 600 48M520 220C550 226 575 220 600 228M470 390C510 396 550 388 600 398M540 300C560 306 580 300 600 306"/>
-          <path id="ferry" d="M392 318C408 330 420 340 440 348" fill="none"/>
-          <text class="dm-lbl" x="250" y="292">KARIAKOO</text>
-          <text class="dm-lbl" x="268" y="226">UPANGA</text>
-          <text class="dm-lbl" x="300" y="336">CITY CENTRE</text>
-          <text class="dm-lbl" x="398" y="104">MASAKI</text>
-          <text class="dm-lbl" x="300" y="120">MIKOCHENI</text>
-          <text class="dm-lbl" x="140" y="180">KINONDONI</text>
-          <text class="dm-lbl" x="470" y="404">KIGAMBONI</text>
-          <text class="dm-lbl dm-lbl--sea" x="508" y="290">INDIAN OCEAN</text>
-          <circle class="dm-car" r="3.5"><animateMotion dur="14s" repeatCount="indefinite"><mpath href="#r0"/></animateMotion></circle>
-          <circle class="dm-car g" r="3.5"><animateMotion dur="11s" begin="-4s" repeatCount="indefinite"><mpath href="#r1"/></animateMotion></circle>
-          <circle class="dm-car" r="3.5"><animateMotion dur="16s" begin="-7s" repeatCount="indefinite" keyPoints="1;0" keyTimes="0;1" calcMode="linear"><mpath href="#r2"/></animateMotion></circle>
-          <circle class="dm-car g" r="3"><animateMotion dur="12s" begin="-2s" repeatCount="indefinite" keyPoints="1;0" keyTimes="0;1" calcMode="linear"><mpath href="#r3"/></animateMotion></circle>
-          <circle class="dm-car" r="3"><animateMotion dur="18s" begin="-9s" repeatCount="indefinite"><mpath href="#r4"/></animateMotion></circle>
-          <rect class="dm-ferry" x="-7" y="-4" width="14" height="8" rx="3"><animateMotion dur="9s" repeatCount="indefinite" keyPoints="0;1;1;0;0" keyTimes="0;.4;.5;.9;1" calcMode="linear" rotate="auto"><mpath href="#ferry"/></animateMotion></rect>
-          <g class="dm-pin" transform="translate(352 262)">
-            <circle class="r" r="14"/><circle class="r r2" r="14"/>
-            <path d="M0 0C-12-14-14-20-14-26a14 14 0 0 1 28 0C14-20 12-14 0 0Z" fill="#FF7A3D"/><circle cy="-26" r="5.5" fill="#fff"/>
+        <svg viewBox="0 0 600 440" preserveAspectRatio="xMidYMid slice">
+          <defs>
+            <pattern id="dmBlocks" width="26" height="20" patternUnits="userSpaceOnUse" patternTransform="rotate(-8)"><rect width="26" height="20" fill="#F3F0EA"/><rect x="2" y="2" width="22" height="16" rx="2.5" fill="#EAE6DD"/></pattern>
+          </defs>
+          <rect class="dm-land" width="600" height="440"/>
+          <!-- Bustani -->
+          <path class="dm-park" d="M300 236c14-6 32-4 40 6s4 24-10 28-34 0-38-12 0-18 8-22z"/>
+          <path class="dm-park" d="M150 92c20-10 52-6 60 10s-6 30-30 32-44-6-46-20 6-18 16-22z"/>
+          <path class="dm-park" d="M40 330c18-8 44-4 50 10s-8 26-28 26-34-8-34-20 2-12 12-16z"/>
+          <!-- Bahari, ghuba ya Msasani na bandari -->
+          <path class="dm-shore" d="M600 0H500C488 26 480 52 486 80C492 108 514 122 512 150C510 176 484 188 468 206C452 224 456 250 444 268C432 286 408 294 400 310C394 324 404 336 424 340C448 344 472 336 488 350C502 362 496 382 512 396C528 410 562 416 600 418Z"/>
+          <path class="dm-sea" d="M600 0H500C488 26 480 52 486 80C492 108 514 122 512 150C510 176 484 188 468 206C452 224 456 250 444 268C432 286 408 294 400 310C394 324 404 336 424 340C448 344 472 336 488 350C502 362 496 382 512 396C528 410 562 416 600 418Z"/>
+          <path class="dm-sea" d="M372 440C380 410 398 388 424 378C452 368 486 376 512 396C528 410 562 416 600 418V440Z"/>
+          <path class="dm-land" d="M600 440H528C534 426 552 420 576 422C588 423 596 426 600 428Z"/>
+          <path class="dm-land" d="M540 0H600V96C586 100 572 92 562 78C552 62 546 40 540 0Z"/>
+          <!-- Barabara ndogo -->
+          <g class="dm-min"><path d="M0 40C80 46 170 60 250 74"/><path d="M60 0C70 90 76 180 74 300"/><path d="M190 0C196 70 206 140 214 200"/><path d="M340 0C346 60 360 120 378 170"/><path d="M0 340C70 330 150 322 230 318"/><path d="M230 318C246 360 256 400 262 440"/><path d="M120 190C170 200 220 214 262 226"/><path d="M330 150C350 190 360 230 362 260"/><path d="M262 226C290 236 320 244 352 250"/></g>
+          <!-- Barabara kuu -->
+          <g class="dm-main"><path class="c" id="dmK" d="M0 150C100 156 200 170 300 190C350 200 400 210 446 216"/><path class="f" d="M0 150C100 156 200 170 300 190C350 200 400 210 446 216"/><path class="c" d="M300 286C300 230 290 160 270 100C262 70 256 30 254 0"/><path class="f" d="M300 286C300 230 290 160 270 100C262 70 256 30 254 0"/><path class="c" d="M0 72C80 82 160 98 244 112"/><path class="f" d="M0 72C80 82 160 98 244 112"/><path class="c" d="M388 312C384 350 376 392 370 440"/><path class="f" d="M388 312C384 350 376 392 370 440"/></g>
+          <!-- Barabara za haraka -->
+          <g class="dm-hw"><path class="c" id="dmM" d="M0 252C90 250 170 262 250 280C300 291 345 300 388 312"/><path class="f" d="M0 252C90 250 170 262 250 280C300 291 345 300 388 312"/><path class="c" id="dmN" d="M388 312C330 326 270 350 200 376C150 394 80 408 0 414"/><path class="f" d="M388 312C330 326 270 350 200 376C150 394 80 408 0 414"/><path class="c" id="dmB" d="M388 312C398 266 410 226 426 186C440 152 452 110 460 70C464 42 466 20 466 0"/><path class="f" d="M388 312C398 266 410 226 426 186C440 152 452 110 460 70C464 42 466 20 466 0"/></g>
+          <text class="dm-rl" dy="-7"><textPath href="#dmM" startOffset="12%">Morogoro Rd</textPath></text>
+          <text class="dm-rl" dy="-7"><textPath href="#dmN" startOffset="48%">Nyerere Rd</textPath></text>
+          <text class="dm-rl" dy="-7"><textPath href="#dmB" startOffset="38%">Ali Hassan Mwinyi Rd</textPath></text>
+          <text class="dm-rl" dy="-6"><textPath href="#dmK" startOffset="20%">Kawawa Rd</textPath></text>
+          <!-- Majina ya maeneo -->
+          <text class="dm-lbl" x="96" y="212">MAGOMENI</text>
+          <text class="dm-lbl" x="150" y="138">KINONDONI</text>
+          <text class="dm-lbl" x="310" y="96">MIKOCHENI</text>
+          <text class="dm-lbl" x="392" y="140">MASAKI</text>
+          <text class="dm-lbl" x="262" y="246">UPANGA</text>
+          <text class="dm-lbl" x="178" y="322">KARIAKOO</text>
+          <text class="dm-lbl" x="250" y="410">TEMEKE</text>
+          <text class="dm-lbl" x="530" y="436">KIGAMBONI</text>
+          <text class="dm-lbl dm-lbl--sea" x="520" y="236" transform="rotate(-72 520 236)">INDIAN OCEAN</text>
+          <text class="dm-lbl dm-lbl--sea" x="508" y="40" style="font-size:8.5px">Msasani Bay</text>
+          <!-- Maeneo maarufu -->
+          <g class="dm-poi"><circle cx="246" cy="300" r="5" stroke="#EA580C"/><text x="254" y="303">Kariakoo Market</text></g>
+          <g class="dm-poi"><circle cx="420" cy="350" r="5" stroke="#0EA5E9"/><text x="404" y="366" text-anchor="end">Kivukoni Ferry</text></g>
+          <g class="dm-poi"><circle cx="100" cy="166" r="5" stroke="#9333EA"/><text x="108" y="169">Mlimani City</text></g>
+          <!-- Kivuko -->
+          <path id="dmFerry" d="M420 352C440 372 466 384 492 388" fill="none"/>
+          <rect class="dm-ferry" x="-7" y="-4" width="14" height="8" rx="3"><animateMotion dur="10s" repeatCount="indefinite" keyPoints="0;1;1;0;0" keyTimes="0;.4;.5;.9;1" calcMode="linear" rotate="auto"><mpath href="#dmFerry"/></animateMotion></rect>
+          <!-- Njia: wewe → JamiiTek -->
+          <path id="dmRoute" class="dm-route-c" d="M96 253C150 254 200 266 250 280C290 290 316 290 336 280C350 272 356 262 360 252"/>
+          <path class="dm-route" pathLength="1" d="M96 253C150 254 200 266 250 280C290 290 316 290 336 280C350 272 356 262 360 252"/>
+          <circle class="dm-car" r="5"><animateMotion dur="7s" begin="3.4s" repeatCount="indefinite" keyPoints="0;1;1" keyTimes="0;.85;1" calcMode="linear"><mpath href="#dmRoute"/></animateMotion></circle>
+          <g class="dm-me" transform="translate(96 253)"><circle class="h" r="18"/><circle class="d" r="7"/></g>
+          <g class="dm-pin" transform="translate(360 248)">
+            <circle class="r" r="12"/><circle class="r r2" r="12"/>
+            <path d="M0 0C-4-6-15-16-15-28a15 15 0 0 1 30 0C15-16 4-6 0 0Z" fill="#EA4335"/><circle cy="-28" r="6" fill="#fff"/>
+            <rect x="20" y="-46" width="74" height="20" rx="10" fill="#fff" filter="drop-shadow(0 2px 3px rgba(0,0,0,.2))"/><text class="dm-tag" x="57" y="-33" text-anchor="middle">JamiiTek</text>
           </g>
         </svg>
+        <div class="dm-search"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg><span><b>JamiiTek</b> · Dar es Salaam, Tanzania</span></div>
+        <div class="dm-ctl"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l4 10-4 10-4-10z" fill="#EA4335" stroke="none"/><path d="M12 12l4 10H8z" fill="#9CA3AF" stroke="none"/></svg></span><div class="zm"><span>+</span><span>−</span></div></div>
+        <div class="dm-eta"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 11l1.5-4.5A2 2 0 0 1 8.4 5h7.2a2 2 0 0 1 1.9 1.5L19 11v7h-2v-2H7v2H5zm2.2-1h9.6l-1-3H8.2zM7.5 14a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm9 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/></svg>Fastest route · via Morogoro Rd</div>
+        <div class="dm-scale"><i></i>500 m</div>
+        <div class="dm-attr">Map · Dar es Salaam</div>
       </div>
-      <div class="float dm-card"><b>JamiiTek · Dar es Salaam</b><small><i></i>We usually reply the same day</small></div>
-      <div class="float dm-clock"><b id="darClock">--:--</b><small>DAR ES SALAAM · EAT</small></div>
+      <div class="dm-place">
+        <div class="dm-place__hd"><img src="{% static 'images/logo.png' %}" alt="" width="40" height="35"><span><b>JamiiTek</b><small>Web, AI &amp; IT studio · Dar es Salaam</small></span></div>
+        <div class="dm-place__st"><span class="ok">● We reply the same day</span><span>Dar now <b id="darClock">--:--</b> EAT</span></div>
+        <div class="dm-place__acts">
+          <a href="https://wa.me/{% contact 'wa' %}?text=Habari%20JamiiTek%2C%20naomba%20maelekezo%20ya%20kufika%20ofisini%20kwenu." target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.7 2.3 2.6 9.6c-1 .4-1 1.8 0 2.1l4.8 1.5 1.8 5.7c.3.9 1.4 1.2 2.1.5l2.6-2.5 4.9 3.6c.8.6 1.9.1 2.1-.9l3.3-15.6c.2-1.2-.9-2.1-2.5-1.7z"/></svg>Directions</a>
+          <a href="https://wa.me/{% contact 'wa' %}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2z"/></svg>WhatsApp</a>
+          <a href="tel:{% contact 'phone' %}"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.6 10.8a15 15 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.2 11.4 11.4 0 0 0 3.6.6 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.2.2 2.5.6 3.6a1 1 0 0 1-.2 1z"/></svg>Call</a>
+        </div>
+      </div>
     </div>
   </div>
 </section>
