@@ -6,8 +6,8 @@
 <style>
 /* ── Mfumo wa huduma: kiini cha JamiiTek, huduma zinazunguka ── */
 .sys{position:relative;width:min(100%,500px);aspect-ratio:1;margin-inline:auto}
-.sys__ring{position:absolute;inset:var(--s);border-radius:50%;border:1px dashed rgba(11,23,48,.14)}
-.sys__ring--2{border-style:solid;border-color:rgba(245,166,35,.25);animation:spin 50s linear infinite reverse}
+.sys__ring{position:absolute;inset:var(--s);border-radius:50%;border:1.5px dashed rgba(27,76,140,.42)}
+.sys__ring--2{border-style:solid;border-color:rgba(245,166,35,.55);animation:spin 50s linear infinite reverse}
 .sys__ring--2::after{content:"";position:absolute;top:-4px;left:50%;width:8px;height:8px;margin-left:-4px;border-radius:50%;background:var(--gold);box-shadow:0 0 14px var(--gold)}
 .sys__orbit{position:absolute;inset:6%;animation:spin 60s linear infinite}
 .sys__item{position:absolute;left:50%;top:50%;width:0;height:0;transform:rotate(var(--a)) translateY(calc(min(500px,100vw - 36px) * -.41))}
@@ -16,7 +16,7 @@
 .sys__item span svg{width:26px;height:26px}
 @keyframes counter{from{rotate:0deg}to{rotate:-360deg}}
 .sys__core{position:absolute;inset:34%;display:grid;place-items:center;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,#FFF4DF);box-shadow:0 0 0 1px var(--line),0 30px 60px -20px rgba(245,166,35,.55)}
-.sys__core::before,.sys__core::after{content:"";position:absolute;inset:0;border-radius:50%;border:2px solid rgba(245,166,35,.5);animation:ring 3s var(--ease) infinite}
+.sys__core::before,.sys__core::after{content:"";position:absolute;inset:0;border-radius:50%;border:2px solid rgba(245,166,35,.75);animation:ring 3s var(--ease) infinite}
 .sys__core::after{animation-delay:1.5s}
 .sys__core img{width:58%;height:auto}
 .jump{display:flex;flex-wrap:wrap;gap:8px;margin-top:28px}
@@ -28,7 +28,7 @@
 .svrow{display:grid;gap:32px;align-items:center;padding:clamp(40px,6vw,80px) 0;border-top:1px solid var(--line)}
 @media (min-width:980px){.svrow{grid-template-columns:1.05fr 1fr;gap:72px}.svrow:nth-child(even) .svrow__art{order:2}}
 .svrow__art{position:relative;border-radius:26px;min-height:340px;display:grid;overflow:hidden;
-  background-image:radial-gradient(70% 60% at 50% 45%,color-mix(in srgb,var(--k) 20%,transparent),transparent),linear-gradient(rgba(11,23,48,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(11,23,48,.045) 1px,transparent 1px);
+  background-image:radial-gradient(70% 60% at 50% 45%,color-mix(in srgb,var(--k) 36%,transparent),transparent),linear-gradient(rgba(11,23,48,.075) 1px,transparent 1px),linear-gradient(90deg,rgba(11,23,48,.075) 1px,transparent 1px);
   background-size:auto,24px 24px,24px 24px;background-color:var(--paper-2);box-shadow:0 0 0 1px var(--line)}
 .art-stage{display:grid;place-items:center;padding:30px 18px}
 .svrow__n{display:inline-flex;align-items:center;gap:10px;font:600 12px var(--mono);letter-spacing:.14em;color:var(--k2)}
