@@ -1,9 +1,11 @@
 {% comment %}
-  Mchoro hai wa huduma moja, kulingana na ikoni iliyochaguliwa kwenye admin
-  (Service.icon). Kila mmoja ni HTML/CSS — hakuna picha ya kupakua.
+  Mchoro hai wa huduma moja. Aina inatoka Service.art — maneno ya jina la
+  huduma (Graphic, Network, CCTV, Hosting…), kisha ikoni ya admin.
+  Kila mmoja ni HTML/CSS/SVG — hakuna picha ya kupakua.
   Kigezo: svc
 {% endcomment %}
-{% if svc.icon == 'bot' %}
+{% with a=svc.art %}
+{% if a == 'bot' %}
 <div class="art-stage"><div class="phone">
   <div class="phone__scr">
     <div class="phone__bar"><i><svg viewBox="0 0 24 24" fill="currentColor"><path d="{{ svc.icon_path }}"/></svg></i><span><b>Serengeti Lodge</b><small>JamiiBot · online</small></span></div>
@@ -16,7 +18,7 @@
     </div>
   </div>
 </div></div>
-{% elif svc.icon == 'server' %}
+{% elif a == 'server' %}
 <div class="art-stage"><div style="width:min(320px,86%)">
   <div class="rack">
     <div class="ru"><i class="led"></i><i class="led" style="--d:.4s;--t:.9s"></i><span class="vent"></span><span class="lbl">WEB-01</span></div>
@@ -27,8 +29,9 @@
     <div class="uptime__hd"><span>UPTIME · 30 DAYS</span><b>● OPERATIONAL</b></div>
     <div class="bars">{% for _ in "123456789012345678901234567890" %}<i style="--i:{{ forloop.counter }}"></i>{% endfor %}</div>
   </div>
+  <div class="hs-toast"><i>✓</i><span><b>Ticket #204 resolved</b><small>SSL renewed · backup verified · 9 min</small></span></div>
 </div></div>
-{% elif svc.icon == 'globe' %}
+{% elif a == 'globe' %}
 <div class="art-stage"><div class="dsearch">
   <div class="dsearch__bar"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17 9h-1V7a4 4 0 0 0-8 0v2H7a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2zm-7-2a2 2 0 0 1 4 0v2h-4z"/></svg><span class="mono"><b data-type="biashara|mamaneema|kilimofresh|safarijumbo"></b><i class="caret"></i></span></div>
   <div class="dsearch__res" data-seq="dom" data-step="550" data-hold="3000">
@@ -38,7 +41,7 @@
     <p><b>.org</b><span class="ok">Available</span><em>Tsh 30,000</em></p>
   </div>
 </div></div>
-{% elif svc.icon == 'mobile' %}
+{% elif a == 'mobile' %}
 <div class="art-stage"><div class="phone phone--app">
   <div class="phone__scr app">
     <div class="app__hd"><small>Habari, Juma 👋</small><b>Tsh 1,240,500</b><span>Mauzo ya leo · +18%</span></div>
@@ -50,7 +53,7 @@
     </div>
   </div>
 </div></div>
-{% elif svc.icon == 'design' %}
+{% elif a == 'design' %}
 <div class="art-stage"><div class="canvas">
   <div class="canvas__sw" data-seq="sw" data-step="420" data-hold="3600">
     <i style="--k:#0A2245"></i><i style="--k:#1B4C8C"></i><i style="--k:#F5A623"></i><i style="--k:#FF7A3D"></i><i style="--k:#25D366"></i>
@@ -58,7 +61,7 @@
   <svg class="canvas__pen draw" viewBox="0 0 300 150"><path d="M10 120C60 10 120 10 150 75S250 140 290 30" pathLength="1"/><circle cx="10" cy="120" r="4"/><circle cx="150" cy="75" r="4"/><circle cx="290" cy="30" r="4"/></svg>
   <div class="canvas__type"><b>Aa</b><span>Sora · Inter</span></div>
 </div></div>
-{% elif svc.icon == 'builder' or svc.icon == 'layout' %}
+{% elif a == 'builder' or a == 'layout' %}
 <div class="art-stage"><div style="width:min(330px,88%);position:relative">
   <div class="win" data-seq="build" data-step="650" data-hold="3200" data-tag="tag{{ svc.pk }}">
     <div class="win__bar"><i></i><i></i><i></i><span class="win__url"><b>yourname</b>.jamiitek.com</span></div>
@@ -71,15 +74,100 @@
   </div>
   <span class="tag-live" id="tag{{ svc.pk }}" style="position:absolute;right:-6px;bottom:-14px">● Published</span>
 </div></div>
+{% elif a == 'graphic' %}
+<div class="art-stage"><div class="gd">
+  <div class="gd__tools"><i class="on"><svg viewBox="0 0 24 24"><path d="M3 21l3.5-1 11-11-2.5-2.5-11 11zM14 5.5 16.5 3 21 7.5 18.5 10"/></svg></i><i><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/></svg></i><i><svg viewBox="0 0 24 24"><path d="M5 6V4h14v2M12 4v16M9 20h6"/></svg></i><i><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 4v16"/></svg></i></div>
+  <div class="gd__board">
+    <span class="gd__lbl">Artboard · Brand kit</span>
+    <svg class="gd__logo" viewBox="0 0 120 120"><circle class="gd__ring" cx="60" cy="60" r="44" pathLength="1"/><path class="gd__leaf" d="M60 90C38 76 34 48 60 28c26 20 22 48 0 62z" pathLength="1"/><path class="gd__vein" d="M60 34v52M60 58l-12-10M60 70l12-10" pathLength="1"/><circle class="gd__pt" cx="60" cy="28" r="3.5"/><circle class="gd__pt" cx="60" cy="90" r="3.5"/></svg>
+    <b class="gd__name">KILIMO<em>FRESH</em></b>
+    <div class="gd__pal"><i style="--c:#14532D"></i><i style="--c:#22C55E"></i><i style="--c:#F5A623"></i><i style="--c:#FEF3C7"></i><i style="--c:#0B1730"></i></div>
+  </div>
+  <div class="gd__card"><b>KILIMO<em>FRESH</em></b><span>Neema Mushi · CEO</span><small>+255 712 000 000</small></div>
+  <div class="gd__post"><small>@kilimofresh</small><b>Mavuno<br>mapya!</b><span>-20% wiki hii</span></div>
+  <svg class="gd__cursor" viewBox="0 0 24 24"><path d="M4 2l16 9-7 2-3 7z" fill="#fff" stroke="#0B1730" stroke-width="1.5" stroke-linejoin="round"/></svg>
+</div></div>
+{% elif a == 'network' %}
+<div class="art-stage"><div class="nw">
+  <svg class="nw__map" viewBox="0 0 360 262">
+    <defs><radialGradient id="nwG{{ svc.pk }}"><stop offset="0" stop-color="#22B8E0" stop-opacity=".35"/><stop offset="1" stop-color="#22B8E0" stop-opacity="0"/></radialGradient></defs>
+    <circle cx="180" cy="122" r="70" fill="url(#nwG{{ svc.pk }})"/>
+    <circle class="nw__wave" cx="180" cy="122" r="30"/><circle class="nw__wave" cx="180" cy="122" r="30" style="animation-delay:1s"/><circle class="nw__wave" cx="180" cy="122" r="30" style="animation-delay:2s"/>
+    <g class="nw__links">
+      <path id="nl1{{ svc.pk }}" d="M180 122L52 48"/><path id="nl2{{ svc.pk }}" d="M180 122L308 48"/><path id="nl3{{ svc.pk }}" d="M180 122L40 168"/>
+      <path id="nl4{{ svc.pk }}" d="M180 122L320 168"/><path id="nl5{{ svc.pk }}" d="M180 122L110 220"/><path id="nl6{{ svc.pk }}" d="M180 122L250 220"/>
+    </g>
+    <g class="nw__pk">{% for n in "123456" %}<circle r="3.2"><animateMotion dur="{% cycle '1.8s' '2.2s' '1.6s' '2.4s' '2s' '1.7s' %}" begin="{% cycle '0s' '.4s' '.8s' '.2s' '.6s' '1s' %}" repeatCount="indefinite" keyPoints="{% cycle '0;1' '1;0' '0;1' '1;0' '0;1' '1;0' %}" keyTimes="0;1" calcMode="linear"><mpath href="#nl{{ n }}{{ svc.pk }}"/></animateMotion></circle>{% endfor %}</g>
+    <g class="nw__dev">
+      <g transform="translate(52 48)"><circle r="22"/><path d="M-10-7h20v12h-20zM-4 9h8M0 5v4"/><text y="36">Office PC</text></g>
+      <g transform="translate(308 48)"><circle r="22"/><path d="M-11-6h22v11h-22zM-14 8h28"/><text y="36">Laptop</text></g>
+      <g transform="translate(40 168)"><circle r="22"/><path d="M-9-2h18v9h-18zM-6-2v-6h12v6M-5 7v4h10v-4"/><text y="36">Printer</text></g>
+      <g transform="translate(320 168)"><circle r="22"/><path d="M-11-5l15-4 3 7-15 4zM5-2l5 2-2 4M-6 3l2 6"/><text y="36">CCTV</text></g>
+      <g transform="translate(110 220)"><circle r="20"/><path d="M-5-9h10v18h-10zM-1 6h2"/><text y="33">Phones</text></g>
+      <g transform="translate(250 220)"><circle r="20"/><path d="M-8-8h16v6h-16zM-8 2h16v6h-16z"/><text y="33">Server</text></g>
+    </g>
+    <g class="nw__core" transform="translate(180 122)"><rect x="-30" y="-15" width="60" height="30" rx="8"/><path class="nw__ant" d="M-18-15l-6-16M18-15l6-16"/><circle cx="-16" cy="0" r="2.6" class="nw__led"/><circle cx="-7" cy="0" r="2.6" class="nw__led" style="animation-delay:.3s"/><circle cx="2" cy="0" r="2.6" class="nw__led" style="animation-delay:.6s"/><circle cx="11" cy="0" r="2.6" class="nw__led" style="animation-delay:.9s"/><circle cx="20" cy="0" r="2.6" class="nw__led nw__led--y" style="animation-delay:.2s"/></g>
+  </svg>
+  <div class="nw__stat"><span><i></i><b>24</b> devices online</span><span><b>1 Gbps</b> LAN</span><span class="ok">🛡 Firewall active</span></div>
+</div></div>
+{% elif a == 'cctv' %}
+<div class="art-stage"><div class="cc">
+  <div class="cc__hd"><b>● LIVE</b><span>4 cameras · 1080p · Night vision</span></div>
+  <div class="cc__grid">
+    <div class="cc__cam cc__cam--gate"><svg viewBox="0 0 160 100" preserveAspectRatio="none"><rect width="160" height="100" fill="#1c2733"/><path d="M0 70h160v30H0z" fill="#25303c"/><g stroke="#3b4a5a" stroke-width="3"><path d="M30 30v40M50 30v40M70 30v40M90 30v40M110 30v40M130 30v40M24 32h112M24 50h112"/></g></svg><i>CAM 01 · Gate</i></div>
+    <div class="cc__cam"><svg viewBox="0 0 160 100" preserveAspectRatio="none"><rect width="160" height="100" fill="#202a24"/><path d="M0 60l160-20v60H0z" fill="#2b3530"/><g fill="#3a4740"><rect x="20" y="58" width="34" height="16" rx="4"/><rect x="74" y="54" width="34" height="16" rx="4"/></g><g stroke="#55635a" stroke-width="1.5" stroke-dasharray="5 5"><path d="M10 82h140"/></g></svg><i>CAM 02 · Parking</i></div>
+    <div class="cc__cam"><svg viewBox="0 0 160 100" preserveAspectRatio="none"><rect width="160" height="100" fill="#26232c"/><rect x="18" y="18" width="50" height="34" fill="#34303c"/><rect x="92" y="20" width="48" height="60" fill="#302c38"/><path d="M0 80h160v20H0z" fill="#1d1b22"/><rect x="30" y="60" width="40" height="8" fill="#3d3846"/></svg><i>CAM 03 · Office</i></div>
+    <div class="cc__cam"><svg viewBox="0 0 160 100" preserveAspectRatio="none"><rect width="160" height="100" fill="#2a2620"/><g fill="#3a342a"><rect x="10" y="20" width="40" height="60"/><rect x="60" y="20" width="40" height="60"/><rect x="110" y="20" width="40" height="60"/></g><g fill="#4a4234"><rect x="14" y="30" width="32" height="6"/><rect x="64" y="40" width="32" height="6"/><rect x="114" y="34" width="32" height="6"/></g></svg><i>CAM 04 · Shop</i></div>
+  </div>
+  <span class="cc__box"></span><span class="cc__person"></span>
+  <div class="cc__alert"><i>!</i><span><b>Motion detected · Gate</b><small>Alert sent to your phone · 02:14</small></span></div>
+</div></div>
+{% elif a == 'support' %}
+<div class="art-stage"><div class="sp">
+  <div class="sp__hd"><span class="sp__av">JT</span><span><b>JamiiTek Helpdesk</b><small>● 3 technicians online</small></span><em>SLA 15 min</em></div>
+  <div class="sp__t" style="--d:0s"><i>🖥</i><span><b>Office PC won't boot</b><small>Bakwata HQ · #311</small></span><em class="sp__st"><s>Open</s><s>In progress</s><s>Resolved ✓</s></em></div>
+  <div class="sp__t" style="--d:1.2s"><i>📧</i><span><b>Email setup for 12 staff</b><small>Kilimo Fresh · #312</small></span><em class="sp__st"><s>Open</s><s>In progress</s><s>Resolved ✓</s></em></div>
+  <div class="sp__t" style="--d:2.4s"><i>🎓</i><span><b>Excel training · 2 hrs</b><small>Mwanza branch · #313</small></span><em class="sp__st"><s>Open</s><s>In progress</s><s>Resolved ✓</s></em></div>
+  <div class="sp__ft"><span><b>12 min</b> avg response</span><span><b>98%</b> solved first time</span></div>
+</div></div>
+{% elif a == 'growth' %}
+<div class="art-stage"><div class="gr">
+  <div class="gr__serp">
+    <div class="gr__q"><svg viewBox="0 0 24 24"><circle cx="10" cy="10" r="6"/><path d="M15 15l5 5"/></svg>best safari company tanzania</div>
+    <div class="gr__res"><p class="gr__me"><small>serengetitrails.co.tz</small><b>Serengeti Trails — Safari Tours Tanzania</b><em>#1</em></p><p><small>competitor.com</small><b>Safari packages and more…</b></p><p><small>another-site.co.tz</small><b>Tours & travel in Arusha</b></p></div>
+  </div>
+  <div class="gr__chart">
+    <div class="gr__kpi"><span>Visitors · 90 days</span><b>+248%</b></div>
+    <svg viewBox="0 0 300 90" preserveAspectRatio="none"><defs><linearGradient id="grF{{ svc.pk }}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#22C55E" stop-opacity=".35"/><stop offset="1" stop-color="#22C55E" stop-opacity="0"/></linearGradient></defs><path class="gr__area" d="M0 82L30 78L60 80L90 70L120 66L150 58L180 50L210 38L240 30L270 18L300 8V90H0z" fill="url(#grF{{ svc.pk }})"/><path class="gr__line" d="M0 82L30 78L60 80L90 70L120 66L150 58L180 50L210 38L240 30L270 18L300 8" pathLength="1"/></svg>
+    <div class="gr__chips"><span>📍 Google Maps</span><span>📸 Instagram</span><span>🎯 Ads</span></div>
+  </div>
+</div></div>
+{% elif a == 'dashboard' %}
+<div class="art-stage"><div class="db">
+  <div class="db__side"><b>◆</b><i class="on"></i><i></i><i></i><i></i></div>
+  <div class="db__main">
+    <div class="db__top"><b>Dashboard</b><span>Leo · {% now "j M" %}</span></div>
+    <div class="db__kpis"><p><small>Mauzo</small><b>Tsh 4.2M</b><em>+18%</em></p><p><small>Oda</small><b>318</b><em>+9%</em></p><p><small>Wateja</small><b>1,204</b><em>+24</em></p></div>
+    <div class="db__chart"><i style="--h:38%;--i:0"></i><i style="--h:52%;--i:1"></i><i style="--h:45%;--i:2"></i><i style="--h:64%;--i:3"></i><i style="--h:58%;--i:4"></i><i style="--h:72%;--i:5"></i><i style="--h:66%;--i:6"></i><i style="--h:84%;--i:7"></i><i style="--h:78%;--i:8"></i><i style="--h:92%;--i:9"></i></div>
+    <div class="db__rows"><p style="--i:0"><i style="--c:#25D366">M</i><span>M-Pesa · Neema</span><b>+35,000</b></p><p style="--i:1"><i style="--c:#F5A623">P</i><span>POS · Duka #2</span><b>+128,500</b></p><p style="--i:2"><i style="--c:#3B82F6">B</i><span>Bank · CRDB</span><b>+410,000</b></p></div>
+  </div>
+</div></div>
 {% else %}
-<div class="art-stage"><div class="term code" data-seq="code" data-step="520" data-hold="3600">
-  <div class="bar" data-static><i></i><i></i><i></i></div>
-  <p><span class="k">&lt;section</span> <span class="c">class</span>=<span class="s">"hero"</span><span class="k">&gt;</span></p>
-  <p>&nbsp;&nbsp;<span class="k">&lt;h1&gt;</span>Karibu Duka la Juma<span class="k">&lt;/h1&gt;</span></p>
-  <p>&nbsp;&nbsp;<span class="k">&lt;a</span> <span class="c">href</span>=<span class="s">"/shop"</span><span class="k">&gt;</span>Nunua sasa<span class="k">&lt;/a&gt;</span></p>
-  <p><span class="k">&lt;/section&gt;</span></p>
-  <p>&nbsp;</p>
-  <p><span class="c">$</span> jamiitek deploy</p>
-  <p class="cur"><span class="ok">✓ live · 0.8s · mobile-ready</span></p>
+<div class="art-stage"><div class="wd">
+  <div class="wd__lap">
+    <div class="wd__scr">
+      <div class="wd__bar"><i></i><i></i><i></i><span>🔒 <b>dukalajuma</b>.co.tz</span></div>
+      <div class="wd__site">
+        <div class="wd__nav"><b>Duka la Juma</b><span><i></i><i></i><i></i></span><em>Cart 2</em></div>
+        <div class="wd__hero"><div><small>MPYA 2026</small><b>Mitindo mipya ya msimu</b><em>Nunua sasa →</em></div><span class="wd__prod"></span></div>
+        <div class="wd__row"><span style="--c:#DBEAFE"></span><span style="--c:#FDE7C8"></span><span style="--c:#DCFCE7"></span><span style="--c:#FCE7F3"></span></div>
+      </div>
+    </div>
+    <div class="wd__base"></div>
+  </div>
+  <div class="wd__phone"><div class="wd__pscr"><div class="wd__pnav">☰ <b>Duka la Juma</b></div><div class="wd__phero"><small>MPYA 2026</small><b>Mitindo mipya</b><em>Nunua</em></div><div class="wd__prow"><span style="--c:#DBEAFE"></span><span style="--c:#FDE7C8"></span></div></div></div>
+  <div class="wd__score"><svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="18"/><circle class="wd__arc" cx="22" cy="22" r="18" pathLength="100"/></svg><b>98</b><span>PageSpeed</span></div>
+  <div class="wd__ssl">🔒 SSL · Mobile-ready · SEO</div>
 </div></div>
 {% endif %}
+{% endwith %}
