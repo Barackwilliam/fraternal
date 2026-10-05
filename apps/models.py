@@ -1,5 +1,7 @@
 # app/models.py
 
+import re
+
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
@@ -28,7 +30,51 @@ SERVICE_ICONS = {
     'design':  'M12 2a10 10 0 0 0 0 20c1 0 1.7-.8 1.7-1.7 0-.4-.2-.8-.4-1.1a1.7 1.7 0 0 1 1.3-2.9H17a5 5 0 0 0 5-5C22 6.5 17.5 2 12 2zM6.5 12a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm3-4a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm3 4a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z',
     'builder': 'M3 3h8v8H3zm10 0h8v5h-8zM3 13h8v8H3zm10-3h8v11h-8z',
     'layout':  'M3 3h18v5H3zm0 7h7v11H3zm9 0h9v11h-9z',
+    # Ikoni za ziada — zinachaguliwa kiotomatiki kutoka jina la huduma (Service.art)
+    'network': 'M12 2a3 3 0 0 1 1 5.8V11h6a2 2 0 0 1 2 2v3.2a3 3 0 1 1-2 0V13h-6v3.2a3 3 0 1 1-2 0V13H5v3.2a3 3 0 1 1-2 0V13a2 2 0 0 1 2-2h6V7.8A3 3 0 0 1 12 2z',
+    'cctv':    'M3 6l13-3 2 6-13 3zm15.5 2.5 3 1-1 4-3-1zM6 12l1.5 4H4v3H2v-8h2v3h1.2l-.9-2.3z',
+    'graphic': 'M14.6 2.6a2 2 0 0 1 2.8 0l4 4a2 2 0 0 1 0 2.8l-1.7 1.7-6.8-6.8zM11.5 5.7l6.8 6.8-8.6 8.6a2 2 0 0 1-1 .6l-5.2 1.2 1.2-5.2a2 2 0 0 1 .6-1z',
+    'support': 'M12 2a9 9 0 0 0-9 9v5a3 3 0 0 0 3 3h2v-7H5v-1a7 7 0 0 1 14 0v1h-3v7h3v1h-6v2h6a2 2 0 0 0 2-2v-9a9 9 0 0 0-9-9z',
+    'growth':  'M3 20h18v2H3zM4 16l5-5 4 4 7-7v4h2V4h-8v2h4l-5 5-4-4-6.4 6.4z',
+    'dashboard': 'M3 3h8v10H3zm10 0h8v6h-8zM3 15h8v6H3zm10-4h8v10h-8z',
 }
+
+# Mchoro wa huduma kwenye /service/ huchaguliwa kwa maneno ya jina lake
+# (huduma nyingi kwenye admin zina ikoni ya default 'code', hivyo zote
+# zilikuwa zikionyesha code editor). Mpangilio una maana: la kwanza linashinda.
+SERVICE_ART_KEYWORDS = [
+    ('bot',       ('chatbot', 'bot', 'whatsapp', 'ai assistant')),
+    ('network',   ('network', 'lan', 'wlan', 'wifi', 'wi-fi', 'cabling', 'router', 'internet', 'mtandao')),
+    ('cctv',      ('cctv', 'camera', 'surveillance', 'security system', 'alarm', 'kamera')),
+    ('graphic',   ('graphic', 'logo', 'brand', 'poster', 'flyer', 'print', 'michoro')),
+    ('design',    ('ui/ux', 'ux', 'ui design', 'user interface')),
+    ('server',    ('hosting', 'server', 'cloud', 'backup', 'vps')),
+    ('globe',     ('domain', 'dns')),
+    ('mobile',    ('mobile', 'android', 'ios', 'app development', 'apps')),
+    ('builder',   ('builder',)),
+    ('layout',    ('template',)),
+    ('growth',    ('seo', 'marketing', 'social media', 'ads', 'advert', 'masoko')),
+    ('dashboard', ('system', 'software', 'erp', 'pos', 'management', 'database', 'school', 'mfumo')),
+    ('support',   ('support', 'maintenance', 'repair', 'helpdesk', 'training', 'consult', 'it service')),
+    ('code',      ('website', 'web development', 'web design', 'e-commerce', 'ecommerce', 'tovuti')),
+]
+
+
+def _art_match(text):
+    for kind, words in SERVICE_ART_KEYWORDS:
+        # \b ili 'lan' isiguse 'plan', 'pos' isiguse 'post', n.k.
+        if any(re.search(r'\b' + re.escape(w) + r's?\b', text) for w in words):
+            return kind
+    return None
+
+
+def service_art_for(name, icon='code', description=''):
+    kind = _art_match((name or '').lower())
+    if kind:
+        return kind
+    if icon and icon != 'code':
+        return icon
+    return _art_match((description or '').lower()[:300]) or 'code'
 
 
 class Service(models.Model):
@@ -65,8 +111,17 @@ class Service(models.Model):
         help_text='Show this service in the homepage "What we build" section.')
 
     @property
+    def art(self):
+        """Aina ya mchoro hai kwenye /service/ (angalia service_art_for)."""
+        if not hasattr(self, '_art'):
+            self._art = service_art_for(self.service_type, self.icon, self.description)
+        return self._art
+
+    @property
     def icon_path(self):
-        return SERVICE_ICONS.get(self.icon or 'code', SERVICE_ICONS['code'])
+        # Ikoni iliyochaguliwa kwenye admin inashinda; 'code' (default) inafuata aina ya huduma
+        key = self.icon if self.icon and self.icon != 'code' else self.art
+        return SERVICE_ICONS.get(key, SERVICE_ICONS['code'])
 
     @property
     def home_url(self):
