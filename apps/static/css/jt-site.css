@@ -99,7 +99,7 @@ button{cursor:pointer;border:0;background:none}
 .hdr__bar{position:absolute;left:0;top:0;height:3px;width:100%;background:var(--grad);transform-origin:0 50%;transform:scaleX(var(--p,0))}
 .hdr__in{display:flex;align-items:center;gap:14px;height:72px}
 /* Header ya blue: inaonekana wazi juu ya ukurasa (ambao nao ni blue hafifu) */
-.hdr{background:linear-gradient(180deg,rgba(172,201,244,.96),rgba(188,213,247,.94));-webkit-backdrop-filter:saturate(170%) blur(16px);backdrop-filter:saturate(170%) blur(16px);box-shadow:0 1px 0 rgba(37,99,235,.18)}
+.hdr{background:linear-gradient(180deg,rgba(138,178,240,.97),rgba(158,193,243,.95));-webkit-backdrop-filter:saturate(170%) blur(16px);backdrop-filter:saturate(170%) blur(16px);box-shadow:0 1px 0 rgba(37,99,235,.28)}
 .hdr.is-stuck{box-shadow:0 1px 0 rgba(37,99,235,.22),0 10px 30px -18px rgba(11,40,100,.35)}
 .hdr.is-hidden{transform:translateY(-100%)}
 .brand{display:flex;align-items:center;gap:10px;flex:none;margin-right:auto;font:800 21px/1 'Sora',sans-serif;letter-spacing:-.045em;color:var(--ink)}
