@@ -4,6 +4,7 @@
 {% block meta_desc %}JamiiTek is a digital studio in Dar es Salaam building websites, WhatsApp bots and systems for businesses across Tanzania and East Africa.{% endblock %}
 
 {% block head %}
+<link rel="stylesheet" href="{% static 'css/jt-art.css' %}">
 <style>
 /* ── Jiji la Dar es Salaam jioni (SVG yote ni code) ── */
 .city{position:relative;border-radius:26px;overflow:hidden;aspect-ratio:600/380;box-shadow:0 0 0 1px var(--line),var(--sh-2)}
@@ -54,17 +55,13 @@
 .val p{color:var(--muted);font-size:14.5px}
 
 /* Huduma (vidonge) + kazi */
-.chips2{display:flex;flex-wrap:wrap;gap:10px}
-.chip2{display:inline-flex;align-items:center;gap:10px;padding:10px 16px 10px 10px;border-radius:999px;background:#fff;box-shadow:0 0 0 1px var(--line);font:600 14.5px 'Sora';letter-spacing:-.01em;transition:transform .35s var(--ease),box-shadow .35s}
-.chip2:hover{transform:translateY(-3px);box-shadow:0 0 0 1px var(--a),0 10px 24px -12px var(--a)}
-.chip2 span{display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--a);color:#fff}
-.chip2 svg{width:16px;height:16px}
 .works{display:grid;gap:18px}
 @media (min-width:800px){.works{grid-template-columns:repeat(3,1fr)}}
 .work{display:block;transition:transform .5s var(--ease)}
 .work:hover{transform:translateY(-6px)}
-.work__shot{aspect-ratio:16/10;background:linear-gradient(135deg,var(--navy-3),var(--navy));display:grid;place-items:center;color:#fff;font:700 18px 'Sora';overflow:hidden}
-.work__shot img{width:100%;height:100%;object-fit:cover;object-position:top}
+.work__shot{position:relative;aspect-ratio:16/10;overflow:hidden;background:#fff}
+/* Picha halisi ikiwepo inakaa juu ya onyesho; ikivunjika, onyesho linaonekana */
+.work__shot img{position:absolute;inset:0;z-index:1;width:100%;height:100%;object-fit:cover;object-position:top;background:#fff}
 .work__meta{display:flex;justify-content:space-between;gap:10px;padding:14px 16px;font-size:14px}
 .work__meta b{font-family:'Sora'}
 .work__meta small{color:var(--muted)}
@@ -153,9 +150,16 @@
 <section class="sec" style="padding-top:0">
   <div class="wrap">
     <div class="sh rv"><span class="eyebrow">What we do</span><h2>One team for everything online.</h2></div>
-    <div class="chips2">
+    <div class="svcards">
       {% for svc in services %}
-      <a class="chip2 rv" style="--a:{{ svc.accent|default:'#2E7BF6' }};--rd:{% widthratio forloop.counter0 1 40 %}ms" href="{% url 'service' %}#svc-{{ svc.pk }}"><span><svg viewBox="0 0 24 24" fill="currentColor"><path d="{{ svc.icon_path }}"/></svg></span>{{ svc.service_type }}</a>
+      <a class="svcard rv" style="--k:{{ svc.accent|default:'#2E7BF6' }};--k2:color-mix(in srgb,{{ svc.accent|default:'#2E7BF6' }} 70%,#0B1730);--rd:{% cycle '0s' '.08s' '.16s' %}" href="{% url 'service' %}#svc-{{ svc.pk }}">
+        <div class="svcard__art" data-live aria-hidden="true"><div class="svcard__in">{% include 'site/_svc_art.html' %}</div></div>
+        <div class="svcard__txt">
+          <b><i><svg viewBox="0 0 24 24" fill="currentColor"><path d="{{ svc.icon_path }}"/></svg></i>{{ svc.service_type }}</b>
+          <p>{% if svc.summary %}{{ svc.summary }}{% else %}{{ svc.description|striptags|truncatewords:22 }}{% endif %}</p>
+          <em>Learn more →</em>
+        </div>
+      </a>
       {% endfor %}
     </div>
   </div>
@@ -170,7 +174,7 @@
       {% for p in work %}
       <a class="work win rv" style="--rd:{% cycle '0s' '.08s' '.16s' %}" href="{{ p.live_url|default:'/#work' }}"{% if p.live_url %} target="_blank" rel="noopener"{% endif %}>
         <div class="win__bar" aria-hidden="true"><i></i><i></i><i></i><span class="win__url">{% if p.live_url %}<b>{{ p.live_url|cut:"https://"|cut:"http://"|cut:"www."|cut:"/" }}</b>{% else %}{{ p.title }}{% endif %}</span></div>
-        <div class="work__shot">{% if p.image %}<img src="{{ p.image }}" alt="{{ p.title }}" loading="lazy" decoding="async" data-hide-broken>{% else %}<span>{{ p.title }}</span>{% endif %}</div>
+        <div class="work__shot">{% include 'site/_work_mock.html' %}{% if p.image %}<img src="{{ p.image }}" alt="{{ p.title }}" loading="lazy" decoding="async" data-hide-broken>{% endif %}</div>
         <div class="work__meta"><b>{{ p.title }}</b>{% if p.category %}<small>{{ p.category }}</small>{% endif %}</div>
       </a>
       {% endfor %}

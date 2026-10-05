@@ -169,6 +169,23 @@ class PortfolioItem(ImageMixin):
     def __str__(self):
         return f'{self.title} — {self.client}' if self.client else self.title
 
+    # Onyesho la tovuti (HTML/CSS) kwa kazi isiyo na screenshot — au picha ikivunjika.
+    MOCKS = [
+        ('shop',   ('pos', 'shop', 'store', 'duka', 'market', 'commerce', 'retail')),
+        ('safari', ('tour', 'travel', 'safari', 'hotel', 'lodge', 'tourism')),
+        ('estate', ('estate', 'property', 'house', 'nyumba', 'rental', 'apartment')),
+        ('school', ('school', 'education', 'academy', 'shule', 'college', 'university')),
+        ('food',   ('restaurant', 'food', 'cafe', 'kitchen', 'chakula')),
+    ]
+
+    @property
+    def mock(self):
+        text = f'{self.category} {self.title} {self.summary}'.lower()
+        for kind, words in self.MOCKS:
+            if any(w in text for w in words):
+                return kind
+        return 'biz'
+
     class Meta:
         ordering = ['order', '-created_at']
         verbose_name = 'Portfolio Item'
