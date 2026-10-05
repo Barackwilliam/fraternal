@@ -18,11 +18,10 @@
 .pill b::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;animation:ping 2s infinite}
 .hero h1{margin:24px 0 20px;font-size:clamp(2.6rem,1.2rem + 5.2vw,5.3rem);font-weight:800;line-height:.98;letter-spacing:-.055em;text-wrap:balance}
 .hero__sub{max-width:560px;font-size:clamp(16.5px,.6vw + 13px,20px);line-height:1.6;color:var(--muted)}
-.hero__facts{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;margin-top:42px;max-width:560px;border-radius:18px;overflow:hidden;background:var(--line);box-shadow:0 0 0 1px var(--line)}
-.hero__facts div{padding:15px 18px;background:#fff}
-.hero__facts b{display:block;font:800 25px/1 'Sora',sans-serif;letter-spacing:-.04em;color:var(--ink)}
-.hero__facts span{display:block;margin-top:6px;font-size:12.5px;color:var(--muted)}
-@media (min-width:640px){.hero__facts{grid-template-columns:repeat(4,1fr)}}
+/* AI Core: simu → chini ya vitufe (kabla ya ramani); desktop → upana wote chini ya hero */
+.hero__in>.map{order:2}
+.hero__in>.eco{order:1}
+@media (min-width:1060px){.hero__in>.eco{order:3;grid-column:1/-1;margin-top:34px}}
 .ticker{position:relative;display:block;height:22px;margin-top:22px;overflow:hidden;font-size:13.5px;color:var(--muted);max-width:560px}
 .ticker a{position:absolute;inset:0;display:flex;gap:10px;align-items:center;white-space:nowrap;overflow:hidden;opacity:0;transform:translateY(100%);transition:opacity .6s var(--ease),transform .6s var(--ease)}
 .ticker a.on{opacity:1;transform:none}
@@ -259,12 +258,6 @@
         {% for s in hero_slides|slice:"1:" %}<a href="{{ s.cta_url|contact_url }}"{% if s.cta_url|is_external %} target="_blank" rel="noopener"{% endif %}{% if forloop.first %} class="on"{% endif %}><b>{{ s.eyebrow|default:"New" }}</b><span>{{ s.headline|cut:"*" }}</span></a>{% endfor %}
       </div>
       {% endif %}
-      <div class="hero__facts up" style="--d:.9s">
-        <div><b>24/7</b><span>JamiiBot on WhatsApp</span></div>
-        <div><b>&lt;2s</b><span>Bot reply time</span></div>
-        <div><b>99.9%</b><span>Hosting uptime</span></div>
-        <div><b>10 min</b><span>To launch a site</span></div>
-      </div>
     </div>
 
     <div class="map" aria-hidden="true">
@@ -345,6 +338,8 @@
         <p class="cur"><span class="ok">● live</span> in 1.2s</p>
       </div>
     </div>
+
+    {% include 'site/_eco.html' %}
   </div>
 </section>
 {% endwith %}
@@ -601,7 +596,7 @@
 </section>
 {% endif %}
 
-{% include 'site/_kili.html' with eco=1 %}
+{% include 'site/_kili.html' %}
 {% endblock %}
 
 {% block scripts %}

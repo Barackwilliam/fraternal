@@ -7,7 +7,7 @@
   zikikaribia skrini, kwa hiyo hazichelewesha ukurasa.
   Vigezo: eyebrow, title, em (neno la dhahabu), text.
 {% endcomment %}
-<section class="kili{% if eco %} kili--eco{% endif %}" id="start" data-live>
+<section class="kili" id="start" data-live>
   <div class="wrap kili__in rv">
     <span class="eyebrow">{{ eyebrow|default:"Tujenge pamoja · Let's build together" }}</span>
     <h2>{{ title|default:"Ready to build something that" }} <span class="gt">{{ em|default:"works?" }}</span></h2>
@@ -18,7 +18,6 @@
       <a class="btn btn--ghost" href="https://wa.me/{% contact "wa" %}" target="_blank" rel="noopener">Chat on WhatsApp</a>
     </div>
   </div>
-  {% if eco %}{% include 'site/_eco.html' %}{% endif %}
   <div class="kili__scene" aria-hidden="true">
     <svg class="kili__fx" viewBox="0 0 1600 700" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
 <defs><radialGradient id="kSunGlow"><stop offset="0" stop-color="#FFF6E2"/><stop offset=".12" stop-color="#FFE2B0" stop-opacity=".95"/><stop offset=".4" stop-color="#FFB98A" stop-opacity=".35"/><stop offset="1" stop-color="#FF9F7A" stop-opacity="0"/></radialGradient></defs>
