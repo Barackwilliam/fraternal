@@ -248,3 +248,40 @@ class SpotlightTest(TestCase):
         with mock.patch.dict('os.environ', {'SPOTLIGHT_AUTOPUBLISH': '1'}):
             r = self._run(self.monday, ['A Practical Guide to .co.tz Domains'])
         self.assertEqual(r['created'][0].status, 'published')
+
+
+class SiteSeoTest(NoPingMixin, TestCase):
+    """SEO ya kurasa kuu: hakuna rating za kubuni, /bot/ ina canonical na schema."""
+
+    def _ld(self, html):
+        out = []
+        for b in re.findall(r'<script type="application/ld\+json">(.*?)</script>', html, re.S):
+            j = json.loads(b)
+            out.extend(j if isinstance(j, list) else [j])
+        return out
+
+    def test_no_fake_ratings_anywhere(self):
+        for url in ('/', '/bot/', '/service/', '/About/', '/contact/', '/get-started/'):
+            html = self.client.get(url).content.decode()
+            self.assertNotIn('aggregateRating', html, url)
+
+    def test_bot_landing_has_canonical_og_and_schema(self):
+        html = self.client.get('/bot/').content.decode()
+        self.assertIn('<link rel="canonical" href="https://www.jamiitek.com/bot/">', html)
+        self.assertIn('property="og:image"', html)
+        types = [b.get('@type') for b in self._ld(html)]
+        self.assertIn('SoftwareApplication', types)
+        self.assertIn('BreadcrumbList', types)
+
+    def test_key_pages_have_schema_and_tanzania_titles(self):
+        for url, kind in (('/About/', 'AboutPage'), ('/contact/', 'ContactPage'), ('/get-started/', 'FAQPage')):
+            html = self.client.get(url).content.decode()
+            self.assertIn(kind, [b.get('@type') for b in self._ld(html)], url)
+            title = re.search(r'<title>(.*?)</title>', html, re.S).group(1)
+            self.assertIn('Tanzania', title, url)
+
+    def test_sitemap_lists_get_started_once_and_service_once(self):
+        xml = self.client.get('/sitemap.xml').content.decode()
+        locs = [re.sub(r'^https?://[^/]+', '', u) for u in re.findall(r'<loc>([^<]*)</loc>', xml)]
+        self.assertIn('/get-started/', locs)
+        self.assertEqual(locs.count('/service/'), 1)

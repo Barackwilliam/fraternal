@@ -19,6 +19,7 @@ class StaticPageSitemap(Sitemap):
         ('About',           0.7,  'monthly'),
         ('contact',         0.7,  'monthly'),
         ('select_website',  0.8,  'weekly'),
+        ('get_started',     0.9,  'weekly'),    # vitufe vyote vya "Start a project"
         ('templates_marketplace', 0.9, 'daily'),
         ('jamiibot_landing',0.95, 'daily'),     # Bot landing page
         ('chatbot_register',0.9,  'weekly'),    # Bot signup
@@ -152,7 +153,6 @@ class TemplateCategorySitemap(Sitemap):
 # Combine all sitemaps
 sitemaps = {
     'static':     StaticPageSitemap(),
-    'services':   ServiceSitemap(),
     'blog_index': BlogIndexSitemap(),
     'blog':       BlogSitemap(),
     'blog-authors': BlogAuthorSitemap(),

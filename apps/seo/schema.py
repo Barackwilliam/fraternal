@@ -126,19 +126,19 @@ def local_business_schema():
                 {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Mobile App Development", "description": "Android and iOS mobile app development"}},
             ]
         },
-        "aggregateRating": {
-            "@type": "AggregateRating",
-            "ratingValue": "5.0",
-            "reviewCount": "89",
-            "bestRating": "5",
-            "worstRating": "1"
-        }
+        # Hakuna aggregateRating: Google inakataza rating zisizotoka kwa reviews
+        # halisi (na self-serving reviews kwenye LocalBusiness). Weka tu zikiwa
+        # zinatoka kwenye data halisi ya wateja.
     }
 
 
-def jamiibot_product_schema():
-    """Product/SoftwareApplication schema for JamiiBot."""
-    return {
+def jamiibot_product_schema(plans=None):
+    """Product/SoftwareApplication schema for JamiiBot.
+
+    `plans` (SubscriptionPlan) zikitolewa, bei zinatoka database — si namba
+    zilizoandikwa kwa mkono ambazo zinaweza kutofautiana na ukurasa.
+    """
+    data = {
         "@context": "https://schema.org",
         "@type": "SoftwareApplication",
         "@id": f"{SITE_URL}/bot/#jamiibot",
@@ -196,6 +196,17 @@ def jamiibot_product_schema():
         "countriesSupported": "TZ",
         "availableOnDevice": "WhatsApp"
     }
+    if plans:
+        data["offers"] = [{
+            "@type": "Offer",
+            "name": f"{p.name} Plan" if 'plan' not in p.name.lower() else p.name,
+            "price": str(p.price_tzs),
+            "priceCurrency": "TZS",
+            "description": ("Unlimited messages per month" if not p.msg_limit
+                            else f"{p.msg_limit:,} messages per month"),
+            "url": f"{SITE_URL}/chatbot/register/?plan={p.slug}",
+        } for p in plans]
+    return data
 
 
 def faq_schema(faqs):
