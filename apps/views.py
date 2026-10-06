@@ -113,9 +113,8 @@ def home(request):
         'schema_markup': schema_html,
         'page_title': 'JamiiTek — Web Development & AI WhatsApp Bot Tanzania',
         'page_desc': (
-            "JamiiTek: Tanzania's leading web developer. We build websites, AI WhatsApp bots "
-            "(JamiiBot), web hosting & domains. Serving Dar es Salaam and all Tanzania. "
-            "Tunajenga website Tanzania. Bot WhatsApp Tanzania."
+            "Websites, AI WhatsApp bots (JamiiBot), hosting and domains for businesses in "
+            "Tanzania. Built in Dar es Salaam — fast, secure and mobile-first."
         ),
         'canonical': 'https://www.jamiitek.com/',
     }

@@ -1,7 +1,13 @@
 {% extends 'site/base.html' %}
 {% load static jt_contact %}
-{% block title %}About Us — JamiiTek{% endblock %}
-{% block meta_desc %}JamiiTek is a digital studio in Dar es Salaam building websites, WhatsApp bots and systems for businesses across Tanzania and East Africa.{% endblock %}
+{% block title %}About JamiiTek — Web &amp; AI Studio in Dar es Salaam, Tanzania{% endblock %}
+{% block og_title %}About JamiiTek — Web &amp; AI Studio in Dar es Salaam, Tanzania{% endblock %}
+{% block meta_desc %}JamiiTek is a web and AI studio in Dar es Salaam building websites, WhatsApp bots and business systems for companies across Tanzania and East Africa.{% endblock %}
+{% block og_desc %}JamiiTek is a web and AI studio in Dar es Salaam building websites, WhatsApp bots and business systems for companies across Tanzania and East Africa.{% endblock %}
+{% block schema_markup %}
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "AboutPage", "@id": "https://www.jamiitek.com/About/#webpage", "url": "https://www.jamiitek.com/About/", "name": "About JamiiTek", "inLanguage": "en", "isPartOf": {"@id": "https://www.jamiitek.com/#website"}, "about": {"@id": "https://www.jamiitek.com/#organization"}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.jamiitek.com/"}, {"@type": "ListItem", "position": 2, "name": "About", "item": "https://www.jamiitek.com/About/"}]}</script>
+{% endblock %}
 
 {% block head %}
 <link rel="stylesheet" href="{% static 'css/jt-art.css' %}">

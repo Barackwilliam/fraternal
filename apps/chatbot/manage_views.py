@@ -481,8 +481,13 @@ def manage_bot_whatsapp(request, bot_id):
 
 def jamiibot_landing(request):
     """Public marketing page for JamiiBot."""
+    from apps.seo.schema import jamiibot_product_schema, breadcrumb_schema, render_schemas
     plans = SubscriptionPlan.objects.filter(is_active=True).order_by('price_tzs')
-    return render(request, 'chatbot_landing/jamiibot_landing.html', {'plans': plans})
+    schema = render_schemas(
+        jamiibot_product_schema(list(plans)),
+        breadcrumb_schema([('Home', '/'), ('JamiiBot', '/bot/')]),
+    )
+    return render(request, 'chatbot_landing/jamiibot_landing.html', {'plans': plans, 'schema_markup': schema})
 
 # ══════════════════════════════════════════════════════════════
 #  BAILEYS SESSIONS
