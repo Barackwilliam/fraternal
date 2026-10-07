@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Alama, Kazi, Ripoti
+from .models import Alama, Kazi, Mtihani, Ripoti
 
 
 @admin.register(Kazi)
@@ -20,3 +20,8 @@ class RipotiAdmin(admin.ModelAdmin):
 @admin.register(Alama)
 class AlamaAdmin(admin.ModelAdmin):
     list_display = ('key', 'value', 'updated_at')
+
+
+@admin.register(Mtihani)
+class MtihaniAdmin(admin.ModelAdmin):
+    list_display = ('created_at', 'status', 'finished_at')

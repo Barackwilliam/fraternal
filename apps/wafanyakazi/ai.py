@@ -29,11 +29,22 @@ PREFERRED = (
 NOT_CHAT = ('whisper', 'guard', 'tts', 'playai', 'orpheus', 'compound', 'distil')
 
 BUDGET = 12
-_state = {'left': BUDGET, 'model': None}
+_state = {'left': BUDGET, 'model': None, 'written': [], 'failed': 0}
 
 
 def reset_budget(n=BUDGET):
     _state['left'] = n
+    _state['written'] = []
+    _state['failed'] = 0
+
+
+def written():
+    """Maandishi yaliyotoka kwa AI tangu reset_budget — kwa mtihani wa umahiri."""
+    return list(_state['written'])
+
+
+def failures():
+    return _state['failed']
 
 
 def _key():
@@ -83,10 +94,15 @@ def write(system, prompt, max_tokens=500, temperature=0.5):
                 r = post(model)
         if r.status_code != 200:
             logger.warning('[wafanyakazi] groq %s: %s', r.status_code, r.text[:200])
+            _state['failed'] += 1
             return ''
-        return (r.json()['choices'][0]['message']['content'] or '').strip()
+        text = (r.json()['choices'][0]['message']['content'] or '').strip()
+        if text:
+            _state['written'].append(text)
+        return text
     except Exception as exc:
         logger.warning('[wafanyakazi] groq: %s', type(exc).__name__)
+        _state['failed'] += 1
         return ''
 
 

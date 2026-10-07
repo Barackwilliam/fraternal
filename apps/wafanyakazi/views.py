@@ -4,18 +4,19 @@ Panel ya timu (/manage/wafanyakazi/), endpoint ya cron na API ya wILife.
 import json
 import os
 import secrets
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from django.contrib import messages
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 
 from apps.management_views import staff_required
 
-from . import actions, runner, wilife
-from .models import Alama, Kazi, Ripoti
+from . import actions, mtihani, runner, wilife
+from .models import Alama, Kazi, Mtihani, Ripoti
 from .team import TEAM, member
 from .william import snapshot
 
@@ -97,6 +98,25 @@ def run_now(request):
     messages.success(request, 'Timu imeanza kazi — onyesha ukurasa upya baada ya dakika moja.'
                      + (' Ripoti itatumwa ikikamilika.' if report else ''))
     return redirect('wafanyakazi_dashboard')
+
+
+@staff_required
+def exam(request):
+    """Mtihani wa umahiri: rasimu za mfano kwenye data halisi, bila kuhifadhi wala kutuma."""
+    if request.method == 'POST':
+        if Mtihani.objects.filter(status=Mtihani.RUNNING,
+                                  created_at__gte=timezone.now() - timedelta(minutes=10)).exists():
+            messages.error(request, 'Mtihani mmoja tayari unaendelea.')
+        else:
+            mtihani.run_in_background()
+            messages.success(request, 'Mtihani umeanza — utachukua dakika 1–2. Ukurasa utajisasisha.')
+        return redirect('wafanyakazi_exam')
+    latest = Mtihani.objects.first()
+    return render(request, 'wafanyakazi/mtihani.html', {
+        'nav': 'wafanyakazi', 'title': 'Mtihani wa umahiri',
+        'exam': latest, 'r': latest.result if latest else {},
+        'history': Mtihani.objects.exclude(pk=getattr(latest, 'pk', None))[:5],
+    })
 
 
 # ══════════════════════════════════════════════════════════════

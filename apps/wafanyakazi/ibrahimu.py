@@ -1,8 +1,8 @@
 """
 Ibrahimu — Mhudumu wa wateja.
 
-Anafanya kazi juu ya JamiiBot ya JamiiTek yenyewe (bot zenye business_name
-"JamiiTek", au zilizotajwa kwa WORKERS_BOT_IDS):
+Anafanya kazi juu ya JamiiBot — bot ya JamiiTek yenyewe, inayotambuliwa kwa
+jina lake (bot_name "JamiiBot"), au zilizotajwa kwa WORKERS_BOT_IDS:
 
   • Wateja waliokabidhiwa binadamu na bado wanasubiri → kazi ya haraka
   • Maswali ambayo bot haikuyajua → rasimu ya jibu; ukikubali inakuwa FAQ
@@ -16,6 +16,7 @@ from .board import found, settle, site
 from .team import signature
 
 SLUG = 'ibrahimu'
+BOT_NAME = 'JamiiBot'
 HANDOFF_WAIT = timedelta(minutes=30)
 GAPS_PER_RUN = 6
 
@@ -30,7 +31,8 @@ def bots():
     ids = [i.strip() for i in os.getenv('WORKERS_BOT_IDS', '').split(',') if i.strip()]
     if ids:
         return BotConfig.objects.filter(pk__in=ids)
-    return BotConfig.objects.filter(business_name__icontains='jamiitek')
+    # Jina kamili, si sehemu yake: bot za wateja zisiingie kwa bahati mbaya.
+    return BotConfig.objects.filter(bot_name__iexact=BOT_NAME)
 
 
 def _who(conv):
@@ -139,7 +141,7 @@ def _buyers(now, bot_qs):
 def run(now):
     bot_qs = bots()
     if not bot_qs.exists():
-        return {'detail': 'hakuna JamiiBot ya JamiiTek (weka WORKERS_BOT_IDS)'}
+        return {'detail': 'hakuna bot yenye jina JamiiBot (au weka WORKERS_BOT_IDS)'}
     return {
         'handoffs': _handoffs(now, bot_qs),
         'gaps': _gaps(now, bot_qs),

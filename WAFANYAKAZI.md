@@ -6,7 +6,7 @@ biashara. Panel yao: **/manage/wafanyakazi/** (menyu → *Timu ya AI*).
 | Mfanyakazi | Kazi yake | Anasoma |
 |---|---|---|
 | 👔 **William** — Kiongozi mkuu | Anawakumbusha kazi zilizokwama (zaidi ya siku 2), anakutumia mpango wa asubuhi (saa 1) na ripoti ya jioni (saa 12) | Kazi za timu nzima |
-| 💬 **Ibrahimu** — Mhudumu wa wateja | Wateja wanaosubiri binadamu, maswali ambayo bot haikujua (anaandaa jibu; ukikubali linakuwa FAQ), wateja wenye nia ya kununua → anampa Selvester | JamiiBot ya JamiiTek |
+| 💬 **Ibrahimu** — Mhudumu wa wateja | Wateja wanaosubiri binadamu, maswali ambayo bot haikujua (anaandaa jibu; ukikubali linakuwa FAQ), wateja wenye nia ya kununua → anampa Selvester | JamiiBot (bot yenye jina "JamiiBot") |
 | 🎯 **Selvester** — Afisa mauzo | Ufuatiliaji wa leads, majibu ya fomu ya mawasiliano, malipo yaliyoachwa njiani, tovuti za builder ambazo hazijachapishwa | `/proposals/`, Contact, Pesapal, builder |
 | 📣 **Grace** — Afisa masoko | Post moja kwa siku ya mitandao ya kijamii (blog → template → huduma) | Blog, templates, huduma |
 | 💰 **Diana** — Fedha na ofisi | Ukumbusho wa invoice zilizochelewa/zinazokaribia, malipo ya JamiiBot ya kuthibitisha, mapato ya wiki | Invoice, Pesapal, malipo ya bot |
@@ -55,3 +55,16 @@ API (header `X-Workers-Token`):
 | `POST /wafanyakazi/api/kazi/<id>/idhinisha/` | tuma rasimu (body hiari: `{"draft": "..."}`) |
 | `POST /wafanyakazi/api/kazi/<id>/kataa/` | achana nayo |
 | `POST /wafanyakazi/api/endesha/` | endesha timu sasa (`{"ripoti": "asubuhi"}` hiari) |
+
+## Mtihani wa umahiri (kabla ya kuwaamini)
+
+**/manage/wafanyakazi/mtihani/** (kitufe *🧪 Mtihani wa umahiri* kwenye panel). Kila mfanyakazi anafanya
+kazi yake kwenye data halisi na AI halisi, kisha kila kitu kinarudishwa nyuma — hakuna kazi
+inayohifadhiwa, hakuna email wala WhatsApp inayotumwa. Unaona rasimu 3 za mfano kwa kila mmoja,
+mpango wa asubuhi wa William ungekuwaje, na ukaguzi wa kila rasimu:
+
+* imeandikwa na AI au ni template (AI ikishindwa)
+* urefu unaofaa, hakuna nafasi tupu kama `{jina}`
+* hakuna kiasi cha pesa kisichotoka kwenye data (AI isibuni bei)
+* Diana: ina link ya invoice · rasimu inamtaja mteja kwa jina
+* Ibrahimu anaitambua bot gani (lazima iwe bot yenye jina **JamiiBot**)

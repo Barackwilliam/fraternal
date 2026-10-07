@@ -11,8 +11,8 @@ from django.utils import timezone
 
 from apps.models import Client, Contact, Invoice, ProjectProposal, Proposal, WebsiteType
 
-from . import actions, diana, grace, ibrahimu, selvester, william
-from .models import Alama, Kazi, Ripoti
+from . import actions, diana, grace, ibrahimu, mtihani, selvester, william
+from .models import Alama, Kazi, Mtihani, Ripoti
 from .runner import run_all
 
 TOKEN = 'siri-ya-majaribio'
@@ -33,7 +33,7 @@ class Base(TestCase):
         self.addCleanup(cache.clear)
         # Tests za apps nyingine zinapita kwenye middleware, ambayo inaweza
         # kuwa imeendesha timu kwenye thread na kuacha safu zilizo-commit.
-        for model in (Kazi, Ripoti, Alama):
+        for model in (Kazi, Ripoti, Alama, Mtihani):
             model.objects.all().delete()
         self.env = mock.patch.dict('os.environ', {
             'GROQ_API_KEY': '', 'WILIFE_URL': '', 'WORKERS_API_TOKEN': TOKEN, 'TASKS_TOKEN': 'cron',
@@ -158,8 +158,17 @@ class IbrahimuTests(Base):
         handoff.refresh_from_db()
         self.assertEqual(handoff.status, Kazi.DONE)
 
-    def test_no_jamiitek_bot(self):
+    def test_only_the_bot_named_jamiibot(self):
+        from apps.chatbot.models import BotConfig, ChatbotClient
         self.assertIn('detail', ibrahimu.run(timezone.now()))
+        user = User.objects.create_user('duka', 'd@example.com', 'p')
+        client = ChatbotClient.objects.create(user=user, full_name='Duka', business_name='JamiiTek Duka',
+                                              email='d@example.com', phone='0700000000')
+        BotConfig.objects.create(client=client, bot_name='Amara', business_name='JamiiTek Duka',
+                                 description='Bot ya mteja', session_name='duka')
+        self.assertFalse(ibrahimu.bots().exists())
+        bot = self.bot()
+        self.assertEqual(list(ibrahimu.bots()), [bot])
 
 
 class GraceTests(Base):
@@ -317,3 +326,52 @@ class PanelTests(Base):
     def test_anonymous_redirected(self):
         self.client.logout()
         self.assertEqual(self.client.get('/manage/wafanyakazi/').status_code, 302)
+
+
+class MtihaniTests(Base):
+    def groq(self, text):
+        response = mock.Mock(status_code=200, text='')
+        response.json.return_value = {'choices': [{'message': {'content': text}}]}
+        return mock.patch('apps.wafanyakazi.ai.requests.post', return_value=response)
+
+    def test_exam_writes_samples_but_keeps_and_sends_nothing(self):
+        self.invoice()
+        Kazi.objects.create(worker='diana', key='zamani', title='Kazi ya zamani')
+        with mock.patch.dict('os.environ', {'GROQ_API_KEY': 'k'}), \
+                self.groq('Habari Asha Shop,\n\nTunakukumbusha invoice yako ya TZS 999,999 kwa heshima.'), \
+                mock.patch('apps.notify.notify') as notify:
+            exam = mtihani.run(now=self.now)
+        notify.assert_not_called()
+        self.assertEqual(len(mail.outbox), 0)
+        self.assertEqual(list(Kazi.objects.values_list('key', flat=True)), ['zamani'])
+        self.assertFalse(Ripoti.objects.exists())
+        self.assertEqual(exam.status, Mtihani.DONE)
+
+        workers = {w['slug']: w for w in exam.result['workers']}
+        sample = workers['diana']['samples'][0]
+        checks = {c['text']: c['ok'] for c in sample['checks']}
+        self.assertTrue(checks['Imeandikwa na AI'])
+        self.assertTrue(checks['Ina link ya invoice'])
+        self.assertTrue(checks['Inamtaja Asha'])
+        self.assertFalse(checks['Kiasi kisichotoka kwenye data: 999999'])
+        self.assertIn('William', exam.result['william'])
+        self.assertTrue(exam.result['score']['total'] > 0)
+
+    def test_template_drafts_are_marked(self):
+        self.invoice()
+        exam = mtihani.run(now=self.now)
+        sample = exam.result['workers'][0]['samples'][0]
+        self.assertIn('Template ya kawaida (AI haikuandika)', [c['text'] for c in sample['checks']])
+        self.assertIn('Hakuna kiasi kilichobuniwa', [c['text'] for c in sample['checks']])
+        self.assertFalse(exam.result['groq'])
+
+    def test_page(self):
+        staff = User.objects.create_user('boss', 'b@example.com', 'p', is_staff=True)
+        self.client.force_login(staff)
+        self.assertContains(self.client.get('/manage/wafanyakazi/mtihani/'), 'Bado hakuna mtihani')
+        mtihani.run(now=self.now)
+        r = self.client.get('/manage/wafanyakazi/mtihani/')
+        self.assertContains(r, 'Mpango wa asubuhi ungekuwa hivi')
+        with mock.patch('apps.wafanyakazi.mtihani.run_in_background') as bg:
+            self.client.post('/manage/wafanyakazi/mtihani/')
+        bg.assert_called_once()

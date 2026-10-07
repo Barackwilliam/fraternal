@@ -123,3 +123,27 @@ class Alama(models.Model):
     @classmethod
     def put(cls, key, value):
         cls.objects.update_or_create(key=key, defaults={'value': str(value)[:400]})
+
+
+class Mtihani(models.Model):
+    """
+    Mtihani wa umahiri: timu inafanya kazi kwenye data halisi, lakini kila
+    kitu kinarudishwa nyuma (rollback) — hakuna kazi inayohifadhiwa wala
+    ujumbe unaotumwa. Kinachobaki ni rasimu zao za mfano na ukaguzi wake.
+    """
+
+    RUNNING, DONE, FAILED = 'running', 'done', 'failed'
+    STATUS = [(RUNNING, 'Unaendelea'), (DONE, 'Umekamilika'), (FAILED, 'Umeshindwa')]
+
+    status = models.CharField(max_length=10, choices=STATUS, default=RUNNING)
+    result = models.JSONField(default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    finished_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Mtihani wa umahiri'
+        verbose_name_plural = 'Mitihani ya umahiri'
+
+    def __str__(self):
+        return f'Mtihani {self.created_at:%d/%m %H:%M} ({self.status})'
