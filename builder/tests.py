@@ -964,6 +964,12 @@ class InquiryNotifyTest(TestCase):
                                     side_effect=lambda inq: inquiry_notify._send(inq.pk))
         run_now.start()
         self.addCleanup(run_now.stop)
+        # `_send` inafunga muunganisho wa database mwishoni — sahihi ndani ya
+        # thread yake, lakini hapa inaendeshwa kwenye thread ya jaribio na
+        # ingefunga muunganisho wa TestCase (connection already closed).
+        keep_open = mock.patch.object(inquiry_notify, 'connection')
+        keep_open.start()
+        self.addCleanup(keep_open.stop)
         self.owner = User.objects.create_user('mmiliki', 'owner@example.com', 'x')
         self.site = ClientWebsite.objects.create(
             owner=self.owner, subdomain='escf', site_name='ESCF Tanzania',
