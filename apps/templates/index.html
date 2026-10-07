@@ -18,9 +18,9 @@
 .pill b::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;animation:ping 2s infinite}
 .hero h1{margin:24px 0 20px;font-size:clamp(2.6rem,1.2rem + 5.2vw,5.3rem);font-weight:800;line-height:.98;letter-spacing:-.055em;text-wrap:balance}
 .hero__sub{max-width:560px;font-size:clamp(16.5px,.6vw + 13px,20px);line-height:1.6;color:var(--muted)}
-/* AI Core: simu → chini ya vitufe (kabla ya ramani); desktop → upana wote chini ya hero */
-.hero__in>.map{order:2}
-.hero__in>.eco{order:1}
+/* Picha ya vifaa: simu → chini ya vitufe; AI Core baada yake; desktop → AI Core upana wote chini ya hero */
+.hero__in>.devs{order:1}
+.hero__in>.eco{order:2}
 @media (min-width:1060px){.hero__in>.eco{order:3;grid-column:1/-1;margin-top:34px}}
 .ticker{position:relative;display:block;height:22px;margin-top:22px;overflow:hidden;font-size:13.5px;color:var(--muted);max-width:560px}
 .ticker a{position:absolute;inset:0;display:flex;gap:10px;align-items:center;white-space:nowrap;overflow:hidden;opacity:0;transform:translateY(100%);transition:opacity .6s var(--ease),transform .6s var(--ease)}
@@ -29,33 +29,36 @@
 .ticker a b{font:600 11px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:#B4690A}
 .ticker a:hover span{color:var(--ink)}
 
-.map{position:relative;width:100%;max-width:620px;margin-inline:auto;aspect-ratio:530/510}
-.map>svg{width:100%;height:100%;overflow:visible}
-.tz-glow{fill:none;stroke:url(#tzG);stroke-width:14;opacity:.18;stroke-linejoin:round}
-.tz-fill{fill:url(#tzFill);opacity:0;animation:fadeIn 2s ease 1s forwards}
-.tz-land{fill:url(#tzDots);opacity:0;animation:fadeIn 1.6s ease 1.2s forwards}
-.tz-line{fill:none;stroke:url(#tzG);stroke-width:2.6;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1;animation:draw 2.6s var(--ease) .2s forwards}
-.tz-isl{fill:rgba(245,166,35,.34);stroke:var(--gold);stroke-width:1.4;opacity:0;animation:fadeIn 1s ease 2s forwards}
-.tz-arc{fill:none;stroke:rgba(214,120,0,.9);stroke-width:1.5;stroke-dasharray:3 5;opacity:0;animation:fadeIn .8s ease var(--d) forwards,flow 1.6s linear infinite}
-@keyframes flow{to{stroke-dashoffset:-16}}
-.tz-pkt{fill:var(--sun)}
-.tz-node{opacity:0;animation:fadeIn .6s ease var(--d) forwards}
-.tz-dot{fill:var(--gold)}
-.tz-node--hq .tz-dot{fill:var(--navy)}
-.tz-ring{fill:none;stroke:var(--gold);stroke-width:1.3;transform-box:fill-box;transform-origin:center;animation:ring 2.8s var(--ease) infinite;animation-delay:var(--d)}
-.tz-node--hq .tz-ring{stroke:var(--navy);stroke-width:1.6}
-.tz-lbl{font:600 9.5px var(--mono);letter-spacing:.12em;fill:#3A4762;opacity:0;animation:fadeIn 1s ease 2.2s forwards}
-.tz-lbl--hq{fill:var(--navy);font-size:10.5px;font-weight:700}
-.tz-lake{font:italic 600 10px 'Inter',sans-serif;fill:rgba(10,110,170,.9);letter-spacing:.08em}
-.tz-ll{fill:none;stroke:rgba(11,23,48,.1);stroke-width:1}
-.f-bot{right:0;top:-12%;width:min(250px,56%);padding:12px;animation-delay:2.9s,3.8s}
+/* ── Vifaa vya JamiiTek (picha ya hero) ── */
+.devs{position:relative;width:100%;max-width:720px;margin-inline:auto;aspect-ratio:1266/849;perspective:1400px}
+/* desktop: inapanuka kuelekea kulia kadri nafasi inavyoruhusu — haikatiki kwenye laptop */
+@media (min-width:1060px){.devs{--bleed:clamp(0px,(100vw - 1200px)/2,110px);width:calc(100% + 30px + var(--bleed));max-width:none;margin:0 calc(-1 * var(--bleed)) 0 -30px}}
+.devs__glow{position:absolute;inset:4% 2% 10%;z-index:-1;border-radius:50%;filter:blur(46px);opacity:0;
+  background:radial-gradient(closest-side at 62% 42%,rgba(34,184,224,.55),transparent),radial-gradient(closest-side at 30% 70%,rgba(245,166,35,.55),transparent);
+  animation:fadeIn 1.4s ease .5s forwards,glow 7s ease-in-out 2s infinite}
+@keyframes glow{50%{transform:scale(1.06) translate(1.5%,-1.5%)}}
+.devs__floor{position:absolute;left:8%;right:4%;bottom:-2%;height:12%;z-index:-1;border-radius:50%;
+  background:radial-gradient(closest-side,rgba(11,23,48,.32),transparent);filter:blur(10px);opacity:0;animation:fadeIn 1s ease 1s forwards}
+.devs__img{position:relative;width:100%;height:100%;opacity:0;transform:translateY(40px) scale(.94);
+  animation:devIn 1.3s var(--ease) .25s forwards,bob 8s ease-in-out 1.8s infinite;
+  transition:rotate .5s var(--ease);transform-style:preserve-3d;rotate:x var(--rx,0deg) y var(--ry,0deg) 0deg}
+@supports not (rotate:x 1deg){.devs__img{rotate:none}}
+@keyframes devIn{to{opacity:1;transform:none}}
+.devs__img img{display:block;width:100%;height:auto;filter:drop-shadow(0 30px 40px rgba(11,23,48,.22))}
+/* mwanga unaopita juu ya skrini — picha yenyewe ni mask, kwa hiyo mwanga uko kwenye vifaa tu */
+.devs__shine{position:absolute;inset:0;pointer-events:none;mix-blend-mode:soft-light;
+  background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.95) 48%,transparent 60%) no-repeat;background-size:250% 100%;background-position:150% 0;
+  -webkit-mask:var(--m) center/100% 100% no-repeat;mask:var(--m) center/100% 100% no-repeat;animation:shine 6s ease-in-out 2.4s infinite}
+@keyframes shine{0%{background-position:150% 0}35%,100%{background-position:-60% 0}}
+@media (prefers-reduced-motion:reduce){.devs__img,.devs__glow,.devs__floor{animation:none;opacity:1;transform:none}.devs__shine{display:none}}
+.devs .f-bot{left:-5%;top:-9%;width:min(240px,40%);padding:12px;animation-delay:2.9s,3.8s}
 .f-bot .who{display:flex;align-items:center;gap:9px;margin-bottom:10px;font:600 12.5px/1.2 'Sora',sans-serif}
 .f-bot .who i{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--wa);color:#fff}
 .f-bot .who i svg{width:16px;height:16px}
 .f-bot .who small{display:block;font:500 10.5px var(--mono);color:var(--green);letter-spacing:.02em}
 .f-bot .msg{padding:9px 12px;border-radius:12px 12px 12px 4px;background:var(--paper);font-size:12.5px;line-height:1.45;color:var(--ink-2)}
-.f-term{left:-2%;bottom:2%;width:min(300px,64%);animation:pop .9s var(--ease) 2.4s forwards,bob 7s ease-in-out 3.3s infinite}
-@media (max-width:520px){.f-term{font-size:10px;left:0}.f-bot{right:0;top:-6%}}
+/* simu: picha nzima ionekane — kadi ya JamiiBot inafunika vifaa */
+@media (max-width:620px){.devs{margin-top:8px}.devs .f-bot{display:none}}
 
 /* ── Domain (navy ya chapa) ── */
 .dom{position:relative;z-index:3;margin-top:-100px}
@@ -260,82 +263,19 @@
       {% endif %}
     </div>
 
-    <div class="map" aria-hidden="true">
-      <svg viewBox="-10 -10 530 510" role="presentation">
-        <defs>
-          <linearGradient id="tzG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1B4C8C"/><stop offset=".55" stop-color="#F5A623"/><stop offset="1" stop-color="#FF7A3D"/></linearGradient>
-          <radialGradient id="tzFill" cx=".82" cy=".52" r=".9"><stop offset="0" stop-color="#F5A623" stop-opacity=".38"/><stop offset=".6" stop-color="#1B4C8C" stop-opacity=".16"/><stop offset="1" stop-color="#1B4C8C" stop-opacity="0"/></radialGradient>
-          <pattern id="tzDots" width="9" height="9" patternUnits="userSpaceOnUse"><circle cx="4.5" cy="4.5" r="1.25" fill="#1B4C8C" fill-opacity=".55"/></pattern>
-        </defs>
-        <g class="tz-ll"><path d="M-10 81H520M-10 213H520M-10 345H520M52-10V500M228-10V500M404-10V500"/></g>
-        <path class="tz-glow" d="M56.3 15.8C57.6 11.3 70.3 13.6 79.2 13.2C88.1 12.8 106.6 10.7 112.2 13.2C117.8 15.7 114.6 21.9 114.4 28.6C114.2 35.3 110.2 46.6 110.9 55.0C111.6 63.4 114.0 77.9 118.8 81.4C123.6 84.9 133.8 76.6 140.8 77.0C147.8 77.4 158.9 85.0 162.8 83.6C166.7 82.2 161.8 70.2 165.0 68.2C168.2 66.2 176.3 72.0 182.6 71.3C188.9 70.6 201.6 68.0 204.6 63.8C207.6 59.6 202.2 50.5 201.5 44.9C200.8 39.2 198.3 33.3 200.2 28.6C202.1 23.9 203.2 12.9 213.4 15.4C223.6 17.9 247.5 34.5 264.0 44.0C280.5 53.5 299.9 65.6 316.8 74.8C333.7 84.0 360.1 92.8 369.6 101.2C379.1 109.6 369.2 119.5 376.2 127.6C383.2 135.7 403.4 144.4 413.6 151.8C423.8 159.2 436.6 167.1 440.0 173.8C443.4 180.5 436.7 188.0 434.7 193.6C432.7 199.2 429.7 202.7 427.7 209.0C425.7 215.3 422.2 226.2 422.4 233.2C422.6 240.2 425.5 247.0 429.0 253.0C432.5 259.0 440.2 264.6 444.4 270.6C448.6 276.6 455.4 283.0 455.4 290.4C455.4 297.8 445.1 307.6 444.4 316.8C443.7 326.0 449.6 339.9 451.0 347.6C452.4 355.3 451.4 357.5 453.2 365.2C455.0 372.9 459.9 388.3 462.0 396.0C464.1 403.7 462.9 409.4 466.4 413.6C469.9 417.8 479.4 419.7 484.0 422.4C488.6 425.1 499.2 425.7 495.0 430.3C490.8 434.9 470.6 445.2 457.6 451.0C444.6 456.8 427.7 461.8 413.6 466.4C399.5 471.0 383.7 477.1 369.6 479.6C355.5 482.1 338.3 482.9 325.6 481.8C312.9 480.7 302.0 473.7 290.4 473.0C278.8 472.3 261.4 480.6 253.0 477.4C244.6 474.2 241.3 462.7 237.6 453.2C233.9 443.7 233.9 428.2 229.7 418.0C225.5 407.8 217.0 394.0 211.2 389.4C205.4 384.8 199.2 391.5 193.6 389.4C188.0 387.3 180.9 377.3 176.0 376.2C171.1 375.1 169.8 384.2 162.8 382.8C155.8 381.4 141.2 372.0 132.0 367.4C122.8 362.8 114.0 357.4 105.6 354.2C97.2 351.0 85.2 351.1 79.2 347.6C73.2 344.1 71.4 339.2 68.2 332.2C65.0 325.2 61.9 312.4 59.4 303.6C56.9 294.8 56.3 284.9 52.8 277.2C49.3 269.5 43.0 261.5 37.4 255.2C31.8 248.9 21.1 244.6 17.6 237.6C14.1 230.6 15.3 219.6 15.4 211.2C15.5 202.8 17.1 192.2 18.5 184.8C19.9 177.4 20.1 169.9 24.2 165.0C28.3 160.1 38.4 160.0 44.0 154.0C49.6 148.0 54.8 134.3 59.4 127.6C64.0 120.9 72.2 116.8 72.6 112.2C73.0 107.6 64.6 103.6 61.6 99.0C58.6 94.4 54.0 87.8 53.7 83.6C53.3 79.4 56.6 79.3 59.4 72.6C62.2 65.9 71.8 50.9 71.3 41.8C70.8 32.7 55.1 20.4 56.3 15.8Z"/>
-        <path class="tz-fill" d="M56.3 15.8C57.6 11.3 70.3 13.6 79.2 13.2C88.1 12.8 106.6 10.7 112.2 13.2C117.8 15.7 114.6 21.9 114.4 28.6C114.2 35.3 110.2 46.6 110.9 55.0C111.6 63.4 114.0 77.9 118.8 81.4C123.6 84.9 133.8 76.6 140.8 77.0C147.8 77.4 158.9 85.0 162.8 83.6C166.7 82.2 161.8 70.2 165.0 68.2C168.2 66.2 176.3 72.0 182.6 71.3C188.9 70.6 201.6 68.0 204.6 63.8C207.6 59.6 202.2 50.5 201.5 44.9C200.8 39.2 198.3 33.3 200.2 28.6C202.1 23.9 203.2 12.9 213.4 15.4C223.6 17.9 247.5 34.5 264.0 44.0C280.5 53.5 299.9 65.6 316.8 74.8C333.7 84.0 360.1 92.8 369.6 101.2C379.1 109.6 369.2 119.5 376.2 127.6C383.2 135.7 403.4 144.4 413.6 151.8C423.8 159.2 436.6 167.1 440.0 173.8C443.4 180.5 436.7 188.0 434.7 193.6C432.7 199.2 429.7 202.7 427.7 209.0C425.7 215.3 422.2 226.2 422.4 233.2C422.6 240.2 425.5 247.0 429.0 253.0C432.5 259.0 440.2 264.6 444.4 270.6C448.6 276.6 455.4 283.0 455.4 290.4C455.4 297.8 445.1 307.6 444.4 316.8C443.7 326.0 449.6 339.9 451.0 347.6C452.4 355.3 451.4 357.5 453.2 365.2C455.0 372.9 459.9 388.3 462.0 396.0C464.1 403.7 462.9 409.4 466.4 413.6C469.9 417.8 479.4 419.7 484.0 422.4C488.6 425.1 499.2 425.7 495.0 430.3C490.8 434.9 470.6 445.2 457.6 451.0C444.6 456.8 427.7 461.8 413.6 466.4C399.5 471.0 383.7 477.1 369.6 479.6C355.5 482.1 338.3 482.9 325.6 481.8C312.9 480.7 302.0 473.7 290.4 473.0C278.8 472.3 261.4 480.6 253.0 477.4C244.6 474.2 241.3 462.7 237.6 453.2C233.9 443.7 233.9 428.2 229.7 418.0C225.5 407.8 217.0 394.0 211.2 389.4C205.4 384.8 199.2 391.5 193.6 389.4C188.0 387.3 180.9 377.3 176.0 376.2C171.1 375.1 169.8 384.2 162.8 382.8C155.8 381.4 141.2 372.0 132.0 367.4C122.8 362.8 114.0 357.4 105.6 354.2C97.2 351.0 85.2 351.1 79.2 347.6C73.2 344.1 71.4 339.2 68.2 332.2C65.0 325.2 61.9 312.4 59.4 303.6C56.9 294.8 56.3 284.9 52.8 277.2C49.3 269.5 43.0 261.5 37.4 255.2C31.8 248.9 21.1 244.6 17.6 237.6C14.1 230.6 15.3 219.6 15.4 211.2C15.5 202.8 17.1 192.2 18.5 184.8C19.9 177.4 20.1 169.9 24.2 165.0C28.3 160.1 38.4 160.0 44.0 154.0C49.6 148.0 54.8 134.3 59.4 127.6C64.0 120.9 72.2 116.8 72.6 112.2C73.0 107.6 64.6 103.6 61.6 99.0C58.6 94.4 54.0 87.8 53.7 83.6C53.3 79.4 56.6 79.3 59.4 72.6C62.2 65.9 71.8 50.9 71.3 41.8C70.8 32.7 55.1 20.4 56.3 15.8Z"/>
-        <path class="tz-land" d="M56.3 15.8C57.6 11.3 70.3 13.6 79.2 13.2C88.1 12.8 106.6 10.7 112.2 13.2C117.8 15.7 114.6 21.9 114.4 28.6C114.2 35.3 110.2 46.6 110.9 55.0C111.6 63.4 114.0 77.9 118.8 81.4C123.6 84.9 133.8 76.6 140.8 77.0C147.8 77.4 158.9 85.0 162.8 83.6C166.7 82.2 161.8 70.2 165.0 68.2C168.2 66.2 176.3 72.0 182.6 71.3C188.9 70.6 201.6 68.0 204.6 63.8C207.6 59.6 202.2 50.5 201.5 44.9C200.8 39.2 198.3 33.3 200.2 28.6C202.1 23.9 203.2 12.9 213.4 15.4C223.6 17.9 247.5 34.5 264.0 44.0C280.5 53.5 299.9 65.6 316.8 74.8C333.7 84.0 360.1 92.8 369.6 101.2C379.1 109.6 369.2 119.5 376.2 127.6C383.2 135.7 403.4 144.4 413.6 151.8C423.8 159.2 436.6 167.1 440.0 173.8C443.4 180.5 436.7 188.0 434.7 193.6C432.7 199.2 429.7 202.7 427.7 209.0C425.7 215.3 422.2 226.2 422.4 233.2C422.6 240.2 425.5 247.0 429.0 253.0C432.5 259.0 440.2 264.6 444.4 270.6C448.6 276.6 455.4 283.0 455.4 290.4C455.4 297.8 445.1 307.6 444.4 316.8C443.7 326.0 449.6 339.9 451.0 347.6C452.4 355.3 451.4 357.5 453.2 365.2C455.0 372.9 459.9 388.3 462.0 396.0C464.1 403.7 462.9 409.4 466.4 413.6C469.9 417.8 479.4 419.7 484.0 422.4C488.6 425.1 499.2 425.7 495.0 430.3C490.8 434.9 470.6 445.2 457.6 451.0C444.6 456.8 427.7 461.8 413.6 466.4C399.5 471.0 383.7 477.1 369.6 479.6C355.5 482.1 338.3 482.9 325.6 481.8C312.9 480.7 302.0 473.7 290.4 473.0C278.8 472.3 261.4 480.6 253.0 477.4C244.6 474.2 241.3 462.7 237.6 453.2C233.9 443.7 233.9 428.2 229.7 418.0C225.5 407.8 217.0 394.0 211.2 389.4C205.4 384.8 199.2 391.5 193.6 389.4C188.0 387.3 180.9 377.3 176.0 376.2C171.1 375.1 169.8 384.2 162.8 382.8C155.8 381.4 141.2 372.0 132.0 367.4C122.8 362.8 114.0 357.4 105.6 354.2C97.2 351.0 85.2 351.1 79.2 347.6C73.2 344.1 71.4 339.2 68.2 332.2C65.0 325.2 61.9 312.4 59.4 303.6C56.9 294.8 56.3 284.9 52.8 277.2C49.3 269.5 43.0 261.5 37.4 255.2C31.8 248.9 21.1 244.6 17.6 237.6C14.1 230.6 15.3 219.6 15.4 211.2C15.5 202.8 17.1 192.2 18.5 184.8C19.9 177.4 20.1 169.9 24.2 165.0C28.3 160.1 38.4 160.0 44.0 154.0C49.6 148.0 54.8 134.3 59.4 127.6C64.0 120.9 72.2 116.8 72.6 112.2C73.0 107.6 64.6 103.6 61.6 99.0C58.6 94.4 54.0 87.8 53.7 83.6C53.3 79.4 56.6 79.3 59.4 72.6C62.2 65.9 71.8 50.9 71.3 41.8C70.8 32.7 55.1 20.4 56.3 15.8Z"/>
-        <path class="tz-line" pathLength="1" d="M56.3 15.8C57.6 11.3 70.3 13.6 79.2 13.2C88.1 12.8 106.6 10.7 112.2 13.2C117.8 15.7 114.6 21.9 114.4 28.6C114.2 35.3 110.2 46.6 110.9 55.0C111.6 63.4 114.0 77.9 118.8 81.4C123.6 84.9 133.8 76.6 140.8 77.0C147.8 77.4 158.9 85.0 162.8 83.6C166.7 82.2 161.8 70.2 165.0 68.2C168.2 66.2 176.3 72.0 182.6 71.3C188.9 70.6 201.6 68.0 204.6 63.8C207.6 59.6 202.2 50.5 201.5 44.9C200.8 39.2 198.3 33.3 200.2 28.6C202.1 23.9 203.2 12.9 213.4 15.4C223.6 17.9 247.5 34.5 264.0 44.0C280.5 53.5 299.9 65.6 316.8 74.8C333.7 84.0 360.1 92.8 369.6 101.2C379.1 109.6 369.2 119.5 376.2 127.6C383.2 135.7 403.4 144.4 413.6 151.8C423.8 159.2 436.6 167.1 440.0 173.8C443.4 180.5 436.7 188.0 434.7 193.6C432.7 199.2 429.7 202.7 427.7 209.0C425.7 215.3 422.2 226.2 422.4 233.2C422.6 240.2 425.5 247.0 429.0 253.0C432.5 259.0 440.2 264.6 444.4 270.6C448.6 276.6 455.4 283.0 455.4 290.4C455.4 297.8 445.1 307.6 444.4 316.8C443.7 326.0 449.6 339.9 451.0 347.6C452.4 355.3 451.4 357.5 453.2 365.2C455.0 372.9 459.9 388.3 462.0 396.0C464.1 403.7 462.9 409.4 466.4 413.6C469.9 417.8 479.4 419.7 484.0 422.4C488.6 425.1 499.2 425.7 495.0 430.3C490.8 434.9 470.6 445.2 457.6 451.0C444.6 456.8 427.7 461.8 413.6 466.4C399.5 471.0 383.7 477.1 369.6 479.6C355.5 482.1 338.3 482.9 325.6 481.8C312.9 480.7 302.0 473.7 290.4 473.0C278.8 472.3 261.4 480.6 253.0 477.4C244.6 474.2 241.3 462.7 237.6 453.2C233.9 443.7 233.9 428.2 229.7 418.0C225.5 407.8 217.0 394.0 211.2 389.4C205.4 384.8 199.2 391.5 193.6 389.4C188.0 387.3 180.9 377.3 176.0 376.2C171.1 375.1 169.8 384.2 162.8 382.8C155.8 381.4 141.2 372.0 132.0 367.4C122.8 362.8 114.0 357.4 105.6 354.2C97.2 351.0 85.2 351.1 79.2 347.6C73.2 344.1 71.4 339.2 68.2 332.2C65.0 325.2 61.9 312.4 59.4 303.6C56.9 294.8 56.3 284.9 52.8 277.2C49.3 269.5 43.0 261.5 37.4 255.2C31.8 248.9 21.1 244.6 17.6 237.6C14.1 230.6 15.3 219.6 15.4 211.2C15.5 202.8 17.1 192.2 18.5 184.8C19.9 177.4 20.1 169.9 24.2 165.0C28.3 160.1 38.4 160.0 44.0 154.0C49.6 148.0 54.8 134.3 59.4 127.6C64.0 120.9 72.2 116.8 72.6 112.2C73.0 107.6 64.6 103.6 61.6 99.0C58.6 94.4 54.0 87.8 53.7 83.6C53.3 79.4 56.6 79.3 59.4 72.6C62.2 65.9 71.8 50.9 71.3 41.8C70.8 32.7 55.1 20.4 56.3 15.8Z"/>
-        <ellipse class="tz-isl" cx="446.6" cy="237.6" rx="5" ry="17" transform="rotate(-12 446.6 237.6)"/><ellipse class="tz-isl" cx="464.2" cy="198.0" rx="4" ry="12" transform="rotate(-15 464.2 198.0)"/><ellipse class="tz-isl" cx="462.9" cy="314.6" rx="4" ry="9" transform="rotate(-20 462.9 314.6)"/>
-        <text class="tz-lake" x="120" y="44">L. Victoria</text>
-        <text class="tz-lake" x="2" y="300" transform="rotate(62 2 300)">L. Tanganyika</text>
-        <text class="tz-lake" x="482" y="372" transform="rotate(90 482 372)">INDIAN OCEAN</text>
-        <path id="a0" class="tz-arc" d="M443.5 268.4Q373.4 210.9 287.8 240.7" style="--d:1.60s"/>
-<path id="a1" class="tz-arc" d="M443.5 268.4Q428.6 160.9 329.1 117.5" style="--d:1.72s"/>
-<path id="a2" class="tz-arc" d="M443.5 268.4Q342.2 116.1 162.8 80.1" style="--d:1.84s"/>
-<path id="a3" class="tz-arc" d="M443.5 268.4Q291.7 248.8 187.4 360.8" style="--d:1.96s"/>
-<path id="a4" class="tz-arc" d="M443.5 268.4Q244.9 157.5 18.9 183.9" style="--d:2.08s"/>
-<path id="a5" class="tz-arc" d="M443.5 268.4Q506.1 333.7 483.1 421.1" style="--d:2.20s"/>
-<path id="a6" class="tz-arc" d="M443.5 268.4Q460.9 228.1 435.6 192.3" style="--d:2.32s"/>
-<path id="a7" class="tz-arc" d="M443.5 268.4Q352.8 245.6 286.0 311.1" style="--d:2.44s"/>
-<path id="a8" class="tz-arc" d="M443.5 268.4Q315.9 309.0 283.8 439.1" style="--d:2.56s"/>
-<path id="a9" class="tz-arc" d="M443.5 268.4Q319.5 161.7 158.4 190.1" style="--d:2.68s"/>
-<path id="a10" class="tz-arc" d="M443.5 268.4Q449.6 253.3 440.0 240.2" style="--d:2.80s"/>
-        <circle class="tz-pkt" r="2.6" opacity="0"><set attributeName="opacity" to="1" begin="2.20s"/><animateMotion dur="2.60s" begin="2.20s" repeatCount="indefinite"><mpath href="#a0"/></animateMotion></circle>
-<circle class="tz-pkt" r="2.6" opacity="0"><set attributeName="opacity" to="1" begin="2.57s"/><animateMotion dur="3.15s" begin="2.57s" repeatCount="indefinite"><mpath href="#a1"/></animateMotion></circle>
-<circle class="tz-pkt" r="2.6" opacity="0"><set attributeName="opacity" to="1" begin="2.94s"/><animateMotion dur="3.70s" begin="2.94s" repeatCount="indefinite"><mpath href="#a2"/></animateMotion></circle>
-<circle class="tz-pkt" r="2.6" opacity="0"><set attributeName="opacity" to="1" begin="3.31s"/><animateMotion dur="4.25s" begin="3.31s" repeatCount="indefinite"><mpath href="#a3"/></animateMotion></circle>
-<circle class="tz-pkt" r="2.6" opacity="0"><set attributeName="opacity" to="1" begin="3.68s"/><animateMotion dur="2.60s" begin="3.68s" repeatCount="indefinite"><mpath href="#a4"/></animateMotion></circle>
-<circle class="tz-pkt" r="2.6" opacity="0"><set attributeName="opacity" to="1" begin="4.05s"/><animateMotion dur="3.15s" begin="4.05s" repeatCount="indefinite"><mpath href="#a5"/></animateMotion></circle>
-<circle class="tz-pkt" r="2.6" opacity="0"><set attributeName="opacity" to="1" begin="4.42s"/><animateMotion dur="3.70s" begin="4.42s" repeatCount="indefinite"><mpath href="#a6"/></animateMotion></circle>
-<circle class="tz-pkt" r="2.6" opacity="0"><set attributeName="opacity" to="1" begin="4.79s"/><animateMotion dur="4.25s" begin="4.79s" repeatCount="indefinite"><mpath href="#a7"/></animateMotion></circle>
-<circle class="tz-pkt" r="2.6" opacity="0"><set attributeName="opacity" to="1" begin="5.16s"/><animateMotion dur="2.60s" begin="5.16s" repeatCount="indefinite"><mpath href="#a8"/></animateMotion></circle>
-<circle class="tz-pkt" r="2.6" opacity="0"><set attributeName="opacity" to="1" begin="5.53s"/><animateMotion dur="3.15s" begin="5.53s" repeatCount="indefinite"><mpath href="#a9"/></animateMotion></circle>
-<circle class="tz-pkt" r="2.6" opacity="0"><set attributeName="opacity" to="1" begin="5.90s"/><animateMotion dur="3.70s" begin="5.90s" repeatCount="indefinite"><mpath href="#a10"/></animateMotion></circle>
-        <g class="tz-node tz-node--hq" style="--d:1.20s"><circle class="tz-ring" cx="443.5" cy="268.4" r="9"/><circle class="tz-dot" cx="443.5" cy="268.4" r="4.5"/></g>
-<g class="tz-node" style="--d:1.29s"><circle class="tz-ring" cx="287.8" cy="240.7" r="6"/><circle class="tz-dot" cx="287.8" cy="240.7" r="3"/></g>
-<g class="tz-node" style="--d:1.38s"><circle class="tz-ring" cx="329.1" cy="117.5" r="6"/><circle class="tz-dot" cx="329.1" cy="117.5" r="3"/></g>
-<g class="tz-node" style="--d:1.47s"><circle class="tz-ring" cx="162.8" cy="80.1" r="6"/><circle class="tz-dot" cx="162.8" cy="80.1" r="3"/></g>
-<g class="tz-node" style="--d:1.56s"><circle class="tz-ring" cx="187.4" cy="360.8" r="6"/><circle class="tz-dot" cx="187.4" cy="360.8" r="3"/></g>
-<g class="tz-node" style="--d:1.65s"><circle class="tz-ring" cx="440.0" cy="240.2" r="6"/><circle class="tz-dot" cx="440.0" cy="240.2" r="3"/></g>
-<g class="tz-node" style="--d:1.74s"><circle class="tz-ring" cx="18.9" cy="183.9" r="6"/><circle class="tz-dot" cx="18.9" cy="183.9" r="3"/></g>
-<g class="tz-node" style="--d:1.83s"><circle class="tz-ring" cx="483.1" cy="421.1" r="6"/><circle class="tz-dot" cx="483.1" cy="421.1" r="3"/></g>
-<g class="tz-node" style="--d:1.92s"><circle class="tz-ring" cx="435.6" cy="192.3" r="6"/><circle class="tz-dot" cx="435.6" cy="192.3" r="3"/></g>
-<g class="tz-node" style="--d:2.01s"><circle class="tz-ring" cx="286.0" cy="311.1" r="6"/><circle class="tz-dot" cx="286.0" cy="311.1" r="3"/></g>
-<g class="tz-node" style="--d:2.10s"><circle class="tz-ring" cx="372.2" cy="269.3" r="6"/><circle class="tz-dot" cx="372.2" cy="269.3" r="3"/></g>
-<g class="tz-node" style="--d:2.19s"><circle class="tz-ring" cx="283.8" cy="439.1" r="6"/><circle class="tz-dot" cx="283.8" cy="439.1" r="3"/></g>
-<g class="tz-node" style="--d:2.28s"><circle class="tz-ring" cx="158.4" cy="190.1" r="6"/><circle class="tz-dot" cx="158.4" cy="190.1" r="3"/></g>
-        <text class="tz-lbl tz-lbl--hq" x="434.5" y="288.4" text-anchor="end">DAR ES SALAAM · HQ</text>
-<text class="tz-lbl" x="296.8" y="244.7" text-anchor="start">DODOMA</text>
-<text class="tz-lbl" x="338.1" y="121.5" text-anchor="start">ARUSHA</text>
-<text class="tz-lbl" x="171.8" y="84.1" text-anchor="start">MWANZA</text>
-<text class="tz-lbl" x="196.4" y="364.8" text-anchor="start">MBEYA</text>
-<text class="tz-lbl" x="27.9" y="187.9" text-anchor="start">KIGOMA</text>
-<text class="tz-lbl" x="474.1" y="425.1" text-anchor="end">MTWARA</text>
-<text class="tz-lbl" x="426.6" y="196.3" text-anchor="end">TANGA</text>
-<text class="tz-lbl" x="295.0" y="315.1" text-anchor="start">IRINGA</text>
-<text class="tz-lbl" x="381.2" y="273.3" text-anchor="start">MOROGORO</text>
-<text class="tz-lbl" x="292.8" y="443.1" text-anchor="start">SONGEA</text>
-<text class="tz-lbl" x="167.4" y="194.1" text-anchor="start">TABORA</text>
-<text class="tz-lbl" x="452.0" y="232.2" text-anchor="start">ZANZIBAR</text>
-      </svg>
+    <div class="devs" aria-label="JamiiTek websites, apps and WhatsApp bots on desktop, laptop, tablet and phone">
+      <span class="devs__glow" aria-hidden="true"></span>
+      <span class="devs__floor" aria-hidden="true"></span>
+      <div class="devs__img">
+        <img src="{% static 'images/hero-devices.webp' %}"
+             srcset="{% static 'images/hero-devices-800.webp' %} 844w, {% static 'images/hero-devices.webp' %} 1266w"
+             sizes="(min-width:1060px) 760px, 94vw" width="1266" height="849" fetchpriority="high" decoding="async"
+             alt="JamiiTek websites on a desktop, laptop, tablet and phone">
+        <span class="devs__shine" aria-hidden="true" style="--m:url('{% static 'images/hero-devices.webp' %}')"></span>
+      </div>
       <div class="float f-bot" style="animation-delay:2.9s,3.8s">
         <div class="who"><i><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2z"/></svg></i><span>JamiiBot<small>● online · replies in 2s</small></span></div>
         <p class="msg">Karibu! 👋 Naweza kukusaidia kupata website, domain au bot ya WhatsApp leo.</p>
-      </div>
-      <div class="float f-term term" data-seq="term" data-step="700" data-hold="3800">
-        <div class="bar" data-static><i></i><i></i><i></i></div>
-        <p><span class="c">~/jamiitek $</span> deploy biashara.co.tz</p>
-        <p>› building … <span class="ok">done</span></p>
-        <p>› SSL certificate <span class="ok">✓ issued</span></p>
-        <p>› CDN · Dar → Mwanza → Arusha <span class="ok">✓</span></p>
-        <p class="cur"><span class="ok">● live</span> in 1.2s</p>
       </div>
     </div>
 
@@ -600,6 +540,22 @@
 {% endblock %}
 
 {% block scripts %}
+<script>
+/* Hero: vifaa vinainama kidogo kufuata kipanya (desktop pekee) */
+(function(){
+  var hero=document.getElementById('hero'),img=hero&&hero.querySelector('.devs__img');
+  if(!img||!matchMedia('(hover:hover) and (pointer:fine)').matches||matchMedia('(prefers-reduced-motion:reduce)').matches)return;
+  var raf=0;
+  hero.addEventListener('pointermove',function(e){
+    if(raf)return;
+    raf=requestAnimationFrame(function(){
+      raf=0;var r=hero.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;
+      img.style.setProperty('--ry',(x*7).toFixed(2)+'deg');img.style.setProperty('--rx',(-y*5).toFixed(2)+'deg');
+    });
+  });
+  hero.addEventListener('pointerleave',function(){img.style.setProperty('--ry','0deg');img.style.setProperty('--rx','0deg');});
+})();
+</script>
 <script>
 (function(){
 'use strict';
