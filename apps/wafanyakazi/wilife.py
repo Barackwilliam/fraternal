@@ -63,8 +63,20 @@ def deliver_report(text):
     """Rudisha njia iliyotumika ('wilife', 'notify') au ''."""
     if is_configured() and _post({'kind': 'report', 'worker': 'william', 'text': text}):
         return 'wilife'
-    from apps.notify import notify
-    return 'notify' if notify(_as_html(text)) else ''
+    # Bila wILife: email iliyopambwa + Telegram/Green API kama zimewekwa
+    from apps import notify
+
+    from . import ripoti_email
+    used = []
+    if ripoti_email.send(text):
+        used.append('email')
+    for backend in (notify._telegram, notify._green_api):
+        try:
+            if backend(_as_html(text)):
+                used.append(backend.__name__.strip('_'))
+        except Exception:
+            pass
+    return '+'.join(used)
 
 
 def push_approval(kazi):

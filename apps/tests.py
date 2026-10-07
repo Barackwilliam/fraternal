@@ -87,6 +87,11 @@ class TemplateSeoTest(NoPingMixin, TestCase):
         robots = self.client.get('/robots.txt').content.decode()
         self.assertIn('User-agent: GPTBot', robots)
         self.assertIn('llms.txt', robots)
+        # Kurasa zenye noindex zisizuiwe, la sivyo Google haioni noindex
+        self.assertNotIn('Disallow: /portal/', robots)
+        self.assertNotIn('/raw/', robots)
+        self.assertIn('Disallow: /manage/', robots)
+        self.assertEqual(self.client.get('/portal/register/')['X-Robots-Tag'], 'noindex, follow')
 
     def test_saving_a_template_pings_indexnow(self):
         with mock.patch('apps.indexnow.ping') as ping:

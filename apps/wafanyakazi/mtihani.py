@@ -60,7 +60,7 @@ def check(kazi, from_ai):
     checks.append((not invented, 'Hakuna kiasi kilichobuniwa' if not invented
                    else f'Kiasi kisichotoka kwenye data: {", ".join(invented[:3])}'))
 
-    if kazi.worker == 'diana' and kazi.ref.startswith('invoice:'):
+    if kazi.worker == 'diana' and kazi.ref.startswith('invoices:'):
         has_link = '/invoice/' in text
         checks.append((has_link, 'Ina link ya invoice' if has_link else 'Haina link ya invoice'))
     if kazi.recipient_name and kazi.channel in ('email', 'whatsapp'):
