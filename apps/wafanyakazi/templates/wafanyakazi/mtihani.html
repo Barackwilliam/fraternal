@@ -1,0 +1,107 @@
+{% extends 'management/base.html' %}
+{% block title %}Mtihani wa umahiri{% endblock %}
+{% block extra_css %}{% if exam and exam.status == 'running' %}<meta http-equiv="refresh" content="6">{% endif %}{% endblock %}
+{% block content %}
+<style>
+  .mt{--ok:#10d98a;--bad:#ff5a6e;--warn:#fbbf24;--blue:#3b82f6}
+  .mt-top{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+  .mt-top h1{font-family:var(--head);font-size:22px;font-weight:800;margin:0}
+  .mt-top p{color:var(--text-2);font-size:13px;margin:4px 0 0;max-width:680px;line-height:1.55}
+  .mt-b{display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 14px;border-radius:10px;font:inherit;
+    font-size:12.5px;font-weight:600;cursor:pointer;text-decoration:none;border:1px solid var(--border);
+    background:var(--card-s);color:var(--text)}
+  .mt-b.pri{background:var(--blue);border-color:var(--blue);color:#fff}
+  .mt-acts{display:flex;gap:8px;flex-wrap:wrap}.mt-acts form{margin:0}
+  .mt-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px 18px;margin-bottom:14px}
+  .mt-score{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+  .mt-score .n{font-family:var(--head);font-size:34px;font-weight:800;line-height:1}
+  .mt-score .n small{font-size:15px;color:var(--text-2)}
+  .mt-score p{margin:0;font-size:13px;color:var(--text-2);line-height:1.55;flex:1 1 300px}
+  .mt-note{font-size:12.5px;padding:10px 12px;border-radius:10px;margin-top:10px;line-height:1.5}
+  .mt-note.warn{background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.25)}
+  .mt-note.bad{background:rgba(255,90,110,.08);border:1px solid rgba(255,90,110,.25)}
+  .mt-w{border-left:3px solid var(--c)}
+  .mt-w h2{font-size:16px;margin:0;display:flex;gap:10px;align-items:center}
+  .mt-w h2 small{font-weight:500;color:var(--text-2);font-size:12.5px}
+  .mt-sum{font-size:12px;color:var(--text-2);margin-top:6px;font-family:var(--mono)}
+  .mt-s{margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}
+  .mt-s .t{font-weight:600;font-size:13.5px}
+  .mt-s .to{font-size:12px;color:var(--text-2);margin-top:3px}
+  .mt-s pre{white-space:pre-wrap;font-family:var(--body);font-size:13px;line-height:1.6;background:var(--bg2);
+    border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin:10px 0 8px;color:var(--text)}
+  .mt-chk{display:flex;gap:6px;flex-wrap:wrap}
+  .mt-chk span{font-size:11.5px;padding:3px 9px;border-radius:999px;border:1px solid}
+  .mt-chk .y{color:var(--ok);border-color:rgba(16,217,138,.3);background:rgba(16,217,138,.08)}
+  .mt-chk .x{color:var(--bad);border-color:rgba(255,90,110,.3);background:rgba(255,90,110,.08)}
+  .mt-empty{font-size:13px;color:var(--text-2);margin-top:10px}
+  .mt-run{display:flex;gap:12px;align-items:center;font-size:14px}
+  .mt-spin{width:18px;height:18px;border-radius:50%;border:2px solid var(--border);border-top-color:var(--blue);animation:mt 1s linear infinite}
+  @keyframes mt{to{transform:rotate(360deg)}}
+  .mt-hist{font-size:12px;color:var(--text-2)}
+</style>
+
+<div class="mt">
+  <div class="mt-top">
+    <div>
+      <h1>🧪 Mtihani wa umahiri</h1>
+      <p>Kila mfanyakazi anafanya kazi yake kwenye data halisi ya JamiiTek na AI halisi — kisha kila kitu
+        kinarudishwa nyuma. <b>Hakuna kazi inayohifadhiwa, hakuna email wala WhatsApp inayotumwa.</b>
+        Unaona rasimu zao za mfano na ukaguzi wa kila moja.</p>
+    </div>
+    <div class="mt-acts">
+      <a class="mt-b" href="{% url 'wafanyakazi_dashboard' %}"><i class="fas fa-arrow-left"></i> Timu</a>
+      <form method="post">{% csrf_token %}
+        <button class="mt-b pri"{% if exam.status == 'running' %} disabled{% endif %}>🧪 Anza mtihani mpya</button></form>
+    </div>
+  </div>
+
+  {% if not exam %}
+    <div class="mt-card">Bado hakuna mtihani. Bonyeza <b>Anza mtihani mpya</b>.</div>
+  {% elif exam.status == 'running' %}
+    <div class="mt-card mt-run"><div class="mt-spin"></div> Timu inafanya mtihani… (ukurasa unajisasisha)</div>
+  {% elif r.error %}
+    <div class="mt-card"><div class="mt-note bad">{{ r.error }}</div></div>
+  {% else %}
+    <div class="mt-card">
+      <div class="mt-score">
+        <div class="n">{{ r.score.passed }}<small> / {{ r.score.total }}</small></div>
+        <p>Vipimo vilivyopita — {{ exam.finished_at|date:"d/m/Y H:i" }}.<br>
+          Ibrahimu anaitambua: {% for b in r.bots %}<b>{{ b }}</b>{% if not forloop.last %}, {% endif %}{% empty %}<b style="color:var(--bad)">hakuna bot yenye jina JamiiBot</b>{% endfor %}</p>
+      </div>
+      {% if not r.groq %}
+      <div class="mt-note warn">GROQ_API_KEY haijawekwa — rasimu zote ni template za kawaida. Weka key ili kupima AI.</div>
+      {% endif %}
+    </div>
+
+    {% for w in r.workers %}
+    <div class="mt-card mt-w" style="--c:{{ w.color }}">
+      <h2>{{ w.icon }} {{ w.name }} <small>{{ w.role }} · kazi {{ w.found }} zimeonekana</small></h2>
+      {% if w.summary %}<div class="mt-sum">{% for k, v in w.summary.items %}{{ k }}: {{ v }}{% if not forloop.last %} · {% endif %}{% endfor %}</div>{% endif %}
+      {% if w.error %}<div class="mt-note bad">Hitilafu: {{ w.error }}</div>{% endif %}
+      {% if w.ai_failed %}<div class="mt-note warn">Maombi {{ w.ai_failed }} ya AI yalishindwa — template ilitumika.</div>{% endif %}
+      {% for s in w.samples %}
+      <div class="mt-s">
+        <div class="t">{{ s.title }}</div>
+        <div class="to">{{ s.channel }}{% if s.to %} → {{ s.to }}{% endif %}{% if s.subject %} · <i>{{ s.subject }}</i>{% endif %}</div>
+        <pre>{{ s.draft }}</pre>
+        <div class="mt-chk">{% for c in s.checks %}<span class="{% if c.ok %}y{% else %}x{% endif %}">{% if c.ok %}✓{% else %}✗{% endif %} {{ c.text }}</span>{% endfor %}</div>
+      </div>
+      {% empty %}
+      <div class="mt-empty">Hakuna rasimu — hakuna data ya kufanyia kazi kwa sasa.</div>
+      {% endfor %}
+    </div>
+    {% endfor %}
+
+    <div class="mt-card mt-w" style="--c:#2563eb">
+      <h2>👔 William <small>Mpango wa asubuhi ungekuwa hivi{% if r.william_ai %} · kipaumbele kimeandikwa na AI{% endif %}</small></h2>
+      <div class="mt-s" style="border:0;padding-top:0"><pre>{{ r.william }}</pre></div>
+    </div>
+  {% endif %}
+
+  {% if history %}
+  <div class="mt-hist">Mitihani iliyopita:
+    {% for h in history %}{{ h.created_at|date:"d/m H:i" }} ({% if h.result.score %}{{ h.result.score.passed }}/{{ h.result.score.total }}{% else %}{{ h.get_status_display }}{% endif %}){% if not forloop.last %} · {% endif %}{% endfor %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

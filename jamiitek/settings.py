@@ -77,6 +77,7 @@ INSTALLED_APPS = [
     'django.contrib.humanize',
     'apps',
     'apps.chatbot',
+    'apps.wafanyakazi',
     'cloudinary',
     'builder',
 ]

@@ -19,6 +19,7 @@ from builder import views as builder_views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('apps.urls')),
+    path('', include('apps.wafanyakazi.urls')),
     path('builder/', include('builder.urls')),
     path('get-started/', builder_views.get_started, name='get_started'),
     path('chatbot/', include('apps.chatbot.urls')),

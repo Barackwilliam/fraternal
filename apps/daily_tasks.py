@@ -15,6 +15,7 @@ RATIBA (kila kazi ina alama yake ya cache, hazitegemeani):
   | check_alerts               | dakika 30   |
   | check_bot_sessions         | dakika 10   |
   | check_handoffs             | dakika 10   |
+  | wafanyakazi (timu ya AI)   | dakika 30   |
   | auto_suspend               | siku        |
   | send_expiry_emails         | siku        |
   | send_digest                | siku        |
@@ -64,6 +65,7 @@ SCHEDULE = {
     'check_bot_sessions':        ('jamiitek:task:bot_sessions',        10 * MINUTE),
     'check_handoffs':            ('jamiitek:task:handoffs',            10 * MINUTE),
     'check_custom_domains':      ('jamiitek:task:custom_domains',      15 * MINUTE),
+    'wafanyakazi':               ('jamiitek:task:wafanyakazi',         30 * MINUTE),
     'send_digest':               ('jamiitek:task:send_digest',         24 * 60 * MINUTE),
     'prune_site_imports':        ('jamiitek:task:prune_site_imports',  24 * 60 * MINUTE),
     'prune_snapshots':           ('jamiitek:task:prune_snapshots',      7 * 24 * 60 * MINUTE),
@@ -74,7 +76,7 @@ SCHEDULE = {
 }
 
 PERIODIC = ('sync_integrations', 'process_scheduled_actions', 'check_alerts',
-            'check_bot_sessions', 'check_handoffs', 'check_custom_domains')
+            'check_bot_sessions', 'check_handoffs', 'check_custom_domains', 'wafanyakazi')
 
 _thread_lock = threading.Lock()
 _running = False           # kazi za kila siku
@@ -152,6 +154,10 @@ def _run_periodic_in_background():
         # Domain za wateja zinazosubiri DNS/SSL. Mteja anapoweka DNS
         # usiku, website inakuwa Live bila mtu kubonyeza "Kagua".
         _run_command('check_custom_domains', quiet=True)
+
+        # Timu ya wafanyakazi wa AI (apps/wafanyakazi). Wa mwisho kwa
+        # sababu inaweza kuita AI — kazi za afya zisisubiri.
+        _run_command('wafanyakazi')
     finally:
         _close_connection()
         with _thread_lock:
