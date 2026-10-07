@@ -1,0 +1,5 @@
+{% extends 'emails/base_email.html' %}
+{% block content %}
+{% for p in paragraphs %}<p style="white-space:pre-line">{{ p|urlize }}</p>
+{% endfor %}
+{% endblock %}

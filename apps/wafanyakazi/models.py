@@ -1,0 +1,125 @@
+from django.db import models
+from django.utils import timezone
+
+from .team import CHOICES
+
+
+class Kazi(models.Model):
+    """
+    Kazi moja ya mfanyakazi. `key` inazuia kazi ileile kuundwa mara mbili:
+    invoice moja iliyochelewa ni kazi moja, hata mzunguko ukipita mara 50.
+    """
+
+    OPEN, AWAITING, SENT, DONE, DISMISSED = 'open', 'awaiting', 'sent', 'done', 'dismissed'
+    STATUS = [
+        (OPEN, 'Inafanyiwa kazi'),
+        (AWAITING, 'Inasubiri idhini yako'),
+        (SENT, 'Imetumwa'),
+        (DONE, 'Imekamilika'),
+        (DISMISSED, 'Imeachwa'),
+    ]
+    LIVE = (OPEN, AWAITING)
+
+    CHANNELS = [
+        ('none', '—'),
+        ('email', 'Email'),
+        ('whatsapp', 'WhatsApp'),
+        ('social', 'Mitandao ya kijamii'),
+        ('faq', 'FAQ ya JamiiBot'),
+    ]
+    PRIORITY = [(1, 'Juu'), (2, 'Kawaida'), (3, 'Chini')]
+
+    worker = models.CharField(max_length=20, choices=CHOICES, db_index=True)
+    key = models.CharField(max_length=120, unique=True)
+    ref = models.CharField(max_length=60, blank=True, db_index=True,
+                           help_text='Kitu kinachohusika, mfano invoice:12')
+    title = models.CharField(max_length=200)
+    detail = models.TextField(blank=True)
+    priority = models.PositiveSmallIntegerField(choices=PRIORITY, default=2)
+    status = models.CharField(max_length=12, choices=STATUS, default=OPEN, db_index=True)
+    link = models.CharField(max_length=300, blank=True)
+
+    channel = models.CharField(max_length=10, choices=CHANNELS, default='none')
+    recipient_name = models.CharField(max_length=160, blank=True)
+    recipient_email = models.EmailField(blank=True)
+    recipient_phone = models.CharField(max_length=40, blank=True)
+    subject = models.CharField(max_length=200, blank=True)
+    draft = models.TextField(blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    reminded_at = models.DateTimeField(null=True, blank=True)
+    reminders = models.PositiveSmallIntegerField(default=0)
+    pushed_at = models.DateTimeField(null=True, blank=True,
+                                     help_text='Ilipotumwa wILife kuomba idhini')
+    wilife_code = models.CharField(max_length=12, blank=True)
+    closed_at = models.DateTimeField(null=True, blank=True)
+    result = models.CharField(max_length=400, blank=True)
+
+    class Meta:
+        ordering = ['priority', '-created_at']
+        indexes = [models.Index(fields=['worker', 'status'], name='wf_kazi_worker_status')]
+        verbose_name = 'Kazi'
+        verbose_name_plural = 'Kazi'
+
+    def __str__(self):
+        return f'{self.worker}: {self.title}'
+
+    @property
+    def is_live(self):
+        return self.status in self.LIVE
+
+    @property
+    def needs_approval(self):
+        return self.status == self.AWAITING
+
+    def close(self, status, result=''):
+        self.status = status
+        self.result = (result or '')[:400]
+        self.closed_at = timezone.now()
+        self.save(update_fields=['status', 'result', 'closed_at', 'updated_at'])
+
+
+class Ripoti(models.Model):
+    """Ripoti ya William — moja kwa kila aina kwa siku."""
+
+    KINDS = [('asubuhi', 'Mpango wa asubuhi'), ('jioni', 'Ripoti ya jioni')]
+
+    kind = models.CharField(max_length=10, choices=KINDS)
+    date = models.DateField()
+    text = models.TextField()
+    delivered = models.CharField(max_length=200, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-date', '-created_at']
+        constraints = [models.UniqueConstraint(fields=['kind', 'date'], name='wf_ripoti_kind_date')]
+        verbose_name = 'Ripoti'
+        verbose_name_plural = 'Ripoti'
+
+    def __str__(self):
+        return f'{self.get_kind_display()} {self.date}'
+
+
+class Alama(models.Model):
+    """Kumbukumbu ndogo za timu: alama ya mwisho kusomwa, mzunguko wa mwisho..."""
+
+    key = models.CharField(max_length=80, unique=True)
+    value = models.CharField(max_length=400, blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Alama'
+        verbose_name_plural = 'Alama'
+
+    def __str__(self):
+        return f'{self.key}={self.value}'
+
+    @classmethod
+    def get(cls, key, default=''):
+        row = cls.objects.filter(key=key).first()
+        return row.value if row else default
+
+    @classmethod
+    def put(cls, key, value):
+        cls.objects.update_or_create(key=key, defaults={'value': str(value)[:400]})
