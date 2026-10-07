@@ -97,6 +97,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'apps.turnstile_middleware.TurnstileMiddleware',
     'builder.middleware.SubdomainMiddleware',
+    'apps.seo.middleware.NoIndexMiddleware',
     'apps.daily_tasks.DailyTasksMiddleware',
 ]
 

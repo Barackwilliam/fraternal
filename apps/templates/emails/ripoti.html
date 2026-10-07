@@ -1,0 +1,18 @@
+{% extends 'emails/base_email.html' %}
+{% block content %}
+{% for b in blocks %}
+  {% if b.kind == 'title' %}<p class="greeting" style="margin-bottom:4px">{{ b.text }}</p>
+  {% elif b.kind == 'subtitle' %}<p style="margin:0 0 18px;font-size:13px;color:#718096">{{ b.text }}</p>
+  {% elif b.kind == 'section' %}
+    <p style="margin:22px 0 8px;font-size:15px;font-weight:700;color:#0d1230;border-bottom:1px solid #eef0f6;padding-bottom:6px">{{ b.icon }} {{ b.title }}</p>
+    {% if b.html %}<p style="margin:0 0 10px">{{ b.html|safe }}</p>{% endif %}
+  {% elif b.kind == 'item' %}
+    <p style="margin:0 0 6px;padding:8px 12px;background:#f7f8fc;border-left:3px solid #2563eb;border-radius:6px;font-size:14px;line-height:1.55">{{ b.html|safe }}</p>
+  {% elif b.kind == 'quote' %}
+    <div class="info-box" style="font-size:14px;line-height:1.65;color:#1a1a2e">{{ b.html|safe }}</div>
+  {% elif b.kind == 'button' %}
+    <div class="btn-wrap"><a href="{{ b.url }}" class="btn">{{ b.label }}</a></div>
+  {% else %}<p>{{ b.html|safe }}</p>
+  {% endif %}
+{% endfor %}
+{% endblock %}

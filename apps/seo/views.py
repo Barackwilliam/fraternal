@@ -25,7 +25,6 @@ def robots_txt(request):
         "Disallow: /chatbot/conversations/",
         "Disallow: /chatbot/billing/",
         "Disallow: /chatbot/setup/",
-        "Disallow: /portal/",
         "Disallow: /chatbot/webhook/",
         "Disallow: /chatbot/simulate/",
         "Disallow: /api/",
@@ -36,8 +35,12 @@ def robots_txt(request):
         "Allow: /chatbot/login/",
         "Allow: /bot/",
         "Allow: /templates/",
-        "Disallow: /templates/preview/*/raw/",
         "",
+        # /portal/ na /templates/preview/*/raw/ HAZIZUIWI hapa kwa makusudi.
+        # Zinatuma `X-Robots-Tag: noindex` (apps.seo.middleware). Robots.txt
+        # ikizizuia, Google haiwezi kuona noindex, na Search Console inaziripoti
+        # "Blocked by robots.txt" milele. Zikiruhusiwa, Google inazisoma na
+        # kuziondoa yenyewe.
         # AI: ChatGPT, Perplexity, Claude, Gemini n.k. ziruhusiwe wazi ili
         # templates na huduma zetu zitajwe kwenye majibu yao. Kila kundi la
         # User-agent linasimama peke yake, kwa hiyo sehemu binafsi zinarudiwa.
@@ -49,10 +52,8 @@ def robots_txt(request):
         "Allow: /",
         "Disallow: /admin/",
         "Disallow: /manage/",
-        "Disallow: /portal/",
         "Disallow: /api/",
         "Disallow: /chatbot/dashboard/",
-        "Disallow: /templates/preview/*/raw/",
         "",
         # Crawl-delay imeondolewa: Bing inaiheshimu na ingechelewesha
         # indexing ya habari mpya (makala ~10 kwa siku). Google inaipuuza.

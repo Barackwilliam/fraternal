@@ -66,7 +66,7 @@ class DianaTests(Base):
         self.assertEqual(kazi.status, Kazi.AWAITING)
         self.assertEqual(kazi.priority, 1)
         self.assertEqual(kazi.recipient_email, 'asha@example.com')
-        self.assertIn('imechelewa siku 20', kazi.title)
+        self.assertIn('imechelewa (siku 20)', kazi.title)
         self.assertIn(f'/invoice/{inv.token}/', kazi.draft)
         self.assertIn('Diana', kazi.draft)
 
@@ -79,6 +79,31 @@ class DianaTests(Base):
         inv.save()
         diana.run(self.now)
         self.assertEqual(Kazi.objects.get().status, Kazi.DONE)
+
+    def test_one_reminder_per_client_listing_all_invoices(self):
+        a = self.invoice(due_days_ago=58)
+        b = self.invoice(due_days_ago=58)
+        c = self.invoice(due_days_ago=40)
+        self.invoice(due_days_ago=30, client_email='other@example.com', client_name='Other')
+        diana.run(self.now)
+        self.assertEqual(Kazi.objects.count(), 2)
+        kazi = Kazi.objects.get(recipient_email='asha@example.com')
+        self.assertIn('invoice 3 zimechelewa (siku 58)', kazi.title)
+        self.assertIn('TZS 1,500,000', kazi.title)
+        for inv in (a, b, c):
+            self.assertIn(f'/invoice/{inv.token}/', kazi.draft)
+            self.assertIn(inv.invoice_number, kazi.detail)
+        self.assertEqual(kazi.draft.count('Habari Asha Shop'), 1)
+
+        # Moja ikilipwa: ukumbusho mpya wenye invoice 2, wa zamani unafungwa
+        c.status = 'paid'
+        c.save()
+        diana.run(self.now)
+        kazi.refresh_from_db()
+        self.assertEqual(kazi.status, Kazi.DONE)
+        fresh = Kazi.objects.get(recipient_email='asha@example.com', status=Kazi.AWAITING)
+        self.assertNotIn(f'/invoice/{c.token}/', fresh.draft)
+        self.assertIn('invoice 2 zimechelewa', fresh.title)
 
     def test_due_soon_and_far_future(self):
         self.invoice(due_days_ago=-2)
@@ -216,12 +241,19 @@ class WilliamTests(Base):
         self.invoice()
         diana.run(self.now)
         grace.run(self.now)
-        with mock.patch('apps.notify.notify', return_value=1) as sent:
-            william.run(self.now)
-            william.run(self.now)
-        self.assertEqual(sent.call_count, 1)
+        william.run(self.now)
+        william.run(self.now)
+        self.assertEqual(len(mail.outbox), 1)
         report = Ripoti.objects.get(kind='asubuhi')
-        self.assertEqual(report.delivered, 'notify')
+        self.assertEqual(report.delivered, 'email')
+        email = mail.outbox[0]
+        self.assertEqual(email.to, ['boss@example.com'])
+        self.assertNotIn('*', email.subject)
+        self.assertTrue(email.subject.startswith('👔 William — Mpango wa leo · '))
+        html = email.alternatives[0][0]
+        self.assertNotIn('*Diana', html)
+        self.assertIn('Diana · Fedha', html)
+        self.assertIn('href="https://www.jamiitek.com/manage/wafanyakazi/"', html)
         self.assertIn('William', report.text)
         self.assertIn('Zinasubiri idhini yako (1)', report.text)
         self.assertIn('Grace · Post ya leo', report.text)
@@ -245,10 +277,9 @@ class WilliamTests(Base):
         response = mock.Mock(status_code=200)
         response.json.return_value = {'ok': True}
         with mock.patch.dict('os.environ', {'WILIFE_URL': 'https://wilife.test'}), \
-                mock.patch('apps.wafanyakazi.wilife.requests.post', return_value=response) as post, \
-                mock.patch('apps.notify.notify') as notify:
+                mock.patch('apps.wafanyakazi.wilife.requests.post', return_value=response) as post:
             william.run(self.now)
-        notify.assert_not_called()
+        self.assertEqual(len(mail.outbox), 0)
         url = post.call_args[0][0]
         self.assertEqual(url, 'https://wilife.test/agent/jamiitek/')
         self.assertEqual(post.call_args[1]['headers']['X-Workers-Token'], TOKEN)

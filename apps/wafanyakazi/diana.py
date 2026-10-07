@@ -1,11 +1,14 @@
 """
 Diana — Fedha na ofisi.
 
-  • Invoice zilizopita tarehe ya kulipwa → rasimu ya kumkumbusha mteja
+  • Invoice zilizopita tarehe ya kulipwa → rasimu MOJA kwa kila mteja, ikiorodhesha
+    invoice zake zote (mteja mwenye invoice 6 anapata email moja, si 6)
   • Invoice zinazoisha ndani ya siku 3 → rasimu ya ukumbusho wa upole
   • Malipo ya JamiiBot yanayosubiri kuthibitishwa → kazi ya ofisi
   • Hesabu za wiki (kwa ripoti ya William)
 """
+import hashlib
+import re
 from datetime import timedelta
 
 from django.db.models import Sum
@@ -18,71 +21,106 @@ SLUG = 'diana'
 DUE_SOON_DAYS = 3
 
 
-def _reminder(inv, days_late):
-    who = member(SLUG)
-    balance = money(inv.balance_due, inv.currency)
-    due = inv.due_date.strftime('%d/%m/%Y')
-    link = site(inv.public_url)
+def _client(inv):
     name = inv.client_name or (inv.client.name if inv.client else '') or 'Mteja'
-    number = inv.invoice_number or f'#{inv.pk}'
+    email = inv.display_email or ''
+    phone = inv.client_phone or (inv.client.phone if inv.client else '') or ''
+    who = (email.lower() or re.sub(r'\D', '', phone) or name.lower().strip() or f'inv{inv.pk}')
+    return who, name, email, phone
 
-    if days_late > 0:
-        subject = f'Ukumbusho: invoice {number} ({balance})'
-        facts = (f"Invoice {number} ({inv.title}) ya {name} ina salio la {balance}. "
-                 f"Ilitakiwa kulipwa {due} — imechelewa siku {days_late}.")
-        fallback = (f"Habari {name},\n\nTunakukumbusha kwa heshima kwamba invoice {number} "
-                    f"({inv.title}) yenye salio la {balance} ilitakiwa kulipwa tarehe {due}. "
-                    "Kama umeshalipa, tafadhali tutumie uthibitisho ili tusasishe kumbukumbu zetu.")
+
+def _line(inv, today):
+    number = inv.invoice_number or f'#{inv.pk}'
+    late = (today - inv.due_date).days
+    when = (f'ilitakiwa {inv.due_date:%d/%m/%Y} (siku {late} zimepita)' if late > 0
+            else f'inatakiwa {inv.due_date:%d/%m/%Y}')
+    return (f"• {number} — {inv.title}: {money(inv.balance_due, inv.currency)}, {when}\n"
+            f"  {site(inv.public_url)}")
+
+
+def _reminder(group, today, late):
+    """Rasimu MOJA kwa mteja mmoja, ikiorodhesha invoice zake zote za hatua hii."""
+    who = member(SLUG)
+    invs, name = group['invoices'], group['name']
+    total = money(sum(i.balance_due for i in invs), invs[0].currency)
+    many = len(invs) > 1
+    numbers = ', '.join(i.invoice_number or f'#{i.pk}' for i in invs)
+
+    if late:
+        subject = (f'Ukumbusho: invoice {len(invs)} zinazodaiwa ({total})' if many
+                   else f'Ukumbusho: invoice {numbers} ({total})')
+        facts = (f"{name} ana invoice {len(invs)} ({numbers}) zilizopita tarehe ya kulipwa, "
+                 f"jumla ya salio {total}." if many else
+                 f"Invoice {numbers} ({invs[0].title}) ya {name} ina salio la {total} na "
+                 f"imechelewa siku {(today - invs[0].due_date).days}.")
+        fallback = (f"Habari {name},\n\nTunakukumbusha kwa heshima kuhusu "
+                    + (f"invoice {len(invs)} ambazo bado hazijalipwa, jumla ya {total}."
+                       if many else f"invoice {numbers} yenye salio la {total} ambayo muda wake wa kulipwa umepita.")
+                    + " Kama umeshalipa, tafadhali tutumie uthibitisho ili tusasishe kumbukumbu zetu.")
     else:
-        subject = f'Invoice {number} inafika tarehe {due}'
-        facts = (f"Invoice {number} ({inv.title}) ya {name} ina salio la {balance} "
-                 f"na inatakiwa kulipwa {due}.")
-        fallback = (f"Habari {name},\n\nHuu ni ukumbusho wa upole kwamba invoice {number} "
-                    f"({inv.title}) yenye salio la {balance} inatakiwa kulipwa tarehe {due}.")
+        subject = f'Invoice {numbers} inakaribia tarehe ya kulipwa'
+        facts = f"{name} ana invoice {numbers} yenye salio la {total} inayokaribia tarehe ya kulipwa."
+        fallback = (f"Habari {name},\n\nHuu ni ukumbusho wa upole kuhusu "
+                    + (f"invoice {len(invs)} zinazokaribia tarehe ya kulipwa, jumla ya {total}."
+                       if many else f"invoice {numbers} yenye salio la {total} inayokaribia tarehe ya kulipwa."))
 
     body = ai.write(
         ai.persona(who['name'], who['role']),
-        f"{facts}\nAndika ujumbe mfupi (aya 2) wa kumkumbusha mteja kulipa, kwa adabu, "
-        f"ukianza na 'Habari {name},'. Usiweke link — itaongezwa.",
-        max_tokens=300) or fallback
-    return subject, f"{body}\n\nInvoice na njia za kulipa: {link}\n\nAsante,\n{signature(SLUG)}"
+        f"{facts}\nAndika aya 1-2 tu za utangulizi za kumkumbusha mteja kulipa, kwa adabu, ukianza "
+        f"na 'Habari {name},'. Usiorodheshe invoice wala kuweka link — orodha itaongezwa chini.",
+        max_tokens=260) or fallback
+    lines = '\n'.join(_line(i, today) for i in invs)
+    return subject[:200], (f"{body}\n\n{'Invoice' if not many else 'Invoice zako'} na njia za kulipa:\n"
+                           f"{lines}\n\nAsante,\n{signature(SLUG)}")
 
 
 def _invoices(today):
     from apps.models import Invoice
 
-    seen = []
+    groups = {}
     qs = (Invoice.objects.select_related('client')
           .exclude(status__in=['draft', 'paid', 'cancelled'])
           .filter(due_date__isnull=False, due_date__lte=today + timedelta(days=DUE_SOON_DAYS))
-          .order_by('due_date')[:150])
+          .order_by('due_date', 'pk')[:300])
     for inv in qs:
         if inv.balance_due <= 0:
             continue
-        days_late = (today - inv.due_date).days
-        stage = 'late' if days_late > 0 else 'soon'
-        key = f'diana:inv:{inv.pk}:{stage}'
+        late = (today - inv.due_date).days > 0
+        who, name, email, phone = _client(inv)
+        g = groups.setdefault((who, late, inv.currency), {
+            'name': name, 'email': email, 'phone': phone, 'invoices': []})
+        g['invoices'].append(inv)
+
+    seen = []
+    for (who, late, currency), g in groups.items():
+        invs = g['invoices']
+        # Invoice zikibadilika (mpya, au moja ikilipwa), kazi mpya inaundwa yenye
+        # rasimu sahihi; ya zamani inafungwa na settle().
+        ids = '-'.join(str(i.pk) for i in sorted(invs, key=lambda i: i.pk))
+        key = f"diana:cli:{hashlib.sha1(f'{who}|{currency}|{ids}'.encode()).hexdigest()[:16]}:{'late' if late else 'soon'}"
         seen.append(key)
-        name = inv.client_name or (inv.client.name if inv.client else '') or 'Mteja'
-        email = inv.display_email
-        phone = inv.client_phone or (inv.client.phone if inv.client else '')
-        balance = money(inv.balance_due, inv.currency)
-        number = inv.invoice_number or f'#{inv.pk}'
-        if days_late > 0:
-            title = f'Invoice {number} ya {name} imechelewa siku {days_late} — {balance}'
-            priority = 1 if days_late > 14 else 2
+        total = money(sum(i.balance_due for i in invs), currency)
+        oldest = max((today - i.due_date).days for i in invs)
+        if late:
+            what = f'invoice {len(invs)} zimechelewa' if len(invs) > 1 else \
+                f'invoice {invs[0].invoice_number or invs[0].pk} imechelewa'
+            title = f'{g["name"]}: {what} (siku {oldest}) — {total}'
+            priority = 1 if oldest > 14 else 2
         else:
-            title = f'Invoice {number} ya {name} inafika {inv.due_date:%d/%m} — {balance}'
+            title = f'{g["name"]}: invoice {len(invs)} zinakaribia tarehe ya kulipwa — {total}'
             priority = 3
-        found(SLUG, key, title,
-              draft=(lambda inv=inv, d=days_late: _reminder(inv, d)) if (email or phone) else None,
-              ref=f'invoice:{inv.pk}', priority=priority,
-              detail=f'{inv.title} · salio {balance} · tarehe ya kulipa {inv.due_date:%d/%m/%Y}',
-              link=site(f'/manage/invoices/{inv.pk}/edit/'),
-              channel='email' if email else ('whatsapp' if phone else 'none'),
-              recipient_name=name, recipient_email=email or '', recipient_phone=phone or '')
-    settle(SLUG, 'diana:inv:', seen, 'Invoice imelipwa au imebadilishwa.')
-    return len(seen)
+        found(SLUG, key, title[:200],
+              draft=(lambda g=g, late=late: _reminder(g, today, late)) if (g['email'] or g['phone']) else None,
+              ref=f"invoices:{ids}"[:60], priority=priority,
+              detail='\n'.join(f"{i.invoice_number or i.pk} · {i.title} · {money(i.balance_due, i.currency)} · "
+                               f"{i.due_date:%d/%m/%Y}" for i in invs)[:2000],
+              link=site(f'/manage/invoices/{invs[0].pk}/edit/' if len(invs) == 1 else '/manage/invoices/'),
+              channel='email' if g['email'] else ('whatsapp' if g['phone'] else 'none'),
+              recipient_name=g['name'], recipient_email=g['email'], recipient_phone=g['phone'])
+    settle(SLUG, 'diana:cli:', seen, 'Invoice zimelipwa au zimebadilika.')
+    # Kazi za mtindo wa zamani (invoice moja moja) zinafungwa
+    settle(SLUG, 'diana:inv:', [], 'Imeunganishwa kwenye ukumbusho mmoja kwa kila mteja.')
+    return sum(len(g['invoices']) for g in groups.values())
 
 
 def _bot_payments():
