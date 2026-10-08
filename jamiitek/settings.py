@@ -13,6 +13,14 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-dev-only-key-change-me')
 # Local development sets DEBUG=True in .env; Render leaves it unset so
 # production is safe by default rather than by remembering.
 DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
+# SECRET_KEY inasaini sessions, password-reset tokens na cookies. Key ya
+# default iko wazi kwenye GitHub — kwa production ingemruhusu yeyote
+# kutengeneza session ya admin. Kama ilivyo kwa DB_PASSWORD, tunakataa kuanza.
+if not DEBUG and (not SECRET_KEY or SECRET_KEY.startswith('django-insecure')):
+    raise RuntimeError(
+        'SECRET_KEY ya production haijawekwa. Weka SECRET_KEY ndefu ya siri '
+        '(herufi 50+) kwenye Render → Environment.'
+    )
 # MUHIMU: dot ya mwanzo (.jamiitek.com / .localhost) inaruhusu SUBDOMAINS ZOTE.
 # 'localhost' pekee HAIRUHUSU duka.localhost — lazima '.localhost' iwepo.
 ALLOWED_HOSTS = [h.strip() for h in os.getenv(
@@ -45,12 +53,26 @@ if not DEBUG:
     SECURE_CONTENT_TYPE_NOSNIFF = True
     SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
     X_FRAME_OPTIONS = 'SAMEORIGIN'
-    # HSTS ni "sticky" (browser inaikumbuka), kwa hiyo default ni 0
-    # (imezimwa) mpaka uwe tayari. Weka HSTS_SECONDS=31536000 ukiwa
-    # umehakikisha kila kitu kiko https.
-    SECURE_HSTS_SECONDS = int(os.getenv('HSTS_SECONDS', '0'))
+    # HSTS: browser inakumbuka kutumia https pekee (inazuia SSL-stripping).
+    # SSL_REDIRECT tayari inalazimisha https, kwa hiyo mwaka mmoja ni salama;
+    # weka HSTS_SECONDS=0 kuzima.
+    SECURE_HSTS_SECONDS = int(os.getenv('HSTS_SECONDS', '31536000'))
     SECURE_HSTS_INCLUDE_SUBDOMAINS = os.getenv('HSTS_SUBDOMAINS', 'False').lower() == 'true'
     SECURE_HSTS_PRELOAD = False
+
+# ── Sessions & cookies ────────────────────────────────
+# Cookie za session hazisomeki na JavaScript (XSS haiwezi kuziiba), hazitumwi
+# na tovuti za nje kwenye POST (SameSite=Lax), na session inaisha baada ya
+# siku 7 baada ya kuingia.
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SAMESITE    = 'Lax'
+SESSION_COOKIE_AGE      = int(os.getenv('SESSION_COOKIE_AGE', str(7 * 24 * 3600)))
+SESSION_SAVE_EVERY_REQUEST = False
+
+# Login zote (portal, JamiiBot, builder, manage, admin) zinafungwa kwa muda
+# baada ya makosa mengi — angalia apps/security.py.
+AUTHENTICATION_BACKENDS = ['apps.security.ThrottledModelBackend']
 
 # Kwa DEV tu: ruhusu host yoyote (inarahisisha kutest custom domains kwa hosts file)
 
@@ -99,6 +121,7 @@ MIDDLEWARE = [
     'builder.middleware.SubdomainMiddleware',
     'apps.seo.middleware.NoIndexMiddleware',
     'apps.daily_tasks.DailyTasksMiddleware',
+    'apps.security.SecurityHeadersMiddleware',
 ]
 
 ROOT_URLCONF = 'jamiitek.urls'
@@ -166,7 +189,8 @@ else:
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+     'OPTIONS': {'min_length': 8}},
     {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
@@ -283,7 +307,9 @@ GROQ_API_KEY = os.getenv('GROQ_API_KEY', '')
 SITE_URL     = os.getenv('SITE_URL', 'https://www.jamiitek.com')
 
 WHATSAPP_MASTER_TOKEN         = os.getenv('WHATSAPP_MASTER_TOKEN', '')
-WHATSAPP_WEBHOOK_VERIFY_TOKEN = os.getenv('WHATSAPP_WEBHOOK_VERIFY_TOKEN', 'jamiitek_wh_2025')
+WHATSAPP_WEBHOOK_VERIFY_TOKEN = os.getenv('WHATSAPP_WEBHOOK_VERIFY_TOKEN', '')
+# App Secret ya Meta — inahitajika kuthibitisha X-Hub-Signature-256 ya webhook
+WHATSAPP_APP_SECRET           = os.getenv('WHATSAPP_APP_SECRET', '')
 WILLIAM_WHATSAPP              = os.getenv('WILLIAM_WHATSAPP', '')
 WILLIAM_PHONE_NUMBER_ID       = os.getenv('WILLIAM_PHONE_NUMBER_ID', '')
 

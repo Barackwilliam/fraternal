@@ -78,7 +78,12 @@ def check(bot, phone):
     """
     digits = ''.join(c for c in str(phone or '') if c.isdigit())
     if not digits:
-        return True, ''
+        # Wageni wa web chat wana funguo za herufi tu ('wabcdef') — awali
+        # walirukwa kabisa na kikomo. Sasa funguo yenyewe ndiyo kitambulisho.
+        digits = ''.join(c for c in str(phone or '') if c.isalnum())
+    if not digits:
+        ok, n = _hit('chat:lim:global', GLOBAL_MINUTE, 60)
+        return (True, '') if ok else (False, 'global')
 
     ok, n = _hit(f'chat:lim:m:{bot.id}:{digits}', PER_CUSTOMER_MINUTE, 60)
     if not ok:

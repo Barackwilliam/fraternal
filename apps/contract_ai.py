@@ -230,8 +230,9 @@ def _clean_html(html):
     """Ruhusu tags salama tu, na ondoa signature lines za AI."""
     html = re.sub(r'<(script|style|iframe|head|html|body)[^>]*>.*?</\1>', '', html, flags=re.DOTALL | re.I)
     html = re.sub(r'</?(?:html|head|body|script|style|iframe)[^>]*>', '', html, flags=re.I)
-    html = re.sub(r'\son\w+="[^"]*"', '', html, flags=re.I)
     html = re.sub(r'\sstyle="[^"]*"', '', html, flags=re.I)
+    from apps.html_sanitize import clean_html
+    html = clean_html(html)
     html = strip_signature_lines(html)
     return html.strip()
 

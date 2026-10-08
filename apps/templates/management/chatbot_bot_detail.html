@@ -172,7 +172,7 @@
           <div style="font-family:var(--mono);font-size:9px;color:rgba(255,255,255,.28);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px">VERIFY TOKEN</div>
           <div class="token-box mb-3">
             <span>{{ bot.webhook_verify_token }}</span>
-            <button class="copy-btn" onclick="copyText('{{ bot.webhook_verify_token }}',this)"><i class="fas fa-copy"></i> Copy</button>
+            <button class="copy-btn" onclick="copyText('{{ bot.webhook_verify_token|escapejs }}',this)"><i class="fas fa-copy"></i> Copy</button>
           </div>
           <div style="font-family:var(--mono);font-size:9px;color:rgba(255,255,255,.28);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px">MASTER TOKEN</div>
           <div style="font-size:13px;color:{% if global_token_set %}#059669{% else %}#dc2626{% endif %}">

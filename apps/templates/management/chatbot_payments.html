@@ -193,7 +193,7 @@
         <span class="dk-badge dk-badge-pending">Pending</span>
         <form method="post" action="/manage/chatbot/payments/{{ pay.id }}/verify/">
           {% csrf_token %}
-          <button type="submit" class="pact pact-verify" onclick="return confirm('Verify TZS {{ pay.amount|floatformat:0 }} from {{ pay.subscription.bot.client.business_name }}?')">
+          <button type="submit" class="pact pact-verify" onclick="return confirm('Verify TZS {{ pay.amount|floatformat:0 }} from {{ pay.subscription.bot.client.business_name|escapejs }}?')">
             <i class="fas fa-check"></i> Verify
           </button>
         </form>

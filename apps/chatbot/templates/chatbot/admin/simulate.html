@@ -65,7 +65,7 @@
     <div class="panel-head" style="margin-top:auto">Recent conversations</div>
     <div style="overflow-y:auto;flex:1">
       {% for c in conversations %}
-      <div class="conv-item" onclick="loadConv('{{ c.customer_phone }}','{{ c.customer_name|default:c.customer_phone }}')">
+      <div class="conv-item" onclick="loadConv('{{ c.customer_phone|escapejs }}','{{ c.customer_name|default:c.customer_phone|escapejs }}')">
         <div style="font-weight:600;color:var(--text)">{{ c.customer_name|default:c.customer_phone }}</div>
         <div style="color:var(--text-3)">{{ c.customer_phone }}</div>
         <div style="color:var(--text-3);font-size:10px">State: {{ c.metadata.state|default:"?" }}</div>
@@ -185,7 +185,11 @@ function loadConv(phone, name){
   document.getElementById('contact-input').value = name;
   document.getElementById('chat-phone').textContent = phone;
   document.getElementById('cur-phone').textContent = phone;
-  chatBody.innerHTML = `<div class="bubble bubble-system">Loaded session for ${name} (${phone})</div>`;
+  // textContent — jina linatoka kwa mgeni wa web chat / WhatsApp (si salama kwa innerHTML)
+  const sys = document.createElement('div');
+  sys.className = 'bubble bubble-system';
+  sys.textContent = `Loaded session for ${name} (${phone})`;
+  chatBody.replaceChildren(sys);
 }
 
 document.getElementById('msg-input').focus();

@@ -261,8 +261,21 @@ def web_chat(request, bot_id):
     except (json.JSONDecodeError, ValueError):
         return _cors(JsonResponse({'error': 'JSON si sahihi'}, status=400), request)
 
-    text = (data.get('message') or '').strip()
+    text = (data.get('message') or '').strip()[:2000]
     raw = _raw_visitor(data.get('visitor') or '')
+
+    # Kikomo kwa IP: mgeni anaweza kubadilisha `visitor` kila ombi, kwa hiyo
+    # kikomo cha kila mteja peke yake hakitoshi kuzuia mafuriko ya AI.
+    from apps.turnstile import get_client_ip
+    from .ratelimit import _hit
+    ip = get_client_ip(request) or 'unknown'
+    ok_m, _ = _hit(f'chat:web:ip:m:{bot.id}:{ip}', 20, 60)
+    ok_h, _ = _hit(f'chat:web:ip:h:{ip}', 300, 3600)
+    if not (ok_m and ok_h):
+        return _cors(JsonResponse({
+            'replies': ['Umetuma jumbe nyingi kwa muda mfupi. Tafadhali subiri kidogo.'],
+            'handoff': False,
+        }, status=429), request)
     contact_name = (data.get('name') or '').strip()[:60]
 
     customer_key = _customer_key(raw)
@@ -326,6 +339,7 @@ def web_chat(request, bot_id):
         'msg_type':      'text',
         'jid':           '',
         'is_lid':        False,
+        'channel':       'web',
     }
 
     from .views import _process_message

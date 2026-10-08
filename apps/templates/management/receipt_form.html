@@ -273,7 +273,7 @@
       <div class="spacer"></div>
       {% if not is_new %}
       <button type="button" class="jt-btn btn-ghost" style="color:#f87171;border-color:rgba(248,113,113,.25)"
-              onclick="if(confirm('Delete {{ receipt.receipt_number }}? This cannot be undone.')) document.getElementById('delForm').submit()">
+              onclick="if(confirm('Delete {{ receipt.receipt_number|escapejs }}? This cannot be undone.')) document.getElementById('delForm').submit()">
         <i class="fas fa-trash"></i> Delete</button>
       {% endif %}
     </div>

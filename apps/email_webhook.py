@@ -72,8 +72,11 @@ def _timestamp(payload):
 def brevo_webhook(request):
     from apps.models import EmailLog
 
+    import secrets
     expected = os.getenv('BREVO_WEBHOOK_TOKEN', '')
-    if expected and request.GET.get('token') != expected:
+    given = request.headers.get('X-Webhook-Token') or request.GET.get('token') or ''
+    # Fail closed: bila token, yeyote angeweza kuweka email za wateja "bounced"
+    if not expected or not secrets.compare_digest(given, expected):
         logger.warning('[brevo-webhook] token si sahihi')
         return JsonResponse({'ok': False, 'error': 'forbidden'}, status=403)
 

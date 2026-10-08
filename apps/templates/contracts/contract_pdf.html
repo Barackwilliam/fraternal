@@ -197,7 +197,7 @@
   <b>{% if lang == 'sw' %}IMESAINIWA KIDIJITALI{% else %}ELECTRONICALLY SIGNED{% endif %}</b><br>
   {% if lang == 'sw' %}Amesaini{% else %}Signed by{% endif %}: <b>{{ contract.signed_name }}</b>{% if contract.signed_email %} ({{ contract.signed_email }}){% endif %}
   &nbsp;·&nbsp; {{ contract.signed_at|date:'M j, Y · H:i' }} (EAT) &nbsp;·&nbsp; IP: {{ contract.signed_ip }}
-  {% if contract.signature_data %}<br><img class="sigimg" src="{{ contract.signature_data }}">{% endif %}
+  {% if contract.signature_data|slice:":22" == "data:image/png;base64," %}<br><img class="sigimg" src="{{ contract.signature_data }}">{% endif %}
 </td></tr></table>
 {% endif %}
 

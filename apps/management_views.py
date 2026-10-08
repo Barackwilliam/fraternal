@@ -12,6 +12,7 @@ from django.utils import timezone
 from django.core.mail import send_mail
 from django.conf import settings
 from django.views.decorators.http import require_GET, require_POST
+from apps.security import same_site_logout
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Sum, Count, Q
 
@@ -428,6 +429,7 @@ def schedule_action(request, pk):
 
 
 @staff_required
+@require_POST
 def cancel_scheduled_action(request, action_pk):
     action = get_object_or_404(ScheduledAction, pk=action_pk)
     wpk = action.website.pk
@@ -568,13 +570,23 @@ def management_login(request):
         user = authenticate(request, username=username, password=password)
         if user and (user.is_staff or user.is_superuser):
             login(request, user)
-            return redirect(request.POST.get('next') or '/manage/')
-        error = 'Invalid credentials or insufficient permissions.'
+            from django.utils.http import url_has_allowed_host_and_scheme
+            nxt = request.POST.get('next') or ''
+            if not url_has_allowed_host_and_scheme(nxt, allowed_hosts={request.get_host()},
+                                                   require_https=request.is_secure()):
+                nxt = '/manage/'
+            return redirect(nxt)
+        if getattr(request, 'login_locked', False):
+            from apps.security import lockout_message
+            error = lockout_message()
+        else:
+            error = 'Invalid credentials or insufficient permissions.'
     return render(request, 'management/login.html', {
         'error': error, 'next': request.GET.get('next', ''),
     })
 
 
+@same_site_logout
 def management_logout(request):
     logout(request)
     return redirect('management_login')

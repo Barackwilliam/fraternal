@@ -82,7 +82,7 @@
         {% csrf_token %}<input type="hidden" name="action" value="toggle_suspend">
         <input type="hidden" name="back" value="f={{ flt }}&q={{ q }}">
         <button class="btn sm ghost" style="{% if s.is_suspended %}border-color:var(--green);color:var(--green-2){% else %}border-color:rgba(255,84,112,.4);color:#ff8ba0{% endif %}"
-                onclick="return confirm('{% if s.is_suspended %}Reactivate{% else %}SUSPEND{% endif %} {{ s.subdomain }}?')">
+                onclick="return confirm('{% if s.is_suspended %}Reactivate{% else %}SUSPEND{% endif %} {{ s.subdomain|escapejs }}?')">
           {% if s.is_suspended %}✓ Reactivate{% else %}🚫 Suspend{% endif %}</button>
       </form>
     </div>

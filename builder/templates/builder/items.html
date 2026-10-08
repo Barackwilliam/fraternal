@@ -51,7 +51,7 @@
         <a class="btn sm" href="{% url 'builder:item_edit' site.id collection.id item.id %}">✏️ Edit</a>
         <form method="post" style="display:inline"
               action="{% url 'builder:item_delete' site.id collection.id item.id %}"
-              onsubmit="return confirm('Delete {{ item.title }}?')">
+              onsubmit="return confirm('Delete {{ item.title|escapejs }}?')">
           {% csrf_token %}<button class="btn sm danger">Delete</button>
         </form>
       </td>

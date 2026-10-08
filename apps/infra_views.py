@@ -284,7 +284,8 @@ def cron_sync(request):
         Header: X-Cron-Token: <token>
     """
     token = os.getenv('CRON_TOKEN', '')
-    if not token or request.headers.get('X-Cron-Token') != token:
+    import secrets
+    if not token or not secrets.compare_digest(request.headers.get('X-Cron-Token', ''), token):
         return HttpResponseForbidden('nope')
 
     call_command('sync_integrations', quiet=True)

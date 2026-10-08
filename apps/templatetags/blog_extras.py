@@ -97,3 +97,11 @@ def img_host(url):
         return ''
     p = urlsplit(url)
     return f'{p.scheme}://{p.netloc}' if p.netloc else ''
+
+
+@register.filter
+def clean_html(value):
+    """HTML ya makala kupitia allowlist kabla ya kuonyeshwa — hata ikihaririwa kwenye admin."""
+    from django.utils.safestring import mark_safe
+    from apps.html_sanitize import clean_html as _clean
+    return mark_safe(_clean(value))

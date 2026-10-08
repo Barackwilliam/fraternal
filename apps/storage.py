@@ -70,6 +70,22 @@ ALLOWED = {
 
 MAX_BYTES = 10 * 1024 * 1024   # 10MB
 
+# Saini ya bytes za mwanzo kwa kila aina — file la HTML lililopewa jina
+# 'picha.png' halipiti, na halihifadhiwi kama text/html kwenye bucket.
+_MAGIC = {
+    'jpg':  (b'\xff\xd8\xff',),
+    'png':  (b'\x89PNG\r\n\x1a\n',),
+    'gif':  (b'GIF87a', b'GIF89a'),
+    'pdf':  (b'%PDF-',),
+}
+
+
+def _content_matches(ext, data):
+    if ext == 'webp':
+        return data[:4] == b'RIFF' and data[8:12] == b'WEBP'
+    sigs = _MAGIC.get(ext)
+    return bool(sigs) and any(data.startswith(s) for s in sigs)
+
 
 def _base():
     return (getattr(settings, 'SUPABASE_URL', '') or '').rstrip('/')
@@ -202,7 +218,13 @@ def upload(file_obj, folder='media', filename=None, content_type=None):
         return {'success': False,
                 'error': f'File ni kubwa mno ({len(data) // 1024 // 1024}MB). Kikomo ni 10MB.'}
 
-    return _put(path, data, content_type)
+    ext = path.rsplit('.', 1)[-1]
+    if not _content_matches(ext, data):
+        return {'success': False,
+                'error': 'File hili si picha/PDF halisi. Tumia JPG, PNG, WEBP, GIF au PDF.'}
+    # Content-Type inatoka kwenye aina tuliyoithibitisha, si kwa browser
+    canonical = {v: k for k, v in ALLOWED.items()}[ext]
+    return _put(path, data, canonical)
 
 
 def upload_bytes(data, folder, ext, content_type):

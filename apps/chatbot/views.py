@@ -39,6 +39,7 @@ from .bridge import BaileysHandler
 from . import handoff
 from . import knowledge
 from . import ratelimit
+from apps.security import same_site_logout
 
 logger = logging.getLogger('chatbot.views')
 
@@ -298,14 +299,14 @@ def chatbot_register(request):
 
         if not all([username, password, email, full_name, business]):
             errors.append("Please fill in all required fields.")
-        if User.objects.filter(username=username).exists():
+        if User.objects.filter(username__iexact=username).exists():
             errors.append("That username is already taken.")
-        if User.objects.filter(email=email).exists():
+        if email and User.objects.filter(email__iexact=email).exists():
             errors.append("That email is already registered.")
         if password2 is not None and password != password2:
             errors.append("Passwords do not match.")
-        if len(password) < 8:
-            errors.append("Password must be at least 8 characters.")
+        from apps.security import password_problems
+        errors += password_problems(password, username, email, full_name)
 
         if errors:
             for e in errors:
@@ -369,11 +370,16 @@ def chatbot_login(request):
             login(request, user)
             return redirect('chatbot_dashboard')
 
-        messages.error(request, "Invalid username or password.")
+        if getattr(request, 'login_locked', False):
+            from apps.security import lockout_message
+            messages.error(request, lockout_message())
+        else:
+            messages.error(request, "Invalid username or password.")
 
     return render(request, 'chatbot/portal/login.html')
 
 
+@same_site_logout
 def chatbot_logout(request):
     logout(request)
     return redirect('chatbot_login')
@@ -502,12 +508,12 @@ def chatbot_setup_wizard(request):
                 a = request.POST.get('faq_answer', '').strip()
                 if q and a:
                     BotFAQ.objects.create(bot=bot, question=q, answer=a)
-            return redirect(request.POST.get('next') or '/chatbot/config/')
+            return redirect(_local_next(request, '/chatbot/config/'))
 
         elif action == 'delete_faq':
             if bot:
                 BotFAQ.objects.filter(id=request.POST.get('faq_id'), bot=bot).delete()
-            return redirect(request.POST.get('next') or '/chatbot/config/')
+            return redirect(_local_next(request, '/chatbot/config/'))
 
         # ── HATUA 3: Mpango + kuanza ──
         elif action == 'deploy':
@@ -528,6 +534,12 @@ def chatbot_setup_wizard(request):
                 context.update({'step': 3})
                 return render(request, 'chatbot/portal/wizard.html', context)
 
+            # Bot iliyosimamishwa na admin inarudishwa na staff tu — awali
+            # kubonyeza "Deploy" tena kuliirudisha hewani.
+            if bot.status == 'suspended' or bot.admin_suspended_reason:
+                messages.error(request, "Bot yako imesimamishwa na JamiiTek. Wasiliana na timu yetu.")
+                return redirect('chatbot_dashboard')
+
             sub, created = BotSubscription.objects.get_or_create(
                 bot=bot,
                 defaults={
@@ -537,7 +549,11 @@ def chatbot_setup_wizard(request):
                     'end_date':   date.today() + timedelta(days=7),
                 }
             )
-            if not created:
+            # Mpango unabadilika bure wakati wa trial tu. Subscription
+            # iliyolipiwa inabadilisha mpango kupitia malipo yaliyothibitishwa
+            # (billing.verify_payment) — vinginevyo mteja angejipa
+            # mpango wa "unlimited" bila kulipa.
+            if not created and sub.status == 'trial' and sub.plan_id != plan.id:
                 sub.plan = plan
                 sub.save(update_fields=['plan'])
 
@@ -741,7 +757,7 @@ def chatbot_billing(request):
     payments = sub.payments.order_by('-payment_date') if sub else []
 
     if request.method == 'POST':
-        from .billing import clean_months, parse_amount, price_for
+        from .billing import clean_months, parse_amount
         ref    = request.POST.get('transaction_ref', '').strip()[:100]
         months = clean_months(request.POST.get('months', 1))
         method = request.POST.get('payment_method', 'NMB Bank')[:60]
@@ -749,11 +765,15 @@ def chatbot_billing(request):
         plan = plans.filter(pk=plan_id).first() if str(plan_id or '').isdigit() else None
         plan = plan or (sub.plan if sub else None)
         # "15,000" ilileta Server Error — Watanzania wengi huandika kwa koma.
-        # Kiasi kisichosomeka kinachukua bei inayotarajiwa ya mpango.
-        amount = parse_amount(request.POST.get('amount')) or (price_for(plan, months) if plan else 0)
+        # Kiasi lazima kiwe kile mteja alicholipa kweli: awali kiasi
+        # kisichosomeka kilijazwa bei ya mpango, kwa hiyo malipo madogo
+        # yalionekana kwa staff kama malipo kamili ya mpango mkubwa.
+        amount = parse_amount(request.POST.get('amount'))
 
         if not ref:
             messages.error(request, "Tafadhali weka namba ya transaction.")
+        elif not amount:
+            messages.error(request, "Tafadhali weka kiasi ulicholipa (mfano 15,000).")
         elif not sub:
             messages.error(request, "Hakuna subscription. Wasiliana na usaidizi.")
         elif SubscriptionPayment.objects.filter(subscription=sub, transaction_ref__iexact=ref).exists():
@@ -779,6 +799,37 @@ def chatbot_billing(request):
 # WHATSAPP WEBHOOK — GLOBAL (routes by phone_number_id)
 # ════════════════════════════════════════════════════════
 
+def _local_next(request, default):
+    """`next` ya ndani ya tovuti tu (si open redirect)."""
+    from django.utils.http import url_has_allowed_host_and_scheme
+    nxt = request.POST.get('next') or ''
+    if nxt.startswith('/') and url_has_allowed_host_and_scheme(
+            nxt, allowed_hosts={request.get_host()}, require_https=request.is_secure()):
+        return nxt
+    return default
+
+
+def _meta_signature_ok(request):
+    """
+    Meta inasaini kila POST kwa `X-Hub-Signature-256` (HMAC-SHA256 ya body
+    kwa App Secret). Bila ukaguzi huu, yeyote angeweza kutuma JSON bandia
+    na kuifanya namba ya WhatsApp ya mteja iwatumie watu jumbe. Hakuna
+    WHATSAPP_APP_SECRET -> tunakataa (fail closed).
+    """
+    import hashlib, hmac
+    secret = getattr(settings, 'WHATSAPP_APP_SECRET', '')
+    sig = request.headers.get('X-Hub-Signature-256', '')
+    if not secret or not sig.startswith('sha256='):
+        return False
+    expected = hmac.new(secret.encode(), request.body, hashlib.sha256).hexdigest()
+    return hmac.compare_digest(sig[7:], expected)
+
+
+def _verify_token_ok(given, expected):
+    import secrets as _s
+    return bool(expected) and _s.compare_digest(str(given or ''), str(expected))
+
+
 @csrf_exempt
 def whatsapp_webhook_global(request):
     """
@@ -796,13 +847,16 @@ def whatsapp_webhook_global(request):
         challenge = request.GET.get('hub.challenge')
 
         master_verify = getattr(settings, 'WHATSAPP_WEBHOOK_VERIFY_TOKEN', '')
-        if mode == 'subscribe' and token == master_verify:
+        if mode == 'subscribe' and _verify_token_ok(token, master_verify):
             logger.info("Global webhook verified")
             return HttpResponse(challenge, content_type='text/plain')
         return HttpResponse('Forbidden', status=403)
 
     # ── POST: Messages ──
     if request.method == 'POST':
+        if not _meta_signature_ok(request):
+            logger.warning('WhatsApp webhook: sahihi ya Meta si sahihi — imekataliwa')
+            return HttpResponse('Forbidden', status=403)
         try:
             data = json.loads(request.body)
         except json.JSONDecodeError:
@@ -860,11 +914,14 @@ def whatsapp_webhook(request, bot_id):
         mode      = request.GET.get('hub.mode')
         token     = request.GET.get('hub.verify_token')
         challenge = request.GET.get('hub.challenge')
-        if mode == 'subscribe' and token == bot.webhook_verify_token:
+        if mode == 'subscribe' and _verify_token_ok(token, bot.webhook_verify_token):
             return HttpResponse(challenge, content_type='text/plain')
         return HttpResponse('Forbidden', status=403)
 
     if request.method == 'POST':
+        if not _meta_signature_ok(request):
+            logger.warning('[%s] webhook ya zamani: sahihi ya Meta si sahihi', bot_id)
+            return HttpResponse('Forbidden', status=403)
         try:
             data = json.loads(request.body)
         except json.JSONDecodeError:
@@ -1119,7 +1176,9 @@ def _process_message(bot: BotConfig, msg_data: dict, handler=None):
         except Exception:
             logger.warning('[%s] kutafsiri LID ya mmiliki kumeshindwa', bot.session_name)
 
-    if bot.is_owner(from_phone):
+    # Web chat (tovuti) HAIWEZI kuwa mmiliki: kitambulisho cha mgeni
+    # kinatoka kwa browser na kingeweza kutengenezwa kufanana na namba yake.
+    if msg_data.get('channel') != 'web' and bot.is_owner(from_phone):
         if handoff.handle_owner_command(bot, wa, from_phone, text):
             return
 
@@ -1463,7 +1522,6 @@ def _update_analytics(bot, ai_result):
 # ════════════════════════════════════════════════════════
 
 @login_required
-@csrf_exempt
 def simulate_message(request, bot_id):
     """
     Simulate a WhatsApp message without actually going through Meta.
@@ -1797,6 +1855,7 @@ def chatbot_seed_demo(request):
 
     # GET — ukurasa wa uthibitisho (dark, on-brand, hauhitaji template)
     from django.middleware.csrf import get_token
+    from django.utils.html import escape as _esc   # majina yanaandikwa na mteja
     token = get_token(request)
     html = f"""<!doctype html><html lang="sw"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>Seed demo — JamiiBot</title>
@@ -1811,7 +1870,7 @@ border-radius:11px;background:linear-gradient(135deg,#F5A623,#e0762a);color:#041
 cursor:pointer;margin-top:8px}}a.back{{display:block;text-align:center;color:#9fb0bd;text-decoration:none;margin-top:14px;font-size:13px}}</style>
 </head><body><div class="c">
 <h1>Jaza demo data</h1>
-<p>Bot: <b>{bot.bot_name}</b> — {bot.business_name or 'bila jina'}</p>
+<p>Bot: <b>{_esc(bot.bot_name)}</b> — {_esc(bot.business_name or 'bila jina')}</p>
 <div class="warn">⚠️ Hii itafuta <b>huduma, FAQ na mazungumzo</b> yaliyopo kwenye bot hii, na kuweka demo ya <b>JamiiBot</b> — bot inayojiuza yenyewe (faida, bei, setup, huduma za JamiiTek, na tips). Itumie kwenye akaunti ya demo tu.</div>
 <form method="post">
   <input type="hidden" name="csrfmiddlewaretoken" value="{token}">

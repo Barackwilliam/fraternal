@@ -69,7 +69,12 @@ def contract_sign(request, token):
     email = (request.POST.get('email') or '').strip()
     agreed = request.POST.get('agreed') in ('true', 'on', '1', 'yes')
     lang = request.POST.get('lang', 'en')
-    sig_data = request.POST.get('signature_data', '')[:200000]  # base64 PNG (hiari)
+    sig_data = (request.POST.get('signature_data') or '').strip()  # base64 PNG (hiari)
+    # PNG data-URI TU. Awali chochote kilihifadhiwa na kuwekwa kwenye <img src>
+    # ya PDF — xhtml2pdf ingefuata http://... au faili za server (SSRF).
+    import re as _re
+    if not (len(sig_data) <= 200000 and _re.fullmatch(r'data:image/png;base64,[A-Za-z0-9+/=]+', sig_data)):
+        sig_data = ''
 
     if len(name) < 3:
         return JsonResponse({'ok': False, 'error': 'Please type your full name.'}, status=400)

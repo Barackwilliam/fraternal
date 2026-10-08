@@ -36,6 +36,16 @@ def _abs(path):
     return f'{base}{path}'
 
 
+def _safe_back(request):
+    """Rudi ukurasa uliotoka — ndani ya tovuti hii tu (si open redirect)."""
+    from django.utils.http import url_has_allowed_host_and_scheme
+    ref = request.META.get('HTTP_REFERER', '')
+    if url_has_allowed_host_and_scheme(ref, allowed_hosts={request.get_host()},
+                                       require_https=request.is_secure()):
+        return ref
+    return '/'
+
+
 def _start(tx, request):
     """
     Anzisha order Pesapal na mpeleke mteja. Inarudisha HttpResponse
@@ -44,7 +54,7 @@ def _start(tx, request):
     client = PesapalClient()
     if not client.configured:
         messages.error(request, 'Malipo ya mtandaoni bado hayajawashwa. Wasiliana na JamiiTek.')
-        return redirect(request.META.get('HTTP_REFERER', '/'))
+        return redirect(_safe_back(request))
 
     tx.save()
     ipn_url = _abs(reverse('pesapal_ipn'))
@@ -80,7 +90,7 @@ def _start(tx, request):
         tx.raw_status = {'error': str(e)}
         tx.save(update_fields=['status', 'raw_status'])
         messages.error(request, f'Imeshindikana kuanzisha malipo: {e}')
-        return redirect(request.META.get('HTTP_REFERER', '/'))
+        return redirect(_safe_back(request))
 
     tx.order_tracking_id = data['order_tracking_id']
     tx.redirect_url = data['redirect_url']

@@ -227,7 +227,10 @@ class BotConfig(models.Model):
         if self.owner_lid and s == self.owner_lid:
             return True
         d = self.owner_digits
-        return bool(d and len(s) < 15 and (s.endswith(d[-9:]) or d.endswith(s[-9:])))
+        # Angalau tarakimu 9 — vinginevyo '5' ingelingana na kila namba inayoishia 5
+        if len(s) < 9 or len(s) >= 15:
+            return False
+        return bool(d and len(d) >= 9 and (s.endswith(d[-9:]) or d.endswith(s[-9:])))
 
     def _make_session_name(self):
         """
