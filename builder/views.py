@@ -127,8 +127,14 @@ def builder_login(request):
         if form.is_valid():
             login(request, form.get_user())
             return redirect(nxt or 'builder:my_sites')
+    error = None
+    if getattr(request, 'login_locked', False):
+        from apps.security import lockout_message
+        error = lockout_message()
+        form.errors.pop('__all__', None)
     return render(request, 'builder/auth.html', {
         'mode': 'login', 'form': form, 'next': nxt, 'from_template': _template_for_next(nxt),
+        'error': error,
     })
 
 
@@ -385,7 +391,17 @@ def ai_generate_website(request):
     inaingia otomatiki.
     """
     from . import ai_oneshot
-    description = (request.POST.get('description') or '').strip()
+    description = (request.POST.get('description') or '').strip()[:3000]
+
+    # Haihitaji login, kwa hiyo kikomo kwa IP — kila ombi ni gharama ya AI
+    from apps.turnstile import get_client_ip
+    from apps.chatbot.ratelimit import _hit
+    ip = get_client_ip(request) or 'unknown'
+    ok_h, _ = _hit(f'builder:aigen:h:{ip}', 10, 3600)
+    ok_d, _ = _hit(f'builder:aigen:d:{ip}', 30, 86400)
+    if not (ok_h and ok_d):
+        return JsonResponse({'ok': False, 'error': 'Too many AI generations from your network. '
+                             'Please try again later.'}, status=429)
 
     try:
         ok, result = ai_oneshot.generate_website_plan(description)
@@ -949,8 +965,11 @@ def item_delete(request, site_id, collection_id, item_id):
 def ai_status(request):
     """
     Diagnostic ya AI — inaonyesha hasa kipi kimekwama:
-    package, API key, mtandao kwenda Groq, cache. Staff/owner yeyote.
+    package, API key, mtandao kwenda Groq, cache. Staff PEKEE — inaonyesha
+    vipande vya API key na REDIS_URL.
     """
+    if not request.user.is_staff:
+        raise Http404
     import time
     checks = {}
 

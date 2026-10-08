@@ -311,7 +311,7 @@
     <div class="sig-grid">
       <div class="sig-col">
         <div class="sig-line">
-          {% if is_signed %}{% if contract.signature_data %}<img class="sig-drawn" src="{{ contract.signature_data }}" alt="signature">{% else %}<span class="sig-hand">{{ contract.signed_name }}</span>{% endif %}{% endif %}
+          {% if is_signed %}{% if contract.signature_data|slice:":22" == "data:image/png;base64," %}<img class="sig-drawn" src="{{ contract.signature_data }}" alt="signature">{% else %}<span class="sig-hand">{{ contract.signed_name }}</span>{% endif %}{% endif %}
         </div>
         <div class="sig-name">{{ contract.display_client }} <span class="sig-role">— {% if lang == 'sw' %}Mteja{% else %}Client{% endif %}</span></div>
         <div class="sig-date">{% if lang == 'sw' %}Tarehe{% else %}Date{% endif %}: {% if is_signed %}<b>{{ contract.signed_at|date:'F j, Y' }}</b>{% else %}<span class="sig-pending">{% if lang == 'sw' %}Inasubiri saini{% else %}Awaiting signature{% endif %}</span>{% endif %}</div>

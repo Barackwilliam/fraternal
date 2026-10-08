@@ -12,3 +12,5 @@ class AppsConfig(AppConfig):
         from . import suspension_signals  # noqa: F401
         # Templates: IndexNow kila template inapohifadhiwa (SEO)
         from . import template_signals  # noqa: F401
+        # Usalama: kuhesabu makosa ya login (brute-force lockout)
+        from . import security  # noqa: F401

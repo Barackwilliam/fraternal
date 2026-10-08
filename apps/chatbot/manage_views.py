@@ -370,11 +370,22 @@ def manage_bulk_payment_action(request):
     pays = SubscriptionPayment.objects.filter(id__in=pay_ids, status='pending')
 
     if action == 'verify_all':
-        from .billing import verify_payment
+        from .billing import verify_payment, price_for
         # list() — `pays.count()` baada ya kuthibitisha ilihesabu upya na
         # kupata 0 (hakuna tena yaliyo 'pending'), ikaripoti "Malipo 0".
-        done = sum(1 for pay in list(pays) if verify_payment(pay, user=request.user))
+        # Mteja ndiye anayechagua mpango/miezi/kiasi kwenye fomu, kwa hiyo
+        # kuthibitisha kwa wingi kunakubali TU malipo ambayo kiasi kinatosha
+        # bei ya mpango huo. Mengine yanabaki 'pending' yakaguliwe moja moja.
+        done, held = 0, 0
+        for pay in list(pays):
+            if pay.plan and int(pay.amount or 0) < price_for(pay.plan, pay.months_covered):
+                held += 1
+                continue
+            done += verify_payment(pay, user=request.user)
         messages.success(request, f"✅ Malipo {done} yamethibitishwa.")
+        if held:
+            messages.warning(request, f"⚠️ Malipo {held} hayakuthibitishwa: kiasi ni pungufu ya bei ya "
+                                      f"mpango uliochaguliwa. Yakague moja moja.")
 
     elif action == 'reject_all':
         pays.update(status='rejected')

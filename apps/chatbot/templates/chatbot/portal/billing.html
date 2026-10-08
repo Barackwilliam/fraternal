@@ -119,7 +119,7 @@
             <div class="plan-feat"><i class="fas fa-check"></i>{% if plan.is_unlimited %}Unlimited messages{% else %}{{ plan.msg_limit }} msgs/mo{% endif %}</div>
             <div class="plan-feat"><i class="fas fa-check"></i>WhatsApp Bot</div>
             <div class="plan-feat"><i class="fas fa-check"></i>Live Dashboard</div>
-            <button class="plan-select-btn {% if sub and sub.plan == plan %}current-btn{% endif %}" onclick="selectPlan('{{ plan.id }}','{{ plan.name }}','{{ plan.price_tzs|floatformat:0 }}')">{% if sub and sub.plan == plan %}✓ Current Plan{% else %}Select Plan{% endif %}</button>
+            <button class="plan-select-btn {% if sub and sub.plan == plan %}current-btn{% endif %}" onclick="selectPlan('{{ plan.id }}','{{ plan.name|escapejs }}','{{ plan.price_tzs|floatformat:0 }}')">{% if sub and sub.plan == plan %}✓ Current Plan{% else %}Select Plan{% endif %}</button>
           </div>
         </div>
         {% endfor %}

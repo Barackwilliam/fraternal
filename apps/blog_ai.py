@@ -182,11 +182,7 @@ def _slugify(text):
 
 
 def _clean_html(html):
-    """Ondoa tags hatari — ruhusu tags salama tu."""
-    # Ondoa script/style/iframe kabisa
-    html = re.sub(r'<(script|style|iframe|head|html|body)[^>]*>.*?</\1>', '', html, flags=re.DOTALL | re.I)
-    html = re.sub(r'</?(?:html|head|body|script|style|iframe)[^>]*>', '', html, flags=re.I)
-    # Ondoa inline event handlers na style attributes
-    html = re.sub(r'\son\w+="[^"]*"', '', html, flags=re.I)
-    html = re.sub(r'\sstyle="[^"]*"', '', html, flags=re.I)
-    return html.strip()
+    """Ondoa tags hatari — allowlist (apps/html_sanitize.py), si regex."""
+    from apps.html_sanitize import clean_html
+    html = re.sub(r'\sstyle="[^"]*"', '', html or '', flags=re.I)
+    return clean_html(html)

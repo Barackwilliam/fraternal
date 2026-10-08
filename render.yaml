@@ -119,6 +119,10 @@ services:
       # WhatsApp Business
       - key: WHATSAPP_MASTER_TOKEN
         sync: false
+      - key: WHATSAPP_APP_SECRET
+        sync: false
+      - key: BREVO_WEBHOOK_TOKEN
+        sync: false
       - key: WHATSAPP_WEBHOOK_VERIFY_TOKEN
         sync: false
       - key: WILLIAM_WHATSAPP

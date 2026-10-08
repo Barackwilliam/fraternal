@@ -331,3 +331,186 @@ class OneAccountTest(NoPingMixin, TestCase):
             self.assertIn('Switch app', html, url)
             for href in ('href="/portal/"', 'href="/chatbot/dashboard/"', 'href="/builder/"'):
                 self.assertIn(href, html, url)
+
+
+class SecurityHardeningTest(TestCase):
+    """Kufunga login baada ya makosa mengi, headers, na `next` salama."""
+
+    def setUp(self):
+        from django.contrib.auth.models import User
+        from django.core.cache import cache
+        cache.clear()
+        self.user = User.objects.create_user('mlinzi', 'mlinzi@example.com', 'Sahihi-Kabisa-2026')
+
+    def _portal(self, password, **extra):
+        return self.client.post('/portal/login/', {'username': 'mlinzi', 'password': password, **extra})
+
+    def test_account_locks_after_five_failures_even_with_right_password(self):
+        for _ in range(5):
+            self._portal('kosa')
+        r = self._portal('Sahihi-Kabisa-2026')
+        self.assertContains(r, 'Too many failed sign-in attempts')
+        self.assertNotIn('_auth_user_id', self.client.session)
+
+    def test_lock_applies_to_every_login_page(self):
+        for _ in range(5):
+            self._portal('kosa')
+        r = self.client.post('/builder/login/', {'username': 'mlinzi', 'password': 'Sahihi-Kabisa-2026'})
+        self.assertContains(r, 'Too many failed sign-in attempts')
+        self.assertNotIn('_auth_user_id', self.client.session)
+
+    def test_success_resets_counter(self):
+        for _ in range(4):
+            self._portal('kosa')
+        self._portal('Sahihi-Kabisa-2026')
+        self.client.logout()
+        for _ in range(4):
+            self._portal('kosa')
+        self._portal('Sahihi-Kabisa-2026')
+        self.assertIn('_auth_user_id', self.client.session)
+
+    def test_portal_next_rejects_external_redirect(self):
+        for bad in ('//evil.com', '/\\evil.com', 'https://evil.com/'):
+            self.client.logout()
+            r = self._portal('Sahihi-Kabisa-2026', next=bad)
+            self.assertEqual(r.status_code, 302)
+            self.assertEqual(r['Location'], '/portal/', bad)
+
+    def test_security_headers_present(self):
+        r = self.client.get('/')
+        self.assertIn('camera=()', r['Permissions-Policy'])
+        self.assertIn("object-src 'none'", r['Content-Security-Policy'])
+
+    def test_private_pages_not_cached_for_signed_in_users(self):
+        self._portal('Sahihi-Kabisa-2026')
+        r = self.client.get('/portal/')
+        self.assertIn('no-store', r.get('Cache-Control', ''))
+
+
+class SecurityFixesTest(NoPingMixin, TestCase):
+    """Matundu yaliyogunduliwa kwenye ukaguzi wa usalama — yasirudi."""
+
+    def setUp(self):
+        super().setUp()
+        from django.core.cache import cache
+        from django.contrib.auth.models import User
+        from apps.chatbot.models import BotConfig, BotSubscription, ChatbotClient, SubscriptionPlan
+        cache.clear()
+        plans = list(SubscriptionPlan.objects.filter(is_active=True).order_by('price_tzs'))
+        self.cheap, self.dear = plans[0], plans[-1]
+        self.user = User.objects.create_user('duka', 'd@x.com', 'Sahihi-Kabisa-2026')
+        cl = ChatbotClient.objects.create(user=self.user, full_name='Mama Duka',
+                                          business_name='Duka', email='d@x.com')
+        self.bot = BotConfig.objects.create(client=cl, bot_name='DukaBot', business_name='Duka',
+                                            status='active', is_active=True,
+                                            owner_whatsapp='255754111225')
+        self.sub = BotSubscription.objects.create(bot=self.bot, plan=self.cheap, status='active')
+
+    # ── JamiiBot ──
+    def test_is_owner_needs_nine_digits(self):
+        self.assertFalse(self.bot.is_owner('5'))
+        self.assertFalse(self.bot.is_owner('w5'))
+        self.assertTrue(self.bot.is_owner('255754111225'))
+
+    def test_web_chat_visitor_cannot_run_owner_commands(self):
+        from apps.chatbot import handoff
+        with mock.patch.object(handoff, 'handle_owner_command', return_value=True) as cmd, \
+                mock.patch('apps.chatbot.views.ai_engine', create=True):
+            self.client.post(f'/chatbot/web/{self.bot.id}/', json.dumps(
+                {'visitor': '255754111225', 'message': 'orodha'}), content_type='application/json')
+        cmd.assert_not_called()
+
+    def test_meta_webhook_rejects_unsigned_post(self):
+        body = json.dumps({'entry': [{'changes': [{'value': {'messages': [
+            {'from': '255700000000', 'id': 'x', 'type': 'text', 'text': {'body': 'hi'}}]}}]}]})
+        with mock.patch('apps.chatbot.views._process_message') as pm:
+            r = self.client.post(f'/chatbot/webhook/{self.bot.id}/', body, content_type='application/json')
+            r2 = self.client.post('/chatbot/webhook/', body, content_type='application/json')
+        self.assertEqual((r.status_code, r2.status_code), (403, 403))
+        pm.assert_not_called()
+
+    def test_meta_webhook_accepts_valid_signature(self):
+        import hashlib, hmac
+        body = b'{"entry": []}'
+        sig = 'sha256=' + hmac.new(b'app-secret', body, hashlib.sha256).hexdigest()
+        with override_settings(WHATSAPP_APP_SECRET='app-secret'):
+            r = self.client.post('/chatbot/webhook/', body, content_type='application/json',
+                                 HTTP_X_HUB_SIGNATURE_256=sig)
+        self.assertEqual(r.status_code, 200)
+
+    def test_letters_only_visitor_is_rate_limited(self):
+        from apps.chatbot import ratelimit
+        results = [ratelimit.check(self.bot, 'wabcdefgh')[0] for _ in range(ratelimit.PER_CUSTOMER_MINUTE + 1)]
+        self.assertFalse(results[-1])
+
+    def test_paid_subscription_cannot_switch_plan_via_deploy(self):
+        self.client.force_login(self.user)
+        self.client.post('/chatbot/setup/', {'action': 'deploy', 'plan_id': self.dear.id})
+        self.sub.refresh_from_db()
+        self.assertEqual(self.sub.plan_id, self.cheap.id)
+
+    def test_suspended_bot_cannot_redeploy_itself(self):
+        self.bot.status, self.bot.is_active, self.bot.admin_suspended_reason = 'suspended', False, 'abuse'
+        self.bot.save()
+        self.client.force_login(self.user)
+        self.client.post('/chatbot/setup/', {'action': 'deploy', 'plan_id': self.cheap.id})
+        self.bot.refresh_from_db()
+        self.assertEqual(self.bot.status, 'suspended')
+
+    def test_unparseable_amount_rejected(self):
+        from apps.chatbot.models import SubscriptionPayment
+        self.client.force_login(self.user)
+        self.client.post('/chatbot/billing/', {'transaction_ref': 'ABC1', 'months': 12,
+                                               'plan_id': self.dear.id, 'amount': 'x'})
+        self.assertFalse(SubscriptionPayment.objects.exists())
+
+    def test_bulk_verify_holds_underpaid(self):
+        from django.contrib.auth.models import User
+        from apps.chatbot.models import SubscriptionPayment
+        pay = SubscriptionPayment.objects.create(subscription=self.sub, plan=self.dear, amount=1000,
+                                                 months_covered=12, transaction_ref='LOW1')
+        staff = User.objects.create_user('boss', 'b@x.com', 'Sahihi-Kabisa-2026', is_staff=True)
+        self.client.force_login(staff)
+        self.client.post('/manage/chatbot/payments/bulk-action/',
+                         {'bulk_action': 'verify_all', 'payment_ids': [pay.id]})
+        pay.refresh_from_db()
+        self.assertEqual(pay.status, 'pending')
+
+    def test_weak_password_rejected_on_bot_register(self):
+        from django.contrib.auth.models import User
+        self.client.post('/chatbot/register/', {
+            'username': 'dhaifu', 'email': 'dh@x.com', 'full_name': 'Dhaifu Mtu',
+            'business_name': 'Biz', 'password': '12345678', 'password2': '12345678'})
+        self.assertFalse(User.objects.filter(username='dhaifu').exists())
+
+    # ── Mengine ──
+    def test_sanitizer_strips_script_vectors(self):
+        from apps.html_sanitize import clean_html
+        dirty = ('<p>Habari</p><img src=x onerror=alert(1)><a href="javascript:alert(1)">x</a>'
+                 "<svg onload='alert(1)'><circle/></svg><script>alert(1)</script>"
+                 '<a href="https://jamiitek.com" target="_blank">ok</a>')
+        out = clean_html(dirty)
+        for bad in ('onerror', 'javascript:', 'onload', '<svg', '<script', 'alert(1)</'):
+            self.assertNotIn(bad, out)
+        self.assertIn('<p>Habari</p>', out)
+        self.assertIn('href="https://jamiitek.com"', out)
+        self.assertIn('rel="noopener noreferrer"', out)
+
+    def test_upload_rejects_html_disguised_as_png(self):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        from apps import storage
+        f = SimpleUploadedFile('a.png', b'<html><script>x</script>', content_type='text/html')
+        with mock.patch.object(storage, 'is_configured', return_value=True), \
+                mock.patch.object(storage, '_put') as put:
+            r = storage.upload(f)
+        self.assertFalse(r['success'])
+        put.assert_not_called()
+        png = SimpleUploadedFile('a.png', b'\x89PNG\r\n\x1a\n' + b'0' * 20, content_type='text/html')
+        with mock.patch.object(storage, 'is_configured', return_value=True), \
+                mock.patch.object(storage, '_put', return_value={'success': True}) as put:
+            storage.upload(png)
+        self.assertEqual(put.call_args[0][2], 'image/png')
+
+    def test_brevo_webhook_fails_closed_without_token(self):
+        r = self.client.post('/webhooks/brevo/', '[]', content_type='application/json')
+        self.assertEqual(r.status_code, 403)

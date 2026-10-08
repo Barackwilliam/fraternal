@@ -339,7 +339,7 @@ def newsletter_subscribe(request):
 
 
 import os
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -498,6 +498,11 @@ def dynamic_form(request, website_type_id):
             )
             _notify_new_proposal(proposal)
 
+            # Kivinjari hiki tu (pamoja na staff na mteja mwenye akaunti)
+            # kinaweza kuona quotation hii — angalia _can_view_proposal.
+            mine = request.session.get('my_proposals', [])
+            request.session['my_proposals'] = (mine + [proposal.id])[-20:]
+
             return redirect(f"{reverse('proposal_preview', args=[proposal.id])}?sent=1")
 
     else:
@@ -608,8 +613,25 @@ def _build_requirement_rows(requirements):
     return rows, total
 
 
+def _can_view_proposal(request, proposal):
+    """
+    Quotation ina jina, email, simu na bajeti ya mteja. Awali yeyote angeweza
+    kupitia /proposals/preview/1/, /2/, /3/... na kuona data za wateja wote.
+    Sasa: staff, mteja mwenyewe (akaunti), au kivinjari kilichoituma.
+    """
+    user = request.user
+    if user.is_authenticated and (user.is_staff or user.is_superuser):
+        return True
+    if proposal.id in request.session.get('my_proposals', []):
+        return True
+    owner = getattr(proposal.client, 'user', None)
+    return bool(user.is_authenticated and owner and owner.pk == user.pk)
+
+
 def proposal_preview(request, proposal_id):
     proposal = get_object_or_404(ProjectProposal, id=proposal_id)
+    if not _can_view_proposal(request, proposal):
+        raise Http404
 
     requirements = proposal.requirements
     if isinstance(requirements, str):
@@ -643,6 +665,8 @@ from apps.utils.proposal_pdf import generate_proposal_pdf
  
 def generate_pdf(request, proposal_id):
     proposal = get_object_or_404(ProjectProposal, id=proposal_id)
+    if not _can_view_proposal(request, proposal):
+        raise Http404
  
     pdf_bytes = generate_proposal_pdf(proposal)
  

@@ -51,7 +51,7 @@
         </div>
 
         <form method="post" action="{% url 'suspend_client_websites' client.pk %}"
-              onsubmit="return confirm('Suspend ALL {{ websites.count }} websites for {{ client.name }}?\n\nEvery one goes offline until you activate it again.')"
+              onsubmit="return confirm('Suspend ALL {{ websites.count }} websites for {{ client.name|escapejs }}?\n\nEvery one goes offline until you activate it again.')"
               style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px">
           {% csrf_token %}
           <input type="text" name="reason" placeholder="Reason for suspension" required
@@ -65,7 +65,7 @@
         </form>
 
         <form method="post" action="{% url 'activate_client_websites' client.pk %}"
-              onsubmit="return confirm('Activate all websites for {{ client.name }}?')"
+              onsubmit="return confirm('Activate all websites for {{ client.name|escapejs }}?')"
               style="display:flex;gap:8px;align-items:center">
           {% csrf_token %}
           <label style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--text-3);cursor:pointer">

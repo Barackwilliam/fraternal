@@ -25,7 +25,11 @@ Kabla ya kuendesha, badilisha sehemu ya MIPANGILIO hapa chini.
 # ══════════════════════════════════════════════════════════════════
 
 USERNAME       = 'tryvis'                     # login ya mteja kwenye portal
-PASSWORD       = 'Mulelo86'          # mwambie abadilishe akishaingia
+# Nywila HAIANDIKWI kwenye code (repo inaonekana). Ipe kwa env:
+#   TRYVIS_PASSWORD='...' python manage.py shell < seed_tryvis_bot.py
+# Isipowekwa, nywila ya nasibu inatengenezwa na kuonyeshwa mara moja.
+import os as _os, secrets as _secrets
+PASSWORD       = _os.getenv('TRYVIS_PASSWORD') or _secrets.token_urlsafe(12)
 EMAIL          = 'info@tryvis.co.tz'
 FULL_NAME      = 'Tryvis Investments Limited'
 BUSINESS_NAME  = 'Tryvis Investments Limited'

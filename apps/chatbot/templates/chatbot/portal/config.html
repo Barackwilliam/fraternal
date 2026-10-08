@@ -216,7 +216,7 @@
           <div class="webhook-card" style="margin-top:10px;background:rgba(245,158,11,.04);border-color:rgba(245,158,11,.15)">
             <div class="wh-label" style="color:rgba(245,158,11,.5)">Verify Token</div>
             <div class="wh-url" style="color:var(--yellow)">{{ bot.webhook_verify_token }}</div>
-            <button class="copy-btn" style="background:rgba(245,158,11,.08);border-color:rgba(245,158,11,.2);color:var(--yellow)" onclick="navigator.clipboard.writeText('{{ bot.webhook_verify_token }}');this.innerHTML='<i class=\'fas fa-check\'></i> Copied!'"><i class="fas fa-copy"></i> Copy</button>
+            <button class="copy-btn" style="background:rgba(245,158,11,.08);border-color:rgba(245,158,11,.2);color:var(--yellow)" onclick="navigator.clipboard.writeText('{{ bot.webhook_verify_token|escapejs }}');this.innerHTML='<i class=\'fas fa-check\'></i> Copied!'"><i class="fas fa-copy"></i> Copy</button>
           </div>
         </div>
       </div>

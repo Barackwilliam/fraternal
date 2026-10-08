@@ -49,6 +49,7 @@ def client_required(view_func):
 # ── REGISTER ───────────────────────────────────────────────────────
 from apps.turnstile import verify_token, get_client_ip
 from apps.contact import contact as _contact
+from apps.security import same_site_logout
 
 def portal_register(request):
     if request.user.is_authenticated and not request.user.is_staff:
@@ -78,11 +79,11 @@ def portal_register(request):
             errors.append('All fields except phone are required.')
         if password != password2:
             errors.append('Passwords do not match.')
-        if len(password) < 8:
-            errors.append('Password must be at least 8 characters.')
-        if User.objects.filter(username=username).exists():
+        from apps.security import password_problems
+        errors += password_problems(password, username, email, full_name)
+        if User.objects.filter(username__iexact=username).exists():
             errors.append('That username is already taken.')
-        if User.objects.filter(email=email).exists():
+        if email and User.objects.filter(email__iexact=email).exists():
             errors.append('That email is already registered.')
 
         if errors:
@@ -187,8 +188,15 @@ def portal_login(request):
                     from apps.accounts_link import ensure_client_profile
                     ensure_client_profile(user)
                     login(request, user)
+                    from django.utils.http import url_has_allowed_host_and_scheme
                     nxt = request.POST.get('next') or ''
-                    return redirect(nxt if nxt.startswith('/') and not nxt.startswith('//') else '/portal/')
+                    if not (nxt.startswith('/') and url_has_allowed_host_and_scheme(
+                            nxt, allowed_hosts={request.get_host()}, require_https=request.is_secure())):
+                        nxt = '/portal/'
+                    return redirect(nxt)
+            elif getattr(request, 'login_locked', False):
+                from apps.security import lockout_message
+                error = lockout_message()
             else:
                 error = 'Invalid username or password.'
 
@@ -197,6 +205,7 @@ def portal_login(request):
     })
 
 
+@same_site_logout
 def portal_logout(request):
     logout(request)
     return redirect('portal_login')
@@ -556,15 +565,18 @@ def portal_profile(request):
             messages.success(request, 'Profile updated successfully.')
 
         elif action == 'change_password':
+            from apps.security import password_problems
             current = request.POST.get('current_password', '')
             new_pw = request.POST.get('new_password', '')
             confirm = request.POST.get('confirm_password', '')
+            problems = password_problems(new_pw, client.user.username, client.user.email, client.name)
             if not client.user.check_password(current):
                 messages.error(request, 'Current password is incorrect.')
             elif new_pw != confirm:
                 messages.error(request, 'New passwords do not match.')
-            elif len(new_pw) < 8:
-                messages.error(request, 'Password must be at least 8 characters.')
+            elif problems:
+                for p in problems:
+                    messages.error(request, p)
             else:
                 client.user.set_password(new_pw)
                 client.user.save()

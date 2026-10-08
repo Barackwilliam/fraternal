@@ -126,7 +126,7 @@
           <form method="post" action="{% url 'site_domain_reregister' s.pk %}">{% csrf_token %}
             <button class="jt-btn dm-ghost" data-jt-wait="Inasajili…"><i class="fas fa-server"></i> Sajili tena Render</button></form>
           {% endif %}
-          <form method="post" action="{% url 'site_domain_disconnect' s.pk %}" onsubmit="return confirm('Ondoa {{ s.custom_domain }}? Website itaendelea kwenye {{ s.subdomain }}.jamiitek.com.')">{% csrf_token %}
+          <form method="post" action="{% url 'site_domain_disconnect' s.pk %}" onsubmit="return confirm('Ondoa {{ s.custom_domain|escapejs }}? Website itaendelea kwenye {{ s.subdomain|escapejs }}.jamiitek.com.')">{% csrf_token %}
             <button class="jt-btn dm-danger"><i class="fas fa-link-slash"></i> Ondoa</button></form>
           <span class="dm-meta">{% if s.domain_checked_at %}imekaguliwa {{ s.domain_checked_at|timesince }} iliyopita{% else %}bado haijakaguliwa{% endif %}</span>
         </div>
