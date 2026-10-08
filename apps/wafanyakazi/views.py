@@ -15,7 +15,7 @@ from django.views.decorators.http import require_GET, require_POST
 
 from apps.management_views import staff_required
 
-from . import actions, mtihani, runner, wilife
+from . import actions, mtihani, ofisi, runner, wilife
 from .models import Alama, Kazi, Mtihani, Ripoti
 from .team import TEAM, member
 from .william import snapshot
@@ -57,15 +57,16 @@ def dashboard(request):
         if kazi.channel == 'whatsapp' and kazi.recipient_phone:
             kazi.wa = actions.wa_link(kazi.recipient_phone, kazi.draft)
 
-    team = snapshot()
-    for w in team:
-        w['last_run'] = _when(Alama.get(f"run:{w['slug']}"))
-        w['error'] = Alama.get(f"error:{w['slug']}")
+    team = ofisi.team(snapshot())
+    says, says_report = ofisi.william_says()
 
     return render(request, 'wafanyakazi/dashboard.html', {
-        'nav': 'wafanyakazi', 'title': 'Timu ya AI',
-        'team': team, 'tasks': tasks, 'worker': worker, 'view': view,
-        'current': member(worker) if worker else None,
+        'nav': 'wafanyakazi', 'title': 'Ofisi ya timu',
+        'team': team, 'lead': team[0], 'staff': team[1:],
+        'tasks': tasks, 'worker': worker, 'view': view,
+        'current': next((w for w in team if w['slug'] == worker), None),
+        'feed': ofisi.feed(), 'counts': ofisi.counts(),
+        'william_says': says, 'william_report': says_report,
         'reports': Ripoti.objects.all()[:6],
         'last_run': _when(Alama.get('run:last')),
         'wilife_ready': wilife.is_configured(),

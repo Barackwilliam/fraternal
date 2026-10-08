@@ -406,3 +406,37 @@ class MtihaniTests(Base):
         with mock.patch('apps.wafanyakazi.mtihani.run_in_background') as bg:
             self.client.post('/manage/wafanyakazi/mtihani/')
         bg.assert_called_once()
+
+
+class OfisiTests(Base):
+    def setUp(self):
+        super().setUp()
+        self.client.force_login(User.objects.create_user('boss', 'b@example.com', 'p', is_staff=True))
+
+    def test_office_shows_people_their_work_and_the_feed(self):
+        self.invoice()
+        run_all(now=self.now)
+        r = self.client.get('/manage/wafanyakazi/')
+        self.assertEqual(r.status_code, 200)
+        for slug in ('william', 'ibrahimu', 'selvester', 'grace', 'diana'):
+            self.assertContains(r, f'wafanyakazi/team/{slug}')
+        self.assertContains(r, 'William anasema')
+        self.assertContains(r, 'Anasubiri idhini yako')          # Diana ana rasimu
+        self.assertContains(r, 'ameandaa rasimu')                # shughuli za ofisi
+        self.assertContains(r, 'Mezani kwako')
+        team = {w['slug']: w for w in r.context['team']}
+        self.assertTrue(team['diana']['online'])
+        self.assertEqual(team['diana']['state'], 'waiting')
+
+    def test_desk_of_one_worker(self):
+        r = self.client.get('/manage/wafanyakazi/?w=grace')
+        self.assertContains(r, 'Meza ya Grace')
+
+    def test_zamani(self):
+        from .templatetags.ofisi import zamani
+        now = timezone.now()
+        self.assertEqual(zamani(now), 'sasa hivi')
+        self.assertEqual(zamani(now - timedelta(minutes=5)), 'dakika 5 zilizopita')
+        self.assertEqual(zamani(now - timedelta(hours=3)), 'saa 3 zilizopita')
+        self.assertEqual(zamani(now - timedelta(days=1, hours=2)), 'jana')
+        self.assertEqual(zamani(now - timedelta(days=4)), 'siku 4 zilizopita')

@@ -1,4 +1,5 @@
 {% extends 'management/base.html' %}
+{% load static %}
 {% block title %}Mtihani wa umahiri{% endblock %}
 {% block extra_css %}{% if exam and exam.status == 'running' %}<meta http-equiv="refresh" content="6">{% endif %}{% endblock %}
 {% block content %}
@@ -75,7 +76,8 @@
 
     {% for w in r.workers %}
     <div class="mt-card mt-w" style="--c:{{ w.color }}">
-      <h2>{{ w.icon }} {{ w.name }} <small>{{ w.role }} · kazi {{ w.found }} zimeonekana</small></h2>
+      <h2>{% if w.photo %}<img src="{% static w.photo %}" alt="" width="40" height="40" style="border-radius:12px;object-fit:cover">{% else %}{{ w.icon }}{% endif %}
+        {{ w.name }} <small>{{ w.title|default:w.role }} · kazi {{ w.found }} zimeonekana</small></h2>
       {% if w.summary %}<div class="mt-sum">{% for k, v in w.summary.items %}{{ k }}: {{ v }}{% if not forloop.last %} · {% endif %}{% endfor %}</div>{% endif %}
       {% if w.error %}<div class="mt-note bad">Hitilafu: {{ w.error }}</div>{% endif %}
       {% if w.ai_failed %}<div class="mt-note warn">Maombi {{ w.ai_failed }} ya AI yalishindwa — template ilitumika.</div>{% endif %}
@@ -93,7 +95,7 @@
     {% endfor %}
 
     <div class="mt-card mt-w" style="--c:#2563eb">
-      <h2>👔 William <small>Mpango wa asubuhi ungekuwa hivi{% if r.william_ai %} · kipaumbele kimeandikwa na AI{% endif %}</small></h2>
+      <h2><img src="{% static 'wafanyakazi/team/william.webp' %}" alt="" width="40" height="40" style="border-radius:12px;object-fit:cover"> William <small>Mpango wa asubuhi ungekuwa hivi{% if r.william_ai %} · kipaumbele kimeandikwa na AI{% endif %}</small></h2>
       <div class="mt-s" style="border:0;padding-top:0"><pre>{{ r.william }}</pre></div>
     </div>
   {% endif %}

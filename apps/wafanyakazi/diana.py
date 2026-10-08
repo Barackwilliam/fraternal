@@ -107,7 +107,9 @@ def _invoices(today):
             title = f'{g["name"]}: {what} (siku {oldest}) — {total}'
             priority = 1 if oldest > 14 else 2
         else:
-            title = f'{g["name"]}: invoice {len(invs)} zinakaribia tarehe ya kulipwa — {total}'
+            what = (f'invoice {len(invs)} zinakaribia' if len(invs) > 1 else
+                    f'invoice {invs[0].invoice_number or invs[0].pk} inakaribia')
+            title = f'{g["name"]}: {what} tarehe ya kulipwa — {total}'
             priority = 3
         found(SLUG, key, title[:200],
               draft=(lambda g=g, late=late: _reminder(g, today, late)) if (g['email'] or g['phone']) else None,
