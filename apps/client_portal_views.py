@@ -32,32 +32,15 @@ from .models import (
 # ── HELPER ─────────────────────────────────────────────────────────
 
 def client_required(view_func):
-    """Require login as a client. Accepts both portal clients AND chatbot-only users."""
+    """Require login as a client. Accepts portal, JamiiBot and Web Builder accounts alike."""
     def wrapper(request, *args, **kwargs):
         if not request.user.is_authenticated:
             return redirect(f'/portal/login/?next={request.path}')
         if request.user.is_staff or request.user.is_superuser:
             return redirect('/manage/')
-        try:
-            request.client_profile = Client.objects.get(user=request.user)
-        except Client.DoesNotExist:
-            # Allow chatbot users to access portal — create a minimal Client profile
-            from apps.chatbot.models import ChatbotClient
-            try:
-                bot_client = ChatbotClient.objects.get(user=request.user)
-                # Auto-create a Client profile linked to this user
-                client, _ = Client.objects.get_or_create(
-                    user=request.user,
-                    defaults={
-                        'name':  bot_client.full_name,
-                        'email': bot_client.email,
-                        'phone': bot_client.phone or '',
-                    }
-                )
-                request.client_profile = client
-            except ChatbotClient.DoesNotExist:
-                messages.error(request, 'Account not linked to a client profile. Please contact JamiiTek.')
-                return redirect('/portal/login/')
+        # Akaunti moja kwa Portal, JamiiBot na Web Builder (apps/accounts_link.py)
+        from apps.accounts_link import ensure_client_profile
+        request.client_profile = ensure_client_profile(request.user)
         return view_func(request, *args, **kwargs)
     wrapper.__name__ = view_func.__name__
     return wrapper
@@ -191,15 +174,21 @@ def portal_login(request):
         else:
             username = request.POST.get('username', '').strip()
             password = request.POST.get('password', '')
+            if '@' in username:   # email badala ya username (kama Web Builder)
+                u = User.objects.filter(email__iexact=username).first()
+                if u:
+                    username = u.username
             user = authenticate(request, username=username, password=password)
             if user:
                 if user.is_staff or user.is_superuser:
                     error = 'Staff accounts use the management panel.'
-                elif Client.objects.filter(user=user).exists():
-                    login(request, user)
-                    return redirect(request.POST.get('next') or '/portal/')
                 else:
-                    error = 'Your account is not linked to a client profile. Please contact JamiiTek.'
+                    # Akaunti ya JamiiBot au Web Builder inaingia pia — profile inatengenezwa
+                    from apps.accounts_link import ensure_client_profile
+                    ensure_client_profile(user)
+                    login(request, user)
+                    nxt = request.POST.get('next') or ''
+                    return redirect(nxt if nxt.startswith('/') and not nxt.startswith('//') else '/portal/')
             else:
                 error = 'Invalid username or password.'
 

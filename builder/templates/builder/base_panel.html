@@ -185,6 +185,12 @@ table tr:hover td{background:rgba(255,255,255,.02)}
   .mob-top .b-name{font-family:var(--ff-display);font-size:18px;font-weight:700;color:#fff;text-decoration:none;line-height:1.1}
   .mob-top .b-name span{color:var(--green)}
   .mob-top small{display:block;font-family:var(--ff-mono);font-size:8.5px;color:var(--dim);letter-spacing:2.2px;text-transform:uppercase}
+  .mob-apps{position:relative}
+  .mob-apps summary{list-style:none;cursor:pointer}
+  .mob-apps summary::-webkit-details-marker{display:none}
+  .mob-apps[open] summary{border-color:var(--green);color:var(--ink)}
+  .mob-apps__p{position:absolute;right:0;top:calc(100% + 8px);z-index:80;width:250px;padding:12px;border-radius:14px;background:#0b1424;border:1px solid var(--line);box-shadow:0 20px 50px rgba(0,0,0,.6)}
+  .mob-apps__site{display:block;padding:4px 4px 0;font-size:12px;color:var(--muted);text-decoration:none}
   .mob-top .home{font-size:12px;color:var(--muted);text-decoration:none;padding:7px 11px;border:1px solid var(--line);border-radius:9px}
   .mob-nav{display:flex;position:fixed;bottom:0;left:0;right:0;z-index:60;
     background:rgba(5,10,22,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
@@ -359,6 +365,7 @@ body.scifi .card:hover::after{opacity:1}
   </nav>
   <div class="foot">
     {% if user.is_authenticated %}
+    {% include 'includes/app_switcher.html' with current='builder' %}
     <form method="post" action="{% url 'builder:logout' %}" style="margin-bottom:10px">{% csrf_token %}
       <button type="submit" style="background:none;border:1px solid var(--line);color:var(--muted);border-radius:8px;padding:7px 12px;cursor:pointer;font-size:12px;width:100%;text-align:left">
         ⎋ Sign out · {{ user.username }}</button></form>
@@ -377,7 +384,11 @@ body.scifi .card:hover::after{opacity:1}
 <main class="main">
   <div class="mob-top">
     <a class="b-name" href="{% url 'builder:my_sites' %}">Jamii<span>Tek</span><small>Website Builder</small></a>
-    <a class="home" href="/">jamiitek.com ↗</a>
+    {% if user.is_authenticated %}
+    <details class="mob-apps"><summary class="home" aria-label="Switch app">⇄ Apps</summary>
+      <div class="mob-apps__p">{% include 'includes/app_switcher.html' with current='builder' %}<a class="mob-apps__site" href="/">jamiitek.com ↗</a></div>
+    </details>
+    {% else %}<a class="home" href="/">jamiitek.com ↗</a>{% endif %}
   </div>
   {% if messages %}{% for m in messages %}
     <div class="msg {{ m.tags }}">{{ m }}</div>

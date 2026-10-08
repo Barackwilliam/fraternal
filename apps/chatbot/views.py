@@ -333,10 +333,12 @@ def chatbot_register(request):
 
 
 def chatbot_login(request):
-    # Already logged in with chatbot account → go to dashboard
+    # Ameshaingia (JamiiBot, Client Portal au Web Builder) → dashboard moja kwa moja.
+    # Akaunti ni moja kwa sehemu zote tatu (apps/accounts_link.py).
     if request.user.is_authenticated:
-        if hasattr(request.user, 'chatbot_profile'):
-            return redirect('chatbot_dashboard')
+        if not request.user.is_staff:
+            _get_or_create_client(request.user)
+        return redirect('chatbot_dashboard')
 
     if request.method == 'POST':
         # Cloudflare Turnstile — anti-bot (pass-through kama keys hazijawekwa)
@@ -349,34 +351,16 @@ def chatbot_login(request):
 
         username = request.POST.get('username', '').strip()
         password = request.POST.get('password', '')
+        if '@' in username:   # email badala ya username (kama Web Builder)
+            from django.contrib.auth.models import User as _U
+            u = _U.objects.filter(email__iexact=username).first()
+            if u:
+                username = u.username
         user = authenticate(request, username=username, password=password)
 
         if user and not user.is_staff:
-            # Ensure ChatbotClient exists for this user
-            # Works for BOTH chatbot-registered users AND portal-registered users
-            if not hasattr(user, 'chatbot_profile'):
-                from apps.chatbot.models import ChatbotClient
-                # Try to get info from portal Client profile
-                full_name     = user.get_full_name() or user.username
-                business_name = user.username
-                email         = user.email or f"{user.username}@jamiitek.com"
-                phone         = ''
-                try:
-                    from apps.models import Client as PortalClient
-                    pc = PortalClient.objects.get(user=user)
-                    full_name     = pc.name or full_name
-                    business_name = pc.company or pc.name or business_name
-                    phone         = pc.phone or ''
-                except Exception:
-                    pass
-                ChatbotClient.objects.create(
-                    user=user,
-                    full_name=full_name,
-                    business_name=business_name,
-                    email=email,
-                    phone=phone,
-                )
-
+            # Akaunti ya Portal au Web Builder inaingia pia — profile ya bot inatengenezwa
+            _get_or_create_client(user)
             login(request, user)
             return redirect('chatbot_dashboard')
 

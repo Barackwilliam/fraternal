@@ -94,10 +94,11 @@
     <div class="right-title">Welcome back</div>
     <div class="right-sub">New to JamiiBot? <a href="/chatbot/register/">Create free account →</a></div>
     {% if messages %}{% for m in messages %}<div class="error-msg"><i class="fas fa-circle-xmark"></i> {{ m }}</div>{% endfor %}{% endif %}
+    {% include 'includes/one_account_note.html' %}
     <form method="post">
       {% csrf_token %}
       <div class="f-group">
-        <label class="f-label">Username</label>
+        <label class="f-label">Username or email</label>
         <div class="f-wrap"><i class="fas fa-user f-ico"></i><input type="text" name="username" class="f-input" placeholder="your_username" required autofocus></div>
       </div>
       <div class="f-group">

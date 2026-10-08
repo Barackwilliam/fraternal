@@ -99,7 +99,7 @@
     .field>i{width:46px;flex:none;text-align:center;font-size:15px;color:var(--text-3);transition:color .2s}
     .field:focus-within>i{color:var(--purple)}
     .field input{flex:1;min-width:0;height:52px;padding:0 14px 0 0;background:transparent;border:0;outline:none;font-family:var(--body);font-size:16px;color:var(--text)}
-    .field input::placeholder{color:rgba(255,255,255,0.25)}
+    .field input::placeholder{color:rgba(255,255,255,0.13)}
     .field .pre{padding-right:2px;font-family:var(--mono);font-size:13.5px;color:var(--text-3)}
     .field .eye{display:grid;place-items:center;width:46px;height:46px;flex:none;color:var(--text-3)}
     .field .eye:hover{color:var(--text)}
@@ -191,6 +191,7 @@
     </div>
     {% endif %}
 
+    {% include 'includes/one_account_note.html' %}
     <form method="post" id="regForm" novalidate>
       {% csrf_token %}
 
