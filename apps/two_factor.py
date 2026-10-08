@@ -151,6 +151,17 @@ def _safe_next(request, default='/manage/'):
     return default
 
 
+def _already_verified_elsewhere(request):
+    """Je ombi jingine (la wakati huo huo) limeshaweka alama ya 2FA kwenye session hii?"""
+    from importlib import import_module
+    from django.conf import settings as dj
+    key = request.session.session_key
+    if not key:
+        return False
+    fresh = import_module(dj.SESSION_ENGINE).SessionStore(session_key=key)
+    return fresh.get(SESSION_FLAG) == request.user.pk
+
+
 def _go_next(request):
     nxt = _safe_next(request)
     request.session.pop(NEXT_KEY, None)
@@ -185,7 +196,10 @@ def _pass(request, rec):
     rec.last_used_at = timezone.now()
     rec.save(update_fields=['last_step', 'recovery_hashes', 'last_used_at'])
     cache.delete(_fail_key(request.user))
-    request.session.cycle_key()          # session mpya baada ya hatua ya pili
+    # HAKUNA cycle_key hapa: login() ilishabadilisha session kwenye hatua ya
+    # nywila. Kubadilisha tena kulifuta session ya zamani — code ikitumwa mara
+    # mbili (auto-submit + Enter), ombi la pili lilikuta session imefutwa,
+    # likamtoa mtumiaji nje, na akarudishwa login → 2FA → login bila mwisho.
     request.session[SESSION_FLAG] = request.user.pk
 
 
@@ -260,6 +274,10 @@ def verify(request):
             if step is not None and step > rec.last_step:
                 rec.last_step = step
                 ok = True
+            elif step is not None and _already_verified_elsewhere(request):
+                # Ombi la pili la code ile ile (double submit) — la kwanza
+                # limeshafaulu kwenye session hii; endelea bila kosa
+                return _go_next(request)
         if ok:
             _pass(request, rec)
             return _go_next(request)

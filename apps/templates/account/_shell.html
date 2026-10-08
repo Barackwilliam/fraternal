@@ -140,7 +140,8 @@ label{display:block;font-size:13.5px;font-weight:600;color:var(--tx);margin-bott
 </main>
 <script>
 /* Kitufe kinazima baada ya kubonyezwa — hakuna kutuma mara mbili */
-document.addEventListener('submit',function(e){var b=e.target.querySelector('button[type=submit]');if(b){setTimeout(function(){b.disabled=true},0)}});
+document.addEventListener('submit',function(e){var f=e.target;if(f.dataset.sent){e.preventDefault();return}f.dataset.sent='1';
+var b=f.querySelector('button[type=submit]');if(b){setTimeout(function(){b.disabled=true},0)}});
 </script>
 {% block scripts %}{% endblock %}
 </body>
