@@ -81,6 +81,25 @@ label{display:block;font-size:13.5px;font-weight:600;color:var(--tx);margin-bott
 .alert ul{padding-left:18px}
 .links{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px;margin-top:20px;font-size:13.5px;font-weight:500}
 .links form{display:inline}
+.card.wide{max-width:640px}
+.faq{display:grid;gap:10px;margin-bottom:22px}
+.faq details{border:1px solid var(--line);border-radius:12px;background:#fff;transition:border-color .15s}
+.faq details[open]{border-color:#c7d6f5;box-shadow:0 4px 14px -6px rgba(37,99,235,.18)}
+.faq summary{list-style:none;cursor:pointer;padding:14px 16px;font-weight:600;font-size:14.5px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"";flex:none;width:9px;height:9px;border-right:2px solid var(--tx3);border-bottom:2px solid var(--tx3);transform:rotate(45deg) translateY(-3px);transition:transform .2s}
+.faq details[open] summary::after{transform:rotate(-135deg) translateY(-2px)}
+.faq .a{padding:0 16px 15px;color:var(--tx2);font-size:14px}
+.faq .a p+p{margin-top:8px}
+.faq .a ol,.faq .a ul{padding-left:20px;margin-top:6px}
+.faq .a li{margin:3px 0}
+.sec-title{font-size:12.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--tx3);margin:22px 0 10px}
+.contact{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.contact a{display:flex;flex-direction:column;gap:3px;padding:14px;border:1px solid var(--line);border-radius:12px;color:var(--tx);background:#fafbfe}
+.contact a:hover{border-color:var(--acc);text-decoration:none}
+.contact b{font-size:14px}
+.contact small{font-size:12.5px;color:var(--tx3);word-break:break-word}
+@media (max-width:560px){.contact{grid-template-columns:1fr}}
 .foot{margin-top:22px;text-align:center;font-size:12.5px;color:var(--tx3)}
 .steps{list-style:none;display:grid;gap:12px;margin-bottom:20px}
 .steps li{display:grid;grid-template-columns:24px 1fr;gap:11px;font-size:14px;color:var(--tx2)}
@@ -129,14 +148,14 @@ label{display:block;font-size:13.5px;font-weight:600;color:var(--tx);margin-bott
 </aside>
 <main class="main">
   <div class="top"><a class="brand" href="/"><span class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6.5v5.2c0 4.6 3.3 8.4 8 9.3 4.7-.9 8-4.7 8-9.3V6.5z"/><path d="m8.8 12.2 2.2 2.2 4.3-4.6"/></svg></span>JamiiTek</a></div>
-  <div class="card">
+  <div class="card{% block card_class %}{% endblock %}">
     <div class="eyebrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>{% block eyebrow %}Account security{% endblock %}</div>
     <h1>{% block heading %}{% endblock %}</h1>
     {% block lead %}{% endblock %}
     {% for m in messages %}<div class="alert {% if m.tags == 'error' %}err{% elif m.tags == 'success' %}ok{% else %}warn{% endif %}" role="alert">{{ m }}</div>{% endfor %}
     {% block content %}{% endblock %}
   </div>
-  <p class="foot">© JamiiTek · <a href="/chatbot/privacy-policy/">Privacy</a> · <a href="/contact/">Help</a></p>
+  <p class="foot">© JamiiTek · <a href="{% url 'privacy_policy' %}" target="_blank" rel="noopener">Privacy</a> · <a href="{% url 'account_help' %}" target="_blank" rel="noopener">Help</a></p>
 </main>
 <script>
 /* Kitufe kinazima baada ya kubonyezwa — hakuna kutuma mara mbili */

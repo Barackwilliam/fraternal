@@ -597,6 +597,16 @@ class StaffTwoFactorTest(TestCase):
         self.assertEqual(r['Location'], '/manage/login/')
         self.assertNotIn('_auth_user_id', self.client.session)
 
+    def test_help_and_privacy_open_during_2fa(self):
+        self._enroll()
+        self.client.logout()
+        self._login()
+        self.assertEqual(self.client.get('/manage/').status_code, 302)      # bado inahitaji code
+        for url in ('/account/help/', '/chatbot/privacy-policy/'):
+            r = self.client.get(url)
+            self.assertEqual(r.status_code, 200, url)
+        self.assertContains(self.client.get('/account/2fa/'), '/account/help/')
+
     def test_clients_are_not_asked_for_2fa(self):
         from django.contrib.auth.models import User
         from apps.models import Client
