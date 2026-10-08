@@ -137,6 +137,7 @@ a{color:var(--cyan)}
     {% if error %}<div class="err">{{ error }}</div>{% endif %}
     {% if form.non_field_errors %}<div class="err">{% for e in form.non_field_errors %}{{ e }} {% endfor %}</div>{% endif %}
 
+    {% if mode == 'login' %}{% include 'includes/one_account_note.html' %}{% endif %}
     <form method="post" novalidate>
       {% csrf_token %}
       <input type="hidden" name="next" value="{{ next }}">

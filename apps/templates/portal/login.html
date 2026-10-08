@@ -255,7 +255,7 @@
       box-shadow: 0 0 0 3px rgba(0,200,255,0.09);
       background: rgba(0,200,255,0.04);
     }
-    .f-input::placeholder { color: rgba(232,244,255,0.18); }
+    .f-input::placeholder { color: rgba(232,244,255,0.12); }
 
     /* Password toggle */
     .pw-wrap { position: relative; }
@@ -386,12 +386,13 @@
     </div>
     {% endif %}
 
+    {% include 'includes/one_account_note.html' %}
     <form method="post">
       {% csrf_token %}
       <input type="hidden" name="next" value="{{ next }}">
 
       <div class="f-group">
-        <label class="f-label">Username</label>
+        <label class="f-label">Username or email</label>
         <input type="text" name="username" class="f-input"
                placeholder="your_username" autofocus autocomplete="username" required>
       </div>

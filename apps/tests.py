@@ -290,3 +290,44 @@ class SiteSeoTest(NoPingMixin, TestCase):
         locs = [re.sub(r'^https?://[^/]+', '', u) for u in re.findall(r'<loc>([^<]*)</loc>', xml)]
         self.assertIn('/get-started/', locs)
         self.assertEqual(locs.count('/service/'), 1)
+
+
+class OneAccountTest(NoPingMixin, TestCase):
+    """Akaunti moja: Web Builder ↔ Client Portal ↔ JamiiBot (apps/accounts_link.py)."""
+
+    def setUp(self):
+        super().setUp()
+        from django.contrib.auth.models import User
+        self.user = User.objects.create_user('neema', 'neema@example.com', 'Kilimo2026!')
+
+    def test_builder_account_signs_in_to_client_portal(self):
+        from apps.models import Client
+        r = self.client.post('/portal/login/', {'username': 'neema', 'password': 'Kilimo2026!'})
+        self.assertRedirects(r, '/portal/', fetch_redirect_response=False)
+        c = Client.objects.get(user=self.user)
+        self.assertEqual(c.email, 'neema@example.com')
+        self.assertEqual(self.client.get('/portal/').status_code, 200)
+
+    def test_portal_login_accepts_email_and_blocks_external_next(self):
+        r = self.client.post('/portal/login/', {'username': 'NEEMA@example.com', 'password': 'Kilimo2026!',
+                                                'next': '//evil.example/x'})
+        self.assertRedirects(r, '/portal/', fetch_redirect_response=False)
+
+    def test_builder_account_signs_in_to_jamiibot(self):
+        from apps.chatbot.models import ChatbotClient
+        r = self.client.post('/chatbot/login/', {'username': 'neema@example.com', 'password': 'Kilimo2026!'})
+        self.assertEqual(r.status_code, 302)
+        self.assertTrue(ChatbotClient.objects.filter(user=self.user).exists())
+
+    def test_already_signed_in_goes_straight_to_bot(self):
+        self.client.force_login(self.user)
+        r = self.client.get('/chatbot/login/')
+        self.assertRedirects(r, '/chatbot/dashboard/', fetch_redirect_response=False)
+
+    def test_switcher_on_all_three_apps(self):
+        self.client.force_login(self.user)
+        for url in ('/portal/', '/builder/'):
+            html = self.client.get(url).content.decode()
+            self.assertIn('Switch app', html, url)
+            for href in ('href="/portal/"', 'href="/chatbot/dashboard/"', 'href="/builder/"'):
+                self.assertIn(href, html, url)
