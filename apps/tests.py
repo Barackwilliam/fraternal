@@ -663,3 +663,25 @@ class PasswordResetTest(TestCase):
     def test_login_pages_link_to_reset(self):
         for url in ('/portal/login/', '/chatbot/login/', '/builder/login/', '/manage/login/'):
             self.assertContains(self.client.get(url), '/account/password-reset/', msg_prefix=url)
+
+
+class AdminPagesRenderTest(TestCase):
+    """Kurasa za admin/manage zenye data zifunguke (zilikuwa zinaanguka au nzito)."""
+
+    def test_subscription_payment_admin_list_renders(self):
+        from django.contrib.auth.models import User
+        from apps.chatbot.models import (BotConfig, BotSubscription, ChatbotClient,
+                                         SubscriptionPayment, SubscriptionPlan)
+        boss = User.objects.create_superuser('boss2', 'b2@x.com', 'Sahihi-Kabisa-2026')
+        cl = ChatbotClient.objects.create(user=boss, full_name='B', business_name='Biz', email='b2@x.com')
+        bot = BotConfig.objects.create(client=cl, bot_name='B', business_name='Biz')
+        plan = SubscriptionPlan.objects.filter(is_active=True).first()
+        sub = BotSubscription.objects.create(bot=bot, plan=plan, status='active')
+        SubscriptionPayment.objects.create(subscription=sub, plan=plan, amount=15000,
+                                           months_covered=1, transaction_ref='Z1')
+        self.client.force_login(boss)
+        r = self.client.get('/admin/chatbot/subscriptionpayment/')
+        self.assertContains(r, 'TZS 15,000')
+        for url in ('/manage/chatbot/', '/manage/chatbot/clients/', '/manage/infra/',
+                    '/manage/websites/', '/manage/clients/', '/admin/chatbot/botconfig/'):
+            self.assertEqual(self.client.get(url).status_code, 200, url)
