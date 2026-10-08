@@ -562,16 +562,19 @@ class StaffTwoFactorTest(TestCase):
         secret, _ = self._enroll()
         self.client.logout()
         self._login()
-        r = self.client.get('/manage/')
-        self.assertTrue(r['Location'].startswith('/account/2fa/?'))
+        r = self.client.get('/manage/clients/')
+        self.assertEqual(r['Location'], '/account/2fa/')     # hakuna ?next= kwenye URL
+        page = self.client.get('/account/2fa/').content.decode()
+        for leak in ('Staff', 'staff', '/manage/', 'payments'):
+            self.assertNotIn(leak, page)
         # Code ile ile iliyotumika kwenye setup haikubaliwi tena (replay)
         used = tf.totp_at(secret, int(time.time() // 30))
         r = self.client.post('/account/2fa/', {'code': used})
         self.assertContains(r, 'not valid')
         # Code ya hatua inayofuata inakubaliwa
         nxt = tf.totp_at(secret, int(time.time() // 30) + 1)
-        r = self.client.post('/account/2fa/', {'code': nxt, 'next': '/manage/'})
-        self.assertEqual(r['Location'], '/manage/')
+        r = self.client.post('/account/2fa/', {'code': nxt})
+        self.assertEqual(r['Location'], '/manage/clients/')   # inarudi ulikokuwa
 
     def test_recovery_code_works_once(self):
         _, r = self._enroll()

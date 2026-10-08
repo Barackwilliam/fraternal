@@ -3,7 +3,7 @@
 {% block page_title %}JamiiBot Manager{% endblock %}
 {% block breadcrumb %}Manage / JamiiBot SaaS{% endblock %}
 {% block extra_css %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
 <style>
 /* WANAOSUBIRI BINADAMU */
 .hwait{background:linear-gradient(140deg,rgba(245,158,11,.12),rgba(245,158,11,.02));
@@ -407,6 +407,8 @@
 </div>
 
 <script>
+/* chart.js ni defer — subiri ipakie (inatekelezwa kabla ya DOMContentLoaded) */
+document.addEventListener("DOMContentLoaded",function(){
 Chart.defaults.color='rgba(255,255,255,.35)';
 Chart.defaults.font.family='IBM Plex Mono';
 Chart.defaults.font.size=10;
@@ -420,6 +422,7 @@ new Chart(document.getElementById('statusChart').getContext('2d'),{
   type:'doughnut',
   data:{labels:['Active','Pending','Suspended','Draft'],datasets:[{data:[{{ active_bots }},{{ pending_bots }},{{ suspended_bots }},{{ draft_bots }}],backgroundColor:['#10b981','#f59e0b','#ef4444','#3b82f6'],borderWidth:2,borderColor:'#0f1629',hoverOffset:6}]},
   options:{responsive:true,plugins:{legend:{display:false}},cutout:'64%'}
+});
 });
 function filterBots(s,btn){document.querySelectorAll('.f-pill').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.querySelectorAll('.bot-item').forEach(r=>{r.style.display=(s==='all'||r.dataset.status===s)?'':'none'})}
 function searchBots(q){const lq=q.toLowerCase();document.querySelectorAll('.bot-item').forEach(r=>{r.style.display=r.dataset.search.includes(lq)?'':'none'})}
