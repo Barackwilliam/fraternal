@@ -1,232 +1,407 @@
 {% extends 'management/base.html' %}
-{% block title %}Timu ya AI{% endblock %}
-{% block content %}
+{% load static ofisi %}
+{% block title %}Ofisi ya timu{% endblock %}
+{% block extra_css %}
+<link rel="preload" as="image" href="{% static lead.photo %}">
 <style>
-  .wf{--ok:#10d98a;--warn:#fbbf24;--bad:#ff5a6e;--blue:#3b82f6}
-  .wf-top{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:18px}
-  .wf-top h1{font-family:var(--head);font-size:22px;font-weight:800;letter-spacing:-.02em;margin:0}
-  .wf-top p{color:var(--text-2);font-size:13px;margin:4px 0 0;max-width:640px;line-height:1.5}
-  .wf-run{display:flex;gap:8px;flex-wrap:wrap}
-  .wf-run form{margin:0}
-  .wf-b{display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 14px;border-radius:10px;font:inherit;
-    font-size:12.5px;font-weight:600;cursor:pointer;text-decoration:none;border:1px solid var(--border);
-    background:var(--card-s);color:var(--text)}
-  .wf-b:hover{border-color:var(--border-s)}
-  .wf-b.pri{background:var(--blue);border-color:var(--blue);color:#fff}
-  .wf-b.ok{background:rgba(16,217,138,.12);border-color:rgba(16,217,138,.3);color:var(--ok)}
-  .wf-b.ghost{background:transparent}
-  .wf-b.sm{height:30px;padding:0 11px;font-size:12px}
-
-  .wf-note{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:12px;margin-bottom:16px;
-    font-size:12.5px;line-height:1.55;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.22);color:var(--text)}
-  .wf-note i{color:var(--warn);margin-top:2px}
-  .wf-note code{font-family:var(--mono);font-size:11.5px;color:var(--warn)}
-
-  .wf-team{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:22px}
-  .wf-m{position:relative;display:block;text-decoration:none;color:inherit;background:var(--card);border:1px solid var(--border);
-    border-radius:16px;padding:16px;transition:border-color .15s,transform .15s}
-  .wf-m:hover{border-color:var(--border-s);transform:translateY(-1px)}
-  .wf-m.on{border-color:var(--c);box-shadow:0 0 0 1px var(--c) inset}
-  .wf-m.lead{grid-column:1/-1;display:flex;gap:16px;align-items:center;flex-wrap:wrap}
-  .wf-av{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;font-size:17px;flex:0 0 auto;
-    color:#fff;background:var(--c)}
-  .wf-m .hd{display:flex;gap:12px;align-items:center}
-  .wf-m .nm{font-weight:700;font-size:15px}
-  .wf-m .rl{font-size:12px;color:var(--text-2)}
-  .wf-m .dt{font-size:12px;color:var(--text-2);line-height:1.5;margin-top:10px}
-  .wf-m.lead .dt{margin:0;flex:1 1 280px}
-  .wf-ct{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
-  .wf-m.lead .wf-ct{margin:0}
-  .wf-pill{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:999px;font-size:11.5px;
-    background:var(--card-s);border:1px solid var(--border);color:var(--text-2)}
-  .wf-pill b{color:var(--text);font-weight:700}
-  .wf-pill.aw{background:rgba(59,130,246,.12);border-color:rgba(59,130,246,.35);color:#93c5fd}
-  .wf-pill.aw b{color:#bfdbfe}
-  .wf-pill.st{background:rgba(251,191,36,.1);border-color:rgba(251,191,36,.3);color:var(--warn)}
-  .wf-pill.er{background:rgba(255,90,110,.1);border-color:rgba(255,90,110,.3);color:var(--bad)}
-  .wf-last{font-family:var(--mono);font-size:10.5px;color:var(--text-3);margin-top:10px}
-  @media(max-width:640px){
-    .wf-team{grid-template-columns:1fr 1fr;gap:8px}
-    .wf-m{padding:12px}
-    .wf-m .dt{display:none}
-    .wf-m.lead .dt{display:block;flex-basis:100%;font-size:11.5px}
-    .wf-av{width:34px;height:34px;font-size:15px;border-radius:10px}
-    .wf-m .nm{font-size:14px}
-    .wf-ct{margin-top:8px}
+  .of{--ok:#22c55e;--warn:#f59e0b;--bad:#ff5a6e;--blue:#3b82f6;--ink:#e8ecf6;--soft:rgba(232,236,246,.62);
+      --mute:rgba(232,236,246,.38);--line:rgba(255,255,255,.07);--panel:rgba(255,255,255,.035);--panel2:rgba(255,255,255,.055);
+      color:var(--ink)}
+  .of *{box-sizing:border-box}
+  .of img{display:block}
+  @media (prefers-reduced-motion:no-preference){
+    .of .rise{opacity:0;transform:translateY(10px);animation:ofRise .55s cubic-bezier(.2,.7,.2,1) forwards;animation-delay:calc(var(--i,0) * 70ms)}
   }
+  @keyframes ofRise{to{opacity:1;transform:none}}
 
-  .wf-grid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:18px;align-items:start}
-  @media(max-width:1100px){.wf-grid{grid-template-columns:1fr}}
-  .wf-h{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 12px;flex-wrap:wrap}
-  .wf-h h2{font-size:15px;font-weight:700;margin:0;display:flex;gap:8px;align-items:center}
-  .wf-tabs{display:flex;gap:6px}
-  .wf-tabs a{padding:5px 12px;border-radius:999px;font-size:12px;text-decoration:none;color:var(--text-2);
-    border:1px solid var(--border);background:var(--card)}
-  .wf-tabs a.on{color:var(--cyan);border-color:rgba(0,212,255,.35);background:var(--cyan-d)}
+  /* ── Kichwa ── */
+  .of-head{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;flex-wrap:wrap;margin-bottom:18px}
+  .of-kicker{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);
+    display:flex;align-items:center;gap:8px}
+  .of-head h1{font-family:var(--head);font-size:28px;font-weight:800;letter-spacing:-.025em;margin:6px 0 4px;line-height:1.1}
+  .of-live{display:flex;gap:14px;align-items:center;flex-wrap:wrap;font-size:13px;color:var(--soft)}
+  .of-live b{color:var(--ink);font-weight:600}
+  .of-clock{font-family:var(--mono);font-size:13px;color:var(--ink);background:var(--panel);border:1px solid var(--line);
+    padding:4px 10px;border-radius:8px;letter-spacing:.02em}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--ok);display:inline-block;position:relative;flex:0 0 auto}
+  .dot.off{background:#64748b}
+  .dot.warn{background:var(--warn)}
+  .dot.bad{background:var(--bad)}
+  @media (prefers-reduced-motion:no-preference){
+    .dot:not(.off)::after{content:"";position:absolute;inset:0;border-radius:50%;background:inherit;animation:ofPing 2s ease-out infinite}
+  }
+  @keyframes ofPing{0%{transform:scale(1);opacity:.7}80%,100%{transform:scale(2.8);opacity:0}}
 
-  .wf-k{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:10px;
+  .of-acts{display:flex;gap:8px;flex-wrap:wrap}
+  .of-acts form{margin:0}
+  .of-b{display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 15px;border-radius:11px;font:inherit;font-size:13px;
+    font-weight:600;cursor:pointer;text-decoration:none;border:1px solid var(--line);background:var(--panel2);color:var(--ink);
+    transition:border-color .15s,background .15s,transform .1s}
+  .of-b:hover{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.08)}
+  .of-b:active{transform:scale(.98)}
+  .of-b.pri{background:linear-gradient(135deg,#2563eb,#4f46e5);border-color:transparent;color:#fff;box-shadow:0 6px 20px -8px rgba(59,130,246,.7)}
+  .of-b.ok{background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.35);color:#86efac}
+  .of-b.sm{height:32px;padding:0 12px;font-size:12px;border-radius:9px}
+  .of-b.ghost{background:transparent}
+
+  .of-note{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:12px;margin-bottom:16px;font-size:12.5px;
+    line-height:1.55;background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.22)}
+  .of-note code{font-family:var(--mono);font-size:11.5px;color:#fcd34d}
+
+  /* ── Takwimu ── */
+  .of-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:16px}
+  .of-kpi{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:13px 15px}
+  .of-kpi .k{font-size:11.5px;color:var(--mute);display:flex;align-items:center;gap:7px}
+  .of-kpi .v{font-family:var(--head);font-size:26px;font-weight:800;letter-spacing:-.03em;margin-top:6px;line-height:1}
+  .of-kpi.hot{background:linear-gradient(135deg,rgba(59,130,246,.16),rgba(79,70,229,.08));border-color:rgba(99,102,241,.35)}
+  .of-kpi.hot .v{color:#c7d2fe}
+
+  /* ── William ── */
+  .of-lead{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr) auto;column-gap:22px;row-gap:12px;align-items:center;
+    grid-template-areas:"pic info stats" "pic says stats";
+    padding:22px;border-radius:20px;margin-bottom:16px;overflow:hidden;
+    background:radial-gradient(120% 140% at 0% 0%,rgba(37,99,235,.22),transparent 55%),linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02));
+    border:1px solid rgba(96,165,250,.22)}
+  .of-portrait{grid-area:pic;position:relative;width:128px;height:128px;flex:0 0 auto}
+  .of-info{grid-area:info;min-width:0;align-self:end}
+  .of-portrait img{width:100%;height:100%;object-fit:cover;border-radius:22px;box-shadow:0 18px 40px -18px rgba(0,0,0,.8)}
+  .of-portrait .dot{position:absolute;right:-3px;bottom:-3px;width:16px;height:16px;border:3px solid #0b1020}
+  .of-lead .name{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+  .of-lead .name b{font-family:var(--head);font-size:22px;font-weight:800;letter-spacing:-.02em}
+  .of-lead .name span{font-size:13px;color:var(--soft)}
+  .of-motto{font-size:12.5px;color:var(--mute);font-style:italic;margin-top:3px}
+  .of-says{grid-area:says;align-self:start;position:relative;padding:13px 16px;border-radius:4px 16px 16px 16px;background:rgba(15,23,42,.55);
+    border:1px solid var(--line);font-size:14.5px;line-height:1.6;color:var(--ink)}
+  .of-says small{display:block;font-size:11px;color:var(--mute);margin-bottom:4px;letter-spacing:.04em;text-transform:uppercase}
+  .of-says a{color:#93c5fd;font-size:12.5px;text-decoration:none;white-space:nowrap}
+  .of-lead-stats{grid-area:stats;display:grid;gap:8px;min-width:150px}
+  .of-ls{background:rgba(15,23,42,.45);border:1px solid var(--line);border-radius:12px;padding:10px 13px}
+  .of-ls .v{font-family:var(--head);font-size:20px;font-weight:800}
+  .of-ls .k{font-size:11.5px;color:var(--mute)}
+
+  /* ── Wafanyakazi ── */
+  .of-staff{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:22px}
+  .of-p{position:relative;display:flex;flex-direction:column;text-decoration:none;color:inherit;padding:16px;border-radius:18px;
+    background:var(--panel);border:1px solid var(--line);transition:transform .18s cubic-bezier(.2,.7,.2,1),border-color .18s,background .18s}
+  .of-p:hover{transform:translateY(-3px);border-color:color-mix(in srgb,var(--c) 55%,transparent);background:var(--panel2)}
+  .of-p.on{border-color:var(--c);box-shadow:0 0 0 1px var(--c) inset,0 16px 40px -24px var(--c)}
+  .of-p::before{content:"";position:absolute;inset:0 0 auto;height:3px;border-radius:18px 18px 0 0;background:var(--c);opacity:.85}
+  .of-p .top{display:flex;gap:12px;align-items:center}
+  .of-av{position:relative;width:64px;height:64px;flex:0 0 auto}
+  .of-av img{width:100%;height:100%;object-fit:cover;border-radius:16px}
+  .of-av .dot{position:absolute;right:-3px;bottom:-3px;width:13px;height:13px;border:2.5px solid #0b1020}
+  .of-p .nm{font-weight:700;font-size:15.5px;letter-spacing:-.01em}
+  .of-p .tt{font-size:11.5px;color:var(--soft);line-height:1.35;margin-top:1px}
+  .of-now{margin-top:13px;padding:10px 12px;border-radius:12px;background:rgba(15,23,42,.45);border:1px solid var(--line);
+    font-size:12.5px;line-height:1.45;min-height:58px}
+  .of-now small{display:flex;align-items:center;gap:6px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);margin-bottom:4px}
+  .of-now span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .typing{display:inline-flex;gap:3px}
+  .typing i{width:4px;height:4px;border-radius:50%;background:var(--c);opacity:.35}
+  @media (prefers-reduced-motion:no-preference){
+    .typing i{animation:ofType 1.2s infinite}.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+  }
+  @keyframes ofType{0%,60%,100%{opacity:.25;transform:none}30%{opacity:1;transform:translateY(-2px)}}
+  .of-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px}
+  .of-stats div{text-align:center;padding:7px 4px;border-radius:10px;background:rgba(255,255,255,.025)}
+  .of-stats b{display:block;font-family:var(--head);font-size:17px;font-weight:800}
+  .of-stats span{font-size:10.5px;color:var(--mute)}
+  .of-stats .hot b{color:#93c5fd}
+  .of-motto2{font-size:11.5px;color:var(--mute);font-style:italic;margin-top:10px;line-height:1.45}
+
+  /* ── Meza ya mfanyakazi (ukichagua mmoja) ── */
+  .of-desk{display:flex;gap:16px;align-items:center;padding:16px 18px;border-radius:16px;margin-bottom:14px;
+    background:linear-gradient(90deg,color-mix(in srgb,var(--c) 16%,transparent),transparent 70%);border:1px solid color-mix(in srgb,var(--c) 35%,transparent)}
+  .of-desk img{width:72px;height:72px;border-radius:18px;object-fit:cover}
+  .of-desk b{font-size:17px}
+  .of-desk p{margin:3px 0 0;font-size:12.5px;color:var(--soft);line-height:1.5;max-width:640px}
+
+  /* ── Mezani kwako + shughuli ── */
+  .of-grid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:18px;align-items:start}
+  .of-h{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 12px;flex-wrap:wrap}
+  .of-h h2{font-size:16px;font-weight:700;margin:0;display:flex;gap:9px;align-items:center}
+  .of-tabs{display:flex;gap:4px;padding:3px;border-radius:11px;background:var(--panel);border:1px solid var(--line)}
+  .of-tabs a{padding:6px 12px;border-radius:8px;font-size:12px;text-decoration:none;color:var(--soft)}
+  .of-tabs a.on{background:rgba(255,255,255,.09);color:var(--ink)}
+  .pill{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:999px;font-size:11.5px;font-weight:500;
+    background:rgba(255,255,255,.05);border:1px solid var(--line);color:var(--soft)}
+  .pill.blue{background:rgba(59,130,246,.13);border-color:rgba(59,130,246,.35);color:#bfdbfe}
+  .pill.red{background:rgba(255,90,110,.1);border-color:rgba(255,90,110,.3);color:#fda4af}
+  .pill.amber{background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.3);color:#fcd34d}
+
+  .of-msg{display:grid;grid-template-columns:44px minmax(0,1fr);gap:12px;margin-bottom:12px}
+  .of-msg > img{width:44px;height:44px;border-radius:13px;object-fit:cover}
+  .of-bubble{background:var(--panel);border:1px solid var(--line);border-radius:4px 16px 16px 16px;padding:13px 15px;
     border-left:3px solid var(--c)}
-  .wf-k.aw{background:linear-gradient(90deg,rgba(59,130,246,.06),transparent 60%),var(--card)}
-  .wf-k .r1{display:flex;gap:10px;align-items:flex-start}
-  .wf-k .who{font-size:11px;font-weight:700;color:var(--c);text-transform:uppercase;letter-spacing:.06em}
-  .wf-k .tt{font-size:14px;font-weight:600;line-height:1.4;margin-top:2px}
-  .wf-k .meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
-  .wf-k .det{font-size:12.5px;color:var(--text-2);margin-top:8px;line-height:1.5;white-space:pre-line}
-  .wf-k .pr{margin-left:auto;flex:0 0 auto}
-  .wf-k textarea{width:100%;min-height:150px;margin-top:10px;border-radius:10px;border:1px solid var(--border);
-    background:var(--bg2);color:var(--text);padding:10px 12px;font:inherit;font-size:13px;line-height:1.55;resize:vertical;outline:none}
-  .wf-k textarea:focus{border-color:var(--blue)}
-  .wf-k .to{font-size:12px;color:var(--text-2);margin-top:8px}
-  .wf-k .to b{color:var(--text)}
-  .wf-k .act{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;align-items:center}
-  .wf-k .act form{margin:0}
-  .wf-k .res{font-size:12px;color:var(--text-2);margin-top:8px}
-  .wf-empty{background:var(--card);border:1px dashed var(--border);border-radius:14px;padding:30px;text-align:center;
-    color:var(--text-2);font-size:13px}
+  .of-msg.aw .of-bubble{background:linear-gradient(90deg,rgba(59,130,246,.07),transparent 60%),var(--panel)}
+  .of-bubble .who{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;font-size:12px;color:var(--mute)}
+  .of-bubble .who b{color:var(--ink);font-size:13px}
+  .of-bubble .ask{font-size:12.5px;color:var(--soft);margin-top:6px}
+  .of-bubble .tt{font-size:14.5px;font-weight:600;line-height:1.45;margin-top:3px}
+  .of-bubble .meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+  .of-bubble .det{font-size:12.5px;color:var(--soft);margin-top:9px;line-height:1.55;white-space:pre-line}
+  .of-bubble .to{font-size:12px;color:var(--soft);margin-top:10px}
+  .of-bubble .to b{color:var(--ink)}
+  .of-bubble textarea{width:100%;min-height:160px;margin-top:8px;border-radius:12px;border:1px solid var(--line);background:rgba(2,6,23,.55);
+    color:var(--ink);padding:11px 13px;font:inherit;font-size:13.5px;line-height:1.6;resize:vertical;outline:none}
+  .of-bubble textarea:focus{border-color:rgba(96,165,250,.6)}
+  .of-bubble .act{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;align-items:center}
+  .of-bubble .act form{margin:0}
+  .of-bubble .res{font-size:12px;color:var(--soft);margin-top:8px}
+  .of-bubble details summary{cursor:pointer;color:var(--mute);font-size:12px;margin-top:8px}
+  .of-empty{background:var(--panel);border:1px dashed var(--line);border-radius:16px;padding:34px;text-align:center;color:var(--soft);font-size:13.5px}
 
-  .wf-rep{background:var(--card);border:1px solid var(--border);border-radius:14px;margin-bottom:10px;overflow:hidden}
-  .wf-rep summary{cursor:pointer;list-style:none;padding:12px 14px;display:flex;gap:8px;align-items:center;font-size:13px;font-weight:600}
-  .wf-rep summary::-webkit-details-marker{display:none}
-  .wf-rep summary small{margin-left:auto;font-weight:500;color:var(--text-3);font-size:11px}
-  .wf-rep pre{margin:0;padding:12px 14px;border-top:1px solid var(--border);white-space:pre-wrap;font-family:var(--body);
-    font-size:12.5px;line-height:1.55;color:var(--text-2);max-height:420px;overflow:auto}
+  .of-side{position:sticky;top:76px;display:grid;gap:16px}
+  .of-card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px 15px}
+  .of-feed{list-style:none;margin:0;padding:0;position:relative}
+  .of-feed::before{content:"";position:absolute;left:15px;top:6px;bottom:6px;width:1px;background:var(--line)}
+  .of-feed li{position:relative;display:grid;grid-template-columns:32px minmax(0,1fr);gap:10px;padding:7px 0}
+  .of-feed img{width:32px;height:32px;border-radius:10px;object-fit:cover;position:relative;box-shadow:0 0 0 3px #0b1020}
+  .of-feed p{margin:0;font-size:12.5px;line-height:1.45;color:var(--soft)}
+  .of-feed p b{color:var(--ink);font-weight:600}
+  .of-feed p em{font-style:normal;color:var(--ink)}
+  .of-feed time{display:block;font-size:10.5px;color:var(--mute);margin-top:2px;font-family:var(--mono)}
+  .of-rep{border-top:1px solid var(--line);padding-top:8px;margin-top:8px}
+  .of-rep summary{cursor:pointer;list-style:none;display:flex;gap:8px;align-items:center;font-size:13px;font-weight:600;padding:4px 0}
+  .of-rep summary::-webkit-details-marker{display:none}
+  .of-rep summary small{margin-left:auto;font-weight:400;color:var(--mute);font-size:11px}
+  .of-rep pre{white-space:pre-wrap;font-family:var(--body);font-size:12.5px;line-height:1.55;color:var(--soft);margin:8px 0 0;max-height:380px;overflow:auto}
+
+  @media (max-width:1180px){.of-staff{grid-template-columns:repeat(2,minmax(0,1fr))}.of-grid{grid-template-columns:1fr}.of-side{position:static}}
+  @media (max-width:760px){
+    .of-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .of-lead{grid-template-columns:auto minmax(0,1fr);grid-template-areas:"pic info" "says says" "stats stats";padding:16px;column-gap:14px}
+    .of-info{align-self:center}
+    .of-portrait{width:84px;height:84px}.of-portrait img{border-radius:18px}
+    .of-lead .name b{font-size:19px}
+    .of-lead-stats{grid-template-columns:repeat(3,1fr);min-width:0}
+    .of-head h1{font-size:23px}
+  }
+  @media (max-width:520px){
+    .of-staff{grid-template-columns:1fr 1fr;gap:8px}
+    .of-p{padding:12px}.of-av{width:48px;height:48px}.of-av img{border-radius:13px}
+    .of-p .top{flex-direction:column;align-items:flex-start;gap:8px}
+    .of-motto2{display:none}.of-now{min-height:0}
+    .of-msg{grid-template-columns:34px minmax(0,1fr);gap:8px}.of-msg > img{width:34px;height:34px;border-radius:10px}
+  }
 </style>
+{% endblock %}
 
-<div class="wf">
-  <div class="wf-top">
+{% block content %}
+<div class="of">
+
+  <!-- KICHWA -->
+  <header class="of-head rise">
     <div>
-      <h1>Timu ya AI</h1>
-      <p>Wanafanya kazi kila dakika 30. Kazi za ndani wanazifanya wenyewe; chochote kinachomfikia mteja
-        kinasubiri idhini yako hapa{% if wilife_ready %} au kwa <b>OK code</b> kupitia wILife{% endif %}.
-        {% if last_run %}<br>Mzunguko wa mwisho: <span style="font-family:var(--mono)">{{ last_run|date:"d/m H:i" }}</span>{% endif %}</p>
+      <div class="of-kicker"><span class="dot{% if not lead.online %} off{% endif %}"></span> JamiiTek · Ofisi ya timu</div>
+      <h1>Habari, {{ request.user.first_name|default:request.user.username|capfirst }}. Timu iko {% if lead.online %}kazini{% else %}tayari{% endif %}.</h1>
+      <div class="of-live">
+        <span class="of-clock" id="ofClock">--:--:--</span>
+        <span>Dar es Salaam</span>
+        {% if last_run %}<span>Mzunguko wa mwisho: <b>{{ last_run|zamani }}</b></span>{% endif %}
+      </div>
     </div>
-    <div class="wf-run">
+    <div class="of-acts">
       <form method="post" action="{% url 'wafanyakazi_run' %}">{% csrf_token %}
-        <button class="wf-b pri"><i class="fas fa-play"></i> Endesha sasa</button></form>
-      <form method="post" action="{% url 'wafanyakazi_run' %}">{% csrf_token %}
-        <input type="hidden" name="ripoti" value="asubuhi">
-        <button class="wf-b"><i class="fas fa-sun"></i> Ripoti ya asubuhi</button></form>
-      <form method="post" action="{% url 'wafanyakazi_run' %}">{% csrf_token %}
-        <input type="hidden" name="ripoti" value="jioni">
-        <button class="wf-b"><i class="fas fa-moon"></i> Ripoti ya jioni</button></form>
-      <a class="wf-b" href="{% url 'wafanyakazi_exam' %}">🧪 Mtihani wa umahiri</a>
+        <button class="of-b pri"><i class="fas fa-play"></i> Endesha sasa</button></form>
+      <form method="post" action="{% url 'wafanyakazi_run' %}">{% csrf_token %}<input type="hidden" name="ripoti" value="asubuhi">
+        <button class="of-b" title="Mpango wa asubuhi">☀️ Ripoti</button></form>
+      <form method="post" action="{% url 'wafanyakazi_run' %}">{% csrf_token %}<input type="hidden" name="ripoti" value="jioni">
+        <button class="of-b" title="Ripoti ya jioni">🌙 Ripoti</button></form>
+      <a class="of-b" href="{% url 'wafanyakazi_exam' %}">🧪 Mtihani</a>
     </div>
-  </div>
+  </header>
 
   {% if not wilife_ready %}
-  <div class="wf-note"><i class="fas fa-plug"></i>
-    <div>wILife haijaunganishwa bado — ripoti za William zinatumwa kupitia taarifa za kawaida za JamiiTek.
-      Weka <code>WILIFE_URL</code> na <code>WORKERS_API_TOKEN</code> kwenye Render ili ripoti na idhini zikufikie kupitia wILife.</div>
+  <div class="of-note rise" style="--i:1"><i class="fas fa-plug" style="color:#fcd34d;margin-top:2px"></i>
+    <div>wILife haijaunganishwa — ripoti za William zinakuja kwa email. Weka <code>WILIFE_URL</code> na <code>WORKERS_API_TOKEN</code>
+      kwenye Render ili zikufikie kupitia wILife pamoja na <b>OK code</b>.</div>
   </div>
   {% endif %}
 
-  <div class="wf-team">
-    {% for w in team %}
-    <a class="wf-m{% if forloop.first %} lead{% endif %}{% if worker == w.slug %} on{% endif %}" style="--c:{{ w.color }}"
-       href="{% if worker == w.slug %}?{% else %}?w={{ w.slug }}{% endif %}">
-      <div class="hd">
-        <div class="wf-av">{{ w.icon }}</div>
-        <div><div class="nm">{{ w.name }}</div><div class="rl">{{ w.role }}</div></div>
+  <!-- TAKWIMU -->
+  <section class="of-kpis">
+    <div class="of-kpi rise{% if counts.awaiting %} hot{% endif %}" style="--i:1"><div class="k"><i class="fas fa-pen-nib"></i> Zinasubiri idhini yako</div><div class="v">{{ counts.awaiting }}</div></div>
+    <div class="of-kpi rise" style="--i:2"><div class="k"><i class="fas fa-list-check"></i> Kazi zinazoendelea</div><div class="v">{{ counts.open }}</div></div>
+    <div class="of-kpi rise" style="--i:3"><div class="k"><i class="fas fa-circle-check"></i> Zimekamilika leo</div><div class="v">{{ counts.done_today }}</div></div>
+    <div class="of-kpi rise" style="--i:4"><div class="k"><i class="fas fa-bolt"></i> Mpya leo</div><div class="v">{{ counts.new_today }}</div></div>
+  </section>
+
+  <!-- WILLIAM -->
+  <section class="of-lead rise" style="--i:2">
+    <div class="of-portrait">
+      <img src="{% static lead.photo %}" alt="{{ lead.name }}" width="128" height="128">
+      <span class="dot{% if not lead.online %} off{% endif %}" title="{% if lead.online %}Kazini{% else %}Nje ya mtandao{% endif %}"></span>
+    </div>
+    <div class="of-info">
+      <div class="name"><b>{{ lead.name }}</b><span>{{ lead.title }} · {{ lead.role }}</span></div>
+      <div class="of-motto">“{{ lead.motto }}”</div>
+    </div>
+    <div class="of-says">
+      <small>William anasema</small>
+      {{ william_says }}
+      {% if william_report %} <a href="#ripoti">Soma {{ william_report.get_kind_display|lower }} →</a>{% endif %}
+    </div>
+    <div class="of-lead-stats">
+      <div class="of-ls"><div class="v">{{ lead.team_load|default:0 }}</div><div class="k">kazi za timu mezani</div></div>
+      <div class="of-ls"><div class="v" {% if lead.team_stale %}style="color:#fcd34d"{% endif %}>{{ lead.team_stale|default:0 }}</div><div class="k">zimekaa &gt; siku 2</div></div>
+      <div class="of-ls"><div class="v">{{ counts.done_today }}</div><div class="k">zimekamilika leo</div></div>
+    </div>
+  </section>
+
+  <!-- WAFANYAKAZI -->
+  <section class="of-staff">
+    {% for w in staff %}
+    <a class="of-p rise{% if worker == w.slug %} on{% endif %}" style="--c:{{ w.color }};--i:{{ forloop.counter|add:2 }}"
+       href="{% if worker == w.slug %}?{% else %}?w={{ w.slug }}{% endif %}#mezani">
+      <div class="top">
+        <div class="of-av">
+          <img src="{% static w.photo %}" alt="{{ w.name }}" width="64" height="64" loading="lazy">
+          <span class="dot{% if w.state == 'error' %} bad{% elif not w.online %} off{% elif w.state == 'waiting' %} warn{% endif %}"></span>
+        </div>
+        <div style="min-width:0"><div class="nm">{{ w.name }}</div><div class="tt">{{ w.title }}</div></div>
       </div>
-      <div class="dt">{{ w.duty }}</div>
-      <div class="wf-ct">
-        {% if w.awaiting %}<span class="wf-pill aw"><b>{{ w.awaiting }}</b> idhini</span>{% endif %}
-        <span class="wf-pill"><b>{{ w.open }}</b> wazi</span>
-        {% if w.stale %}<span class="wf-pill st"><b>{{ w.stale }}</b> zimekwama</span>{% endif %}
-        {% if w.error %}<span class="wf-pill er" title="{{ w.error }}"><i class="fas fa-triangle-exclamation"></i> hitilafu</span>{% endif %}
+      <div class="of-now">
+        <small>{% if w.state == 'waiting' %}Anakusubiri{% elif w.state == 'busy' %}Sasa hivi <span class="typing"><i></i><i></i><i></i></span>{% elif w.state == 'error' %}Ana tatizo{% else %}Hali{% endif %}</small>
+        <span>{% if w.state == 'error' %}{{ w.error|truncatechars:90 }}{% else %}{{ w.doing }}{% endif %}</span>
       </div>
-      {% if not forloop.first %}<div class="wf-last">{% if w.last_run %}{{ w.last_run|date:"d/m H:i" }}{% else %}bado hajaanza{% endif %}</div>{% endif %}
+      <div class="of-stats">
+        <div{% if w.awaiting %} class="hot"{% endif %}><b>{{ w.awaiting }}</b><span>idhini</span></div>
+        <div><b>{{ w.open }}</b><span>wazi</span></div>
+        <div><b>{{ w.done_today }}</b><span>leo</span></div>
+      </div>
+      <div class="of-motto2">“{{ w.motto }}”</div>
     </a>
     {% endfor %}
-  </div>
+  </section>
 
-  <div class="wf-grid">
+  <div class="of-grid" id="mezani">
+    <!-- MEZANI KWAKO -->
     <section>
-      <div class="wf-h">
-        <h2>{% if current %}<span style="color:{{ current.color }}">{{ current.name }}</span> · {% endif %}Kazi
-          {% if awaiting_total %}<span class="wf-pill aw"><b>{{ awaiting_total }}</b> zinasubiri idhini</span>{% endif %}</h2>
-        <div class="wf-tabs">
-          <a href="?{% if worker %}w={{ worker }}&{% endif %}hali=hai" class="{% if view == 'hai' %}on{% endif %}">Hai</a>
-          <a href="?{% if worker %}w={{ worker }}&{% endif %}hali=zilizofungwa" class="{% if view != 'hai' %}on{% endif %}">Zilizofungwa</a>
+      {% if current %}
+      <div class="of-desk rise" style="--c:{{ current.color }}">
+        <img src="{% static current.photo %}" alt="{{ current.name }}" width="72" height="72">
+        <div><b>Meza ya {{ current.name }}</b> <span class="pill">{{ current.title }}</span>
+          <p>{{ current.duty }}</p></div>
+      </div>
+      {% endif %}
+
+      <div class="of-h">
+        <h2><i class="fas fa-inbox" style="color:#93c5fd"></i> Mezani kwako
+          {% if awaiting_total %}<span class="pill blue">{{ awaiting_total }} zinasubiri idhini</span>{% endif %}</h2>
+        <div class="of-tabs">
+          <a href="?{% if worker %}w={{ worker }}&{% endif %}hali=hai#mezani" class="{% if view == 'hai' %}on{% endif %}">Hai</a>
+          <a href="?{% if worker %}w={{ worker }}&{% endif %}hali=zilizofungwa#mezani" class="{% if view != 'hai' %}on{% endif %}">Zilizofungwa</a>
         </div>
       </div>
 
       {% for k in tasks %}
-      <article class="wf-k{% if k.needs_approval %} aw{% endif %}" style="--c:{{ k.who.color }}">
-        <div class="r1">
-          <div style="min-width:0">
-            <div class="who">{{ k.who.name }} · {{ k.who.role }}</div>
-            <div class="tt">{{ k.title }}</div>
-          </div>
-          <span class="pr wf-pill{% if k.priority == 1 %} er{% endif %}">{{ k.get_priority_display }}</span>
-        </div>
-        <div class="meta">
-          <span class="wf-pill">{{ k.get_status_display }}</span>
-          {% if k.channel != 'none' %}<span class="wf-pill">{{ k.get_channel_display }}</span>{% endif %}
-          <span class="wf-pill">{{ k.created_at|date:"d/m H:i" }}</span>
-          {% if k.reminders %}<span class="wf-pill st">imekumbushwa mara {{ k.reminders }}</span>{% endif %}
-          {% if k.wilife_code %}<span class="wf-pill aw">wILife: OK {{ k.wilife_code }}</span>{% endif %}
-        </div>
-        {% if k.detail %}<div class="det">{{ k.detail|truncatechars:400 }}</div>{% endif %}
-
-        {% if k.is_live %}
-          {% if k.draft %}
-          <form method="post" action="{% url 'wafanyakazi_action' k.pk 'tuma' %}">{% csrf_token %}
-            <input type="hidden" name="next" value="{{ request.get_full_path }}">
-            {% if k.recipient_email or k.recipient_phone %}
-            <div class="to">Kwenda kwa: <b>{{ k.recipient_name|default:"—" }}</b>
-              {% if k.channel == 'email' %}&lt;{{ k.recipient_email }}&gt;{% else %}{{ k.recipient_phone }}{% endif %}
-              {% if k.subject %} · <i>{{ k.subject }}</i>{% endif %}</div>
-            {% endif %}
-            <textarea name="draft" id="d{{ k.pk }}">{{ k.draft }}</textarea>
-            <div class="act">
-              {% if k.channel == 'email' %}<button class="wf-b ok sm"><i class="fas fa-paper-plane"></i> Kubali na utume email</button>
-              {% elif k.channel == 'whatsapp' %}<button class="wf-b ok sm"><i class="fab fa-whatsapp"></i> Kubali na utume WhatsApp</button>
-              {% elif k.channel == 'faq' %}<button class="wf-b ok sm"><i class="fas fa-graduation-cap"></i> Kubali — ifundishe bot</button>
-              {% elif k.channel == 'social' %}<button class="wf-b ok sm"><i class="fas fa-check"></i> Nimechapisha</button>
-              {% endif %}
-              <button type="button" class="wf-b ghost sm" onclick="wfCopy({{ k.pk }}, this)"><i class="fas fa-copy"></i> Nakili</button>
-              {% if k.wa %}<a class="wf-b ghost sm" href="{{ k.wa }}" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i> Fungua WhatsApp</a>{% endif %}
-            </div>
-          </form>
+      <article class="of-msg rise{% if k.needs_approval %} aw{% endif %}" style="--c:{{ k.who.color }};--i:{{ forloop.counter0|add:4 }}">
+        <img src="{% static k.who.photo %}" alt="{{ k.who.name }}" width="44" height="44" loading="lazy">
+        <div class="of-bubble">
+          <div class="who"><b>{{ k.who.name }}</b> {{ k.who.title }} · {{ k.created_at|zamani }}
+            {% if k.priority == 1 %}<span class="pill red">Haraka</span>{% endif %}</div>
+          {% if k.is_live %}
+          <div class="ask">{% if k.channel == 'email' %}Nimeandaa email — naomba uipitie kabla sijamtumia mteja.
+            {% elif k.channel == 'whatsapp' %}Nimeandaa ujumbe wa WhatsApp — ukikubali, naupeleka.
+            {% elif k.channel == 'faq' %}JamiiBot haikujua jibu. Nimeandaa jibu — ukikubali, bot itajifunza.
+            {% elif k.channel == 'social' %}Post ya leo iko tayari — inakili, ichapishe, kisha nijulishe.
+            {% else %}Nimeona hili — linahitaji jicho lako.{% endif %}</div>
           {% endif %}
-          <div class="act">
-            {% if k.link %}<a class="wf-b ghost sm" href="{{ k.link }}" target="_blank" rel="noopener"><i class="fas fa-arrow-up-right-from-square"></i> Fungua</a>{% endif %}
-            <form method="post" action="{% url 'wafanyakazi_action' k.pk 'kamilisha' %}">{% csrf_token %}
-              <input type="hidden" name="next" value="{{ request.get_full_path }}">
-              <button class="wf-b ghost sm"><i class="fas fa-check-double"></i> Nimeifanya</button></form>
-            <form method="post" action="{% url 'wafanyakazi_action' k.pk 'achana' %}">{% csrf_token %}
-              <input type="hidden" name="next" value="{{ request.get_full_path }}">
-              <button class="wf-b ghost sm" onclick="return confirm('Achana na kazi hii?')"><i class="fas fa-xmark"></i> Achana</button></form>
+          <div class="tt">{{ k.title }}</div>
+          <div class="meta">
+            <span class="pill{% if k.needs_approval %} blue{% endif %}">{{ k.get_status_display }}</span>
+            {% if k.channel != 'none' %}<span class="pill">{{ k.get_channel_display }}</span>{% endif %}
+            {% if k.reminders %}<span class="pill amber">William amekumbusha ×{{ k.reminders }}</span>{% endif %}
+            {% if k.wilife_code %}<span class="pill blue">wILife: OK {{ k.wilife_code }}</span>{% endif %}
           </div>
-        {% else %}
-          {% if k.result %}<div class="res"><i class="fas fa-circle-info"></i> {{ k.result|urlize }}</div>{% endif %}
-          {% if k.draft %}<details class="det"><summary>Rasimu</summary>{{ k.draft }}</details>{% endif %}
-        {% endif %}
+          {% if k.detail %}<div class="det">{{ k.detail|truncatechars:420 }}</div>{% endif %}
+
+          {% if k.is_live %}
+            {% if k.draft %}
+            <form method="post" action="{% url 'wafanyakazi_action' k.pk 'tuma' %}">{% csrf_token %}
+              <input type="hidden" name="next" value="{{ request.get_full_path }}">
+              {% if k.recipient_email or k.recipient_phone %}
+              <div class="to">Kwenda kwa <b>{{ k.recipient_name|default:"—" }}</b>
+                {% if k.channel == 'email' %}&lt;{{ k.recipient_email }}&gt;{% else %}{{ k.recipient_phone }}{% endif %}
+                {% if k.subject %} · <i>{{ k.subject }}</i>{% endif %}</div>
+              {% endif %}
+              <textarea name="draft" id="d{{ k.pk }}">{{ k.draft }}</textarea>
+              <div class="act">
+                {% if k.channel == 'email' %}<button class="of-b ok sm"><i class="fas fa-paper-plane"></i> Kubali na utume</button>
+                {% elif k.channel == 'whatsapp' %}<button class="of-b ok sm"><i class="fab fa-whatsapp"></i> Kubali na utume</button>
+                {% elif k.channel == 'faq' %}<button class="of-b ok sm"><i class="fas fa-graduation-cap"></i> Kubali — ifundishe bot</button>
+                {% elif k.channel == 'social' %}<button class="of-b ok sm"><i class="fas fa-check"></i> Nimechapisha</button>
+                {% endif %}
+                <button type="button" class="of-b ghost sm" onclick="ofCopy({{ k.pk }}, this)"><i class="fas fa-copy"></i> Nakili</button>
+                {% if k.wa %}<a class="of-b ghost sm" href="{{ k.wa }}" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i> Fungua WhatsApp</a>{% endif %}
+              </div>
+            </form>
+            {% endif %}
+            <div class="act">
+              {% if k.link %}<a class="of-b ghost sm" href="{{ k.link }}" target="_blank" rel="noopener"><i class="fas fa-arrow-up-right-from-square"></i> Fungua</a>{% endif %}
+              <form method="post" action="{% url 'wafanyakazi_action' k.pk 'kamilisha' %}">{% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                <button class="of-b ghost sm"><i class="fas fa-check-double"></i> Nimeifanya</button></form>
+              <form method="post" action="{% url 'wafanyakazi_action' k.pk 'achana' %}">{% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                <button class="of-b ghost sm" onclick="return confirm('Achana na kazi hii?')"><i class="fas fa-xmark"></i> Achana</button></form>
+            </div>
+          {% else %}
+            {% if k.result %}<div class="res"><i class="fas fa-circle-info"></i> {{ k.result|urlize }}</div>{% endif %}
+            {% if k.draft %}<details><summary>Rasimu</summary><div class="det">{{ k.draft }}</div></details>{% endif %}
+          {% endif %}
+        </div>
       </article>
       {% empty %}
-      <div class="wf-empty"><i class="fas fa-mug-hot" style="font-size:22px;display:block;margin-bottom:8px"></i>
-        {% if view == 'hai' %}Hakuna kazi wazi kwa sasa.{% else %}Hakuna kazi zilizofungwa bado.{% endif %}</div>
+      <div class="of-empty"><div style="font-size:26px;margin-bottom:8px">☕</div>
+        {% if view == 'hai' %}Mezani hakuna kitu kinachokusubiri. Timu inaendelea na kazi.{% else %}Bado hakuna kazi zilizofungwa.{% endif %}</div>
       {% endfor %}
     </section>
 
-    <aside>
-      <div class="wf-h"><h2><i class="fas fa-user-tie" style="color:#2563eb"></i> Ripoti za William</h2></div>
-      {% for r in reports %}
-      <details class="wf-rep"{% if forloop.first %} open{% endif %}>
-        <summary>{% if r.kind == 'asubuhi' %}☀️{% else %}🌙{% endif %} {{ r.get_kind_display }}
-          <small>{{ r.date|date:"d/m" }} · {{ r.delivered|default:"—" }}</small></summary>
-        <pre>{{ r.text }}</pre>
-      </details>
-      {% empty %}
-      <div class="wf-empty">William atatuma ripoti ya kwanza saa 1 asubuhi.</div>
-      {% endfor %}
+    <!-- SHUGHULI ZA OFISI -->
+    <aside class="of-side">
+      <div class="of-card rise" style="--i:5">
+        <div class="of-h" style="margin-bottom:6px"><h2><span class="dot"></span> Shughuli za ofisi</h2></div>
+        <ul class="of-feed">
+          {% for e in feed %}
+          <li>
+            <img src="{% static e.who.photo %}" alt="{{ e.who.name }}" width="32" height="32" loading="lazy">
+            <p>{% if e.you %}<b>Wewe</b> {{ e.verb }} kazi ya {{ e.who.name }}:{% else %}<b>{{ e.who.name }}</b> {{ e.verb }}:{% endif %}
+              <em>{{ e.what|truncatechars:90 }}</em>
+              <time>{{ e.at|zamani }}</time></p>
+          </li>
+          {% empty %}
+          <li><span></span><p>Shughuli za timu zitaonekana hapa mzunguko wa kwanza ukikamilika.</p></li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <div class="of-card rise" id="ripoti" style="--i:6">
+        <div class="of-h" style="margin-bottom:2px"><h2><img src="{% static lead.photo %}" alt="" width="22" height="22" style="border-radius:7px"> Ripoti za William</h2></div>
+        {% for r in reports %}
+        <details class="of-rep"{% if forloop.first %} open{% endif %}>
+          <summary>{% if r.kind == 'asubuhi' %}☀️{% else %}🌙{% endif %} {{ r.get_kind_display }}
+            <small>{{ r.date|date:"d/m" }} · {{ r.delivered|default:"—" }}</small></summary>
+          <pre>{{ r.text }}</pre>
+        </details>
+        {% empty %}
+        <p style="font-size:12.5px;color:var(--soft);margin:6px 0 0">William atatuma ripoti ya kwanza saa 1 asubuhi.</p>
+        {% endfor %}
+      </div>
     </aside>
   </div>
 </div>
 
 <script>
-function wfCopy(id, btn){
+(function(){
+  var el = document.getElementById('ofClock');
+  if (!el) return;
+  var fmt = new Intl.DateTimeFormat('sw-TZ', {timeZone:'Africa/Dar_es_Salaam', hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false});
+  function tick(){ el.textContent = fmt.format(new Date()); }
+  tick(); setInterval(tick, 1000);
+})();
+function ofCopy(id, btn){
   var t = document.getElementById('d' + id);
   if (!t) return;
   navigator.clipboard.writeText(t.value).then(function(){

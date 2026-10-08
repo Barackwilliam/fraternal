@@ -99,7 +99,7 @@ def _exam(now):
     for slug, module in WORKERS:
         ai.reset_budget(AI_PER_WORKER)
         when = now.replace(hour=max(now.hour, grace.START_HOUR + 1)) if slug == 'grace' else now
-        entry = {'slug': slug, **{k: member(slug)[k] for k in ('name', 'role', 'icon', 'color')}}
+        entry = {'slug': slug, **{k: member(slug)[k] for k in ('name', 'role', 'icon', 'color', 'photo', 'title')}}
         try:
             with transaction.atomic():   # savepoint: kosa la mmoja lisiharibu wengine
                 entry['summary'] = module.run(when)
