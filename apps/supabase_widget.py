@@ -117,7 +117,7 @@ class SupabaseImageWidget(forms.TextInput):
 
   function measure(f) {{
     return new Promise(function (resolve) {{
-      if (!minPx || !/^image\//i.test(f.type)) return resolve(0);
+      if (!minPx || !/^image\\//i.test(f.type)) return resolve(0);
       var u = URL.createObjectURL(f), im = new Image();
       im.onload = function () {{ URL.revokeObjectURL(u); resolve(im.naturalWidth); }};
       im.onerror = function () {{ URL.revokeObjectURL(u); resolve(0); }};
@@ -128,7 +128,7 @@ class SupabaseImageWidget(forms.TextInput):
   // Punguza picha kwenye browser (canvas → WebP/JPEG). GIF/PDF/SVG haziguswi.
   function shrink(f) {{
     return new Promise(function (resolve) {{
-      if (!maxPx || !/^image\/(jpeg|png|webp)$/i.test(f.type)) return resolve(f);
+      if (!maxPx || !/^image\\/(jpeg|png|webp)$/i.test(f.type)) return resolve(f);
       var url = URL.createObjectURL(f), im = new Image();
       im.onload = function () {{
         var w = im.naturalWidth, h = im.naturalHeight, k = Math.min(1, maxPx / Math.max(w, h));
@@ -142,7 +142,7 @@ class SupabaseImageWidget(forms.TextInput):
         c.toBlob(function (b) {{
           if (!b || b.size >= f.size) return resolve(f);
           var ext = b.type === 'image/webp' ? 'webp' : 'jpg';
-          resolve(new File([b], (f.name || 'image').replace(/\.[^.]+$/, '') + '.' + ext, {{ type: b.type }}));
+          resolve(new File([b], (f.name || 'image').replace(/\\.[^.]+$/, '') + '.' + ext, {{ type: b.type }}));
         }}, 'image/webp', 0.82);
       }};
       im.onerror = function () {{ URL.revokeObjectURL(url); resolve(f); }};
