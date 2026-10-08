@@ -56,36 +56,79 @@ button{font:inherit;color:inherit}
 @keyframes sheen{0%{transform:translateX(-120%) skewX(-18deg)}60%,100%{transform:translateX(220%) skewX(-18deg)}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 
-/* ══ Mpangilio ══ */
-.shell{position:relative;z-index:1;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:28px 16px 36px}
-.card{width:100%;max-width:470px;animation:rise .5s var(--ease) both}
-@media(min-width:560px){
-  .card{padding:36px 38px 30px;border-radius:26px;background:rgba(7,26,49,.62);
-    border:1px solid var(--line);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
-    box-shadow:0 50px 100px -40px rgba(0,0,0,.75),inset 0 1px 0 rgba(255,255,255,.04)}
-}
+/* ══ Mpangilio: skrini mbili (onyesho | fomu) — simu: fomu upana wote ══ */
+.split{position:relative;z-index:1;min-height:100vh;min-height:100dvh;display:grid;grid-template-columns:minmax(0,1fr)}
+@media(min-width:960px){.split{grid-template-columns:minmax(0,1.02fr) minmax(0,1fr)}}
 
-/* ══ Logo inayoishi ══ */
-.top{display:flex;flex-direction:column;align-items:center;text-align:center}
-.avatar{position:relative;width:118px;height:118px;flex:0 0 auto}
-.avatar .ring{position:absolute;inset:12px;border-radius:50%;border:2px solid rgba(245,166,35,.55)}
+/* Upande wa onyesho */
+.show{display:none}
+@media(min-width:960px){
+  .show{position:sticky;top:0;height:100vh;height:100dvh;display:flex;flex-direction:column;justify-content:center;gap:26px;padding:48px clamp(36px,5vw,72px);
+    background:radial-gradient(600px 400px at 0% 0%,rgba(245,166,35,.16),transparent 60%),radial-gradient(520px 420px at 100% 100%,rgba(37,211,102,.14),transparent 60%),linear-gradient(160deg,#061629,#04101F);
+    border-right:1px solid var(--line);overflow:hidden}
+}
+.brand{display:inline-flex;align-items:center;gap:10px;text-decoration:none;font:800 20px var(--head);letter-spacing:-.02em}
+.brand img{width:38px;height:38px;border-radius:11px}
+.brand b{color:var(--gold)}
+.show h2{font:800 clamp(30px,2.6vw,42px)/1.08 var(--head);letter-spacing:-.035em;max-width:520px}
+.show h2 em{font-style:normal;background:linear-gradient(100deg,var(--wa),#7DE2B0);-webkit-background-clip:text;background-clip:text;color:transparent}
+.show>p{max-width:460px;color:var(--ink2);font-size:16px;line-height:1.6}
+.trust{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:13px;color:var(--ink2)}
+.trust span{display:inline-flex;align-items:center;gap:7px}
+.trust i{color:var(--green)}
+
+/* Chat ya WhatsApp (site: _register_chat.html) */
+.chat{width:min(400px,100%);border-radius:20px;overflow:hidden;background:#0B141A;border:1px solid rgba(255,255,255,.07);box-shadow:0 40px 80px -30px rgba(0,0,0,.8);animation:float 7s ease-in-out infinite}
+.chat-top{display:flex;align-items:center;gap:10px;padding:12px 14px;background:#1F2C33}
+.chat-top img{width:34px;height:34px;border-radius:50%}
+.chat-top .n{font-weight:600;font-size:14px}.chat-top .s{font-size:11.5px;color:#7DE2B0}
+.chat-top .v{margin-left:auto;color:#8696A0}
+.chat-body{display:flex;flex-direction:column;gap:7px;min-height:236px;padding:14px;background-image:radial-gradient(rgba(255,255,255,.035) 1px,transparent 1px);background-size:14px 14px}
+.chat .b{position:relative;max-width:84%;padding:8px 11px 16px;border-radius:10px;font-size:13px;line-height:1.45;color:#E9EDEF;opacity:0;animation:msg 16s infinite}
+.chat .b .t{position:absolute;right:8px;bottom:3px;font-size:9.5px;color:rgba(233,237,239,.5)}
+.chat .in{align-self:flex-start;background:#202C33;border-top-left-radius:3px}
+.chat .out{align-self:flex-end;background:#005C4B;border-top-right-radius:3px}
+.chat .typing{display:flex;gap:4px;align-self:flex-end;padding:10px 12px;border-radius:10px;background:#005C4B;opacity:0;animation:typ 16s infinite}
+.chat .typing i{width:5px;height:5px;border-radius:50%;background:#B5E8D5;animation:blink 1s infinite}
+.chat .typing i:nth-child(2){animation-delay:.15s}.chat .typing i:nth-child(3){animation-delay:.3s}
+.chat .m1{animation-delay:.3s}.chat .m2t{animation-delay:1.4s}.chat .m2{animation-delay:3s}.chat .m3{animation-delay:5.2s}.chat .m4t{animation-delay:6.4s}.chat .m4{animation-delay:7.8s}
+@keyframes msg{0%{opacity:0;transform:translateY(8px)}3%,90%{opacity:1;transform:none}96%,100%{opacity:0}}
+@keyframes typ{0%{opacity:0;display:flex}2%,9%{opacity:1}10%,100%{opacity:0;height:0;padding:0;margin-top:-7px}}
+
+/* Faida (site: _register_perks.html) */
+.perks{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:560px}
+.perks li{display:flex;gap:11px;padding:13px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid var(--line)}
+.perk-i{display:grid;place-items:center;width:34px;height:34px;flex:none;border-radius:10px;background:rgba(37,211,102,.12);color:var(--wa);font-size:14px}
+.perk-t{font-weight:600;font-size:13.5px}.perk-s{margin-top:2px;font-size:12px;line-height:1.45;color:var(--ink3)}
+
+/* Upande wa fomu */
+.formside{display:flex;flex-direction:column;justify-content:center;padding:22px 20px calc(30px + env(safe-area-inset-bottom,0px))}
+@media(min-width:600px){.formside{padding:44px clamp(28px,6vw,64px)}}
+.card{width:100%;max-width:560px;margin:0 auto;animation:rise .5s var(--ease) both}
+
+/* Kichwa cha simu (onyesho limefichwa) */
+.top{display:flex;align-items:center;gap:14px}
+.avatar{position:relative;width:72px;height:72px;flex:0 0 auto}
+.avatar .ring{position:absolute;inset:6px;border-radius:50%;border:2px solid rgba(245,166,35,.55)}
 .avatar .r1{animation:ring 3s ease-out infinite}
 .avatar .r2{animation:ring 3s ease-out 1.5s infinite;border-color:rgba(37,211,102,.55)}
-.avatar .orb{position:absolute;inset:12px;border-radius:50%;animation:float 4s ease-in-out infinite;
-  box-shadow:0 14px 36px -6px rgba(37,211,102,.45),0 0 0 4px rgba(255,255,255,.05)}
+.avatar .orb{position:absolute;inset:6px;border-radius:50%;animation:float 4s ease-in-out infinite;box-shadow:0 10px 26px -6px rgba(37,211,102,.45),0 0 0 3px rgba(255,255,255,.05)}
 .avatar .orb img{width:100%;height:100%;border-radius:50%;display:block}
 .avatar .sat{position:absolute;inset:0;animation:orbit 7s linear infinite}
-.avatar .sat::before{content:"";position:absolute;top:3px;left:50%;width:11px;height:11px;margin-left:-5.5px;
-  border-radius:50%;background:var(--gold);box-shadow:0 0 12px var(--gold)}
-.avatar .badge{position:absolute;bottom:4px;right:-2px;z-index:2;display:flex;align-items:center;gap:5px;
-  padding:3px 9px;border-radius:999px;font-size:10.5px;font-weight:600;
-  background:#0B1F14;border:1px solid rgba(34,197,94,.45);color:#86EFAC;animation:bob 4s ease-in-out infinite}
-.avatar .badge .d{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 7px var(--green);animation:blink 1.6s infinite}
-
-.h{font-family:var(--head);font-weight:800;font-size:27px;letter-spacing:-.03em;line-height:1.15;margin-top:18px}
-.pill{display:inline-flex;align-items:center;gap:7px;margin-top:10px;padding:5px 12px;border-radius:999px;
-  font-size:12.5px;font-weight:600;color:#86EFAC;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.26)}
+.avatar .sat::before{content:"";position:absolute;top:1px;left:50%;width:8px;height:8px;margin-left:-4px;border-radius:50%;background:var(--gold);box-shadow:0 0 10px var(--gold)}
+.avatar .badge{display:none}
+.h{font-family:var(--head);font-weight:800;font-size:clamp(24px,5.6vw,30px);letter-spacing:-.03em;line-height:1.12}
+.pill{display:inline-flex;align-items:center;gap:7px;margin-top:8px;padding:5px 12px;border-radius:999px;font-size:12.5px;font-weight:600;color:#86EFAC;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.26)}
 .pill .d{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green)}
+@media(min-width:960px){.top .avatar{display:none}}
+
+.notice{display:flex;gap:12px;align-items:flex-start;margin:18px 0 0;padding:13px 15px;border-radius:14px;background:rgba(245,197,66,.08);border:1px solid rgba(245,197,66,.3);color:#f7dc8c;font-size:13.5px;line-height:1.55}
+.notice i{margin-top:3px;color:#f5c542}
+.notice strong{color:#fff}
+.notice a{color:#f5c542;font-weight:700}
+.card .one{margin-top:14px}
+.grp{margin-top:6px;font:600 11px var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);display:flex;align-items:center;gap:10px}
+.grp::after{content:"";flex:1;height:1px;background:var(--line)}
 
 /* ══ Ujumbe ══ */
 .msgs{display:grid;gap:8px;margin-top:22px}
@@ -95,9 +138,9 @@ button{font:inherit;color:inherit}
 .msg-success{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);color:#86EFAC}
 
 /* ══ Fomu ══ */
-form{margin-top:26px;display:grid;gap:14px}
+form{margin-top:20px;display:grid;gap:14px}
 .two{display:grid;gap:14px}
-@media(min-width:560px){.two{grid-template-columns:1fr 1fr}}
+@media(min-width:520px){.two{grid-template-columns:1fr 1fr}}
 
 /* Lebo inayoelea: sehemu inaonyesha jina lake ndani, na linapanda juu
    unapoandika. Fomu inaonekana fupi kwa sababu hakuna lebo juu ya kila
@@ -112,7 +155,7 @@ form{margin-top:26px;display:grid;gap:14px}
   pointer-events:none;transition:all .18s var(--ease);white-space:nowrap}
 .f input:focus+label,.f input:not(:placeholder-shown)+label{top:8px;transform:none;font-size:11px;font-weight:600;letter-spacing:.01em;color:var(--ink2)}
 .f input::placeholder{color:transparent}
-.f input:focus::placeholder{color:rgba(243,246,250,.28)}
+.f input:focus::placeholder{color:rgba(243,246,250,.13)}
 .f input:hover{border-color:rgba(255,255,255,.24)}
 .f input:focus{border-color:var(--gold);background:rgba(255,255,255,.055);box-shadow:0 0 0 4px rgba(245,166,35,.14)}
 .f:focus-within .ico{color:var(--gold)}
@@ -156,7 +199,17 @@ form{margin-top:26px;display:grid;gap:14px}
 <body>
 <div class="bg" aria-hidden="true"><i></i><i></i></div>
 
-<main class="shell">
+<main class="split">
+  <aside class="show" aria-label="About JamiiBot">
+    <a href="/bot/" class="brand"><img src="{% static 'img/jamiibot-icon.png' %}" alt="" width="38" height="38">Jamii<b>Bot</b></a>
+    <h2>Your WhatsApp, answering customers <em>24/7.</em></h2>
+    <p>JamiiBot replies in Swahili and English, shares your prices and takes orders — while you run your business.</p>
+    {% include 'chatbot/portal/_register_chat.html' %}
+    {% include 'chatbot/portal/_register_perks.html' %}
+    <div class="trust"><span><i class="fas fa-circle-check"></i>7 days free</span><span><i class="fas fa-circle-check"></i>No card needed</span><span><i class="fas fa-circle-check"></i>Set up in 10 minutes</span></div>
+  </aside>
+
+  <section class="formside">
   <div class="card">
 
     <div class="top">
@@ -165,13 +218,14 @@ form{margin-top:26px;display:grid;gap:14px}
         <span class="orb">
           <picture>
             <source srcset="{% static 'img/jamiibot-icon.webp' %}" type="image/webp">
-            <img src="{% static 'img/jamiibot-icon.png' %}" alt="JamiiBot" width="94" height="94">
+            <img src="{% static 'img/jamiibot-icon.png' %}" alt="JamiiBot" width="60" height="60">
           </picture>
         </span>
-        <span class="badge"><span class="d"></span>Online</span>
       </a>
-      <h1 class="h">Create your account</h1>
-      <span class="pill"><span class="d"></span>Free for 7 days &middot; No payment today</span>
+      <div>
+        <h1 class="h">Create your account</h1>
+        <span class="pill"><span class="d"></span>Free for 7 days &middot; No payment today</span>
+      </div>
     </div>
 
     {% if messages %}
@@ -185,14 +239,16 @@ form{margin-top:26px;display:grid;gap:14px}
     {% endif %}
 
     {% comment %} Wanaobonyeza "Start Free Trial" moja kwa moja hawaoni demo ya /bot/. Bila onyo hili, wanagundua kwenye hatua ya QR kwamba wanahitaji kifaa cha pili. {% endcomment %}
-    <div style="display:flex;gap:12px;align-items:flex-start;margin:0 0 18px;padding:13px 15px;border-radius:14px;background:rgba(245,197,66,.1);border:1px solid rgba(245,197,66,.4);color:#f7dc8c;font-size:13.5px;line-height:1.55">
-      <i class="fas fa-mobile-screen-button" style="margin-top:3px;color:#f5c542"></i>
-      <span><strong style="color:#fff">Utahitaji vifaa viwili kuunganisha WhatsApp:</strong> simu ya biashara (yenye WhatsApp) na kifaa kingine — kompyuta au simu nyingine — kuonyesha QR. <a href="/bot/#demo" style="color:#f5c542;font-weight:700">Tazama demo ya sekunde 45 →</a></span>
+    <div class="notice">
+      <i class="fas fa-mobile-screen-button"></i>
+      <span><strong>Utahitaji vifaa viwili kuunganisha WhatsApp:</strong> simu ya biashara (yenye WhatsApp) na kifaa kingine — kompyuta au simu nyingine — kuonyesha QR. <a href="/bot/#demo">Tazama demo ya sekunde 45 →</a></span>
     </div>
+    <div class="one">{% include 'includes/one_account_note.html' %}</div>
 
     <form method="post" id="regForm" novalidate>
       {% csrf_token %}
 
+      <div class="grp">You &amp; your business</div>
       <div class="two">
         <div class="f"><i class="fas fa-user ico"></i>
           <input id="full_name" type="text" name="full_name" placeholder="Juma Hassan" required autocomplete="name" value="{{ request.POST.full_name }}">
@@ -211,6 +267,7 @@ form{margin-top:26px;display:grid;gap:14px}
         <label for="phone">WhatsApp number</label>
         <span class="tag">Optional</span></div>
 
+      <div class="grp">Sign-in details</div>
       <div class="two">
         <div class="f"><i class="fas fa-at ico"></i>
           <input id="username" type="text" name="username" placeholder="juma123" required autocomplete="username" autocorrect="off" autocapitalize="none" spellcheck="false" value="{{ request.POST.username }}">
@@ -234,6 +291,7 @@ form{margin-top:26px;display:grid;gap:14px}
     <p class="foot">Already have an account? <a href="/chatbot/login/">Sign in</a></p>
     <p class="tos">By continuing you agree to our <a href="#">Terms</a> and <a href="#">Privacy Policy</a>.</p>
   </div>
+  </section>
 </main>
 
 <script>
