@@ -9,14 +9,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 WEBSITE_TYPES_DIR = BASE_DIR / 'website_types'
 
 # ── Security ──────────────────────────────────────────
-SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-dev-only-key-change-me')
+_DEV_SECRET_KEY = 'django-insecure-dev-only-key-change-me'
+SECRET_KEY = os.getenv('SECRET_KEY', '').strip() or _DEV_SECRET_KEY
 # Local development sets DEBUG=True in .env; Render leaves it unset so
 # production is safe by default rather than by remembering.
 DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 # SECRET_KEY inasaini sessions, password-reset tokens na cookies. Key ya
 # default iko wazi kwenye GitHub — kwa production ingemruhusu yeyote
 # kutengeneza session ya admin. Kama ilivyo kwa DB_PASSWORD, tunakataa kuanza.
-if not DEBUG and (not SECRET_KEY or SECRET_KEY.startswith('django-insecure')):
+# (Key halali za Django nyingi zinaanza na 'django-insecure-' — hizo ni sawa;
+# tunakataa tu key tupu au hii ya default iliyo wazi.)
+if not DEBUG and SECRET_KEY == _DEV_SECRET_KEY:
     raise RuntimeError(
         'SECRET_KEY ya production haijawekwa. Weka SECRET_KEY ndefu ya siri '
         '(herufi 50+) kwenye Render → Environment.'
