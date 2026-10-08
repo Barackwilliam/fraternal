@@ -150,6 +150,8 @@
           <i class="fas fa-envelope-open-text"></i> Email Delivery</a>
         <a href="/admin/" target="_blank" class="sb-link">
           <i class="fas fa-database"></i> Django Admin</a>
+        <a href="{% url 'two_factor_recovery_codes' %}" class="sb-link">
+          <i class="fas fa-shield-halved"></i> 2FA &amp; Recovery Codes</a>
         <a href="{% url 'management_logout' %}" class="sb-link sb-danger"
            onclick="return confirm('Sign out?')">
           <i class="fas fa-power-off"></i> Sign Out</a>

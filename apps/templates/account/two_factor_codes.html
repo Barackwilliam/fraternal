@@ -1,0 +1,22 @@
+{% extends "account/_shell.html" %}
+{% block title %}Recovery codes{% endblock %}
+{% block eyebrow %}Staff · Recovery codes{% endblock %}
+{% block heading %}{% if fresh_setup %}Two-step verification is on ✓{% elif codes %}New recovery codes{% else %}Recovery codes{% endif %}{% endblock %}
+{% block lead %}{% if codes %}<p class="lead">If you lose your phone, each code below lets you sign in <b>once</b>. Save them somewhere safe — a password manager or printed paper. <b>They will not be shown again.</b></p>{% else %}<p class="lead">You have <b>{{ remaining }}</b> unused recovery code{{ remaining|pluralize }}. Generating new codes cancels all the old ones.</p>{% endif %}{% endblock %}
+{% block content %}
+{% if codes %}
+<div class="codes" id="codes">{% for c in codes %}<code>{{ c }}</code>{% endfor %}</div>
+<div class="row" style="margin-bottom:12px">
+  <button class="btn ghost" type="button" id="copy">Copy</button>
+  <button class="btn ghost" type="button" onclick="window.print()">Print</button>
+</div>
+<a class="btn" href="{{ next|default:'/manage/' }}">I've saved my codes — continue</a>
+{% else %}
+<form method="post">{% csrf_token %}<button class="btn" type="submit">Generate new recovery codes</button></form>
+<div class="links"><a href="{% url 'two_factor_setup' %}">Move 2FA to a new phone</a><a href="/manage/">Back to dashboard</a></div>
+{% endif %}
+{% endblock %}
+{% block scripts %}{% if codes %}<script>
+document.getElementById('copy').addEventListener('click',function(){var t=[].map.call(document.querySelectorAll('#codes code'),function(c){return c.textContent}).join('\n');
+navigator.clipboard&&navigator.clipboard.writeText('JamiiTek recovery codes\n'+t).then(function(){var b=document.getElementById('copy');b.textContent='Copied ✓';setTimeout(function(){b.textContent='Copy'},1800)});});
+</script>{% endif %}{% endblock %}

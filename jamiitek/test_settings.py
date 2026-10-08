@@ -6,6 +6,8 @@ Kwa uhakiki wa haraka bila Postgres/Redis/env halisi.
 import os
 os.environ.setdefault('SECRET_KEY', 'test-only-key')
 os.environ.setdefault('DEBUG', 'True')
+# Tests za zamani zinatumia force_login ya staff; tests za 2FA zinaiwasha zenyewe
+os.environ.setdefault('STAFF_2FA_REQUIRED', 'False')
 
 from jamiitek.settings import *  # noqa
 

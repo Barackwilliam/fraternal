@@ -1031,3 +1031,26 @@ class EmailLogAdmin(admin.ModelAdmin):
 
     def has_change_permission(self, request, obj=None):
         return False
+
+
+# ── Staff 2FA (apps/two_factor.py) ──
+# Kusoma tu: siri na recovery codes hazionyeshwi. Kufuta rekodi = reset
+# (staff anaunganisha simu mpya akiingia tena).
+from .security_models import StaffTwoFactor  # noqa: E402
+
+
+@admin.register(StaffTwoFactor)
+class StaffTwoFactorAdmin(admin.ModelAdmin):
+    list_display = ('user', 'confirmed', 'confirmed_at', 'last_used_at', 'codes_left')
+    readonly_fields = ('user', 'confirmed', 'confirmed_at', 'last_used_at', 'created_at')
+    exclude = ('secret_encrypted', 'recovery_hashes', 'last_step')
+
+    def codes_left(self, obj):
+        return len(obj.recovery_hashes or [])
+    codes_left.short_description = 'Recovery codes left'
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
