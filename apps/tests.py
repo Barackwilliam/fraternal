@@ -562,16 +562,19 @@ class StaffTwoFactorTest(TestCase):
         secret, _ = self._enroll()
         self.client.logout()
         self._login()
-        r = self.client.get('/manage/')
-        self.assertTrue(r['Location'].startswith('/account/2fa/?'))
+        r = self.client.get('/manage/clients/')
+        self.assertEqual(r['Location'], '/account/2fa/')     # hakuna ?next= kwenye URL
+        page = self.client.get('/account/2fa/').content.decode()
+        for leak in ('Staff', 'staff', '/manage/', 'payments'):
+            self.assertNotIn(leak, page)
         # Code ile ile iliyotumika kwenye setup haikubaliwi tena (replay)
         used = tf.totp_at(secret, int(time.time() // 30))
         r = self.client.post('/account/2fa/', {'code': used})
         self.assertContains(r, 'not valid')
         # Code ya hatua inayofuata inakubaliwa
         nxt = tf.totp_at(secret, int(time.time() // 30) + 1)
-        r = self.client.post('/account/2fa/', {'code': nxt, 'next': '/manage/'})
-        self.assertEqual(r['Location'], '/manage/')
+        r = self.client.post('/account/2fa/', {'code': nxt})
+        self.assertEqual(r['Location'], '/manage/clients/')   # inarudi ulikokuwa
 
     def test_recovery_code_works_once(self):
         _, r = self._enroll()
@@ -660,3 +663,25 @@ class PasswordResetTest(TestCase):
     def test_login_pages_link_to_reset(self):
         for url in ('/portal/login/', '/chatbot/login/', '/builder/login/', '/manage/login/'):
             self.assertContains(self.client.get(url), '/account/password-reset/', msg_prefix=url)
+
+
+class AdminPagesRenderTest(TestCase):
+    """Kurasa za admin/manage zenye data zifunguke (zilikuwa zinaanguka au nzito)."""
+
+    def test_subscription_payment_admin_list_renders(self):
+        from django.contrib.auth.models import User
+        from apps.chatbot.models import (BotConfig, BotSubscription, ChatbotClient,
+                                         SubscriptionPayment, SubscriptionPlan)
+        boss = User.objects.create_superuser('boss2', 'b2@x.com', 'Sahihi-Kabisa-2026')
+        cl = ChatbotClient.objects.create(user=boss, full_name='B', business_name='Biz', email='b2@x.com')
+        bot = BotConfig.objects.create(client=cl, bot_name='B', business_name='Biz')
+        plan = SubscriptionPlan.objects.filter(is_active=True).first()
+        sub = BotSubscription.objects.create(bot=bot, plan=plan, status='active')
+        SubscriptionPayment.objects.create(subscription=sub, plan=plan, amount=15000,
+                                           months_covered=1, transaction_ref='Z1')
+        self.client.force_login(boss)
+        r = self.client.get('/admin/chatbot/subscriptionpayment/')
+        self.assertContains(r, 'TZS 15,000')
+        for url in ('/manage/chatbot/', '/manage/chatbot/clients/', '/manage/infra/',
+                    '/manage/websites/', '/manage/clients/', '/admin/chatbot/botconfig/'):
+            self.assertEqual(self.client.get(url).status_code, 200, url)
