@@ -1,0 +1,82 @@
+{% comment %}
+  Ganda la kurasa za usalama wa akaunti: Forgot password na 2FA ya staff.
+  Halitegemei fonts za nje wala CSS kubwa — linafunguka papo hapo.
+  Blocks: title, eyebrow, heading, lead, content, foot
+{% endcomment %}<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#071226">
+<title>{% block title %}Account security{% endblock %} — JamiiTek</title>
+<style>
+:root{--bg:#071226;--bg2:#0b1d3a;--card:rgba(255,255,255,.035);--line:rgba(255,255,255,.09);--line2:rgba(255,255,255,.16);
+--tx:#eaf0fa;--tx2:rgba(234,240,250,.62);--tx3:rgba(234,240,250,.4);--acc:#3d8bff;--acc2:#00d4ff;--ok:#22c55e;--warn:#f5a623;--bad:#ff5a6e;
+--r:16px;--font:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%}
+body{font-family:var(--font);color:var(--tx);background:radial-gradient(1200px 600px at 85% -10%,rgba(61,139,255,.18),transparent 60%),radial-gradient(900px 500px at -10% 110%,rgba(0,212,255,.10),transparent 60%),linear-gradient(180deg,var(--bg),var(--bg2));
+display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 16px;-webkit-font-smoothing:antialiased}
+.wrap{width:100%;max-width:440px}
+.brand{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:22px;text-decoration:none;color:var(--tx)}
+.brand i{display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--acc),var(--acc2));box-shadow:0 8px 24px rgba(61,139,255,.35)}
+.brand i svg{width:18px;height:18px}
+.brand b{font-size:18px;letter-spacing:-.2px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:30px 28px;box-shadow:0 30px 80px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.04)}
+.badge{display:inline-flex;align-items:center;gap:8px;padding:6px 11px;border-radius:999px;border:1px solid rgba(61,139,255,.35);background:rgba(61,139,255,.1);color:#9cc4ff;font:600 11px/1 var(--mono);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:16px}
+.badge svg{width:13px;height:13px}
+h1{font-size:23px;line-height:1.25;letter-spacing:-.3px;margin-bottom:8px}
+.lead{color:var(--tx2);font-size:14.5px;line-height:1.6;margin-bottom:22px}
+.lead b{color:var(--tx)}
+label{display:block;font-size:13px;font-weight:600;color:var(--tx2);margin:0 0 7px}
+.in{width:100%;padding:13px 14px;border-radius:12px;border:1.5px solid var(--line2);background:rgba(255,255,255,.04);color:var(--tx);font:500 15px var(--font);outline:none;transition:border-color .2s,box-shadow .2s,background .2s}
+.in:focus{border-color:var(--acc);box-shadow:0 0 0 4px rgba(61,139,255,.16);background:rgba(255,255,255,.06)}
+.in::placeholder{color:rgba(234,240,250,.14)}
+.in.code{font:600 26px/1 var(--mono);letter-spacing:10px;text-align:center;padding:15px 10px}
+.field{margin-bottom:16px}
+.hint{font-size:12.5px;color:var(--tx3);margin-top:7px;line-height:1.5}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;border:0;border-radius:12px;cursor:pointer;font:700 15px var(--font);color:#fff;background:linear-gradient(135deg,var(--acc),#2563eb);box-shadow:0 10px 28px rgba(37,99,235,.35);transition:transform .15s,box-shadow .2s;text-decoration:none}
+.btn:hover{transform:translateY(-1px);box-shadow:0 14px 34px rgba(37,99,235,.45)}
+.btn:active{transform:translateY(0)}
+.btn.ghost{background:transparent;border:1.5px solid var(--line2);box-shadow:none;color:var(--tx)}
+.alert{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:12px;font-size:13.5px;line-height:1.5;margin-bottom:18px}
+.alert.err{background:rgba(255,90,110,.09);border:1px solid rgba(255,90,110,.3);color:#ffb3bd}
+.alert.ok{background:rgba(34,197,94,.09);border:1px solid rgba(34,197,94,.3);color:#a7f3c0}
+.alert.warn{background:rgba(245,166,35,.09);border:1px solid rgba(245,166,35,.3);color:#fcd9a0}
+.alert ul{margin:0;padding-left:16px}
+.links{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 16px;margin-top:20px;font-size:13px}
+.links a{color:#9cc4ff;text-decoration:none;font-weight:600}
+.links a:hover{text-decoration:underline}
+.foot{margin-top:22px;text-align:center;font-size:12px;color:var(--tx3);display:flex;align-items:center;justify-content:center;gap:7px}
+.foot svg{width:13px;height:13px}
+.steps{list-style:none;counter-reset:s;display:grid;gap:12px;margin:0 0 20px}
+.steps li{counter-increment:s;display:grid;grid-template-columns:26px 1fr;gap:10px;font-size:14px;line-height:1.5;color:var(--tx2)}
+.steps li::before{content:counter(s);display:grid;place-items:center;width:26px;height:26px;border-radius:8px;background:rgba(61,139,255,.15);color:#9cc4ff;font:700 12px var(--mono)}
+.steps b{color:var(--tx)}
+.qr{display:grid;place-items:center;background:#fff;border-radius:16px;padding:12px;width:208px;height:208px;margin:0 auto 14px}
+.qr svg{width:184px;height:184px}
+.secret{font:600 14px var(--mono);letter-spacing:1.5px;text-align:center;color:var(--tx);background:rgba(255,255,255,.04);border:1px dashed var(--line2);border-radius:10px;padding:10px;word-break:break-all;margin-bottom:20px;user-select:all}
+.codes{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 18px}
+.codes code{font:600 15px var(--mono);letter-spacing:1px;text-align:center;padding:11px 6px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid var(--line2)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sep{height:1px;background:var(--line);margin:22px 0}
+@media (max-width:420px){.card{padding:24px 18px;border-radius:18px}h1{font-size:21px}.in.code{font-size:22px;letter-spacing:7px}}
+@media print{body{background:#fff;color:#000}.card{box-shadow:none;border-color:#ccc}.btn,.links,.foot,.badge{display:none}.codes code{border-color:#999;background:#fff;color:#000}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <a class="brand" href="/" aria-label="JamiiTek home"><i><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6.5v5.2c0 4.6 3.3 8.4 8 9.3 4.7-.9 8-4.7 8-9.3V6.5z"/><path d="m8.8 12.2 2.2 2.2 4.3-4.6"/></svg></i><b>JamiiTek</b></a>
+  <div class="card">
+    <div class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>{% block eyebrow %}Account security{% endblock %}</div>
+    <h1>{% block heading %}{% endblock %}</h1>
+    {% block lead %}{% endblock %}
+    {% if messages %}{% for m in messages %}<div class="alert {% if m.tags == 'error' %}err{% elif m.tags == 'success' %}ok{% else %}warn{% endif %}" role="alert">{{ m }}</div>{% endfor %}{% endif %}
+    {% block content %}{% endblock %}
+  </div>
+  {% block foot %}<p class="foot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6.5v5.2c0 4.6 3.3 8.4 8 9.3 4.7-.9 8-4.7 8-9.3V6.5z"/></svg>Encrypted connection · JamiiTek never asks for your password by phone or WhatsApp</p>{% endblock %}
+</main>
+{% block scripts %}{% endblock %}
+</body>
+</html>

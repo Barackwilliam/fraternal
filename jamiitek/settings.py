@@ -74,6 +74,9 @@ SESSION_SAVE_EVERY_REQUEST = False
 # baada ya makosa mengi — angalia apps/security.py.
 AUTHENTICATION_BACKENDS = ['apps.security.ThrottledModelBackend']
 
+# Link ya "Forgot password" inatumika mara moja na inakufa baada ya saa 1
+PASSWORD_RESET_TIMEOUT = 60 * 60
+
 # Kwa DEV tu: ruhusu host yoyote (inarahisisha kutest custom domains kwa hosts file)
 
 
@@ -116,6 +119,8 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    # Staff lazima wapite 2FA kabla ya ukurasa wowote (apps/two_factor.py)
+    'apps.two_factor.StaffTwoFactorMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'apps.turnstile_middleware.TurnstileMiddleware',
     'builder.middleware.SubdomainMiddleware',

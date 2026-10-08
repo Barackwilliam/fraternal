@@ -58,7 +58,8 @@ def login_locked(request, username):
 
 def lockout_message():
     return ('Too many failed sign-in attempts. For your security this account '
-            'is locked for 15 minutes. Try again later or reset your password.')
+            'is locked for 15 minutes. Try again later, or reset your password at '
+            '/account/password-reset/ to unlock it now.')
 
 
 class ThrottledModelBackend(ModelBackend):

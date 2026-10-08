@@ -149,7 +149,7 @@ a{color:var(--cyan)}
           <input id="p" name="password" type="password" autocomplete="current-password" required></div>
         <button class="go" type="submit">Sign in →</button>
         <p class="alt">New to JamiiTek? <a href="{% url 'builder:signup' %}{% if next %}?next={{ next|urlencode }}{% endif %}">Create a free account</a></p>
-        <p class="fine">Forgot your password? <a href="https://wa.me/{% contact "wa" %}?text=Hello%20JamiiTek,%20I%20need%20help%20resetting%20my%20Website%20Builder%20password" target="_blank" rel="noopener">Ask us on WhatsApp</a></p>
+        <p class="fine">Forgot your password? <a href="{% url 'password_reset' %}?from=builder">Reset it by email</a> · <a href="https://wa.me/{% contact "wa" %}?text=Hello%20JamiiTek,%20I%20need%20help%20resetting%20my%20Website%20Builder%20password" target="_blank" rel="noopener">Ask us on WhatsApp</a></p>
       {% else %}
         {% if not account_only %}<div class="sec">1 · Your account</div>{% endif %}
         <div class="row">

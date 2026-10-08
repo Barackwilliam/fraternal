@@ -22,8 +22,21 @@ from django.views.generic import TemplateView
 from . import sw_views
 from . import pesapal_views
 from apps.seo.feeds import BlogFeed
+from . import password_reset
+from . import two_factor
 
 urlpatterns = [
+    # ── Usalama wa akaunti: Forgot password (wote) + 2FA (staff) ──
+    path('account/password-reset/', password_reset.RequestView.as_view(), name='password_reset'),
+    path('account/password-reset/sent/', password_reset.DoneView.as_view(), name='password_reset_done'),
+    path('account/password-reset/<uidb64>/<token>/', password_reset.ConfirmView.as_view(),
+         name='password_reset_confirm'),
+    path('account/password-reset/complete/', password_reset.CompleteView.as_view(),
+         name='password_reset_complete'),
+    path('account/2fa/', two_factor.verify, name='two_factor_verify'),
+    path('account/2fa/setup/', two_factor.setup, name='two_factor_setup'),
+    path('account/2fa/recovery-codes/', two_factor.recovery_codes, name='two_factor_recovery_codes'),
+
     # ── PESAPAL PAYMENTS (mfumo mzima) ──────────────────────
     path('pay/subscription/', pesapal_views.pay_subscription, name='pesapal_pay_subscription'),
     path('pay/hosting/<int:website_pk>/', pesapal_views.pay_hosting, name='pesapal_pay_hosting'),

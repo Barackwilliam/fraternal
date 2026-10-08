@@ -58,6 +58,7 @@
     <h1>Staff Access</h1>
     <p class="sub">Authentication required for management panel.</p>
 
+    {% for m in messages %}<div class="err-box"><i class="fas fa-shield-halved fa-sm"></i> {{ m }}</div>{% endfor %}
     {% if error %}<div class="err-box"><i class="fas fa-circle-exclamation fa-sm"></i> {{ error }}</div>{% endif %}
 
     <form method="post">
@@ -73,6 +74,7 @@
           <input type="password" name="password" id="pw" class="f-input" placeholder="••••••••••" style="padding-right:42px" required>
           <button type="button" class="f-eye" onclick="togglePw()"><i class="fas fa-eye" id="eyeIco"></i></button>
         </div>
+        <a href="{% url 'password_reset' %}?from=staff" style="display:block;text-align:right;margin-top:8px;font-size:12.5px;font-weight:600;text-decoration:none;color:var(--cyan)">Forgot password?</a>
       </div>
       <button type="submit" class="submit-btn">AUTHENTICATE <i class="fas fa-arrow-right"></i></button>
     </form>

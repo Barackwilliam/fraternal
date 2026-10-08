@@ -514,3 +514,149 @@ class SecurityFixesTest(NoPingMixin, TestCase):
     def test_brevo_webhook_fails_closed_without_token(self):
         r = self.client.post('/webhooks/brevo/', '[]', content_type='application/json')
         self.assertEqual(r.status_code, 403)
+
+
+@mock.patch.dict('os.environ', {'STAFF_2FA_REQUIRED': 'True'})
+class StaffTwoFactorTest(TestCase):
+    def setUp(self):
+        from django.contrib.auth.models import User
+        from django.core.cache import cache
+        cache.clear()
+        self.staff = User.objects.create_user('boss', 'boss@x.com', 'Sahihi-Kabisa-2026', is_staff=True)
+
+    def _login(self):
+        self.client.post('/manage/login/', {'username': 'boss', 'password': 'Sahihi-Kabisa-2026'})
+
+    def _enroll(self):
+        from apps import two_factor as tf
+        self._login()
+        self.client.get('/account/2fa/setup/')
+        secret = self.client.session['staff_2fa_pending']
+        r = self.client.post('/account/2fa/setup/', {'code': tf.totp_at(secret, int(__import__('time').time() // 30))})
+        return secret, r
+
+    def test_totp_matches_rfc6238_vector(self):
+        from apps import two_factor as tf
+        secret = __import__('base64').b32encode(b'12345678901234567890').decode()
+        # RFC 6238 SHA1, T=59 → 94287082 (tarakimu 8); 6 za mwisho
+        self.assertEqual(tf.totp_at(secret, 59 // 30), '287082')
+
+    def test_staff_forced_to_set_up_2fa(self):
+        self._login()
+        r = self.client.get('/manage/')
+        self.assertEqual(r.status_code, 302)
+        self.assertTrue(r['Location'].startswith('/account/2fa/setup/'))
+
+    def test_enroll_shows_recovery_codes_and_unlocks(self):
+        secret, r = self._enroll()
+        self.assertContains(r, 'Two-step verification is on')
+        self.assertEqual(len(r.context['codes']), 8)
+        self.assertNotEqual(self.client.get('/manage/').get('Location', ''), '/account/2fa/setup/')
+        from apps.security_models import StaffTwoFactor
+        rec = StaffTwoFactor.objects.get(user=self.staff)
+        self.assertNotIn(secret, rec.secret_encrypted)        # imesimbwa
+
+    def test_new_login_needs_code_and_code_cannot_be_replayed(self):
+        import time
+        from apps import two_factor as tf
+        secret, _ = self._enroll()
+        self.client.logout()
+        self._login()
+        r = self.client.get('/manage/')
+        self.assertTrue(r['Location'].startswith('/account/2fa/?'))
+        # Code ile ile iliyotumika kwenye setup haikubaliwi tena (replay)
+        used = tf.totp_at(secret, int(time.time() // 30))
+        r = self.client.post('/account/2fa/', {'code': used})
+        self.assertContains(r, 'not valid')
+        # Code ya hatua inayofuata inakubaliwa
+        nxt = tf.totp_at(secret, int(time.time() // 30) + 1)
+        r = self.client.post('/account/2fa/', {'code': nxt, 'next': '/manage/'})
+        self.assertEqual(r['Location'], '/manage/')
+
+    def test_recovery_code_works_once(self):
+        _, r = self._enroll()
+        code = r.context['codes'][0]
+        for expect_ok in (True, False):
+            self.client.logout()
+            self._login()
+            r = self.client.post('/account/2fa/', {'mode': 'recovery', 'code': code, 'next': '/manage/'})
+            if expect_ok:
+                self.assertEqual(r['Location'], '/manage/')
+            else:
+                self.assertContains(r, 'not valid')
+
+    def test_five_wrong_codes_sign_out(self):
+        self._enroll()
+        self.client.logout()
+        self._login()
+        for _ in range(5):
+            r = self.client.post('/account/2fa/', {'code': '000000'})
+        self.assertEqual(r['Location'], '/manage/login/')
+        self.assertNotIn('_auth_user_id', self.client.session)
+
+    def test_clients_are_not_asked_for_2fa(self):
+        from django.contrib.auth.models import User
+        from apps.models import Client
+        u = User.objects.create_user('mteja', 'm@x.com', 'Sahihi-Kabisa-2026')
+        Client.objects.create(user=u, name='Mteja', email='m@x.com')
+        self.client.force_login(u)
+        self.assertEqual(self.client.get('/portal/').status_code, 200)
+
+    def test_reset_command_removes_2fa(self):
+        from django.core.management import call_command
+        from apps.security_models import StaffTwoFactor
+        self._enroll()
+        call_command('reset_staff_2fa', 'boss', stdout=__import__('io').StringIO())
+        self.assertFalse(StaffTwoFactor.objects.exists())
+
+
+class PasswordResetTest(TestCase):
+    def setUp(self):
+        from django.contrib.auth.models import User
+        from django.core.cache import cache
+        cache.clear()
+        self.user = User.objects.create_user('asha', 'asha@example.com', 'Zamani-Sana-2026')
+
+    def _link(self):
+        self.client.post('/account/password-reset/', {'email': 'ASHA@example.com'})
+        self.assertEqual(len(mail.outbox), 1)
+        body = mail.outbox[0].body
+        return re.search(r'https?://[^/\s]+(/account/password-reset/[^\s]+/)', body).group(1), body
+
+    def test_same_response_for_unknown_email(self):
+        r = self.client.post('/account/password-reset/', {'email': 'nobody@example.com'})
+        self.assertRedirects(r, '/account/password-reset/sent/')
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_link_uses_configured_domain_not_host_header(self):
+        with override_settings(SITE_BASE_URL='https://www.jamiitek.com'):
+            self.client.post('/account/password-reset/', {'email': 'asha@example.com'},
+                             HTTP_HOST='localhost')
+        self.assertIn('https://www.jamiitek.com/account/password-reset/', mail.outbox[0].body)
+
+    def test_full_reset_flow_unlocks_and_link_dies(self):
+        from apps.security import _key
+        from django.core.cache import cache
+        cache.set(_key('user', 'asha'), 99, 900)       # imefungwa kwa makosa
+        path, _ = self._link()
+        r = self.client.get(path, follow=True)
+        set_url = r.redirect_chain[-1][0]
+        weak = self.client.post(set_url, {'new_password1': '12345678', 'new_password2': '12345678'})
+        self.assertContains(weak, 'too common')
+        r = self.client.post(set_url, {'new_password1': 'Mpya-Kabisa-2026!', 'new_password2': 'Mpya-Kabisa-2026!'})
+        self.assertRedirects(r, '/account/password-reset/complete/')
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.check_password('Mpya-Kabisa-2026!'))
+        self.assertIsNone(cache.get(_key('user', 'asha')))
+        self.assertIn('password was changed', mail.outbox[-1].subject)
+        # Link haitumiki mara ya pili
+        self.assertContains(self.client.get(path, follow=True), 'This link has expired')
+
+    def test_requests_are_rate_limited(self):
+        for _ in range(8):
+            self.client.post('/account/password-reset/', {'email': 'asha@example.com'})
+        self.assertEqual(len(mail.outbox), 5)
+
+    def test_login_pages_link_to_reset(self):
+        for url in ('/portal/login/', '/chatbot/login/', '/builder/login/', '/manage/login/'):
+            self.assertContains(self.client.get(url), '/account/password-reset/', msg_prefix=url)
