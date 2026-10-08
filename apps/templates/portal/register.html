@@ -1,192 +1,360 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Create Account — JamiiTek Portal</title>
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#050810">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
   {% if TURNSTILE_ENABLED %}
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
   {% endif %}
+  {% comment %}
+    Usajili wa portal kama hatua 3 (Wewe → Website → Usalama). Rangi ni zile
+    zile za awali. Fomu bado ni MOJA inayotumwa mara moja (majina ya fields
+    hayajabadilika), kwa hiyo view haihitaji kubadilika. JS isipofanya kazi,
+    hatua zote zinaonekana pamoja na kitufe cha kutuma.
+  {% endcomment %}
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
-    :root{--bg:#050810;--cyan:#00d4ff;--purple:#8b5cf6;--green:#00ff88;--red:#ff3b5c;--border:rgba(255,255,255,0.07);--text:rgba(255,255,255,0.85);--text-2:rgba(255,255,255,0.4);--mono:'JetBrains Mono',monospace;--head:'Syne',sans-serif;--body:'Space Grotesk',sans-serif}
-    body{font-family:var(--body);background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;overflow-x:hidden}
-    body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,212,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,0.03) 1px,transparent 1px);background-size:50px 50px;pointer-events:none}
-    .orb{position:fixed;border-radius:50%;filter:blur(100px);pointer-events:none}
-    .orb-1{width:400px;height:400px;background:rgba(139,92,246,0.07);top:-80px;right:-80px}
-    .orb-2{width:300px;height:300px;background:rgba(0,212,255,0.05);bottom:-40px;left:-40px}
-    .scan{position:fixed;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,212,255,0.3),transparent);animation:scan 6s linear infinite;pointer-events:none}
-    @keyframes scan{from{top:0}to{top:100%}}
+    :root{--bg:#050810;--cyan:#00d4ff;--purple:#8b5cf6;--green:#00ff88;--red:#ff3b5c;--amber:#ffb800;--border:rgba(255,255,255,0.08);--text:rgba(255,255,255,0.9);--text-2:rgba(255,255,255,0.55);--text-3:rgba(255,255,255,0.35);--mono:'JetBrains Mono',monospace;--head:'Syne',sans-serif;--body:'Space Grotesk',sans-serif;--grad:linear-gradient(135deg,var(--purple),var(--cyan))}
+    html{-webkit-text-size-adjust:100%}
+    body{font-family:var(--body);background:var(--bg);color:var(--text);min-height:100vh;min-height:100dvh;overflow-x:hidden;-webkit-tap-highlight-color:transparent}
+    body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,212,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,0.03) 1px,transparent 1px);background-size:44px 44px;pointer-events:none}
+    .orb{position:fixed;border-radius:50%;filter:blur(90px);pointer-events:none}
+    .orb-1{width:380px;height:380px;background:rgba(139,92,246,0.12);top:-120px;right:-120px}
+    .orb-2{width:300px;height:300px;background:rgba(0,212,255,0.08);bottom:-80px;left:-80px}
+    a{color:inherit;text-decoration:none}
+    button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 
-    .container{position:relative;z-index:10;width:100%;max-width:580px}
-    .card{background:rgba(255,255,255,0.025);border:1px solid rgba(139,92,246,0.15);border-radius:20px;padding:40px;backdrop-filter:blur(20px);box-shadow:0 24px 80px rgba(0,0,0,0.5)}
-    .back-link{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:11px;color:var(--text-2);letter-spacing:1px;margin-bottom:28px;transition:color 0.2s;cursor:pointer}
-    .back-link:hover{color:var(--purple)}
-    .logo{font-family:var(--head);font-size:24px;font-weight:800;background:linear-gradient(135deg,var(--purple),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px}
-    .tag{font-family:var(--mono);font-size:10px;color:var(--text-2);letter-spacing:2px;text-transform:uppercase;margin-bottom:24px;display:flex;align-items:center;gap:8px}
-    .tag::before,.tag::after{content:'';flex:1;height:1px;background:var(--border)}
-    h1{font-family:var(--head);font-size:22px;font-weight:800;color:var(--text);margin-bottom:5px}
-    p.sub{font-size:13px;color:var(--text-2);margin-bottom:24px}
-    .steps-bar{display:flex;gap:6px;margin-bottom:24px}
-    .step{flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,0.08);transition:background 0.4s}
-    .step.done{background:var(--green)}
-    .step.active{background:linear-gradient(90deg,var(--purple),var(--cyan))}
-    .info-box{background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.2);border-radius:12px;padding:14px 16px;font-size:13px;color:rgba(139,92,246,0.9);margin-bottom:22px;display:flex;align-items:flex-start;gap:9px;line-height:1.6}
-    .err-box{background:rgba(255,59,92,0.08);border:1px solid rgba(255,59,92,0.2);border-radius:10px;padding:11px 14px;color:var(--red);font-size:13px;margin-bottom:18px;display:flex;align-items:center;gap:8px}
-    .row-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-    .f-group{margin-bottom:18px}
-    .f-label{display:block;font-family:var(--mono);font-size:10px;font-weight:600;color:rgba(139,92,246,0.6);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:7px}
-    .f-label .req{color:var(--red);margin-left:2px}
-    .f-input{width:100%;padding:11px 14px;background:rgba(255,255,255,0.04);border:1.5px solid rgba(255,255,255,0.1);border-radius:10px;font-family:var(--body);font-size:14px;color:var(--text);outline:none;transition:all 0.2s}
-    .f-input:focus{border-color:var(--purple);box-shadow:0 0 0 3px rgba(139,92,246,0.12);background:rgba(255,255,255,0.06)}
-    .f-input::placeholder{color:rgba(255,255,255,0.2)}
-    .f-help{font-family:var(--mono);font-size:10px;color:var(--text-2);margin-top:5px;letter-spacing:0.5px}
-    .submit-btn{width:100%;padding:13px;background:linear-gradient(135deg,var(--purple),var(--cyan));color:#fff;border:none;border-radius:10px;font-family:var(--head);font-weight:700;font-size:15px;cursor:pointer;transition:all 0.2s;margin-top:4px;letter-spacing:0.5px}
-    .submit-btn:hover{transform:translateY(-1px);box-shadow:0 8px 30px rgba(139,92,246,0.35)}
-    .alt{text-align:center;font-size:13px;color:var(--text-2);margin-top:16px}
+    .page{position:relative;z-index:2;width:100%;max-width:1040px;margin:0 auto;padding:0 18px calc(110px + env(safe-area-inset-bottom));display:grid;grid-template-columns:minmax(0,1fr);gap:22px}
+    .intro,.card{min-width:0}
+    @media(min-width:920px){.page{grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:48px;align-items:start;padding:48px 28px 60px}}
+
+    /* ── Upau wa juu (simu) ── */
+    .top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:12px;margin:0 -18px;padding:calc(12px + env(safe-area-inset-top)) 18px 12px;background:rgba(5,8,16,.82);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-bottom:1px solid var(--border)}
+    .top__back{display:grid;place-items:center;width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--text-2)}
+    .logo{font-family:var(--head);font-size:21px;font-weight:800;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+    .top__step{margin-left:auto;font-family:var(--mono);font-size:11px;letter-spacing:1px;color:var(--text-2)}
+    @media(min-width:920px){.top{display:none}}
+
+    /* ── Upande wa maelezo ── */
+    .intro h1{font-family:var(--head);font-size:clamp(26px,6.4vw,40px);line-height:1.08;font-weight:800;letter-spacing:-.01em}
+    .intro h1 span{background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+    .intro p{margin-top:10px;font-size:15px;line-height:1.6;color:var(--text-2)}
+    .intro .logo{display:none;font-size:26px;margin-bottom:28px}
+    .intro .back{display:none;align-items:center;gap:8px;margin-bottom:22px;font-family:var(--mono);font-size:11px;letter-spacing:1px;color:var(--text-3)}
+    .intro .back:hover{color:var(--purple)}
+    @media(min-width:920px){.intro{position:sticky;top:48px}.intro .back{display:flex;width:max-content}.intro .logo{display:block;width:max-content}}
+    .perks{display:flex;gap:10px;margin:18px -18px 0;padding:2px 18px 4px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}
+    .perks::-webkit-scrollbar{display:none}
+    .perk{flex:0 0 auto;width:178px;scroll-snap-align:start;display:flex;flex-direction:column;gap:8px;padding:14px;border-radius:16px;background:rgba(255,255,255,.03);border:1px solid var(--border)}
+    .perk i{display:grid;place-items:center;width:34px;height:34px;border-radius:10px;font-size:14px;color:#fff;background:var(--c)}
+    .perk b{font-size:14px;font-weight:600}
+    .perk small{font-size:12.5px;line-height:1.45;color:var(--text-2)}
+    @media(min-width:920px){.perks{flex-direction:column;margin:28px 0 0;padding:0;overflow:visible}.perk{width:auto;flex-direction:row;align-items:flex-start;gap:14px}.perk i{flex:none}.perk span{display:grid;gap:3px}}
+    .perk span{display:grid;gap:3px}
+
+    /* ── Kadi ya fomu ── */
+    .card{background:rgba(255,255,255,0.025);border:1px solid rgba(139,92,246,0.18);border-radius:22px;padding:20px 18px 22px;-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);box-shadow:0 24px 80px rgba(0,0,0,0.45)}
+    @media(min-width:520px){.card{padding:30px 30px 28px}}
+    /* backdrop-filter ingefanya .nav (position:fixed) ifuate kadi badala ya skrini */
+    @media(max-width:919px){.card{-webkit-backdrop-filter:none;backdrop-filter:none;background:rgba(14,18,30,.92)}}
+
+    /* Hatua (stepper) */
+    .stepper{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:22px}
+    .st{display:grid;gap:7px;text-align:left}
+    .st__bar{height:4px;border-radius:4px;background:rgba(255,255,255,.08);overflow:hidden}
+    .st__bar i{display:block;height:100%;width:0;background:var(--grad);transition:width .45s cubic-bezier(.22,1,.36,1)}
+    .st.is-done .st__bar i,.st.is-on .st__bar i{width:100%}
+    .st.is-done .st__bar i{background:var(--green)}
+    .st__lbl{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;color:var(--text-3);transition:color .3s}
+    .st__lbl em{display:grid;place-items:center;width:20px;height:20px;border-radius:50%;font:600 10.5px var(--mono);font-style:normal;background:rgba(255,255,255,.07);transition:all .3s}
+    .st.is-on .st__lbl{color:var(--text)}
+    .st.is-on .st__lbl em{background:var(--grad);color:#fff}
+    .st.is-done .st__lbl{color:var(--text-2)}
+    .st.is-done .st__lbl em{background:rgba(0,255,136,.15);color:var(--green)}
+
+    .err-box{display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;padding:12px 14px;border-radius:12px;background:rgba(255,59,92,0.08);border:1px solid rgba(255,59,92,0.22);color:#ff8fa3;font-size:14px;line-height:1.5}
+    .err-box i{margin-top:3px}
+
+    /* Hatua moja */
+    .pane+.pane{margin-top:26px}
+    .js .pane{display:none;margin-top:0}
+    .js .pane.is-on{display:block;animation:paneIn .4s cubic-bezier(.22,1,.36,1)}
+    @keyframes paneIn{from{opacity:0;transform:translateX(14px)}}
+    .pane__hd{margin-bottom:18px}
+    .pane__hd small{font-family:var(--mono);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--cyan)}
+    .pane__hd h2{margin:6px 0 4px;font-family:var(--head);font-size:21px;font-weight:800}
+    .pane__hd p{font-size:14px;line-height:1.55;color:var(--text-2)}
+
+    .f-group{margin-bottom:16px}
+    .f-label{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;font-size:13.5px;font-weight:600;color:var(--text)}
+    .f-label .req{color:var(--red);margin-left:3px}
+    .f-label .opt{font-family:var(--mono);font-size:10.5px;font-weight:500;letter-spacing:.5px;color:var(--text-3)}
+    .field{position:relative;display:flex;align-items:center;min-height:54px;border-radius:14px;background:rgba(255,255,255,0.04);border:1.5px solid rgba(255,255,255,0.1);transition:border-color .2s,box-shadow .2s,background .2s}
+    .field:focus-within{border-color:var(--purple);box-shadow:0 0 0 4px rgba(139,92,246,0.14);background:rgba(255,255,255,0.06)}
+    .field>i{width:46px;flex:none;text-align:center;font-size:15px;color:var(--text-3);transition:color .2s}
+    .field:focus-within>i{color:var(--purple)}
+    .field input{flex:1;min-width:0;height:52px;padding:0 14px 0 0;background:transparent;border:0;outline:none;font-family:var(--body);font-size:16px;color:var(--text)}
+    .field input::placeholder{color:rgba(255,255,255,0.25)}
+    .field .pre{padding-right:2px;font-family:var(--mono);font-size:13.5px;color:var(--text-3)}
+    .field .eye{display:grid;place-items:center;width:46px;height:46px;flex:none;color:var(--text-3)}
+    .field .eye:hover{color:var(--text)}
+    .field.is-bad{border-color:rgba(255,59,92,.7);box-shadow:0 0 0 4px rgba(255,59,92,.12)}
+    .field.is-ok{border-color:rgba(0,255,136,.45)}
+    .field input:disabled{opacity:.45}
+    .f-help{margin-top:7px;font-size:12.5px;line-height:1.45;color:var(--text-3)}
+    .f-msg{display:none;margin-top:7px;font-size:12.5px;color:#ff8fa3}
+    .f-group.is-bad .f-msg{display:block}
+    .row-2{display:grid;gap:0 14px}
+    @media(min-width:560px){.row-2{grid-template-columns:1fr 1fr}}
+
+    .toggle{display:inline-flex;align-items:center;gap:10px;margin:2px 0 16px;padding:10px 14px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid var(--border);font-size:14px;color:var(--text-2);cursor:pointer;user-select:none}
+    .toggle input{appearance:none;-webkit-appearance:none;width:20px;height:20px;flex:none;border-radius:6px;border:1.5px solid rgba(255,255,255,.25);display:grid;place-items:center;transition:all .2s}
+    .toggle input:checked{background:var(--grad);border-color:transparent}
+    .toggle input:checked::after{content:'\2713';font-size:12px;font-weight:700;color:#fff}
+
+    .info-box{display:flex;align-items:flex-start;gap:11px;padding:14px;border-radius:14px;background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.22);font-size:13.5px;line-height:1.6;color:rgba(196,181,253,.95)}
+    .info-box i{margin-top:3px;flex:none}
+
+    .pw-meter{display:flex;gap:5px;margin-top:9px}
+    .pw-meter span{flex:1;height:4px;border-radius:4px;background:rgba(255,255,255,0.1);transition:background .3s}
+    .pw-rules{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:9px;font-size:12.5px;color:var(--text-3)}
+    .pw-rules span{display:inline-flex;align-items:center;gap:6px;transition:color .2s}
+    .pw-rules span::before{content:'';width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.2);transition:background .2s}
+    .pw-rules span.ok{color:var(--green)}
+    .pw-rules span.ok::before{background:var(--green)}
+
+    .review{display:grid;gap:6px;margin-bottom:16px;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.03);border:1px dashed rgba(255,255,255,.12);font-size:13.5px}
+    .review p{display:flex;justify-content:space-between;gap:12px}
+    .review span{color:var(--text-3)}
+    .review b{font-weight:600;text-align:right;overflow-wrap:anywhere}
+    .review button{justify-self:start;margin-top:2px;font-size:12.5px;font-weight:600;color:var(--cyan)}
+
+    /* Vitufe */
+    .nav{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;gap:10px;padding:12px 18px calc(12px + env(safe-area-inset-bottom));background:rgba(5,8,16,.9);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border-top:1px solid var(--border)}
+    @media(min-width:920px){.nav{position:static;padding:0;margin-top:22px;background:none;border:0;-webkit-backdrop-filter:none;backdrop-filter:none}}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:54px;padding:0 20px;border-radius:14px;font-family:var(--head);font-weight:700;font-size:15.5px;letter-spacing:.3px;transition:transform .15s,box-shadow .2s,opacity .2s}
+    .btn:active{transform:scale(.98)}
+    .btn--go{flex:1;background:var(--grad);color:#fff;box-shadow:0 10px 30px -10px rgba(139,92,246,.6)}
+    .btn--go:hover{box-shadow:0 12px 34px -8px rgba(139,92,246,.75)}
+    .btn--back{flex:none;width:58px;padding:0;background:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--text-2)}
+    .btn--back[hidden]{display:none}
+    .btn[disabled]{opacity:.6;pointer-events:none}
+    .no-js-submit{width:100%;margin-top:6px}
+    .js .no-js-submit{display:none}
+    .nav{display:none}
+    .js .nav{display:flex}
+
+    .alt{margin-top:18px;text-align:center;font-size:14px;color:var(--text-2)}
     .alt a{color:var(--purple);font-weight:600}
-    .domain-prefix{display:flex;align-items:center;background:rgba(0,0,0,0.3);border:1.5px solid rgba(255,255,255,0.1);border-radius:10px;overflow:hidden}
-    .domain-prefix span{padding:11px 10px 11px 14px;font-family:var(--mono);font-size:13px;color:var(--text-2);white-space:nowrap;border-right:1px solid rgba(255,255,255,0.08)}
-    .domain-prefix input{flex:1;padding:11px 14px;background:transparent;border:none;font-family:var(--body);font-size:14px;color:var(--text);outline:none}
-    .domain-prefix input::placeholder{color:rgba(255,255,255,0.2)}
-    .domain-prefix:focus-within{border-color:var(--purple);box-shadow:0 0 0 3px rgba(139,92,246,0.12)}
-    @media(max-width:480px){.row-2{grid-template-columns:1fr}}
+    .secure{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:12px;font-family:var(--mono);font-size:11px;letter-spacing:.5px;color:var(--text-3)}
+    @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
   </style>
+  <script>document.documentElement.classList.add('js')</script>
 </head>
 <body>
-<div class="orb orb-1"></div><div class="orb orb-2"></div><div class="scan"></div>
-<div class="container">
-  <div class="card">
-    <a href="{% url 'portal_login' %}" class="back-link"><i class="fas fa-arrow-left fa-xs"></i> BACK TO SIGN IN</a>
+<div class="orb orb-1"></div><div class="orb orb-2"></div>
+
+<div class="page">
+  <header class="top">
+    <a href="{% url 'portal_login' %}" class="top__back" aria-label="Back to sign in"><i class="fas fa-arrow-left"></i></a>
+    <span class="logo">JamiiTek</span>
+    <span class="top__step" data-step-label>STEP 1 / 3</span>
+  </header>
+
+  <aside class="intro">
+    <a href="{% url 'portal_login' %}" class="back"><i class="fas fa-arrow-left fa-xs"></i> BACK TO SIGN IN</a>
     <div class="logo">JamiiTek</div>
-    <div class="tag">Create Account</div>
-    <h1>Join the Portal</h1>
-    <p class="sub">Create your client account to manage your website and hosting.</p>
+    <h1>Your website, <span>all in one place.</span></h1>
+    <p>Create your client account in about a minute. Once our team links your website, you can follow everything from here.</p>
+    <div class="perks" aria-label="What you get">
+      <div class="perk" style="--c:linear-gradient(135deg,#8b5cf6,#6d28d9)"><i class="fas fa-server"></i><span><b>Hosting status</b><small>See if your site is online, SSL and renewal dates.</small></span></div>
+      <div class="perk" style="--c:linear-gradient(135deg,#00b4d8,#0077b6)"><i class="fas fa-receipt"></i><span><b>Payments &amp; invoices</b><small>Every payment and receipt in one list.</small></span></div>
+      <div class="perk" style="--c:linear-gradient(135deg,#10b981,#047857)"><i class="fas fa-headset"></i><span><b>Support requests</b><small>Ask for changes and follow their progress.</small></span></div>
+    </div>
+  </aside>
 
-    <!-- Progress bar -->
-    <div class="steps-bar"><div class="step active"></div><div class="step active"></div><div class="step active"></div></div>
-
-    {% if messages %}
-    {% for m in messages %}
-    <div class="err-box"><i class="fas fa-circle-exclamation fa-sm"></i> {{ m }}</div>
-    {% endfor %}
-    {% endif %}
-
-    <div class="info-box">
-      <i class="fas fa-info-circle" style="margin-top:2px;flex-shrink:0"></i>
-      <span>After creating your account, JamiiTek staff will link your website to your profile. You'll then see all hosting details, payments, and status updates here.</span>
+  <main class="card">
+    <div class="stepper" aria-hidden="true">
+      <div class="st is-on" data-st="0"><div class="st__bar"><i></i></div><div class="st__lbl"><em>1</em>You</div></div>
+      <div class="st" data-st="1"><div class="st__bar"><i></i></div><div class="st__lbl"><em>2</em>Website</div></div>
+      <div class="st" data-st="2"><div class="st__bar"><i></i></div><div class="st__lbl"><em>3</em>Security</div></div>
     </div>
 
-    <form method="post">
+    {% if messages %}
+    <div data-errors>
+      {% for m in messages %}<div class="err-box" role="alert"><i class="fas fa-circle-exclamation"></i><span>{{ m }}</span></div>{% endfor %}
+    </div>
+    {% endif %}
+
+    <form method="post" id="regForm" novalidate>
       {% csrf_token %}
 
-      <!-- Personal Info -->
-      <div class="row-2">
+      <!-- ── Hatua 1: Wewe ── -->
+      <section class="pane is-on" data-pane="0" aria-labelledby="h1p">
+        <div class="pane__hd"><small>Step 1 of 3</small><h2 id="h1p">Tell us about you</h2><p>We'll use these to reach you about your website.</p></div>
         <div class="f-group">
-          <label class="f-label">Full Name <span class="req">*</span></label>
-          <input type="text" name="full_name" class="f-input" placeholder="e.g. William Chipindi" required autofocus>
-        </div>
-        <div class="f-group">
-          <label class="f-label">Phone Number</label>
-          <input type="tel" name="phone" class="f-input" placeholder="+255 7XX XXX XXX">
-        </div>
-      </div>
-
-      <div class="f-group">
-        <label class="f-label">Email Address <span class="req">*</span></label>
-        <input type="email" name="email" class="f-input" placeholder="william@example.com" required>
-      </div>
-
-      <!-- Website Info -->
-      <div class="f-group">
-        <label class="f-label">Website / Business Name</label>
-        <input type="text" name="website_name" class="f-input" placeholder="e.g. My Online Shop, William's Clinic...">
-        <div class="f-help">The name of your business or website</div>
-      </div>
-
-      <div class="f-group">
-        <label class="f-label">Website Domain / URL</label>
-        <div class="domain-prefix">
-          <span>https://</span>
-          <input type="text" name="website_url" placeholder="www.yourdomain.com" id="domainInput">
-        </div>
-        <div class="f-help">Your website's domain — e.g. www.myshop.co.tz (optional, if you have one)</div>
-      </div>
-
-      <!-- Account credentials -->
-      <div class="f-group">
-        <label class="f-label">Username <span class="req">*</span></label>
-        <input type="text" name="username" class="f-input" placeholder="choose_a_username" required autocomplete="username">
-        <div class="f-help">Used to log in. Lowercase letters, numbers, underscores only.</div>
-      </div>
-
-      <div class="row-2">
-        <div class="f-group">
-          <label class="f-label">Password <span class="req">*</span></label>
-          <input type="password" name="password" id="pw1" class="f-input" placeholder="Min. 8 characters" required>
+          <label class="f-label" for="fName">Full name <span class="req">*</span></label>
+          <div class="field"><i class="fas fa-user"></i><input type="text" id="fName" name="full_name" placeholder="e.g. William Chipindi" required autocomplete="name" autocapitalize="words" value="{{ request.POST.full_name }}"></div>
+          <div class="f-msg">Please enter your full name.</div>
         </div>
         <div class="f-group">
-          <label class="f-label">Confirm Password <span class="req">*</span></label>
-          <input type="password" name="password2" id="pw2" class="f-input" placeholder="Repeat password" required>
+          <label class="f-label" for="fEmail">Email address <span class="req">*</span></label>
+          <div class="field"><i class="fas fa-envelope"></i><input type="email" id="fEmail" name="email" placeholder="william@example.com" required autocomplete="email" inputmode="email" autocapitalize="off" value="{{ request.POST.email }}"></div>
+          <div class="f-msg">Please enter a valid email address.</div>
         </div>
-      </div>
-      <!-- Password strength indicator -->
-      <div id="pwStrength" style="margin-bottom:16px;display:none">
-        <div style="display:flex;gap:4px;margin-bottom:4px">
-          <div id="ps1" style="flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,0.1);transition:background 0.3s"></div>
-          <div id="ps2" style="flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,0.1);transition:background 0.3s"></div>
-          <div id="ps3" style="flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,0.1);transition:background 0.3s"></div>
-          <div id="ps4" style="flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,0.1);transition:background 0.3s"></div>
+        <div class="f-group">
+          <label class="f-label" for="fPhone">Phone number <span class="opt">OPTIONAL</span></label>
+          <div class="field"><i class="fas fa-phone"></i><input type="tel" id="fPhone" name="phone" placeholder="+255 7XX XXX XXX" autocomplete="tel" inputmode="tel" value="{{ request.POST.phone }}"></div>
+          <div class="f-help">For quick updates on WhatsApp or SMS.</div>
         </div>
-        <div id="psLabel" style="font-family:var(--mono);font-size:10px;color:var(--text-2)"></div>
-      </div>
+      </section>
 
-      {% if TURNSTILE_ENABLED %}
-      <div class="f-group">
-        <div class="cf-turnstile"
-             data-sitekey="{{ TURNSTILE_SITEKEY }}"
-             data-theme="dark"></div>
-      </div>
-      {% endif %}
+      <!-- ── Hatua 2: Website ── -->
+      <section class="pane" data-pane="1" aria-labelledby="h2p">
+        <div class="pane__hd"><small>Step 2 of 3</small><h2 id="h2p">Your business &amp; website</h2><p>Helps our team find and link the right website to your account.</p></div>
+        <div class="f-group">
+          <label class="f-label" for="fBiz">Business or website name <span class="opt">OPTIONAL</span></label>
+          <div class="field"><i class="fas fa-store"></i><input type="text" id="fBiz" name="website_name" placeholder="e.g. My Online Shop, William's Clinic" autocomplete="organization" value="{{ request.POST.website_name }}"></div>
+        </div>
+        <label class="toggle"><input type="checkbox" id="noSite"> I don't have a website yet</label>
+        <div class="f-group" data-domain>
+          <label class="f-label" for="domainInput">Website address <span class="opt">OPTIONAL</span></label>
+          <div class="field"><i class="fas fa-globe"></i><span class="pre">https://</span><input type="text" id="domainInput" name="website_url" placeholder="www.yourdomain.co.tz" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" value="{{ request.POST.website_url }}"></div>
+          <div class="f-help">e.g. www.myshop.co.tz — only if you already have one.</div>
+        </div>
+        <div class="info-box"><i class="fas fa-circle-info"></i><span>After you sign up, JamiiTek staff link your website to your profile. You'll then see hosting details, payments and status updates in your portal.</span></div>
+      </section>
 
-      <button type="submit" class="submit-btn">Create Account <i class="fas fa-arrow-right"></i></button>
+      <!-- ── Hatua 3: Usalama ── -->
+      <section class="pane" data-pane="2" aria-labelledby="h3p">
+        <div class="pane__hd"><small>Step 3 of 3</small><h2 id="h3p">Secure your account</h2><p>Choose how you'll sign in.</p></div>
+        <div class="review" data-review hidden></div>
+        <div class="f-group">
+          <label class="f-label" for="fUser">Username <span class="req">*</span></label>
+          <div class="field"><i class="fas fa-at"></i><input type="text" id="fUser" name="username" placeholder="choose_a_username" required autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false" value="{{ request.POST.username }}"></div>
+          <div class="f-help">Lowercase letters, numbers and underscores.</div>
+          <div class="f-msg">Please choose a username (at least 3 characters).</div>
+        </div>
+        <div class="f-group">
+          <label class="f-label" for="pw1">Password <span class="req">*</span></label>
+          <div class="field"><i class="fas fa-lock"></i><input type="password" name="password" id="pw1" placeholder="At least 8 characters" required autocomplete="new-password"><button type="button" class="eye" data-eye="pw1" aria-label="Show password"><i class="fas fa-eye"></i></button></div>
+          <div class="pw-meter" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+          <div class="pw-rules"><span data-r="len">8+ characters</span><span data-r="case">Upper &amp; lower case</span><span data-r="num">A number or symbol</span></div>
+          <div class="f-msg">Password must be at least 8 characters.</div>
+        </div>
+        <div class="f-group">
+          <label class="f-label" for="pw2">Confirm password <span class="req">*</span></label>
+          <div class="field"><i class="fas fa-shield-halved"></i><input type="password" name="password2" id="pw2" placeholder="Type it again" required autocomplete="new-password"><button type="button" class="eye" data-eye="pw2" aria-label="Show password"><i class="fas fa-eye"></i></button></div>
+          <div class="f-msg">Passwords don't match.</div>
+        </div>
+        {% if TURNSTILE_ENABLED %}
+        <div class="f-group"><div class="cf-turnstile" data-sitekey="{{ TURNSTILE_SITEKEY }}" data-theme="dark" data-size="flexible"></div></div>
+        {% endif %}
+        <button type="submit" class="btn btn--go no-js-submit">Create account <i class="fas fa-arrow-right"></i></button>
+      </section>
+
+      <div class="nav">
+        <button type="button" class="btn btn--back" data-prev hidden aria-label="Back"><i class="fas fa-arrow-left"></i></button>
+        <button type="button" class="btn btn--go" data-next>Continue <i class="fas fa-arrow-right"></i></button>
+      </div>
     </form>
+
     <div class="alt">Already have an account? <a href="{% url 'portal_login' %}">Sign in</a></div>
-  </div>
+    <div class="secure"><i class="fas fa-lock"></i> Encrypted · we never share your details</div>
+  </main>
 </div>
+
 <script>
-// Password strength
-const pw = document.getElementById('pw1');
-const bars = [document.getElementById('ps1'),document.getElementById('ps2'),document.getElementById('ps3'),document.getElementById('ps4')];
-const label = document.getElementById('psLabel');
-const pwDiv = document.getElementById('pwStrength');
-pw.addEventListener('input', function() {
-  const v = this.value;
-  if(!v) { pwDiv.style.display='none'; return; }
-  pwDiv.style.display='block';
-  let score = 0;
-  if(v.length >= 8) score++;
-  if(v.length >= 12) score++;
-  if(/[A-Z]/.test(v) && /[a-z]/.test(v)) score++;
-  if(/[0-9]/.test(v) || /[^A-Za-z0-9]/.test(v)) score++;
-  const colors = ['','#ff3b5c','#ffb800','#00d4ff','#00ff88'];
-  const labels = ['','Weak','Fair','Good','Strong'];
-  bars.forEach((b,i) => { b.style.background = i < score ? colors[score] : 'rgba(255,255,255,0.1)'; });
-  label.textContent = labels[score] || '';
-  label.style.color = colors[score] || '';
-});
+(function(){
+  var form=document.getElementById('regForm'), panes=[].slice.call(form.querySelectorAll('[data-pane]')),
+      sts=[].slice.call(document.querySelectorAll('[data-st]')), next=form.querySelector('[data-next]'), prev=form.querySelector('[data-prev]'),
+      lbl=document.querySelector('[data-step-label]'), cur=0, $=function(id){return document.getElementById(id)};
 
-// Auto-fill domain field with https://
-document.getElementById('domainInput').addEventListener('blur', function(){
-  if(this.value && !this.value.startsWith('http')) {
-    // Clean up domain
-    this.value = this.value.replace(/^https?:\/\//, '');
+  function go(i, focus){
+    cur=i;
+    panes.forEach(function(p,k){p.classList.toggle('is-on',k===i)});
+    sts.forEach(function(s,k){s.classList.toggle('is-on',k===i);s.classList.toggle('is-done',k<i)});
+    prev.hidden=i===0;
+    next.innerHTML=i===panes.length-1?'Create account <i class="fas fa-check"></i>':'Continue <i class="fas fa-arrow-right"></i>';
+    if(lbl) lbl.textContent='STEP '+(i+1)+' / '+panes.length;
+    if(i===2) review();
+    // Rudi juu ya fomu (si juu ya ukurasa) — mtu asipite maelezo kila hatua
+    if(focus!==false){var c=document.querySelector('.card'), tb=document.querySelector('.top'); window.scrollTo({top:c.getBoundingClientRect().top+scrollY-((tb&&tb.offsetHeight)||0)-12,behavior:'smooth'})}
+    if(focus!==false){var f=panes[i].querySelector('input:not([type=checkbox]):not(:disabled)'); if(f&&!f.value) setTimeout(function(){f.focus({preventScroll:true})},350)}
   }
-});
-</script>
 
+  function bad(input,isBad){
+    var g=input.closest('.f-group'), f=input.closest('.field');
+    if(g) g.classList.toggle('is-bad',isBad);
+    if(f) f.classList.toggle('is-bad',isBad);
+    return !isBad;
+  }
+  var emailRe=/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  function check(i){
+    var ok=true, first=null;
+    function t(input,cond){if(!bad(input,!cond)){ok=false;first=first||input}}
+    if(i===0){ t($('fName'),$('fName').value.trim().length>1); t($('fEmail'),emailRe.test($('fEmail').value.trim())); }
+    if(i===2){ t($('fUser'),$('fUser').value.trim().length>=3); t($('pw1'),$('pw1').value.length>=8); t($('pw2'),$('pw2').value&&$('pw2').value===$('pw1').value); }
+    if(first) first.focus();
+    return ok;
+  }
+  form.querySelectorAll('input').forEach(function(inp){inp.addEventListener('input',function(){var g=inp.closest('.f-group'); if(g&&g.classList.contains('is-bad')) bad(inp,false)})});
+
+  next.addEventListener('click',function(){
+    if(!check(cur)) return;
+    if(cur<panes.length-1){go(cur+1);return}
+    next.disabled=true; next.innerHTML='Creating account… <i class="fas fa-spinner fa-spin"></i>';
+    form.submit();
+  });
+  prev.addEventListener('click',function(){if(cur>0) go(cur-1)});
+  // Enter kwenye simu = Continue
+  form.addEventListener('keydown',function(e){if(e.key==='Enter'&&e.target.tagName==='INPUT'&&e.target.type!=='checkbox'){e.preventDefault();next.click()}});
+  form.addEventListener('submit',function(e){if(!check(0)||!check(2)){e.preventDefault();go(check(0)?2:0,false)}});
+
+  // Hatua 2: sina website bado
+  var no=$('noSite'), dom=$('domainInput');
+  no.addEventListener('change',function(){dom.disabled=no.checked; if(no.checked) dom.value=''; document.querySelector('[data-domain]').style.opacity=no.checked?.45:1});
+  dom.addEventListener('blur',function(){this.value=this.value.trim().replace(/^https?:\/\//,'').replace(/\/$/,'')});
+
+  // Username: pendekezo kutoka jina, herufi ndogo tu
+  var user=$('fUser'), touched=!!user.value;
+  user.addEventListener('input',function(){touched=true; var p=this.selectionStart; this.value=this.value.toLowerCase().replace(/\s+/g,'_').replace(/[^a-z0-9_]/g,''); try{this.setSelectionRange(p,p)}catch(e){}});
+  $('fName').addEventListener('input',function(){ if(touched) return; user.value=this.value.trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/\s+/g,'_').replace(/[^a-z0-9_]/g,'').slice(0,24)});
+
+  // Muhtasari kabla ya kutuma
+  function review(){
+    var r=document.querySelector('[data-review]'), rows=[['Name',$('fName').value.trim()],['Email',$('fEmail').value.trim()],['Business',$('fBiz').value.trim()],['Website',no.checked?'Not yet':dom.value.trim()]].filter(function(x){return x[1]});
+    if(!rows.length){r.hidden=true;return}
+    r.hidden=false; r.innerHTML='';
+    rows.forEach(function(x){var p=document.createElement('p'),s=document.createElement('span'),b=document.createElement('b');s.textContent=x[0];b.textContent=x[1];p.appendChild(s);p.appendChild(b);r.appendChild(p)});
+    var e=document.createElement('button'); e.type='button'; e.textContent='Edit details'; e.onclick=function(){go(0)}; r.appendChild(e);
+  }
+
+  // Onyesha/ficha password
+  document.querySelectorAll('[data-eye]').forEach(function(b){b.addEventListener('click',function(){var i=$(b.dataset.eye), show=i.type==='password'; i.type=show?'text':'password'; b.innerHTML=show?'<i class="fas fa-eye-slash"></i>':'<i class="fas fa-eye"></i>'; b.setAttribute('aria-label',show?'Hide password':'Show password')})});
+
+  // Nguvu ya password
+  var pw=$('pw1'), pw2=$('pw2'), bars=[].slice.call(document.querySelectorAll('.pw-meter span')), colors=['','#ff3b5c','#ffb800','#00d4ff','#00ff88'];
+  function rule(k,ok){document.querySelector('[data-r="'+k+'"]').classList.toggle('ok',ok)}
+  pw.addEventListener('input',function(){
+    var v=pw.value, s=0;
+    if(v.length>=8)s++; if(v.length>=12)s++; if(/[A-Z]/.test(v)&&/[a-z]/.test(v))s++; if(/[0-9]/.test(v)||/[^A-Za-z0-9]/.test(v))s++;
+    bars.forEach(function(b,i){b.style.background=i<s?colors[s]:'rgba(255,255,255,0.1)'});
+    rule('len',v.length>=8); rule('case',/[A-Z]/.test(v)&&/[a-z]/.test(v)); rule('num',/[0-9]/.test(v)||/[^A-Za-z0-9]/.test(v));
+    match();
+  });
+  function match(){var f=pw2.closest('.field'); f.classList.toggle('is-ok',!!pw2.value&&pw2.value===pw.value)}
+  pw2.addEventListener('input',match);
+
+  // Kosa kutoka server: fungua hatua inayohusika (thamani zimehifadhiwa)
+  var err=document.querySelector('[data-errors]');
+  if(err){var t=err.textContent.toLowerCase(); go(/username|password|uthibitisho/.test(t)?2:0)} else go(0,false);
+})();
+</script>
 </body>
 </html>
