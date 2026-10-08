@@ -685,3 +685,35 @@ class AdminPagesRenderTest(TestCase):
         for url in ('/manage/chatbot/', '/manage/chatbot/clients/', '/manage/infra/',
                     '/manage/websites/', '/manage/clients/', '/admin/chatbot/botconfig/'):
             self.assertEqual(self.client.get(url).status_code, 200, url)
+
+
+@mock.patch.dict('os.environ', {'STAFF_2FA_REQUIRED': 'True'})
+class StaffTwoFactorDoubleSubmitTest(TestCase):
+    """Code ikitumwa mara mbili (auto-submit + Enter) mtumiaji asitolewe nje."""
+
+    def test_same_code_twice_keeps_user_signed_in(self):
+        import time
+        from django.contrib.auth.models import User
+        from django.core.cache import cache
+        from apps import two_factor as tf
+        cache.clear()
+        User.objects.create_user('boss3', 'b3@x.com', 'Sahihi-Kabisa-2026', is_staff=True)
+        self.client.post('/manage/login/', {'username': 'boss3', 'password': 'Sahihi-Kabisa-2026'})
+        self.client.get('/account/2fa/setup/')
+        secret = self.client.session['staff_2fa_pending']
+        now = int(time.time() // 30)
+        self.client.post('/account/2fa/setup/', {'code': tf.totp_at(secret, now)})
+        self.client.logout()
+        self.client.post('/manage/login/', {'username': 'boss3', 'password': 'Sahihi-Kabisa-2026'})
+        self.client.get('/manage/')
+        code = tf.totp_at(secret, now + 1)
+        from django.conf import settings as dj
+        old_cookie = self.client.cookies[dj.SESSION_COOKIE_NAME].value
+        r1 = self.client.post('/account/2fa/', {'code': code})
+        # Ombi la pili lilitumwa KABLA jibu la kwanza halijafika: lina cookie ya zamani
+        self.client.cookies[dj.SESSION_COOKIE_NAME] = old_cookie
+        r2 = self.client.post('/account/2fa/', {'code': code})
+        self.assertEqual(r1['Location'], '/manage/')
+        self.assertEqual(r2['Location'], '/manage/')
+        self.assertIn('_auth_user_id', self.client.session)
+        self.assertEqual(self.client.get('/manage/').status_code, 200)
