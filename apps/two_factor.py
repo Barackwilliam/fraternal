@@ -211,7 +211,8 @@ def _reset_flag_on_login(sender, request=None, user=None, **kwargs):
 
 # ── Middleware ───────────────────────────────────────────────────
 _EXEMPT_PREFIXES = (
-    '/account/2fa/', '/account/password-reset/', '/account/sign-out/', '/static/', '/media/', '/favicon',
+    '/account/2fa/', '/account/password-reset/', '/account/sign-out/', '/account/help/',
+    '/chatbot/privacy-policy/', '/static/', '/media/', '/favicon',
     '/manage/logout/', '/portal/logout/', '/chatbot/logout/', '/builder/logout/',
     '/admin/logout/', '/robots.txt', '/manifest.json', '/sw.js',
 )
