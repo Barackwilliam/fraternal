@@ -292,6 +292,71 @@ class SiteSeoTest(NoPingMixin, TestCase):
         self.assertEqual(locs.count('/service/'), 1)
 
 
+class SeoAuditFixesTest(NoPingMixin, TestCase):
+    """Marekebisho ya ukaguzi wa SEO: domain rasmi, canonical, noindex, alt, viungo."""
+
+    def setUp(self):
+        super().setUp()
+        from django.core.cache import cache
+        cache.clear()
+        self.addCleanup(cache.clear)
+
+    def test_sitemaps_and_robots_use_the_canonical_domain_only(self):
+        xml = self.client.get('/sitemap.xml', HTTP_HOST='jamiitek.onrender.com').content.decode()
+        locs = re.findall(r'<loc>([^<]*)</loc>', xml)
+        self.assertTrue(locs)
+        self.assertTrue(all(u.startswith('https://www.jamiitek.com/') for u in locs), locs)
+        self.assertIn('https://www.jamiitek.com/builder/ai/', locs)
+        self.assertIn('https://www.jamiitek.com/chatbot/privacy-policy/', locs)
+        self.assertNotIn('https://www.jamiitek.com/company-profile/', locs)   # hakuna profile hai
+        # Kurasa za kudumu hazina lastmod ya "leo" ya kubuni
+        home = re.search(r'<url><loc>https://www.jamiitek.com/</loc>(.*?)</url>', xml, re.S).group(1)
+        self.assertNotIn('<lastmod>', home)
+        robots = self.client.get('/robots.txt', HTTP_HOST='jamiitek.com').content.decode()
+        self.assertIn('Sitemap: https://www.jamiitek.com/sitemap.xml', robots)
+
+    def test_company_profile_link_only_when_profile_exists(self):
+        from apps.models import CompanyProfile
+        self.assertNotContains(self.client.get('/'), '/company-profile/')
+        CompanyProfile.objects.create(is_active=True)
+        from django.core.cache import cache
+        cache.clear()
+        self.assertContains(self.client.get('/'), '/company-profile/')
+        self.assertEqual(self.client.get('/company-profile/').status_code, 200)
+
+    def test_standalone_pages_have_canonical_and_social_tags(self):
+        for url in ('/chatbot/register/?plan=pro', '/chatbot/privacy-policy/', '/builder/ai/'):
+            html = self.client.get(url).content.decode()
+            path = url.split('?')[0]
+            self.assertIn(f'<link rel="canonical" href="https://www.jamiitek.com{path}">', html, url)
+            self.assertIn('property="og:title"', html, url)
+            self.assertIn('name="twitter:card"', html, url)
+            self.assertIn('name="description"', html, url)
+        login = self.client.get('/chatbot/login/').content.decode()
+        self.assertIn('<meta name="robots" content="noindex, follow">', login)
+
+    def test_old_base_twitter_image_and_non_blocking_fonts(self):
+        html = self.client.get('/templates/').content.decode()
+        self.assertIn('name="twitter:image"       content="https://www.jamiitek.com/static/images/og-image.jpg"', html)
+        self.assertNotIn('/static/images.jpg', html)
+        self.assertNotIn('family=Orbitron:wght@700;800&family=Exo+2:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"', html)
+
+    def test_article_images_get_alt_and_lazy_loading(self):
+        from apps.templatetags.blog_extras import img_seo
+        out = img_seo('<p><img src="/a.jpg"><img src="/b.jpg" alt="Ramani" loading="eager"></p>', 'Bei ya "website"')
+        self.assertIn('<img src="/a.jpg" alt="Bei ya &quot;website&quot;" loading="lazy" decoding="async">', out)
+        self.assertIn('alt="Ramani" loading="eager" decoding="async"', out)
+
+    def test_titles_and_descriptions_stay_within_search_limits(self):
+        WebsiteType.objects.create(name='E-commerce')
+        for url in ('/service/', '/proposals/', '/templates/'):
+            html = self.client.get(url).content.decode()
+            title = re.search(r'<title>(.*?)</title>', html, re.S).group(1).strip()
+            desc = re.search(r'<meta name="description" content="([^"]*)"', html).group(1)
+            self.assertLessEqual(len(title), 65, (url, title))
+            self.assertLessEqual(len(desc), 165, (url, desc))
+
+
 class OneAccountTest(NoPingMixin, TestCase):
     """Akaunti moja: Web Builder ↔ Client Portal ↔ JamiiBot (apps/accounts_link.py)."""
 
